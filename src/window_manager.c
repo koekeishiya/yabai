@@ -491,6 +491,38 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     }
 }
 
+void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
+{
+    int window_count;
+    uint32_t *window_list = space_window_list(sid, &window_count);
+    if (!window_list) return;
+
+    struct view *view = space_manager_find_view(sm, sid);
+    uint32_t *view_window_list = view_find_window_list(view);
+
+    for (int i = 0; i < buf_len(view_window_list); ++i) {
+        bool found = false;
+
+        for (int j = 0; j < window_count; ++j) {
+            if (view_window_list[i]  == window_list[j]) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            struct ax_window *window = window_manager_find_window(wm, view_window_list[i]);
+            if (!window) continue;
+
+            space_manager_untile_window(sm, view, window);
+            window_manager_remove_managed_window(wm, window);
+        }
+    }
+
+    buf_free(view_window_list);
+    free(window_list);
+}
+
 void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
     int window_count;

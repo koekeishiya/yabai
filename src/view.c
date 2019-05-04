@@ -171,6 +171,30 @@ static void window_node_flush(struct window_node *node)
     }
 }
 
+static struct window_node *window_node_find_first_leaf(struct window_node *root)
+{
+    struct window_node *node = root;
+    while (!window_node_is_leaf(node)) {
+        node = node->left;
+    }
+    return node;
+}
+
+static struct window_node *window_node_find_next_leaf(struct window_node *node)
+{
+    if (!node->parent) return NULL;
+
+    if (window_node_is_right_child(node)) {
+        return window_node_find_next_leaf(node->parent);
+    }
+
+    if (window_node_is_leaf(node->parent->right)) {
+        return node->parent->right;
+    }
+
+    return window_node_find_first_leaf(node->parent->right->left)->left;
+}
+
 struct window_node *view_find_min_depth_leaf_node(struct window_node *node)
 {
     struct window_node *list[256] = { node };
@@ -255,6 +279,22 @@ void view_add_window_node(struct view *view, struct ax_window *window)
             view_update(view);
         }
     }
+}
+
+uint32_t *view_find_window_list(struct view *view)
+{
+    uint32_t *window_list = NULL;
+
+    struct window_node *node = window_node_find_first_leaf(view->root);
+    while (node) {
+        if (window_node_is_leaf(node)) {
+            buf_push(window_list, node->window_id);
+        }
+
+        node = window_node_find_next_leaf(node);
+    }
+
+    return window_list;
 }
 
 bool view_is_invalid(struct view *view)

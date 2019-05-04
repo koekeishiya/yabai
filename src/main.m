@@ -16,6 +16,7 @@
 #include "misc/helpers.h"
 #include "misc/log.h"
 #include "misc/cfstring.h"
+#include "misc/sbuffer.h"
 #define HASHTABLE_IMPLEMENTATION
 #include "misc/hashtable.h"
 #undef HASHTABLE_IMPLEMENTATION

@@ -134,8 +134,8 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct ax_windo
             view_update(view);
             view_flush(view);
         } else {
-            window_node_update(node);
-            window_node_flush(node);
+            window_node_update(node->parent);
+            window_node_flush(node->parent);
         }
     }
 }

@@ -427,6 +427,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
         }
     }
 
+    window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 }
 
@@ -453,6 +454,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
         }
     }
 
+    window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 }
 

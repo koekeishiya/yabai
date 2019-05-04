@@ -11,7 +11,6 @@ struct buf_hdr
     char buf[0];
 };
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define OFFSETOF(t, f) (size_t)((char *)&(((t *)0)->f) - (char *)0)
 
 #define buf__hdr(b) ((struct buf_hdr *)((char *)(b) - OFFSETOF(struct buf_hdr, buf)))
@@ -26,7 +25,7 @@ struct buf_hdr
 
 static void *buf__grow_f(const void *buf, size_t new_len, size_t elem_size)
 {
-    size_t new_cap = MAX(1 + 2*buf_cap(buf), new_len);
+    size_t new_cap = max(1 + 2*buf_cap(buf), new_len);
     size_t new_size = OFFSETOF(struct buf_hdr, buf) + new_cap*elem_size;
     struct buf_hdr *new_hdr = realloc(buf ? buf__hdr(buf) : 0, new_size);
     new_hdr->cap = new_cap;
