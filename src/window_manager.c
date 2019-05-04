@@ -384,7 +384,7 @@ next:;
 
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid)
 {
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
         space_manager_untile_window(sm, view, window);
         window_manager_remove_managed_window(wm, window);
@@ -440,7 +440,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
             window_manager_add_managed_window(wm, window, view);
         }
     } else {
-        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        struct view *view = window_manager_find_managed_window(wm, window);
         if (view) {
             space_manager_untile_window(sm, view, window);
             window_manager_remove_managed_window(wm, window);
@@ -458,7 +458,7 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
             window_manager_add_managed_window(wm, window, view);
         }
     } else {
-        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        struct view *view = window_manager_find_managed_window(wm, window);
         if (view) {
             space_manager_untile_window(sm, view, window);
             window_manager_remove_managed_window(wm, window);
@@ -469,7 +469,7 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
 
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
 {
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    struct view *view = window_manager_find_managed_window(wm, window);
     if (!view) return;
 
     if (view->root->zoom && view->root->zoom->window_id != window->id) {
@@ -530,17 +530,59 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
     if (!window_list) return;
 
     for (int i = 0; i < window_count; ++i) {
-        struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[i]);
+        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
         if (!window || !window_manager_should_manage_window(window)) continue;
 
-        struct view *existing_view = window_manager_find_managed_window(&g_window_manager, window);
+        struct view *existing_view = window_manager_find_managed_window(wm, window);
         if (existing_view) continue;
 
-        struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, sid);
-        window_manager_add_managed_window(&g_window_manager, window, view);
+        struct view *view = space_manager_tile_window_on_space(sm, window, sid);
+        window_manager_add_managed_window(wm, window, view);
     }
 
     free(window_list);
+}
+
+void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t display_id, uint64_t sid)
+{
+    int space_count;
+    uint64_t *space_list = display_space_list(display_id, &space_count);
+    if (!space_list) goto out;
+
+    int window_count;
+    uint32_t *window_list = space_window_list(space_list[0], &window_count);
+    if (!window_list) goto sfree;
+
+    for (int i = 0; i < window_count; ++i) {
+        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        if (!window) continue;
+
+        if (window_manager_should_manage_window(window)) {
+            struct view *existing_view = window_manager_find_managed_window(wm, window);
+            if (existing_view && existing_view->sid != space_list[0]) {
+                space_manager_untile_window(sm, existing_view, window);
+                window_manager_remove_managed_window(wm, window);
+            }
+
+            if (!existing_view || existing_view->sid != space_list[0]) {
+                struct view *view = space_manager_tile_window_on_space(sm, window, space_list[0]);
+                window_manager_add_managed_window(wm, window, view);
+            }
+        }
+    }
+
+    for (int i = 0; i < space_count; ++i) {
+        if (space_list[i] == sid) {
+            space_manager_refresh_view(sm, sid);
+        } else {
+            space_manager_mark_view_invalid(sm, space_list[i]);
+        }
+    }
+
+    free(window_list);
+sfree:
+    free(space_list);
+out:;
 }
 
 void window_manager_init(struct window_manager *wm)
