@@ -198,12 +198,8 @@ static void send_post_event(ProcessSerialNumber *window_psn, uint32_t window_id)
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
 
-struct ax_window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction)
+static struct ax_window *window_manager_find_closest_window_in_direction_for_window_list(struct window_manager *wm, struct ax_window *window, int direction, uint32_t *window_list, int window_count)
 {
-    int window_count;
-    uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count);
-    if (!window_list) return NULL;
-
     struct ax_window *best_window = NULL;
     float best_distance = FLT_MAX;
 
@@ -244,8 +240,33 @@ struct ax_window *window_manager_find_closest_window_in_direction(struct window_
         }
     }
 
-    free(window_list);
     return best_window;
+}
+
+struct ax_window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    uint32_t *view_window_list = view_find_window_list(view);
+    if (!view_window_list) return NULL;
+
+    struct ax_window *result = window_manager_find_closest_window_in_direction_for_window_list(wm, window, direction, view_window_list, buf_len(view_window_list));
+    buf_free(view_window_list);
+
+    return result;
+}
+
+struct ax_window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction)
+{
+    int window_count;
+    uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count);
+    if (!window_list) return NULL;
+
+    struct ax_window *result = window_manager_find_closest_window_in_direction_for_window_list(wm, window, direction, window_list, window_count);
+    free(window_list);
+
+    return result;
 }
 
 void window_manager_focus_window_without_raise(uint32_t window_id)
@@ -430,6 +451,23 @@ next:;
     }
 
     free(window_list);
+}
+
+void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+
+    struct window_node *a_node = view_find_window_node(view->root, a->id);
+    if (!a_node) return;
+
+    struct window_node *b_node = view_find_window_node(view->root, b->id);
+    if (!b_node) return;
+
+    a_node->window_id = b->id;
+    b_node->window_id = a->id;
+
+    window_node_flush(a_node);
+    window_node_flush(b_node);
 }
 
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid)

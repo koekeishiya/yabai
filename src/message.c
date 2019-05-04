@@ -410,6 +410,31 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_WINDOW_SWAP)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_NORTH);
+            if (closest_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_EAST);
+            if (closest_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_SOUTH);
+            if (closest_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
+            if (closest_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else if (token_equals(command, COMMAND_WINDOW_GRID)) {
         struct token value = get_token(&message);
         unsigned r, c, x, y, w, h;

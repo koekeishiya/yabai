@@ -52,6 +52,7 @@ void window_manager_tile_window(struct window_manager *wm, struct ax_window *win
 void window_manager_move_window(struct ax_window *window, float x, float y);
 void window_manager_resize_window(struct ax_window *window, float width, float height);
 struct ax_window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point);
+struct ax_window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction);
 struct ax_window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction);
 void window_manager_focus_window_without_raise(uint32_t window_id);
 void window_manager_focus_window_with_raise(uint32_t window_id);
@@ -70,6 +71,7 @@ struct ax_application *window_manager_find_application(struct window_manager *wm
 void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct ax_application *application);
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count);
+void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid);
 void window_manager_add_application_windows(struct window_manager *wm, struct ax_application *application);
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
