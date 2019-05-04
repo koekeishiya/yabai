@@ -198,6 +198,56 @@ static void send_post_event(ProcessSerialNumber *window_psn, uint32_t window_id)
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
 
+struct ax_window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction)
+{
+    int window_count;
+    uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count);
+    if (!window_list) return NULL;
+
+    struct ax_window *best_window = NULL;
+    float best_distance = FLT_MAX;
+
+    CGRect source_frame = window_frame(window);
+    CGPoint ma = CGPointMake(CGRectGetMidX(source_frame), CGRectGetMidY(source_frame));
+
+    for (int i = 0; i < window_count; ++i) {
+        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        if (!window) continue;
+
+        CGRect frame = window_frame(window);
+        CGPoint mb = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame));
+
+        float x_distance = mb.x - ma.x;
+        float y_distance = mb.y - ma.y;
+        float distance = sqrt((x_distance * x_distance ) + (y_distance * y_distance));
+
+        if (direction == DIR_NORTH) {
+            if (y_distance < 0 && distance < best_distance) {
+                best_window = window;
+                best_distance = distance;
+            }
+        } else if (direction == DIR_EAST) {
+            if (x_distance > 0 && distance < best_distance) {
+                best_window = window;
+                best_distance = distance;
+            }
+        } else if (direction == DIR_SOUTH) {
+            if (y_distance > 0 && distance < best_distance) {
+                best_window = window;
+                best_distance = distance;
+            }
+        } else if (direction == DIR_WEST) {
+            if (x_distance < 0 && distance < best_distance) {
+                best_window = window;
+                best_distance = distance;
+            }
+        }
+    }
+
+    free(window_list);
+    return best_window;
+}
+
 void window_manager_focus_window_without_raise(uint32_t window_id)
 {
     int window_connection;
@@ -403,6 +453,9 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
 {
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (view) return;
+
     uint32_t did = window_display_id(window);
     if (!did) return;
 
