@@ -61,7 +61,14 @@ extern struct window_manager g_window_manager;
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
-#define COMMAND_WINDOW_FOCUS "--focus"
+#define COMMAND_WINDOW_FOCUS  "--focus"
+#define COMMAND_WINDOW_GRID   "--grid"
+#define COMMAND_WINDOW_TOGGLE "--toggle"
+
+#define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
+#define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
+#define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
+#define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -357,6 +364,37 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     }
 }
 
+static void handle_domain_window(FILE *rsp, struct token domain, char *message)
+{
+    struct token command = get_token(&message);
+    if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            window_manager_toggle_window_float(&g_space_manager, &g_window_manager, window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            window_manager_toggle_window_sticky(&g_space_manager, &g_window_manager, window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SPLIT)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            space_manager_toggle_window_split(&g_space_manager, window);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_GRID)) {
+        struct token value = get_token(&message);
+        unsigned r, c, x, y, w, h;
+        if ((sscanf(value.text, ARGUMENT_WINDOW_GRID, &r, &c, &x, &y, &w, &h) == 6)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            window_manager_apply_grid(&g_space_manager, &g_window_manager, window, r, c, x, y, w, h);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else {
+        daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
+    }
+}
+
 void handle_message(FILE *rsp, char *message)
 {
     struct token domain = get_token(&message);
@@ -366,6 +404,8 @@ void handle_message(FILE *rsp, char *message)
         handle_domain_display(rsp, domain, message);
     } else if (token_equals(domain, DOMAIN_SPACE)) {
         handle_domain_space(rsp, domain, message);
+    } else if (token_equals(domain, DOMAIN_WINDOW)) {
+        handle_domain_window(rsp, domain, message);
     } else {
         daemon_fail(rsp, "unknown domain '%.*s'\n", domain.length, domain.text);
     }

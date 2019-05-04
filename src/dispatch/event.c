@@ -29,10 +29,12 @@ observe:
         if (window_list) {
             for (int i = 0; i < window_count; ++i) {
                 struct ax_window *window = window_list[i];
-                if (!window || !window_is_standard(window)) continue;
+                if (!window) continue;
 
-                struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
-                window_manager_add_managed_window(&g_window_manager, window, view);
+                if (window_manager_should_manage_window(window)) {
+                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
+                    window_manager_add_managed_window(&g_window_manager, window, view);
+                }
             }
             free(window_list);
         }
@@ -140,15 +142,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         if (window_count) {
             for (int i = 0; i < window_count; ++i) {
                 struct ax_window *window = window_list[i];
-                if (!window || !window_is_standard(window)) continue;
+                if (!window) continue;
 
-                int space_count = 0;
-                uint64_t *space_list = window_space_list(window, &space_count);
-                struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, *space_list);
-                window_manager_add_managed_window(&g_window_manager, window, view);
-                free(space_list);
+                if (window_manager_should_manage_window(window)) {
+                    int space_count = 0;
+                    uint64_t *space_list = window_space_list(window, &space_count);
+                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, *space_list);
+                    window_manager_add_managed_window(&g_window_manager, window, view);
+                    free(space_list);
 
-                border_window_show(window);
+                    border_window_show(window);
+                }
             }
             free(window_list);
         }
@@ -207,7 +211,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
 
-        if (window_is_standard(window)) {
+        if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
@@ -370,7 +374,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
 
     if (space_manager_is_window_on_active_space(window)) {
         debug("%s: window %s %d is deminimized on active space\n", __FUNCTION__, window->application->name, window->id);
-        if (window_is_standard(window)) {
+        if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
@@ -464,17 +468,19 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_ADDED)
     if (window_list) {
         for (int i = 0; i < window_count; ++i) {
             struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-            if (!window || !window_is_standard(window)) continue;
+            if (!window) continue;
 
-            struct view *existing_view = window_manager_find_managed_window(&g_window_manager, window);
-            if (existing_view && existing_view->sid != space_list[0]) {
-                space_manager_untile_window(&g_space_manager, existing_view, window);
-                window_manager_remove_managed_window(&g_window_manager, window);
-            }
+            if (window_manager_should_manage_window(window)) {
+                struct view *existing_view = window_manager_find_managed_window(&g_window_manager, window);
+                if (existing_view && existing_view->sid != space_list[0]) {
+                    space_manager_untile_window(&g_space_manager, existing_view, window);
+                    window_manager_remove_managed_window(&g_window_manager, window);
+                }
 
-            if (!existing_view || existing_view->sid != space_list[0]) {
-                struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_list[0]);
-                window_manager_add_managed_window(&g_window_manager, window, view);
+                if (!existing_view || existing_view->sid != space_list[0]) {
+                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_list[0]);
+                    window_manager_add_managed_window(&g_window_manager, window, view);
+                }
             }
         }
 
@@ -508,17 +514,19 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_REMOVED)
     if (window_list) {
         for (int i = 0; i < window_count; ++i) {
             struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-            if (!window || !window_is_standard(window)) continue;
+            if (!window) continue;
 
-            struct view *existing_view = window_manager_find_managed_window(&g_window_manager, window);
-            if (existing_view && existing_view->sid != space_list[0]) {
-                space_manager_untile_window(&g_space_manager, existing_view, window);
-                window_manager_remove_managed_window(&g_window_manager, window);
-            }
+            if (window_manager_should_manage_window(window)) {
+                struct view *existing_view = window_manager_find_managed_window(&g_window_manager, window);
+                if (existing_view && existing_view->sid != space_list[0]) {
+                    space_manager_untile_window(&g_space_manager, existing_view, window);
+                    window_manager_remove_managed_window(&g_window_manager, window);
+                }
 
-            if (!existing_view || existing_view->sid != space_list[0]) {
-                struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_list[0]);
-                window_manager_add_managed_window(&g_window_manager, window, view);
+                if (!existing_view || existing_view->sid != space_list[0]) {
+                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_list[0]);
+                    window_manager_add_managed_window(&g_window_manager, window, view);
+                }
             }
         }
 

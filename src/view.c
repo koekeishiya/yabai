@@ -233,7 +233,7 @@ void view_remove_window_node(struct view *view, struct ax_window *window)
 
     if (g_space_manager.auto_balance) {
         window_node_equalize(view->root);
-        window_node_update(view->root);
+        view_update(view);
     }
 }
 
@@ -249,7 +249,7 @@ void view_add_window_node(struct view *view, struct ax_window *window)
 
         if (g_space_manager.auto_balance) {
             window_node_equalize(view->root);
-            window_node_update(view->root);
+            view_update(view);
         }
     }
 }
@@ -273,35 +273,7 @@ void view_flush(struct view *view)
 void view_update(struct view *view)
 {
     uint32_t did = space_display_id(view->sid);
-    CGRect frame = display_bounds(did);
-    CGRect menu  = space_manager_menu_bar_rect();
-    CGRect dock  = space_manager_dock_rect();
-
-    if (!space_manager_menu_bar_hidden()) {
-        frame.origin.y    += menu.size.height;
-        frame.size.height -= menu.size.height;
-    }
-
-    if (!space_manager_dock_hidden()) {
-        switch (space_manager_dock_orientation()) {
-        case DOCK_ORIENTATION_LEFT: {
-        if (did == display_manager_left_display_id()) {
-            frame.origin.x   += dock.size.width;
-            frame.size.width -= dock.size.width;
-        }
-        } break;
-        case DOCK_ORIENTATION_RIGHT: {
-        if (did == display_manager_right_display_id()) {
-            frame.size.width -= dock.size.width;
-        }
-        } break;
-        case DOCK_ORIENTATION_BOTTOM: {
-        if (did == display_manager_bottom_display_id()) {
-            frame.size.height -= dock.size.height;
-        }
-        } break;
-        }
-    }
+    CGRect frame = display_bounds_constrained(did);
 
     view->root->area = area_from_cgrect(frame);
     view->root->area.x += g_space_manager.left_padding;

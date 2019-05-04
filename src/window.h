@@ -43,6 +43,7 @@ struct ax_window
     uint8_t notification;
     struct border border;
     bool is_minimized;
+    bool is_floating;
 };
 
 CFStringRef window_display_uuid(struct ax_window *window);

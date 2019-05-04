@@ -43,6 +43,15 @@ void window_manager_center_mouse(struct window_manager *wm, struct ax_window *wi
     CGWarpMouseCursorPosition(center);
 }
 
+bool window_manager_should_manage_window(struct ax_window *window)
+{
+    return window_is_standard(window) &&
+           window_can_move(window) &&
+           window_can_resize(window) &&
+          !window_is_sticky(window) &&
+          !window->is_floating;
+}
+
 struct view *window_manager_find_managed_window(struct window_manager *wm, struct ax_window *window)
 {
     return table_find(&wm->managed_window, &window->id);
@@ -88,6 +97,26 @@ void window_manager_resize_window(struct ax_window *window, float width, float h
 
     AXUIElementSetAttributeValue(window->ref, kAXSizeAttribute, size_ref);
     CFRelease(size_ref);
+}
+
+void window_manager_sticky_window(struct ax_window *window, bool sticky)
+{
+    int sockfd;
+    char message[255];
+
+    if (socket_connect_in(&sockfd, 5050)) {
+        snprintf(message, sizeof(message), "window_sticky %d %d", window->id, sticky);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
+
+    if (socket_connect_in(&sockfd, 5050)) {
+        snprintf(message, sizeof(message), "window_level %d %d", window->id, sticky ? kCGModalPanelWindowLevelKey : kCGNormalWindowLevelKey);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
 }
 
 void window_manager_purify_window(struct ax_window *window)
@@ -353,6 +382,72 @@ next:;
     free(window_list);
 }
 
+void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
+{
+    uint32_t did = window_display_id(window);
+    if (!did) return;
+
+    if (x >= c)    x = c - 1;
+    if (y >= r)    y = r - 1;
+    if (w <= 0)    w = 1;
+    if (h <= 0)    h = 1;
+    if (w > c - x) w = c - x;
+    if (h > r - y) h = r - y;
+
+    CGRect bounds = display_bounds_constrained(did);
+    bounds.origin.x    += sm->left_padding;
+    bounds.size.width  -= (sm->left_padding + sm->right_padding);
+    bounds.origin.y    += sm->top_padding;
+    bounds.size.height -= (sm->top_padding + sm->bottom_padding);
+
+    float cw = bounds.size.width / c;
+    float ch = bounds.size.height / r;
+
+    float fx = bounds.origin.x + bounds.size.width  - cw * (c - x);
+    float fy = bounds.origin.y + bounds.size.height - ch * (r - y);
+    float fw = cw * w;
+    float fh = ch * h;
+
+    window_manager_move_window(window, fx, fy);
+    window_manager_resize_window(window, fw, fh);
+}
+
+void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    if (window->is_floating) {
+        window->is_floating = false;
+        if (window_manager_should_manage_window(window)) {
+            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
+            window_manager_add_managed_window(wm, window, view);
+        }
+    } else {
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        if (view) {
+            space_manager_untile_window(sm, view, window);
+            window_manager_remove_managed_window(wm, window);
+        }
+        window->is_floating = true;
+    }
+}
+
+void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    if (window_is_sticky(window)) {
+        window_manager_sticky_window(window, false);
+        if (window_manager_should_manage_window(window)) {
+            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
+            window_manager_add_managed_window(wm, window, view);
+        }
+    } else {
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        if (view) {
+            space_manager_untile_window(sm, view, window);
+            window_manager_remove_managed_window(wm, window);
+        }
+        window_manager_sticky_window(window, true);
+    }
+}
+
 void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
     int window_count;
@@ -361,7 +456,7 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (!window || !window_is_standard(window)) continue;
+        if (!window || !window_manager_should_manage_window(window)) continue;
 
         struct view *existing_view = window_manager_find_managed_window(&g_window_manager, window);
         if (existing_view) continue;
@@ -389,7 +484,6 @@ void window_manager_init(struct window_manager *wm)
     table_init(&wm->application, 150, hash_wm, compare_wm);
     table_init(&wm->window, 150, hash_wm, compare_wm);
     table_init(&wm->managed_window, 150, hash_wm, compare_wm);
-    table_init(&wm->floating_window, 150, hash_wm, compare_wm);
     table_init(&wm->window_lost_focused_event, 150, hash_wm, compare_wm);
 }
 

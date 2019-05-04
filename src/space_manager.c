@@ -114,6 +114,24 @@ struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct
     return view;
 }
 
+void space_manager_toggle_window_split(struct space_manager *sm, struct ax_window *window)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    struct window_node *node = view_find_window_node(view->root, window->id);
+    if (node && window_node_is_intermediate(node)) {
+        node->parent->split = node->parent->split == SPLIT_Y ? SPLIT_X : SPLIT_Y;
+
+        if (g_space_manager.auto_balance) {
+            window_node_equalize(view->root);
+            view_update(view);
+            view_flush(view);
+        } else {
+            window_node_update(node);
+            window_node_flush(node);
+        }
+    }
+}
+
 uint64_t space_manager_mission_control_space(int desktop_id)
 {
     uint64_t result = 0;

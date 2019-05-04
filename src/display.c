@@ -35,6 +35,41 @@ CGRect display_bounds(uint32_t display_id)
     return CGDisplayBounds(display_id);
 }
 
+CGRect display_bounds_constrained(uint32_t display_id)
+{
+    CGRect frame = display_bounds(display_id);
+    CGRect menu  = space_manager_menu_bar_rect();
+    CGRect dock  = space_manager_dock_rect();
+
+    if (!space_manager_menu_bar_hidden()) {
+        frame.origin.y    += menu.size.height;
+        frame.size.height -= menu.size.height;
+    }
+
+    if (!space_manager_dock_hidden()) {
+        switch (space_manager_dock_orientation()) {
+        case DOCK_ORIENTATION_LEFT: {
+        if (display_id == display_manager_left_display_id()) {
+            frame.origin.x   += dock.size.width;
+            frame.size.width -= dock.size.width;
+        }
+        } break;
+        case DOCK_ORIENTATION_RIGHT: {
+        if (display_id == display_manager_right_display_id()) {
+            frame.size.width -= dock.size.width;
+        }
+        } break;
+        case DOCK_ORIENTATION_BOTTOM: {
+        if (display_id == display_manager_bottom_display_id()) {
+            frame.size.height -= dock.size.height;
+        }
+        } break;
+        }
+    }
+
+    return frame;
+}
+
 uint64_t display_space_id(uint32_t display_id)
 {
     CFStringRef uuid = display_uuid(display_id);

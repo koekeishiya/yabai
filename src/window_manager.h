@@ -33,8 +33,7 @@ struct window_manager
     AXUIElementRef system_element;
     struct table application;
     struct table window;
-    struct table managed_window; // wid -> virtual_space
-    struct table floating_window; // wid -> unused
+    struct table managed_window;
     struct table window_lost_focused_event;
     uint32_t focused_window_id;
     pid_t focused_window_pid;
@@ -48,6 +47,7 @@ struct window_manager
 };
 
 void window_manager_center_mouse(struct window_manager *wm, struct ax_window *window);
+bool window_manager_should_manage_window(struct ax_window *window);
 void window_manager_tile_window(struct window_manager *wm, struct ax_window *window);
 void window_manager_move_window(struct ax_window *window, float x, float y);
 void window_manager_resize_window(struct ax_window *window, float width, float height);
@@ -70,6 +70,9 @@ void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct ax_application *application);
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count);
 void window_manager_add_application_windows(struct window_manager *wm, struct ax_application *application);
+void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
+void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
+void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_begin(struct window_manager *window_manager);
 void window_manager_init(struct window_manager *window_manager);
