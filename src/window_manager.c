@@ -467,6 +467,21 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
     }
 }
 
+void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    if (window_is_fullscreen(window)) {
+        AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanFalse);
+        return;
+    }
+
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (view) {
+        space_manager_untile_window(sm, view, window);
+        window_manager_remove_managed_window(wm, window);
+    }
+    AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
+}
+
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
 {
     struct view *view = window_manager_find_managed_window(wm, window);

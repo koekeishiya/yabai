@@ -155,7 +155,7 @@ bool window_is_fullscreen(struct ax_window *window)
 {
     Boolean result = 0;
     CFTypeRef value;
-    if (AXUIElementCopyAttributeValue(window->ref, CFSTR("AXFullScreen"), &value) == kAXErrorSuccess) {
+    if (AXUIElementCopyAttributeValue(window->ref, kAXFullscreenAttribute, &value) == kAXErrorSuccess) {
         result = CFBooleanGetValue(value);
         CFRelease(value);
     }

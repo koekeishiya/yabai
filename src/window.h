@@ -8,6 +8,8 @@ extern CFStringRef SLSCopyManagedDisplayForWindow(int cid, uint32_t wid);
 extern CFStringRef SLSCopyBestManagedDisplayForRect(int cid, CGRect rect);
 extern CFArrayRef SLSCopySpacesForWindows(int cid, int selector, CFArrayRef window_list);
 
+const CFStringRef kAXFullscreenAttribute = CFSTR("AXFullScreen");
+
 #define AX_WINDOW_MINIMIZED_INDEX      0
 #define AX_WINDOW_DEMINIMIZED_INDEX    1
 #define AX_WINDOW_SHEET_CREATED_INDEX  2

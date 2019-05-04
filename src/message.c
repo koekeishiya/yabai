@@ -73,6 +73,7 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
 #define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
 #define ARGUMENT_WINDOW_TOGGLE_FULLSC "fullscreen"
+#define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
 #define ARGUMENT_WINDOW_SPACE_PREV    "prev"
 #define ARGUMENT_WINDOW_SPACE_NEXT    "next"
 #define ARGUMENT_WINDOW_SPACE_LAST    "last"
@@ -393,6 +394,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_NATIVE)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, window);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
