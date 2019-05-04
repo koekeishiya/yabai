@@ -49,8 +49,9 @@ extern struct window_manager g_window_manager;
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
-#define COMMAND_SPACE_FOCUS "--focus"
-#define COMMAND_SPACE_MOVE  "--move"
+#define COMMAND_SPACE_FOCUS   "--focus"
+#define COMMAND_SPACE_MOVE    "--move"
+#define COMMAND_SPACE_BALANCE "--balance"
 
 #define ARGUMENT_SPACE_FOCUS_PREV "prev"
 #define ARGUMENT_SPACE_FOCUS_NEXT "next"
@@ -359,6 +360,8 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_SPACE_BALANCE)) {
+        space_manager_balance_space(&g_space_manager, space_manager_active_space());
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
     }

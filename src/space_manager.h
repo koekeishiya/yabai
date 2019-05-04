@@ -44,6 +44,7 @@ void space_manager_mark_view_invalid(struct space_manager *sm,  uint64_t sid);
 void space_manager_mark_view_dirty(struct space_manager *sm,  uint64_t sid);
 void space_manager_untile_window(struct space_manager *sm, struct view *view, struct ax_window *window);
 struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct ax_window *window, uint64_t sid);
+void space_manager_balance_space(struct space_manager *sm, uint64_t sid);
 void space_manager_toggle_window_split(struct space_manager *sm, struct ax_window *window);
 uint64_t space_manager_mission_control_space(int desktop_id);
 uint64_t space_manager_prev_space(uint64_t sid);

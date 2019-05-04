@@ -102,6 +102,14 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     }
 }
 
+void space_manager_balance_space(struct space_manager *sm, uint64_t sid)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    window_node_equalize(view->root);
+    view_update(view);
+    view_flush(view);
+}
+
 struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct ax_window *window, uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
