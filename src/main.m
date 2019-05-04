@@ -67,9 +67,18 @@
 #define CLIENT_OPT_LONG "--msg"
 #define CLIENT_OPT_SHRT "-m"
 
+#define DEBUG_VERBOSE_OPT_LONG "--verbose"
+#define DEBUG_VERBOSE_OPT_SHRT "-V"
+#define VERSION_OPT_LONG       "--version"
+#define VERSION_OPT_SHRT       "-v"
+
 #define SCRPT_ADD_INSTALL_OPT   "--install-sa"
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
 #define SCRPT_ADD_LOAD_OPT      "--load-sa"
+
+#define MAJOR 0
+#define MINOR 1
+#define PATCH 0
 
 struct eventloop g_eventloop;
 void *g_workspace_context;
@@ -185,6 +194,12 @@ static bool parse_arguments(int argc, char **argv)
 {
     if (argc <= 1) return false;
 
+    if ((strcmp(argv[1], VERSION_OPT_LONG) == 0) ||
+        (strcmp(argv[1], VERSION_OPT_SHRT) == 0)) {
+        fprintf(stdout, "yabai version %d.%d.%d\n", MAJOR, MINOR, PATCH);
+        return true;
+    }
+
     if ((strcmp(argv[1], CLIENT_OPT_LONG) == 0) ||
         (strcmp(argv[1], CLIENT_OPT_SHRT) == 0)) {
         exit(client_send_message(argc-1, argv+1));
@@ -202,13 +217,31 @@ static bool parse_arguments(int argc, char **argv)
         exit(scripting_addition_load());
     }
 
+    while (argc > 1) {
+        char *opt = argv[--argc];
+
+        if ((strcmp(opt, DEBUG_VERBOSE_OPT_LONG) == 0) ||
+            (strcmp(opt, DEBUG_VERBOSE_OPT_SHRT) == 0)) {
+            g_verbose = true;
+        }
+    }
+
     return false;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+void init_misc_settings(void)
+{
+    NSApplicationLoad();
+    CGSetLocalEventsSuppressionInterval(0.0f);
+    CGEnableEventStateCombining(false);
+    g_connection = SLSMainConnectionID();
+}
+#pragma clang diagnostic pop
+
 int main(int argc, char **argv)
 {
-    g_verbose = true;
-
     if (parse_arguments(argc, argv)) {
         return EXIT_SUCCESS;
     }
@@ -221,10 +254,7 @@ int main(int argc, char **argv)
         error("yabai: could not access accessibility features! abort..\n");
     }
 
-    NSApplicationLoad();
-    CGSetLocalEventsSuppressionInterval(0.0f);
-    CGEnableEventStateCombining(false);
-    g_connection = SLSMainConnectionID();
+    init_misc_settings();
 
     if (!space_manager_has_separate_spaces()) {
         error("yabai: 'display has separate spaces' is enabled! abort..\n");
