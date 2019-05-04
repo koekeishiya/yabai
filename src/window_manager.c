@@ -570,19 +570,17 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_manager_find_window(wm, window_list[i]);
-        if (!window) continue;
+        if (!window || !window_manager_should_manage_window(window)) continue;
 
-        if (window_manager_should_manage_window(window)) {
-            struct view *existing_view = window_manager_find_managed_window(wm, window);
-            if (existing_view && existing_view->sid != space_list[0]) {
-                space_manager_untile_window(sm, existing_view, window);
-                window_manager_remove_managed_window(wm, window);
-            }
+        struct view *existing_view = window_manager_find_managed_window(wm, window);
+        if (existing_view && existing_view->sid != space_list[0]) {
+            space_manager_untile_window(sm, existing_view, window);
+            window_manager_remove_managed_window(wm, window);
+        }
 
-            if (!existing_view || existing_view->sid != space_list[0]) {
-                struct view *view = space_manager_tile_window_on_space(sm, window, space_list[0]);
-                window_manager_add_managed_window(wm, window, view);
-            }
+        if (!existing_view || existing_view->sid != space_list[0]) {
+            struct view *view = space_manager_tile_window_on_space(sm, window, space_list[0]);
+            window_manager_add_managed_window(wm, window, view);
         }
     }
 
