@@ -221,6 +221,8 @@ int main(int argc, char **argv)
     }
 
     NSApplicationLoad();
+    CGSetLocalEventsSuppressionInterval(0.0f);
+    CGEnableEventStateCombining(false);
     g_connection = SLSMainConnectionID();
 
     if (!space_manager_has_separate_spaces()) {

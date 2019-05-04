@@ -382,6 +382,25 @@ next:;
     free(window_list);
 }
 
+void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid)
+{
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    if (view) {
+        space_manager_untile_window(sm, view, window);
+        window_manager_remove_managed_window(wm, window);
+    }
+
+    space_manager_move_window_to_space(sid, window);
+    border_window_refresh(window);
+
+    if (window_manager_should_manage_window(window)) {
+        if (space_is_visible(sid)) {
+            struct view *view = space_manager_tile_window_on_space(sm, window, sid);
+            window_manager_add_managed_window(wm, window, view);
+        }
+    }
+}
+
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
 {
     uint32_t did = window_display_id(window);
@@ -445,6 +464,30 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
             window_manager_remove_managed_window(wm, window);
         }
         window_manager_sticky_window(window, true);
+    }
+}
+
+void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    if (!view) return;
+
+    if (view->root->zoom && view->root->zoom->window_id != window->id) {
+        struct ax_window *zoomed_window = window_manager_find_window(wm, view->root->zoom->window_id);
+        if (zoomed_window) {
+            window_manager_move_window(zoomed_window, view->root->zoom->area.x, view->root->zoom->area.y);
+            window_manager_resize_window(zoomed_window, view->root->zoom->area.w, view->root->zoom->area.h);
+        }
+    }
+
+    if (view->root->zoom && view->root->zoom->window_id == window->id) {
+        window_manager_move_window(window, view->root->zoom->area.x, view->root->zoom->area.y);
+        window_manager_resize_window(window, view->root->zoom->area.w, view->root->zoom->area.h);
+        view->root->zoom = NULL;
+    } else {
+        window_manager_move_window(window, view->root->area.x, view->root->area.y);
+        window_manager_resize_window(window, view->root->area.w, view->root->area.h);
+        view->root->zoom = view_find_window_node(view->root, window->id);
     }
 }
 

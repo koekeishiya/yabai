@@ -310,8 +310,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
+#if 0
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) view_flush(view);
+#endif
 
     border_window_refresh(window);
 }
@@ -329,8 +331,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
+#if 0
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) view_flush(view);
+#endif
 
     border_window_refresh(window);
 }

@@ -69,10 +69,12 @@ struct ax_application *window_manager_find_application(struct window_manager *wm
 void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct ax_application *application);
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count);
+void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid);
 void window_manager_add_application_windows(struct window_manager *wm, struct ax_application *application);
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
+void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_begin(struct window_manager *window_manager);
 void window_manager_init(struct window_manager *window_manager);

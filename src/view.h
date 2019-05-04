@@ -1,6 +1,8 @@
 #ifndef VIEW_H
 #define VIEW_H
 
+struct ax_window;
+
 struct area
 {
     float x;
@@ -25,10 +27,11 @@ enum window_node_split
 struct window_node
 {
     struct area area;
-    struct ax_window *window;
+    uint32_t window_id;
     struct window_node *parent;
     struct window_node *left;
     struct window_node *right;
+    struct window_node *zoom;
     enum window_node_split split;
     float ratio;
 };

@@ -62,14 +62,23 @@ extern struct window_manager g_window_manager;
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
-#define COMMAND_WINDOW_FOCUS  "--focus"
-#define COMMAND_WINDOW_GRID   "--grid"
-#define COMMAND_WINDOW_TOGGLE "--toggle"
+#define COMMAND_WINDOW_FOCUS   "--focus"
+#define COMMAND_WINDOW_GRID    "--grid"
+#define COMMAND_WINDOW_TOGGLE  "--toggle"
+#define COMMAND_WINDOW_DISPLAY "--display"
+#define COMMAND_WINDOW_SPACE   "--space"
 
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
 #define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
+#define ARGUMENT_WINDOW_TOGGLE_FULLSC "fullscreen"
+#define ARGUMENT_WINDOW_SPACE_PREV    "prev"
+#define ARGUMENT_WINDOW_SPACE_NEXT    "next"
+#define ARGUMENT_WINDOW_SPACE_LAST    "last"
+#define ARGUMENT_WINDOW_DISPLAY_PREV  "prev"
+#define ARGUMENT_WINDOW_DISPLAY_NEXT  "next"
+#define ARGUMENT_WINDOW_DISPLAY_LAST  "last"
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -381,6 +390,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SPLIT)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             space_manager_toggle_window_split(&g_space_manager, window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, window);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -390,6 +402,72 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         if ((sscanf(value.text, ARGUMENT_WINDOW_GRID, &r, &c, &x, &y, &w, &h) == 6)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             window_manager_apply_grid(&g_space_manager, &g_window_manager, window, r, c, x, y, w, h);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_DISPLAY)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_PREV)) {
+            uint32_t did = display_manager_prev_display_id(display_manager_active_display_id());
+            if (did) {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(did));
+            } else {
+                daemon_fail(rsp, "could not locate the previous display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_NEXT)) {
+            uint32_t did = display_manager_next_display_id(display_manager_active_display_id());
+            if (did) {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(did));
+            } else {
+                daemon_fail(rsp, "could not locate the next display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_LAST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(g_display_manager.last_display_id));
+        } else if (token_is_valid(value)) {
+            int arrangement_index = token_to_int(value);
+            uint32_t did = display_manager_arrangement_display_id(arrangement_index);
+            if (did) {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(did));
+            } else {
+                daemon_fail(rsp, "could not locate display with arrangement index '%d'.\n", arrangement_index);
+            }
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_SPACE)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_WINDOW_SPACE_PREV)) {
+            uint64_t sid = space_manager_prev_space(space_manager_active_space());
+            if (sid) {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
+            } else {
+                daemon_fail(rsp, "could not locate the previous space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SPACE_NEXT)) {
+            uint64_t sid = space_manager_next_space(space_manager_active_space());
+            if (sid) {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
+            } else {
+                daemon_fail(rsp, "could not locate the next space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SPACE_LAST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, g_space_manager.last_space_id);
+        } else if (token_is_valid(value)) {
+            int mission_control_index = token_to_int(value);
+            uint64_t sid = space_manager_mission_control_space(mission_control_index);
+            if (sid) {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
+            } else {
+                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mission_control_index);
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

@@ -61,7 +61,7 @@ static void area_make_pair(struct window_node *node)
 
 static bool window_node_is_occupied(struct window_node *node)
 {
-    return node->window != NULL;
+    return node->window_id != 0;
 }
 
 static bool window_node_is_intermediate(struct window_node *node)
@@ -130,13 +130,13 @@ static void window_node_split(struct window_node *node, struct ax_window *window
     struct window_node *right = malloc(sizeof(struct window_node));
     memset(right, 0, sizeof(struct window_node));
 
-    left->window = node->window;
+    left->window_id = node->window_id;
     left->parent = node;
 
-    right->window = window;
+    right->window_id = window->id;
     right->parent = node;
 
-    node->window = NULL;
+    node->window_id = 0;
     node->left = left;
     node->right = right;
 
@@ -158,8 +158,11 @@ static void window_node_update(struct window_node *node)
 static void window_node_flush(struct window_node *node)
 {
     if (window_node_is_occupied(node)) {
-        window_manager_move_window(node->window, node->area.x, node->area.y);
-        window_manager_resize_window(node->window, node->area.w, node->area.h);
+        struct ax_window *window = window_manager_find_window(&g_window_manager, node->window_id);
+        if (window) {
+            window_manager_move_window(window, node->area.x, node->area.y);
+            window_manager_resize_window(window, node->area.w, node->area.h);
+        }
     }
 
     if (!window_node_is_leaf(node)) {
@@ -186,7 +189,7 @@ struct window_node *view_find_min_depth_leaf_node(struct window_node *node)
 
 struct window_node *view_find_window_node(struct window_node *node, uint32_t window_id)
 {
-    if (node->window && node->window->id == window_id) return node;
+    if (node->window_id == window_id) return node;
 
     if (!window_node_is_leaf(node)) {
         struct window_node *left = view_find_window_node(node->left, window_id);
@@ -205,7 +208,7 @@ void view_remove_window_node(struct view *view, struct ax_window *window)
     if (!node) return;
 
     if (node == view->root) {
-        view->root->window = NULL;
+        view->root->window_id = 0;
         return;
     }
 
@@ -214,9 +217,9 @@ void view_remove_window_node(struct view *view, struct ax_window *window)
                                ? parent->left
                                : parent->right;
 
-    parent->window = child->window;
-    parent->left   = NULL;
-    parent->right  = NULL;
+    parent->window_id = child->window_id;
+    parent->left      = NULL;
+    parent->right     = NULL;
 
     if (window_node_is_intermediate(child) && !window_node_is_leaf(child)) {
         parent->left = child->left;
@@ -241,7 +244,7 @@ void view_add_window_node(struct view *view, struct ax_window *window)
 {
     if (!window_node_is_occupied(view->root) &&
         window_node_is_leaf(view->root)) {
-        view->root->window = window;
+        view->root->window_id = window->id;
     } else {
         struct window_node *leaf = view_find_window_node(view->root, g_window_manager.focused_window_id);
         if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
