@@ -58,7 +58,7 @@
 #include "display_manager.c"
 #include "space_manager.c"
 #include "window_manager.c"
-#include "sa.mm"
+#include "sa.m"
 
 #define CONFIG_FILE_FMT "%s/.yabairc"
 #define SOCKET_PATH_FMT "/tmp/yabai_%s.socket"
