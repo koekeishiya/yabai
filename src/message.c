@@ -51,7 +51,11 @@ extern struct window_manager g_window_manager;
 /* --------------------------------DOMAIN SPACE--------------------------------- */
 #define COMMAND_SPACE_FOCUS   "--focus"
 #define COMMAND_SPACE_MOVE    "--move"
+#define COMMAND_SPACE_CREATE  "--create"
+#define COMMAND_SPACE_DESTROY "--destroy"
 #define COMMAND_SPACE_BALANCE "--balance"
+#define COMMAND_SPACE_MIRROR  "--mirror"
+#define COMMAND_SPACE_ROTATE  "--rotate"
 
 #define ARGUMENT_SPACE_FOCUS_PREV "prev"
 #define ARGUMENT_SPACE_FOCUS_NEXT "next"
@@ -59,6 +63,11 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_SPACE_MOVE_PREV  "prev"
 #define ARGUMENT_SPACE_MOVE_NEXT  "next"
 #define ARGUMENT_SPACE_MOVE_LAST  "last"
+#define ARGUMENT_SPACE_MIRROR_X   "x-axis"
+#define ARGUMENT_SPACE_MIRROR_Y   "y-axis"
+#define ARGUMENT_SPACE_ROTATE_90  "90"
+#define ARGUMENT_SPACE_ROTATE_180 "180"
+#define ARGUMENT_SPACE_ROTATE_270 "270"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
@@ -377,8 +386,32 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_SPACE_CREATE)) {
+        space_manager_add_space();
+    } else if (token_equals(command, COMMAND_SPACE_DESTROY)) {
+        space_manager_destroy_space();
     } else if (token_equals(command, COMMAND_SPACE_BALANCE)) {
         space_manager_balance_space(&g_space_manager, space_manager_active_space());
+    } else if (token_equals(command, COMMAND_SPACE_MIRROR)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_SPACE_MIRROR_X)) {
+            space_manager_mirror_space(&g_space_manager, space_manager_active_space(), SPLIT_X);
+        } else if (token_equals(value, ARGUMENT_SPACE_MIRROR_Y)) {
+            space_manager_mirror_space(&g_space_manager, space_manager_active_space(), SPLIT_Y);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_SPACE_ROTATE)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_SPACE_ROTATE_90)) {
+            space_manager_rotate_space(&g_space_manager, space_manager_active_space(), 90);
+        } else if (token_equals(value, ARGUMENT_SPACE_ROTATE_180)) {
+            space_manager_rotate_space(&g_space_manager, space_manager_active_space(), 180);
+        } else if (token_equals(value, ARGUMENT_SPACE_ROTATE_270)) {
+            space_manager_rotate_space(&g_space_manager, space_manager_active_space(), 270);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
     }

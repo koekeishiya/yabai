@@ -50,6 +50,8 @@ uint64_t space_manager_mission_control_space(int desktop_id);
 uint64_t space_manager_prev_space(uint64_t sid);
 uint64_t space_manager_next_space(uint64_t sid);
 uint64_t space_manager_active_space(void);
+void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees);
+void space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis);
 void space_manager_move_window_to_space(uint64_t sid, struct ax_window *window);
 void space_manager_remove_window_from_space(uint64_t sid, struct ax_window *window);
 void space_manager_add_window_to_space(uint64_t sid, struct ax_window *window);

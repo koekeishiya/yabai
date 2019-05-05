@@ -102,6 +102,22 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     }
 }
 
+void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    window_node_rotate(view->root, degrees);
+    view_update(view);
+    view_flush(view);
+}
+
+void space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    window_node_mirror(view->root, axis);
+    view_update(view);
+    view_flush(view);
+}
+
 void space_manager_balance_space(struct space_manager *sm, uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
