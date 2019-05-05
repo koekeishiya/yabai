@@ -65,6 +65,7 @@ extern struct window_manager g_window_manager;
 #define COMMAND_WINDOW_FOCUS   "--focus"
 #define COMMAND_WINDOW_SWAP    "--swap"
 #define COMMAND_WINDOW_WARP    "--warp"
+#define COMMAND_WINDOW_INSERT  "--insert"
 #define COMMAND_WINDOW_GRID    "--grid"
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
 #define COMMAND_WINDOW_DISPLAY "--display"
@@ -458,6 +459,27 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (!window) return;
             struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
             if (closest_window) window_manager_warp_window(&g_space_manager, window, closest_window);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_INSERT)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            window_manager_set_window_insertion(&g_space_manager, window, DIR_NORTH);
+        } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            window_manager_set_window_insertion(&g_space_manager, window, DIR_EAST);
+        } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            window_manager_set_window_insertion(&g_space_manager, window, DIR_SOUTH);
+        } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            window_manager_set_window_insertion(&g_space_manager, window, DIR_WEST);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

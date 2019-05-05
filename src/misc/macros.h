@@ -5,7 +5,7 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-#define DIR_NORTH   0
+#define DIR_NORTH 360
 #define DIR_EAST   90
 #define DIR_SOUTH 180
 #define DIR_WEST  270

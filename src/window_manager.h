@@ -44,6 +44,7 @@ struct window_manager
     int window_border_width;
     uint32_t active_window_border_color;
     uint32_t normal_window_border_color;
+    uint32_t insert_window_border_color;
 };
 
 void window_manager_center_mouse(struct window_manager *wm, struct ax_window *window);
@@ -71,6 +72,7 @@ struct ax_application *window_manager_find_application(struct window_manager *wm
 void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct ax_application *application);
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count);
+void window_manager_set_window_insertion(struct space_manager *sm, struct ax_window *window, int direction);
 void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b);
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid);

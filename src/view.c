@@ -15,6 +15,12 @@ static struct area area_from_cgrect(CGRect rect)
     return  area;
 }
 
+static enum window_node_child window_node_get_child(struct window_node *node)
+{
+    if (node->child != CHILD_NONE) return node->child;
+    return CHILD_RIGHT;
+}
+
 static enum window_node_split window_node_get_split(struct window_node *node)
 {
     if (node->split != SPLIT_NONE) return node->split;
@@ -130,10 +136,15 @@ static void window_node_split(struct window_node *node, struct ax_window *window
     struct window_node *right = malloc(sizeof(struct window_node));
     memset(right, 0, sizeof(struct window_node));
 
-    left->window_id = node->window_id;
-    left->parent = node;
+    if (window_node_get_child(node) == CHILD_RIGHT) {
+        left->window_id = node->window_id;
+        right->window_id = window->id;
+    } else {
+        right->window_id = node->window_id;
+        left->window_id = window->id;
+    }
 
-    right->window_id = window->id;
+    left->parent = node;
     right->parent = node;
 
     node->window_id = 0;
@@ -279,7 +290,15 @@ void view_add_window_node(struct view *view, struct ax_window *window)
 
         if (!leaf) leaf = view_find_window_node(view->root, g_window_manager.focused_window_id);
         if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
+        struct ax_window *leaf_window = window_manager_find_window(&g_window_manager, leaf->window_id);
         window_node_split(leaf, window);
+
+        if (leaf_window) {
+            if (leaf_window->border.insert_active) {
+                leaf_window->border.insert_active = false;
+                leaf_window->border.insert_dir = 0;
+            }
+        }
 
         if (g_space_manager.auto_balance) {
             window_node_equalize(view->root);

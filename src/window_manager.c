@@ -453,6 +453,42 @@ next:;
     free(window_list);
 }
 
+void window_manager_set_window_insertion(struct space_manager *sm, struct ax_window *window, int direction)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    struct window_node *node = view_find_window_node(view->root, window->id);
+    if (!node) return;
+
+    if (direction == window->border.insert_dir) {
+        node->split = SPLIT_NONE;
+        node->child = CHILD_NONE;;
+        window->border.insert_active = false;
+        window->border.insert_dir = 0;
+    } else if (direction == DIR_NORTH) {
+        node->split = SPLIT_X;
+        node->child = CHILD_LEFT;;
+        window->border.insert_active = true;
+        window->border.insert_dir = direction;
+    } else if (direction == DIR_EAST) {
+        node->split = SPLIT_Y;
+        node->child = CHILD_RIGHT;;
+        window->border.insert_active = true;
+        window->border.insert_dir = direction;
+    } else if (direction == DIR_SOUTH) {
+        node->split = SPLIT_X;
+        node->child = CHILD_RIGHT;;
+        window->border.insert_active = true;
+        window->border.insert_dir = direction;
+    } else if (direction == DIR_WEST) {
+        node->split = SPLIT_Y;
+        node->child = CHILD_LEFT;;
+        window->border.insert_active = true;
+        window->border.insert_dir = direction;
+    }
+
+    border_window_refresh(window);
+}
+
 void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
@@ -724,6 +760,7 @@ void window_manager_init(struct window_manager *wm)
     wm->window_border_width = 4;
     wm->active_window_border_color = 0xff775759;
     wm->normal_window_border_color = 0xff555555;
+    wm->insert_window_border_color = 0xfff57f7f;
 
     table_init(&wm->application, 150, hash_wm, compare_wm);
     table_init(&wm->window, 150, hash_wm, compare_wm);

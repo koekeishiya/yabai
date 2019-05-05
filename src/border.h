@@ -32,8 +32,11 @@ struct border
 {
     CGContextRef context;
     uint32_t id;
-    struct rgba_color color;
     int width;
+    struct rgba_color color;
+    struct rgba_color insert_color;
+    bool insert_active;
+    int insert_dir;
 };
 
 struct ax_window;

@@ -59,6 +59,62 @@ static void border_window_ensure_same_space(struct ax_window *window)
     CFRelease(border_space_list_ref);
 }
 
+static CGMutablePathRef border_normal_shape(CGRect frame, float radius)
+{
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRoundedRect(path, NULL, frame, radius, radius);
+    return path;
+}
+
+static CGMutablePathRef border_insert_shape(struct border *border, CGRect frame, float radius)
+{
+    CGMutablePathRef insert = CGPathCreateMutable();
+    CGFloat minx = CGRectGetMinX(frame), midx = CGRectGetMidX(frame), maxx = CGRectGetMaxX(frame);
+    CGFloat miny = CGRectGetMinY(frame), midy = CGRectGetMidY(frame), maxy = CGRectGetMaxY(frame);
+
+    switch (border->insert_dir) {
+    case DIR_NORTH: {
+        CGPathMoveToPoint(insert, NULL, maxx, midy);
+        CGPathAddArcToPoint(insert, NULL, maxx, maxy, midx, maxy, radius);
+        CGPathAddArcToPoint(insert, NULL, minx, maxy, minx, midy, radius);
+        CGPathAddArcToPoint(insert, NULL, minx, midy, minx, miny, radius);
+    } break;
+    case DIR_EAST: {
+        CGPathMoveToPoint(insert, NULL, midx, miny);
+        CGPathAddArcToPoint(insert, NULL, maxx, miny, maxx, midy, radius);
+        CGPathAddArcToPoint(insert, NULL, maxx, maxy, midx, maxy, radius);
+        CGPathAddArcToPoint(insert, NULL, midx, maxy, maxx, maxy, radius);
+    } break;
+    case DIR_SOUTH: {
+        CGPathMoveToPoint(insert, NULL, minx, midy);
+        CGPathAddArcToPoint(insert, NULL, minx, miny, midx, miny, radius);
+        CGPathAddArcToPoint(insert, NULL, maxx, miny, maxx, midy, radius);
+        CGPathAddArcToPoint(insert, NULL, maxx, midy, maxx, maxy, radius);
+    } break;
+    case DIR_WEST: {
+        CGPathMoveToPoint(insert, NULL, midx, miny);
+        CGPathAddArcToPoint(insert, NULL, minx, miny, minx, midy, radius);
+        CGPathAddArcToPoint(insert, NULL, minx, maxy, midx, maxy, radius);
+        CGPathAddArcToPoint(insert, NULL, midx, maxy, midx, maxy, radius);
+    } break;
+    }
+
+    return insert;
+}
+
+static float border_radius_clamp(CGRect frame, float radius)
+{
+    if (radius * 2 > CGRectGetWidth(frame)) {
+        radius = CGRectGetWidth(frame) / 2;
+    }
+
+    if (radius * 2 > CGRectGetHeight(frame)) {
+        radius = CGRectGetHeight(frame) / 2;
+    }
+
+    return radius;
+}
+
 void border_window_refresh(struct ax_window *window)
 {
     if (!window->border.id) return;
@@ -86,25 +142,25 @@ void border_window_refresh(struct ax_window *window)
     CFTypeRef region_ref;
     CGSNewRegionWithRect(&region, &region_ref);
 
-    float x_radius = 0.5f * border->width;
-    if (x_radius * 2 > CGRectGetWidth(border_frame)) {
-        x_radius = CGRectGetWidth(border_frame) / 2;
-    }
-
-    float y_radius = 0.5f * border->width;
-    if (y_radius * 2 > CGRectGetHeight(border_frame)) {
-        y_radius = CGRectGetHeight(border_frame) / 2;
-    }
-
-    CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRoundedRect(path, NULL, border_frame, x_radius, y_radius);
-    CGPathCloseSubpath(path);
+    float radius = border_radius_clamp(border_frame, 0.5f * border->width);
+    CGMutablePathRef path = border_normal_shape(border_frame, radius);
 
     SLSOrderWindow(g_connection, border->id, 0, window->id);
     SLSSetWindowShape(g_connection, border->id, 0.0f, 0.0f, region_ref);
     CGContextClearRect(border->context, clear_region);
+
     CGContextAddPath(border->context, path);
     CGContextStrokePath(border->context);
+
+    if (border->insert_active) {
+        CGMutablePathRef insert = border_insert_shape(border, border_frame, radius);
+        CGContextSetRGBStrokeColor(border->context, border->insert_color.r, border->insert_color.g, border->insert_color.b, border->insert_color.a);
+        CGContextAddPath(border->context, insert);
+        CGContextStrokePath(border->context);
+        CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
+        CGPathRelease(insert);
+    }
+
     CGContextFlush(border->context);
     SLSOrderWindow(g_connection, border->id, 1, window->id);
 
@@ -152,6 +208,7 @@ void border_window_create(struct ax_window *window)
 
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
+    border->insert_color = rgba_color_from_hex(g_window_manager.insert_window_border_color);
     border->width = g_window_manager.window_border_width;
 
     CFTypeRef frame_region;

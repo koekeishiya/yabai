@@ -17,6 +17,13 @@ struct equalize_node
     int x_count;
 };
 
+enum window_node_child
+{
+    CHILD_NONE,
+    CHILD_RIGHT,
+    CHILD_LEFT,
+};
+
 enum window_node_split
 {
     SPLIT_NONE,
@@ -33,6 +40,8 @@ struct window_node
     struct window_node *right;
     struct window_node *zoom;
     enum window_node_split split;
+    enum window_node_child child;
+    int insert_direction;
     float ratio;
 };
 
