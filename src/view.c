@@ -192,7 +192,7 @@ static struct window_node *window_node_find_next_leaf(struct window_node *node)
         return node->parent->right;
     }
 
-    return window_node_find_first_leaf(node->parent->right->left)->left;
+    return window_node_find_first_leaf(node->parent->right->left);
 }
 
 struct window_node *view_find_min_depth_leaf_node(struct window_node *node)
@@ -270,7 +270,14 @@ void view_add_window_node(struct view *view, struct ax_window *window)
         window_node_is_leaf(view->root)) {
         view->root->window_id = window->id;
     } else {
-        struct window_node *leaf = view_find_window_node(view->root, g_window_manager.focused_window_id);
+        struct window_node *leaf = NULL;
+
+        if (view->insertion_point) {
+            leaf = view_find_window_node(view->root, view->insertion_point);
+            view->insertion_point = 0;
+        }
+
+        if (!leaf) leaf = view_find_window_node(view->root, g_window_manager.focused_window_id);
         if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
         window_node_split(leaf, window);
 

@@ -47,6 +47,7 @@ struct view
     uint64_t sid;
     enum view_type type;
     struct window_node *root;
+    uint32_t insertion_point;
     bool is_valid;
     bool is_dirty;
 };

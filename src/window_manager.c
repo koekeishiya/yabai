@@ -453,6 +453,29 @@ next:;
     free(window_list);
 }
 
+void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+
+    struct window_node *a_node = view_find_window_node(view->root, a->id);
+    if (!a_node) return;
+
+    struct window_node *b_node = view_find_window_node(view->root, b->id);
+    if (!b_node) return;
+
+    if (a_node->parent == b_node->parent) {
+        a_node->window_id = b->id;
+        b_node->window_id = a->id;
+
+        window_node_flush(a_node);
+        window_node_flush(b_node);
+    } else {
+        space_manager_untile_window(sm, view, a);
+        view->insertion_point = b->id;
+        space_manager_tile_window_on_space(sm, a, view->sid);
+    }
+}
+
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
