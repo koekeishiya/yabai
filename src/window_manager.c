@@ -198,7 +198,7 @@ static void send_post_event(ProcessSerialNumber *window_psn, uint32_t window_id)
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
 
-static struct ax_window *window_manager_find_closest_window_in_direction_for_window_list(struct window_manager *wm, struct ax_window *window, int direction, uint32_t *window_list, int window_count)
+static struct ax_window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct ax_window *window, int direction, uint32_t *window_list, int window_count)
 {
     struct ax_window *best_window = NULL;
     float best_distance = FLT_MAX;
@@ -251,7 +251,7 @@ struct ax_window *window_manager_find_closest_managed_window_in_direction(struct
     uint32_t *view_window_list = view_find_window_list(view);
     if (!view_window_list) return NULL;
 
-    struct ax_window *result = window_manager_find_closest_window_in_direction_for_window_list(wm, window, direction, view_window_list, buf_len(view_window_list));
+    struct ax_window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, view_window_list, buf_len(view_window_list));
     buf_free(view_window_list);
 
     return result;
@@ -263,7 +263,7 @@ struct ax_window *window_manager_find_closest_window_in_direction(struct window_
     uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count);
     if (!window_list) return NULL;
 
-    struct ax_window *result = window_manager_find_closest_window_in_direction_for_window_list(wm, window, direction, window_list, window_count);
+    struct ax_window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, window_list, window_count);
     free(window_list);
 
     return result;
