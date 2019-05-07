@@ -18,6 +18,7 @@ extern struct window_manager g_window_manager;
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
 #define COMMAND_CONFIG_ACTIVE_BORDER_COLOR   "active_window_border_color"
 #define COMMAND_CONFIG_NORMAL_BORDER_COLOR   "normal_window_border_color"
+#define COMMAND_CONFIG_INSERT_BORDER_COLOR   "insert_window_border_color"
 #define COMMAND_CONFIG_TOP_PADDING           "top_padding"
 #define COMMAND_CONFIG_BOTTOM_PADDING        "bottom_padding"
 #define COMMAND_CONFIG_LEFT_PADDING          "left_padding"
@@ -261,6 +262,14 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         uint32_t color = token_to_uint32t(value);
         if (color) {
             g_window_manager.normal_window_border_color = color;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_INSERT_BORDER_COLOR)) {
+        struct token value = get_token(&message);
+        uint32_t color = token_to_uint32t(value);
+        if (color) {
+            g_window_manager.insert_window_border_color = color;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
