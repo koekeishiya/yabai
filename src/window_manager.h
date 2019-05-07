@@ -21,11 +21,25 @@ enum purify_mode
     PURIFY_ALWAYS
 };
 
+static const char *purify_mode_str[] =
+{
+    "on",
+    "float",
+    "off"
+};
+
 enum ffm_mode
 {
     FFM_DISABLED,
     FFM_AUTOFOCUS,
     FFM_AUTORAISE
+};
+
+static const char *ffm_mode_str[] =
+{
+    "disabled",
+    "autofocus",
+    "autoraise"
 };
 
 struct window_manager

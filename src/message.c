@@ -5,6 +5,12 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 
+static const char *bool_str[] =
+{
+    "off",
+    "on"
+};
+
 #define DOMAIN_CONFIG  "config"
 #define DOMAIN_DISPLAY "display"
 #define DOMAIN_SPACE   "space"
@@ -226,7 +232,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 
     if (token_equals(command, COMMAND_CONFIG_MFF)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_CONFIG_MFF_OFF)) {
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_mff]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_MFF_OFF)) {
             g_window_manager.enable_mff = false;
         } else if (token_equals(value, ARGUMENT_CONFIG_MFF_ON)) {
             g_window_manager.enable_mff = true;
@@ -235,7 +243,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_FFM)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_CONFIG_FFM_DISABLED)) {
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", ffm_mode_str[g_window_manager.ffm_mode]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_FFM_DISABLED)) {
             g_window_manager.ffm_mode = FFM_DISABLED;
         } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTOFOCUS)) {
             g_window_manager.ffm_mode = FFM_AUTOFOCUS;
@@ -246,7 +256,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_SHADOW)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_CONFIG_SHADOW_OFF)) {
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", purify_mode_str[g_window_manager.purify_mode]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_OFF)) {
             g_window_manager.purify_mode = PURIFY_ALWAYS;
 #if 0
         } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_FLT)) {
@@ -259,7 +271,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_BORDER)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_CONFIG_BORDER_OFF)) {
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_BORDER_OFF)) {
             g_window_manager.enable_window_border = false;
         } else if (token_equals(value, ARGUMENT_CONFIG_BORDER_ON)) {
             g_window_manager.enable_window_border = true;
@@ -268,54 +282,92 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_BORDER_WIDTH)) {
         struct token value = get_token(&message);
-        int width = token_to_int(value);
-        if (width) {
-            g_window_manager.window_border_width = width;
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%d\n", g_window_manager.window_border_width);
         } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            int width = token_to_int(value);
+            if (width) {
+                g_window_manager.window_border_width = width;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         }
     } else if (token_equals(command, COMMAND_CONFIG_ACTIVE_BORDER_COLOR)) {
         struct token value = get_token(&message);
-        uint32_t color = token_to_uint32t(value);
-        if (color) {
-            g_window_manager.active_window_border_color = color;
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "0x%x\n", g_window_manager.active_window_border_color);
         } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                g_window_manager.active_window_border_color = color;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         }
     } else if (token_equals(command, COMMAND_CONFIG_NORMAL_BORDER_COLOR)) {
         struct token value = get_token(&message);
-        uint32_t color = token_to_uint32t(value);
-        if (color) {
-            g_window_manager.normal_window_border_color = color;
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "0x%x\n", g_window_manager.normal_window_border_color);
         } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                g_window_manager.normal_window_border_color = color;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         }
     } else if (token_equals(command, COMMAND_CONFIG_INSERT_BORDER_COLOR)) {
         struct token value = get_token(&message);
-        uint32_t color = token_to_uint32t(value);
-        if (color) {
-            g_window_manager.insert_window_border_color = color;
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "0x%x\n", g_window_manager.insert_window_border_color);
         } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                g_window_manager.insert_window_border_color = color;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         }
     } else if (token_equals(command, COMMAND_CONFIG_TOP_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.top_padding[sel_mci] = token_to_int(value);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%d\n", g_space_manager.top_padding[sel_mci]);
+        } else {
+            g_space_manager.top_padding[sel_mci] = token_to_int(value);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_BOTTOM_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.bottom_padding[sel_mci] = token_to_int(value);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%d\n", g_space_manager.bottom_padding[sel_mci]);
+        } else {
+            g_space_manager.bottom_padding[sel_mci] = token_to_int(value);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_LEFT_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.left_padding[sel_mci] = token_to_int(value);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%d\n", g_space_manager.left_padding[sel_mci]);
+        } else {
+            g_space_manager.left_padding[sel_mci] = token_to_int(value);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_RIGHT_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.right_padding[sel_mci] = token_to_int(value);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%d\n", g_space_manager.right_padding[sel_mci]);
+        } else {
+            g_space_manager.right_padding[sel_mci] = token_to_int(value);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_WINDOW_GAP)) {
         struct token value = get_token(&message);
-        g_space_manager.window_gap[sel_mci] = token_to_int(value);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%d\n", g_space_manager.window_gap[sel_mci]);
+        } else {
+            g_space_manager.window_gap[sel_mci] = token_to_int(value);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_LAYOUT)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", view_type_str[g_space_manager.layout[sel_mci]]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
             g_space_manager.layout[sel_mci] = VIEW_BSP;
         } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_FLOAT)) {
             g_space_manager.layout[sel_mci] = VIEW_FLOAT;
@@ -324,10 +376,16 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_SPLIT_RATIO)) {
         struct token value = get_token(&message);
-        g_space_manager.split_ratio = token_to_float(value);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%.4f\n", g_space_manager.split_ratio);
+        } else {
+            g_space_manager.split_ratio = token_to_float(value);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_AUTO_BALANCE)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_CONFIG_AUTO_BALANCE_OFF)) {
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_space_manager.auto_balance]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_AUTO_BALANCE_OFF)) {
             g_space_manager.auto_balance = false;
         } else if (token_equals(value, ARGUMENT_CONFIG_AUTO_BALANCE_ON)) {
             g_space_manager.auto_balance = true;

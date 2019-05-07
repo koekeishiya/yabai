@@ -47,9 +47,16 @@ struct window_node
 
 enum view_type
 {
-    VIEW_UNKNOWN,
+    VIEW_DEFAULT,
     VIEW_BSP,
     VIEW_FLOAT
+};
+
+static const char *view_type_str[] =
+{
+    "default",
+    "bsp",
+    "float"
 };
 
 struct view
@@ -69,7 +76,7 @@ struct view
     bool is_dirty;
 };
 
-#define view_lookup_layout(p, i) (p[i] == VIEW_UNKNOWN ? p[0] : p[i])
+#define view_lookup_layout(p, i) (p[i] == VIEW_DEFAULT ? p[0] : p[i])
 #define view_lookup_padding(p, i) (p[i] == -1 ? p[0] : p[i])
 #define view_lookup_gap(p, i) (p[i] == -1 ? p[0] : p[i])
 
