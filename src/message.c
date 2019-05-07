@@ -213,22 +213,29 @@ static void daemon_fail(FILE *rsp, char *fmt, ...)
     va_end(ap);
 }
 
+static void handle_domain_config_selector_space(FILE *rsp, struct token domain, struct token selector, char **message, int *sel_mci)
+{
+    struct token value = get_token(message);
+    if ((*sel_mci = token_to_int(value)) == 0) {
+        daemon_fail(rsp, "unknown value '%.*s' given to selector '%.*s' for domain '%.*s'\n", value.length, value.text, selector.length, selector.text, domain.length, domain.text);
+    }
+}
+
 static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 {
+    bool found_selector = true;
     int sel_mci = 0;
 
     struct token selector = get_token(&message);
     struct token command  = selector;
 
     if (token_equals(selector, SELECTOR_CONFIG_SPACE)) {
-        struct token value = get_token(&message);
-        if ((sel_mci = token_to_int(value)) == 0) {
-            daemon_fail(rsp, "unknown value '%.*s' given to selector '%.*s' for domain '%.*s'\n", value.length, value.text, selector.length, selector.text, domain.length, domain.text);
-            return;
-        }
-
-        command = get_token(&message);
+        handle_domain_config_selector_space(rsp, domain, selector, &message, &sel_mci);
+    } else {
+        found_selector = false;
     }
+
+    if (found_selector) command = get_token(&message);
 
     if (token_equals(command, COMMAND_CONFIG_MFF)) {
         struct token value = get_token(&message);
