@@ -18,17 +18,19 @@ extern void CoreDockGetOrientationAndPinning(int *orientation, int *pinning);
 #define DOCK_ORIENTATION_LEFT   3
 #define DOCK_ORIENTATION_RIGHT  4
 
+#define SM_MAX_SPACE            50
+
 struct space_manager
 {
     struct table view;
     uint64_t current_space_id;
     uint64_t last_space_id;
-    enum view_type layout[100];
-    int top_padding[100];
-    int bottom_padding[100];
-    int left_padding[100];
-    int right_padding[100];
-    int window_gap[100];
+    enum view_type layout[SM_MAX_SPACE];
+    int top_padding[SM_MAX_SPACE];
+    int bottom_padding[SM_MAX_SPACE];
+    int left_padding[SM_MAX_SPACE];
+    int right_padding[SM_MAX_SPACE];
+    int window_gap[SM_MAX_SPACE];
     float split_ratio;
     bool auto_balance;
 };

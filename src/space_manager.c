@@ -518,7 +518,7 @@ bool space_manager_refresh_application_windows(void)
 
 void space_manager_init(struct space_manager *sm)
 {
-    for (int i = 1; i < 100 ; ++i) {
+    for (int i = 1; i < SM_MAX_SPACE ; ++i) {
         sm->top_padding[i]    = -1;
         sm->bottom_padding[i] = -1;
         sm->left_padding[i]   = -1;
