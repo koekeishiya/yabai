@@ -402,7 +402,6 @@ void view_update(struct view *view)
     view->is_dirty = true;
 }
 
-
 struct view *view_create(uint64_t sid)
 {
     struct view *view = malloc(sizeof(struct view));
