@@ -76,6 +76,8 @@ struct view *space_manager_find_view(struct space_manager *sm, uint64_t sid)
 void space_manager_refresh_view(struct space_manager *sm, uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     view_update(view);
     view_flush(view);
 }
