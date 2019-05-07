@@ -397,6 +397,7 @@ void view_update(struct view *view)
     view->is_dirty = true;
 }
 
+
 struct view *view_create(uint64_t sid)
 {
     struct view *view = malloc(sizeof(struct view));
@@ -405,11 +406,12 @@ struct view *view_create(uint64_t sid)
     view->root = malloc(sizeof(struct window_node));
     memset(view->root, 0, sizeof(struct window_node));
 
+    int mci = space_manager_mission_control_index(sid);
+    view->top_padding = view_lookup_padding(g_space_manager.top_padding, mci);
+    view->bottom_padding = view_lookup_padding(g_space_manager.bottom_padding, mci);
+    view->left_padding = view_lookup_padding(g_space_manager.left_padding, mci);
+    view->right_padding = view_lookup_padding(g_space_manager.right_padding, mci);
     view->enable_padding = true;
-    view->top_padding = g_space_manager.top_padding;
-    view->bottom_padding = g_space_manager.bottom_padding;
-    view->left_padding = g_space_manager.left_padding;
-    view->right_padding = g_space_manager.right_padding;
     view->type = VIEW_MANAGED;
     view->sid = sid;
     view_update(view);

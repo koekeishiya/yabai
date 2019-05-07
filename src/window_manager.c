@@ -563,11 +563,14 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
     if (w > c - x) w = c - x;
     if (h > r - y) h = r - y;
 
+    uint64_t sid = display_space_id(did);
+    int mci = space_manager_mission_control_index(sid);
+
     CGRect bounds = display_bounds_constrained(did);
-    bounds.origin.x    += sm->left_padding;
-    bounds.size.width  -= (sm->left_padding + sm->right_padding);
-    bounds.origin.y    += sm->top_padding;
-    bounds.size.height -= (sm->top_padding + sm->bottom_padding);
+    bounds.origin.x    += view_lookup_padding(sm->left_padding, mci);
+    bounds.size.width  -= (view_lookup_padding(sm->left_padding, mci) + view_lookup_padding(sm->right_padding, mci));
+    bounds.origin.y    += view_lookup_padding(sm->top_padding, mci);
+    bounds.size.height -= (view_lookup_padding(sm->top_padding, mci) + view_lookup_padding(sm->bottom_padding, mci));
 
     float cw = bounds.size.width / c;
     float ch = bounds.size.height / r;

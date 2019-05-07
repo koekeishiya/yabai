@@ -23,10 +23,10 @@ struct space_manager
     struct table view;
     uint64_t current_space_id;
     uint64_t last_space_id;
-    uint32_t top_padding;
-    uint32_t bottom_padding;
-    uint32_t left_padding;
-    uint32_t right_padding;
+    int top_padding[255];
+    int bottom_padding[255];
+    int left_padding[255];
+    int right_padding[255];
     uint32_t window_gap;
     float split_ratio;
     bool auto_balance;
@@ -46,6 +46,7 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
 struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct ax_window *window, uint64_t sid);
 void space_manager_balance_space(struct space_manager *sm, uint64_t sid);
 void space_manager_toggle_window_split(struct space_manager *sm, struct ax_window *window);
+int space_manager_mission_control_index(uint64_t sid);
 uint64_t space_manager_mission_control_space(int desktop_id);
 uint64_t space_manager_prev_space(uint64_t sid);
 uint64_t space_manager_next_space(uint64_t sid);

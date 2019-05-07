@@ -27,6 +27,8 @@ extern struct window_manager g_window_manager;
 #define COMMAND_CONFIG_SPLIT_RATIO           "split_ratio"
 #define COMMAND_CONFIG_AUTO_BALANCE          "auto_balance"
 
+#define SELECTOR_CONFIG_SPACE                "--space"
+
 #define ARGUMENT_CONFIG_MFF_ON               "on"
 #define ARGUMENT_CONFIG_MFF_OFF              "off"
 #define ARGUMENT_CONFIG_FFM_DISABLED         "off"
@@ -198,7 +200,21 @@ static void daemon_fail(FILE *rsp, char *fmt, ...)
 
 static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 {
-    struct token command = get_token(&message);
+    int sel_mci = 0;
+
+    struct token selector = get_token(&message);
+    struct token command  = selector;
+
+    if (token_equals(selector, SELECTOR_CONFIG_SPACE)) {
+        struct token value = get_token(&message);
+        if ((sel_mci = token_to_int(value)) == 0) {
+            daemon_fail(rsp, "unknown value '%.*s' given to selector '%.*s' for domain '%.*s'\n", value.length, value.text, selector.length, selector.text, domain.length, domain.text);
+            return;
+        }
+
+        command = get_token(&message);
+    }
+
     if (token_equals(command, COMMAND_CONFIG_MFF)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_CONFIG_MFF_OFF)) {
@@ -275,16 +291,16 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_TOP_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.top_padding = token_to_int(value);
+        g_space_manager.top_padding[sel_mci] = token_to_int(value);
     } else if (token_equals(command, COMMAND_CONFIG_BOTTOM_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.bottom_padding = token_to_int(value);
+        g_space_manager.bottom_padding[sel_mci] = token_to_int(value);
     } else if (token_equals(command, COMMAND_CONFIG_LEFT_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.left_padding = token_to_int(value);
+        g_space_manager.left_padding[sel_mci] = token_to_int(value);
     } else if (token_equals(command, COMMAND_CONFIG_RIGHT_PADDING)) {
         struct token value = get_token(&message);
-        g_space_manager.right_padding = token_to_int(value);
+        g_space_manager.right_padding[sel_mci] = token_to_int(value);
     } else if (token_equals(command, COMMAND_CONFIG_WINDOW_GAP)) {
         struct token value = get_token(&message);
         g_space_manager.window_gap = token_to_int(value);
@@ -364,12 +380,12 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_SPACE_FOCUS_LAST)) {
             space_manager_focus_space(g_space_manager.last_space_id);
         } else if (token_is_valid(value)) {
-            int mission_control_index = token_to_int(value);
-            uint64_t sid = space_manager_mission_control_space(mission_control_index);
+            int mci = token_to_int(value);
+            uint64_t sid = space_manager_mission_control_space(mci);
             if (sid) {
                 space_manager_focus_space(sid);
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mission_control_index);
+                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -635,13 +651,13 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, g_space_manager.last_space_id);
         } else if (token_is_valid(value)) {
-            int mission_control_index = token_to_int(value);
-            uint64_t sid = space_manager_mission_control_space(mission_control_index);
+            int mci = token_to_int(value);
+            uint64_t sid = space_manager_mission_control_space(mci);
             if (sid) {
                 struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mission_control_index);
+                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);

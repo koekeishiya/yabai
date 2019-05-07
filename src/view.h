@@ -66,6 +66,8 @@ struct view
     bool is_dirty;
 };
 
+#define view_lookup_padding(p, i) (p[i] == -1 ? p[0] : p[i])
+
 void view_remove_window_node(struct view *view, struct ax_window *window);
 void view_add_window_node(struct view *view, struct ax_window *window);
 uint32_t *view_find_window_list(struct view *view);

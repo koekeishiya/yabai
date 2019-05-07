@@ -175,6 +175,36 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct ax_windo
     }
 }
 
+int space_manager_mission_control_index(uint64_t sid)
+{
+    uint64_t result = 0;
+    int desktop_cnt = 1;
+
+    CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
+    int display_spaces_count = CFArrayGetCount(display_spaces_ref);
+
+    for (int i = 0; i < display_spaces_count; ++i) {
+        CFDictionaryRef display_ref = CFArrayGetValueAtIndex(display_spaces_ref, i);
+        CFArrayRef spaces_ref = CFDictionaryGetValue(display_ref, CFSTR("Spaces"));
+        int spaces_count = CFArrayGetCount(spaces_ref);
+
+        for (int j = 0; j < spaces_count; ++j) {
+            CFDictionaryRef space_ref = CFArrayGetValueAtIndex(spaces_ref, j);
+            CFNumberRef sid_ref = CFDictionaryGetValue(space_ref, CFSTR("id64"));
+            CFNumberGetValue(sid_ref, CFNumberGetType(sid_ref), &result);
+            if (!space_is_user(result)) continue;
+            if (sid == result) goto out;
+
+            ++desktop_cnt;
+        }
+    }
+
+    desktop_cnt = 0;
+out:
+    CFRelease(display_spaces_ref);
+    return desktop_cnt;
+}
+
 uint64_t space_manager_mission_control_space(int desktop_id)
 {
     uint64_t result = 0;
@@ -441,10 +471,13 @@ bool space_manager_refresh_application_windows(void)
 
 void space_manager_init(struct space_manager *sm)
 {
-    sm->top_padding = 0;
-    sm->bottom_padding = 0;
-    sm->left_padding = 0;
-    sm->right_padding = 0;
+    for (int i = 1; i < 255 ; ++i) {
+        sm->top_padding[i]    = -1;
+        sm->bottom_padding[i] = -1;
+        sm->left_padding[i]   = -1;
+        sm->right_padding[i]  = -1;
+    }
+
     sm->window_gap = 0;
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;
