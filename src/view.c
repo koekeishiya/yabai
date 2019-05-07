@@ -383,14 +383,16 @@ void view_update(struct view *view)
 {
     uint32_t did = space_display_id(view->sid);
     CGRect frame = display_bounds_constrained(did);
-
     view->root->area = area_from_cgrect(frame);
-    view->root->area.x += g_space_manager.left_padding;
-    view->root->area.w -= (g_space_manager.left_padding + g_space_manager.right_padding);
-    view->root->area.y += g_space_manager.top_padding;
-    view->root->area.h -= (g_space_manager.top_padding + g_space_manager.bottom_padding);
-    window_node_update(view->root);
 
+    if (view->enable_padding) {
+        view->root->area.x += view->left_padding;
+        view->root->area.w -= (view->left_padding + view->right_padding);
+        view->root->area.y += view->top_padding;
+        view->root->area.h -= (view->top_padding + view->bottom_padding);
+    }
+
+    window_node_update(view->root);
     view->is_valid = true;
     view->is_dirty = true;
 }
@@ -403,6 +405,11 @@ struct view *view_create(uint64_t sid)
     view->root = malloc(sizeof(struct window_node));
     memset(view->root, 0, sizeof(struct window_node));
 
+    view->enable_padding = true;
+    view->top_padding = g_space_manager.top_padding;
+    view->bottom_padding = g_space_manager.bottom_padding;
+    view->left_padding = g_space_manager.left_padding;
+    view->right_padding = g_space_manager.right_padding;
     view->type = VIEW_MANAGED;
     view->sid = sid;
     view_update(view);

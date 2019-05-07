@@ -57,6 +57,11 @@ struct view
     enum view_type type;
     struct window_node *root;
     uint32_t insertion_point;
+    uint32_t top_padding;
+    uint32_t bottom_padding;
+    uint32_t left_padding;
+    uint32_t right_padding;
+    bool enable_padding;
     bool is_valid;
     bool is_dirty;
 };

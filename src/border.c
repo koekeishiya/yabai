@@ -118,6 +118,7 @@ static float border_radius_clamp(CGRect frame, float radius)
 void border_window_refresh(struct ax_window *window)
 {
     if (!window->border.id) return;
+    if (!window->border.enabled) return;
     struct border *border = &window->border;
     border_window_ensure_same_space(window);
 
@@ -171,6 +172,7 @@ void border_window_refresh(struct ax_window *window)
 void border_window_activate(struct ax_window *window)
 {
     if (!window->border.id) return;
+    if (!window->border.enabled) return;
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.active_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
@@ -182,6 +184,7 @@ void border_window_activate(struct ax_window *window)
 void border_window_deactivate(struct ax_window *window)
 {
     if (!window->border.id) return;
+    if (!window->border.enabled) return;
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
@@ -193,12 +196,14 @@ void border_window_deactivate(struct ax_window *window)
 void border_window_show(struct ax_window *window)
 {
     if (!window->border.id) return;
+    if (!window->border.enabled) return;
     SLSOrderWindow(g_connection, window->border.id, 1, window->id);
 }
 
 void border_window_hide(struct ax_window *window)
 {
     if (!window->border.id) return;
+    if (!window->border.enabled) return;
     SLSOrderWindow(g_connection, window->border.id, 0, window->id);
 }
 
@@ -210,6 +215,7 @@ void border_window_create(struct ax_window *window)
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
     border->insert_color = rgba_color_from_hex(g_window_manager.insert_window_border_color);
     border->width = g_window_manager.window_border_width;
+    border->enabled = true;
 
     CFTypeRef frame_region;
     CGRect frame = window_frame(window);

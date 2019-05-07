@@ -32,8 +32,9 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
 #define ARGUMENT_CONFIG_SHADOW_OFF           "off"
-#define ARGUMENT_CONFIG_SHADOW_FLT           "float"
-#define ARGUMENT_CONFIG_SHADOW_ALL           "always"
+#define ARGUMENT_CONFIG_SHADOW_ALL           "on"
+// #define ARGUMENT_CONFIG_SHADOW_FLT           "float"
+// #define ARGUMENT_CONFIG_SHADOW_ALL           "always"
 #define ARGUMENT_CONFIG_BORDER_ON            "on"
 #define ARGUMENT_CONFIG_BORDER_OFF           "off"
 #define ARGUMENT_CONFIG_AUTO_BALANCE_ON      "on"
@@ -56,18 +57,22 @@ extern struct window_manager g_window_manager;
 #define COMMAND_SPACE_BALANCE "--balance"
 #define COMMAND_SPACE_MIRROR  "--mirror"
 #define COMMAND_SPACE_ROTATE  "--rotate"
+#define COMMAND_SPACE_PADDING "--padding"
+#define COMMAND_SPACE_TOGGLE  "--toggle"
 
-#define ARGUMENT_SPACE_FOCUS_PREV "prev"
-#define ARGUMENT_SPACE_FOCUS_NEXT "next"
-#define ARGUMENT_SPACE_FOCUS_LAST "last"
-#define ARGUMENT_SPACE_MOVE_PREV  "prev"
-#define ARGUMENT_SPACE_MOVE_NEXT  "next"
-#define ARGUMENT_SPACE_MOVE_LAST  "last"
-#define ARGUMENT_SPACE_MIRROR_X   "x-axis"
-#define ARGUMENT_SPACE_MIRROR_Y   "y-axis"
-#define ARGUMENT_SPACE_ROTATE_90  "90"
-#define ARGUMENT_SPACE_ROTATE_180 "180"
-#define ARGUMENT_SPACE_ROTATE_270 "270"
+#define ARGUMENT_SPACE_FOCUS_PREV  "prev"
+#define ARGUMENT_SPACE_FOCUS_NEXT  "next"
+#define ARGUMENT_SPACE_FOCUS_LAST  "last"
+#define ARGUMENT_SPACE_MOVE_PREV   "prev"
+#define ARGUMENT_SPACE_MOVE_NEXT   "next"
+#define ARGUMENT_SPACE_MOVE_LAST   "last"
+#define ARGUMENT_SPACE_MIRROR_X    "x-axis"
+#define ARGUMENT_SPACE_MIRROR_Y    "y-axis"
+#define ARGUMENT_SPACE_ROTATE_90   "90"
+#define ARGUMENT_SPACE_ROTATE_180  "180"
+#define ARGUMENT_SPACE_ROTATE_270  "270"
+#define ARGUMENT_SPACE_PADDING     "%d:%d:%d:%d"
+#define ARGUMENT_SPACE_TGL_PADDING "padding"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
@@ -90,6 +95,7 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
 #define ARGUMENT_WINDOW_TOGGLE_FULLSC "fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
+#define ARGUMENT_WINDOW_TOGGLE_BORDER "border"
 #define ARGUMENT_WINDOW_SPACE_PREV    "prev"
 #define ARGUMENT_WINDOW_SPACE_NEXT    "next"
 #define ARGUMENT_WINDOW_SPACE_LAST    "last"
@@ -216,8 +222,10 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_CONFIG_SHADOW_OFF)) {
             g_window_manager.purify_mode = PURIFY_ALWAYS;
+#if 0
         } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_FLT)) {
             g_window_manager.purify_mode = PURIFY_MANAGED;
+#endif
         } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_ALL)) {
             g_window_manager.purify_mode = PURIFY_DISABLED;
         } else {
@@ -412,6 +420,21 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_SPACE_PADDING)) {
+        struct token value = get_token(&message);
+        unsigned t, b, l, r;
+        if ((sscanf(value.text, ARGUMENT_SPACE_PADDING, &t, &b, &l, &r) == 4)) {
+            space_manager_set_padding_for_space(&g_space_manager, space_manager_active_space(), t, b, l, r);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_SPACE_TOGGLE)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_SPACE_TGL_PADDING)) {
+            space_manager_toggle_padding_for_space(&g_space_manager, space_manager_active_space());
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
     }
@@ -542,6 +565,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_NATIVE)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_BORDER)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (window) window_manager_toggle_window_border(window);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

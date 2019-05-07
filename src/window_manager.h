@@ -82,6 +82,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
 void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
+void window_manager_toggle_window_border(struct ax_window *window);
 void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t display_id, uint64_t sid);

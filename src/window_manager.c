@@ -656,6 +656,17 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     }
 }
 
+void window_manager_toggle_window_border(struct ax_window *window)
+{
+    if (window->border.enabled) {
+        border_window_hide(window);
+        window->border.enabled = false;
+    } else {
+        window->border.enabled = true;
+        border_window_refresh(window);
+    }
+}
+
 void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
     int window_count;

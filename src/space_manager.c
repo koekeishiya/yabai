@@ -102,6 +102,25 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     }
 }
 
+void space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, unsigned top, unsigned bottom, unsigned left, unsigned right)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    view->top_padding = top;
+    view->bottom_padding = bottom;
+    view->left_padding = left;
+    view->right_padding = right;
+    view_update(view);
+    view_flush(view);
+}
+
+void space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t sid)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    view->enable_padding = !view->enable_padding;
+    view_update(view);
+    view_flush(view);
+}
+
 void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees)
 {
     struct view *view = space_manager_find_view(sm, sid);
