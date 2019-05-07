@@ -33,11 +33,16 @@ static float window_node_get_ratio(struct window_node *node)
     return g_space_manager.split_ratio;
 }
 
-static void area_make_pair(struct window_node *node)
+static float window_node_get_gap(struct view *view)
+{
+    return view->enable_gap ? view->window_gap / 2.0f : 0.0f;
+}
+
+static void area_make_pair(struct view *view, struct window_node *node)
 {
     enum window_node_split split = window_node_get_split(node);
     float ratio = window_node_get_ratio(node);
-    float gap   = g_space_manager.window_gap / 2.0f;
+    float gap   = window_node_get_gap(view);
 
     if (split == SPLIT_Y) {
         node->left->area = node->area;
@@ -128,7 +133,7 @@ static struct equalize_node window_node_equalize(struct window_node *node)
 }
 
 
-static void window_node_split(struct window_node *node, struct ax_window *window)
+static void window_node_split(struct view *view, struct window_node *node, struct ax_window *window)
 {
     struct window_node *left = malloc(sizeof(struct window_node));
     memset(left, 0, sizeof(struct window_node));
@@ -151,18 +156,18 @@ static void window_node_split(struct window_node *node, struct ax_window *window
     node->left = left;
     node->right = right;
 
-    area_make_pair(node);
+    area_make_pair(view, node);
 }
 
-static void window_node_update(struct window_node *node)
+static void window_node_update(struct view *view, struct window_node *node)
 {
     if (window_node_is_intermediate(node)) {
-        area_make_pair(node->parent);
+        area_make_pair(view, node->parent);
     }
 
     if (!window_node_is_leaf(node)) {
-        window_node_update(node->left);
-        window_node_update(node->right);
+        window_node_update(view, node->left);
+        window_node_update(view, node->right);
     }
 }
 
@@ -303,7 +308,7 @@ void view_remove_window_node(struct view *view, struct ax_window *window)
         parent->right = child->right;
         parent->right->parent = parent;
 
-        window_node_update(parent);
+        window_node_update(view, parent);
     }
 
     free(child);
@@ -331,7 +336,7 @@ void view_add_window_node(struct view *view, struct ax_window *window)
         if (!leaf) leaf = view_find_window_node(view->root, g_window_manager.focused_window_id);
         if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
         struct ax_window *leaf_window = window_manager_find_window(&g_window_manager, leaf->window_id);
-        window_node_split(leaf, window);
+        window_node_split(view, leaf, window);
 
         if (leaf_window) {
             if (leaf_window->border.insert_active) {
@@ -392,7 +397,7 @@ void view_update(struct view *view)
         view->root->area.h -= (view->top_padding + view->bottom_padding);
     }
 
-    window_node_update(view->root);
+    window_node_update(view, view->root);
     view->is_valid = true;
     view->is_dirty = true;
 }
@@ -407,12 +412,14 @@ struct view *view_create(uint64_t sid)
     memset(view->root, 0, sizeof(struct window_node));
 
     int mci = space_manager_mission_control_index(sid);
+    view->enable_padding = true;
+    view->enable_gap = true;
     view->top_padding = view_lookup_padding(g_space_manager.top_padding, mci);
     view->bottom_padding = view_lookup_padding(g_space_manager.bottom_padding, mci);
     view->left_padding = view_lookup_padding(g_space_manager.left_padding, mci);
     view->right_padding = view_lookup_padding(g_space_manager.right_padding, mci);
-    view->enable_padding = true;
     view->type = view_lookup_layout(g_space_manager.layout, mci);
+    view->window_gap = view_lookup_gap(g_space_manager.window_gap, mci);
     view->sid = sid;
     view_update(view);
 

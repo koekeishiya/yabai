@@ -62,13 +62,16 @@ struct view
     uint32_t bottom_padding;
     uint32_t left_padding;
     uint32_t right_padding;
+    uint32_t window_gap;
     bool enable_padding;
+    bool enable_gap;
     bool is_valid;
     bool is_dirty;
 };
 
-#define view_lookup_padding(p, i) (p[i] == -1 ? p[0] : p[i])
 #define view_lookup_layout(p, i) (p[i] == VIEW_UNKNOWN ? p[0] : p[i])
+#define view_lookup_padding(p, i) (p[i] == -1 ? p[0] : p[i])
+#define view_lookup_gap(p, i) (p[i] == -1 ? p[0] : p[i])
 
 void view_remove_window_node(struct view *view, struct ax_window *window);
 void view_add_window_node(struct view *view, struct ax_window *window);

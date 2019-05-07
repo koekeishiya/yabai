@@ -115,6 +115,26 @@ void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, 
     if (view->type == VIEW_BSP) window_manager_check_for_windows_on_space(sm, &g_window_manager, sid);
 }
 
+void space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, unsigned gap)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
+    view->window_gap = gap;
+    view_update(view);
+    view_flush(view);
+}
+
+void space_manager_toggle_gap_for_space(struct space_manager *sm, uint64_t sid)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
+    view->enable_gap = !view->enable_gap;
+    view_update(view);
+    view_flush(view);
+}
+
 void space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, unsigned top, unsigned bottom, unsigned left, unsigned right)
 {
     struct view *view = space_manager_find_view(sm, sid);
@@ -196,7 +216,7 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct ax_windo
             view_update(view);
             view_flush(view);
         } else {
-            window_node_update(node->parent);
+            window_node_update(view, node->parent);
             window_node_flush(node->parent);
         }
     }
@@ -503,10 +523,10 @@ void space_manager_init(struct space_manager *sm)
         sm->bottom_padding[i] = -1;
         sm->left_padding[i]   = -1;
         sm->right_padding[i]  = -1;
+        sm->window_gap[i]     = -1;
     }
 
     sm->layout[0] = VIEW_BSP;
-    sm->window_gap = 0;
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;
 

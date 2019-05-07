@@ -64,6 +64,7 @@ extern struct window_manager g_window_manager;
 #define COMMAND_SPACE_MIRROR  "--mirror"
 #define COMMAND_SPACE_ROTATE  "--rotate"
 #define COMMAND_SPACE_PADDING "--padding"
+#define COMMAND_SPACE_GAP     "--gap"
 #define COMMAND_SPACE_TOGGLE  "--toggle"
 #define COMMAND_SPACE_LAYOUT  "--layout"
 
@@ -79,7 +80,9 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_SPACE_ROTATE_180  "180"
 #define ARGUMENT_SPACE_ROTATE_270  "270"
 #define ARGUMENT_SPACE_PADDING     "%d:%d:%d:%d"
+#define ARGUMENT_SPACE_GAP         "%d"
 #define ARGUMENT_SPACE_TGL_PADDING "padding"
+#define ARGUMENT_SPACE_TGL_GAP     "gap"
 #define ARGUMENT_SPACE_LAYOUT_BSP  "bsp"
 #define ARGUMENT_SPACE_LAYOUT_FLT  "float"
 /* ----------------------------------------------------------------------------- */
@@ -309,7 +312,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         g_space_manager.right_padding[sel_mci] = token_to_int(value);
     } else if (token_equals(command, COMMAND_CONFIG_WINDOW_GAP)) {
         struct token value = get_token(&message);
-        g_space_manager.window_gap = token_to_int(value);
+        g_space_manager.window_gap[sel_mci] = token_to_int(value);
     } else if (token_equals(command, COMMAND_CONFIG_LAYOUT)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
@@ -468,10 +471,20 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_SPACE_GAP)) {
+        struct token value = get_token(&message);
+        unsigned gap;
+        if ((sscanf(value.text, ARGUMENT_SPACE_GAP, &gap) == 1)) {
+            space_manager_set_gap_for_space(&g_space_manager, space_manager_active_space(), gap);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else if (token_equals(command, COMMAND_SPACE_TOGGLE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_SPACE_TGL_PADDING)) {
             space_manager_toggle_padding_for_space(&g_space_manager, space_manager_active_space());
+        } else if (token_equals(value, ARGUMENT_SPACE_TGL_GAP)) {
+            space_manager_toggle_gap_for_space(&g_space_manager, space_manager_active_space());
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
