@@ -23,6 +23,7 @@ extern struct window_manager g_window_manager;
 #define COMMAND_CONFIG_BOTTOM_PADDING        "bottom_padding"
 #define COMMAND_CONFIG_LEFT_PADDING          "left_padding"
 #define COMMAND_CONFIG_RIGHT_PADDING         "right_padding"
+#define COMMAND_CONFIG_LAYOUT                "layout"
 #define COMMAND_CONFIG_WINDOW_GAP            "window_gap"
 #define COMMAND_CONFIG_SPLIT_RATIO           "split_ratio"
 #define COMMAND_CONFIG_AUTO_BALANCE          "auto_balance"
@@ -42,6 +43,8 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_CONFIG_BORDER_OFF           "off"
 #define ARGUMENT_CONFIG_AUTO_BALANCE_ON      "on"
 #define ARGUMENT_CONFIG_AUTO_BALANCE_OFF     "off"
+#define ARGUMENT_CONFIG_LAYOUT_BSP           "bsp"
+#define ARGUMENT_CONFIG_LAYOUT_FLOAT         "float"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
@@ -62,6 +65,7 @@ extern struct window_manager g_window_manager;
 #define COMMAND_SPACE_ROTATE  "--rotate"
 #define COMMAND_SPACE_PADDING "--padding"
 #define COMMAND_SPACE_TOGGLE  "--toggle"
+#define COMMAND_SPACE_LAYOUT  "--layout"
 
 #define ARGUMENT_SPACE_FOCUS_PREV  "prev"
 #define ARGUMENT_SPACE_FOCUS_NEXT  "next"
@@ -76,6 +80,8 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_SPACE_ROTATE_270  "270"
 #define ARGUMENT_SPACE_PADDING     "%d:%d:%d:%d"
 #define ARGUMENT_SPACE_TGL_PADDING "padding"
+#define ARGUMENT_SPACE_LAYOUT_BSP  "bsp"
+#define ARGUMENT_SPACE_LAYOUT_FLT  "float"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
@@ -304,6 +310,15 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_CONFIG_WINDOW_GAP)) {
         struct token value = get_token(&message);
         g_space_manager.window_gap = token_to_int(value);
+    } else if (token_equals(command, COMMAND_CONFIG_LAYOUT)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
+            g_space_manager.layout[sel_mci] = VIEW_BSP;
+        } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_FLOAT)) {
+            g_space_manager.layout[sel_mci] = VIEW_FLOAT;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_SPLIT_RATIO)) {
         struct token value = get_token(&message);
         g_space_manager.split_ratio = token_to_float(value);
@@ -457,6 +472,15 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_SPACE_TGL_PADDING)) {
             space_manager_toggle_padding_for_space(&g_space_manager, space_manager_active_space());
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_SPACE_LAYOUT)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_SPACE_LAYOUT_BSP)) {
+            space_manager_set_layout_for_space(&g_space_manager, space_manager_active_space(), VIEW_BSP);
+        } else if (token_equals(value, ARGUMENT_SPACE_LAYOUT_FLT)) {
+            space_manager_set_layout_for_space(&g_space_manager, space_manager_active_space(), VIEW_FLOAT);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

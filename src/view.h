@@ -47,8 +47,9 @@ struct window_node
 
 enum view_type
 {
-    VIEW_FLOAT,
-    VIEW_MANAGED
+    VIEW_UNKNOWN,
+    VIEW_BSP,
+    VIEW_FLOAT
 };
 
 struct view
@@ -67,6 +68,7 @@ struct view
 };
 
 #define view_lookup_padding(p, i) (p[i] == -1 ? p[0] : p[i])
+#define view_lookup_layout(p, i) (p[i] == VIEW_UNKNOWN ? p[0] : p[i])
 
 void view_remove_window_node(struct view *view, struct ax_window *window);
 void view_add_window_node(struct view *view, struct ax_window *window);

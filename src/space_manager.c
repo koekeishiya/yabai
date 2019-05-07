@@ -83,17 +83,23 @@ void space_manager_refresh_view(struct space_manager *sm, uint64_t sid)
 void space_manager_mark_view_invalid(struct space_manager *sm,  uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     view->is_valid = false;
 }
 
 void space_manager_mark_view_dirty(struct space_manager *sm,  uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     view->is_dirty = true;
 }
 
 void space_manager_untile_window(struct space_manager *sm, struct view *view, struct ax_window *window)
 {
+    if (view->type != VIEW_BSP) return;
+
     view_remove_window_node(view, window);
     if (space_is_visible(view->sid)) {
         view_flush(view);
@@ -102,9 +108,18 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     }
 }
 
+void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, enum view_type type)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    view->type = type;
+    if (view->type == VIEW_BSP) window_manager_check_for_windows_on_space(sm, &g_window_manager, sid);
+}
+
 void space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, unsigned top, unsigned bottom, unsigned left, unsigned right)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     view->top_padding = top;
     view->bottom_padding = bottom;
     view->left_padding = left;
@@ -116,6 +131,8 @@ void space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid,
 void space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     view->enable_padding = !view->enable_padding;
     view_update(view);
     view_flush(view);
@@ -124,6 +141,8 @@ void space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t s
 void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     window_node_rotate(view->root, degrees);
     view_update(view);
     view_flush(view);
@@ -132,6 +151,8 @@ void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degr
 void space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     window_node_mirror(view->root, axis);
     view_update(view);
     view_flush(view);
@@ -140,6 +161,8 @@ void space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum win
 void space_manager_balance_space(struct space_manager *sm, uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return;
+
     window_node_equalize(view->root);
     view_update(view);
     view_flush(view);
@@ -148,6 +171,8 @@ void space_manager_balance_space(struct space_manager *sm, uint64_t sid)
 struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct ax_window *window, uint64_t sid)
 {
     struct view *view = space_manager_find_view(sm, sid);
+    if (view->type != VIEW_BSP) return view;
+
     view_add_window_node(view, window);
     if (space_is_visible(view->sid)) {
         view_flush(view);
@@ -160,6 +185,8 @@ struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct
 void space_manager_toggle_window_split(struct space_manager *sm, struct ax_window *window)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (view->type != VIEW_BSP) return;
+
     struct window_node *node = view_find_window_node(view->root, window->id);
     if (node && window_node_is_intermediate(node)) {
         node->parent->split = node->parent->split == SPLIT_Y ? SPLIT_X : SPLIT_Y;
@@ -471,13 +498,14 @@ bool space_manager_refresh_application_windows(void)
 
 void space_manager_init(struct space_manager *sm)
 {
-    for (int i = 1; i < 255 ; ++i) {
+    for (int i = 1; i < 100 ; ++i) {
         sm->top_padding[i]    = -1;
         sm->bottom_padding[i] = -1;
         sm->left_padding[i]   = -1;
         sm->right_padding[i]  = -1;
     }
 
+    sm->layout[0] = VIEW_BSP;
     sm->window_gap = 0;
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;

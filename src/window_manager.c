@@ -64,6 +64,7 @@ void window_manager_remove_managed_window(struct window_manager *wm, struct ax_w
 
 void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view)
 {
+    if (view->type != VIEW_BSP) return;
     table_add(&wm->managed_window, &window->id, view);
 }
 
@@ -456,6 +457,8 @@ next:;
 void window_manager_set_window_insertion(struct space_manager *sm, struct ax_window *window, int direction)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (view->type != VIEW_BSP) return;
+
     struct window_node *node = view_find_window_node(view->root, window->id);
     if (!node) return;
 
@@ -492,6 +495,7 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct ax_win
 void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (view->type != VIEW_BSP) return;
 
     struct window_node *a_node = view_find_window_node(view->root, a->id);
     if (!a_node) return;
@@ -515,6 +519,7 @@ void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, s
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (view->type != VIEW_BSP) return;
 
     struct window_node *a_node = view_find_window_node(view->root, a->id);
     if (!a_node) return;
@@ -638,7 +643,7 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
-    if (!view) return;
+    if (!view || view->type != VIEW_BSP) return;
 
     if (view->root->zoom && view->root->zoom->window_id != window->id) {
         struct ax_window *zoomed_window = window_manager_find_window(wm, view->root->zoom->window_id);
@@ -737,12 +742,12 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
         if (!window || !window_manager_should_manage_window(window)) continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
-        if (existing_view && existing_view->sid != space_list[0]) {
+        if (existing_view && existing_view->type == VIEW_BSP && existing_view->sid != space_list[0]) {
             space_manager_untile_window(sm, existing_view, window);
             window_manager_remove_managed_window(wm, window);
         }
 
-        if (!existing_view || existing_view->sid != space_list[0]) {
+        if (!existing_view || (existing_view->type == VIEW_BSP && existing_view->sid != space_list[0])) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_list[0]);
             window_manager_add_managed_window(wm, window, view);
         }

@@ -412,7 +412,7 @@ struct view *view_create(uint64_t sid)
     view->left_padding = view_lookup_padding(g_space_manager.left_padding, mci);
     view->right_padding = view_lookup_padding(g_space_manager.right_padding, mci);
     view->enable_padding = true;
-    view->type = VIEW_MANAGED;
+    view->type = view_lookup_layout(g_space_manager.layout, mci);
     view->sid = sid;
     view_update(view);
 
