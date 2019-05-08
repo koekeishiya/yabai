@@ -49,6 +49,7 @@ struct window_manager
     struct table window;
     struct table managed_window;
     struct table window_lost_focused_event;
+    struct table application_lost_activated_event;
     uint32_t focused_window_id;
     pid_t focused_window_pid;
     bool enable_mff;
@@ -76,6 +77,9 @@ struct ax_application *window_manager_focused_application(struct window_manager 
 struct view *window_manager_find_managed_window(struct window_manager *wm, struct ax_window *window);
 void window_manager_remove_managed_window(struct window_manager *wm, struct ax_window *window);
 void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view);
+bool window_manager_find_lost_activated_event(struct window_manager *wm, pid_t pid);
+void window_manager_remove_lost_activated_event(struct window_manager *wm, pid_t pid);
+void window_manager_add_lost_activated_event(struct window_manager *wm, pid_t pid, enum event_type type);
 bool window_manager_find_lost_focused_event(struct window_manager *wm, uint32_t window_id);
 void window_manager_remove_lost_focused_event(struct window_manager *wm, uint32_t window_id);
 void window_manager_add_lost_focused_event(struct window_manager *wm, uint32_t window_id, enum event_type type);

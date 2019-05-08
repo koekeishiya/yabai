@@ -2,33 +2,6 @@
 
 extern struct eventloop g_eventloop;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-static struct workspace_process *
-workspace_process_create(NSNotification *notification)
-{
-    struct workspace_process *process = malloc(sizeof(struct workspace_process));
-    memset(process, 0, sizeof(struct workspace_process));
-
-    process->pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-    GetProcessForPID(process->pid, &process->psn);
-
-    CFStringRef process_name_ref;
-    if (CopyProcessName(&process->psn, &process_name_ref) == noErr) {
-        process->name = cfstring_copy(process_name_ref);
-        CFRelease(process_name_ref);
-    }
-
-    return process;
-}
-#pragma clang diagnostic pop
-
-void workspace_process_destroy(struct workspace_process *process)
-{
-    if (process->name) free(process->name);
-    free(process);
-}
-
 void workspace_event_handler_init(void **context)
 {
     workspace_context *ws_context = [workspace_context alloc];
@@ -107,42 +80,38 @@ void workspace_event_handler_end(void *context)
 
 - (void)didActivateApplication:(NSNotification *)notification
 {
-    struct workspace_process *process = workspace_process_create(notification);
-    if (process) {
-        struct event *event;
-        event_create(event, APPLICATION_ACTIVATED, process);
-        eventloop_post(&g_eventloop, event);
-    }
+    pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
+
+    struct event *event;
+    event_create(event, APPLICATION_ACTIVATED, (void *)(intptr_t) pid);
+    eventloop_post(&g_eventloop, event);
 }
 
 - (void)didDeactivateApplication:(NSNotification *)notification
 {
-    struct workspace_process *process = workspace_process_create(notification);
-    if (process) {
-        struct event *event;
-        event_create(event, APPLICATION_DEACTIVATED, process);
-        eventloop_post(&g_eventloop, event);
-    }
+    pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
+
+    struct event *event;
+    event_create(event, APPLICATION_DEACTIVATED, (void *)(intptr_t) pid);
+    eventloop_post(&g_eventloop, event);
 }
 
 - (void)didHideApplication:(NSNotification *)notification
 {
-    struct workspace_process *process = workspace_process_create(notification);
-    if (process) {
-        struct event *event;
-        event_create(event, APPLICATION_HIDDEN, process);
-        eventloop_post(&g_eventloop, event);
-    }
+    pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
+
+    struct event *event;
+    event_create(event, APPLICATION_HIDDEN, (void *)(intptr_t) pid);
+    eventloop_post(&g_eventloop, event);
 }
 
 - (void)didUnhideApplication:(NSNotification *)notification
 {
-    struct workspace_process *process = workspace_process_create(notification);
-    if (process) {
-        struct event *event;
-        event_create(event, APPLICATION_VISIBLE, process);
-        eventloop_post(&g_eventloop, event);
-    }
+    pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
+
+    struct event *event;
+    event_create(event, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
+    eventloop_post(&g_eventloop, event);
 }
 
 @end

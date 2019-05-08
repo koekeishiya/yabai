@@ -11,14 +11,13 @@ static uint64_t last_event_time;
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
     struct process *process = context;
-    struct ax_application *application = application_create(process);
 
-observe:
     if ((process->terminated) || (kill(process->pid, 0) == -1)) {
-        application_destroy(application);
+        window_manager_remove_lost_activated_event(&g_window_manager, process->pid);
         return;
     }
 
+    struct ax_application *application = application_create(process);
     if (application_observe(application)) {
         debug("%s: %s\n", __FUNCTION__, process->name);
         window_manager_add_application(&g_window_manager, application);
@@ -38,10 +37,23 @@ observe:
             }
             free(window_list);
         }
+
+        if (window_manager_find_lost_activated_event(&g_window_manager, application->pid)) {
+            struct event *event;
+            event_create(event, APPLICATION_ACTIVATED, (void *)(intptr_t) application->pid);
+            eventloop_post(&g_eventloop, event);
+            window_manager_remove_lost_activated_event(&g_window_manager, application->pid);
+        }
     } else {
         debug("%s: could not observe %s\n", __FUNCTION__, process->name);
         application_unobserve(application);
-        goto observe;
+        application_destroy(application);
+
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            struct event *event;
+            event_create(event, APPLICATION_LAUNCHED, process);
+            eventloop_post(&g_eventloop, event);
+        });
     }
 }
 
@@ -84,114 +96,97 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
 {
-    struct workspace_process *process = context;
-    struct ax_application *application = window_manager_find_application(&g_window_manager, process->pid);
-
-    if (application) {
-        debug("%s: %s\n", __FUNCTION__, process->name);
-        uint32_t application_focused_window_id = application_focused_window(application);
-        if (g_window_manager.focused_window_id != application_focused_window_id) {
-            g_window_manager.focused_window_id = application_focused_window(application);
-            g_window_manager.focused_window_pid = application->pid;
-
-            struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
-            if (focused_window) {
-                border_window_activate(focused_window);
-                window_manager_center_mouse(&g_window_manager, focused_window);
-            }
-        }
-    } else {
-        debug("%s: %s (not observed)\n", __FUNCTION__, process->name);
+    struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
+    if (!application) {
+        window_manager_add_lost_activated_event(&g_window_manager, (pid_t)(intptr_t) context, APPLICATION_ACTIVATED);
+        return;
     }
 
-    workspace_process_destroy(process);
+    debug("%s: %s\n", __FUNCTION__, application->name);
+    uint32_t application_focused_window_id = application_focused_window(application);
+    if (g_window_manager.focused_window_id != application_focused_window_id) {
+        g_window_manager.focused_window_id = application_focused_window(application);
+        g_window_manager.focused_window_pid = application->pid;
+
+        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
+        if (focused_window) {
+            border_window_activate(focused_window);
+            window_manager_center_mouse(&g_window_manager, focused_window);
+        }
+    }
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
 {
-    struct workspace_process *process = context;
-    struct ax_application *application = window_manager_find_application(&g_window_manager, process->pid);
+    struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
+    if (!application) return;
 
-    if (application) {
-        debug("%s: %s\n", __FUNCTION__, process->name);
-        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
-        if (focused_window) {
-            border_window_deactivate(focused_window);
+    debug("%s: %s\n", __FUNCTION__, application->name);
+    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
+    if (focused_window) {
+        border_window_deactivate(focused_window);
 
-            if (!window_is_standard(focused_window)) {
-                struct ax_window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
-                if (main_window && main_window != focused_window) border_window_deactivate(main_window);
-            }
+        if (!window_is_standard(focused_window)) {
+            struct ax_window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
+            if (main_window && main_window != focused_window) border_window_deactivate(main_window);
         }
-    } else {
-        debug("%s: %s (not observed)\n", __FUNCTION__, process->name);
     }
-
-    workspace_process_destroy(process);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 {
-    struct workspace_process *process = context;
-    struct ax_application *application = window_manager_find_application(&g_window_manager, process->pid);
+    struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
+    if (!application) return;
 
-    if (application) {
-        debug("%s: %s\n", __FUNCTION__, process->name);
-        int window_count = 0;
-        struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-        if (window_count) {
-            for (int i = 0; i < window_count; ++i) {
-                struct ax_window *window = window_list[i];
-                if (!window) continue;
+    debug("%s: %s\n", __FUNCTION__, application->name);
 
-                if (window_manager_should_manage_window(window)) {
-                    int space_count = 0;
-                    uint64_t *space_list = window_space_list(window, &space_count);
-                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, *space_list);
-                    window_manager_add_managed_window(&g_window_manager, window, view);
-                    free(space_list);
+    int window_count = 0;
+    struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
+    if (!window_count) return;
 
-                    border_window_show(window);
-                }
-            }
-            free(window_list);
+    for (int i = 0; i < window_count; ++i) {
+        struct ax_window *window = window_list[i];
+        if (!window) continue;
+
+        if (window_manager_should_manage_window(window)) {
+            int space_count = 0;
+            uint64_t *space_list = window_space_list(window, &space_count);
+            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, *space_list);
+            window_manager_add_managed_window(&g_window_manager, window, view);
+            free(space_list);
+
+            border_window_show(window);
         }
-    } else {
-        debug("%s: %s (not observed)\n", __FUNCTION__, process->name);
     }
 
-    workspace_process_destroy(process);
+    free(window_list);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 {
-    struct workspace_process *process = context;
-    struct ax_application *application = window_manager_find_application(&g_window_manager, process->pid);
+    struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
+    if (!application) return;
 
-    if (application) {
-        debug("%s: %s\n", __FUNCTION__, process->name);
-        int window_count = 0;
-        struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-        if (window_count) {
-            for (int i = 0; i < window_count; ++i) {
-                struct ax_window *window = window_list[i];
-                if (!window) continue;
+    debug("%s: %s\n", __FUNCTION__, application->name);
 
-                border_window_hide(window);
+    int window_count = 0;
+    struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
+    if (!window_count) return;
 
-                struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-                if (view) {
-                    space_manager_untile_window(&g_space_manager, view, window);
-                    window_manager_remove_managed_window(&g_window_manager, window);
-                }
-            }
-            free(window_list);
+    for (int i = 0; i < window_count; ++i) {
+        struct ax_window *window = window_list[i];
+        if (!window) continue;
+
+        border_window_hide(window);
+
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        if (view) {
+            space_manager_untile_window(&g_space_manager, view, window);
+            window_manager_remove_managed_window(&g_window_manager, window);
         }
-    } else {
-        debug("%s: %s (not observed)\n", __FUNCTION__, process->name);
     }
 
-    workspace_process_destroy(process);
+    free(window_list);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
