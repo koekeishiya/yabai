@@ -68,6 +68,61 @@ void window_manager_add_managed_window(struct window_manager *wm, struct ax_wind
     table_add(&wm->managed_window, &window->id, view);
 }
 
+void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, float dx, float dy)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (view) return;
+
+    CGRect frame = window_frame(window);
+    float fx     = frame.origin.x + dx;
+    float fy     = frame.origin.y + dy;
+
+    window_manager_move_window(window, fx, fy);
+}
+
+void window_manager_resize_window_relative(struct window_manager *wm, struct ax_window *window, int direction, float dx, float dy)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (view) {
+        struct window_node *x_fence = NULL;
+        struct window_node *y_fence = NULL;
+
+        struct window_node *node = view_find_window_node(view->root, window->id);
+        if (!node) return;
+
+        if (direction & HANDLE_TOP)    x_fence = window_node_fence(node, DIR_NORTH);
+        if (direction & HANDLE_BOTTOM) x_fence = window_node_fence(node, DIR_SOUTH);
+        if (direction & HANDLE_LEFT)   y_fence = window_node_fence(node, DIR_WEST);
+        if (direction & HANDLE_RIGHT)  y_fence = window_node_fence(node, DIR_EAST);
+        if (!x_fence && !y_fence)      return;
+
+        if (y_fence) {
+            float sr = y_fence->ratio + (float) dx / (float) y_fence->area.w;
+            y_fence->ratio = min(1, max(0, sr));
+        }
+
+        if (x_fence) {
+            float sr = x_fence->ratio + (float) dy / (float) x_fence->area.h;
+            x_fence->ratio = min(1, max(0, sr));
+        }
+
+        view_update(view);
+        view_flush(view);
+    } else {
+        int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
+        int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
+
+        CGRect frame = window_frame(window);
+        float fw = max(1, frame.size.width  + dx * x_mod);
+        float fh = max(1, frame.size.height + dy * y_mod);
+        float fx = (direction & HANDLE_LEFT) ? frame.origin.x + frame.size.width  - fw : frame.origin.x;
+        float fy = (direction & HANDLE_TOP)  ? frame.origin.y + frame.size.height - fh : frame.origin.y;
+
+        window_manager_move_window(window, fx, fy);
+        window_manager_resize_window(window, fw, fh);
+    }
+}
+
 void window_manager_move_window(struct ax_window *window, float x, float y)
 {
 #if 0

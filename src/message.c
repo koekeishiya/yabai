@@ -99,6 +99,8 @@ static const char *bool_str[] =
 #define COMMAND_WINDOW_WARP    "--warp"
 #define COMMAND_WINDOW_INSERT  "--insert"
 #define COMMAND_WINDOW_GRID    "--grid"
+#define COMMAND_WINDOW_MOVE    "--move"
+#define COMMAND_WINDOW_RESIZE  "--resize"
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
 #define COMMAND_WINDOW_DISPLAY "--display"
 #define COMMAND_WINDOW_SPACE   "--space"
@@ -108,6 +110,8 @@ static const char *bool_str[] =
 #define ARGUMENT_WINDOW_DIR_SOUTH     "south"
 #define ARGUMENT_WINDOW_DIR_WEST      "west"
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
+#define ARGUMENT_WINDOW_MOVE          "%f:%f"
+#define ARGUMENT_WINDOW_RESIZE        "%[^:]:%f:%f"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
 #define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
@@ -567,6 +571,29 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     }
 }
 
+static uint8_t parse_resize_handle(char *handle)
+{
+    if (strcmp(handle, "top") == 0) {
+        return HANDLE_TOP;
+    } else if (strcmp(handle, "bottom") == 0) {
+        return HANDLE_BOTTOM;
+    } else if (strcmp(handle, "left") == 0) {
+        return HANDLE_LEFT;
+    } else if (strcmp(handle, "right") == 0) {
+        return HANDLE_RIGHT;
+    } else if (strcmp(handle, "top_left") == 0) {
+        return HANDLE_TOP | HANDLE_LEFT;
+    } else if (strcmp(handle, "top_right") == 0) {
+        return HANDLE_TOP | HANDLE_RIGHT;
+    } else if (strcmp(handle, "bottom_left") == 0) {
+        return HANDLE_BOTTOM | HANDLE_LEFT;
+    } else if (strcmp(handle, "bottom_right") == 0) {
+        return HANDLE_BOTTOM | HANDLE_RIGHT;
+    } else {
+        return 0;
+    }
+}
+
 static void handle_domain_window(FILE *rsp, struct token domain, char *message)
 {
     struct token command = get_token(&message);
@@ -672,6 +699,25 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         if ((sscanf(value.text, ARGUMENT_WINDOW_GRID, &r, &c, &x, &y, &w, &h) == 6)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) window_manager_apply_grid(&g_space_manager, &g_window_manager, window, r, c, x, y, w, h);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_MOVE)) {
+        struct token value = get_token(&message);
+        float x, y;
+        if ((sscanf(value.text, ARGUMENT_WINDOW_MOVE, &x, &y) == 2)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (window) window_manager_move_window_relative(&g_window_manager, window, x, y);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_RESIZE)) {
+        struct token value = get_token(&message);
+        char handle[BUFSIZ];
+        float w, h;
+        if ((sscanf(value.text, ARGUMENT_WINDOW_RESIZE, handle, &w, &h) == 3)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (window) window_manager_resize_window_relative(&g_window_manager, window, parse_resize_handle(handle), w, h);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

@@ -251,6 +251,25 @@ struct window_node *window_node_mirror(struct window_node *node, enum window_nod
     return node;
 }
 
+struct window_node *window_node_fence(struct window_node *node, int dir)
+{
+    if (!node) return NULL;
+
+    struct window_node *parent = node->parent;
+    while (parent) {
+    if ((dir == DIR_NORTH && parent->split == SPLIT_X && parent->area.y < node->area.y) ||
+        (dir == DIR_WEST  && parent->split == SPLIT_Y && parent->area.x < node->area.x) ||
+        (dir == DIR_SOUTH && parent->split == SPLIT_X && (parent->area.y + parent->area.h) > (node->area.y + node->area.h)) ||
+        (dir == DIR_EAST  && parent->split == SPLIT_Y && (parent->area.x + parent->area.w) > (node->area.x + node->area.w))) {
+            return parent;
+        }
+
+        parent = parent->parent;
+    }
+
+    return NULL;
+}
+
 struct window_node *view_find_min_depth_leaf_node(struct window_node *node)
 {
     struct window_node *list[256] = { node };
