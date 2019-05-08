@@ -200,8 +200,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     if (window_manager_find_window(&g_window_manager, window_id)) return;
 
     struct ax_application *application = window_manager_find_application(&g_window_manager, window_pid);
-    struct ax_window *window = window_create(application, context);
+    if (!application) return;
 
+    struct ax_window *window = window_create(application, context);
     if (window_observe(window)) {
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
