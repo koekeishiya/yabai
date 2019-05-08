@@ -48,9 +48,7 @@ static inline uint32_t ax_window_id(AXUIElementRef ref)
 
 static inline pid_t ax_window_pid(AXUIElementRef ref)
 {
-    pid_t pid = 0;
-    AXUIElementGetPid(ref, &pid);
-    return pid;
+    return *(pid_t *)((void *) ref + 0x10);
 }
 
 #endif
