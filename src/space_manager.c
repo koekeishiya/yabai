@@ -63,6 +63,15 @@ CGRect space_manager_dock_rect(void)
     return bounds;
 }
 
+bool space_manager_query_active_space(FILE *rsp)
+{
+    int mci = space_manager_mission_control_index(space_manager_active_space());
+    if (!mci) return false;
+
+    fprintf(rsp, "%d\n", mci);
+    return true;
+}
+
 bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
 {
     int space_count;

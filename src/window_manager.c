@@ -19,6 +19,18 @@ static TABLE_COMPARE_FUNC(compare_wm)
     return *(uint32_t *) key_a == *(uint32_t *) key_b;
 }
 
+bool window_manager_query_window_title(FILE *rsp)
+{
+    struct ax_window *window = window_manager_focused_window(&g_window_manager);
+    if (!window) return false;
+
+    char *title = window_title(window);
+    if (!title) return false;
+
+    fprintf(rsp, "%s\n", title);
+    return true;
+}
+
 void window_manager_center_mouse(struct window_manager *wm, struct ax_window *window)
 {
     if (!wm->enable_mff) return;

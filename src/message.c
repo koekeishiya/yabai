@@ -843,10 +843,27 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not retrieve spaces for display\n");
                 }
             }
+        } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
+            if (!space_manager_query_active_space(rsp)) {
+                daemon_fail(rsp, "could not retrieve active space\n");
+            }
         } else {
             if (!space_manager_query_spaces_for_displays(rsp)) {
                 daemon_fail(rsp, "could not retrieve spaces for displays\n");
             }
+        }
+    } else if (token_equals(command, COMMAND_QUERY_WINDOWS)) {
+        struct token option = get_token(&message);
+        if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+            } else {
+                if (!window_manager_query_window_title(rsp)) {
+                    daemon_fail(rsp, "could not retrieve window title\n");
+                }
+            }
+        } else {
+            // TODO(koekeishiya): output list of all windows
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

@@ -62,6 +62,7 @@ struct window_manager
     uint32_t insert_window_border_color;
 };
 
+bool window_manager_query_window_title(FILE *rsp);
 void window_manager_center_mouse(struct window_manager *wm, struct ax_window *window);
 bool window_manager_should_manage_window(struct ax_window *window);
 void window_manager_tile_window(struct window_manager *wm, struct ax_window *window);
