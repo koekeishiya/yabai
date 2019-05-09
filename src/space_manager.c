@@ -151,9 +151,9 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     if (view->type != VIEW_BSP) return;
 
     view_remove_window_node(view, window);
-    if (space_is_visible(view->sid)) {
-        view_flush(view);
-    } else {
+    view_flush(view);
+
+    if (!space_is_visible(view->sid)) {
         view->is_dirty = true;
     }
 }
@@ -244,11 +244,12 @@ struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct
     if (view->type != VIEW_BSP) return view;
 
     view_add_window_node(view, window);
-    if (space_is_visible(view->sid)) {
-        view_flush(view);
-    } else {
+    view_flush(view);
+
+    if (!space_is_visible(view->sid)) {
         view->is_dirty = true;
     }
+
     return view;
 }
 

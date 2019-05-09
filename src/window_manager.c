@@ -800,10 +800,15 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
         if (!window || !window_manager_should_manage_window(window)) continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
-        if (existing_view) continue;
+        if (existing_view && existing_view->sid != sid) {
+            space_manager_untile_window(sm, existing_view, window);
+            window_manager_remove_managed_window(wm, window);
+        }
 
-        struct view *view = space_manager_tile_window_on_space(sm, window, sid);
-        window_manager_add_managed_window(wm, window, view);
+        if (!existing_view || existing_view->sid != sid) {
+            struct view *view = space_manager_tile_window_on_space(sm, window, sid);
+            window_manager_add_managed_window(wm, window, view);
+        }
     }
 
     free(window_list);
