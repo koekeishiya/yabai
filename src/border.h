@@ -45,6 +45,7 @@ struct ax_window;
 void border_window_refresh(struct ax_window *window);
 void border_window_activate(struct ax_window *window);
 void border_window_deactivate(struct ax_window *window);
+void border_window_topmost(struct ax_window *window, bool topmost);
 void border_window_show(struct ax_window *window);
 void border_window_hide(struct ax_window *window);
 

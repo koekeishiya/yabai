@@ -286,7 +286,7 @@ int main(int argc, char **argv)
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
-    event_tap_begin(&g_event_tap, 1 << kCGEventMouseMoved, mouse_handler);
+    event_tap_begin(&g_event_tap, 1 << kCGEventMouseMoved | 1 << kCGEventLeftMouseDown | 1 << kCGEventLeftMouseUp, mouse_handler);
 
     CFRunLoopRun();
     return 0;

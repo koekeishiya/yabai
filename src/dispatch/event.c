@@ -6,6 +6,7 @@ extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern int g_connection;
 
+static struct ax_window *mouse_window;
 static uint64_t last_event_time;
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
@@ -78,6 +79,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
                     space_manager_untile_window(&g_space_manager, view, window);
                     window_manager_remove_managed_window(&g_window_manager, window);
                 }
+
+                if (mouse_window == window) mouse_window = NULL;
 
                 window_manager_remove_window(&g_window_manager, window->id);
                 window_destroy(window);
@@ -256,6 +259,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
         space_manager_untile_window(&g_space_manager, view, window);
         window_manager_remove_managed_window(&g_window_manager, window);
     }
+
+    if (mouse_window == window) mouse_window = NULL;
 
     window_manager_remove_window(&g_window_manager, window->id);
     window_unobserve(window);
@@ -520,6 +525,25 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED)
     }
 
     free(space_list);
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_DOWN)
+{
+    CGEventRef event = context;
+    CGPoint point = CGEventGetLocation(event);
+    CFRelease(event);
+
+    mouse_window = window_manager_find_window_at_point(&g_window_manager, point);
+    if (mouse_window) border_window_topmost(mouse_window, true);
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
+{
+    CGEventRef event = context;
+    CGPoint point = CGEventGetLocation(event);
+    CFRelease(event);
+
+    if (mouse_window) border_window_topmost(mouse_window, false);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
