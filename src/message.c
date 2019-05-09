@@ -15,6 +15,7 @@ static const char *bool_str[] =
 #define DOMAIN_DISPLAY "display"
 #define DOMAIN_SPACE   "space"
 #define DOMAIN_WINDOW  "window"
+#define DOMAIN_QUERY   "query"
 
 /* --------------------------------DOMAIN CONFIG-------------------------------- */
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
@@ -124,6 +125,17 @@ static const char *bool_str[] =
 #define ARGUMENT_WINDOW_DISPLAY_PREV  "prev"
 #define ARGUMENT_WINDOW_DISPLAY_NEXT  "next"
 #define ARGUMENT_WINDOW_DISPLAY_LAST  "last"
+/* ----------------------------------------------------------------------------- */
+
+/* --------------------------------DOMAIN QUERY--------------------------------- */
+#define COMMAND_QUERY_DISPLAYS "--displays"
+#define COMMAND_QUERY_SPACES   "--spaces"
+#define COMMAND_QUERY_WINDOWS  "--windows"
+
+#define ARGUMENT_QUERY_DISPLAY "--display"
+#define ARGUMENT_QUERY_SPACE   "--space"
+#define ARGUMENT_QUERY_WINDOW  "--window"
+
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -815,6 +827,32 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     }
 }
 
+static void handle_domain_query(FILE *rsp, struct token domain, char *message)
+{
+    struct token command = get_token(&message);
+    if (token_equals(command, COMMAND_QUERY_SPACES)) {
+        struct token option = get_token(&message);
+        if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+                if (!space_manager_query_spaces_for_display(rsp, display_manager_arrangement_display_id(token_to_int(value)))) {
+                    daemon_fail(rsp, "could not retrieve spaces for display\n");
+                }
+            } else {
+                if (!space_manager_query_spaces_for_display(rsp, display_manager_active_display_id())) {
+                    daemon_fail(rsp, "could not retrieve spaces for display\n");
+                }
+            }
+        } else {
+            if (!space_manager_query_spaces_for_displays(rsp)) {
+                daemon_fail(rsp, "could not retrieve spaces for displays\n");
+            }
+        }
+    } else {
+        daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
+    }
+}
+
 void handle_message(FILE *rsp, char *message)
 {
     struct token domain = get_token(&message);
@@ -826,6 +864,8 @@ void handle_message(FILE *rsp, char *message)
         handle_domain_space(rsp, domain, message);
     } else if (token_equals(domain, DOMAIN_WINDOW)) {
         handle_domain_window(rsp, domain, message);
+    } else if (token_equals(domain, DOMAIN_QUERY)) {
+        handle_domain_query(rsp, domain, message);
     } else {
         daemon_fail(rsp, "unknown domain '%.*s'\n", domain.length, domain.text);
     }

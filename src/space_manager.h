@@ -41,6 +41,8 @@ CGRect space_manager_menu_bar_rect(void);
 bool space_manager_dock_hidden(void);
 int space_manager_dock_orientation(void);
 CGRect space_manager_dock_rect(void);
+bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did);
+bool space_manager_query_spaces_for_displays(FILE *rsp);
 struct view *space_manager_find_view(struct space_manager *sm, uint64_t sid);
 void space_manager_refresh_view(struct space_manager *sm, uint64_t sid);
 void space_manager_mark_view_invalid(struct space_manager *sm,  uint64_t sid);
