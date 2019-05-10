@@ -155,6 +155,22 @@ uint32_t display_manager_bottom_display_id(void)
     return bid;
 }
 
+bool display_manager_active_display_is_animating(void)
+{
+    CFStringRef uuid = display_manager_active_display_uuid();
+    bool result = SLSManagedDisplayIsAnimating(g_connection, uuid);
+    CFRelease(uuid);
+    return result;
+}
+
+bool display_manager_display_is_animating(uint32_t did)
+{
+    CFStringRef uuid = display_uuid(did);
+    bool result = SLSManagedDisplayIsAnimating(g_connection, uuid);
+    CFRelease(uuid);
+    return result;
+}
+
 uint32_t display_manager_active_display_count(void)
 {
     uint32_t count;

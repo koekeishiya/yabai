@@ -50,6 +50,7 @@ struct window_manager
     struct table managed_window;
     struct table window_lost_focused_event;
     struct table application_lost_activated_event;
+    bool reactivate_focused_window;
     uint32_t focused_window_id;
     pid_t focused_window_pid;
     bool enable_mff;

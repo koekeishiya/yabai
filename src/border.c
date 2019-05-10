@@ -177,7 +177,6 @@ void border_window_activate(struct ax_window *window)
     border->color = rgba_color_from_hex(g_window_manager.active_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
     border_window_refresh(window);
-    SLSOrderWindow(g_connection, border->id, 1, window->id);
 }
 
 void border_window_deactivate(struct ax_window *window)
@@ -188,7 +187,6 @@ void border_window_deactivate(struct ax_window *window)
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
     border_window_refresh(window);
-    SLSOrderWindow(g_connection, border->id, 1, window->id);
 }
 
 void border_window_topmost(struct ax_window *window, bool topmost)

@@ -115,6 +115,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
         if (focused_window) {
             border_window_activate(focused_window);
             window_manager_center_mouse(&g_window_manager, focused_window);
+            g_window_manager.reactivate_focused_window = display_manager_active_display_is_animating();
         }
     }
 }
@@ -420,11 +421,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
     if (view_is_invalid(view)) view_update(view);
     if (view_is_dirty(view))   view_flush(view);
 
-    if (space_manager_refresh_application_windows()) {
+    if (space_manager_refresh_application_windows() || g_window_manager.reactivate_focused_window) {
         struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
         if (focused_window) {
             border_window_activate(focused_window);
             window_manager_center_mouse(&g_window_manager, focused_window);
+            g_window_manager.reactivate_focused_window = false;
         }
     }
 
