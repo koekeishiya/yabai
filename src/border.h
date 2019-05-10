@@ -10,6 +10,7 @@ extern CGError SLSSetWindowOpacity(int cid, uint32_t wid, bool isOpaque);
 extern CGError SLSSetMouseEventEnableFlags(int cid, uint32_t wid, bool shouldEnable);
 extern CGError SLSOrderWindow(int cid, uint32_t wid, int mode, uint32_t relativeToWID);
 extern CGError SLSSetWindowLevel(int cid, uint32_t wid, int level);
+extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
 extern CGContextRef SLWindowContextCreate(int cid, uint32_t wid, CFDictionaryRef options);
 extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *outRegion);
 extern CGError CGSReleaseRegion(CFTypeRef region);

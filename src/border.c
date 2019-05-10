@@ -14,6 +14,15 @@ rgba_color_from_hex(uint32_t color)
     return result;
 }
 
+static int border_detect_window_level(struct ax_window *window)
+{
+    int window_level = 0;
+    SLSGetWindowLevel(g_connection, window->id, &window_level);
+
+    int key = window_level == 0 ? 4 : 14;
+    return CGWindowLevelForKey(key);
+}
+
 static void border_window_ensure_same_space(struct ax_window *window)
 {
     int w_space_count;
@@ -191,7 +200,11 @@ void border_window_deactivate(struct ax_window *window)
 
 void border_window_topmost(struct ax_window *window, bool topmost)
 {
-    SLSSetWindowLevel(g_connection, window->border.id, CGWindowLevelForKey(topmost ? 10 : 4));
+    if (topmost) {
+        SLSSetWindowLevel(g_connection, window->border.id, CGWindowLevelForKey(14));
+    } else {
+        SLSSetWindowLevel(g_connection, window->border.id, border_detect_window_level(window));
+    }
 }
 
 void border_window_show(struct ax_window *window)
@@ -233,7 +246,7 @@ void border_window_create(struct ax_window *window)
     SLSSetWindowTags(g_connection, border->id, tags, 32);
     SLSSetWindowOpacity(g_connection, border->id, 0);
     SLSSetMouseEventEnableFlags(g_connection, border->id, false);
-    SLSSetWindowLevel(g_connection, border->id, CGWindowLevelForKey(4));
+    SLSSetWindowLevel(g_connection, border->id, border_detect_window_level(window));
     border->context = SLWindowContextCreate(g_connection, border->id, 0);
     CGContextSetAllowsAntialiasing(border->context, true);
     CGContextSetShouldAntialias(border->context, true);
