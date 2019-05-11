@@ -498,17 +498,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_DOWN)
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
     CFRelease(event);
+
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
+    mouse_left_down = true;
 
     mouse_window = window_manager_find_window_at_point(&g_window_manager, point);
     if (!mouse_window) mouse_window = window_manager_focused_window(&g_window_manager);
+    if (!mouse_window) return;
 
-    if (mouse_window) {
-        mouse_window_frame = window_ax_frame(mouse_window);
-        border_window_topmost(mouse_window, true);
-    }
-
-    mouse_left_down = true;
+    mouse_window_frame = window_ax_frame(mouse_window);
+    border_window_topmost(mouse_window, true);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
@@ -516,35 +515,40 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
     CFRelease(event);
+
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
+    mouse_left_down = false;
+    if (!mouse_window) return;
 
-    if (mouse_window) {
-        border_window_topmost(mouse_window, false);
-
-        CGRect frame = window_ax_frame(mouse_window);
-        float dx = frame.origin.x - mouse_window_frame.origin.x;
-        float dy = frame.origin.y - mouse_window_frame.origin.y;
-        float dw = frame.size.width - mouse_window_frame.size.width;
-        float dh = frame.size.height - mouse_window_frame.size.height;
-
-        if ((dx != 0.0f || dy != 0.0f) && (dw != 0.0f || dh != 0.0f)) {
-            uint8_t direction = 0;
-            if (dx != 0.0f) direction |= HANDLE_LEFT;
-            if (dy != 0.0f) direction |= HANDLE_TOP;
-            window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dx, dy);
-        }
-
-        if (dw != 0.0f || dh != 0.0f) {
-            uint8_t direction = 0;
-            if (dw != 0.0f) direction |= HANDLE_RIGHT;
-            if (dh != 0.0f) direction |= HANDLE_BOTTOM;
-            window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dw, dh);
-        }
-
+    if (!__sync_bool_compare_and_swap(mouse_window->id_ptr, &mouse_window->id, &mouse_window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, mouse_window->id);
         mouse_window = NULL;
+        return;
     }
 
-    mouse_left_down = false;
+    border_window_topmost(mouse_window, false);
+
+    CGRect frame = window_ax_frame(mouse_window);
+    float dx = frame.origin.x - mouse_window_frame.origin.x;
+    float dy = frame.origin.y - mouse_window_frame.origin.y;
+    float dw = frame.size.width - mouse_window_frame.size.width;
+    float dh = frame.size.height - mouse_window_frame.size.height;
+
+    if ((dx != 0.0f || dy != 0.0f) && (dw != 0.0f || dh != 0.0f)) {
+        uint8_t direction = 0;
+        if (dx != 0.0f) direction |= HANDLE_LEFT;
+        if (dy != 0.0f) direction |= HANDLE_TOP;
+        window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dx, dy);
+    }
+
+    if (dw != 0.0f || dh != 0.0f) {
+        uint8_t direction = 0;
+        if (dw != 0.0f) direction |= HANDLE_RIGHT;
+        if (dh != 0.0f) direction |= HANDLE_BOTTOM;
+        window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dw, dh);
+    }
+
+    mouse_window = NULL;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
