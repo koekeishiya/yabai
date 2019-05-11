@@ -29,7 +29,6 @@ bool space_manager_menu_bar_hidden(void)
 {
     int status = 0;
     SLSGetMenuBarAutohideEnabled(g_connection, &status);
-    // printf("autohide = %d\n", status);
     return status;
 }
 
@@ -37,7 +36,6 @@ CGRect space_manager_menu_bar_rect(void)
 {
     CGRect bounds = {};
     SLSGetRevealedMenuBarBounds(&bounds, g_connection, space_manager_active_space());
-    // printf("%.2f, %.2f, %.2f, %.2f\n", bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
     return bounds;
 }
 
@@ -59,7 +57,6 @@ CGRect space_manager_dock_rect(void)
     int reason = 0;
     CGRect bounds = {};
     SLSGetDockRectWithReason(g_connection, &bounds, &reason);
-    // printf("%.2f, %.2f, %.2f, %.2f, %d\n", bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height, reason);
     return bounds;
 }
 
