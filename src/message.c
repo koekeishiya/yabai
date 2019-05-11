@@ -899,11 +899,6 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not retrieve window details\n");
             }
-#if 0
-            if (!window_manager_query_window_title(rsp)) {
-                daemon_fail(rsp, "could not retrieve window title\n");
-            }
-#endif
         } else {
             window_manager_query_windows_for_displays(rsp);
         }
