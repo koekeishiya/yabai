@@ -129,19 +129,33 @@ static int client_send_message(int argc, char **argv)
     }
 
     int result = EXIT_SUCCESS;
+    int byte_count = 0;
     char rsp[BUFSIZ];
 
-    if (socket_wait_read(sockfd, rsp, sizeof(rsp) - 1)) {
-        if (rsp[0] == FAILURE_MESSAGE[0]) {
-            fprintf(stdout, "%s", rsp + 1);
-            result = EXIT_FAILURE;
-        } else {
-            fprintf(stdout, "%s", rsp);
-        }
-        fflush(stdout);
-    }
-    socket_close(sockfd);
+    struct pollfd fds[] = {
+        { sockfd, POLLIN, 0 }
+    };
 
+    while (poll(fds, 1, -1) > 0) {
+        if (fds[0].revents & POLLIN) {
+            if ((byte_count = recv(sockfd, rsp, sizeof(rsp)-1, 0)) <= 0) {
+                break;
+            }
+
+            rsp[byte_count] = '\0';
+
+            if (rsp[0] == FAILURE_MESSAGE[0]) {
+                fprintf(stdout, "%s", rsp + 1);
+                result = EXIT_FAILURE;
+            } else {
+                fprintf(stdout, "%s", rsp);
+            }
+
+            fflush(stdout);
+        }
+    }
+
+    socket_close(sockfd);
     return result;
 }
 

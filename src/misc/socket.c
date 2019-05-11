@@ -1,27 +1,5 @@
 #include "socket.h"
 
-bool socket_wait_read(int sockfd, char *rsp, int rsp_size)
-{
-    int byte_count = 0;
-
-    struct pollfd fds[] = {
-        { sockfd, POLLIN, 0 }
-    };
-
-    while (poll(fds, 1, -1) > 0) {
-        if (fds[0].revents & POLLIN) {
-            if ((byte_count = recv(sockfd, rsp, rsp_size, 0)) <= 0) {
-                return false;
-            }
-
-            rsp[byte_count] = '\0';
-            return true;
-        }
-    }
-
-    return false;
-}
-
 char *socket_read(int sockfd)
 {
     int length = 256;

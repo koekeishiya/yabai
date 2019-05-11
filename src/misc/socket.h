@@ -25,7 +25,6 @@ struct daemon
     socket_daemon_handler *handler;
 };
 
-bool socket_wait_read(int sockfd, char *rsp, int rsp_size);
 char *socket_read(int sockfd);
 bool socket_write(int sockfd, char *message);
 bool socket_connect_in(int *sockfd, int port);
