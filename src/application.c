@@ -175,6 +175,14 @@ uint32_t application_focused_window(struct ax_application *application)
     return window_id;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+bool application_is_hidden(struct ax_application *application)
+{
+    return IsProcessVisible(&application->psn);
+}
+#pragma clang diagnostic pop
+
 struct ax_window **application_window_list(struct ax_application *application, int *window_count)
 {
     CFTypeRef window_list_ref;
@@ -200,6 +208,7 @@ struct ax_application *application_create(struct process *process)
     application->psn = process->psn;
     application->pid = process->pid;
     application->name = process->name;
+    application->is_hidden = application_is_hidden(application);
     return application;
 }
 

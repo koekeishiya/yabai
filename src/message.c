@@ -23,6 +23,8 @@ static const char *bool_str[] =
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
+#define COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY "active_window_opacity"
+#define COMMAND_CONFIG_NORMAL_WINDOW_OPACITY "normal_window_opacity"
 #define COMMAND_CONFIG_ACTIVE_BORDER_COLOR   "active_window_border_color"
 #define COMMAND_CONFIG_NORMAL_BORDER_COLOR   "normal_window_border_color"
 #define COMMAND_CONFIG_INSERT_BORDER_COLOR   "insert_window_border_color"
@@ -311,6 +313,30 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             int width = token_to_int(value);
             if (width) {
                 g_window_manager.window_border_width = width;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%.4f\n", g_window_manager.active_window_opacity);
+        } else {
+            float opacity = token_to_float(value);
+            if (opacity > 0.0f && opacity <= 1.0f) {
+                g_window_manager.active_window_opacity = opacity;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_NORMAL_WINDOW_OPACITY)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%.4f\n", g_window_manager.normal_window_opacity);
+        } else {
+            float opacity = token_to_float(value);
+            if (opacity > 0.0f && opacity <= 1.0f) {
+                g_window_manager.normal_window_opacity = opacity;
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

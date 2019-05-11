@@ -8,6 +8,8 @@ yabai -m config window_border_width          4
 yabai -m config active_window_border_color   0xff775759
 yabai -m config normal_window_border_color   0xff505050
 yabai -m config insert_window_border_color   0xffd75f5f
+yabai -m config active_window_opacity        1.0f
+yabai -m config normal_window_opacity        0.95f
 yabai -m config layout                       bsp
 yabai -m config top_padding                  55
 yabai -m config bottom_padding               20

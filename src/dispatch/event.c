@@ -116,6 +116,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
         struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
         if (focused_window) {
             border_window_activate(focused_window);
+            window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
             window_manager_center_mouse(&g_window_manager, focused_window);
             g_window_manager.reactivate_focused_window = display_manager_active_display_is_animating();
         }
@@ -131,10 +132,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
     if (focused_window) {
         border_window_deactivate(focused_window);
+        window_manager_set_window_opacity(focused_window, g_window_manager.normal_window_opacity);
 
         if (!window_is_standard(focused_window)) {
             struct ax_window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
-            if (main_window && main_window != focused_window) border_window_deactivate(main_window);
+            if (main_window && main_window != focused_window) {
+                border_window_deactivate(main_window);
+                window_manager_set_window_opacity(main_window, g_window_manager.normal_window_opacity);
+            }
         }
     }
 }
@@ -145,6 +150,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
     if (!application) return;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
+    application->is_hidden = false;
 
     int window_count = 0;
     struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
@@ -174,6 +180,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
     if (!application) return;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
+    application->is_hidden = true;
 
     int window_count = 0;
     struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
@@ -209,6 +216,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     if (!application) return;
 
     struct ax_window *window = window_create(application, context);
+    window_manager_set_window_opacity(window, g_window_manager.normal_window_opacity);
+
     if (window_observe(window)) {
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
@@ -292,9 +301,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
-    if (focused_window) border_window_deactivate(focused_window);
+    if (focused_window) {
+        border_window_deactivate(focused_window);
+        window_manager_set_window_opacity(focused_window, g_window_manager.normal_window_opacity);
+    }
 
     border_window_activate(window);
+    window_manager_set_window_opacity(window, g_window_manager.active_window_opacity);
     window_manager_center_mouse(&g_window_manager, window);
 
     g_window_manager.focused_window_id = window->id;
@@ -311,6 +324,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
         return;
     }
+
+    if (window->application->is_hidden) return;
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
@@ -332,6 +347,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
         return;
     }
+
+    if (window->application->is_hidden) return;
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
@@ -427,6 +444,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
         struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
         if (focused_window) {
             border_window_activate(focused_window);
+            window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
             window_manager_center_mouse(&g_window_manager, focused_window);
             g_window_manager.reactivate_focused_window = false;
         }
@@ -586,7 +604,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
     FILE *rsp = fdopen(param1, "w");
     if (!rsp) goto fderr;
 
-    debug("%s: msg '%s'\n", __FUNCTION__, context);
+    // debug("%s: msg '%s'\n", __FUNCTION__, context);
     handle_message(rsp, context);
 
     fflush(rsp);

@@ -41,6 +41,7 @@ struct ax_application
     AXObserverRef observer_ref;
     uint8_t notification;
     bool is_observing;
+    bool is_hidden;
 };
 
 uint32_t application_main_window(struct ax_application *application);

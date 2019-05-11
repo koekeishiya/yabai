@@ -167,6 +167,19 @@ void window_manager_resize_window(struct ax_window *window, float width, float h
     CFRelease(size_ref);
 }
 
+void window_manager_set_window_opacity(struct ax_window *window, float opacity)
+{
+    int sockfd;
+    char message[255];
+
+    if (socket_connect_in(&sockfd, 5050)) {
+        snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", window->id, opacity, 0.2f);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
+}
+
 void window_manager_sticky_window(struct ax_window *window, bool sticky)
 {
     int sockfd;
@@ -521,6 +534,7 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
             goto uobs_win;
         }
 
+        window_manager_set_window_opacity(window, wm->normal_window_opacity);
         window_manager_add_window(wm, window);
         goto next;
 
@@ -865,6 +879,8 @@ void window_manager_init(struct window_manager *wm)
     wm->active_window_border_color = 0xff775759;
     wm->normal_window_border_color = 0xff555555;
     wm->insert_window_border_color = 0xfff57f7f;
+    wm->active_window_opacity = 1.0f;
+    wm->normal_window_opacity = 1.0f;
 
     table_init(&wm->application, 150, hash_wm, compare_wm);
     table_init(&wm->window, 150, hash_wm, compare_wm);
@@ -899,4 +915,5 @@ void window_manager_begin(struct window_manager *wm)
     wm->focused_window_id = window->id;
     wm->focused_window_pid = window->application->pid;
     border_window_activate(window);
+    window_manager_set_window_opacity(window, wm->active_window_opacity);
 }
