@@ -877,16 +877,41 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_QUERY_WINDOWS)) {
         struct token option = get_token(&message);
-        if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
+        if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
+                window_manager_query_windows_for_display(rsp, display_manager_arrangement_display_id(token_to_int(value)));
             } else {
-                if (!window_manager_query_window_title(rsp)) {
-                    daemon_fail(rsp, "could not retrieve window title\n");
-                }
+                window_manager_query_windows_for_display(rsp, display_manager_active_display_id());
             }
+        } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+                int mci = token_to_int(value);
+                uint64_t sid = space_manager_mission_control_space(mci);
+                if (sid) {
+                    window_manager_query_windows_for_space(rsp, sid);
+                } else {
+                    daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
+                }
+            } else {
+                window_manager_query_windows_for_space(rsp, space_manager_active_space());
+            }
+        } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (window) {
+                window_serialize(window, rsp);
+                fprintf(rsp, "\n");
+            } else {
+                daemon_fail(rsp, "could not retrieve window details\n");
+            }
+#if 0
+            if (!window_manager_query_window_title(rsp)) {
+                daemon_fail(rsp, "could not retrieve window title\n");
+            }
+#endif
         } else {
-            // TODO(koekeishiya): output list of all windows
+            window_manager_query_windows_for_displays(rsp);
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

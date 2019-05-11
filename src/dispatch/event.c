@@ -222,6 +222,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
 
+        if ((!window_is_standard(window)) ||
+            (!window_can_move(window)) ||
+            (!window_can_resize(window))) {
+            window->is_floating = true;
+        }
+
         if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
             window_manager_add_managed_window(&g_window_manager, window, view);

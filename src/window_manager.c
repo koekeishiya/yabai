@@ -19,6 +19,102 @@ static TABLE_COMPARE_FUNC(compare_wm)
     return *(uint32_t *) key_a == *(uint32_t *) key_b;
 }
 
+void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid)
+{
+    int window_count;
+    uint32_t *window_list = space_window_list(sid, &window_count);
+    if (!window_list) return;
+
+    struct ax_window **window_aggregate_list = NULL;
+    for (int i = 0; i < window_count; ++i) {
+        struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[i]);
+        if (window) buf_push(window_aggregate_list, window);
+    }
+
+    fprintf(rsp, "[");
+    for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
+        struct ax_window *window = window_aggregate_list[i];
+        window_serialize(window, rsp);
+        if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
+    }
+    fprintf(rsp, "]\n");
+
+    buf_free(window_aggregate_list);
+    free(window_list);
+}
+
+void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
+{
+    int space_count;
+    uint64_t *space_list = display_space_list(did, &space_count);
+    if (!space_list) return;
+
+    struct ax_window **window_aggregate_list = NULL;
+    for (int i = 0; i < space_count; ++i) {
+        int window_count;
+        uint32_t *window_list = space_window_list(space_list[i], &window_count);
+        if (!window_list) continue;
+
+        for (int j = 0; j < window_count; ++j) {
+            struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[j]);
+            if (window) buf_push(window_aggregate_list, window);
+        }
+
+        free(window_list);
+    }
+
+    fprintf(rsp, "[");
+    for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
+        struct ax_window *window = window_aggregate_list[i];
+        window_serialize(window, rsp);
+        if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
+    }
+    fprintf(rsp, "]\n");
+
+    buf_free(window_aggregate_list);
+    free(space_list);
+}
+
+void window_manager_query_windows_for_displays(FILE *rsp)
+{
+    uint32_t display_count;
+    uint32_t *display_list = display_manager_active_display_list(&display_count);
+    if (!display_list) return;
+
+    struct ax_window **window_aggregate_list = NULL;
+    for (int i = 0; i < display_count; ++i) {
+        int space_count;
+        uint64_t *space_list = display_space_list(display_list[i], &space_count);
+        if (!space_list) continue;
+
+        for (int j = 0; j < space_count; ++j) {
+            int window_count;
+            uint32_t *window_list = space_window_list(space_list[j], &window_count);
+            if (!window_list) continue;
+
+            for (int k = 0; k < window_count; ++k) {
+                struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[k]);
+                if (window) buf_push(window_aggregate_list, window);
+            }
+
+            free(window_list);
+        }
+
+        free(space_list);
+    }
+
+    fprintf(rsp, "[");
+    for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
+        struct ax_window *window = window_aggregate_list[i];
+        window_serialize(window, rsp);
+        if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
+    }
+    fprintf(rsp, "]\n");
+
+    buf_free(window_aggregate_list);
+    free(display_list);
+}
+
 bool window_manager_query_window_title(FILE *rsp)
 {
     struct ax_window *window = window_manager_focused_window(&g_window_manager);
@@ -57,11 +153,11 @@ void window_manager_center_mouse(struct window_manager *wm, struct ax_window *wi
 
 bool window_manager_should_manage_window(struct ax_window *window)
 {
-    return window_is_standard(window) &&
-           window_can_move(window) &&
-           window_can_resize(window) &&
-          !window_is_sticky(window) &&
-          !window->is_floating;
+    return ((window_is_standard(window)) &&
+            (window_can_move(window)) &&
+            (window_can_resize(window)) &&
+            (!window_is_sticky(window)) &&
+            (!window->is_floating));
 }
 
 struct view *window_manager_find_managed_window(struct window_manager *wm, struct ax_window *window)
@@ -582,6 +678,13 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
 
         window_manager_set_window_opacity(window, wm->normal_window_opacity);
         window_manager_add_window(wm, window);
+
+        if ((!window_is_standard(window)) ||
+            (!window_can_move(window)) ||
+            (!window_can_resize(window))) {
+            window->is_floating = true;
+        }
+
         goto next;
 
 uobs_win:

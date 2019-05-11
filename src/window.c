@@ -83,6 +83,55 @@ err:
     return space_list;
 }
 
+void window_serialize(struct ax_window *window, FILE *rsp)
+{
+    CGRect frame = window_frame(window);
+    char *title = window_title(window);
+    char *role = NULL;
+    char *subrole = NULL;
+
+    CFStringRef cfrole = window_role(window);
+    if (cfrole) {
+        role = cfstring_copy(cfrole);
+        CFRelease(cfrole);
+    }
+
+    CFStringRef cfsubrole = window_subrole(window);
+    if (cfsubrole) {
+        subrole = cfstring_copy(cfsubrole);
+        CFRelease(cfsubrole);
+    }
+
+    fprintf(rsp,
+            "{\n"
+            "\t\"id\":%d,\n"
+            "\t\"app\":\"%s\",\n"
+            "\t\"title\":\"%s\",\n"
+            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
+            "\t\"role\":\"%s\",\n"
+            "\t\"subrole\":\"%s\"\n"
+            "\t\"movable\":%d\n"
+            "\t\"resizable\":%d\n"
+            "\t\"fullscreen\":%d\n"
+            "\t\"floating\":%d\n"
+            "}",
+            window->id,
+            window->application->name,
+            title ? title : "",
+            frame.origin.x, frame.origin.y,
+            frame.size.width, frame.size.height,
+            role ? role : "",
+            subrole ? subrole : "",
+            window_can_move(window),
+            window_can_resize(window),
+            window_is_fullscreen(window),
+            window->is_floating);
+
+    if (subrole) free(subrole);
+    if (role) free(role);
+    if (title) free(title);
+}
+
 char *window_title(struct ax_window *window)
 {
     char *title = NULL;

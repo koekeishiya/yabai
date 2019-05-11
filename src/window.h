@@ -51,6 +51,7 @@ struct ax_window
 CFStringRef window_display_uuid(struct ax_window *window);
 int window_display_id(struct ax_window *window);
 uint64_t *window_space_list(struct ax_window *window, int *count);
+void window_serialize(struct ax_window *window, FILE *rsp);
 char *window_title(struct ax_window *window);
 CGRect window_ax_frame(struct ax_window *window);
 CGRect window_frame(struct ax_window *window);
