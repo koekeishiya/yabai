@@ -44,6 +44,7 @@ struct ax_application
     bool is_hidden;
 };
 
+bool application_is_hidden(struct ax_application *application);
 uint32_t application_main_window(struct ax_application *application);
 uint32_t application_focused_window(struct ax_application *application);
 struct ax_window **application_window_list(struct ax_application *application, int *window_count);

@@ -179,7 +179,7 @@ uint32_t application_focused_window(struct ax_application *application)
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 bool application_is_hidden(struct ax_application *application)
 {
-    return IsProcessVisible(&application->psn);
+    return IsProcessVisible(&application->psn) == 0;
 }
 #pragma clang diagnostic pop
 
