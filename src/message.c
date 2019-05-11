@@ -715,19 +715,19 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (!window) return;
-            window_manager_set_window_insertion(&g_space_manager, window, DIR_NORTH);
+            window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_NORTH);
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (!window) return;
-            window_manager_set_window_insertion(&g_space_manager, window, DIR_EAST);
+            window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_EAST);
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (!window) return;
-            window_manager_set_window_insertion(&g_space_manager, window, DIR_SOUTH);
+            window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_SOUTH);
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (!window) return;
-            window_manager_set_window_insertion(&g_space_manager, window, DIR_WEST);
+            window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_WEST);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

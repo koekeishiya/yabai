@@ -97,7 +97,7 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
 void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, float x, float y);
 void window_manager_resize_window_relative(struct window_manager *wm, struct ax_window *window, int direction, float dx, float dy);
 void window_manager_set_window_opacity(struct ax_window *window, float opacity);
-void window_manager_set_window_insertion(struct space_manager *sm, struct ax_window *window, int direction);
+void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, int direction);
 void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b);
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid);

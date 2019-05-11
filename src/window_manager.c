@@ -548,7 +548,7 @@ next:;
     free(window_list);
 }
 
-void window_manager_set_window_insertion(struct space_manager *sm, struct ax_window *window, int direction)
+void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, int direction)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (view->type != VIEW_BSP) return;
@@ -556,31 +556,51 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct ax_win
     struct window_node *node = view_find_window_node(view->root, window->id);
     if (!node) return;
 
+    if (view->insertion_point && view->insertion_point != window->id) {
+        struct window_node *insert_node = view_find_window_node(view->root, view->insertion_point);
+        if (insert_node) {
+            insert_node->split = SPLIT_NONE;
+            insert_node->child = CHILD_NONE;
+        }
+
+        struct ax_window *insert_window = window_manager_find_window(wm, view->insertion_point);
+        if (insert_window) {
+            insert_window->border.insert_active = false;
+            insert_window->border.insert_dir = 0;
+            border_window_refresh(insert_window);
+        }
+    }
+
     if (direction == window->border.insert_dir) {
         node->split = SPLIT_NONE;
         node->child = CHILD_NONE;;
         window->border.insert_active = false;
         window->border.insert_dir = 0;
+        view->insertion_point = 0;
     } else if (direction == DIR_NORTH) {
         node->split = SPLIT_X;
         node->child = CHILD_LEFT;;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
+        view->insertion_point = node->window_id;
     } else if (direction == DIR_EAST) {
         node->split = SPLIT_Y;
         node->child = CHILD_RIGHT;;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
+        view->insertion_point = node->window_id;
     } else if (direction == DIR_SOUTH) {
         node->split = SPLIT_X;
         node->child = CHILD_RIGHT;;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
+        view->insertion_point = node->window_id;
     } else if (direction == DIR_WEST) {
         node->split = SPLIT_Y;
         node->child = CHILD_LEFT;;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
+        view->insertion_point = node->window_id;
     }
 
     border_window_refresh(window);
