@@ -8,8 +8,8 @@ extern int g_connection;
 
 static struct ax_window *mouse_window;
 static CGRect mouse_window_frame;
-static uint64_t last_event_time;
 static bool mouse_left_down;
+static uint64_t mouse_moved_time;
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
@@ -544,8 +544,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
         return;
     }
 
-    border_window_topmost(mouse_window, false);
-
     CGRect frame = window_ax_frame(mouse_window);
     float dx = frame.origin.x - mouse_window_frame.origin.x;
     float dy = frame.origin.y - mouse_window_frame.origin.y;
@@ -566,6 +564,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
         window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dw, dh);
     }
 
+    border_window_topmost(mouse_window, false);
     mouse_window = NULL;
 }
 
@@ -576,7 +575,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     uint64_t event_time = CGEventGetTimestamp(event);
     CFRelease(event);
 
-    float delta = ((float)event_time - last_event_time) * (1.0f / 1E6);
+    float delta = ((float)event_time - mouse_moved_time) * (1.0f / 1E6);
     if (delta < 35.0f) return;
 
     if (g_window_manager.ffm_mode != FFM_DISABLED) {
@@ -590,7 +589,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
         }
     }
 
-    last_event_time = event_time;
+    mouse_moved_time = event_time;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
