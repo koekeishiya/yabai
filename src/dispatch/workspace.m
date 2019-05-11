@@ -53,6 +53,11 @@ void workspace_event_handler_end(void *context)
                 selector:@selector(didUnhideApplication:)
                 name:NSWorkspaceDidUnhideApplicationNotification
                 object:nil];
+
+       [[NSDistributedNotificationCenter defaultCenter] addObserver:self
+                selector:@selector(didChangeMenuBarHiding:)
+                name:@"AppleInterfaceMenuBarHidingChangedNotification"
+              object:nil];
     }
 
     return self;
@@ -61,7 +66,15 @@ void workspace_event_handler_end(void *context)
 - (void)dealloc
 {
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
+    [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
+}
+
+- (void)didChangeMenuBarHiding:(NSNotification *)notification
+{
+    struct event *event;
+    event_create(event, MENU_BAR_HIDDEN_CHANGED, NULL);
+    eventloop_post(&g_eventloop, event);
 }
 
 - (void)activeDisplayDidChange:(NSNotification *)notification

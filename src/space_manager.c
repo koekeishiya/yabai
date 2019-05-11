@@ -552,6 +552,37 @@ out:
     return result;
 }
 
+void space_manager_mark_spaces_invalid_for_display(struct space_manager *sm, uint32_t did)
+{
+    int space_count;
+    uint64_t *space_list = display_space_list(did, &space_count);
+    if (!space_list) return;
+
+    uint64_t sid = display_space_id(did);
+    for (int i = 0; i < space_count; ++i) {
+        if (space_list[i] == sid) {
+            space_manager_refresh_view(sm, sid);
+        } else {
+            space_manager_mark_view_invalid(sm, space_list[i]);
+        }
+    }
+
+    free(space_list);
+}
+
+void space_manager_mark_spaces_invalid(struct space_manager *sm)
+{
+    uint32_t display_count = 0;
+    uint32_t *display_list = display_manager_active_display_list(&display_count);
+    if (!display_list) return;
+
+    for (int i = 0; i < display_count; ++i) {
+        space_manager_mark_spaces_invalid_for_display(sm, display_list[i]);
+    }
+
+    free(display_list);
+}
+
 bool space_manager_refresh_application_windows(void)
 {
     int window_count = g_window_manager.window.count;

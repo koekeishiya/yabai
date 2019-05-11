@@ -7,7 +7,9 @@ extern struct window_manager g_window_manager;
 extern int g_connection;
 
 static struct ax_window *mouse_window;
+static CGRect mouse_window_frame;
 static uint64_t last_event_time;
+static bool mouse_left_down;
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
@@ -481,52 +483,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_MOVED)
 {
     uint32_t display_id = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, display_id);
-
-    uint32_t display_count = 0;
-    uint32_t *display_list = display_manager_active_display_list(&display_count);
-    if (!display_list) return;
-
-    for (int i = 0; i < display_count; ++i) {
-        uint32_t display_id = display_list[i];
-        uint32_t sid = display_space_id(display_id);
-
-        int space_count;
-        uint64_t *space_list = display_space_list(display_id, &space_count);
-        if (!space_list) continue;
-
-        for (int j = 0; j < space_count; ++j) {
-            if (space_list[j] == sid) {
-                space_manager_refresh_view(&g_space_manager, sid);
-            } else {
-                space_manager_mark_view_invalid(&g_space_manager, space_list[j]);
-            }
-        }
-
-        free(space_list);
-    }
-
-    free(display_list);
+    space_manager_mark_spaces_invalid(&g_space_manager);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED)
 {
     uint32_t display_id = (uint32_t)(intptr_t) context;
-    uint64_t sid = display_space_id(display_id);
     debug("%s: %d\n", __FUNCTION__, display_id);
-
-    int space_count;
-    uint64_t *space_list = display_space_list(display_id, &space_count);
-    if (!space_list) return;
-
-    for (int i = 0; i < space_count; ++i) {
-        if (space_list[i] == sid) {
-            space_manager_refresh_view(&g_space_manager, sid);
-        } else {
-            space_manager_mark_view_invalid(&g_space_manager, space_list[i]);
-        }
-    }
-
-    free(space_list);
+    space_manager_mark_spaces_invalid_for_display(&g_space_manager, display_id);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_DOWN)
@@ -534,9 +498,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_DOWN)
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
     CFRelease(event);
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
     mouse_window = window_manager_find_window_at_point(&g_window_manager, point);
-    if (mouse_window) border_window_topmost(mouse_window, true);
+    if (!mouse_window) mouse_window = window_manager_focused_window(&g_window_manager);
+
+    if (mouse_window) {
+        mouse_window_frame = window_ax_frame(mouse_window);
+        border_window_topmost(mouse_window, true);
+    }
+
+    mouse_left_down = true;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
@@ -544,8 +516,35 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
     CFRelease(event);
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
-    if (mouse_window) border_window_topmost(mouse_window, false);
+    if (mouse_window) {
+        border_window_topmost(mouse_window, false);
+
+        CGRect frame = window_ax_frame(mouse_window);
+        float dx = frame.origin.x - mouse_window_frame.origin.x;
+        float dy = frame.origin.y - mouse_window_frame.origin.y;
+        float dw = frame.size.width - mouse_window_frame.size.width;
+        float dh = frame.size.height - mouse_window_frame.size.height;
+
+        if ((dx != 0.0f || dy != 0.0f) && (dw != 0.0f || dh != 0.0f)) {
+            uint8_t direction = 0;
+            if (dx != 0.0f) direction |= HANDLE_LEFT;
+            if (dy != 0.0f) direction |= HANDLE_TOP;
+            window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dx, dy);
+        }
+
+        if (dw != 0.0f || dh != 0.0f) {
+            uint8_t direction = 0;
+            if (dw != 0.0f) direction |= HANDLE_RIGHT;
+            if (dh != 0.0f) direction |= HANDLE_BOTTOM;
+            window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dw, dh);
+        }
+
+        mouse_window = NULL;
+    }
+
+    mouse_left_down = false;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
@@ -570,6 +569,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     }
 
     last_event_time = event_time;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
+{
+    debug("%s:\n", __FUNCTION__);
+    space_manager_mark_spaces_invalid(&g_space_manager);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)

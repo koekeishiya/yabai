@@ -75,6 +75,8 @@ void space_manager_assign_process_to_space(pid_t pid, uint64_t sid);
 void space_manager_assign_process_to_all_spaces(pid_t pid);
 bool space_manager_is_window_on_active_space(struct ax_window *window);
 bool space_manager_is_window_on_space(uint64_t sid, struct ax_window *window);
+void space_manager_mark_spaces_invalid_for_display(struct space_manager *sm, uint32_t did);
+void space_manager_mark_spaces_invalid(struct space_manager *sm);
 bool space_manager_refresh_application_windows(void);
 void space_manager_begin(struct space_manager *sm);
 
