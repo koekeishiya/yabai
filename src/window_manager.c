@@ -350,45 +350,23 @@ static void send_post_event(ProcessSerialNumber *window_psn, uint32_t window_id)
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
 
-static struct ax_window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct ax_window *window, int direction, uint32_t *window_list, int window_count)
+static struct ax_window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct ax_window *source, int direction, uint32_t *window_list, int window_count)
 {
+    CGRect source_frame = window_frame(source);
     struct ax_window *best_window = NULL;
-    float best_distance = FLT_MAX;
-
-    CGRect source_frame = window_frame(window);
-    CGPoint ma = CGPointMake(CGRectGetMidX(source_frame), CGRectGetMidY(source_frame));
+    uint32_t best_distance = UINT32_MAX;
 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_manager_find_window(wm, window_list[i]);
-        if (!window || !window_is_standard(window)) continue;
+        if (!window || !window_is_standard(window) || window == source) continue;
 
         CGRect frame = window_frame(window);
-        CGPoint mb = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame));
+        if (!rect_is_in_direction(source_frame, frame, direction))      continue;
 
-        float x_distance = mb.x - ma.x;
-        float y_distance = mb.y - ma.y;
-        float distance = sqrt((x_distance * x_distance ) + (y_distance * y_distance));
-
-        if (direction == DIR_NORTH) {
-            if (y_distance < 0 && distance < best_distance) {
-                best_window = window;
-                best_distance = distance;
-            }
-        } else if (direction == DIR_EAST) {
-            if (x_distance > 0 && distance < best_distance) {
-                best_window = window;
-                best_distance = distance;
-            }
-        } else if (direction == DIR_SOUTH) {
-            if (y_distance > 0 && distance < best_distance) {
-                best_window = window;
-                best_distance = distance;
-            }
-        } else if (direction == DIR_WEST) {
-            if (x_distance < 0 && distance < best_distance) {
-                best_window = window;
-                best_distance = distance;
-            }
+        uint32_t distance = rect_distance(source_frame, frame, direction);
+        if (distance < best_distance) {
+            best_window = window;
+            best_distance = distance;
         }
     }
 
