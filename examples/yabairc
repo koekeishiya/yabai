@@ -10,14 +10,15 @@ yabai -m config normal_window_border_color   0xff505050
 yabai -m config insert_window_border_color   0xffd75f5f
 yabai -m config active_window_opacity        1.0f
 yabai -m config normal_window_opacity        0.95f
+yabai -m config split_ratio                  0.52
+yabai -m config auto_balance                 off
+
 yabai -m config layout                       bsp
 yabai -m config top_padding                  55
 yabai -m config bottom_padding               20
 yabai -m config left_padding                 20
 yabai -m config right_padding                20
 yabai -m config window_gap                   10
-yabai -m config split_ratio                  0.52
-yabai -m config auto_balance                 off
 
 yabai -m config --space 7 layout             float
 
