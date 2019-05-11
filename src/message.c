@@ -5,12 +5,6 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 
-static const char *bool_str[] =
-{
-    "off",
-    "on"
-};
-
 #define DOMAIN_CONFIG  "config"
 #define DOMAIN_DISPLAY "display"
 #define DOMAIN_SPACE   "space"
