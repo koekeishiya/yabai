@@ -360,7 +360,7 @@ static struct ax_window *window_manager_find_closest_window_for_direction_in_win
 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_manager_find_window(wm, window_list[i]);
-        if (!window) continue;
+        if (!window || !window_is_standard(window)) continue;
 
         CGRect frame = window_frame(window);
         CGPoint mb = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame));
