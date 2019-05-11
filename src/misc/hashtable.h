@@ -26,8 +26,8 @@ struct table
 void table_init(struct table *table, int capacity, table_hash_func hash, table_compare_func cmp);
 void table_free(struct table *table);
 
-#define table_add(table, key, value) _table_add(table, key, sizeof(*key), value, sizeof(*value))
-void _table_add(struct table *table, void *key, int key_size, void *value, int value_size);
+#define table_add(table, key, value) _table_add(table, key, sizeof(*key), value)
+void _table_add(struct table *table, void *key, int key_size, void *value);
 void table_remove(struct table *table, void *key);
 void *table_find(struct table *table, void *key);
 
@@ -55,7 +55,6 @@ void table_free(struct table *table)
         while (bucket) {
             next = bucket->next;
             free(bucket->key);
-            free(bucket->value);
             free(bucket);
             bucket = next;
         }
@@ -84,41 +83,43 @@ static void
 table_rehash(struct table *table)
 {
     struct bucket **old_buckets = table->buckets;
-    int old_count = table->count;
+    int old_capacity = table->capacity;
 
     table->count = 0;
     table->capacity = 2 * table->capacity;
     table->buckets = malloc(sizeof(struct bucket *) * table->capacity);
     memset(table->buckets, 0, sizeof(struct bucket *) * table->capacity);
 
-    for (int i = 0; i < old_count; ++i) {
+    for (int i = 0; i < old_capacity; ++i) {
         struct bucket *old_bucket = old_buckets[i];
-        struct bucket **new_bucket = table_get_bucket(table, old_bucket->key);
-        *new_bucket = malloc(sizeof(struct bucket));
-        (*new_bucket)->key = old_bucket->key;
-        (*new_bucket)->value = old_bucket->value;
-        (*new_bucket)->next = NULL;
-        ++table->count;
+        while (old_bucket) {
+            struct bucket **new_bucket = table_get_bucket(table, old_bucket->key);
+            *new_bucket = malloc(sizeof(struct bucket));
+            (*new_bucket)->key = old_bucket->key;
+            (*new_bucket)->value = old_bucket->value;
+            (*new_bucket)->next = NULL;
+            ++table->count;
+            old_bucket = old_bucket->next;
+        }
+
         free(old_bucket);
     }
 
     free(old_buckets);
 }
 
-void _table_add(struct table *table, void *key, int key_size, void *value, int value_size)
+void _table_add(struct table *table, void *key, int key_size, void *value)
 {
     struct bucket **bucket = table_get_bucket(table, key);
     if (*bucket) {
         if (!(*bucket)->value) {
-            (*bucket)->value = malloc(value_size);
-            memcpy((*bucket)->value, value, value_size);
+            (*bucket)->value = value;
         }
     } else {
         *bucket = malloc(sizeof(struct bucket));
         (*bucket)->key = malloc(key_size);
-        (*bucket)->value = malloc(value_size);
+        (*bucket)->value = value;
         memcpy((*bucket)->key, key, key_size);
-        memcpy((*bucket)->value, value, value_size);
         (*bucket)->next = NULL;
         ++table->count;
 
@@ -134,7 +135,6 @@ void table_remove(struct table *table, void *key)
     struct bucket *next, **bucket = table_get_bucket(table, key);
     if (*bucket) {
         free((*bucket)->key);
-        // free((*bucket)->value);
         next = (*bucket)->next;
         free(*bucket);
         *bucket = next;

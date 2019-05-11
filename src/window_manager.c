@@ -416,7 +416,7 @@ void window_manager_remove_lost_activated_event(struct window_manager *wm, pid_t
 
 void window_manager_add_lost_activated_event(struct window_manager *wm, pid_t pid, enum event_type type)
 {
-    table_add(&wm->application_lost_activated_event, &pid, &type);
+    table_add(&wm->application_lost_activated_event, &pid, (void *)(intptr_t) type);
 }
 
 bool window_manager_find_lost_focused_event(struct window_manager *wm, uint32_t window_id)
@@ -431,13 +431,12 @@ void window_manager_remove_lost_focused_event(struct window_manager *wm, uint32_
 
 void window_manager_add_lost_focused_event(struct window_manager *wm, uint32_t window_id, enum event_type type)
 {
-    table_add(&wm->window_lost_focused_event, &window_id, &type);
+    table_add(&wm->window_lost_focused_event, &window_id, (void *)(intptr_t) type);
 }
 
 struct ax_window *window_manager_find_window(struct window_manager *wm, uint32_t window_id)
 {
-    struct ax_window **it = table_find(&wm->window, &window_id);
-    return it ? *it : NULL;
+    return table_find(&wm->window, &window_id);
 }
 
 void window_manager_remove_window(struct window_manager *wm, uint32_t window_id)
@@ -451,13 +450,12 @@ void window_manager_add_window(struct window_manager *wm, struct ax_window *wind
         window_manager_purify_window(window);
     }
 
-    table_add(&wm->window, &window->id, &window);
+    table_add(&wm->window, &window->id, window);
 }
 
 struct ax_application *window_manager_find_application(struct window_manager *wm, pid_t pid)
 {
-    struct ax_application **it = table_find(&wm->application, &pid);
-    return it ? *it : NULL;
+    return table_find(&wm->application, &pid);
 }
 
 void window_manager_remove_application(struct window_manager *wm, pid_t pid)
@@ -467,7 +465,7 @@ void window_manager_remove_application(struct window_manager *wm, pid_t pid)
 
 void window_manager_add_application(struct window_manager *wm, struct ax_application *application)
 {
-    table_add(&wm->application, &application->pid, &application);
+    table_add(&wm->application, &application->pid, application);
 }
 
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count)
@@ -479,7 +477,7 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
         struct bucket *bucket = wm->window.buckets[window_index];
         while (bucket) {
             if (bucket->value) {
-                struct ax_window *window = *(struct ax_window **) bucket->value;
+                struct ax_window *window = bucket->value;
                 if (window->application == application) {
                     window_list[window_count++] = window->id;
                 }
@@ -880,15 +878,17 @@ void window_manager_begin(struct window_manager *wm)
     for (int process_index = 0; process_index < g_process_manager.process.capacity; ++process_index) {
         struct bucket *bucket = g_process_manager.process.buckets[process_index];
         while (bucket) {
-            struct process *process = *(struct process **) bucket->value;
-            struct ax_application *application = application_create(process);
+            if (bucket->value) {
+                struct process *process = bucket->value;
+                struct ax_application *application = application_create(process);
 
-            if (application_observe(application)) {
-                window_manager_add_application(wm, application);
-                window_manager_add_application_windows(wm, application);
-            } else {
-                application_unobserve(application);
-                application_destroy(application);
+                if (application_observe(application)) {
+                    window_manager_add_application(wm, application);
+                    window_manager_add_application_windows(wm, application);
+                } else {
+                    application_unobserve(application);
+                    application_destroy(application);
+                }
             }
 
             bucket = bucket->next;

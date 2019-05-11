@@ -43,9 +43,7 @@ process_manager_add_running_processes(struct process_manager *pm)
 
 struct process *process_manager_find_process(struct process_manager *pm, ProcessSerialNumber *psn)
 {
-    // return table_find(&pm->process, psn);
-    struct process **it = table_find(&pm->process, psn);
-    return it ? *it : NULL;
+    return table_find(&pm->process, psn);
 }
 
 void process_manager_remove_process(struct process_manager *pm, ProcessSerialNumber *psn)
@@ -55,7 +53,7 @@ void process_manager_remove_process(struct process_manager *pm, ProcessSerialNum
 
 void process_manager_add_process(struct process_manager *pm, struct process *process)
 {
-    table_add(&pm->process, &process->psn, &process);
+    table_add(&pm->process, &process->psn, process);
 }
 
 void process_manager_init(struct process_manager *pm)

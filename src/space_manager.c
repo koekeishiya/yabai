@@ -589,8 +589,10 @@ bool space_manager_refresh_application_windows(void)
     for (int i = 0; i < g_window_manager.application.capacity; ++i) {
         struct bucket *bucket = g_window_manager.application.buckets[i];
         while (bucket) {
-            struct ax_application **application = bucket->value;
-            window_manager_add_application_windows(&g_window_manager, *application);
+            if (bucket->value) {
+                struct ax_application *application = bucket->value;
+                window_manager_add_application_windows(&g_window_manager, application);
+            }
             bucket = bucket->next;
         }
     }
@@ -612,7 +614,7 @@ void space_manager_init(struct space_manager *sm)
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;
 
-    table_init(&sm->view, 150, hash_view, compare_view);
+    table_init(&sm->view, 23, hash_view, compare_view);
 }
 
 void space_manager_begin(struct space_manager *sm)
