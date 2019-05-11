@@ -45,9 +45,8 @@ static const char *bool_str[] =
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
 #define ARGUMENT_CONFIG_SHADOW_OFF           "off"
-#define ARGUMENT_CONFIG_SHADOW_ALL           "on"
-// #define ARGUMENT_CONFIG_SHADOW_FLT           "float"
-// #define ARGUMENT_CONFIG_SHADOW_ALL           "always"
+#define ARGUMENT_CONFIG_SHADOW_FLT           "float"
+#define ARGUMENT_CONFIG_SHADOW_ON            "on"
 #define ARGUMENT_CONFIG_BORDER_ON            "on"
 #define ARGUMENT_CONFIG_BORDER_OFF           "off"
 #define ARGUMENT_CONFIG_AUTO_BALANCE_ON      "on"
@@ -284,13 +283,11 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", purify_mode_str[g_window_manager.purify_mode]);
         } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_OFF)) {
-            g_window_manager.purify_mode = PURIFY_ALWAYS;
-#if 0
+            window_manager_set_purify_mode(&g_window_manager, PURIFY_ALWAYS);
         } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_FLT)) {
-            g_window_manager.purify_mode = PURIFY_MANAGED;
-#endif
-        } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_ALL)) {
-            g_window_manager.purify_mode = PURIFY_DISABLED;
+            window_manager_set_purify_mode(&g_window_manager, PURIFY_MANAGED);
+        } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_ON)) {
+            window_manager_set_purify_mode(&g_window_manager, PURIFY_DISABLED);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -324,7 +321,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             float opacity = token_to_float(value);
             if (opacity > 0.0f && opacity <= 1.0f) {
-                g_window_manager.active_window_opacity = opacity;
+                window_manager_set_active_window_opacity(&g_window_manager, opacity);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
@@ -336,7 +333,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             float opacity = token_to_float(value);
             if (opacity > 0.0f && opacity <= 1.0f) {
-                g_window_manager.normal_window_opacity = opacity;
+                window_manager_set_normal_window_opacity(&g_window_manager, opacity);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
@@ -348,7 +345,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             uint32_t color = token_to_uint32t(value);
             if (color) {
-                g_window_manager.active_window_border_color = color;
+                window_manager_set_active_border_window_color(&g_window_manager, color);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
@@ -360,7 +357,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             uint32_t color = token_to_uint32t(value);
             if (color) {
-                g_window_manager.normal_window_border_color = color;
+                window_manager_set_normal_border_window_color(&g_window_manager, color);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

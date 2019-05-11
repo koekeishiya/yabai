@@ -167,6 +167,45 @@ void window_manager_resize_window(struct ax_window *window, float width, float h
     CFRelease(size_ref);
 }
 
+void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode)
+{
+    wm->purify_mode = mode;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct ax_window *window = bucket->value;
+                window_manager_purify_window(wm, window);
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color)
+{
+    wm->active_window_border_color = color;
+    struct ax_window *window = window_manager_focused_window(wm);
+    if (window) border_window_activate(window);
+}
+
+void window_manager_set_normal_border_window_color(struct window_manager *wm, uint32_t color)
+{
+    wm->normal_window_border_color = color;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct ax_window *window = bucket->value;
+                if (window->id != wm->focused_window_id) border_window_deactivate(window);
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
 void window_manager_set_window_opacity(struct ax_window *window, float opacity)
 {
     int sockfd;
@@ -178,6 +217,29 @@ void window_manager_set_window_opacity(struct ax_window *window, float opacity)
         socket_wait(sockfd);
     }
     socket_close(sockfd);
+}
+
+void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity)
+{
+    wm->active_window_opacity = opacity;
+    struct ax_window *window = window_manager_focused_window(wm);
+    if (window) window_manager_set_window_opacity(window, wm->active_window_opacity);
+}
+
+void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity)
+{
+    wm->normal_window_opacity = opacity;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct ax_window *window = bucket->value;
+                if (window->id != wm->focused_window_id) window_manager_set_window_opacity(window, wm->normal_window_opacity);
+            }
+
+            bucket = bucket->next;
+        }
+    }
 }
 
 void window_manager_sticky_window(struct ax_window *window, bool sticky)
@@ -200,13 +262,22 @@ void window_manager_sticky_window(struct ax_window *window, bool sticky)
     socket_close(sockfd);
 }
 
-void window_manager_purify_window(struct ax_window *window)
+void window_manager_purify_window(struct window_manager *wm, struct ax_window *window)
 {
+    int value;
     int sockfd;
     char message[255];
 
+    if (wm->purify_mode == PURIFY_DISABLED) {
+        value = 1;
+    } else if (wm->purify_mode == PURIFY_MANAGED) {
+        value = window_manager_find_managed_window(wm, window) ? 0 : 1;
+    } else if (wm->purify_mode == PURIFY_ALWAYS) {
+        value = 0;
+    }
+
     if (socket_connect_in(&sockfd, 5050)) {
-        snprintf(message, sizeof(message), "window_shadow %d 0", window->id);
+        snprintf(message, sizeof(message), "window_shadow %d %d", window->id, value);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
@@ -459,10 +530,7 @@ void window_manager_remove_window(struct window_manager *wm, uint32_t window_id)
 
 void window_manager_add_window(struct window_manager *wm, struct ax_window *window)
 {
-    if (wm->purify_mode != PURIFY_DISABLED) {
-        window_manager_purify_window(window);
-    }
-
+    window_manager_purify_window(wm, window);
     table_add(&wm->window, &window->id, window);
 }
 
@@ -710,6 +778,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
         if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
             window_manager_add_managed_window(wm, window, view);
+            window_manager_purify_window(wm, window);
         }
     } else {
         struct view *view = window_manager_find_managed_window(wm, window);
@@ -717,6 +786,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
             space_manager_untile_window(sm, view, window);
             window_manager_remove_managed_window(wm, window);
         }
+        window_manager_purify_window(wm, window);
         window->is_floating = true;
     }
 }
