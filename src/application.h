@@ -44,6 +44,7 @@ struct ax_application
     bool is_hidden;
 };
 
+bool application_is_frontmost(struct ax_application *application);
 bool application_is_hidden(struct ax_application *application);
 uint32_t application_main_window(struct ax_application *application);
 uint32_t application_focused_window(struct ax_application *application);

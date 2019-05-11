@@ -305,6 +305,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
         return;
     }
 
+    if (!application_is_frontmost(window->application)) {
+        return;
+    }
+
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
     if (focused_window) {

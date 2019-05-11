@@ -175,6 +175,13 @@ uint32_t application_focused_window(struct ax_application *application)
     return window_id;
 }
 
+bool application_is_frontmost(struct ax_application *application)
+{
+    ProcessSerialNumber psn = {};
+    _SLPSGetFrontProcess(&psn);
+    return psn.lowLongOfPSN == application->psn.lowLongOfPSN;
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 bool application_is_hidden(struct ax_application *application)
