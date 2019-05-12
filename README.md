@@ -41,9 +41,13 @@ TODO
 Requires xcode-8 command-line tools.
 
 ```
+# clone repo and build binary
 git clone https://github.com/koekeishiya/yabai
 make install      # release version
 make              # debug version
+
+# symlink binary to a location in $PATH
+ln -s $PWD/bin/yabai /usr/local/bin/yabai
 ```
 
 **Install scripting-addition**:
@@ -78,7 +82,10 @@ TODO
 **Source**:
 
 ```
-Remove the cloned git-repository
+# remove symlink from location in $PATH
+rm /usr/local/bin/yabai
+
+remove the cloned git-repository..
 ```
 
 ### Configuration
