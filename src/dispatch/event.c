@@ -723,7 +723,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
     FILE *rsp = fdopen(param1, "w");
     if (!rsp) goto fderr;
 
-    // debug("%s: msg '%s'\n", __FUNCTION__, context);
+    debug("%s: msg '%s'\n", __FUNCTION__, context);
     handle_message(rsp, context);
 
     fflush(rsp);
