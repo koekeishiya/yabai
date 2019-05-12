@@ -1,0 +1,12 @@
+yabai(1)
+========
+
+Name
+----
+
+yabai - A tiling window manager for macOS based on binary space partitioning
+
+Synopsis
+--------
+
+*yabai* [*-v|--version*|*-V|--verbose*|*-m|--message* 'msg'|*-c|--config* 'config_path'|*--install-sa*|*--uninstall-sa*|*--load-sa*]
