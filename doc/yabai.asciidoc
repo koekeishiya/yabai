@@ -9,7 +9,7 @@ yabai - A tiling window manager for macOS based on binary space partitioning
 Synopsis
 --------
 
-*yabai* [*-v*|*--version*|*-V*|*--verbose*|*-m* 'msg'|*--message* 'msg'|*-c* 'config_file'|*--config* 'config_file'|*--install-sa*|*--uninstall-sa*|*--load-sa*]
+*yabai* [*-v*,*--version*|*-V*,*--verbose*|*-m*,*--message* 'msg'|*-c*,*--config* 'config_file'|*--install-sa*|*--uninstall-sa*|*--load-sa*]
 
 Description
 -----------
@@ -18,16 +18,16 @@ yabai - A tiling window manager for macOS based on binary space partitioning
 
 Options
 -------
-*-v* | *--version*::
+*-v*, *--version*::
     Print the version and exit.
 
-*-V* | *--verbose*::
+*-V*, *--verbose*::
     Output debug information to stdout.
 
-*-m* | *--message* 'msg'::
+*-m*, *--message* 'msg'::
     Send message to a running instance of yabai.
 
-*-c* | *--config* 'config_file'::
+*-c*, *--config* 'config_file'::
     Use the specified configuration file.
 
 *--install-sa*::
