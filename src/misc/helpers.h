@@ -10,6 +10,17 @@ static inline bool is_root(void)
     return getuid() == 0 || geteuid() == 0;
 }
 
+static inline char *string_copy(char *s)
+{
+    int length = strlen(s);
+    char *result = malloc(length + 1);
+    if (!result) return NULL;
+
+    memcpy(result, s, length);
+    result[length] = '\0';
+    return result;
+}
+
 static bool fork_exec_wait(char *command)
 {
     static const char *shell = "/bin/bash";
