@@ -84,7 +84,8 @@ Remove the cloned git-repository
 ### Configuration
 
 The default configuration file is a shell-script located at `~/.yabairc`, thus the executable permission-bit must be set.
-A different location can be specified with the *--config | -c* argument.
+A different location can be specified with the *--config | -c* argument. The configuration file consists of commands that
+send messags to the running **yabai** instance. To send a message, invoke **yabai** with the *--message | -m* argument.
 
 Keyboard shortcuts can be defined with [*skhd*](https://github.com/koekeishiya/skhd) or any other suitable software you may prefer.
 
