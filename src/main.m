@@ -65,7 +65,7 @@
 #define SOCKET_PATH_FMT "/tmp/yabai_%s.socket"
 #define LCFILE_PATH_FMT "/tmp/yabai_%s.lock"
 
-#define CLIENT_OPT_LONG "--msg"
+#define CLIENT_OPT_LONG "--message"
 #define CLIENT_OPT_SHRT "-m"
 
 #define DEBUG_VERBOSE_OPT_LONG "--verbose"
