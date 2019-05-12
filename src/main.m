@@ -191,13 +191,14 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
 
 static void exec_config_file(char *config)
 {
+    char config_file[BUFSIZ];
+
     if (!config) {
         char *home = getenv("HOME");
         if (!home) {
             error("yabai: 'env HOME' not set! abort..\n");
         }
 
-        char config_file[BUFSIZ];
         snprintf(config_file, sizeof(config_file), CONFIG_FILE_FMT, home);
         config = config_file;
     }
