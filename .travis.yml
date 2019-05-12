@@ -1,0 +1,4 @@
+language: c
+os: osx
+compiler: clang
+script: make install

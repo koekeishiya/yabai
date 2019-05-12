@@ -1,4 +1,4 @@
-### Description
+[![Build Status](https://travis-ci.org/koekeishiya/yabai.svg?branch=master)](https://travis-ci.org/koekeishiya/yabai)
 
 **yabai** started as a C99 re-rewrite of [*chunkwm*](https://github.com/koekeishiya/chunkwm), originally supposed to be its first RC version.
 
