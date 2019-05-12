@@ -72,6 +72,8 @@
 #define DEBUG_VERBOSE_OPT_SHRT "-V"
 #define VERSION_OPT_LONG       "--version"
 #define VERSION_OPT_SHRT       "-v"
+#define CONFIG_OPT_LONG       "--config"
+#define CONFIG_OPT_SHRT       "-c"
 
 #define SCRPT_ADD_INSTALL_OPT   "--install-sa"
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
@@ -91,6 +93,7 @@ struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
 int g_connection;
+char *g_config;
 bool g_verbose;
 
 static int client_send_message(int argc, char **argv)
@@ -186,34 +189,35 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
     return socket_daemon_begin_un(daemon, socket_file, handler);
 }
 
-static void exec_config_file(void)
+static void exec_config_file(char *config)
 {
-    char *home = getenv("HOME");
-    if (!home) {
-        error("yabai: 'env HOME' not set! abort..\n");
-    }
+    if (!config) {
+        char *home = getenv("HOME");
+        if (!home) {
+            error("yabai: 'env HOME' not set! abort..\n");
+        }
 
-    char config_file[BUFSIZ];
-    snprintf(config_file, sizeof(config_file), CONFIG_FILE_FMT, home);
+        char config_file[BUFSIZ];
+        snprintf(config_file, sizeof(config_file), CONFIG_FILE_FMT, home);
+        config = config_file;
+    }
 
     struct stat buffer;
-    if (stat(config_file, &buffer) != 0) {
-        error("yabai: config '%s' not found!\n", config_file);
+    if (stat(config, &buffer) != 0) {
+        error("yabai: config '%s' not found!\n", config);
     }
 
-    if (!fork_exec_wait(config_file)) {
-        error("yabai: failed to execute config '%s'!\n", config_file);
+    if (!fork_exec_wait(config)) {
+        error("yabai: failed to execute config '%s'!\n", config);
     }
 }
 
-static bool parse_arguments(int argc, char **argv)
+static void parse_arguments(int argc, char **argv)
 {
-    if (argc <= 1) return false;
-
     if ((strcmp(argv[1], VERSION_OPT_LONG) == 0) ||
         (strcmp(argv[1], VERSION_OPT_SHRT) == 0)) {
         fprintf(stdout, "yabai version %d.%d.%d\n", MAJOR, MINOR, PATCH);
-        return true;
+        exit(EXIT_SUCCESS);
     }
 
     if ((strcmp(argv[1], CLIENT_OPT_LONG) == 0) ||
@@ -233,16 +237,21 @@ static bool parse_arguments(int argc, char **argv)
         exit(scripting_addition_load());
     }
 
-    while (argc > 1) {
-        char *opt = argv[--argc];
+    for (int i = 1; i < argc; ++i) {
+        char *opt = argv[i];
 
         if ((strcmp(opt, DEBUG_VERBOSE_OPT_LONG) == 0) ||
             (strcmp(opt, DEBUG_VERBOSE_OPT_SHRT) == 0)) {
             g_verbose = true;
+        } else if ((strcmp(opt, CONFIG_OPT_LONG) == 0) ||
+                   (strcmp(opt, CONFIG_OPT_SHRT) == 0)) {
+            char *val = i < argc - 1 ? argv[++i] : NULL;
+            if (!val) error("yabai: option '%s|%s' requires an argument!\n", CONFIG_OPT_LONG, CONFIG_OPT_SHRT);
+            g_config = string_copy(val);
+        } else {
+            error("yabai: '%s' is not a valid option!\n", opt);
         }
     }
-
-    return false;
 }
 
 #pragma clang diagnostic push
@@ -258,8 +267,8 @@ void init_misc_settings(void)
 
 int main(int argc, char **argv)
 {
-    if (parse_arguments(argc, argv)) {
-        return EXIT_SUCCESS;
+    if (argc > 1) {
+        parse_arguments(argc, argv);
     }
 
     if (is_root()) {
@@ -295,7 +304,7 @@ int main(int argc, char **argv)
     }
 
     eventloop_begin(&g_eventloop);
-    exec_config_file();
+    exec_config_file(g_config);
 
     display_manager_begin(&g_display_manager);
     space_manager_begin(&g_space_manager);
