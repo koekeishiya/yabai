@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/koekeishiya/yabai.svg?branch=master)](https://travis-ci.org/koekeishiya/yabai)
 
-**yabai** started as a C99 re-rewrite of [*chunkwm*](https://github.com/koekeishiya/chunkwm), originally supposed to be its first RC version.
+**yabai** started as a C99 rewrite of [*chunkwm*](https://github.com/koekeishiya/chunkwm), originally supposed to be its first RC version.
 
 However due to major architectural changes, supported systems, and changes to functionality, it is being released separately.
 There are multiple reasons behind these changes, based on the experience I've gained through experimenting with, designing, and using both *kwm*
