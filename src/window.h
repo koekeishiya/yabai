@@ -41,7 +41,7 @@ struct ax_window
     struct ax_application *application;
     AXUIElementRef ref;
     uint32_t id;
-    volatile uint32_t **id_ptr;
+    uint32_t **volatile id_ptr;
     uint8_t notification;
     struct border border;
     bool is_minimized;
