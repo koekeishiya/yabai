@@ -215,7 +215,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     pid_t window_pid = ax_window_pid(context);
     if (!window_pid) return EVENT_SUCCESS;
 
-    if (window_manager_find_window(&g_window_manager, window_id)) return 0;
+    if (window_manager_find_window(&g_window_manager, window_id)) return EVENT_SUCCESS;
 
     struct ax_application *application = window_manager_find_application(&g_window_manager, window_pid);
     if (!application) return EVENT_SUCCESS;
