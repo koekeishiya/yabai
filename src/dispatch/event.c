@@ -666,7 +666,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 
         if (dx >= 25 || dx <= -25 || dy >= 25 || dy <= 25) {
             float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-            if (dt < 125.0f) return EVENT_SUCCESS;
+            if (dt < 200.0f) return EVENT_SUCCESS;
 
             uint8_t direction = 0;
             CGPoint frame_mid = { CGRectGetMidX(g_mouse_state.window_frame), CGRectGetMidY(g_mouse_state.window_frame) };
@@ -679,7 +679,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 
             g_mouse_state.last_moved_time = event_time;
             g_mouse_state.down_location = point;
-            g_mouse_state.window_frame = window_frame(g_mouse_state.window);
+            g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
         }
     }
 
