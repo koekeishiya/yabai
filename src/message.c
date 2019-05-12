@@ -4,6 +4,7 @@ extern struct eventloop g_eventloop;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
+extern struct mouse_state g_mouse_state;
 
 #define DOMAIN_CONFIG  "config"
 #define DOMAIN_DISPLAY "display"
@@ -30,6 +31,9 @@ extern struct window_manager g_window_manager;
 #define COMMAND_CONFIG_WINDOW_GAP            "window_gap"
 #define COMMAND_CONFIG_SPLIT_RATIO           "split_ratio"
 #define COMMAND_CONFIG_AUTO_BALANCE          "auto_balance"
+#define COMMAND_CONFIG_MOUSE_MOD             "mouse_modifier"
+#define COMMAND_CONFIG_MOUSE_ACTION1         "mouse_action1"
+#define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
@@ -47,6 +51,13 @@ extern struct window_manager g_window_manager;
 #define ARGUMENT_CONFIG_AUTO_BALANCE_OFF     "off"
 #define ARGUMENT_CONFIG_LAYOUT_BSP           "bsp"
 #define ARGUMENT_CONFIG_LAYOUT_FLOAT         "float"
+#define ARGUMENT_CONFIG_MOUSE_MOD_ALT        "alt"
+#define ARGUMENT_CONFIG_MOUSE_MOD_SHIFT      "shift"
+#define ARGUMENT_CONFIG_MOUSE_MOD_CMD        "cmd"
+#define ARGUMENT_CONFIG_MOUSE_MOD_CTRL       "ctrl"
+#define ARGUMENT_CONFIG_MOUSE_MOD_FN         "fn"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE    "move"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE  "resize"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
@@ -429,6 +440,45 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_space_manager.auto_balance = false;
         } else if (token_equals(value, ARGUMENT_CONFIG_AUTO_BALANCE_ON)) {
             g_space_manager.auto_balance = true;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_MOD)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", mouse_mod_str[g_mouse_state.modifier]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_ALT)) {
+            g_mouse_state.modifier = MOUSE_MOD_ALT;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_SHIFT)) {
+            g_mouse_state.modifier = MOUSE_MOD_SHIFT;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CMD)) {
+            g_mouse_state.modifier = MOUSE_MOD_CMD;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CTRL)) {
+            g_mouse_state.modifier = MOUSE_MOD_CTRL;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_FN)) {
+            g_mouse_state.modifier = MOUSE_MOD_FN;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_ACTION1)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.action1]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE)) {
+            g_mouse_state.action1 = MOUSE_MODE_MOVE;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
+            g_mouse_state.action1 = MOUSE_MODE_RESIZE;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_ACTION2)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.action2]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE)) {
+            g_mouse_state.action2 = MOUSE_MODE_MOVE;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
+            g_mouse_state.action2 = MOUSE_MODE_RESIZE;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

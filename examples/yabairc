@@ -12,6 +12,9 @@ yabai -m config active_window_opacity        1.0f
 yabai -m config normal_window_opacity        0.95f
 yabai -m config split_ratio                  0.52
 yabai -m config auto_balance                 off
+yabai -m config mouse_modifier               fn
+yabai -m config mouse_action1                move
+yabai -m config mouse_action2                resize
 
 yabai -m config layout                       bsp
 yabai -m config top_padding                  55

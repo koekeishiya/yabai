@@ -4,12 +4,8 @@ extern struct eventloop g_eventloop;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
+extern struct mouse_state g_mouse_state;
 extern int g_connection;
-
-static struct ax_window *mouse_window;
-static CGRect mouse_window_frame;
-static bool mouse_left_down;
-static uint64_t mouse_moved_time;
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
@@ -17,7 +13,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 
     if ((process->terminated) || (kill(process->pid, 0) == -1)) {
         window_manager_remove_lost_activated_event(&g_window_manager, process->pid);
-        return;
+        return EVENT_SUCCESS;
     }
 
     struct ax_application *application = application_create(process);
@@ -58,6 +54,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
             eventloop_post(&g_eventloop, event);
         });
     }
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
@@ -82,7 +80,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
                     window_manager_remove_managed_window(&g_window_manager, window);
                 }
 
-                if (mouse_window == window) mouse_window = NULL;
+                if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
                 window_manager_remove_window(&g_window_manager, window->id);
                 window_destroy(window);
@@ -97,6 +95,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
     }
 
     process_destroy(process);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
@@ -104,7 +103,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
     if (!application) {
         window_manager_add_lost_activated_event(&g_window_manager, (pid_t)(intptr_t) context, APPLICATION_ACTIVATED);
-        return;
+        return EVENT_SUCCESS;
     }
 
     debug("%s: %s\n", __FUNCTION__, application->name);
@@ -121,12 +120,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
             g_window_manager.reactivate_focused_window = display_manager_active_display_is_animating();
         }
     }
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return;
+    if (!application) return EVENT_SUCCESS;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
@@ -142,19 +143,21 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
             }
         }
     }
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return;
+    if (!application) return EVENT_SUCCESS;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = false;
 
     int window_count = 0;
     struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-    if (!window_count) return;
+    if (!window_count) return EVENT_SUCCESS;
 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_list[i];
@@ -172,19 +175,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
     }
 
     free(window_list);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return;
+    if (!application) return EVENT_SUCCESS;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = true;
 
     int window_count = 0;
     struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-    if (!window_count) return;
+    if (!window_count) return EVENT_SUCCESS;
 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_list[i];
@@ -200,20 +204,21 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
     }
 
     free(window_list);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
-    if (!window_id) return;
+    if (!window_id) return EVENT_SUCCESS;
 
     pid_t window_pid = ax_window_pid(context);
-    if (!window_pid) return;
+    if (!window_pid) return EVENT_SUCCESS;
 
-    if (window_manager_find_window(&g_window_manager, window_id)) return;
+    if (window_manager_find_window(&g_window_manager, window_id)) return 0;
 
     struct ax_application *application = window_manager_find_application(&g_window_manager, window_pid);
-    if (!application) return;
+    if (!application) return EVENT_SUCCESS;
 
     struct ax_window *window = window_create(application, context);
     window_manager_set_window_opacity(window, g_window_manager.normal_window_opacity);
@@ -245,29 +250,33 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         window_unobserve(window);
         window_destroy(window);
     }
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_SHEET_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
-    if (!window_id) return;
+    if (!window_id) return EVENT_SUCCESS;
 
     debug("%s: %d\n", __FUNCTION__, window_id);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DRAWER_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
-    if (!window_id) return;
+    if (!window_id) return EVENT_SUCCESS;
 
     debug("%s: %d\n", __FUNCTION__, window_id);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
 {
     uint32_t window_id = (uint32_t)(uintptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
+    if (!window) return EVENT_SUCCESS;
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     assert(!*window->id_ptr);
@@ -278,11 +287,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
         window_manager_remove_managed_window(&g_window_manager, window);
     }
 
-    if (mouse_window == window) mouse_window = NULL;
+    if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
     window_manager_remove_window(&g_window_manager, window->id);
     window_unobserve(window);
     window_destroy(window);
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
@@ -292,21 +303,21 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
 
     if (!window) {
         window_manager_add_lost_focused_event(&g_window_manager, window_id, WINDOW_FOCUSED);
-        return;
+        return EVENT_SUCCESS;
     }
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
+        return EVENT_SUCCESS;
     }
 
     if (window_is_minimized(window)) {
         window_manager_add_lost_focused_event(&g_window_manager, window->id, WINDOW_FOCUSED);
-        return;
+        return EVENT_SUCCESS;
     }
 
     if (!application_is_frontmost(window->application)) {
-        return;
+        return EVENT_SUCCESS;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -322,20 +333,22 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
 
     g_window_manager.focused_window_id = window->id;
     g_window_manager.focused_window_pid = window->application->pid;
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
+    if (!window) return EVENT_SUCCESS;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
+        return EVENT_SUCCESS;
     }
 
-    if (window->application->is_hidden) return;
+    if (window->application->is_hidden) return EVENT_SUCCESS;
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
@@ -345,20 +358,22 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 #endif
 
     border_window_refresh(window);
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
+    if (!window) return EVENT_SUCCESS;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
+        return EVENT_SUCCESS;
     }
 
-    if (window->application->is_hidden) return;
+    if (window->application->is_hidden) return EVENT_SUCCESS;
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
@@ -368,17 +383,19 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 #endif
 
     border_window_refresh(window);
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
+    if (!window) return EVENT_SUCCESS;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
+        return EVENT_SUCCESS;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -390,18 +407,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
         space_manager_untile_window(&g_space_manager, view, window);
         window_manager_remove_managed_window(&g_window_manager, window);
     }
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
+    if (!window) return EVENT_SUCCESS;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
         window_manager_remove_lost_focused_event(&g_window_manager, window_id);
-        return;
+        return EVENT_SUCCESS;
     }
 
     window->is_minimized = false;
@@ -423,20 +442,23 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
         eventloop_post(&g_eventloop, event);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
     }
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_TITLE_CHANGED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
+    if (!window) return EVENT_SUCCESS;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
+        return EVENT_SUCCESS;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
@@ -462,6 +484,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
 
     window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
@@ -489,6 +513,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
 
     window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_ADDED)
@@ -497,6 +523,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_ADDED)
     uint32_t sid = display_space_id(display_id);
     debug("%s: %d\n", __FUNCTION__, display_id);
     window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, display_id, sid);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_REMOVED)
@@ -505,6 +532,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_REMOVED)
     uint32_t sid = display_space_id(display_id);
     debug("%s: %d\n", __FUNCTION__, display_id);
     window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, display_id, sid);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_MOVED)
@@ -512,6 +540,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_MOVED)
     uint32_t display_id = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, display_id);
     space_manager_mark_spaces_invalid(&g_space_manager);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED)
@@ -519,63 +548,142 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED)
     uint32_t display_id = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, display_id);
     space_manager_mark_spaces_invalid_for_display(&g_space_manager, display_id);
+    return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_DOWN)
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
 {
+    CGEventRef event = context;
+    CGPoint point = CGEventGetLocation(event);
+    int64_t button = CGEventGetIntegerValueField(event, kCGMouseEventButtonNumber);
+    uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
+    CFRelease(event);
+
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
+    if (g_mouse_state.current_action != MOUSE_MODE_NONE) return EVENT_SUCCESS;
+
+    g_mouse_state.window = window_manager_find_window_at_point(&g_window_manager, point);
+    if (!g_mouse_state.window) g_mouse_state.window = window_manager_focused_window(&g_window_manager);
+    if (!g_mouse_state.window) return EVENT_SUCCESS;
+
+    g_mouse_state.down_location = point;
+    g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
+    border_window_topmost(g_mouse_state.window, true);
+
+    if (button == kCGMouseButtonLeft && g_mouse_state.modifier == mod) {
+        g_mouse_state.current_action = g_mouse_state.action1;
+        return EVENT_MOUSE_IGNORE;
+    } else if (button == kCGMouseButtonRight && g_mouse_state.modifier == mod) {
+        g_mouse_state.current_action = g_mouse_state.action2;
+        return EVENT_MOUSE_IGNORE;
+    }
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
+{
+    int result = EVENT_SUCCESS;
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
     CFRelease(event);
 
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
-    mouse_left_down = true;
+    if (!g_mouse_state.window) return EVENT_SUCCESS;
 
-    mouse_window = window_manager_find_window_at_point(&g_window_manager, point);
-    if (!mouse_window) mouse_window = window_manager_focused_window(&g_window_manager);
-    if (!mouse_window) return;
+    if (!__sync_bool_compare_and_swap(g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
+        g_mouse_state.window = NULL;
+        g_mouse_state.current_action = MOUSE_MODE_NONE;
+        return EVENT_SUCCESS;
+    }
 
-    mouse_window_frame = window_ax_frame(mouse_window);
-    border_window_topmost(mouse_window, true);
+    if (g_mouse_state.current_action == MOUSE_MODE_NONE) {
+        CGRect frame = window_ax_frame(g_mouse_state.window);
+        float dx = frame.origin.x - g_mouse_state.window_frame.origin.x;
+        float dy = frame.origin.y - g_mouse_state.window_frame.origin.y;
+        float dw = frame.size.width - g_mouse_state.window_frame.size.width;
+        float dh = frame.size.height - g_mouse_state.window_frame.size.height;
+
+        if ((dx != 0.0f || dy != 0.0f) && (dw != 0.0f || dh != 0.0f)) {
+            uint8_t direction = 0;
+            if (dx != 0.0f) direction |= HANDLE_LEFT;
+            if (dy != 0.0f) direction |= HANDLE_TOP;
+            window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
+        }
+
+        if (dw != 0.0f || dh != 0.0f) {
+            uint8_t direction = 0;
+            if (dw != 0.0f) direction |= HANDLE_RIGHT;
+            if (dh != 0.0f) direction |= HANDLE_BOTTOM;
+            window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dw, dh);
+        }
+
+        result = EVENT_MOUSE_IGNORE;
+    }
+
+    border_window_topmost(g_mouse_state.window, false);
+    g_mouse_state.current_action = MOUSE_MODE_NONE;
+    g_mouse_state.window = NULL;
+
+    return result;
 }
 
-static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP)
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 {
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
+    uint64_t event_time = CGEventGetTimestamp(event);
     CFRelease(event);
 
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
-    mouse_left_down = false;
-    if (!mouse_window) return;
+    if (!g_mouse_state.window) return EVENT_SUCCESS;
 
-    if (!__sync_bool_compare_and_swap(mouse_window->id_ptr, &mouse_window->id, &mouse_window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, mouse_window->id);
-        mouse_window = NULL;
-        return;
+    if (!__sync_bool_compare_and_swap(g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
+        g_mouse_state.window = NULL;
+        g_mouse_state.current_action = MOUSE_MODE_NONE;
+        return EVENT_SUCCESS;
     }
 
-    CGRect frame = window_ax_frame(mouse_window);
-    float dx = frame.origin.x - mouse_window_frame.origin.x;
-    float dy = frame.origin.y - mouse_window_frame.origin.y;
-    float dw = frame.size.width - mouse_window_frame.size.width;
-    float dh = frame.size.height - mouse_window_frame.size.height;
+    if (g_mouse_state.current_action == MOUSE_MODE_MOVE) {
+        int dx = point.x - g_mouse_state.down_location.x;
+        int dy = point.y - g_mouse_state.down_location.y;
 
-    if ((dx != 0.0f || dy != 0.0f) && (dw != 0.0f || dh != 0.0f)) {
-        uint8_t direction = 0;
-        if (dx != 0.0f) direction |= HANDLE_LEFT;
-        if (dy != 0.0f) direction |= HANDLE_TOP;
-        window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dx, dy);
+        if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= 10) {
+            float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
+            if (dt < 25.0f) return EVENT_SUCCESS;
+
+            float fx = g_mouse_state.window_frame.origin.x + dx;
+            float fy = g_mouse_state.window_frame.origin.y + dy;
+            window_manager_move_window(g_mouse_state.window, fx, fy);
+
+            g_mouse_state.last_moved_time = event_time;
+        }
+    } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
+        int dx = point.x - g_mouse_state.down_location.x;
+        int dy = point.y - g_mouse_state.down_location.y;
+
+        if (dx >= 25 || dx <= -25 || dy >= 25 || dy <= 25) {
+            float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
+            if (dt < 125.0f) return EVENT_SUCCESS;
+
+            uint8_t direction = 0;
+            CGPoint frame_mid = { CGRectGetMidX(g_mouse_state.window_frame), CGRectGetMidY(g_mouse_state.window_frame) };
+
+            if (point.x < frame_mid.x) direction |= HANDLE_LEFT;
+            if (point.y < frame_mid.y) direction |= HANDLE_TOP;
+            if (point.x > frame_mid.x) direction |= HANDLE_RIGHT;
+            if (point.y > frame_mid.y) direction |= HANDLE_BOTTOM;
+            window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
+
+            g_mouse_state.last_moved_time = event_time;
+            g_mouse_state.down_location = point;
+            g_mouse_state.window_frame = window_frame(g_mouse_state.window);
+        }
     }
 
-    if (dw != 0.0f || dh != 0.0f) {
-        uint8_t direction = 0;
-        if (dw != 0.0f) direction |= HANDLE_RIGHT;
-        if (dh != 0.0f) direction |= HANDLE_BOTTOM;
-        window_manager_resize_window_relative(&g_window_manager, mouse_window, direction, dw, dh);
-    }
-
-    border_window_topmost(mouse_window, false);
-    mouse_window = NULL;
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
@@ -585,8 +693,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     uint64_t event_time = CGEventGetTimestamp(event);
     CFRelease(event);
 
-    float delta = ((float)event_time - mouse_moved_time) * (1.0f / 1E6);
-    if (delta < 35.0f) return;
+    float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
+    if (dt < 25.0f) return EVENT_SUCCESS;
 
     if (g_window_manager.ffm_mode != FFM_DISABLED) {
         struct ax_window *window = window_manager_find_window_at_point(&g_window_manager, point);
@@ -599,13 +707,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
         }
     }
 
-    mouse_moved_time = event_time;
+    g_mouse_state.last_moved_time = event_time;
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
 {
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
@@ -622,4 +732,5 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 fderr:
     socket_close(param1);
     free(context);
+    return EVENT_SUCCESS;
 }

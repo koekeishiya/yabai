@@ -12,14 +12,30 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         struct event_tap *event_tap = (struct event_tap *) reference;
         CGEventTapEnable(event_tap->handle, 1);
     } break;
-    case kCGEventLeftMouseDown: {
+    case kCGEventLeftMouseDown:
+    case kCGEventRightMouseDown: {
+        volatile int status = EVENT_QUEUED;
+        volatile int result = EVENT_SUCCESS;
+
         struct event *event;
-        event_create(event, MOUSE_LEFT_DOWN, (void *) CFRetain(cgevent));
+        event_create(event, MOUSE_DOWN, (void *) CFRetain(cgevent));
+        event->status = &status;
+        event->result = &result;
+        eventloop_post(&g_eventloop, event);
+        while (status != EVENT_PROCESSED);
+
+        if (result == EVENT_MOUSE_IGNORE) return NULL;
+    } break;
+    case kCGEventLeftMouseUp:
+    case kCGEventRightMouseUp: {
+        struct event *event;
+        event_create(event, MOUSE_UP, (void *) CFRetain(cgevent));
         eventloop_post(&g_eventloop, event);
     } break;
-    case kCGEventLeftMouseUp: {
+    case kCGEventLeftMouseDragged:
+    case kCGEventRightMouseDragged: {
         struct event *event;
-        event_create(event, MOUSE_LEFT_UP, (void *) CFRetain(cgevent));
+        event_create(event, MOUSE_DRAGGED, (void *) CFRetain(cgevent));
         eventloop_post(&g_eventloop, event);
     } break;
     case kCGEventMouseMoved: {

@@ -1,7 +1,7 @@
 #ifndef EVENTLOOP_EVENT_H
 #define EVENTLOOP_EVENT_H
 
-#define EVENT_CALLBACK(name) void name(void *context, int param1)
+#define EVENT_CALLBACK(name) int name(void *context, int param1)
 typedef EVENT_CALLBACK(event_callback);
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED);
@@ -30,19 +30,28 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_MOVED);
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED);
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED);
 
-static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_DOWN);
-static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_LEFT_UP);
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN);
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP);
+static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED);
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED);
 
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED);
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE);
 
+#define EVENT_QUEUED    0
+#define EVENT_PROCESSED 1
+
+#define EVENT_SUCCESS      0
+#define EVENT_MOUSE_IGNORE 1
+
 struct event
 {
     event_callback *handler;
     void *context;
     int param1;
+    volatile int *status;
+    volatile int *result;
 };
 
 enum event_type
@@ -73,8 +82,9 @@ enum event_type
     DISPLAY_RESIZED,
     DISPLAY_CHANGED,
 
-    MOUSE_LEFT_DOWN,
-    MOUSE_LEFT_UP,
+    MOUSE_DOWN,
+    MOUSE_UP,
+    MOUSE_DRAGGED,
     MOUSE_MOVED,
 
     MENU_BAR_HIDDEN_CHANGED,
@@ -88,6 +98,8 @@ enum event_type
         event->context = data;\
         event->handler = &EVENT_HANDLER_##type;\
         event->param1 = 0;\
+        event->status = 0;\
+        event->result = 0;\
     } while (0)
 
 #define event_create_p1(event, type, data, p1)\
@@ -96,6 +108,8 @@ enum event_type
         event->context = data;\
         event->handler = &EVENT_HANDLER_##type;\
         event->param1 = p1;\
+        event->status = 0;\
+        event->result = 0;\
     } while (0)
 
 #endif

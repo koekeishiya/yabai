@@ -29,6 +29,7 @@
 #include "dispatch/process.h"
 #include "dispatch/workspace.h"
 
+#include "mouse.h"
 #include "message.h"
 #include "display.h"
 #include "space.h"
@@ -86,6 +87,7 @@ struct process_manager g_process_manager;
 struct display_manager g_display_manager;
 struct space_manager g_space_manager;
 struct window_manager g_window_manager;
+struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
 int g_connection;
@@ -282,6 +284,7 @@ int main(int argc, char **argv)
     workspace_event_handler_init(&g_workspace_context);
     space_manager_init(&g_space_manager);
     window_manager_init(&g_window_manager);
+    mouse_state_init(&g_mouse_state);
 
     if (!daemon_init(&g_daemon, message_handler)) {
         error("yabai: could not initialize daemon! abort..\n");
@@ -300,7 +303,7 @@ int main(int argc, char **argv)
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
-    event_tap_begin(&g_event_tap, 1 << kCGEventMouseMoved | 1 << kCGEventLeftMouseDown | 1 << kCGEventLeftMouseUp, mouse_handler);
+    event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
 
     CFRunLoopRun();
     return 0;

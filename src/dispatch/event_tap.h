@@ -4,6 +4,20 @@
 #include <stdbool.h>
 #include <Carbon/Carbon.h>
 
+#define EVENT_MASK_MOUSE (1 << kCGEventMouseMoved) | \
+                         (1 << kCGEventLeftMouseDown) | \
+                         (1 << kCGEventLeftMouseUp) | \
+                         (1 << kCGEventLeftMouseDragged) | \
+                         (1 << kCGEventRightMouseDown) | \
+                         (1 << kCGEventRightMouseUp) | \
+                         (1 << kCGEventRightMouseDragged)
+
+#define EVENT_MASK_ALT   kCGEventFlagMaskAlternate
+#define EVENT_MASK_SHIFT kCGEventFlagMaskShift
+#define EVENT_MASK_CMD   kCGEventFlagMaskCommand
+#define EVENT_MASK_CTRL  kCGEventFlagMaskControl
+#define EVENT_MASK_FN    kCGEventFlagMaskSecondaryFn
+
 struct event_tap
 {
     CFMachPortRef handle;
