@@ -20,7 +20,7 @@ You can read more about codesigning [here](https://developer.apple.com/library/a
 
 The *Mission Control* setting [*displays have separate spaces*](https://support.apple.com/library/content/dam/edam/applecare/images/en_US/osx/separate_spaces.png) must be enabled.
 
-**yabai** stores a lock file at `/tmp/yabai_$USER.lock` to keep multiple instances from launcing by the same user.
+**yabai** stores a lock file at `/tmp/yabai_$USER.lock` to keep multiple instances from launching by the same user.
 
 **yabai** stores a unix domain socket at `/tmp/yabai_$USER.socket` to listen for commands.
 
