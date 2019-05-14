@@ -405,14 +405,22 @@ void view_flush(struct view *view)
 
 void view_serialize(FILE *rsp, struct view *view)
 {
+    int windows = 0;
     int count = 0;
-    uint32_t *space_list = space_window_list(view->sid, &count);
-    if (space_list) free(space_list);
+    uint32_t *window_list = space_window_list(view->sid, &count);
+    if (window_list) {
+        for (int i = 0; i < count; ++i) {
+            if (window_manager_find_window(&g_window_manager, window_list[i])) {
+                ++windows;
+            }
+        }
+        free(window_list);
+    }
 
     fprintf(rsp, "{\n");
     fprintf(rsp, "\t\"index\":%d,\n", space_manager_mission_control_index(view->sid));
     fprintf(rsp, "\t\"monitor\":%d,\n", display_arrangement(space_display_id(view->sid)));
-    fprintf(rsp, "\t\"windows\":%d,\n", count);
+    fprintf(rsp, "\t\"windows\":%d,\n", windows);
     fprintf(rsp, "\t\"type\":\"%s\"\n", view_type_str[view->type]);
     fprintf(rsp, "}");
 }
