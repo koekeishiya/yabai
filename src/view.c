@@ -403,6 +403,20 @@ void view_flush(struct view *view)
     view->is_dirty = false;
 }
 
+void view_serialize(FILE *rsp, struct view *view)
+{
+    int count = 0;
+    uint32_t *space_list = space_window_list(view->sid, &count);
+    if (space_list) free(space_list);
+
+    fprintf(rsp, "{\n");
+    fprintf(rsp, "\t\"index\":%d,\n", space_manager_mission_control_index(view->sid));
+    fprintf(rsp, "\t\"monitor\":%d,\n", display_arrangement(space_display_id(view->sid)));
+    fprintf(rsp, "\t\"windows\":%d,\n", count);
+    fprintf(rsp, "\t\"type\":\"%s\"\n", view_type_str[view->type]);
+    fprintf(rsp, "}");
+}
+
 void view_update(struct view *view)
 {
     uint32_t did = space_display_id(view->sid);

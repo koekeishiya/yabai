@@ -897,7 +897,51 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
 static void handle_domain_query(FILE *rsp, struct token domain, char *message)
 {
     struct token command = get_token(&message);
-    if (token_equals(command, COMMAND_QUERY_SPACES)) {
+    if (token_equals(command, COMMAND_QUERY_DISPLAYS)) {
+        struct token option = get_token(&message);
+        if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+                display_manager_query_display(rsp, display_manager_arrangement_display_id(token_to_int(value)));
+                fprintf(rsp, "\n");
+            } else {
+                display_manager_query_display(rsp, display_manager_active_display_id());
+                fprintf(rsp, "\n");
+            }
+        } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+                display_manager_query_display(rsp, space_display_id(space_manager_mission_control_space(token_to_int(value))));
+                fprintf(rsp, "\n");
+            } else {
+                display_manager_query_display(rsp, space_display_id(space_manager_active_space()));
+                fprintf(rsp, "\n");
+            }
+        } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+                struct ax_window *window = window_manager_find_window(&g_window_manager, token_to_int(value));
+                if (window) {
+                    display_manager_query_display(rsp, window_display_id(window));
+                    fprintf(rsp, "\n");
+                } else {
+                    daemon_fail(rsp, "could not find window to retrieve display details\n");
+                }
+            } else {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                if (window) {
+                    display_manager_query_display(rsp, window_display_id(window));
+                    fprintf(rsp, "\n");
+                } else {
+                    daemon_fail(rsp, "could not find window to retrieve display details\n");
+                }
+            }
+        } else if (token_is_valid(option)) {
+            daemon_fail(rsp, "unknown option '%.*s' given to command '%.*s' for domain '%.*s'\n", option.length, option.text, command.length, command.text, domain.length, domain.text);
+        } else {
+            display_manager_query_displays(rsp);
+        }
+    } else if (token_equals(command, COMMAND_QUERY_SPACES)) {
         struct token option = get_token(&message);
         if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             struct token value = get_token(&message);
@@ -911,9 +955,36 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                 }
             }
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
-            if (!space_manager_query_active_space(rsp)) {
-                daemon_fail(rsp, "could not retrieve active space\n");
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+                uint64_t sid = space_manager_mission_control_space(token_to_int(value));
+                struct view *view = space_manager_find_view(&g_space_manager, sid);
+                view_serialize(rsp, view);
+                fprintf(rsp, "\n");
+            } else {
+                if (!space_manager_query_active_space(rsp)) {
+                    daemon_fail(rsp, "could not retrieve active space\n");
+                }
             }
+        } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
+            struct token value = get_token(&message);
+            if (token_is_valid(value)) {
+                struct ax_window *window = window_manager_find_window(&g_window_manager, token_to_int(value));
+                if (window) {
+                    space_manager_query_spaces_for_window(rsp, window);
+                } else {
+                    daemon_fail(rsp, "could not find window to retrieve space details\n");
+                }
+            } else {
+                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                if (window) {
+                    space_manager_query_spaces_for_window(rsp, window);
+                } else {
+                    daemon_fail(rsp, "could not find window to retrieve space details\n");
+                }
+            }
+        } else if (token_is_valid(option)) {
+            daemon_fail(rsp, "unknown option '%.*s' given to command '%.*s' for domain '%.*s'\n", option.length, option.text, command.length, command.text, domain.length, domain.text);
         } else {
             if (!space_manager_query_spaces_for_displays(rsp)) {
                 daemon_fail(rsp, "could not retrieve spaces for displays\n");
@@ -949,6 +1020,8 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not retrieve window details\n");
             }
+        } else if (token_is_valid(option)) {
+            daemon_fail(rsp, "unknown option '%.*s' given to command '%.*s' for domain '%.*s'\n", option.length, option.text, command.length, command.text, domain.length, domain.text);
         } else {
             window_manager_query_windows_for_displays(rsp);
         }

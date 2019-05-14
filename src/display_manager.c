@@ -3,6 +3,35 @@
 extern struct window_manager g_window_manager;
 extern int g_connection;
 
+void display_manager_query_display(FILE *rsp, uint32_t did)
+{
+    int count = 0;
+    uint64_t *space_list = display_space_list(did, &count);
+    if (space_list) free(space_list);
+
+    fprintf(rsp, "{\n");
+    fprintf(rsp, "\t\"index\":%d,\n", display_arrangement(did));
+    fprintf(rsp, "\t\"spaces\":%d\n", count);
+    fprintf(rsp, "}");
+}
+
+bool display_manager_query_displays(FILE *rsp)
+{
+    uint32_t count = 0;
+    uint32_t *display_list = display_manager_active_display_list(&count);
+    if (!display_list) return false;
+
+    fprintf(rsp, "[");
+    for (int i = 0; i < count; ++i) {
+        display_manager_query_display(rsp, display_list[i]);
+        fprintf(rsp, "%c", i < count - 1 ? ',' : ']');
+    }
+    fprintf(rsp, "\n");
+
+    free(display_list);
+    return true;
+}
+
 CFStringRef display_manager_main_display_uuid(void)
 {
     uint32_t display_id = display_manager_main_display_id();

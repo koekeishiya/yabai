@@ -62,10 +62,27 @@ CGRect space_manager_dock_rect(void)
 
 bool space_manager_query_active_space(FILE *rsp)
 {
-    int mci = space_manager_mission_control_index(space_manager_active_space());
-    if (!mci) return false;
+    struct view *view = space_manager_find_view(&g_space_manager, space_manager_active_space());
+    view_serialize(rsp, view);
+    fprintf(rsp, "\n");
+    return true;
+}
 
-    fprintf(rsp, "%d\n", mci);
+bool space_manager_query_spaces_for_window(FILE *rsp, struct ax_window *window)
+{
+    int space_count;
+    uint64_t *space_list = window_space_list(window, &space_count);
+    if (!space_list) return false;
+
+    fprintf(rsp, "[");
+    for (int i = 0; i < space_count; ++i) {
+        struct view *view = space_manager_find_view(&g_space_manager, space_list[i]);
+        view_serialize(rsp, view);
+        fprintf(rsp, "%c", i < space_count - 1 ? ',' : ']');
+    }
+    fprintf(rsp, "\n");
+
+    free(space_list);
     return true;
 }
 
@@ -75,10 +92,13 @@ bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
     uint64_t *space_list = display_space_list(did, &space_count);
     if (!space_list) return false;
 
+    fprintf(rsp, "[");
     for (int i = 0; i < space_count; ++i) {
-        fprintf(rsp, "%d", space_manager_mission_control_index(space_list[i]));
-        fprintf(rsp, "%c", i < space_count - 1 ? ' ' : '\n');
+        struct view *view = space_manager_find_view(&g_space_manager, space_list[i]);
+        view_serialize(rsp, view);
+        fprintf(rsp, "%c", i < space_count - 1 ? ',' : ']');
     }
+    fprintf(rsp, "\n");
 
     free(space_list);
     return true;
@@ -90,19 +110,22 @@ bool space_manager_query_spaces_for_displays(FILE *rsp)
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return false;
 
+    fprintf(rsp, "[");
     for (int i = 0; i < display_count; ++i) {
         int space_count;
         uint64_t *space_list = display_space_list(display_list[i], &space_count);
         if (!space_list) continue;
 
         for (int j = 0; j < space_count; ++j) {
-            fprintf(rsp, "%d", space_manager_mission_control_index(space_list[j]));
-            if (j < space_count - 1) fprintf(rsp, " ");
+            struct view *view = space_manager_find_view(&g_space_manager, space_list[j]);
+            view_serialize(rsp, view);
+            if (j < space_count - 1) fprintf(rsp, ",");
         }
 
         free(space_list);
-        fprintf(rsp, "%c", i < display_count - 1 ? ' ' : '\n');
+        fprintf(rsp, "%c", i < display_count - 1 ? ',' : ']');
     }
+    fprintf(rsp, "\n");
 
     free(display_list);
     return true;

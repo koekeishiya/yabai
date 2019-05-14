@@ -84,6 +84,7 @@ void view_remove_window_node(struct view *view, struct ax_window *window);
 void view_add_window_node(struct view *view, struct ax_window *window);
 uint32_t *view_find_window_list(struct view *view);
 
+void view_serialize(FILE *rsp, struct view *view);
 bool view_is_invalid(struct view *view);
 bool view_is_dirty(struct view *view);
 void view_flush(struct view *view);
