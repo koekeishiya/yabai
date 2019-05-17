@@ -3,7 +3,7 @@
 pkill Übersicht
 sleep 1
 
-yabai -m config mouse_follows_focus          on
+yabai -m config mouse_follows_focus          off
 yabai -m config focus_follows_mouse          off
 yabai -m config window_shadow                float
 yabai -m config window_border                on
