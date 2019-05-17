@@ -1,0 +1,349 @@
+'\" t
+.\"     Title: yabai
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.6
+.\"      Date: 2019-05-18
+.\"    Manual: Yabai Manual
+.\"    Source: Yabai
+.\"  Language: English
+.\"
+.TH "YABAI" "1" "2019-05-18" "Yabai" "Yabai Manual"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+.sp
+yabai
+.SH "SYNOPSIS"
+.sp
+\fByabai\fP [\fB\-v\fP,\fB\-\-version\fP|\fB\-V\fP,\fB\-\-verbose\fP|\fB\-m\fP,\fB\-\-message\fP \fImsg\fP|\fB\-c\fP,\fB\-\-config\fP \fIconfig_file\fP|\fB\-\-install\-sa\fP|\fB\-\-uninstall\-sa\fP|\fB\-\-load\-sa\fP]
+.SH "DESCRIPTION"
+.sp
+\fByabai\fP is a tiling window manager for macOS based on binary space partitioning.
+.SH "OPTIONS"
+.sp
+\fB\-v\fP, \fB\-\-version\fP
+.RS 4
+Print the version and exit.
+.RE
+.sp
+\fB\-V\fP, \fB\-\-verbose\fP
+.RS 4
+Output debug information to stdout.
+.RE
+.sp
+\fB\-m\fP, \fB\-\-message\fP \fI<msg>\fP
+.RS 4
+Send message to a running instance of yabai.
+.RE
+.sp
+\fB\-c\fP, \fB\-\-config\fP \fI<config_file>\fP
+.RS 4
+Use the specified configuration file.
+.RE
+.sp
+\fB\-\-install\-sa\fP
+.RS 4
+Install the scripting\-addition into /System/Library/ScriptingAdditions. Must be ran as root.
+.RE
+.sp
+\fB\-\-uninstall\-sa\fP
+.RS 4
+Remove the scripting\-addition from /System/Library/ScriptingAdditions. Must be ran as root.
+.RE
+.sp
+\fB\-\-load\-sa\fP
+.RS 4
+Loads the scripting\-addition into Dock.app.
+.RE
+.SH "DEFINITIONS"
+.sp
+.if n .RS 4
+.nf
+DIR_SEL     := north | east | south | west
+
+DISPLAY_SEL := prev | next | last | arrangement index (1\-based)
+
+SPACE_SEL   := prev | next | last | mission\-control index (1\-based)
+.fi
+.if n .RE
+.SH "DOMAINS"
+.SS "Config"
+.SS "General Syntax"
+.sp
+yabai \-m config [\-\-space \fI<mission\-control index>\fP] <setting> [<value>]
+.RS 4
+Get or set the value of <setting>.
+.RE
+.SS "Global Settings"
+.sp
+Colors are in the form \fI#AARRGGBB\fP, booleans are \fIon\fP or \fIoff\fP.
+.sp
+\fImouse_follows_focus\fP
+.RS 4
+When focusing a window, put the mouse at its center.
+.RE
+.sp
+\fIfocus_follows_mouse\fP
+.RS 4
+Focus the window under the mouse. Accept the following values: \fBautofocus\fP, \fBautoraise\fP, \fBoff\fP.
+.RE
+.sp
+\fIwindow_shadow\fP
+.RS 4
+Draw shadow for windows. Accept the following values: \fBon\fP, \fBfloat\fP, \fBoff\fP.
+.RE
+.sp
+\fIwindow_border\fP
+.RS 4
+Draw border for windows.
+.RE
+.sp
+\fIwindow_border_width\fP
+.RS 4
+Width of window borders.
+.RE
+.sp
+\fIactive_window_border_color\fP
+.RS 4
+Color of the border of the focused window.
+.RE
+.sp
+\fInormal_window_border_color\fP
+.RS 4
+Color of the border of an unfocused window.
+.RE
+.sp
+\fIinsert_window_border_color\fP
+.RS 4
+Color of the \fBwindow \-\-insert\fP message selection.
+.RE
+.sp
+\fIactive_window_opacity\fP
+.RS 4
+Opacity of the focused window.
+.RE
+.sp
+\fInormal_window_opacity\fP
+.RS 4
+Opacity of an unfocused window.
+.RE
+.sp
+\fIsplit_ratio\fP
+.RS 4
+Default split ratio.
+.RE
+.sp
+\fIauto_balance\fP
+.RS 4
+Balance the window tree upon change, so that all windows occupy the same area.
+.RE
+.sp
+\fImouse_modifier\fP
+.RS 4
+Keyboard modifier used for moving and resizing windows. Accept the following values: \fBcmd\fP, \fBalt\fP, \fBshift\fP, \fBctrl\fP, \fBfn\fP.
+.RE
+.sp
+\fImouse_action1\fP, \fImouse_action2\fP
+.RS 4
+Action performed when pressing \fImouse_modifier\fP + \fIbutton<n>\fP. Accept the following values: \fBmove\fP, \fBresize\fP.
+.RE
+.SS "Space Settings"
+.sp
+\fIlayout\fP
+.RS 4
+Set the layout of the selected space. Accept the following values: \fBbsp\fP, \fBfloat\fP.
+.RE
+.sp
+\fItop_padding\fP, \fIbottom_padding\fP, \fIleft_padding\fP, \fIright_padding\fP
+.RS 4
+Padding added at the sides of the selected space.
+.RE
+.sp
+\fIwindow_gap\fP
+.RS 4
+Size of the gap that separates windows for the selected space.
+.RE
+.SS "Display"
+.SS "General Syntax"
+.sp
+yabai \-m display \fICOMMAND\fP
+.SS "COMMAND"
+.sp
+\fB\-\-focus\fP \fIDISPLAY_SEL\fP
+.RS 4
+Focus the given display.
+.RE
+.SS "Space"
+.SS "General Syntax"
+.sp
+yabai \-m space \fICOMMAND\fP
+.SS "COMMAND"
+.sp
+\fB\-\-focus\fP \fISPACE_SEL\fP
+.RS 4
+Focus the given display.
+.RE
+.sp
+\fB\-\-move\fP \fIDISPLAY_SEL\fP
+.RS 4
+Move the active space to the given display.
+.RE
+.sp
+\fB\-\-create\fP
+.RS 4
+Create a new space on the active display.
+.RE
+.sp
+\fB\-\-destroy\fP
+.RS 4
+Remove the currently active space.
+.RE
+.sp
+\fB\-\-balance\fP
+.RS 4
+Adjust the split ratios of the active space so that all windows occupy the same area.
+.RE
+.sp
+\fB\-\-mirror\fP \fIx\-axis|y\-axis\fP
+.RS 4
+Flip the tree of the active space.
+.RE
+.sp
+\fB\-\-rotate\fP \fI90|180|270\fP
+.RS 4
+Rotate the tree of the active space.
+.RE
+.sp
+\fB\-\-padding\fP \fI<top>:<bottom>:<left>:<right>\fP
+.RS 4
+Padding added at the sides of the space.
+.RE
+.sp
+\fB\-\-gap\fP \fI<gap>\fP
+.RS 4
+Size of the gap that separates windows.
+.RE
+.sp
+\fB\-\-toggle\fP \fIpadding|gap\fP
+.RS 4
+Toggle space setting on or off.
+.RE
+.sp
+\fB\-\-layout\fP \fIbsp|float\fP
+.RS 4
+Set the layout of the space.
+.RE
+.SS "Window"
+.SS "General Syntax"
+.sp
+yabai \-m window \fICOMMAND\fP
+.SS "COMMAND"
+.sp
+\fB\-\-focus\fP \fIDIR_SEL\fP
+.RS 4
+Focus the window in the given direction.
+.RE
+.sp
+\fB\-\-swap\fP \fIDIR_SEL\fP
+.RS 4
+Swap position with the window in the given direction.
+.RE
+.sp
+\fB\-\-warp\fP \fIDIR_SEL\fP
+.RS 4
+Re\-insert, splitting the window in the given direction.
+.RE
+.sp
+\fB\-\-insert\fP \fIDIR_SEL\fP
+.RS 4
+Select the splitting area of the focused window. If the current selection matches \fIDIR_SEL\fP, the action will be undone.
+.RE
+.sp
+\fB\-\-grid\fP \fI<rows>:<cols>:<start\-x>:<start\-y>:<width>:<height>\fP
+.RS 4
+Set the window frame based on a self\-defined grid.
+.RE
+.sp
+\fB\-\-move\fP \fI<dx>:<dy>\fP
+.RS 4
+Move window by \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically.
+.RE
+.sp
+\fB\-\-resize\fP \fItop|left|bottom|right|top_left|top_right|bottom_right|bottom_left:<dx>:<dy>\fP
+.RS 4
+Resize window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically.
+.RE
+.sp
+\fB\-\-toggle\fP \fIfloat|sticky|split|border|fullscreen|native\-fullscreen\fP
+.RS 4
+Toggle the selected property of a window.
+.RE
+.sp
+\fB\-\-display\fP \fIDISPLAY_SEL\fP
+.RS 4
+Send the window to the given display.
+.RE
+.sp
+\fB\-\-space\fP \fISPACE_SEL\fP
+.RS 4
+Send the window to the given space.
+.RE
+.SS "Query"
+.SS "General Syntax"
+.sp
+yabai \-m query \fICOMMAND\fP [\fIARGUMENT\fP]
+.SS "COMMAND"
+.sp
+\fB\-\-displays\fP
+.RS 4
+Retrieve information about displays.
+.RE
+.sp
+\fB\-\-spaces\fP
+.RS 4
+Retrieve information about spaces.
+.RE
+.sp
+\fB\-\-windows\fP
+.RS 4
+Retrieve information about windows.
+.RE
+.SS "ARGUMENT"
+.sp
+\fB\-\-display\fP [\fI<arrangement index\fP]
+.RS 4
+Constrain matches to the selected display.
+.RE
+.sp
+\fB\-\-space\fP [\fI<mission\-control index>\fP]
+.RS 4
+Constrain matches to the selected space.
+.RE
+.sp
+\fB\-\-window\fP
+.RS 4
+Constrain matches to the focused window.
+.RE
+.SH "EXIT CODES"
+.sp
+If \fByabai\fP can\(cqt handle a message, it will return a non\-zero exit code.
+.SH "AUTHOR"
+.sp
+Åsmund Vikane <aasvi93 at gmail.com>
