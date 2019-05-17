@@ -1,3 +1,9 @@
+# open terminal
+cmd - return : /Applications/Kitty.app/Contents/MacOS/kitty --single-instance -d ~
+
+# open mpv with url from clipboard
+cmd - m : open -na /Applications/mpv.app $(pbpaste)
+
 # focus window
 alt - h : yabai -m window --focus west
 alt - j : yabai -m window --focus south
