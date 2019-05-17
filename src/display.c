@@ -119,7 +119,7 @@ int display_arrangement(uint32_t display_id)
     int displays_count = CFArrayGetCount(displays);
     for (int i = 0; i < displays_count; ++i) {
         if (CFEqual(CFArrayGetValueAtIndex(displays, i), uuid)) {
-            result = i;
+            result = i + 1;
             break;
         }
     }

@@ -9,10 +9,17 @@ void display_manager_query_display(FILE *rsp, uint32_t did)
     uint64_t *space_list = display_space_list(did, &count);
     if (space_list) free(space_list);
 
-    fprintf(rsp, "{\n");
-    fprintf(rsp, "\t\"index\":%d,\n", display_arrangement(did));
-    fprintf(rsp, "\t\"spaces\":%d\n", count);
-    fprintf(rsp, "}");
+    CGRect frame = display_bounds(did);
+
+    fprintf(rsp,
+            "{\n"
+            "\t\"index\":%d,\n"
+            "\t\"spaces\":%d\n"
+            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}\n"
+            "}",
+            display_arrangement(did), count,
+            frame.origin.x, frame.origin.y,
+            frame.size.width, frame.size.height);
 }
 
 bool display_manager_query_displays(FILE *rsp)
@@ -66,7 +73,7 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 
     int displays_count = CFArrayGetCount(displays);
     for (int i = 0; i < displays_count; ++i) {
-        if (i != arrangement) continue;
+        if ((i+1) != arrangement) continue;
         result = CFRetain(CFArrayGetValueAtIndex(displays, i));
         break;
     }
@@ -82,7 +89,7 @@ uint32_t display_manager_arrangement_display_id(int arrangement)
 
     int displays_count = CFArrayGetCount(displays);
     for (int i = 0; i < displays_count; ++i) {
-        if (i != arrangement) continue;
+        if ((i+1) != arrangement) continue;
         CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, CFArrayGetValueAtIndex(displays, i));
         result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
         CFRelease(uuid_ref);
@@ -96,7 +103,7 @@ uint32_t display_manager_arrangement_display_id(int arrangement)
 uint32_t display_manager_prev_display_id(uint32_t did)
 {
     int arrangement = display_arrangement(did);
-    if (!arrangement) return 0;
+    if (arrangement <= 1) return 0;
 
     return display_manager_arrangement_display_id(arrangement - 1);
 }
@@ -104,7 +111,7 @@ uint32_t display_manager_prev_display_id(uint32_t did)
 uint32_t display_manager_next_display_id(uint32_t did)
 {
     int arrangement = display_arrangement(did);
-    if (arrangement >= display_manager_active_display_count() - 1) return 0;
+    if (arrangement >= display_manager_active_display_count()) return 0;
 
     return display_manager_arrangement_display_id(arrangement + 1);
 }
