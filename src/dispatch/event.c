@@ -5,6 +5,7 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
+extern bool g_mission_control_active;
 extern int g_connection;
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
@@ -693,6 +694,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     uint64_t event_time = CGEventGetTimestamp(event);
     CFRelease(event);
 
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
     float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
     if (dt < 25.0f) return EVENT_SUCCESS;
 
@@ -715,6 +717,92 @@ static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
 {
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
+{
+    g_mission_control_active = true;
+
+    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+        struct bucket *bucket = g_window_manager.window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct ax_window *window = bucket->value;
+                border_window_hide(window);
+            }
+
+            bucket = bucket->next;
+        }
+    }
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        struct event *event;
+        event_create(event, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
+        eventloop_post(&g_eventloop, event);
+    });
+
+    return EVENT_SUCCESS;
+}
+
+static CFStringRef CFSTR_DOCK = CFSTR("Dock");
+static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
+{
+    if (!g_mission_control_active) return EVENT_SUCCESS;
+
+    CFArrayRef window_list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, 0);
+    int window_count = CFArrayGetCount(window_list);
+    bool found = false;
+
+    for (int i = 0; i < window_count; ++i) {
+        CFDictionaryRef dictionary = CFArrayGetValueAtIndex(window_list, i);
+
+        CFStringRef owner = CFDictionaryGetValue(dictionary, kCGWindowOwnerName);
+        if (!owner) continue;
+
+        CFStringRef name = CFDictionaryGetValue(dictionary, kCGWindowName);
+        if (!name) continue;
+
+        if (CFEqual(CFSTR_DOCK, owner) && CFEqual(CFSTR_DOCK, name)) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            struct event *event;
+            event_create(event, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
+            eventloop_post(&g_eventloop, event);
+        });
+    } else {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            struct event *event;
+            event_create(event, MISSION_CONTROL_EXIT, NULL);
+            eventloop_post(&g_eventloop, event);
+        });
+    }
+
+    CFRelease(window_list);
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
+{
+    g_mission_control_active = false;
+
+    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+        struct bucket *bucket = g_window_manager.window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct ax_window *window = bucket->value;
+                border_window_show(window);
+            }
+
+            bucket = bucket->next;
+        }
+    }
+
     return EVENT_SUCCESS;
 }
 

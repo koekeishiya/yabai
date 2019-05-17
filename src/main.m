@@ -92,6 +92,7 @@ struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
+bool g_mission_control_active;
 int g_connection;
 char *g_config;
 bool g_verbose;
@@ -266,6 +267,16 @@ void init_misc_settings(void)
 }
 #pragma clang diagnostic pop
 
+typedef void (*CGConnectionNotifyProc)(uint32_t type, void *data, size_t data_length, void *context, int cid);
+extern CGError CGSRegisterConnectionNotifyProc(int cid, CGConnectionNotifyProc function, uint32_t event, void *context);
+
+void connection_notification_handler(uint32_t type, void *data, size_t data_length, void *context, int cid)
+{
+    struct event *event;
+    event_create(event, MISSION_CONTROL_ENTER, NULL);
+    eventloop_post(&g_eventloop, event);
+}
+
 int main(int argc, char **argv)
 {
     if (argc > 1) {
@@ -300,13 +311,10 @@ int main(int argc, char **argv)
         error("yabai: could not initialize daemon! abort..\n");
     }
 
-    if (scripting_addition_is_installed()) {
-        scripting_addition_load();
-    }
-
     eventloop_begin(&g_eventloop);
     exec_config_file(g_config);
 
+    CGSRegisterConnectionNotifyProc(g_connection, connection_notification_handler, 1204, NULL);
     display_manager_begin(&g_display_manager);
     space_manager_begin(&g_space_manager);
     window_manager_begin(&g_window_manager);
@@ -314,6 +322,10 @@ int main(int argc, char **argv)
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+
+    if (scripting_addition_is_installed()) {
+        scripting_addition_load();
+    }
 
     CFRunLoopRun();
     return 0;

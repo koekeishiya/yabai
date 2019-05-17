@@ -71,6 +71,7 @@ eventloop_run(void *context)
 
 void eventloop_post(struct eventloop *eventloop, struct event *event)
 {
+    if (!eventloop->is_running) return;
     queue_push(&eventloop->queue, event);
     sem_post(eventloop->semaphore);
 }
