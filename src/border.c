@@ -14,12 +14,12 @@ rgba_color_from_hex(uint32_t color)
     return result;
 }
 
-static int border_detect_window_level(struct ax_window *window)
+static int border_detect_window_level(struct ax_window *window, bool topmost)
 {
     int window_level = 0;
     SLSGetWindowLevel(g_connection, window->id, &window_level);
 
-    int key = window_level == 0 ? 4 : 5;
+    int key = window_level == 0 ? topmost ? 5 : 4 : 14;
     return CGWindowLevelForKey(key);
 }
 
@@ -186,7 +186,7 @@ void border_window_activate(struct ax_window *window)
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.active_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
-    SLSSetWindowLevel(g_connection, window->border.id, CGWindowLevelForKey(5));
+    SLSSetWindowLevel(g_connection, window->border.id, border_detect_window_level(window, true));
 
     if (window_is_fullscreen(window)) {
         border_window_hide(window);
@@ -203,7 +203,7 @@ void border_window_deactivate(struct ax_window *window)
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
-    SLSSetWindowLevel(g_connection, window->border.id, CGWindowLevelForKey(4));
+    SLSSetWindowLevel(g_connection, window->border.id, border_detect_window_level(window, false));
 
     if (window_is_fullscreen(window)) {
         border_window_hide(window);
@@ -251,7 +251,7 @@ void border_window_create(struct ax_window *window)
     SLSSetWindowTags(g_connection, border->id, tags, 32);
     SLSSetWindowOpacity(g_connection, border->id, 0);
     SLSSetMouseEventEnableFlags(g_connection, border->id, false);
-    SLSSetWindowLevel(g_connection, border->id, border_detect_window_level(window));
+    SLSSetWindowLevel(g_connection, border->id, border_detect_window_level(window, false));
     border->context = SLWindowContextCreate(g_connection, border->id, 0);
     CGContextSetAllowsAntialiasing(border->context, true);
     CGContextSetShouldAntialias(border->context, true);
