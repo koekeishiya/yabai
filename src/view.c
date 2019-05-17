@@ -417,12 +417,17 @@ void view_serialize(FILE *rsp, struct view *view)
         free(window_list);
     }
 
-    fprintf(rsp, "{\n");
-    fprintf(rsp, "\t\"index\":%d,\n", space_manager_mission_control_index(view->sid));
-    fprintf(rsp, "\t\"monitor\":%d,\n", display_arrangement(space_display_id(view->sid)));
-    fprintf(rsp, "\t\"windows\":%d,\n", windows);
-    fprintf(rsp, "\t\"type\":\"%s\"\n", view_type_str[view->type]);
-    fprintf(rsp, "}");
+    fprintf(rsp,
+            "{\n"
+            "\t\"index\":%d,\n"
+            "\t\"monitor\":%d,\n"
+            "\t\"windows\":%d,\n"
+            "\t\"type\":\"%s\"\n"
+            "}",
+            space_manager_mission_control_index(view->sid),
+            display_arrangement(space_display_id(view->sid)),
+            windows,
+            view_type_str[view->type]);
 }
 
 void view_update(struct view *view)
