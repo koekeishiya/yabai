@@ -902,8 +902,14 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
-                display_manager_query_display(rsp, display_manager_arrangement_display_id(token_to_int(value)));
-                fprintf(rsp, "\n");
+                int arrangement_index = token_to_int(value);
+                uint32_t did = display_manager_arrangement_display_id(arrangement_index);
+                if (did) {
+                    display_manager_query_display(rsp, did);
+                    fprintf(rsp, "\n");
+                } else {
+                    daemon_fail(rsp, "could not locate display with arrangement index '%d'.\n", arrangement_index);
+                }
             } else {
                 display_manager_query_display(rsp, display_manager_active_display_id());
                 fprintf(rsp, "\n");
@@ -911,8 +917,14 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
-                display_manager_query_display(rsp, space_display_id(space_manager_mission_control_space(token_to_int(value))));
-                fprintf(rsp, "\n");
+                int mci = token_to_int(value);
+                uint64_t sid = space_manager_mission_control_space(mci);
+                if (sid) {
+                    display_manager_query_display(rsp, space_display_id(sid));
+                    fprintf(rsp, "\n");
+                } else {
+                    daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
+                }
             } else {
                 display_manager_query_display(rsp, space_display_id(space_manager_active_space()));
                 fprintf(rsp, "\n");
@@ -946,8 +958,14 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
-                if (!space_manager_query_spaces_for_display(rsp, display_manager_arrangement_display_id(token_to_int(value)))) {
-                    daemon_fail(rsp, "could not retrieve spaces for display\n");
+                int arrangement_index = token_to_int(value);
+                uint32_t did = display_manager_arrangement_display_id(arrangement_index);
+                if (did) {
+                    if (!space_manager_query_spaces_for_display(rsp, did)) {
+                        daemon_fail(rsp, "could not retrieve spaces for display\n");
+                    }
+                } else {
+                    daemon_fail(rsp, "could not locate display with arrangement index '%d'.\n", arrangement_index);
                 }
             } else {
                 if (!space_manager_query_spaces_for_display(rsp, display_manager_active_display_id())) {
@@ -957,10 +975,15 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
-                uint64_t sid = space_manager_mission_control_space(token_to_int(value));
-                struct view *view = space_manager_find_view(&g_space_manager, sid);
-                view_serialize(rsp, view);
-                fprintf(rsp, "\n");
+                int mci = token_to_int(value);
+                uint64_t sid = space_manager_mission_control_space(mci);
+                if (sid) {
+                    struct view *view = space_manager_find_view(&g_space_manager, sid);
+                    view_serialize(rsp, view);
+                    fprintf(rsp, "\n");
+                } else {
+                    daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
+                }
             } else {
                 if (!space_manager_query_active_space(rsp)) {
                     daemon_fail(rsp, "could not retrieve active space\n");
@@ -995,7 +1018,13 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
-                window_manager_query_windows_for_display(rsp, display_manager_arrangement_display_id(token_to_int(value)));
+                int arrangement_index = token_to_int(value);
+                uint32_t did = display_manager_arrangement_display_id(arrangement_index);
+                if (did) {
+                    window_manager_query_windows_for_display(rsp, did);
+                } else {
+                    daemon_fail(rsp, "could not locate display with arrangement index '%d'.\n", arrangement_index);
+                }
             } else {
                 window_manager_query_windows_for_display(rsp, display_manager_active_display_id());
             }
