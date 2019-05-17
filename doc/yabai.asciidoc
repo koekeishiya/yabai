@@ -1,3 +1,7 @@
+:man source:   Yabai
+:man version:  {revnumber}
+:man manual:   Yabai Manual
+
 yabai(1)
 ========
 
@@ -56,7 +60,7 @@ Domains
 Config
 ~~~~~~
 
-General Syntax
+General Syntax
 ^^^^^^^^^^^^^^
 
 yabai -m config [--space '<mission-control index>'] <setting> [<value>]::
@@ -128,7 +132,7 @@ Space Settings
 Display
 ~~~~~~~
 
-General Syntax
+General Syntax
 ^^^^^^^^^^^^^^
 
 yabai -m display 'COMMAND'
@@ -142,7 +146,7 @@ COMMAND
 Space
 ~~~~~
 
-General Syntax
+General Syntax
 ^^^^^^^^^^^^^^
 
 yabai -m space 'COMMAND'
@@ -186,7 +190,7 @@ COMMAND
 Window
 ~~~~~~
 
-General Syntax
+General Syntax
 ^^^^^^^^^^^^^^
 
 yabai -m window 'COMMAND'
@@ -227,7 +231,7 @@ COMMAND
 Query
 ~~~~~~
 
-General Syntax
+General Syntax
 ^^^^^^^^^^^^^^
 
 yabai -m query 'COMMAND' ['ARGUMENT']
