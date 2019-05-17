@@ -647,18 +647,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
     }
 
     if (g_mouse_state.current_action == MOUSE_MODE_MOVE) {
-        int dx = point.x - g_mouse_state.down_location.x;
-        int dy = point.y - g_mouse_state.down_location.y;
+        if (!window_manager_find_managed_window(&g_window_manager, g_mouse_state.window)) {
+            int dx = point.x - g_mouse_state.down_location.x;
+            int dy = point.y - g_mouse_state.down_location.y;
 
-        if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= 10) {
-            float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-            if (dt < 25.0f) return EVENT_SUCCESS;
+            if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= 10) {
+                float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
+                if (dt < 25.0f) return EVENT_SUCCESS;
 
-            float fx = g_mouse_state.window_frame.origin.x + dx;
-            float fy = g_mouse_state.window_frame.origin.y + dy;
-            window_manager_move_window(g_mouse_state.window, fx, fy);
+                float fx = g_mouse_state.window_frame.origin.x + dx;
+                float fy = g_mouse_state.window_frame.origin.y + dy;
+                window_manager_move_window(g_mouse_state.window, fx, fy);
 
-            g_mouse_state.last_moved_time = event_time;
+                g_mouse_state.last_moved_time = event_time;
+            }
         }
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         int dx = point.x - g_mouse_state.down_location.x;
