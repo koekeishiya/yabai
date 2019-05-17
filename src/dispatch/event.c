@@ -568,7 +568,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
 
     g_mouse_state.down_location = point;
     g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
-    border_window_topmost(g_mouse_state.window, true);
 
     if (button == kCGMouseButtonLeft && g_mouse_state.modifier == mod) {
         g_mouse_state.current_action = g_mouse_state.action1;
@@ -622,7 +621,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         result = EVENT_MOUSE_IGNORE;
     }
 
-    border_window_topmost(g_mouse_state.window, false);
     g_mouse_state.current_action = MOUSE_MODE_NONE;
     g_mouse_state.window = NULL;
 
