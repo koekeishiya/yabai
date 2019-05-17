@@ -54,6 +54,11 @@ void workspace_event_handler_end(void *context)
                 name:NSWorkspaceDidUnhideApplicationNotification
                 object:nil];
 
+       [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self
+                selector:@selector(didWake:)
+                name:NSWorkspaceDidWakeNotification
+                object:nil];
+
        [[NSDistributedNotificationCenter defaultCenter] addObserver:self
                 selector:@selector(didChangeMenuBarHiding:)
                 name:@"AppleInterfaceMenuBarHidingChangedNotification"
@@ -124,6 +129,13 @@ void workspace_event_handler_end(void *context)
 
     struct event *event;
     event_create(event, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
+    eventloop_post(&g_eventloop, event);
+}
+
+- (void)didWake:(NSNotification *)notification
+{
+    struct event *event;
+    event_create(event, SYSTEM_WOKE, NULL);
     eventloop_post(&g_eventloop, event);
 }
 

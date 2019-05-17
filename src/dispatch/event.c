@@ -806,6 +806,18 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
     return EVENT_SUCCESS;
 }
 
+static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
+{
+    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
+    if (focused_window) {
+        border_window_activate(focused_window);
+        window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
+        window_manager_center_mouse(&g_window_manager, focused_window);
+    }
+
+    return EVENT_SUCCESS;
+}
+
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
     FILE *rsp = fdopen(param1, "w");
