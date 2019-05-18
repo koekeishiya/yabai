@@ -15,7 +15,7 @@ must be installed for **yabai** to function properly. The *scripting-addition* i
 The *WindowServer* is a single point of contact for all applications. It is central to the implementation of the GUI frameworks and many other services.
 
 **yabai** must be given permission to utilize the *Accessibility API*, and will request access upon launch. The application must be restarted after access has been granted.
-It is recommended to first [*codesign*](https://github.com/koekeishiya/yabai/blob/master/CODESIGN.md) the binary such that access can persist through builds/updates.
+If you are building from source or using the *brew --HEAD option*, it is recommended to first [*codesign*](https://github.com/koekeishiya/yabai/blob/master/CODESIGN.md) the binary such that access can persist through builds/updates.
 You can read more about codesigning [here](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW2).
 
 The *Mission Control* setting [*displays have separate spaces*](https://support.apple.com/library/content/dam/edam/applecare/images/en_US/osx/separate_spaces.png) must be enabled.
@@ -30,15 +30,22 @@ no recommendation as to whether you should or should not disable SIP.
 
 ### Install
 
+Requires xcode-10 command-line tools.
+
 **Homebrew**:
 
 ```
-TODO
+# clone tap
+brew tap koekeishiya/formulae
+
+# install latest stable version
+brew install yabai
+
+# install from git master branch
+brew install --HEAD yabai
 ```
 
 **Source**:
-
-Requires xcode-8 command-line tools.
 
 ```
 # clone repo and build binary
@@ -48,6 +55,9 @@ make              # debug version
 
 # symlink binary to a location in $PATH
 ln -s $PWD/bin/yabai /usr/local/bin/yabai
+
+# symlink manpage
+ln -s $PWD/doc/yabai.1 /usr/local/share/man/man1/yabai.1
 ```
 
 **Install scripting-addition**:
@@ -67,6 +77,7 @@ sudo yabai --uninstall-sa
 ```
 
 **Remove config and tmp files**:
+
 ```
 rm ~/.yabairc
 rm /tmp/yabai_$USER.lock
@@ -76,14 +87,22 @@ rm /tmp/yabai_$USER.socket
 **Homebrew**:
 
 ```
-TODO
+# if you were using brew services to manage yabai
+brew services stop yabai
+rm -rf /usr/local/var/log/yabai
+
+# uninstall binary, manpage and plist
+brew uninstall yabai
 ```
 
 **Source**:
 
 ```
-# remove symlink from location in $PATH
+# remove binary symlink
 rm /usr/local/bin/yabai
+
+# remove manpage symlink
+rm /usr/local/share/man/man1/yabai.1
 
 remove the cloned git-repository..
 ```
