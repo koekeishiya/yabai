@@ -155,7 +155,7 @@ COMMAND
 ^^^^^^^
 
 *--focus* 'SPACE_SEL'::
-    Focus the given display.
+    Focus the given space.
 
 *--move* 'DISPLAY_SEL'::
     Move the active space to the given display.
