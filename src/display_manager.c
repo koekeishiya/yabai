@@ -14,7 +14,7 @@ void display_manager_query_display(FILE *rsp, uint32_t did)
     fprintf(rsp,
             "{\n"
             "\t\"index\":%d,\n"
-            "\t\"spaces\":%d\n"
+            "\t\"spaces\":%d,\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}\n"
             "}",
             display_arrangement(did), count,

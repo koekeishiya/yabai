@@ -109,10 +109,10 @@ void window_serialize(struct ax_window *window, FILE *rsp)
             "\t\"title\":\"%s\",\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
             "\t\"role\":\"%s\",\n"
-            "\t\"subrole\":\"%s\"\n"
-            "\t\"movable\":%d\n"
-            "\t\"resizable\":%d\n"
-            "\t\"fullscreen\":%d\n"
+            "\t\"subrole\":\"%s\",\n"
+            "\t\"movable\":%d,\n"
+            "\t\"resizable\":%d,\n"
+            "\t\"fullscreen\":%d,\n"
             "\t\"floating\":%d\n"
             "}",
             window->id,
