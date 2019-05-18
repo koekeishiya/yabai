@@ -156,12 +156,14 @@ struct view *window_manager_find_managed_window(struct window_manager *wm, struc
 void window_manager_remove_managed_window(struct window_manager *wm, struct ax_window *window)
 {
     table_remove(&wm->managed_window, &window->id);
+    window_manager_purify_window(wm, window);
 }
 
 void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view)
 {
     if (view->type != VIEW_BSP) return;
     table_add(&wm->managed_window, &window->id, view);
+    window_manager_purify_window(wm, window);
 }
 
 void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, float dx, float dy)
@@ -847,7 +849,6 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
         if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
             window_manager_add_managed_window(wm, window, view);
-            window_manager_purify_window(wm, window);
         }
     } else {
         struct view *view = window_manager_find_managed_window(wm, window);
@@ -855,7 +856,6 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
             space_manager_untile_window(sm, view, window);
             window_manager_remove_managed_window(wm, window);
         }
-        window_manager_purify_window(wm, window);
         window->is_floating = true;
     }
 }
