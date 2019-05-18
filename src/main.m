@@ -218,7 +218,7 @@ static void parse_arguments(int argc, char **argv)
 {
     if ((strcmp(argv[1], VERSION_OPT_LONG) == 0) ||
         (strcmp(argv[1], VERSION_OPT_SHRT) == 0)) {
-        fprintf(stdout, "yabai version %d.%d.%d\n", MAJOR, MINOR, PATCH);
+        fprintf(stdout, "yabai-v%d.%d.%d\n", MAJOR, MINOR, PATCH);
         exit(EXIT_SUCCESS);
     }
 
