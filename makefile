@@ -25,6 +25,7 @@ archive: install sign man
 	cp -r $(DOC_PATH) $(ARCH_PATH)/
 	cp -r $(SMP_PATH) $(ARCH_PATH)/
 	tar -cvzf $(BUILD_PATH)/$(shell $(BUILD_PATH)/yabai --version).tar.gz $(ARCH_PATH)
+	rm -rf $(ARCH_PATH)
 
 sign:
 	codesign -fs "yabai-cert" $(BUILD_PATH)/yabai
