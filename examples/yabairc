@@ -1,8 +1,6 @@
 #!/bin/bash
 
-pkill Übersicht
-sleep 1
-
+# global settings
 yabai -m config mouse_follows_focus          off
 yabai -m config focus_follows_mouse          off
 yabai -m config window_shadow                float
@@ -19,15 +17,12 @@ yabai -m config mouse_modifier               fn
 yabai -m config mouse_action1                move
 yabai -m config mouse_action2                resize
 
+# general space settings
 yabai -m config layout                       bsp
 yabai -m config top_padding                  55
 yabai -m config bottom_padding               20
 yabai -m config left_padding                 20
 yabai -m config right_padding                20
 yabai -m config window_gap                   10
-
-yabai -m config --space 7 layout             float
-
-open -na /Applications/Übersicht.app
 
 echo "yabai configuration loaded.."
