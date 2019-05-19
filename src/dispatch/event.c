@@ -223,6 +223,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 
     struct ax_window *window = window_create(application, context);
     window_manager_set_window_opacity(window, g_window_manager.normal_window_opacity);
+    window_manager_purify_window(&g_window_manager, window);
 
     if (window_observe(window)) {
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);

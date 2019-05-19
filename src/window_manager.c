@@ -594,7 +594,6 @@ void window_manager_remove_window(struct window_manager *wm, uint32_t window_id)
 
 void window_manager_add_window(struct window_manager *wm, struct ax_window *window)
 {
-    window_manager_purify_window(wm, window);
     table_add(&wm->window, &window->id, window);
 }
 
@@ -667,6 +666,7 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
         }
 
         window_manager_set_window_opacity(window, wm->normal_window_opacity);
+        window_manager_purify_window(wm, window);
         window_manager_add_window(wm, window);
 
         if ((!window_is_standard(window)) ||
