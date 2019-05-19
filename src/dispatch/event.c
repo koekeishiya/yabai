@@ -598,7 +598,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         return EVENT_SUCCESS;
     }
 
-    if (g_mouse_state.current_action == MOUSE_MODE_NONE) {
+    if ((g_mouse_state.current_action == MOUSE_MODE_NONE) &&
+        (window_manager_find_managed_window(&g_window_manager, g_mouse_state.window))) {
         CGRect frame = window_ax_frame(g_mouse_state.window);
         float dx = frame.origin.x - g_mouse_state.window_frame.origin.x;
         float dy = frame.origin.y - g_mouse_state.window_frame.origin.y;
