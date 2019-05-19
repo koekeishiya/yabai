@@ -141,7 +141,6 @@ extern struct mouse_state g_mouse_state;
 #define ARGUMENT_QUERY_DISPLAY "--display"
 #define ARGUMENT_QUERY_SPACE   "--space"
 #define ARGUMENT_QUERY_WINDOW  "--window"
-
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -978,9 +977,13 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                 int mci = token_to_int(value);
                 uint64_t sid = space_manager_mission_control_space(mci);
                 if (sid) {
-                    struct view *view = space_manager_find_view(&g_space_manager, sid);
-                    view_serialize(rsp, view);
-                    fprintf(rsp, "\n");
+                    struct view *view = space_manager_query_view(&g_space_manager, sid);
+                    if (view) {
+                        view_serialize(rsp, view);
+                        fprintf(rsp, "\n");
+                    } else {
+                        daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
+                    }
                 } else {
                     daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
                 }

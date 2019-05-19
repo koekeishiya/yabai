@@ -25,6 +25,7 @@ struct space_manager
     struct table view;
     uint64_t current_space_id;
     uint64_t last_space_id;
+    bool did_begin;
     enum view_type layout[SM_MAX_SPACE];
     int top_padding[SM_MAX_SPACE];
     int bottom_padding[SM_MAX_SPACE];
@@ -45,6 +46,7 @@ bool space_manager_query_active_space(FILE *rsp);
 bool space_manager_query_spaces_for_window(FILE *rsp, struct ax_window *window);
 bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did);
 bool space_manager_query_spaces_for_displays(FILE *rsp);
+struct view *space_manager_query_view(struct space_manager *sm, uint64_t sid);
 struct view *space_manager_find_view(struct space_manager *sm, uint64_t sid);
 void space_manager_refresh_view(struct space_manager *sm, uint64_t sid);
 void space_manager_mark_view_invalid(struct space_manager *sm,  uint64_t sid);

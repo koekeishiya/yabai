@@ -62,7 +62,9 @@ CGRect space_manager_dock_rect(void)
 
 bool space_manager_query_active_space(FILE *rsp)
 {
-    struct view *view = space_manager_find_view(&g_space_manager, space_manager_active_space());
+    struct view *view = space_manager_query_view(&g_space_manager, space_manager_active_space());
+    if (!view) return false;
+
     view_serialize(rsp, view);
     fprintf(rsp, "\n");
     return true;
@@ -76,7 +78,9 @@ bool space_manager_query_spaces_for_window(FILE *rsp, struct ax_window *window)
 
     fprintf(rsp, "[");
     for (int i = 0; i < space_count; ++i) {
-        struct view *view = space_manager_find_view(&g_space_manager, space_list[i]);
+        struct view *view = space_manager_query_view(&g_space_manager, space_list[i]);
+        if (!view) continue;
+
         view_serialize(rsp, view);
         fprintf(rsp, "%c", i < space_count - 1 ? ',' : ']');
     }
@@ -94,7 +98,9 @@ bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
 
     fprintf(rsp, "[");
     for (int i = 0; i < space_count; ++i) {
-        struct view *view = space_manager_find_view(&g_space_manager, space_list[i]);
+        struct view *view = space_manager_query_view(&g_space_manager, space_list[i]);
+        if (!view) continue;
+
         view_serialize(rsp, view);
         fprintf(rsp, "%c", i < space_count - 1 ? ',' : ']');
     }
@@ -117,7 +123,9 @@ bool space_manager_query_spaces_for_displays(FILE *rsp)
         if (!space_list) continue;
 
         for (int j = 0; j < space_count; ++j) {
-            struct view *view = space_manager_find_view(&g_space_manager, space_list[j]);
+            struct view *view = space_manager_query_view(&g_space_manager, space_list[j]);
+            if (!view) continue;
+
             view_serialize(rsp, view);
             if (j < space_count - 1) fprintf(rsp, ",");
         }
@@ -129,6 +137,12 @@ bool space_manager_query_spaces_for_displays(FILE *rsp)
 
     free(display_list);
     return true;
+}
+
+struct view *space_manager_query_view(struct space_manager *sm, uint64_t sid)
+{
+    if (sm->did_begin) return space_manager_find_view(sm, sid);
+    return table_find(&sm->view, &sid);
 }
 
 struct view *space_manager_find_view(struct space_manager *sm, uint64_t sid)
@@ -641,4 +655,5 @@ void space_manager_begin(struct space_manager *sm)
 {
     sm->current_space_id = space_manager_active_space();
     sm->last_space_id = sm->current_space_id;
+    sm->did_begin = true;
 }
