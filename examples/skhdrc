@@ -33,14 +33,14 @@ shift + alt - right  : yabai -m window --grid 1:2:1:0:1:1
 
 # create desktop, move window and follow focus
 shift + cmd - n : yabai -m space --create;\
-                  id=$(yabai -m query --spaces --monitor);\
-                  yabai -m window --space $(echo ${id##* });\
-                  yabai -m space --focus $(echo ${id##* })
+                  id=$(yabai -m query --displays --display | grep "spaces");\
+                  yabai -m window --space $(echo ${id:10:${#id}-10});\
+                  yabai -m space --focus $(echo ${id:10:${#id}-10})
 
 # create desktop and follow focus
 cmd + alt - n : yabai -m space --create;\
-                id=$(yabai -m query --spaces --monitor);\
-                yabai -m space --focus $(echo ${id##* })
+                id=$(yabai -m query --displays --display | grep "spaces");\
+                yabai -m space --focus $(echo ${id:10:${#id}-10})
 
 # destroy desktop
 cmd + alt - w : yabai -m space --destroy
