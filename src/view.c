@@ -171,7 +171,7 @@ static void window_node_update(struct view *view, struct window_node *node)
     }
 }
 
-static void window_node_flush(struct window_node *node)
+void window_node_flush(struct window_node *node)
 {
     if (window_node_is_occupied(node)) {
         struct ax_window *window = window_manager_find_window(&g_window_manager, node->window_id);

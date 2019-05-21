@@ -599,22 +599,40 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         return EVENT_SUCCESS;
     }
 
-    if ((g_mouse_state.current_action == MOUSE_MODE_NONE) &&
-        (window_manager_find_managed_window(&g_window_manager, g_mouse_state.window))) {
+    struct view *view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
+
+    if ((g_mouse_state.current_action != MOUSE_MODE_RESIZE) && (view && view->type == VIEW_BSP)) {
         CGRect frame = window_ax_frame(g_mouse_state.window);
         float dx = frame.origin.x - g_mouse_state.window_frame.origin.x;
         float dy = frame.origin.y - g_mouse_state.window_frame.origin.y;
         float dw = frame.size.width - g_mouse_state.window_frame.size.width;
         float dh = frame.size.height - g_mouse_state.window_frame.size.height;
 
-        if ((dx != 0.0f || dy != 0.0f) && (dw != 0.0f || dh != 0.0f)) {
+        bool did_change_pos  = dx != 0.0f || dy != 0.0f;
+        bool did_change_size = dw != 0.0f || dh != 0.0f;
+
+        if (did_change_pos && did_change_size) {
             uint8_t direction = 0;
             if (dx != 0.0f) direction |= HANDLE_LEFT;
             if (dy != 0.0f) direction |= HANDLE_TOP;
             window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
+        } else  if (did_change_pos && !did_change_size) {
+            uint32_t filter_window_id = g_window_manager.focused_window_id == g_mouse_state.window->id ? g_mouse_state.window->id : 0;
+            struct ax_window *window = window_manager_find_window_at_point_ignoring_window(&g_window_manager, point, filter_window_id);
+            struct window_node *a_node = view_find_window_node(view->root, g_mouse_state.window->id);
+            struct window_node *b_node = window ? view_find_window_node(view->root, window->id) : NULL;
+
+            if (a_node && b_node) {
+                a_node->window_id = window->id;
+                b_node->window_id = g_mouse_state.window->id;
+                window_node_flush(a_node);
+                window_node_flush(b_node);
+            } else if (a_node) {
+                window_node_flush(a_node);
+            }
         }
 
-        if (dw != 0.0f || dh != 0.0f) {
+        if (did_change_size) {
             uint8_t direction = 0;
             if (dw != 0.0f) direction |= HANDLE_RIGHT;
             if (dh != 0.0f) direction |= HANDLE_BOTTOM;
@@ -648,20 +666,18 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
     }
 
     if (g_mouse_state.current_action == MOUSE_MODE_MOVE) {
-        if (!window_manager_find_managed_window(&g_window_manager, g_mouse_state.window)) {
-            int dx = point.x - g_mouse_state.down_location.x;
-            int dy = point.y - g_mouse_state.down_location.y;
+        int dx = point.x - g_mouse_state.down_location.x;
+        int dy = point.y - g_mouse_state.down_location.y;
 
-            if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= 10) {
-                float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-                if (dt < 25.0f) return EVENT_SUCCESS;
+        if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= 10) {
+            float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
+            if (dt < 25.0f) return EVENT_SUCCESS;
 
-                float fx = g_mouse_state.window_frame.origin.x + dx;
-                float fy = g_mouse_state.window_frame.origin.y + dy;
-                window_manager_move_window(g_mouse_state.window, fx, fy);
+            float fx = g_mouse_state.window_frame.origin.x + dx;
+            float fy = g_mouse_state.window_frame.origin.y + dy;
+            window_manager_move_window(g_mouse_state.window, fx, fy);
 
-                g_mouse_state.last_moved_time = event_time;
-            }
+            g_mouse_state.last_moved_time = event_time;
         }
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         int dx = point.x - g_mouse_state.down_location.x;
