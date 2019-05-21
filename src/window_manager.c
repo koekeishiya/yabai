@@ -370,13 +370,13 @@ void window_manager_purify_window(struct window_manager *wm, struct ax_window *w
     socket_close(sockfd);
 }
 
-struct ax_window *window_manager_find_window_at_point_ignoring_window(struct window_manager *wm, CGPoint point, uint32_t top_wid)
+struct ax_window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid)
 {
     uint32_t window_id = 0;
     CGPoint window_point;
     int window_cid;
 
-    SLSFindWindowByGeometry(g_connection, top_wid, 0xffffffff, 0, &point, &window_point, &window_id, &window_cid);
+    SLSFindWindowByGeometry(g_connection, filter_wid, 0xffffffff, 0, &point, &window_point, &window_id, &window_cid);
     return window_manager_find_window(wm, window_id);
 }
 
