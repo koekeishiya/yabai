@@ -49,18 +49,18 @@ CGRect display_bounds_constrained(uint32_t display_id)
     if (!space_manager_dock_hidden()) {
         switch (space_manager_dock_orientation()) {
         case DOCK_ORIENTATION_LEFT: {
-        if (display_id == display_manager_left_display_id()) {
+        if (CGRectGetMinX(frame) == CGRectGetMinX(dock)) {
             frame.origin.x   += dock.size.width;
             frame.size.width -= dock.size.width;
         }
         } break;
         case DOCK_ORIENTATION_RIGHT: {
-        if (display_id == display_manager_right_display_id()) {
+        if (CGRectGetMaxX(frame) == CGRectGetMaxX(dock)) {
             frame.size.width -= dock.size.width;
         }
         } break;
         case DOCK_ORIENTATION_BOTTOM: {
-        if (display_id == display_manager_bottom_display_id()) {
+        if (CGRectGetMaxY(frame) == CGRectGetMaxY(dock)) {
             frame.size.height -= dock.size.height;
         }
         } break;
