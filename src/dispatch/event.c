@@ -608,15 +608,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         float dw = frame.size.width - g_mouse_state.window_frame.size.width;
         float dh = frame.size.height - g_mouse_state.window_frame.size.height;
 
-        bool did_change_pos  = dx != 0.0f || dy != 0.0f;
-        bool did_change_size = dw != 0.0f || dh != 0.0f;
+        bool did_change_x = dx != 0.0f;
+        bool did_change_y = dy != 0.0f;
+        bool did_change_w = dw != 0.0f;
+        bool did_change_h = dh != 0.0f;
+        bool did_change_p = did_change_x || did_change_y;
+        bool did_change_s = did_change_w || did_change_h;
 
-        if (did_change_pos && did_change_size) {
-            uint8_t direction = 0;
-            if (dx != 0.0f) direction |= HANDLE_LEFT;
-            if (dy != 0.0f) direction |= HANDLE_TOP;
-            window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
-        } else  if (did_change_pos && !did_change_size) {
+        if (did_change_p && !did_change_s) {
             uint32_t filter_window_id = g_window_manager.focused_window_id == g_mouse_state.window->id ? g_mouse_state.window->id : 0;
             struct ax_window *window = window_manager_find_window_at_point_filtering_window(&g_window_manager, point, filter_window_id);
             struct window_node *a_node = view_find_window_node(view->root, g_mouse_state.window->id);
@@ -630,13 +629,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
             } else if (a_node) {
                 window_node_flush(a_node);
             }
-        }
+        } else {
+            if (did_change_p) {
+                uint8_t direction = 0;
+                if (dx != 0.0f) direction |= HANDLE_LEFT;
+                if (dy != 0.0f) direction |= HANDLE_TOP;
+                window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
+            }
 
-        if (did_change_size) {
-            uint8_t direction = 0;
-            if (dw != 0.0f) direction |= HANDLE_RIGHT;
-            if (dh != 0.0f) direction |= HANDLE_BOTTOM;
-            window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dw, dh);
+            if (did_change_s) {
+                uint8_t direction = 0;
+                if (did_change_w && !did_change_x) direction |= HANDLE_RIGHT;
+                if (did_change_h && !did_change_y) direction |= HANDLE_BOTTOM;
+                window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dw, dh);
+            }
         }
 
         result = EVENT_MOUSE_IGNORE;
