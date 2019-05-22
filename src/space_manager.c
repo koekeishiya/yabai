@@ -25,41 +25,6 @@ bool space_manager_has_separate_spaces(void)
     return SLSGetSpaceManagementMode(g_connection) == 1;
 }
 
-bool space_manager_menu_bar_hidden(void)
-{
-    int status = 0;
-    SLSGetMenuBarAutohideEnabled(g_connection, &status);
-    return status;
-}
-
-CGRect space_manager_menu_bar_rect(void)
-{
-    CGRect bounds = {};
-    SLSGetRevealedMenuBarBounds(&bounds, g_connection, space_manager_active_space());
-    return bounds;
-}
-
-bool space_manager_dock_hidden(void)
-{
-    return CoreDockGetAutoHideEnabled();
-}
-
-int space_manager_dock_orientation(void)
-{
-    int pinning = 0;
-    int orientation = 0;
-    CoreDockGetOrientationAndPinning(&orientation, &pinning);
-    return orientation;
-}
-
-CGRect space_manager_dock_rect(void)
-{
-    int reason = 0;
-    CGRect bounds = {};
-    SLSGetDockRectWithReason(g_connection, &bounds, &reason);
-    return bounds;
-}
-
 bool space_manager_query_active_space(FILE *rsp)
 {
     struct view *view = space_manager_query_view(&g_space_manager, space_manager_active_space());

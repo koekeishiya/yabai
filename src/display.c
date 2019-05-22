@@ -38,31 +38,26 @@ CGRect display_bounds(uint32_t display_id)
 CGRect display_bounds_constrained(uint32_t display_id)
 {
     CGRect frame = display_bounds(display_id);
-    CGRect menu  = space_manager_menu_bar_rect();
-    CGRect dock  = space_manager_dock_rect();
+    CGRect menu  = display_manager_menu_bar_rect();
+    CGRect dock  = display_manager_dock_rect();
+    uint32_t did = display_manager_dock_display_id();
 
-    if (!space_manager_menu_bar_hidden()) {
+    if (!display_manager_menu_bar_hidden()) {
         frame.origin.y    += menu.size.height;
         frame.size.height -= menu.size.height;
     }
 
-    if (!space_manager_dock_hidden()) {
-        switch (space_manager_dock_orientation()) {
+    if (did == display_id) {
+        switch (display_manager_dock_orientation()) {
         case DOCK_ORIENTATION_LEFT: {
-        if (CGRectGetMinX(frame) == CGRectGetMinX(dock)) {
             frame.origin.x   += dock.size.width;
             frame.size.width -= dock.size.width;
-        }
         } break;
         case DOCK_ORIENTATION_RIGHT: {
-        if (CGRectGetMaxX(frame) == CGRectGetMaxX(dock)) {
             frame.size.width -= dock.size.width;
-        }
         } break;
         case DOCK_ORIENTATION_BOTTOM: {
-        if (CGRectGetMaxY(frame) == CGRectGetMaxY(dock)) {
             frame.size.height -= dock.size.height;
-        }
         } break;
         }
     }

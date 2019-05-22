@@ -66,6 +66,26 @@ uint32_t display_manager_active_display_id(void)
     return result;
 }
 
+CFStringRef display_manager_dock_display_uuid(void)
+{
+    if (display_manager_dock_hidden()) return NULL;
+
+    CGRect dock = display_manager_dock_rect();
+    return SLSCopyBestManagedDisplayForRect(g_connection, dock);
+}
+
+uint32_t display_manager_dock_display_id(void)
+{
+    CFStringRef uuid = display_manager_dock_display_uuid();
+    if (!uuid) return 0;
+
+    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid);
+    uint32_t result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
+    CFRelease(uuid_ref);
+    CFRelease(uuid);
+    return result;
+}
+
 CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 {
     CFStringRef result = NULL;
@@ -114,6 +134,41 @@ uint32_t display_manager_next_display_id(uint32_t did)
     if (arrangement >= display_manager_active_display_count()) return 0;
 
     return display_manager_arrangement_display_id(arrangement + 1);
+}
+
+bool display_manager_menu_bar_hidden(void)
+{
+    int status = 0;
+    SLSGetMenuBarAutohideEnabled(g_connection, &status);
+    return status;
+}
+
+CGRect display_manager_menu_bar_rect(void)
+{
+    CGRect bounds = {};
+    SLSGetRevealedMenuBarBounds(&bounds, g_connection, space_manager_active_space());
+    return bounds;
+}
+
+bool display_manager_dock_hidden(void)
+{
+    return CoreDockGetAutoHideEnabled();
+}
+
+int display_manager_dock_orientation(void)
+{
+    int pinning = 0;
+    int orientation = 0;
+    CoreDockGetOrientationAndPinning(&orientation, &pinning);
+    return orientation;
+}
+
+CGRect display_manager_dock_rect(void)
+{
+    int reason = 0;
+    CGRect bounds = {};
+    SLSGetDockRectWithReason(g_connection, &bounds, &reason);
+    return bounds;
 }
 
 bool display_manager_active_display_is_animating(void)

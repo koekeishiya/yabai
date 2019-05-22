@@ -3,20 +3,11 @@
 
 extern int SLSGetSpaceManagementMode(int cid);
 extern CFArrayRef SLSCopyManagedDisplaySpaces(int cid);
-extern CGError SLSGetMenuBarAutohideEnabled(int cid, int *enabled);
-extern CGError SLSGetRevealedMenuBarBounds(CGRect *rect, int cid, uint64_t sid);
-extern CGError SLSGetDockRectWithReason(int cid, CGRect *rect, int *reason);
 extern CGError SLSProcessAssignToSpace(int cid, pid_t pid, uint64_t sid);
 extern CGError SLSProcessAssignToAllSpaces(int cid, pid_t pid);
 extern void CGSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
 extern void CGSRemoveWindowsFromSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
 extern void CGSAddWindowsToSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
-extern Boolean CoreDockGetAutoHideEnabled(void);
-extern void CoreDockGetOrientationAndPinning(int *orientation, int *pinning);
-
-#define DOCK_ORIENTATION_BOTTOM 2
-#define DOCK_ORIENTATION_LEFT   3
-#define DOCK_ORIENTATION_RIGHT  4
 
 #define SM_MAX_SPACE            50
 
@@ -37,11 +28,6 @@ struct space_manager
 };
 
 bool space_manager_has_separate_spaces(void);
-bool space_manager_menu_bar_hidden(void);
-CGRect space_manager_menu_bar_rect(void);
-bool space_manager_dock_hidden(void);
-int space_manager_dock_orientation(void);
-CGRect space_manager_dock_rect(void);
 bool space_manager_query_active_space(FILE *rsp);
 bool space_manager_query_spaces_for_window(FILE *rsp, struct ax_window *window);
 bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did);
