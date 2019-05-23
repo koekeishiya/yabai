@@ -495,6 +495,45 @@ struct ax_window *window_manager_find_closest_window_in_direction(struct window_
     return result;
 }
 
+struct ax_window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view->root, window->id);
+    if (!node) return NULL;
+
+    struct window_node *prev = window_node_find_prev_leaf(node);
+    if (!prev) return NULL;
+
+    return window_manager_find_window(wm, prev->window_id);
+}
+
+struct ax_window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view->root, window->id);
+    if (!node) return NULL;
+
+    struct window_node *prev = window_node_find_next_leaf(node);
+    if (!prev) return NULL;
+
+    return window_manager_find_window(wm, prev->window_id);
+}
+
+struct ax_window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view->root, wm->last_window_id);
+    if (!node) return NULL;
+
+    return window_manager_find_window(wm, node->window_id);
+}
+
 void window_manager_focus_window_without_raise(uint32_t window_id)
 {
     int window_connection;
@@ -1081,6 +1120,7 @@ void window_manager_begin(struct window_manager *wm)
     }
 
     struct ax_window *window = window_manager_focused_window(wm);
+    wm->last_window_id = window->id;
     wm->focused_window_id = window->id;
     wm->focused_window_pid = window->application->pid;
     border_window_activate(window);

@@ -53,6 +53,7 @@ struct window_manager
     bool reactivate_focused_window;
     uint32_t focused_window_id;
     pid_t focused_window_pid;
+    uint32_t last_window_id;
     bool enable_mff;
     enum ffm_mode ffm_mode;
     enum purify_mode purify_mode;
@@ -77,6 +78,9 @@ struct ax_window *window_manager_find_window_at_point_filtering_window(struct wi
 struct ax_window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point);
 struct ax_window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction);
 struct ax_window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction);
+struct ax_window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
+struct ax_window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
+struct ax_window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_focus_window_without_raise(uint32_t window_id);
 void window_manager_focus_window_with_raise(uint32_t window_id);
 struct ax_window *window_manager_focused_window(struct window_manager *wm);

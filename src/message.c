@@ -112,6 +112,9 @@ extern struct mouse_state g_mouse_state;
 #define COMMAND_WINDOW_DISPLAY "--display"
 #define COMMAND_WINDOW_SPACE   "--space"
 
+#define ARGUMENT_WINDOW_SEL_PREV      "prev"
+#define ARGUMENT_WINDOW_SEL_NEXT      "next"
+#define ARGUMENT_WINDOW_SEL_LAST      "last"
 #define ARGUMENT_WINDOW_DIR_NORTH     "north"
 #define ARGUMENT_WINDOW_DIR_EAST      "east"
 #define ARGUMENT_WINDOW_DIR_SOUTH     "south"
@@ -697,6 +700,21 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (!window) return;
             struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_WEST);
             if (closest_window) window_manager_focus_window_with_raise(closest_window->id);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
+            if (prev_window) window_manager_focus_window_with_raise(prev_window->id);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
+            if (next_window) window_manager_focus_window_with_raise(next_window->id);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager, window);
+            if (last_window) window_manager_focus_window_with_raise(last_window->id);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -722,6 +740,21 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (!window) return;
             struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
             if (closest_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
+            if (prev_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, prev_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
+            if (next_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, next_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager, window);
+            if (last_window) window_manager_swap_window(&g_space_manager, &g_window_manager, window, last_window);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -747,6 +780,21 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (!window) return;
             struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
             if (closest_window) window_manager_warp_window(&g_space_manager, window, closest_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
+            if (prev_window) window_manager_warp_window(&g_space_manager, window, prev_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
+            if (next_window) window_manager_warp_window(&g_space_manager, window, next_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (!window) return;
+            struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager, window);
+            if (last_window) window_manager_warp_window(&g_space_manager, window, last_window);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

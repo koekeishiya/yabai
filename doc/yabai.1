@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-05-18
+.\"      Date: 2019-05-23
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-05-18" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-05-23" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -77,6 +77,8 @@ Loads the scripting\-addition into Dock.app.
 .if n .RS 4
 .nf
 DIR_SEL     := north | east | south | west
+
+WINDOW_SEL  := prev | next | last | DIR_SEL
 
 DISPLAY_SEL := prev | next | last | arrangement index (1\-based)
 
@@ -256,17 +258,17 @@ Set the layout of the space.
 yabai \-m window \fICOMMAND\fP
 .SS "COMMAND"
 .sp
-\fB\-\-focus\fP \fIDIR_SEL\fP
+\fB\-\-focus\fP \fIWINDOW_SEL\fP
 .RS 4
 Focus the window in the given direction.
 .RE
 .sp
-\fB\-\-swap\fP \fIDIR_SEL\fP
+\fB\-\-swap\fP \fIWINDOW_SEL\fP
 .RS 4
 Swap position with the window in the given direction.
 .RE
 .sp
-\fB\-\-warp\fP \fIDIR_SEL\fP
+\fB\-\-warp\fP \fIWINDOW_SEL\fP
 .RS 4
 Re\-insert, splitting the window in the given direction.
 .RE

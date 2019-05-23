@@ -49,6 +49,8 @@ Definitions
 ----
 DIR_SEL     := north | east | south | west
 
+WINDOW_SEL  := prev | next | last | DIR_SEL
+
 DISPLAY_SEL := prev | next | last | arrangement index (1-based)
 
 SPACE_SEL   := prev | next | last | mission-control index (1-based)
@@ -198,13 +200,13 @@ yabai -m window 'COMMAND'
 COMMAND
 ^^^^^^^
 
-*--focus* 'DIR_SEL'::
+*--focus* 'WINDOW_SEL'::
     Focus the window in the given direction.
 
-*--swap* 'DIR_SEL'::
+*--swap* 'WINDOW_SEL'::
     Swap position with the window in the given direction.
 
-*--warp* 'DIR_SEL'::
+*--warp* 'WINDOW_SEL'::
     Re-insert, splitting the window in the given direction.
 
 *--insert* 'DIR_SEL'::

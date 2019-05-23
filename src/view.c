@@ -196,7 +196,22 @@ static struct window_node *window_node_find_first_leaf(struct window_node *root)
     return node;
 }
 
-static struct window_node *window_node_find_next_leaf(struct window_node *node)
+struct window_node *window_node_find_prev_leaf(struct window_node *node)
+{
+    if (!node->parent) return NULL;
+
+    if (window_node_is_left_child(node)) {
+        return window_node_find_prev_leaf(node->parent);
+    }
+
+    if (window_node_is_leaf(node->parent->left)) {
+        return node->parent->left;
+    }
+
+    return window_node_find_first_leaf(node->parent->left->right);
+}
+
+struct window_node *window_node_find_next_leaf(struct window_node *node)
 {
     if (!node->parent) return NULL;
 

@@ -110,6 +110,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     debug("%s: %s\n", __FUNCTION__, application->name);
     uint32_t application_focused_window_id = application_focused_window(application);
     if (g_window_manager.focused_window_id != application_focused_window_id) {
+        g_window_manager.last_window_id = g_window_manager.focused_window_id;
         g_window_manager.focused_window_id = application_focused_window(application);
         g_window_manager.focused_window_pid = application->pid;
 
@@ -333,6 +334,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
     window_manager_set_window_opacity(window, g_window_manager.active_window_opacity);
     window_manager_center_mouse(&g_window_manager, window);
 
+    g_window_manager.last_window_id = g_window_manager.focused_window_id;
     g_window_manager.focused_window_id = window->id;
     g_window_manager.focused_window_pid = window->application->pid;
 
