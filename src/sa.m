@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <errno.h>
 
+#include "sa.h"
 #include "sa_core.c"
 #include "sa_bundle.c"
 
@@ -137,7 +138,7 @@ static void scripting_addition_prepare_binaries(void)
     system("codesign -f -s - \"/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle/Contents/MacOS/chunkwm-sa\" 2>/dev/null");
 }
 
-static bool scripting_addition_is_installed(void)
+bool scripting_addition_is_installed(void)
 {
     DIR *dir = opendir(OSAX_DIR);
     if (!dir) return false;
@@ -154,7 +155,7 @@ static bool scripting_addition_remove(void)
     return code == 0;
 }
 
-static int scripting_addition_install(void)
+int scripting_addition_install(void)
 {
     if ((scripting_addition_is_installed()) &&
         (!scripting_addition_remove())) {
@@ -197,14 +198,14 @@ cleanup:
     return 2;
 }
 
-static int scripting_addition_uninstall(void)
+int scripting_addition_uninstall(void)
 {
     if (!scripting_addition_is_installed()) return  0;
     if (!scripting_addition_remove())       return -1;
     return 0;
 }
 
-static int scripting_addition_load(void)
+int scripting_addition_load(void)
 {
     if (!scripting_addition_is_installed()) return 1;
 

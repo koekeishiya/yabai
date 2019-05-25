@@ -10,6 +10,11 @@ static inline bool is_root(void)
     return getuid() == 0 || geteuid() == 0;
 }
 
+static inline bool string_equals(char *a, char *b)
+{
+    return a && b && strcmp(a, b) == 0;
+}
+
 static inline char *string_copy(char *s)
 {
     int length = strlen(s);

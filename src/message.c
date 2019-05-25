@@ -654,21 +654,21 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
 
 static uint8_t parse_resize_handle(char *handle)
 {
-    if (strcmp(handle, "top") == 0) {
+    if (string_equals(handle, "top")) {
         return HANDLE_TOP;
-    } else if (strcmp(handle, "bottom") == 0) {
+    } else if (string_equals(handle, "bottom")) {
         return HANDLE_BOTTOM;
-    } else if (strcmp(handle, "left") == 0) {
+    } else if (string_equals(handle, "left")) {
         return HANDLE_LEFT;
-    } else if (strcmp(handle, "right") == 0) {
+    } else if (string_equals(handle, "right")) {
         return HANDLE_RIGHT;
-    } else if (strcmp(handle, "top_left") == 0) {
+    } else if (string_equals(handle, "top_left")) {
         return HANDLE_TOP | HANDLE_LEFT;
-    } else if (strcmp(handle, "top_right") == 0) {
+    } else if (string_equals(handle, "top_right")) {
         return HANDLE_TOP | HANDLE_RIGHT;
-    } else if (strcmp(handle, "bottom_left") == 0) {
+    } else if (string_equals(handle, "bottom_left")) {
         return HANDLE_BOTTOM | HANDLE_LEFT;
-    } else if (strcmp(handle, "bottom_right") == 0) {
+    } else if (string_equals(handle, "bottom_right")) {
         return HANDLE_BOTTOM | HANDLE_RIGHT;
     } else {
         return 0;

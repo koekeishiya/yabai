@@ -41,6 +41,7 @@
 #include "display_manager.h"
 #include "space_manager.h"
 #include "window_manager.h"
+#include "sa.h"
 
 #include "dispatch/event.c"
 #include "dispatch/eventloop.c"
@@ -216,37 +217,37 @@ static void exec_config_file(char *config)
 
 static void parse_arguments(int argc, char **argv)
 {
-    if ((strcmp(argv[1], VERSION_OPT_LONG) == 0) ||
-        (strcmp(argv[1], VERSION_OPT_SHRT) == 0)) {
+    if ((string_equals(argv[1], VERSION_OPT_LONG)) ||
+        (string_equals(argv[1], VERSION_OPT_SHRT))) {
         fprintf(stdout, "yabai-v%d.%d.%d\n", MAJOR, MINOR, PATCH);
         exit(EXIT_SUCCESS);
     }
 
-    if ((strcmp(argv[1], CLIENT_OPT_LONG) == 0) ||
-        (strcmp(argv[1], CLIENT_OPT_SHRT) == 0)) {
+    if ((string_equals(argv[1], CLIENT_OPT_LONG)) ||
+        (string_equals(argv[1], CLIENT_OPT_SHRT))) {
         exit(client_send_message(argc-1, argv+1));
     }
 
-    if (strcmp(argv[1], SCRPT_ADD_INSTALL_OPT) == 0) {
+    if (string_equals(argv[1], SCRPT_ADD_INSTALL_OPT)) {
         exit(scripting_addition_install());
     }
 
-    if (strcmp(argv[1], SCRPT_ADD_UNINSTALL_OPT) == 0) {
+    if (string_equals(argv[1], SCRPT_ADD_UNINSTALL_OPT)) {
         exit(scripting_addition_uninstall());
     }
 
-    if (strcmp(argv[1], SCRPT_ADD_LOAD_OPT) == 0) {
+    if (string_equals(argv[1], SCRPT_ADD_LOAD_OPT)) {
         exit(scripting_addition_load());
     }
 
     for (int i = 1; i < argc; ++i) {
         char *opt = argv[i];
 
-        if ((strcmp(opt, DEBUG_VERBOSE_OPT_LONG) == 0) ||
-            (strcmp(opt, DEBUG_VERBOSE_OPT_SHRT) == 0)) {
+        if ((string_equals(opt, DEBUG_VERBOSE_OPT_LONG)) ||
+            (string_equals(opt, DEBUG_VERBOSE_OPT_SHRT))) {
             g_verbose = true;
-        } else if ((strcmp(opt, CONFIG_OPT_LONG) == 0) ||
-                   (strcmp(opt, CONFIG_OPT_SHRT) == 0)) {
+        } else if ((string_equals(opt, CONFIG_OPT_LONG)) ||
+                   (string_equals(opt, CONFIG_OPT_SHRT))) {
             char *val = i < argc - 1 ? argv[++i] : NULL;
             if (!val) error("yabai: option '%s|%s' requires an argument!\n", CONFIG_OPT_LONG, CONFIG_OPT_SHRT);
             g_config = string_copy(val);
@@ -301,6 +302,10 @@ int main(int argc, char **argv)
         error("yabai: could not initialize eventloop! abort..\n");
     }
 
+    if (scripting_addition_is_installed()) {
+        scripting_addition_load();
+    }
+
     process_manager_init(&g_process_manager);
     workspace_event_handler_init(&g_workspace_context);
     space_manager_init(&g_space_manager);
@@ -322,10 +327,6 @@ int main(int argc, char **argv)
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
-
-    if (scripting_addition_is_installed()) {
-        scripting_addition_load();
-    }
 
     CFRunLoopRun();
     return 0;
