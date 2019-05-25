@@ -249,6 +249,7 @@ void border_window_create(struct ax_window *window)
     };
 
     SLSNewWindow(g_connection, 2, 0.0f, 0.0f, frame_region, &border->id);
+    SLSSetWindowResolution(g_connection, border->id, 2.0f);
     SLSSetWindowTags(g_connection, border->id, tags, 32);
     SLSSetWindowOpacity(g_connection, border->id, 0);
     SLSSetMouseEventEnableFlags(g_connection, border->id, false);
