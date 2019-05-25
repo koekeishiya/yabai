@@ -832,6 +832,18 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
 {
     if (scripting_addition_is_installed()) {
         scripting_addition_load();
+
+        for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+            struct bucket *bucket = g_window_manager.window.buckets[window_index];
+            while (bucket) {
+                if (bucket->value) {
+                    struct ax_window *window = bucket->value;
+                    window_manager_purify_window(&g_window_manager, window);
+                }
+
+                bucket = bucket->next;
+            }
+        }
     }
 
     return EVENT_SUCCESS;
