@@ -739,13 +739,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
-{
-    debug("%s:\n", __FUNCTION__);
-    space_manager_mark_spaces_invalid(&g_space_manager);
-    return EVENT_SUCCESS;
-}
-
 static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
 {
     g_mission_control_active = true;
@@ -829,6 +822,22 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
         }
     }
 
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
+{
+    if (scripting_addition_is_installed()) {
+        scripting_addition_load();
+    }
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
+{
+    debug("%s:\n", __FUNCTION__);
+    space_manager_mark_spaces_invalid(&g_space_manager);
     return EVENT_SUCCESS;
 }
 

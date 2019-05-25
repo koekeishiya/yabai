@@ -59,6 +59,11 @@ void workspace_event_handler_end(void *context)
                 name:NSWorkspaceDidWakeNotification
                 object:nil];
 
+       [[NSNotificationCenter defaultCenter] addObserver:self
+                selector:@selector(didRestartDock:)
+                name:@"NSApplicationDockDidRestartNotification"
+                object:nil];
+
        [[NSDistributedNotificationCenter defaultCenter] addObserver:self
                 selector:@selector(didChangeMenuBarHiding:)
                 name:@"AppleInterfaceMenuBarHidingChangedNotification"
@@ -71,8 +76,23 @@ void workspace_event_handler_end(void *context)
 - (void)dealloc
 {
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
+}
+
+- (void)didWake:(NSNotification *)notification
+{
+    struct event *event;
+    event_create(event, SYSTEM_WOKE, NULL);
+    eventloop_post(&g_eventloop, event);
+}
+
+- (void)didRestartDock:(NSNotification *)notification
+{
+    struct event *event;
+    event_create(event, DOCK_DID_RESTART, NULL);
+    eventloop_post(&g_eventloop, event);
 }
 
 - (void)didChangeMenuBarHiding:(NSNotification *)notification
@@ -129,13 +149,6 @@ void workspace_event_handler_end(void *context)
 
     struct event *event;
     event_create(event, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
-    eventloop_post(&g_eventloop, event);
-}
-
-- (void)didWake:(NSNotification *)notification
-{
-    struct event *event;
-    event_create(event, SYSTEM_WOKE, NULL);
     eventloop_post(&g_eventloop, event);
 }
 

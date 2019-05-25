@@ -16,13 +16,6 @@ static PROCESS_EVENT_HANDLER(process_handler)
         struct process *process = process_create(psn);
         if (!process) return noErr;
 
-        if ((string_equals(process->name, "Dock")) &&
-            (scripting_addition_is_installed())) {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                scripting_addition_load();
-            });
-        }
-
         if ((!process->background) &&
             (!process->lsuielement) &&
             (!process->xpc)) {
