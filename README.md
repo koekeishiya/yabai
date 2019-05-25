@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/koekeishiya/yabai.svg?branch=master)](https://travis-ci.org/koekeishiya/yabai)
 
-![img](https://user-images.githubusercontent.com/6175959/57938534-a5163880-78c8-11e9-9b98-fbea9d32f348.png)
+![img](https://user-images.githubusercontent.com/6175959/58374447-adace580-7f3e-11e9-9ed7-1146cfac7de4.png)
 
 **yabai** started as a C99 rewrite of [*chunkwm*](https://github.com/koekeishiya/chunkwm), originally supposed to be its first RC version.
 
