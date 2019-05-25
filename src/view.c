@@ -176,8 +176,9 @@ void window_node_flush(struct window_node *node)
     if (window_node_is_occupied(node)) {
         struct ax_window *window = window_manager_find_window(&g_window_manager, node->window_id);
         if (window) {
-            window_manager_move_window(window, node->area.x, node->area.y);
-            window_manager_resize_window(window, node->area.w, node->area.h);
+            float offset = window->border.enabled ? 0.375f * window->border.width : 0.0f;
+            window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
+            window_manager_resize_window(window, node->area.w - 2*offset, node->area.h - 2*offset);
         }
     }
 
