@@ -968,8 +968,11 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     }
 }
 
-void window_manager_toggle_window_border(struct ax_window *window)
+void window_manager_toggle_window_border(struct window_manager *wm, struct ax_window *window)
 {
+    struct view *view = window_manager_find_managed_window(wm, window);
+    struct window_node *node = view ? view_find_window_node(view->root, window->id) : NULL;
+
     if (window->border.enabled) {
         border_window_hide(window);
         window->border.enabled = false;
@@ -977,6 +980,8 @@ void window_manager_toggle_window_border(struct ax_window *window)
         window->border.enabled = true;
         border_window_refresh(window);
     }
+
+    if (node) window_node_flush(node);
 }
 
 void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)

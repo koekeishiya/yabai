@@ -1058,7 +1058,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_BORDER)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
-                window_manager_toggle_window_border(window);
+                window_manager_toggle_window_border(&g_window_manager, window);
             } else {
                 daemon_fail(rsp, "could not locate the focused window.\n");
             }
