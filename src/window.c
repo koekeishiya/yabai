@@ -291,7 +291,12 @@ struct ax_window *window_create(struct ax_application *application, AXUIElementR
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;
     border_window_create(window);
-    border_window_refresh(window);
+
+    if ((!application->is_hidden) &&
+        (!window->is_minimized)) {
+        border_window_refresh(window);
+    }
+
     return window;
 }
 
