@@ -815,7 +815,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
         while (bucket) {
             if (bucket->value) {
                 struct ax_window *window = bucket->value;
-                border_window_show(window);
+                if ((!window->application->is_hidden) &&
+                    (!window->is_minimized)) {
+                    border_window_show(window);
+                }
             }
 
             bucket = bucket->next;
