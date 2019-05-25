@@ -873,21 +873,23 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
     if (h > r - y) h = r - y;
 
     uint64_t sid = display_space_id(did);
-    int mci = space_manager_mission_control_index(sid);
+    struct view *dview = space_manager_find_view(sm, sid);
 
     CGRect bounds = display_bounds_constrained(did);
-    bounds.origin.x    += view_lookup_padding(sm->left_padding, mci);
-    bounds.size.width  -= (view_lookup_padding(sm->left_padding, mci) + view_lookup_padding(sm->right_padding, mci));
-    bounds.origin.y    += view_lookup_padding(sm->top_padding, mci);
-    bounds.size.height -= (view_lookup_padding(sm->top_padding, mci) + view_lookup_padding(sm->bottom_padding, mci));
+    if (dview && dview->enable_padding) {
+        bounds.origin.x    += dview->left_padding;
+        bounds.size.width  -= (dview->left_padding + dview->right_padding);
+        bounds.origin.y    += dview->top_padding;
+        bounds.size.height -= (dview->top_padding + dview->bottom_padding);
+    }
 
+    float offset = window->border.enabled ? 0.375f * window->border.width : 0.0f;
     float cw = bounds.size.width / c;
     float ch = bounds.size.height / r;
-
-    float fx = bounds.origin.x + bounds.size.width  - cw * (c - x);
-    float fy = bounds.origin.y + bounds.size.height - ch * (r - y);
-    float fw = cw * w;
-    float fh = ch * h;
+    float fx = bounds.origin.x + bounds.size.width  - cw * (c - x) + offset;
+    float fy = bounds.origin.y + bounds.size.height - ch * (r - y) + offset;
+    float fw = cw * w - 2 * offset;
+    float fh = ch * h - 2 * offset;
 
     window_manager_move_window(window, fx, fy);
     window_manager_resize_window(window, fw, fh);
