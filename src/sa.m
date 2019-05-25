@@ -215,7 +215,7 @@ int scripting_addition_load(void)
     [dock setTimeout:10*60];
     [dock setSendMode:kAEWaitReply];
     [dock sendEvent:'ascr' id:'gdut' parameters:0];
-    [dock setSendMode:kAENoReply];
+    [dock setSendMode:kAEWaitReply];
     [dock sendEvent:'CHWM' id:'injc' parameters:0];
     [dock release];
 
