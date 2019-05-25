@@ -5,7 +5,7 @@ yabai -m config mouse_follows_focus          off
 yabai -m config focus_follows_mouse          off
 yabai -m config window_shadow                float
 yabai -m config window_border                on
-yabai -m config window_border_width          2
+yabai -m config window_border_width          4
 yabai -m config active_window_border_color   0xff775759
 yabai -m config normal_window_border_color   0xff505050
 yabai -m config insert_window_border_color   0xffd75f5f
