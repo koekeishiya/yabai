@@ -19,7 +19,7 @@ static int border_detect_window_level(struct ax_window *window, bool topmost)
     int window_level = 0;
     SLSGetWindowLevel(g_connection, window->id, &window_level);
 
-    int key = window_level == 0 ? topmost ? 5 : 4 : 14;
+    int key = topmost ? kCGModalPanelWindowLevelKey : window_level == 0 ? kCGNormalWindowLevelKey : kCGModalPanelWindowLevelKey;
     return CGWindowLevelForKey(key);
 }
 
@@ -137,7 +137,7 @@ void border_window_refresh(struct ax_window *window)
         { border->width, border->width },
         { region.size.width  - border->width,
           region.size.height - border->width }
-    }), -0.375f * border->width, -0.375f * border->width);
+    }), -0.5f * border->width, -0.5f * border->width);
 
     CGRect clear_region = {
         { 0, 0 },
@@ -153,7 +153,7 @@ void border_window_refresh(struct ax_window *window)
     CFTypeRef region_ref;
     CGSNewRegionWithRect(&region, &region_ref);
 
-    float radius = border_radius_clamp(border_frame, 1.125f * border->width);
+    float radius = border_radius_clamp(border_frame, 1.25f * border->width);
     CGMutablePathRef path = border_normal_shape(border_frame, radius);
 
     SLSOrderWindow(g_connection, border->id, 0, window->id);
