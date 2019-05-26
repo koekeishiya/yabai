@@ -80,6 +80,7 @@ struct view
 #define view_lookup_padding(p, i) (p[i] == -1 ? p[0] : p[i])
 #define view_lookup_gap(p, i) (p[i] == -1 ? p[0] : p[i])
 
+float window_node_border_window_offset(struct ax_window *window);
 void window_node_flush(struct window_node *node);
 struct window_node *window_node_find_prev_leaf(struct window_node *node);
 struct window_node *window_node_find_next_leaf(struct window_node *node);

@@ -223,24 +223,12 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct ax_
 
 void window_manager_move_window(struct ax_window *window, float x, float y)
 {
-#if 0
-    int sockfd;
-    char message[255];
-
-    if (socket_connect_in(&sockfd, 5050)) {
-        snprintf(message, sizeof(message), "window_move %d %.2f %.2f", window->id, x, y);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-#else
     CGPoint position = CGPointMake(x, y);
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
     if (!position_ref) return;
 
     AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref);
     CFRelease(position_ref);
-#endif
 }
 
 void window_manager_resize_window(struct ax_window *window, float width, float height)
@@ -954,18 +942,21 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     if (view->root->zoom && view->root->zoom->window_id != window->id) {
         struct ax_window *zoomed_window = window_manager_find_window(wm, view->root->zoom->window_id);
         if (zoomed_window) {
-            window_manager_move_window(zoomed_window, view->root->zoom->area.x, view->root->zoom->area.y);
-            window_manager_resize_window(zoomed_window, view->root->zoom->area.w, view->root->zoom->area.h);
+            float offset = window_node_border_window_offset(zoomed_window);
+            window_manager_move_window(zoomed_window, view->root->zoom->area.x + offset, view->root->zoom->area.y + offset);
+            window_manager_resize_window(zoomed_window, view->root->zoom->area.w - 2*offset, view->root->zoom->area.h - 2*offset);
         }
     }
 
     if (view->root->zoom && view->root->zoom->window_id == window->id) {
-        window_manager_move_window(window, view->root->zoom->area.x, view->root->zoom->area.y);
-        window_manager_resize_window(window, view->root->zoom->area.w, view->root->zoom->area.h);
+        float offset = window_node_border_window_offset(window);
+        window_manager_move_window(window, view->root->zoom->area.x + offset, view->root->zoom->area.y + offset);
+        window_manager_resize_window(window, view->root->zoom->area.w - 2*offset, view->root->zoom->area.h - 2*offset);
         view->root->zoom = NULL;
     } else {
-        window_manager_move_window(window, view->root->area.x, view->root->area.y);
-        window_manager_resize_window(window, view->root->area.w, view->root->area.h);
+        float offset = window_node_border_window_offset(window);
+        window_manager_move_window(window, view->root->area.x + offset, view->root->area.y + offset);
+        window_manager_resize_window(window, view->root->area.w - 2*offset, view->root->area.h - 2*offset);
         view->root->zoom = view_find_window_node(view->root, window->id);
     }
 }
