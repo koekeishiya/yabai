@@ -291,7 +291,8 @@ struct ax_window *window_create(struct ax_application *application, AXUIElementR
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;
 
-    if (window_is_standard(window)) {
+    if ((window_is_standard(window)) ||
+        (window_is_dialog(window))) {
         border_window_create(window);
 
         if ((!application->is_hidden) &&
