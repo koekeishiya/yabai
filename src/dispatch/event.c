@@ -232,7 +232,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 
         if ((!window_is_standard(window)) ||
             (!window_can_move(window)) ||
-            (!window_can_resize(window))) {
+            (window_is_sticky(window))) {
             window->is_floating = true;
         }
 

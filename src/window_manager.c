@@ -143,7 +143,6 @@ bool window_manager_should_manage_window(struct ax_window *window)
 {
     return ((window_is_standard(window)) &&
             (window_can_move(window)) &&
-            (window_can_resize(window)) &&
             (!window_is_sticky(window)) &&
             (!window->is_floating));
 }
