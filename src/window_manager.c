@@ -870,7 +870,7 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
         bounds.size.height -= (dview->top_padding + dview->bottom_padding);
     }
 
-    float offset = window->border.enabled ? 0.375f * window->border.width : 0.0f;
+    float offset = window_node_border_window_offset(window);
     float cw = bounds.size.width / c;
     float ch = bounds.size.height / r;
     float fx = bounds.origin.x + bounds.size.width  - cw * (c - x) + offset;

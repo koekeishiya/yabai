@@ -18,9 +18,7 @@ static int border_detect_window_level(struct ax_window *window, bool topmost)
 {
     int window_level = 0;
     SLSGetWindowLevel(g_connection, window->id, &window_level);
-
-    int key = topmost ? kCGModalPanelWindowLevelKey : window_level == 0 ? kCGNormalWindowLevelKey : kCGModalPanelWindowLevelKey;
-    return CGWindowLevelForKey(key);
+    return window_level;
 }
 
 static void border_window_ensure_same_space(struct ax_window *window)
@@ -131,29 +129,18 @@ void border_window_refresh(struct ax_window *window)
     struct border *border = &window->border;
     border_window_ensure_same_space(window);
 
-    CGRect region = window_ax_frame(window);
-
-    CGRect border_frame = CGRectInset(((CGRect) {
-        { border->width, border->width },
-        { region.size.width  - border->width,
-          region.size.height - border->width }
-    }), -0.5f * border->width, -0.5f * border->width);
-
-    CGRect clear_region = {
-        { 0, 0 },
-        { region.size.width  + border->width,
-          region.size.height + border->width }
-    };
-
-    region.origin.x -= border->width / 2;
-    region.origin.y -= border->width / 2;
-    region.size.width  += border->width;
-    region.size.height += border->width;
-
     CFTypeRef region_ref;
+    CGRect region = window_ax_frame(window);
+    region.origin.x -= border->width;
+    region.origin.y -= border->width;
+    region.size.width  += (2*border->width);
+    region.size.height += (2*border->width);
     CGSNewRegionWithRect(&region, &region_ref);
 
-    float radius = border_radius_clamp(border_frame, 1.25f * border->width);
+    CGRect border_frame = { { 2, 2 }, { region.size.width - 4, region.size.height - 4} };
+    CGRect clear_region = { { 0, 0 }, { region.size.width, region.size.height } };
+
+    float radius = border_radius_clamp(border_frame, 2.0f * border->width);
     CGMutablePathRef path = border_normal_shape(border_frame, radius);
 
     SLSOrderWindow(g_connection, border->id, 0, window->id);
@@ -242,10 +229,10 @@ void border_window_create(struct ax_window *window)
     CGSNewRegionWithRect(&frame, &frame_region);
 
     uint32_t tags[2] = {
-          kCGSModalWindowTagBit |
-          kCGSDisableShadowTagBit |
-          kCGSHighQualityResamplingTagBit |
-          kCGSIgnoreForExposeTagBit
+        kCGSModalWindowTagBit |
+        kCGSDisableShadowTagBit |
+        kCGSHighQualityResamplingTagBit |
+        kCGSIgnoreForExposeTagBit
     };
 
     SLSNewWindow(g_connection, 2, 0.0f, 0.0f, frame_region, &border->id);

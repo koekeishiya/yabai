@@ -173,7 +173,7 @@ static void window_node_update(struct view *view, struct window_node *node)
 
 float window_node_border_window_offset(struct ax_window *window)
 {
-    float offset = window->border.enabled ? 0.5f * window->border.width : 0.0f;
+    float offset = window->border.enabled ? window->border.width : 0.0f;
     return offset;
 }
 
