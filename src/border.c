@@ -143,6 +143,7 @@ void border_window_refresh(struct ax_window *window)
     float radius = border_radius_clamp(border_frame, 2.0f * border->width);
     CGMutablePathRef path = border_normal_shape(border_frame, radius);
 
+    SLSDisableUpdate(g_connection);
     SLSOrderWindow(g_connection, border->id, 0, window->id);
     SLSSetWindowShape(g_connection, border->id, 0.0f, 0.0f, region_ref);
     CGContextClearRect(border->context, clear_region);
@@ -161,6 +162,7 @@ void border_window_refresh(struct ax_window *window)
 
     CGContextFlush(border->context);
     SLSOrderWindow(g_connection, border->id, 1, window->id);
+    SLSReenableUpdate(g_connection);
 
     CGSReleaseRegion(region_ref);
     CGPathRelease(path);

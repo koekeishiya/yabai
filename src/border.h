@@ -1,6 +1,8 @@
 #ifndef BORDER_WINDOW_H
 #define BORDER_WINDOW_H
 
+extern CGError SLSDisableUpdate(int cid);
+extern CGError SLSReenableUpdate(int cid);
 extern CGError SLSNewWindow(int cid, int type, CGFloat x, CGFloat y, CFTypeRef region, uint32_t *wid);
 extern CGError SLSReleaseWindow(int cid, uint32_t wid);
 extern CGError SLSSetWindowTags(int cid, uint32_t wid, uint32_t tags[2], int tag_size);
