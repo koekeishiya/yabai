@@ -137,7 +137,7 @@ void border_window_refresh(struct ax_window *window)
     region.size.height += (2*border->width);
     CGSNewRegionWithRect(&region, &region_ref);
 
-    CGRect border_frame = { { 2, 2 }, { region.size.width - 4, region.size.height - 4} };
+    CGRect border_frame = { { 0.5f*border->width, 0.5f*border->width }, { region.size.width - border->width, region.size.height - border->width} };
     CGRect clear_region = { { 0, 0 }, { region.size.width, region.size.height } };
 
     float radius = border_radius_clamp(border_frame, 2.0f * border->width);
