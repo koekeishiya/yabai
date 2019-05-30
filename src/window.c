@@ -208,6 +208,14 @@ bool window_can_resize(struct ax_window *window)
     return result;
 }
 
+bool window_is_undersized(struct ax_window *window)
+{
+    CGRect frame = window_frame(window);
+    if (frame.size.width  < 200.0f) return true;
+    if (frame.size.height < 200.0f) return true;
+    return false;
+}
+
 bool window_is_minimized(struct ax_window *window)
 {
     Boolean result = 0;

@@ -61,6 +61,7 @@ CFStringRef window_role(struct ax_window *window);
 CFStringRef window_subrole(struct ax_window *window);
 bool window_can_move(struct ax_window *window);
 bool window_can_resize(struct ax_window *window);
+bool window_is_undersized(struct ax_window *window);
 bool window_is_minimized(struct ax_window *window);
 bool window_is_fullscreen(struct ax_window *window);
 bool window_is_sticky(struct ax_window *window);

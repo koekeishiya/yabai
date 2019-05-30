@@ -723,7 +723,8 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
         if ((!application->is_hidden) && (!window->is_minimized)) {
             if ((!window_is_standard(window)) ||
                 (!window_can_move(window)) ||
-                (window_is_sticky(window))) {
+                (window_is_sticky(window)) ||
+                (window_is_undersized(window))) {
                 window_manager_make_children_floating(wm, window, true);
                 window_manager_make_floating(window->id, true);
                 window->is_floating = true;

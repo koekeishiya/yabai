@@ -229,7 +229,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 
         if ((!window_is_standard(window)) ||
             (!window_can_move(window)) ||
-            (window_is_sticky(window))) {
+            (window_is_sticky(window)) ||
+            (window_is_undersized(window))) {
             window_manager_make_children_floating(&g_window_manager, window, true);
             window_manager_make_floating(window->id, true);
             window->is_floating = true;
