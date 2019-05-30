@@ -69,10 +69,7 @@ struct process *process_create(ProcessSerialNumber psn)
     CFDictionaryRef process_dict = ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
     if (process_dict) {
         CFBooleanRef process_lsuielement = CFDictionaryGetValue(process_dict, CFSTR("LSUIElement"));
-        if (process_lsuielement) {
-            process->lsuielement = CFBooleanGetValue(process_lsuielement);
-            CFRelease(process_lsuielement);
-        }
+        if (process_lsuielement) process->lsuielement = CFBooleanGetValue(process_lsuielement);
         CFRelease(process_dict);
     }
 

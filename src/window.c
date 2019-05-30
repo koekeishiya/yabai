@@ -67,7 +67,6 @@ uint64_t window_space(struct ax_window *window)
 
     CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, 0);
     CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &sid);
-    CFRelease(id_ref);
 
     CFRelease(space_list_ref);
 err:
@@ -91,7 +90,6 @@ uint64_t *window_space_list(struct ax_window *window, int *count)
     for (int i = 0; i < *count; ++i) {
         CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, i);
         CFNumberGetValue(id_ref, CFNumberGetType(id_ref), space_list + i);
-        CFRelease(id_ref);
     }
 
 out:

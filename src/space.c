@@ -40,7 +40,6 @@ uint32_t *space_window_list_for_connection(uint64_t sid, int cid, int *count)
     for (int i = 0; i < *count; ++i) {
         CFNumberRef id_ref = CFArrayGetValueAtIndex(window_list_ref, i);
         CFNumberGetValue(id_ref, CFNumberGetType(id_ref), window_list + i);
-        CFRelease(id_ref);
     }
 
 out:
