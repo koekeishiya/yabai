@@ -892,7 +892,7 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
 void window_manager_make_children_floating(struct window_manager *wm, struct ax_window *window, bool floating)
 {
     uint64_t sid = window_space(window);
-    assert(sid);
+    if (!sid) sid = space_manager_active_space();
 
     int count;
     uint32_t *window_list = space_window_list_for_connection(sid, window->connection, &count);
