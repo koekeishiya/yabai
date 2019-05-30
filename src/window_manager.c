@@ -695,51 +695,38 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
 void window_manager_add_application_windows(struct window_manager *wm, struct ax_application *application)
 {
     int window_count;
-    struct ax_window *window;
-    struct ax_window **window_list;
-
-    window_list = application_window_list(application, &window_count);
+    struct ax_window **window_list = application_window_list(application, &window_count);
     if (!window_list) return;
 
     for (int window_index = 0; window_index < window_count; ++window_index) {
-        window = window_list[window_index];
-
-        if (!window->id) {
-            goto free_win;
-        }
-
-        if (window_manager_find_window(wm, window->id)) {
-            goto free_win;
-        }
-
-        if (!window_observe(window)) {
-            goto uobs_win;
+        struct ax_window *window = window_list[window_index];
+        if (!window->id || window_manager_find_window(wm, window->id)) {
+            window_destroy(window);
+            continue;
         }
 
         window_manager_set_window_opacity(window, wm->normal_window_opacity);
         window_manager_purify_window(wm, window);
-        window_manager_add_window(wm, window);
 
-        if ((!application->is_hidden) && (!window->is_minimized)) {
-            if ((!window_is_standard(window)) ||
-                (!window_can_move(window)) ||
-                (window_is_sticky(window)) ||
-                (window_is_undersized(window))) {
-                window_manager_make_children_floating(wm, window, true);
-                window_manager_make_floating(window->id, true);
-                window->is_floating = true;
+        if (window_observe(window)) {
+            window_manager_add_window(wm, window);
+
+            if ((!application->is_hidden) && (!window->is_minimized)) {
+                if ((!window_is_standard(window)) ||
+                    (!window_can_move(window)) ||
+                    (window_is_sticky(window)) ||
+                    (window_is_undersized(window))) {
+                    window_manager_make_children_floating(wm, window, true);
+                    window_manager_make_floating(window->id, true);
+                    window->is_floating = true;
+                }
             }
+        } else {
+            window_manager_make_children_floating(wm, window, true);
+            window_manager_make_floating(window->id, true);
+            window_unobserve(window);
+            window_destroy(window);
         }
-
-        goto next;
-
-uobs_win:
-        window_manager_make_children_floating(wm, window, true);
-        window_manager_make_floating(window->id, true);
-        window_unobserve(window);
-free_win:
-        window_destroy(window);
-next:;
     }
 
     free(window_list);
