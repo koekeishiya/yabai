@@ -49,7 +49,6 @@ static void border_window_ensure_same_space(struct ax_window *window)
     for (int i = 0; i < CFArrayGetCount(border_space_list_ref); ++i) {
         CFNumberRef id_ref = CFArrayGetValueAtIndex(border_space_list_ref, i);
         CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &b_sid);
-        CFRelease(id_ref);
 
         if (b_sid == w_sid) {
             found = true;
