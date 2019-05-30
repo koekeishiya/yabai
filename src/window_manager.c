@@ -731,6 +731,8 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
         goto next;
 
 uobs_win:
+        window_manager_make_children_floating(wm, window, true);
+        window_manager_make_floating(window->id, true);
         window_unobserve(window);
 free_win:
         window_destroy(window);
