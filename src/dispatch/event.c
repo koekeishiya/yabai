@@ -166,7 +166,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         if (!window) continue;
 
         if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
+            uint64_t sid = window_space(window);
+            assert(sid);
+
+            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, sid);
             window_manager_add_managed_window(&g_window_manager, window, view);
             border_window_show(window);
         }
