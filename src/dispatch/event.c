@@ -249,6 +249,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         }
     } else {
         debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
+        window_manager_make_children_floating(&g_window_manager, window, true);
+        window_manager_make_floating(window->id, true);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
         window_unobserve(window);
         window_destroy(window);
