@@ -118,7 +118,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
         if (focused_window) {
             border_window_activate(focused_window);
             window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
-            window_manager_center_mouse(&g_window_manager, focused_window);
+
+            if (g_mouse_state.ffm_window_id != focused_window->id) {
+                window_manager_center_mouse(&g_window_manager, focused_window);
+            } else {
+                g_mouse_state.ffm_window_id = 0;
+            }
+
             g_window_manager.reactivate_focused_window = display_manager_active_display_is_animating();
         }
     }
@@ -316,7 +322,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
 
     border_window_activate(window);
     window_manager_set_window_opacity(window, g_window_manager.active_window_opacity);
-    window_manager_center_mouse(&g_window_manager, window);
+
+    if (g_mouse_state.ffm_window_id != window->id) {
+        window_manager_center_mouse(&g_window_manager, window);
+    } else {
+        g_mouse_state.ffm_window_id = 0;
+    }
 
     g_window_manager.last_window_id = g_window_manager.focused_window_id;
     g_window_manager.focused_window_id = window->id;
@@ -495,7 +506,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
         struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
         if (focused_window) {
             border_window_activate(focused_window);
-            window_manager_center_mouse(&g_window_manager, focused_window);
+
+            if (g_mouse_state.ffm_window_id != focused_window->id) {
+                window_manager_center_mouse(&g_window_manager, focused_window);
+            } else {
+                g_mouse_state.ffm_window_id = 0;
+            }
         }
     }
 
@@ -716,6 +732,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     if (g_window_manager.ffm_mode != FFM_DISABLED) {
         struct ax_window *window = window_manager_find_window_at_point(&g_window_manager, point);
         if (window && window->id != g_window_manager.focused_window_id && window_is_standard(window)) {
+            g_mouse_state.ffm_window_id = window->id;
             if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
                 window_manager_focus_window_without_raise(window->id);
             } else {

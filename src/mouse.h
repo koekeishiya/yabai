@@ -26,6 +26,7 @@ struct mouse_state
     uint64_t last_moved_time;
     struct ax_window *window;
     CGRect window_frame;
+    uint32_t ffm_window_id;
 };
 
 static char *mouse_mod_str[] =
