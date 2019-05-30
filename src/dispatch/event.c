@@ -166,12 +166,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         if (!window) continue;
 
         if (window_manager_should_manage_window(window)) {
-            int space_count = 0;
-            uint64_t *space_list = window_space_list(window, &space_count);
-            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, *space_list);
+            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
-            free(space_list);
-
             border_window_show(window);
         }
     }
