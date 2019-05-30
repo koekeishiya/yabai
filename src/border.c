@@ -163,7 +163,7 @@ void border_window_refresh(struct ax_window *window)
     SLSOrderWindow(g_connection, border->id, 1, window->id);
     SLSReenableUpdate(g_connection);
 
-    CGSReleaseRegion(region_ref);
+    CFRelease(region_ref);
     CGPathRelease(path);
 }
 
@@ -247,7 +247,7 @@ void border_window_create(struct ax_window *window)
     CGContextSetShouldAntialias(border->context, true);
     CGContextSetLineWidth(border->context, border->width);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
-    CGSReleaseRegion(frame_region);
+    CFRelease(frame_region);
 }
 
 void border_window_destroy(struct ax_window *window)
