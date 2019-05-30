@@ -168,16 +168,6 @@ static bool token_is_valid(struct token token)
     return token.text && token.length > 0;
 }
 
-static uint64_t token_to_uint64t(struct token token)
-{
-    uint64_t result = 0;
-    char buffer[token.length + 1];
-    memcpy(buffer, token.text, token.length);
-    buffer[token.length] = '\0';
-    sscanf(buffer, "%lld", &result);
-    return result;
-}
-
 static uint32_t token_to_uint32t(struct token token)
 {
     uint32_t result = 0;

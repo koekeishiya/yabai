@@ -69,7 +69,6 @@ uint64_t window_space(struct ax_window *window)
     CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &sid);
     CFRelease(id_ref);
 
-out:
     CFRelease(space_list_ref);
 err:
     CFRelease(window_list_ref);
