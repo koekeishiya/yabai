@@ -16,7 +16,6 @@ extern CGError SLSSetWindowLevel(int cid, uint32_t wid, int level);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
 extern CGContextRef SLWindowContextCreate(int cid, uint32_t wid, CFDictionaryRef options);
 extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *outRegion);
-extern CGError CGSReleaseRegion(CFTypeRef region);
 
 #define kCGSModalWindowTagBit           (1 << 31)
 #define kCGSDisableShadowTagBit         (1 <<  3)
