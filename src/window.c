@@ -65,8 +65,11 @@ uint64_t window_space(struct ax_window *window)
     CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
     if (!space_list_ref) goto err;
 
-    CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, 0);
-    CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &sid);
+    int count = CFArrayGetCount(space_list_ref);
+    if (count) {
+        CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, 0);
+        CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &sid);
+    }
 
     CFRelease(space_list_ref);
 err:
