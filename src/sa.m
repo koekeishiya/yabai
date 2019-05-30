@@ -209,9 +209,11 @@ int scripting_addition_load(void)
 {
     if (!scripting_addition_is_installed()) return 1;
 
-    SBApplication *dock = [[SBApplication applicationWithBundleIdentifier:@"com.apple.Dock"] retain];
-    if (dock == nil) return 2;
+    // @memory_leak
+    // [SBApplication applicationWithBundleIdentifier] leaks memory and there is nothing we
+    // can do about it.. So much for all the automatic memory management techniques in objc
 
+    SBApplication *dock = [SBApplication applicationWithBundleIdentifier:@"com.apple.Dock"];
     [dock setTimeout:10*60];
     [dock setSendMode:kAEWaitReply];
     [dock sendEvent:'ascr' id:'gdut' parameters:0];
