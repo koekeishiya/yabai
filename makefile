@@ -12,7 +12,7 @@ BINS           = $(BUILD_PATH)/yabai
 
 all: clean $(BINS)
 
-install: BUILD_FLAGS=-std=c99 -O2
+install: BUILD_FLAGS=-std=c99 -Wall -O2
 install: clean $(BINS)
 
 man:
