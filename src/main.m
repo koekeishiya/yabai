@@ -259,7 +259,7 @@ static void parse_arguments(int argc, char **argv)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-void init_misc_settings(void)
+static inline void init_misc_settings(void)
 {
     NSApplicationLoad();
     CGSetLocalEventsSuppressionInterval(0.0f);
