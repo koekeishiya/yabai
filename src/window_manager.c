@@ -905,7 +905,7 @@ void window_manager_make_children_floating(struct window_manager *wm, struct ax_
 
     for (int i = 0; i < count; ++i) {
         struct ax_window *child = window_manager_find_window(wm, window_list[i]);
-        if (!child || !window_is_standard(child) || !window_can_move(child)) {
+        if ((!child) || (!window_is_standard(child) && !window_can_move(child))) {
             window_manager_make_floating(window_list[i], floating);
         }
     }
