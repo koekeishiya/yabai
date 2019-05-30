@@ -24,15 +24,13 @@ bool socket_write(int sockfd, char *message)
 bool socket_connect_in(int *sockfd, int port)
 {
     struct sockaddr_in socket_address;
-    struct hostent *server;
 
     *sockfd = socket(PF_INET, SOCK_STREAM, 0);
     if (*sockfd == -1) return false;
 
-    server = gethostbyname("localhost");
     socket_address.sin_family = AF_INET;
     socket_address.sin_port = htons(port);
-    memcpy(&socket_address.sin_addr.s_addr, server->h_addr, server->h_length);
+    socket_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     memset(&socket_address.sin_zero, '\0', 8);
 
     return connect(*sockfd, (struct sockaddr*) &socket_address, sizeof(struct sockaddr)) != -1;
