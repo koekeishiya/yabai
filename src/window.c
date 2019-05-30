@@ -287,6 +287,7 @@ struct ax_window *window_create(struct ax_application *application, AXUIElementR
     window->application = application;
     window->ref = window_ref;
     window->id = ax_window_id(window->ref);
+    SLSGetWindowOwner(g_connection, window->id, &window->connection);
     window->is_minimized = window_is_minimized(window);
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;

@@ -9,6 +9,7 @@ typedef OBSERVER_CALLBACK(observer_callback);
 #define AX_APPLICATION_WINDOW_MOVED_INDEX         2
 #define AX_APPLICATION_WINDOW_RESIZED_INDEX       3
 #define AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX 4
+#define AX_APPLICATION_WINDOW_MENU_OPENED_INDEX   5
 
 #define AX_APPLICATION_WINDOW_CREATED       (1 << AX_APPLICATION_WINDOW_CREATED_INDEX)
 #define AX_APPLICATION_WINDOW_FOCUSED       (1 << AX_APPLICATION_WINDOW_FOCUSED_INDEX)
@@ -25,11 +26,12 @@ static const CFStringRef kAXFocusedTabChangedNotification = CFSTR("AXFocusedTabC
 
 static CFStringRef ax_application_notification[] =
 {
-    [AX_APPLICATION_WINDOW_CREATED_INDEX]       = kAXWindowCreatedNotification,
+    [AX_APPLICATION_WINDOW_CREATED_INDEX]       = kAXCreatedNotification,
     [AX_APPLICATION_WINDOW_FOCUSED_INDEX]       = kAXFocusedWindowChangedNotification,
     [AX_APPLICATION_WINDOW_MOVED_INDEX]         = kAXWindowMovedNotification,
     [AX_APPLICATION_WINDOW_RESIZED_INDEX]       = kAXWindowResizedNotification,
-    [AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX] = kAXTitleChangedNotification
+    [AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX] = kAXTitleChangedNotification,
+    [AX_APPLICATION_WINDOW_MENU_OPENED_INDEX]   = kAXMenuOpenedNotification
 };
 
 struct ax_application

@@ -40,6 +40,7 @@ struct ax_window
 {
     struct ax_application *application;
     AXUIElementRef ref;
+    int connection;
     uint32_t id;
     uint32_t **volatile id_ptr;
     uint8_t notification;

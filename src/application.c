@@ -4,17 +4,9 @@ extern struct eventloop g_eventloop;
 
 static OBSERVER_CALLBACK(application_notification_handler)
 {
-    if (CFEqual(notification, kAXWindowCreatedNotification)) {
+    if (CFEqual(notification, kAXCreatedNotification)) {
         struct event *event;
         event_create(event, WINDOW_CREATED, (void *) CFRetain(element));
-        eventloop_post(&g_eventloop, event);
-    } else if (CFEqual(notification, kAXSheetCreatedNotification)) {
-        struct event *event;
-        event_create(event, WINDOW_SHEET_CREATED, (void *) CFRetain(element));
-        eventloop_post(&g_eventloop, event);
-    } else if (CFEqual(notification, kAXDrawerCreatedNotification)) {
-        struct event *event;
-        event_create(event, WINDOW_DRAWER_CREATED, (void *) CFRetain(element));
         eventloop_post(&g_eventloop, event);
     } else if (CFEqual(notification, kAXUIElementDestroyedNotification)) {
         /*
@@ -41,6 +33,8 @@ static OBSERVER_CALLBACK(application_notification_handler)
         /* NOTE(koekeishiya): Option 'b' has been implemented. Leave note for future reference. */
 
         uint32_t *window_id_ptr = *(uint32_t **) context;
+        if (!window_id_ptr) return;
+
         uint32_t window_id = *window_id_ptr;
         while (!__sync_bool_compare_and_swap((uint32_t **) context, window_id_ptr, NULL));
 
@@ -105,6 +99,13 @@ static OBSERVER_CALLBACK(application_notification_handler)
 
         struct event *event;
         event_create(event, WINDOW_TITLE_CHANGED, (void *)(intptr_t) window_id);
+        eventloop_post(&g_eventloop, event);
+    } else if (CFEqual(notification, kAXMenuOpenedNotification)) {
+        uint32_t window_id = ax_window_id(element);
+        if (!window_id) return;
+
+        struct event *event;
+        event_create(event, MENU_OPENED, (void *)(intptr_t) window_id);
         eventloop_post(&g_eventloop, event);
     }
 }

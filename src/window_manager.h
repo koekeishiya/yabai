@@ -90,10 +90,10 @@ void window_manager_remove_managed_window(struct window_manager *wm, struct ax_w
 void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view);
 bool window_manager_find_lost_activated_event(struct window_manager *wm, pid_t pid);
 void window_manager_remove_lost_activated_event(struct window_manager *wm, pid_t pid);
-void window_manager_add_lost_activated_event(struct window_manager *wm, pid_t pid, enum event_type type);
+void window_manager_add_lost_activated_event(struct window_manager *wm, pid_t pid);
 bool window_manager_find_lost_focused_event(struct window_manager *wm, uint32_t window_id);
 void window_manager_remove_lost_focused_event(struct window_manager *wm, uint32_t window_id);
-void window_manager_add_lost_focused_event(struct window_manager *wm, uint32_t window_id, enum event_type type);
+void window_manager_add_lost_focused_event(struct window_manager *wm, uint32_t window_id);
 struct ax_window *window_manager_find_window(struct window_manager *wm, uint32_t window_id);
 void window_manager_remove_window(struct window_manager *wm, uint32_t window_id);
 void window_manager_add_window(struct window_manager *wm, struct ax_window *window);
@@ -116,6 +116,9 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 void window_manager_add_application_windows(struct window_manager *wm, struct ax_application *application);
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
 void window_manager_purify_window(struct window_manager *wm, struct ax_window *window);
+void window_manager_make_children_floating(struct window_manager *wm, struct ax_window *window, bool floating);
+void window_manager_make_floating(uint32_t wid, bool floating);
+void window_manager_make_sticky(uint32_t wid, bool sticky);
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);

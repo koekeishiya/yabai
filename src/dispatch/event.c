@@ -103,7 +103,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
     if (!application) {
-        window_manager_add_lost_activated_event(&g_window_manager, (pid_t)(intptr_t) context, APPLICATION_ACTIVATED);
+        window_manager_add_lost_activated_event(&g_window_manager, (pid_t)(intptr_t) context);
         return EVENT_SUCCESS;
     }
 
@@ -212,12 +212,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
-    if (!window_id) return EVENT_SUCCESS;
+    if (!window_id || window_manager_find_window(&g_window_manager, window_id)) return EVENT_SUCCESS;
 
     pid_t window_pid = ax_window_pid(context);
     if (!window_pid) return EVENT_SUCCESS;
-
-    if (window_manager_find_window(&g_window_manager, window_id)) return EVENT_SUCCESS;
 
     struct ax_application *application = window_manager_find_application(&g_window_manager, window_pid);
     if (!application) return EVENT_SUCCESS;
@@ -233,6 +231,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         if ((!window_is_standard(window)) ||
             (!window_can_move(window)) ||
             (window_is_sticky(window))) {
+            window_manager_make_children_floating(&g_window_manager, window, true);
+            window_manager_make_floating(window->id, true);
             window->is_floating = true;
         }
 
@@ -254,24 +254,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         window_destroy(window);
     }
 
-    return EVENT_SUCCESS;
-}
-
-static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_SHEET_CREATED)
-{
-    uint32_t window_id = ax_window_id(context);
-    if (!window_id) return EVENT_SUCCESS;
-
-    debug("%s: %d\n", __FUNCTION__, window_id);
-    return EVENT_SUCCESS;
-}
-
-static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DRAWER_CREATED)
-{
-    uint32_t window_id = ax_window_id(context);
-    if (!window_id) return EVENT_SUCCESS;
-
-    debug("%s: %d\n", __FUNCTION__, window_id);
     return EVENT_SUCCESS;
 }
 
@@ -305,7 +287,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
 
     if (!window) {
-        window_manager_add_lost_focused_event(&g_window_manager, window_id, WINDOW_FOCUSED);
+        window_manager_add_lost_focused_event(&g_window_manager, window_id);
         return EVENT_SUCCESS;
     }
 
@@ -315,7 +297,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
     }
 
     if (window_is_minimized(window)) {
-        window_manager_add_lost_focused_event(&g_window_manager, window->id, WINDOW_FOCUSED);
+        window_manager_add_lost_focused_event(&g_window_manager, window->id);
         return EVENT_SUCCESS;
     }
 
@@ -846,6 +828,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
         }
     }
 
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MENU_OPENED)
+{
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    window_manager_make_floating(window_id, true);
     return EVENT_SUCCESS;
 }
 
