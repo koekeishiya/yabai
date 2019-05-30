@@ -84,6 +84,9 @@
 #define MINOR 1
 #define PATCH 0
 
+typedef void (*CGConnectionNotifyProc)(uint32_t type, void *data, size_t data_length, void *context, int cid);
+extern CGError CGSRegisterConnectionNotifyProc(int cid, CGConnectionNotifyProc function, uint32_t event, void *context);
+
 struct eventloop g_eventloop;
 void *g_workspace_context;
 struct process_manager g_process_manager;
@@ -215,6 +218,24 @@ static void exec_config_file(char *config)
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static inline void init_misc_settings(void)
+{
+    NSApplicationLoad();
+    CGSetLocalEventsSuppressionInterval(0.0f);
+    CGEnableEventStateCombining(false);
+    g_connection = SLSMainConnectionID();
+}
+#pragma clang diagnostic pop
+
+static void connection_notification_handler(uint32_t type, void *data, size_t data_length, void *context, int cid)
+{
+    struct event *event;
+    event_create(event, MISSION_CONTROL_ENTER, NULL);
+    eventloop_post(&g_eventloop, event);
+}
+
 static void parse_arguments(int argc, char **argv)
 {
     if ((string_equals(argv[1], VERSION_OPT_LONG)) ||
@@ -255,27 +276,6 @@ static void parse_arguments(int argc, char **argv)
             error("yabai: '%s' is not a valid option!\n", opt);
         }
     }
-}
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-static inline void init_misc_settings(void)
-{
-    NSApplicationLoad();
-    CGSetLocalEventsSuppressionInterval(0.0f);
-    CGEnableEventStateCombining(false);
-    g_connection = SLSMainConnectionID();
-}
-#pragma clang diagnostic pop
-
-typedef void (*CGConnectionNotifyProc)(uint32_t type, void *data, size_t data_length, void *context, int cid);
-extern CGError CGSRegisterConnectionNotifyProc(int cid, CGConnectionNotifyProc function, uint32_t event, void *context);
-
-void connection_notification_handler(uint32_t type, void *data, size_t data_length, void *context, int cid)
-{
-    struct event *event;
-    event_create(event, MISSION_CONTROL_ENTER, NULL);
-    eventloop_post(&g_eventloop, event);
 }
 
 int main(int argc, char **argv)
