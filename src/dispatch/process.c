@@ -67,12 +67,14 @@ struct process *process_create(ProcessSerialNumber psn)
     process->xpc = process_info.processType == 'XPC!';
 
     CFDictionaryRef process_dict = ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
-    CFBooleanRef process_lsuielement = CFDictionaryGetValue(process_dict, CFSTR("LSUIElement"));
-    if (process_lsuielement) {
-        process->lsuielement = CFBooleanGetValue(process_lsuielement);
-        CFRelease(process_lsuielement);
+    if (process_dict) {
+        CFBooleanRef process_lsuielement = CFDictionaryGetValue(process_dict, CFSTR("LSUIElement"));
+        if (process_lsuielement) {
+            process->lsuielement = CFBooleanGetValue(process_lsuielement);
+            CFRelease(process_lsuielement);
+        }
+        CFRelease(process_dict);
     }
-    CFRelease(process_dict);
 
     return process;
 }
