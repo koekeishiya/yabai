@@ -217,13 +217,22 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
-    if (!window_id || window_manager_find_window(&g_window_manager, window_id)) return EVENT_SUCCESS;
+    if (!window_id || window_manager_find_window(&g_window_manager, window_id)) {
+        CFRelease(context);
+        return EVENT_SUCCESS;
+    }
 
     pid_t window_pid = ax_window_pid(context);
-    if (!window_pid) return EVENT_SUCCESS;
+    if (!window_pid) {
+        CFRelease(context);
+        return EVENT_SUCCESS;
+    }
 
     struct ax_application *application = window_manager_find_application(&g_window_manager, window_pid);
-    if (!application) return EVENT_SUCCESS;
+    if (!application) {
+        CFRelease(context);
+        return EVENT_SUCCESS;
+    }
 
     struct ax_window *window = window_create(application, context);
     window_manager_set_window_opacity(window, g_window_manager.normal_window_opacity);
