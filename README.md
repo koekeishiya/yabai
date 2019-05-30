@@ -7,7 +7,7 @@
 However due to major architectural changes, supported systems, and changes to functionality, it is being released separately.
 There are multiple reasons behind these changes, based on the experience I've gained through experimenting with, designing, and using both *kwm*
 and *chunkwm*. Some of these changes are performance related while other changes have been made to keep the user experience simple and more complete,
-attemps to achieve a seamless integration with the operating system (when possible), proper error reporting, and yet still keep the property of being
+attempts to achieve a seamless integration with the operating system (when possible), proper error reporting, and yet still keep the property of being
 customizable.
 
 ### Requirements
