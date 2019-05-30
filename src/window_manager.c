@@ -544,14 +544,16 @@ void window_manager_focus_window_without_raise(uint32_t window_id)
     SLSGetConnectionPSN(window_connection, &window_psn);
     SLSConnectionGetPID(window_connection, &window_pid);
 
-    send_pre_event(&window_psn, window_id);
-    if (g_window_manager.focused_window_pid != window_pid) {
-        _SLPSSetFrontProcessWithOptions(&window_psn, window_id, kCPSUserGenerated);
-    } else {
+    if (g_window_manager.focused_window_pid == window_pid) {
+        send_pre_event(&window_psn, window_id);
         send_de_event(&window_psn, g_window_manager.focused_window_id);
         send_re_event(&window_psn, window_id);
+        send_post_event(&window_psn, window_id);
+    } else {
+        send_pre_event(&window_psn, window_id);
+        _SLPSSetFrontProcessWithOptions(&window_psn, window_id, kCPSUserGenerated);
+        send_post_event(&window_psn, window_id);
     }
-    send_post_event(&window_psn, window_id);
 }
 
 void window_manager_focus_window_with_raise(uint32_t window_id)
@@ -586,7 +588,7 @@ struct ax_window *window_manager_focused_window(struct window_manager *wm)
     struct ax_application *application = window_manager_find_application(wm, process->pid);
     if (!application) return NULL;
 
-    uint32_t window_id = application_main_window(application);
+    uint32_t window_id = application_focused_window(application);
     return window_manager_find_window(wm, window_id);
 }
 
