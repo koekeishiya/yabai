@@ -92,7 +92,6 @@ table_rehash(struct table *table)
 
     for (int i = 0; i < old_capacity; ++i) {
         struct bucket *next_bucket, *old_bucket = old_buckets[i];
-
         while (old_bucket) {
             struct bucket **new_bucket = table_get_bucket(table, old_bucket->key);
             *new_bucket = malloc(sizeof(struct bucket));
@@ -104,8 +103,6 @@ table_rehash(struct table *table)
             free(old_bucket);
             old_bucket = next_bucket;
         }
-
-        free(old_bucket);
     }
 
     free(old_buckets);
