@@ -193,9 +193,9 @@ bool application_is_hidden(struct ax_application *application)
 
 struct ax_window **application_window_list(struct ax_application *application, int *window_count)
 {
-    CFTypeRef window_list_ref;
-    bool result = AXUIElementCopyAttributeValue(application->ref, kAXWindowsAttribute, &window_list_ref) == kAXErrorSuccess;
-    if (!result) return NULL;
+    CFTypeRef window_list_ref = NULL;
+    AXUIElementCopyAttributeValue(application->ref, kAXWindowsAttribute, &window_list_ref);
+    if (!window_list_ref) return NULL;
 
     *window_count = CFArrayGetCount(window_list_ref);
     struct ax_window **window_list = malloc((*window_count) * sizeof(struct ax_window *));
