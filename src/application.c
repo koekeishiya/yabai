@@ -9,29 +9,6 @@ static OBSERVER_CALLBACK(application_notification_handler)
         event_create(event, WINDOW_CREATED, (void *) CFRetain(element));
         eventloop_post(&g_eventloop, event);
     } else if (CFEqual(notification, kAXUIElementDestroyedNotification)) {
-        /*
-         * NOTE(koekeishiya): If this is an actual window, it should be associated
-         * with a valid CGWindowID. HOWEVER, because the window in question has been
-         * destroyed. We are unable to utilize this window reference with the AX API.
-         *
-         * The 'CFEqual()' function can still be used to compare this AXUIElementRef
-         * with any existing window refs that we may have. There are a couple of ways
-         * we can use to track if an actual window is closed.
-         *
-         *   a) Store all window AXUIElementRefs in a local cache that we update upon
-         *      creation and removal. Requires unsorted container with custom comparator
-         *      that uses 'CFEqual()' to match AXUIElementRefs.
-         *
-         *   b) Instead of tracking 'kAXUIElementDestroyedNotification' for an application,
-         *      we have to register this notification separately for every window created.
-         *      By doing this, we can pass our own data containing the information necessary
-         *      to properly identify and report which window was destroyed.
-         *
-         * At the very least, we need to know the windowid of the destroyed window.
-         */
-
-        /* NOTE(koekeishiya): Option 'b' has been implemented. Leave note for future reference. */
-
         uint32_t *window_id_ptr = *(uint32_t **) context;
         if (!window_id_ptr) return;
 
@@ -42,12 +19,6 @@ static OBSERVER_CALLBACK(application_notification_handler)
         event_create(event, WINDOW_DESTROYED, (void *)(uintptr_t) window_id);
         eventloop_post(&g_eventloop, event);
     } else if (CFEqual(notification, kAXFocusedWindowChangedNotification)) {
-        /*
-         * NOTE(koekeishiya): We have to make sure that we can actually interact with the window.
-         * When a window is created, we receive this notification before kAXWindowCreatedNotification.
-         * When a window is deminimized, we receive this notification before the window is visible.
-         */
-
         uint32_t window_id = ax_window_id(element);
         if (!window_id) return;
 
@@ -69,26 +40,11 @@ static OBSERVER_CALLBACK(application_notification_handler)
         event_create(event, WINDOW_RESIZED, (void *)(intptr_t) window_id);
         eventloop_post(&g_eventloop, event);
     } else if (CFEqual(notification, kAXWindowMiniaturizedNotification)) {
-        /*
-         * NOTE(koekeishiya): We cannot register this notification globally for an application.
-         * The AXUIElementRef 'Element' we receive cannot be used with 'AXLibGetWindowID', because
-         * a window that is minimized often return a CGWindowID of 0. We have to register this
-         * notification for every window such that we can pass our own cached window-information.
-         */
-
         struct event *event;
         uint32_t window_id = **((uint32_t **) context);
         event_create(event, WINDOW_MINIMIZED, (void *)(intptr_t) window_id);
         eventloop_post(&g_eventloop, event);
     } else if (CFEqual(notification, kAXWindowDeminiaturizedNotification)) {
-        /*
-         * NOTE(koekeishiya): when a deminimized window pulls the user to the space of that window,
-         * we receive this notification before 'didActiveSpaceChangeNotification'.
-         *
-         * This does NOT happen if a window is deminimized by cmd-clicking the window. The window
-         * will be deminimized on the currently active space, and no space change occur.
-         */
-
         struct event *event;
         uint32_t window_id = **((uint32_t **) context);
         event_create(event, WINDOW_DEMINIMIZED, (void *)(intptr_t) window_id);
