@@ -70,7 +70,11 @@ static void
 application_observe_notification(struct ax_application *application, int notification)
 {
     AXError result = AXObserverAddNotification(application->observer_ref, application->ref, ax_application_notification[notification], application);
-    if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) application->notification |= 1 << notification;
+    if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
+        application->notification |= 1 << notification;
+    } else if (result != kAXErrorNotImplemented) {
+        application->retry = true;
+    }
 }
 
 static void
@@ -122,9 +126,9 @@ uint32_t application_main_window(struct ax_application *application)
 
 uint32_t application_focused_window(struct ax_application *application)
 {
-    CFTypeRef window_ref;
-    bool result = AXUIElementCopyAttributeValue(application->ref, kAXFocusedWindowAttribute, &window_ref) == kAXErrorSuccess;
-    if (!result) return 0;
+    CFTypeRef window_ref = NULL;
+    AXUIElementCopyAttributeValue(application->ref, kAXFocusedWindowAttribute, &window_ref);
+    if (!window_ref) return 0;
 
     uint32_t window_id = ax_window_id(window_ref);
     CFRelease(window_ref);
@@ -136,7 +140,7 @@ bool application_is_frontmost(struct ax_application *application)
 {
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
-    return psn.lowLongOfPSN == application->psn.lowLongOfPSN;
+    return psn_equals(psn, application->psn);
 }
 
 #pragma clang diagnostic push

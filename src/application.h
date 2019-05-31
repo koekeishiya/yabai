@@ -44,6 +44,7 @@ struct ax_application
     uint8_t notification;
     bool is_observing;
     bool is_hidden;
+    bool retry;
 };
 
 bool application_is_frontmost(struct ax_application *application);
