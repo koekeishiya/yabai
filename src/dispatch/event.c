@@ -115,7 +115,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
 {
     uint64_t packed_psn = (uint64_t)(uintptr_t) context;
     ProcessSerialNumber psn = psn_unpack(packed_psn);
-    if (psn_equals(g_process_manager.front_psn, psn)) return EVENT_SUCCESS;
 
     pid_t pid;
     GetProcessPID(&psn, &pid);
@@ -158,22 +157,23 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
 
     if (g_window_manager.focused_window_id != application_focused_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
-        g_window_manager.focused_window_id = application_focused_window_id;
-        g_window_manager.focused_window_pid = application->pid;
+    }
 
-        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window_id);
-        if (focused_window) {
-            border_window_activate(focused_window);
-            window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
+    g_window_manager.focused_window_id = application_focused_window_id;
+    g_window_manager.focused_window_pid = application->pid;
 
-            if (g_mouse_state.ffm_window_id != focused_window->id) {
-                window_manager_center_mouse(&g_window_manager, focused_window);
-            } else {
-                g_mouse_state.ffm_window_id = 0;
-            }
+    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window_id);
+    if (focused_window) {
+        border_window_activate(focused_window);
+        window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
 
-            g_window_manager.reactivate_focused_window = display_manager_active_display_is_animating();
+        if (g_mouse_state.ffm_window_id != focused_window->id) {
+            window_manager_center_mouse(&g_window_manager, focused_window);
+        } else {
+            g_mouse_state.ffm_window_id = 0;
         }
+
+        g_window_manager.reactivate_focused_window = display_manager_active_display_is_animating();
     }
 
     return EVENT_SUCCESS;
