@@ -155,6 +155,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     uint32_t application_focused_window_id = application_focused_window(application);
     if (!application_focused_window_id) return EVENT_SUCCESS;
 
+    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window_id);
+    if (!focused_window) {
+        window_manager_add_lost_focused_event(&g_window_manager, application_focused_window_id);
+        return EVENT_SUCCESS;
+    }
+
     if (g_window_manager.focused_window_id != application_focused_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
     }
@@ -162,18 +168,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     g_window_manager.focused_window_id = application_focused_window_id;
     g_window_manager.focused_window_pid = application->pid;
 
-    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window_id);
-    if (focused_window) {
-        border_window_activate(focused_window);
-        window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
+    border_window_activate(focused_window);
+    window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
 
-        if (g_mouse_state.ffm_window_id != focused_window->id) {
-            window_manager_center_mouse(&g_window_manager, focused_window);
-        } else {
-            g_mouse_state.ffm_window_id = 0;
-        }
-
-        g_window_manager.reactivate_focused_window = display_manager_active_display_is_animating();
+    if (g_mouse_state.ffm_window_id != focused_window->id) {
+        window_manager_center_mouse(&g_window_manager, focused_window);
+    } else {
+        g_mouse_state.ffm_window_id = 0;
     }
 
     return EVENT_SUCCESS;
@@ -542,13 +543,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
     if (view_is_invalid(view)) view_update(view);
     if (view_is_dirty(view))   view_flush(view);
 
-    if (space_manager_refresh_application_windows() || g_window_manager.reactivate_focused_window) {
-        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
-        if (focused_window) {
+    if (space_manager_refresh_application_windows()) {
+        struct ax_window *focused_window = window_manager_focused_window(&g_window_manager);
+        if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
             border_window_activate(focused_window);
             window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
             window_manager_center_mouse(&g_window_manager, focused_window);
-            g_window_manager.reactivate_focused_window = false;
+            window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
         }
     }
 
@@ -574,15 +575,18 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
     if (view_is_dirty(view))   view_flush(view);
 
     if (space_manager_refresh_application_windows()) {
-        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
-        if (focused_window) {
+        struct ax_window *focused_window = window_manager_focused_window(&g_window_manager);
+        if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
             border_window_activate(focused_window);
+            window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
 
             if (g_mouse_state.ffm_window_id != focused_window->id) {
                 window_manager_center_mouse(&g_window_manager, focused_window);
             } else {
                 g_mouse_state.ffm_window_id = 0;
             }
+
+            window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
         }
     }
 
