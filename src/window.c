@@ -125,6 +125,7 @@ void window_serialize(struct ax_window *window, FILE *rsp)
     fprintf(rsp,
             "{\n"
             "\t\"id\":%d,\n"
+            "\t\"pid\":%d,\n"
             "\t\"app\":\"%s\",\n"
             "\t\"title\":\"%s\",\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
@@ -136,6 +137,7 @@ void window_serialize(struct ax_window *window, FILE *rsp)
             "\t\"floating\":%d\n"
             "}",
             window->id,
+            window->application->pid,
             window->application->name,
             title ? title : "",
             frame.origin.x, frame.origin.y,
