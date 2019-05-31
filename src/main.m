@@ -295,7 +295,7 @@ int main(int argc, char **argv)
     init_misc_settings();
 
     if (!space_manager_has_separate_spaces()) {
-        error("yabai: 'display has separate spaces' is enabled! abort..\n");
+        error("yabai: 'display has separate spaces' is disabled! abort..\n");
     }
 
     if (!eventloop_init(&g_eventloop)) {
