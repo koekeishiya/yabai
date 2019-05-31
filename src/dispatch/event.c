@@ -115,6 +115,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
 {
     uint64_t packed_psn = (uint64_t)(uintptr_t) context;
     ProcessSerialNumber psn = psn_unpack(packed_psn);
+    if (psn_equals(g_process_manager.front_psn, psn)) return EVENT_SUCCESS;
 
     pid_t pid;
     GetProcessPID(&psn, &pid);
