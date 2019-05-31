@@ -61,6 +61,8 @@ struct process *process_create(ProcessSerialNumber psn)
     if (CopyProcessName(&psn, &process_name_ref) == noErr) {
         process->name = cfstring_copy(process_name_ref);
         CFRelease(process_name_ref);
+    } else {
+        process->name = string_copy("<unknown>");
     }
 
     ProcessInfoRec process_info = {};
@@ -87,6 +89,6 @@ struct process *process_create(ProcessSerialNumber psn)
 
 void process_destroy(struct process *process)
 {
-    if (process->name) free(process->name);
+    free(process->name);
     free(process);
 }
