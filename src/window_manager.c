@@ -582,10 +582,10 @@ struct ax_window *window_manager_focused_window(struct window_manager *wm)
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
 
-    struct process *process = process_manager_find_process(&g_process_manager, &psn);
-    if (!process) return NULL;
+    pid_t pid;
+    GetProcessPID(&psn, pid);
 
-    struct ax_application *application = window_manager_find_application(wm, process->pid);
+    struct ax_application *application = window_manager_find_application(wm, pid);
     if (!application) return NULL;
 
     uint32_t window_id = application_focused_window(application);
@@ -597,10 +597,10 @@ struct ax_application *window_manager_focused_application(struct window_manager 
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
 
-    struct process *process = process_manager_find_process(&g_process_manager, &psn);
-    if (!process) return NULL;
+    pid_t pid;
+    GetProcessPID(&psn, pid);
 
-    return window_manager_find_application(wm, process->pid);
+    return window_manager_find_application(wm, pid);
 }
 
 bool window_manager_find_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
