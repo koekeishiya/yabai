@@ -708,6 +708,8 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
 
     for (int window_index = 0; window_index < window_count; ++window_index) {
         struct ax_window *window = window_list[window_index];
+        if (!window) continue;
+
         if (!window->id || window_manager_find_window(wm, window->id)) {
             window_destroy(window);
             continue;

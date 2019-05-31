@@ -69,7 +69,7 @@ bool window_is_standard(struct ax_window *window);
 bool window_is_dialog(struct ax_window *window);
 bool window_observe(struct ax_window *window);
 void window_unobserve(struct ax_window *window);
-struct ax_window *window_create(struct ax_application *application, AXUIElementRef window_ref);
+struct ax_window *window_create(struct ax_application *application, AXUIElementRef window_ref, uint32_t window_id);
 void window_destroy(struct ax_window *window);
 
 #endif

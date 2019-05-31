@@ -286,7 +286,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         return EVENT_SUCCESS;
     }
 
-    struct ax_window *window = window_create(application, context);
+    struct ax_window *window = window_create(application, context, window_id);
     window_manager_set_window_opacity(window, g_window_manager.normal_window_opacity);
     window_manager_purify_window(&g_window_manager, window);
 

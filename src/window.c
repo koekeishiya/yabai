@@ -308,13 +308,14 @@ out:
     return standard_win;
 }
 
-struct ax_window *window_create(struct ax_application *application, AXUIElementRef window_ref)
+struct ax_window *window_create(struct ax_application *application, AXUIElementRef window_ref, uint32_t window_id)
 {
     struct ax_window *window = malloc(sizeof(struct ax_window));
     memset(window, 0, sizeof(struct ax_window));
+
     window->application = application;
     window->ref = window_ref;
-    window->id = ax_window_id(window->ref);
+    window->id = window_id;
     SLSGetWindowOwner(g_connection, window->id, &window->connection);
     window->is_minimized = window_is_minimized(window);
     window->id_ptr = malloc(sizeof(uint32_t *));
