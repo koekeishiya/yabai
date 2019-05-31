@@ -281,6 +281,7 @@ void window_manager_set_normal_border_window_color(struct window_manager *wm, ui
 
 void window_manager_set_window_opacity(struct ax_window *window, float opacity)
 {
+#if 0
     int sockfd;
     char message[255];
 
@@ -290,6 +291,7 @@ void window_manager_set_window_opacity(struct ax_window *window, float opacity)
         socket_wait(sockfd);
     }
     socket_close(sockfd);
+#endif
 }
 
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity)
