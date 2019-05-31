@@ -733,7 +733,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     CFRelease(event);
 
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
-    if (g_mission_control_active) return EVENT_SUCCESS;
+    if (g_mission_control_active)    return EVENT_SUCCESS;
+    if (g_mouse_state.ffm_window_id) return EVENT_SUCCESS;
 
     float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
     if (dt < 25.0f) return EVENT_SUCCESS;
