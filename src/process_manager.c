@@ -32,7 +32,10 @@ process_manager_add_running_processes(struct process_manager *pm)
         struct process *process = process_create(psn);
         if (!process) continue;
 
-        if (!process->background && !process->lsuielement && !process->xpc) {
+        if ((!process->background) &&
+            (!process->lsbackground) &&
+            (!process->lsuielement) &&
+            (!process->xpc)) {
             process_manager_add_process(pm, process);
         } else {
             process_destroy(process);
@@ -61,16 +64,19 @@ void process_manager_init(struct process_manager *pm)
     pm->target = GetApplicationEventTarget();
     pm->handler = NewEventHandlerUPP(process_handler);
     pm->type[0].eventClass = kEventClassApplication;
-    pm->type[0].eventKind = kEventAppLaunched;
+    pm->type[0].eventKind  = kEventAppLaunched;
     pm->type[1].eventClass = kEventClassApplication;
-    pm->type[1].eventKind = kEventAppTerminated;
+    pm->type[1].eventKind  = kEventAppTerminated;
+    pm->type[2].eventClass = kEventClassApplication;
+    pm->type[2].eventKind  = kEventAppFrontSwitched;
     table_init(&pm->process, 125, hash_psn, compare_psn);
     process_manager_add_running_processes(pm);
 }
 
 bool process_manager_begin(struct process_manager *pm)
 {
-    return InstallEventHandler(pm->target, pm->handler, 2, pm->type, pm, &pm->ref) == noErr;
+    _SLPSGetFrontProcess(&g_process_manager.front_psn);
+    return InstallEventHandler(pm->target, pm->handler, 3, pm->type, pm, &pm->ref) == noErr;
 }
 
 bool process_manager_end(struct process_manager *pm)

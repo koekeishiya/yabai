@@ -17,6 +17,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
         if (!process) return noErr;
 
         if ((!process->background) &&
+            (!process->lsbackground) &&
             (!process->lsuielement) &&
             (!process->xpc)) {
             process_manager_add_process(pm, process);
@@ -37,6 +38,11 @@ static PROCESS_EVENT_HANDLER(process_handler)
 
         struct event *event;
         event_create(event, APPLICATION_TERMINATED, process);
+        eventloop_post(&g_eventloop, event);
+    } break;
+    case kEventAppFrontSwitched: {
+        struct event *event;
+        event_create(event, APPLICATION_FRONT_SWITCHED, (void *)(intptr_t) psn_pack(psn));
         eventloop_post(&g_eventloop, event);
     } break;
     }
@@ -70,6 +76,8 @@ struct process *process_create(ProcessSerialNumber psn)
     if (process_dict) {
         CFBooleanRef process_lsuielement = CFDictionaryGetValue(process_dict, CFSTR("LSUIElement"));
         if (process_lsuielement) process->lsuielement = CFBooleanGetValue(process_lsuielement);
+        CFBooleanRef process_lsbackground = CFDictionaryGetValue(process_dict, CFSTR("LSBackgroundOnly"));
+        if (process_lsbackground) process->lsbackground = CFBooleanGetValue(process_lsbackground);
         CFRelease(process_dict);
     }
 

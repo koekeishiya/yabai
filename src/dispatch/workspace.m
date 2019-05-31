@@ -35,16 +35,6 @@ void workspace_event_handler_end(void *context)
                 object:nil];
 
        [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self
-                selector:@selector(didActivateApplication:)
-                name:NSWorkspaceDidActivateApplicationNotification
-                object:nil];
-
-       [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self
-                selector:@selector(didDeactivateApplication:)
-                name:NSWorkspaceDidDeactivateApplicationNotification
-                object:nil];
-
-       [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self
                 selector:@selector(didHideApplication:)
                 name:NSWorkspaceDidHideApplicationNotification
                 object:nil];
@@ -113,24 +103,6 @@ void workspace_event_handler_end(void *context)
 {
     struct event *event;
     event_create(event, SPACE_CHANGED, NULL);
-    eventloop_post(&g_eventloop, event);
-}
-
-- (void)didActivateApplication:(NSNotification *)notification
-{
-    pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-
-    struct event *event;
-    event_create(event, APPLICATION_ACTIVATED, (void *)(intptr_t) pid);
-    eventloop_post(&g_eventloop, event);
-}
-
-- (void)didDeactivateApplication:(NSNotification *)notification
-{
-    pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-
-    struct event *event;
-    event_create(event, APPLICATION_DEACTIVATED, (void *)(intptr_t) pid);
     eventloop_post(&g_eventloop, event);
 }
 

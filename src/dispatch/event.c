@@ -1,6 +1,7 @@
 #include "event.h"
 
 extern struct eventloop g_eventloop;
+extern struct process_manager g_process_manager;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
@@ -11,49 +12,58 @@ extern int g_connection;
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
     struct process *process = context;
+    uint64_t packed_psn = psn_pack(process->psn);
+    debug("%s: %s\n", __FUNCTION__, process->name);
 
     if ((process->terminated) || (kill(process->pid, 0) == -1)) {
-        window_manager_remove_lost_activated_event(&g_window_manager, process->pid);
+        debug("%s: %s terminated during launch\n", __FUNCTION__, process->name);
+        window_manager_remove_lost_front_switched_event(&g_window_manager, packed_psn);
         return EVENT_SUCCESS;
     }
 
     struct ax_application *application = application_create(process);
     if (application_observe(application)) {
-        debug("%s: %s\n", __FUNCTION__, process->name);
         window_manager_add_application(&g_window_manager, application);
         window_manager_add_application_windows(&g_window_manager, application);
 
         int window_count = 0;
         struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
         if (window_list) {
+            uint32_t prev_window_id = g_window_manager.focused_window_id;
             for (int i = 0; i < window_count; ++i) {
                 struct ax_window *window = window_list[i];
-                if (!window) continue;
-
-                if (window_manager_should_manage_window(window)) {
-                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
-                    window_manager_add_managed_window(&g_window_manager, window, view);
+                if (window) {
+                    if (window_manager_should_manage_window(window)) {
+                        struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, space_manager_active_space(), prev_window_id);
+                        window_manager_add_managed_window(&g_window_manager, window, view);
+                        prev_window_id = window->id;
+                    }
+                } else {
+                    prev_window_id = 0;
                 }
             }
             free(window_list);
         }
 
-        if (window_manager_find_lost_activated_event(&g_window_manager, application->pid)) {
+        if (window_manager_find_lost_front_switched_event(&g_window_manager, packed_psn)) {
             struct event *event;
-            event_create(event, APPLICATION_ACTIVATED, (void *)(intptr_t) application->pid);
+            event_create(event, APPLICATION_FRONT_SWITCHED, (void *)(intptr_t) packed_psn);
             eventloop_post(&g_eventloop, event);
-            window_manager_remove_lost_activated_event(&g_window_manager, application->pid);
+            window_manager_remove_lost_front_switched_event(&g_window_manager, packed_psn);
         }
     } else {
-        debug("%s: could not observe %s\n", __FUNCTION__, process->name);
+        bool retry_ax = application->retry;
         application_unobserve(application);
         application_destroy(application);
+        debug("%s: could not observe %s (%d)\n", __FUNCTION__, process->name, retry_ax);
 
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            struct event *event;
-            event_create(event, APPLICATION_LAUNCHED, process);
-            eventloop_post(&g_eventloop, event);
-        });
+        if (retry_ax) {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                struct event *event;
+                event_create(event, APPLICATION_LAUNCHED, process);
+                eventloop_post(&g_eventloop, event);
+            });
+        }
     }
 
     return EVENT_SUCCESS;
@@ -99,22 +109,58 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
 {
-    struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
+    uint64_t packed_psn = (uint64_t)(uintptr_t) context;
+    ProcessSerialNumber psn = psn_unpack(packed_psn);
+
+    pid_t pid;
+    GetProcessPID(&psn, &pid);
+
+    struct ax_application *application = window_manager_find_application(&g_window_manager, pid);
     if (!application) {
-        window_manager_add_lost_activated_event(&g_window_manager, (pid_t)(intptr_t) context);
+        window_manager_add_lost_front_switched_event(&g_window_manager, packed_psn);
         return EVENT_SUCCESS;
     }
 
+    debug("%s: %lld\n", __FUNCTION__, packed_psn);
+
+    if (psn_is_valid(g_process_manager.front_psn)) {
+        pid_t front_pid;
+        GetProcessPID(&g_process_manager.front_psn, &front_pid);
+
+        struct event *event;
+        event_create(event, APPLICATION_DEACTIVATED, (void *)(intptr_t) front_pid);
+        eventloop_post(&g_eventloop, event);
+    }
+
+    struct event *event;
+    event_create(event, APPLICATION_ACTIVATED, (void *)(intptr_t) pid);
+    eventloop_post(&g_eventloop, event);
+
+    return EVENT_SUCCESS;
+}
+#pragma clang diagnostic pop
+
+static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
+{
+    struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
+    if (!application) return EVENT_SUCCESS;
+
     debug("%s: %s\n", __FUNCTION__, application->name);
+    g_process_manager.front_psn = application->psn;
+
     uint32_t application_focused_window_id = application_focused_window(application);
+    if (!application_focused_window_id) return EVENT_SUCCESS;
+
     if (g_window_manager.focused_window_id != application_focused_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
         g_window_manager.focused_window_id = application_focused_window_id;
         g_window_manager.focused_window_pid = application->pid;
 
-        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
+        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window_id);
         if (focused_window) {
             border_window_activate(focused_window);
             window_manager_set_window_opacity(focused_window, g_window_manager.active_window_opacity);
@@ -167,17 +213,22 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
     struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
     if (!window_count) return EVENT_SUCCESS;
 
+    uint32_t prev_window_id = g_window_manager.last_window_id;
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_list[i];
-        if (!window) continue;
+        if (window) {
+            if (window_manager_should_manage_window(window)) {
+                uint64_t sid = window_space(window);
+                assert(sid);
 
-        if (window_manager_should_manage_window(window)) {
-            uint64_t sid = window_space(window);
-            assert(sid);
+                struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, sid, prev_window_id);
+                window_manager_add_managed_window(&g_window_manager, window, view);
+                border_window_show(window);
 
-            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, sid);
-            window_manager_add_managed_window(&g_window_manager, window, view);
-            border_window_show(window);
+                prev_window_id = window->id;
+            }
+        } else {
+            prev_window_id = 0;
         }
     }
 
@@ -410,6 +461,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
     window->is_minimized = true;
     border_window_hide(window);
 
+    if (window->id == g_window_manager.last_window_id) {
+        g_window_manager.last_window_id = g_window_manager.focused_window_id;
+    }
+
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
         space_manager_untile_window(&g_space_manager, view, window);
@@ -437,7 +492,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
     if (space_manager_is_window_on_active_space(window)) {
         debug("%s: window %s %d is deminimized on active space\n", __FUNCTION__, window->application->name, window->id);
         if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
+            struct ax_window *last_window = window_manager_find_window(&g_window_manager, g_window_manager.last_window_id);
+            uint32_t insertion_point = last_window && last_window->application->pid != window->application->pid ? last_window->id : 0;
+            struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, space_manager_active_space(), insertion_point);
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
     } else {

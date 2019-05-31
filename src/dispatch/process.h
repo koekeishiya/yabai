@@ -14,6 +14,7 @@ struct process
     char *name;
     bool background;
     bool lsuielement;
+    bool lsbackground;
     bool xpc;
     bool volatile terminated;
 };

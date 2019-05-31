@@ -8,8 +8,9 @@ struct process_manager
     struct table process;
     EventTargetRef target;
     EventHandlerUPP handler;
-    EventTypeSpec type[2];
+    EventTypeSpec type[3];
     EventHandlerRef ref;
+    ProcessSerialNumber front_psn;
 };
 
 struct process *process_manager_find_process(struct process_manager *pm, ProcessSerialNumber *psn);

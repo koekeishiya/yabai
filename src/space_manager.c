@@ -237,11 +237,12 @@ void space_manager_balance_space(struct space_manager *sm, uint64_t sid)
     view_flush(view);
 }
 
-struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct ax_window *window, uint64_t sid)
+struct view *space_manager_tile_window_on_space_with_insertion_point(struct space_manager *sm, struct ax_window *window, uint64_t sid, uint32_t insertion_point)
 {
     struct view *view = space_manager_find_view(sm, sid);
     if (view->type != VIEW_BSP) return view;
 
+    if (insertion_point) view->insertion_point = insertion_point;
     view_add_window_node(view, window);
     view_flush(view);
 
@@ -250,6 +251,11 @@ struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct
     }
 
     return view;
+}
+
+struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct ax_window *window, uint64_t sid)
+{
+    return space_manager_tile_window_on_space_with_insertion_point(sm, window, sid, 0);
 }
 
 void space_manager_toggle_window_split(struct space_manager *sm, struct ax_window *window)

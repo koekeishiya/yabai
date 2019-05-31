@@ -603,19 +603,19 @@ struct ax_application *window_manager_focused_application(struct window_manager 
     return window_manager_find_application(wm, process->pid);
 }
 
-bool window_manager_find_lost_activated_event(struct window_manager *wm, pid_t pid)
+bool window_manager_find_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
 {
-    return table_find(&wm->application_lost_activated_event, &pid) != NULL;
+    return table_find(&wm->application_lost_front_switched_event, &packed_psn) != NULL;
 }
 
-void window_manager_remove_lost_activated_event(struct window_manager *wm, pid_t pid)
+void window_manager_remove_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
 {
-    table_remove(&wm->application_lost_activated_event, &pid);
+    table_remove(&wm->application_lost_front_switched_event, &packed_psn);
 }
 
-void window_manager_add_lost_activated_event(struct window_manager *wm, pid_t pid)
+void window_manager_add_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
 {
-    table_add(&wm->application_lost_activated_event, &pid, (void *)(intptr_t) 1);
+    table_add(&wm->application_lost_front_switched_event, &packed_psn, (void *)(intptr_t) 1);
 }
 
 bool window_manager_find_lost_focused_event(struct window_manager *wm, uint32_t window_id)
@@ -1123,7 +1123,7 @@ void window_manager_init(struct window_manager *wm)
     table_init(&wm->window, 150, hash_wm, compare_wm);
     table_init(&wm->managed_window, 150, hash_wm, compare_wm);
     table_init(&wm->window_lost_focused_event, 150, hash_wm, compare_wm);
-    table_init(&wm->application_lost_activated_event, 150, hash_wm, compare_wm);
+    table_init(&wm->application_lost_front_switched_event, 150, hash_wm, compare_wm);
 }
 
 void window_manager_begin(struct window_manager *wm)
