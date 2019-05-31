@@ -161,9 +161,9 @@ struct ax_window **application_window_list(struct ax_application *application, i
     struct ax_window **window_list = malloc((*window_count) * sizeof(struct ax_window *));
 
     for (int i = 0; i < *window_count; ++i) {
-        AXUIElementRef window_ref = CFRetain(CFArrayGetValueAtIndex(window_list_ref, i));
+        AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list_ref, i);
         uint32_t window_id = ax_window_id(window_ref);
-        window_list[i] = window_id ? window_create(application, window_ref, window_id) : NULL;
+        window_list[i] = window_id ? window_create(application, CFRetain(window_ref), window_id) : NULL;
     }
 
     CFRelease(window_list_ref);
