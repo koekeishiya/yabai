@@ -374,6 +374,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
         return EVENT_SUCCESS;
     }
 
+    if (g_window_manager.focused_window_id == window->id) {
+        return EVENT_SUCCESS;
+    }
+
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
     if (focused_window) {
