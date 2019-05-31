@@ -32,14 +32,31 @@ process_manager_add_running_processes(struct process_manager *pm)
         struct process *process = process_create(psn);
         if (!process) continue;
 
-        if ((!process->background) &&
-            (!process->lsbackground) &&
-            (!process->lsuielement) &&
-            (!process->xpc)) {
-            process_manager_add_process(pm, process);
-        } else {
-            process_destroy(process);
+        if (process->lsbackground) {
+            debug("%s: %s was marked as background only! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
         }
+
+        if (process->lsuielement) {
+            debug("%s: %s was marked as agent! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
+        }
+
+        if (process->background) {
+            debug("%s: %s was marked as daemon! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
+        }
+
+        if (process->xpc) {
+            debug("%s: %s was marked as xpc service! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
+        }
+
+        process_manager_add_process(pm, process);
+        goto out;
+ign:
+        process_destroy(process);
+out:;
     }
 }
 #pragma clang diagnostic pop

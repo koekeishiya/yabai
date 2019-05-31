@@ -16,18 +16,35 @@ static PROCESS_EVENT_HANDLER(process_handler)
         struct process *process = process_create(psn);
         if (!process) return noErr;
 
-        if ((!process->background) &&
-            (!process->lsbackground) &&
-            (!process->lsuielement) &&
-            (!process->xpc)) {
-            process_manager_add_process(pm, process);
-
-            struct event *event;
-            event_create(event, APPLICATION_LAUNCHED, process);
-            eventloop_post(&g_eventloop, event);
-        } else {
-            process_destroy(process);
+        if (process->lsbackground) {
+            debug("%s: %s was marked as background only! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
         }
+
+        if (process->lsuielement) {
+            debug("%s: %s was marked as agent! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
+        }
+
+        if (process->background) {
+            debug("%s: %s was marked as daemon! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
+        }
+
+        if (process->xpc) {
+            debug("%s: %s was marked as xpc service! ignoring..\n", __FUNCTION__, process->name);
+            goto ign;
+        }
+
+        struct event *event;
+        event_create(event, APPLICATION_LAUNCHED, process);
+        eventloop_post(&g_eventloop, event);
+
+        process_manager_add_process(pm, process);
+        goto out;
+ign:
+        process_destroy(process);
+out:;
     } break;
     case kEventAppTerminated: {
         struct process *process = process_manager_find_process(pm, &psn);
