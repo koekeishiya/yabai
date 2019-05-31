@@ -57,7 +57,7 @@ static void border_window_ensure_same_space(struct ax_window *window)
     }
 
     if (!found) {
-        CGSMoveWindowsToManagedSpace(g_connection, border_list_ref, w_sid);
+        SLSMoveWindowsToManagedSpace(g_connection, border_list_ref, w_sid);
     }
 
     CFRelease(border_list_ref);

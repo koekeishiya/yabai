@@ -68,7 +68,7 @@ CGRect display_bounds_constrained(uint32_t display_id)
 uint64_t display_space_id(uint32_t display_id)
 {
     CFStringRef uuid = display_uuid(display_id);
-    uint64_t sid = CGSManagedDisplayGetCurrentSpace(g_connection, uuid);
+    uint64_t sid = SLSManagedDisplayGetCurrentSpace(g_connection, uuid);
     CFRelease(uuid);
     return sid;
 }

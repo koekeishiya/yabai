@@ -5,9 +5,9 @@ extern int SLSGetSpaceManagementMode(int cid);
 extern CFArrayRef SLSCopyManagedDisplaySpaces(int cid);
 extern CGError SLSProcessAssignToSpace(int cid, pid_t pid, uint64_t sid);
 extern CGError SLSProcessAssignToAllSpaces(int cid, pid_t pid);
-extern void CGSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
-extern void CGSRemoveWindowsFromSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
-extern void CGSAddWindowsToSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
+extern void SLSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
+extern void SLSRemoveWindowsFromSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
+extern void SLSAddWindowsToSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
 
 #define SM_MAX_SPACE            50
 
