@@ -577,13 +577,15 @@ void window_manager_focus_window_with_raise(uint32_t window_id)
 #endif
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 struct ax_window *window_manager_focused_window(struct window_manager *wm)
 {
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
 
     pid_t pid;
-    GetProcessPID(&psn, pid);
+    GetProcessPID(&psn, &pid);
 
     struct ax_application *application = window_manager_find_application(wm, pid);
     if (!application) return NULL;
@@ -591,17 +593,21 @@ struct ax_window *window_manager_focused_window(struct window_manager *wm)
     uint32_t window_id = application_focused_window(application);
     return window_manager_find_window(wm, window_id);
 }
+#pragma clang diagnostic pop
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 struct ax_application *window_manager_focused_application(struct window_manager *wm)
 {
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
 
     pid_t pid;
-    GetProcessPID(&psn, pid);
+    GetProcessPID(&psn, &pid);
 
     return window_manager_find_application(wm, pid);
 }
+#pragma clang diagnostic pop
 
 bool window_manager_find_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
 {
