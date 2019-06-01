@@ -4,32 +4,32 @@
 #include <errno.h>
 
 #include "sa.h"
-#include "sa_core.c"
-#include "sa_bundle.c"
+#include "sa_loader.c"
+#include "sa_payload.c"
 
-#define OSAX_DIR                  "/System/Library/ScriptingAdditions/CHWMInjector.osax"
-#define CONTENTS_DIR              "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents"
-#define CONTENTS_MACOS_DIR        "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/MacOS"
-#define RESOURCES_DIR             "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources"
-#define BUNDLE_DIR                "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle"
-#define BUNDLE_CONTENTS_DIR       "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle/Contents"
-#define BUNDLE_CONTENTS_MACOS_DIR "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle/Contents/MacOS"
+#define OSAX_DIR                  "/System/Library/ScriptingAdditions/yabai.osax"
+#define CONTENTS_DIR              "/System/Library/ScriptingAdditions/yabai.osax/Contents"
+#define CONTENTS_MACOS_DIR        "/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS"
+#define RESOURCES_DIR             "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources"
+#define BUNDLE_DIR                "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle"
+#define BUNDLE_CONTENTS_DIR       "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents"
+#define BUNDLE_CONTENTS_MACOS_DIR "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS"
 
-#define INFO_PLIST_FILE           "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Info.plist"
-#define DEFINITION_FILE           "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/CHWMInjector.sdef"
-#define BUNDLE_INFO_PLIST_FILE    "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle/Contents/Info.plist"
+#define INFO_PLIST_FILE           "/System/Library/ScriptingAdditions/yabai.osax/Contents/Info.plist"
+#define DEFINITION_FILE           "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/yabai.sdef"
+#define BUNDLE_INFO_PLIST_FILE    "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/Info.plist"
 
-#define BIN_INJECTOR              "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/MacOS/CHWMInjector"
-#define BIN_CORE                  "/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle/Contents/MacOS/chunkwm-sa"
+#define BIN_INJECTOR              "/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader"
+#define BIN_CORE                  "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload"
 
-#define CMD_SA_REMOVE             "rm -rf /System/Library/ScriptingAdditions/CHWMInjector.osax 2>/dev/null"
+#define CMD_SA_REMOVE             "rm -rf /System/Library/ScriptingAdditions/yabai.osax 2>/dev/null"
 
 static char sa_def[] =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<!DOCTYPE dictionary SYSTEM \"file://localhost/System/Library/DTDs/sdef.dtd\">\n"
-    "<dictionary title=\"CHWMInjector Terminology\">\n"
-    "<suite name=\"CHWMInjector Suite\" code=\"CHWM\" description=\"CHWM Injector commands\">\n"
-    "<command name=\"init CHWMInjector\" code=\"CHWMinjc\" description=\"Install Payload into the process\"/>\n"
+    "<dictionary title=\"Yabai Terminology\">\n"
+    "<suite name=\"Yabai Suite\" code=\"YBSA\" description=\"Yabai Scripting Addition\">\n"
+    "<command name=\"init Yabai\" code=\"YBSAload\" description=\"Install payload into the process\"/>\n"
     "</suite>\n"
     "</dictionary>";
 
@@ -41,13 +41,13 @@ static char sa_plist[] =
     "<key>CFBundleDevelopmentRegion</key>\n"
     "<string>en</string>\n"
     "<key>CFBundleExecutable</key>\n"
-    "<string>CHWMInjector</string>\n"
+    "<string>loader</string>\n"
     "<key>CFBundleIdentifier</key>\n"
-    "<string>com.koekeishiya.CHWMInjector</string>\n"
+    "<string>com.koekeishiya.yabai-osax</string>\n"
     "<key>CFBundleInfoDictionaryVersion</key>\n"
     "<string>6.0</string>\n"
     "<key>CFBundleName</key>\n"
-    "<string>CHWMInjector</string>\n"
+    "<string>yabai</string>\n"
     "<key>CFBundlePackageType</key>\n"
     "<string>osax</string>\n"
     "<key>CFBundleShortVersionString</key>\n"
@@ -55,19 +55,19 @@ static char sa_plist[] =
     "<key>CFBundleVersion</key>\n"
     "<string>1.0</string>\n"
     "<key>NSHumanReadableCopyright</key>\n"
-    "<string>Copyright © 2017 Åsmund Vikane. All rights reserved.</string>\n"
+    "<string>Copyright © 2019 Åsmund Vikane. All rights reserved.</string>\n"
     "<key>OSAScriptingDefinition</key>\n"
-    "<string>CHWMInjector.sdef</string>\n"
+    "<string>yabai.sdef</string>\n"
     "<key>OSAXHandlers</key>\n"
     "<dict>\n"
     "<key>Events</key>\n"
     "<dict>\n"
-    "<key>CHWMinjc</key>\n"
+    "<key>YBSAload</key>\n"
     "<dict>\n"
     "<key>Context</key>\n"
     "<string>Process</string>\n"
     "<key>Handler</key>\n"
-    "<string>CHWMhandleInject</string>\n"
+    "<string>yabai_osax_load</string>\n"
     "<key>ThreadSafe</key>\n"
     "<false/>\n"
     "</dict>\n"
@@ -84,13 +84,13 @@ static char sa_bundle_plist[] =
     "<key>CFBundleDevelopmentRegion</key>\n"
     "<string>en</string>\n"
     "<key>CFBundleExecutable</key>\n"
-    "<string>chunkwm-sa</string>\n"
+    "<string>payload</string>\n"
     "<key>CFBundleIdentifier</key>\n"
-    "<string>com.koekeishiya.chunkwm-sa</string>\n"
+    "<string>com.koekeishiya.yabai-sa</string>\n"
     "<key>CFBundleInfoDictionaryVersion</key>\n"
     "<string>6.0</string>\n"
     "<key>CFBundleName</key>\n"
-    "<string>chunkwm-sa</string>\n"
+    "<string>payload</string>\n"
     "<key>CFBundlePackageType</key>\n"
     "<string>BNDL</string>\n"
     "<key>CFBundleShortVersionString</key>\n"
@@ -98,7 +98,7 @@ static char sa_bundle_plist[] =
     "<key>CFBundleVersion</key>\n"
     "<string>1</string>\n"
     "<key>NSHumanReadableCopyright</key>\n"
-    "<string>Copyright © 2017 Åsmund Vikane. All rights reserved.</string>\n"
+    "<string>Copyright © 2019 Åsmund Vikane. All rights reserved.</string>\n"
     "<key>NSPrincipalClass</key>\n"
     "<string></string>\n"
     "</dict>\n"
@@ -132,10 +132,10 @@ static bool scripting_addition_write_file(char *buffer, unsigned int size, char 
 
 static void scripting_addition_prepare_binaries(void)
 {
-    system("chmod +x \"/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/MacOS/CHWMInjector\"");
-    system("chmod +x \"/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle/Contents/MacOS/chunkwm-sa\"");
-    system("codesign -f -s - \"/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/MacOS/CHWMInjector\" 2>/dev/null");
-    system("codesign -f -s - \"/System/Library/ScriptingAdditions/CHWMInjector.osax/Contents/Resources/chunkwm-sa.bundle/Contents/MacOS/chunkwm-sa\" 2>/dev/null");
+    system("chmod +x \"/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader\"");
+    system("chmod +x \"/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload\"");
+    system("codesign -f -s - \"/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader\" 2>/dev/null");
+    system("codesign -f -s - \"/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload\" 2>/dev/null");
 }
 
 bool scripting_addition_is_installed(void)
@@ -178,15 +178,11 @@ int scripting_addition_install(void)
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file((char *) bin_CHWMInjector_osax_Contents_MacOS_CHWMInjector,
-                                       bin_CHWMInjector_osax_Contents_MacOS_CHWMInjector_len,
-                                       BIN_INJECTOR, "wb")) {
+    if (!scripting_addition_write_file((char *) __src_osax_loader, __src_osax_loader_len, BIN_INJECTOR, "wb")) {
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file((char *) bin_CHWMInjector_osax_Contents_Resources_chunkwm_sa_bundle_Contents_MacOS_chunkwm_sa,
-                                       bin_CHWMInjector_osax_Contents_Resources_chunkwm_sa_bundle_Contents_MacOS_chunkwm_sa_len,
-                                       BIN_CORE, "wb")) {
+    if (!scripting_addition_write_file((char *) __src_osax_payload, __src_osax_payload_len, BIN_CORE, "wb")) {
         goto cleanup;
     }
 
@@ -218,7 +214,7 @@ int scripting_addition_load(void)
     [dock setSendMode:kAEWaitReply];
     [dock sendEvent:'ascr' id:'gdut' parameters:0];
     [dock setSendMode:kAEWaitReply];
-    [dock sendEvent:'CHWM' id:'injc' parameters:0];
+    [dock sendEvent:'YBSA' id:'load' parameters:0];
     [dock release];
 
     return 0;

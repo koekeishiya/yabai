@@ -1,6 +1,7 @@
 #include "space_manager.h"
 
 extern struct window_manager g_window_manager;
+extern char *g_sa_socket_path;
 extern int g_connection;
 
 static TABLE_HASH_FUNC(hash_view)
@@ -450,7 +451,7 @@ void space_manager_focus_space(uint64_t sid)
     uint32_t cur_did = space_display_id(cur_sid);
     uint32_t new_did = space_display_id(sid);
 
-    if (socket_connect_in(&sockfd, 5050)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "space %lld", sid);
         socket_write(sockfd, message);
         socket_wait(sockfd);
@@ -475,7 +476,7 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did)
     d_sid = display_space_id(did);
     if (!d_sid) return;
 
-    if (socket_connect_in(&sockfd, 5050)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "space_move %lld %lld", sid, d_sid);
         socket_write(sockfd, message);
         socket_wait(sockfd);
@@ -495,7 +496,7 @@ void space_manager_destroy_space(void)
     sid = space_manager_active_space();
     if (!sid || !space_is_user(sid)) return;
 
-    if (socket_connect_in(&sockfd, 5050)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "space_destroy %lld", sid);
         socket_write(sockfd, message);
         socket_wait(sockfd);
@@ -512,7 +513,7 @@ void space_manager_add_space(void)
     sid = space_manager_active_space();
     if (!sid) return;
 
-    if (socket_connect_in(&sockfd, 5050)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "space_create %lld", sid);
         socket_write(sockfd, message);
         socket_wait(sockfd);

@@ -23,6 +23,9 @@
 #include "misc/socket.h"
 #include "misc/socket.c"
 
+#include "osax/sa.h"
+#include "osax/sa.m"
+
 #include "dispatch/event.h"
 #include "dispatch/eventloop.h"
 #include "dispatch/event_tap.h"
@@ -41,7 +44,6 @@
 #include "display_manager.h"
 #include "space_manager.h"
 #include "window_manager.h"
-#include "sa.h"
 
 #include "dispatch/event.c"
 #include "dispatch/eventloop.c"
@@ -60,7 +62,8 @@
 #include "display_manager.c"
 #include "space_manager.c"
 #include "window_manager.c"
-#include "sa.m"
+
+#define SA_SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 
 #define CONFIG_FILE_FMT "%s/.yabairc"
 #define SOCKET_PATH_FMT "/tmp/yabai_%s.socket"
@@ -98,6 +101,7 @@ struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
 bool g_mission_control_active;
+char *g_sa_socket_path;
 int g_connection;
 char *g_config;
 bool g_verbose;
@@ -187,6 +191,13 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
 
     if (flock(handle, LOCK_EX | LOCK_NB) == -1) {
         error("yabai: could not acquire lock-file! abort..\n");
+    }
+
+    g_sa_socket_path = malloc(255);
+    if (g_sa_socket_path) {
+        snprintf(g_sa_socket_path, 255, SA_SOCKET_PATH_FMT, user);
+    } else {
+        error("yabai: could not get memory for path to sa-socket! abort..\n");
     }
 
     char socket_file[255];
