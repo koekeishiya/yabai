@@ -265,9 +265,9 @@ err:
 
 int window_level(struct ax_window *window)
 {
-    int window_level = 0;
-    SLSGetWindowLevel(g_connection, window->id, &window_level);
-    return window_level;
+    int level = 0;
+    SLSGetWindowLevel(g_connection, window->id, &level);
+    return level;
 }
 
 CFStringRef window_role(struct ax_window *window)
