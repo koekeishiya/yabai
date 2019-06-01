@@ -805,19 +805,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
     if (dt < 25.0f) return EVENT_SUCCESS;
 
-    if (g_window_manager.ffm_mode != FFM_DISABLED) {
-        struct ax_window *window = window_manager_find_window_at_point(&g_window_manager, point);
-        if (window && window->id != g_window_manager.focused_window_id && window_is_standard(window)) {
-            g_mouse_state.ffm_window_id = window->id;
-            if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
-                window_manager_focus_window_without_raise(window->id);
-            } else {
-                window_manager_focus_window_with_raise(window->id);
-            }
-        }
+    g_mouse_state.last_moved_time = event_time;
+    if (g_window_manager.ffm_mode == FFM_DISABLED) return EVENT_SUCCESS;
+
+    struct ax_window *window = window_manager_find_window_at_point(&g_window_manager, point);
+    if (!window || window->id == g_window_manager.focused_window_id)      return EVENT_SUCCESS;
+    if (!window_level_is_standard(window) || !window_is_standard(window)) return EVENT_SUCCESS;
+
+    g_mouse_state.ffm_window_id = window->id;
+    if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
+        window_manager_focus_window_without_raise(window->id);
+    } else {
+        window_manager_focus_window_with_raise(window->id);
     }
 
-    g_mouse_state.last_moved_time = event_time;
     return EVENT_SUCCESS;
 }
 
