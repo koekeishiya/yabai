@@ -53,24 +53,24 @@ struct event
     volatile int *result;
 };
 
-#define event_create(event, type, data)\
+#define event_create(e, t, d)\
     do {\
-        event = malloc(sizeof(struct event));\
-        event->context = data;\
-        event->handler = &EVENT_HANDLER_##type;\
-        event->param1 = 0;\
-        event->status = 0;\
-        event->result = 0;\
+        e = malloc(sizeof(struct event));\
+        e->context = d;\
+        e->handler = &EVENT_HANDLER_##t;\
+        e->param1 = 0;\
+        e->status = 0;\
+        e->result = 0;\
     } while (0)
 
-#define event_create_p1(event, type, data, p1)\
+#define event_create_p1(e, t, d, p1)\
     do {\
-        event = malloc(sizeof(struct event));\
-        event->context = data;\
-        event->handler = &EVENT_HANDLER_##type;\
-        event->param1 = p1;\
-        event->status = 0;\
-        event->result = 0;\
+        e = malloc(sizeof(struct event));\
+        e->context = d;\
+        e->handler = &EVENT_HANDLER_##t;\
+        e->param1 = p1;\
+        e->status = 0;\
+        e->result = 0;\
     } while (0)
 
 #endif
