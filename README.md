@@ -12,9 +12,9 @@ customizable.
 
 ### Requirements
 
-**yabai** is officially supported on **macOS High Sierra 10.13.6** and **macOS Mojave 10.14.4/5**. [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) must be disabled and [*chunkwm-sa*](https://github.com/koekeishiya/chwm-sa)
-must be installed for **yabai** to function properly. The *scripting-addition* is a bundle of code that we inject into *Dock.app* to elevate our privileges when communicating with the *WindowServer*.
-The *WindowServer* is a single point of contact for all applications. It is central to the implementation of the GUI frameworks and many other services.
+**yabai** is officially supported on **macOS High Sierra 10.13.6** and **macOS Mojave 10.14.4/5**. It uses a *scripting-addition*, which is a bundle of code
+that we inject into *Dock.app* to elevate our privileges when communicating with the *WindowServer*. The *WindowServer* is a single point of contact for all applications.
+It is central to the implementation of the GUI frameworks and many other services. Because of this, [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) must be disabled for **yabai** to function properly.
 
 **yabai** must be given permission to utilize the *Accessibility API*, and will request access upon launch. The application must be restarted after access has been granted.
 If you are building from source or using the *brew --HEAD option*, it is recommended to first [*codesign*](https://github.com/koekeishiya/yabai/blob/master/CODESIGN.md) the binary such that access can persist through builds/updates.
