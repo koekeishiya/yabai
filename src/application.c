@@ -140,7 +140,7 @@ bool application_is_frontmost(struct ax_application *application)
 {
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
-    return psn_equals(psn, application->psn);
+    return psn_equals(&psn, &application->psn);
 }
 
 #pragma clang diagnostic push

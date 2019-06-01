@@ -69,27 +69,15 @@ static inline pid_t ax_window_pid(AXUIElementRef ref)
     return *(pid_t *)((void *) ref + 0x10);
 }
 
-static inline uint64_t psn_pack(ProcessSerialNumber psn)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static inline bool psn_equals(ProcessSerialNumber *a, ProcessSerialNumber *b)
 {
-    uint64_t packed_psn = (uint64_t) psn.highLongOfPSN << 32 | psn.lowLongOfPSN;
-    return packed_psn;
+    Boolean result;
+    SameProcess(a, b, &result);
+    return result == 1;
 }
-
-static inline ProcessSerialNumber psn_unpack(uint64_t packed_psn)
-{
-    ProcessSerialNumber psn = { packed_psn >> 32, packed_psn & 0xffffffff };
-    return psn;
-}
-
-static inline bool psn_is_valid(ProcessSerialNumber psn)
-{
-    return psn.highLongOfPSN != 0 || psn.lowLongOfPSN != 0;
-}
-
-static inline bool psn_equals(ProcessSerialNumber a, ProcessSerialNumber b)
-{
-    return a.lowLongOfPSN == b.lowLongOfPSN && a.highLongOfPSN == b.highLongOfPSN;
-}
+#pragma clang diagnostic pop
 
 static bool rect_is_in_direction(CGRect r1, CGRect r2, int direction)
 {

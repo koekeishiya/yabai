@@ -58,8 +58,11 @@ out:;
         eventloop_post(&g_eventloop, event);
     } break;
     case kEventAppFrontSwitched: {
+        struct process *process = process_manager_find_process(pm, &psn);
+        if (!process) return noErr;
+
         struct event *event;
-        event_create(event, APPLICATION_FRONT_SWITCHED, (void *)(intptr_t) psn_pack(psn));
+        event_create(event, APPLICATION_FRONT_SWITCHED, process);
         eventloop_post(&g_eventloop, event);
     } break;
     }

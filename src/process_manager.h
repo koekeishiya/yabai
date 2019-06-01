@@ -10,7 +10,7 @@ struct process_manager
     EventHandlerUPP handler;
     EventTypeSpec type[3];
     EventHandlerRef ref;
-    ProcessSerialNumber front_psn;
+    pid_t front_pid;
 };
 
 struct process *process_manager_find_process(struct process_manager *pm, ProcessSerialNumber *psn);

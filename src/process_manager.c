@@ -12,15 +12,10 @@ static TABLE_HASH_FUNC(hash_psn)
     return result;
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static TABLE_COMPARE_FUNC(compare_psn)
 {
-    Boolean result;
-    SameProcess((ProcessSerialNumber*) key_a, (ProcessSerialNumber*) key_b, &result);
-    return result == 1;
+    return psn_equals(key_a, key_b);
 }
-#pragma clang diagnostic pop
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -90,11 +85,16 @@ void process_manager_init(struct process_manager *pm)
     process_manager_add_running_processes(pm);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 bool process_manager_begin(struct process_manager *pm)
 {
-    _SLPSGetFrontProcess(&g_process_manager.front_psn);
+    ProcessSerialNumber front_psn;
+    _SLPSGetFrontProcess(&front_psn);
+    GetProcessPID(&front_psn, &g_process_manager.front_pid);
     return InstallEventHandler(pm->target, pm->handler, 3, pm->type, pm, &pm->ref) == noErr;
 }
+#pragma clang diagnostic pop
 
 bool process_manager_end(struct process_manager *pm)
 {

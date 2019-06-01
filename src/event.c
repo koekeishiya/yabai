@@ -12,12 +12,11 @@ extern int g_connection;
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
     struct process *process = context;
-    uint64_t packed_psn = psn_pack(process->psn);
     debug("%s: %s\n", __FUNCTION__, process->name);
 
     if ((process->terminated) || (kill(process->pid, 0) == -1)) {
         debug("%s: %s terminated during launch\n", __FUNCTION__, process->name);
-        window_manager_remove_lost_front_switched_event(&g_window_manager, packed_psn);
+        window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
         return EVENT_SUCCESS;
     }
 
@@ -45,11 +44,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
             free(window_list);
         }
 
-        if (window_manager_find_lost_front_switched_event(&g_window_manager, packed_psn)) {
+        if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
             struct event *event;
-            event_create(event, APPLICATION_FRONT_SWITCHED, (void *)(intptr_t) packed_psn);
+            event_create(event, APPLICATION_FRONT_SWITCHED, process);
             eventloop_post(&g_eventloop, event);
-            window_manager_remove_lost_front_switched_event(&g_window_manager, packed_psn);
+            window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
         }
     } else {
         bool retry_ax = application->retry;
@@ -113,32 +112,23 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
 {
-    uint64_t packed_psn = (uint64_t)(uintptr_t) context;
-    ProcessSerialNumber psn = psn_unpack(packed_psn);
+    struct process *process = context;
 
-    pid_t pid;
-    GetProcessPID(&psn, &pid);
-
-    struct ax_application *application = window_manager_find_application(&g_window_manager, pid);
+    struct ax_application *application = window_manager_find_application(&g_window_manager, process->pid);
     if (!application) {
-        window_manager_add_lost_front_switched_event(&g_window_manager, packed_psn);
+        window_manager_add_lost_front_switched_event(&g_window_manager, process->pid);
         return EVENT_SUCCESS;
     }
 
-    debug("%s: %lld\n", __FUNCTION__, packed_psn);
+    debug("%s: %s\n", __FUNCTION__, process->name);
 
-    if (psn_is_valid(g_process_manager.front_psn)) {
-        pid_t front_pid;
-        GetProcessPID(&g_process_manager.front_psn, &front_pid);
+    struct event *de_event;
+    event_create(de_event, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid);
+    eventloop_post(&g_eventloop, de_event);
 
-        struct event *event;
-        event_create(event, APPLICATION_DEACTIVATED, (void *)(intptr_t) front_pid);
-        eventloop_post(&g_eventloop, event);
-    }
-
-    struct event *event;
-    event_create(event, APPLICATION_ACTIVATED, (void *)(intptr_t) pid);
-    eventloop_post(&g_eventloop, event);
+    struct event *re_event;
+    event_create(re_event, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid);
+    eventloop_post(&g_eventloop, re_event);
 
     return EVENT_SUCCESS;
 }
@@ -150,7 +140,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     if (!application) return EVENT_SUCCESS;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
-    g_process_manager.front_psn = application->psn;
+    g_process_manager.front_pid = application->pid;
 
     uint32_t application_focused_window_id = application_focused_window(application);
     if (!application_focused_window_id) return EVENT_SUCCESS;

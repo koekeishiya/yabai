@@ -611,19 +611,19 @@ struct ax_application *window_manager_focused_application(struct window_manager 
 }
 #pragma clang diagnostic pop
 
-bool window_manager_find_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
+bool window_manager_find_lost_front_switched_event(struct window_manager *wm, pid_t pid)
 {
-    return table_find(&wm->application_lost_front_switched_event, &packed_psn) != NULL;
+    return table_find(&wm->application_lost_front_switched_event, &pid) != NULL;
 }
 
-void window_manager_remove_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
+void window_manager_remove_lost_front_switched_event(struct window_manager *wm, pid_t pid)
 {
-    table_remove(&wm->application_lost_front_switched_event, &packed_psn);
+    table_remove(&wm->application_lost_front_switched_event, &pid);
 }
 
-void window_manager_add_lost_front_switched_event(struct window_manager *wm, uint64_t packed_psn)
+void window_manager_add_lost_front_switched_event(struct window_manager *wm, pid_t pid)
 {
-    table_add(&wm->application_lost_front_switched_event, &packed_psn, (void *)(intptr_t) 1);
+    table_add(&wm->application_lost_front_switched_event, &pid, (void *)(intptr_t) 1);
 }
 
 bool window_manager_find_lost_focused_event(struct window_manager *wm, uint32_t window_id)
