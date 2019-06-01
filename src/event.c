@@ -191,7 +191,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
         border_window_deactivate(focused_window);
         window_manager_set_window_opacity(focused_window, g_window_manager.normal_window_opacity);
 
-        if (!window_is_standard(focused_window)) {
+        if (!window_level_is_standard(focused_window) || !window_is_standard(focused_window)) {
             struct ax_window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
             if (main_window && main_window != focused_window) {
                 border_window_deactivate(main_window);
@@ -295,7 +295,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
 
-        if ((!window_is_standard(window)) ||
+        if ((!window_level_is_standard(window)) ||
+            (!window_is_standard(window)) ||
             (!window_can_move(window)) ||
             (window_is_sticky(window)) ||
             (window_is_undersized(window))) {
@@ -375,29 +376,30 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
         return EVENT_SUCCESS;
     }
 
-    if (g_window_manager.focused_window_id == window->id) {
-        return EVENT_SUCCESS;
-    }
-
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
     if (focused_window) {
         border_window_deactivate(focused_window);
         window_manager_set_window_opacity(focused_window, g_window_manager.normal_window_opacity);
     }
 
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     border_window_activate(window);
     window_manager_set_window_opacity(window, g_window_manager.active_window_opacity);
 
-    if (g_mouse_state.ffm_window_id != window->id) {
-        window_manager_center_mouse(&g_window_manager, window);
-    } else {
-        g_mouse_state.ffm_window_id = 0;
-    }
+    if (window_level_is_standard(window) && window_is_standard(window)) {
+        if (g_window_manager.focused_window_id != window->id) {
+            if (g_mouse_state.ffm_window_id != window->id) {
+                window_manager_center_mouse(&g_window_manager, window);
+            } else {
+                g_mouse_state.ffm_window_id = 0;
+            }
 
-    g_window_manager.last_window_id = g_window_manager.focused_window_id;
-    g_window_manager.focused_window_id = window->id;
-    g_window_manager.focused_window_pid = window->application->pid;
+            g_window_manager.last_window_id = g_window_manager.focused_window_id;
+        }
+
+        g_window_manager.focused_window_id = window->id;
+        g_window_manager.focused_window_pid = window->application->pid;
+    }
 
     return EVENT_SUCCESS;
 }

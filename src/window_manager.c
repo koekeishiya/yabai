@@ -722,7 +722,8 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
             window_manager_add_window(wm, window);
 
             if ((!application->is_hidden) && (!window->is_minimized)) {
-                if ((!window_is_standard(window)) ||
+                if ((!window_level_is_standard(window)) ||
+                    (!window_is_standard(window)) ||
                     (!window_can_move(window)) ||
                     (window_is_sticky(window)) ||
                     (window_is_undersized(window))) {
