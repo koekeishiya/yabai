@@ -850,16 +850,16 @@ static bool start_daemon(char *socket_path)
 @implementation Payload
 + (void) load
 {
+    NSLog(@"[yabai-sa] loaded payload");
+
     char *user = getenv("USER");
     if (!user) {
         NSLog(@"[yabai-sa] could not get 'env USER'! abort..");
         return;
     }
 
-    int sockfd;
     char socket_file[255];
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
-    NSLog(@"[yabai-sa] loaded payload");
 
     if (start_daemon(socket_file)) {
         init_instances();
