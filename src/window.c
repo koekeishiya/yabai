@@ -2,6 +2,9 @@
 
 extern int g_connection;
 
+int g_normal_window_level;
+int g_floating_window_level;
+
 static void
 window_observe_notification(struct ax_window *window, int notification)
 {
@@ -129,6 +132,7 @@ void window_serialize(struct ax_window *window, FILE *rsp)
             "\t\"app\":\"%s\",\n"
             "\t\"title\":\"%s\",\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
+            "\t\"level\":\"%d\",\n"
             "\t\"role\":\"%s\",\n"
             "\t\"subrole\":\"%s\",\n"
             "\t\"movable\":%d,\n"
@@ -142,6 +146,7 @@ void window_serialize(struct ax_window *window, FILE *rsp)
             title ? title : "",
             frame.origin.x, frame.origin.y,
             frame.size.width, frame.size.height,
+            window_level(window),
             role ? role : "",
             subrole ? subrole : "",
             window_can_move(window),
@@ -258,6 +263,13 @@ err:
     return result;
 }
 
+int window_level(struct ax_window *window)
+{
+    int window_level = 0;
+    SLSGetWindowLevel(g_connection, window->id, &window_level);
+    return window_level;
+}
+
 CFStringRef window_role(struct ax_window *window)
 {
     const void *role = NULL;
@@ -270,6 +282,15 @@ CFStringRef window_subrole(struct ax_window *window)
     const void *srole = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXSubroleAttribute, &srole);
     return srole;
+}
+
+bool window_level_is_standard(struct ax_window *window)
+{
+    if (!g_normal_window_level)   g_normal_window_level   = CGWindowLevelForKey(4);
+    if (!g_floating_window_level) g_floating_window_level = CGWindowLevelForKey(5);
+
+    int level = window_level(window);
+    return level == g_normal_window_level || level == g_floating_window_level;
 }
 
 bool window_is_standard(struct ax_window *window)
