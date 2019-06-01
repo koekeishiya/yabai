@@ -367,7 +367,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
     }
 
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
-    if (focused_window) {
+    if (focused_window && focused_window != window) {
         border_window_deactivate(focused_window);
         window_manager_set_window_opacity(focused_window, g_window_manager.normal_window_opacity);
     }
