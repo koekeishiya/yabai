@@ -142,7 +142,8 @@ void window_manager_center_mouse(struct window_manager *wm, struct ax_window *wi
 
 bool window_manager_should_manage_window(struct ax_window *window)
 {
-    return ((window_is_standard(window)) &&
+    return ((window_level_is_standard(window)) &&
+            (window_is_standard(window)) &&
             (window_can_move(window)) &&
             (!window_is_sticky(window)) &&
             (!window->is_floating));
