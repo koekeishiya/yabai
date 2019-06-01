@@ -14,13 +14,6 @@ rgba_color_from_hex(uint32_t color)
     return result;
 }
 
-static int border_detect_window_level(struct ax_window *window)
-{
-    int window_level = 0;
-    SLSGetWindowLevel(g_connection, window->id, &window_level);
-    return window_level;
-}
-
 static void border_window_ensure_same_space(struct ax_window *window)
 {
     int w_space_count;
@@ -175,7 +168,7 @@ void border_window_activate(struct ax_window *window)
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.active_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
-    SLSSetWindowLevel(g_connection, window->border.id, border_detect_window_level(window));
+    SLSSetWindowLevel(g_connection, window->border.id, window_level(window));
 
     if (window_is_fullscreen(window)) {
         border_window_hide(window);
@@ -192,7 +185,7 @@ void border_window_deactivate(struct ax_window *window)
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
-    SLSSetWindowLevel(g_connection, window->border.id, border_detect_window_level(window));
+    SLSSetWindowLevel(g_connection, window->border.id, window_level(window));
 
     if (window_is_fullscreen(window)) {
         border_window_hide(window);
@@ -241,7 +234,7 @@ void border_window_create(struct ax_window *window)
     SLSSetWindowTags(g_connection, border->id, tags, 32);
     SLSSetWindowOpacity(g_connection, border->id, 0);
     SLSSetMouseEventEnableFlags(g_connection, border->id, false);
-    SLSSetWindowLevel(g_connection, border->id, border_detect_window_level(window));
+    SLSSetWindowLevel(g_connection, border->id, window_level(window));
     border->context = SLWindowContextCreate(g_connection, border->id, 0);
     CGContextSetAllowsAntialiasing(border->context, true);
     CGContextSetShouldAntialias(border->context, true);
