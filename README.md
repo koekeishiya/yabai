@@ -84,6 +84,7 @@ sudo yabai --uninstall-sa
 rm ~/.yabairc
 rm /tmp/yabai_$USER.lock
 rm /tmp/yabai_$USER.socket
+rm /tmp/yabai-sa_$USER.socket
 ```
 
 **Homebrew**:
