@@ -50,6 +50,7 @@ struct window_manager
     struct table managed_window;
     struct table window_lost_focused_event;
     struct table application_lost_front_switched_event;
+    struct rule **rules;
     uint32_t focused_window_id;
     pid_t focused_window_pid;
     uint32_t last_window_id;
@@ -68,6 +69,8 @@ struct window_manager
 void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid);
 void window_manager_query_windows_for_display(FILE *rsp, uint32_t did);
 void window_manager_query_windows_for_displays(FILE *rsp);
+void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, struct rule *rule);
+void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_center_mouse(struct window_manager *wm, struct ax_window *window);
 bool window_manager_should_manage_window(struct ax_window *window);
 void window_manager_tile_window(struct window_manager *wm, struct ax_window *window);
@@ -112,7 +115,7 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
 void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b);
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid);
-void window_manager_add_application_windows(struct window_manager *wm, struct ax_application *application);
+void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct ax_application *application);
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
 void window_manager_purify_window(struct window_manager *wm, struct ax_window *window);
 void window_manager_make_children_floating(struct window_manager *wm, struct ax_window *window, bool floating);
@@ -126,7 +129,7 @@ void window_manager_toggle_window_border(struct window_manager *wm, struct ax_wi
 void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t display_id, uint64_t sid);
-void window_manager_begin(struct window_manager *window_manager);
+void window_manager_begin(struct space_manager *sm, struct window_manager *window_manager);
 void window_manager_init(struct window_manager *window_manager);
 
 #endif

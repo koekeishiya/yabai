@@ -48,6 +48,9 @@ struct ax_window
     struct border border;
     bool is_minimized;
     bool is_floating;
+    float rule_alpha;
+    bool rule_manage;
+    bool rule_fullscreen;
 };
 
 CFStringRef window_display_uuid(struct ax_window *window);

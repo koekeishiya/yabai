@@ -116,6 +116,75 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     free(display_list);
 }
 
+void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, struct rule *rule)
+{
+    regex_t regex;
+
+    if (regex_match(&regex, window->application->name, rule->app) == REGEX_MATCH_NO) {
+        return;
+    }
+
+    if (regex_match(&regex, window_title(window), rule->title) == REGEX_MATCH_NO) {
+        return;
+    }
+
+    if (rule->display) {
+        uint32_t did = display_manager_arrangement_display_id(rule->display);
+        if (did) {
+            uint64_t sid = display_space_id(did);
+            space_manager_move_window_to_space(sid, window);
+            if (rule->follow_space) space_manager_focus_space(sid);
+        }
+    } else if (rule->space) {
+        uint64_t sid = space_manager_mission_control_space(rule->space);
+        if (sid) {
+            space_manager_move_window_to_space(sid, window);
+            if (rule->follow_space) space_manager_focus_space(sid);
+        }
+    }
+
+    if (rule->alpha > 0.0f && rule->alpha <= 1.0f) {
+        window_manager_set_window_opacity(window, rule->alpha);
+        window->rule_alpha = rule->alpha;
+    }
+
+    if (rule->manage == RULE_PROP_ON) {
+        window->rule_manage = true;
+    } else if (rule->manage == RULE_PROP_OFF) {
+        window_manager_make_children_floating(wm, window, true);
+        window_manager_make_floating(window->id, true);
+        window->is_floating = true;
+    }
+
+    if (rule->sticky == RULE_PROP_ON) {
+        window_manager_make_sticky(window->id, true);
+    } else if (rule->sticky == RULE_PROP_OFF) {
+        window_manager_make_sticky(window->id, false);
+    }
+
+    if (rule->border == RULE_PROP_ON) {
+        border_window_create(window);
+    } else if (rule->border == RULE_PROP_OFF) {
+        border_window_destroy(window);
+    }
+
+    if (rule->fullscreen == RULE_PROP_ON) {
+        AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
+        window->rule_fullscreen = true;
+    }
+
+    if (rule->grid[0] != 0 && rule->grid[1] != 0) {
+        window_manager_apply_grid(sm, wm, window, rule->grid[0], rule->grid[1], rule->grid[2], rule->grid[3], rule->grid[4], rule->grid[5]);
+    }
+}
+
+void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    for (int i = 0; i < buf_len(wm->rules); ++i) {
+        window_manager_apply_rule_to_window(sm, wm, window, wm->rules[i]);
+    }
+}
+
 void window_manager_center_mouse(struct window_manager *wm, struct ax_window *window)
 {
     if (!wm->enable_mff) return;
@@ -142,6 +211,8 @@ void window_manager_center_mouse(struct window_manager *wm, struct ax_window *wi
 
 bool window_manager_should_manage_window(struct ax_window *window)
 {
+    if (window->rule_manage) return true;
+
     return ((window_level_is_standard(window)) &&
             (window_is_standard(window)) &&
             (window_can_move(window)) &&
@@ -283,8 +354,10 @@ void window_manager_set_normal_border_window_color(struct window_manager *wm, ui
 
 void window_manager_set_window_opacity(struct ax_window *window, float opacity)
 {
+    if (window->rule_alpha != 0.0f) return;
+
     int sockfd;
-    char message[255];
+    char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", window->id, opacity, 0.2f);
@@ -320,7 +393,7 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
 void window_manager_make_floating(uint32_t wid, bool floating)
 {
     int sockfd;
-    char message[255];
+    char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "window_level %d %d", wid, floating ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
@@ -333,7 +406,7 @@ void window_manager_make_floating(uint32_t wid, bool floating)
 void window_manager_make_sticky(uint32_t wid, bool sticky)
 {
     int sockfd;
-    char message[255];
+    char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "window_sticky %d %d", wid, sticky);
@@ -354,7 +427,7 @@ void window_manager_purify_window(struct window_manager *wm, struct ax_window *w
 {
     int value;
     int sockfd;
-    char message[255];
+    char message[MAXLEN];
 
     if (wm->purify_mode == PURIFY_DISABLED) {
         value = 1;
@@ -562,7 +635,7 @@ void window_manager_focus_window_with_raise(uint32_t window_id)
 {
 #if 1
     int sockfd;
-    char message[255];
+    char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_path)) {
         snprintf(message, sizeof(message), "window_focus %d", window_id);
@@ -674,7 +747,7 @@ void window_manager_add_application(struct window_manager *wm, struct ax_applica
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count)
 {
     int window_count = 0;
-    uint32_t window_list[255] = {};
+    uint32_t window_list[MAXLEN];
 
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
         struct bucket *bucket = wm->window.buckets[window_index];
@@ -700,7 +773,7 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
     return result;
 }
 
-void window_manager_add_application_windows(struct window_manager *wm, struct ax_application *application)
+void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct ax_application *application)
 {
     int window_count;
     struct ax_window **window_list = application_window_list(application, &window_count);
@@ -715,18 +788,21 @@ void window_manager_add_application_windows(struct window_manager *wm, struct ax
             continue;
         }
 
+        window_manager_apply_rules_to_window(sm, wm, window);
         window_manager_set_window_opacity(window, wm->normal_window_opacity);
         window_manager_purify_window(wm, window);
 
         if (window_observe(window)) {
             window_manager_add_window(wm, window);
 
-            if ((!application->is_hidden) && (!window->is_minimized)) {
-                if ((!window_level_is_standard(window)) ||
-                    (!window_is_standard(window)) ||
-                    (!window_can_move(window)) ||
-                    (window_is_sticky(window)) ||
-                    (window_is_undersized(window))) {
+            if ((!application->is_hidden) && (!window->is_minimized) && (!window->rule_manage)) {
+                if (window->rule_fullscreen) {
+                    window->rule_fullscreen = false;
+                } else if ((!window_level_is_standard(window)) ||
+                           (!window_is_standard(window)) ||
+                           (!window_can_move(window)) ||
+                           (window_is_sticky(window)) ||
+                           (window_is_undersized(window))) {
                     window_manager_make_children_floating(wm, window, true);
                     window_manager_make_floating(window->id, true);
                     window->is_floating = true;
@@ -1137,7 +1213,7 @@ void window_manager_init(struct window_manager *wm)
     table_init(&wm->application_lost_front_switched_event, 150, hash_wm, compare_wm);
 }
 
-void window_manager_begin(struct window_manager *wm)
+void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 {
     for (int process_index = 0; process_index < g_process_manager.process.capacity; ++process_index) {
         struct bucket *bucket = g_process_manager.process.buckets[process_index];
@@ -1148,7 +1224,7 @@ void window_manager_begin(struct window_manager *wm)
 
                 if (application_observe(application)) {
                     window_manager_add_application(wm, application);
-                    window_manager_add_application_windows(wm, application);
+                    window_manager_add_application_windows(sm, wm, application);
                 } else {
                     application_unobserve(application);
                     application_destroy(application);

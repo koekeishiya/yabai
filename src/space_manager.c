@@ -445,7 +445,7 @@ void space_manager_add_window_to_space(uint64_t sid, struct ax_window *window)
 void space_manager_focus_space(uint64_t sid)
 {
     int sockfd;
-    char message[255];
+    char message[MAXLEN];
 
     uint64_t cur_sid = space_manager_active_space();
     uint32_t cur_did = space_display_id(cur_sid);
@@ -468,7 +468,7 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did)
     int sockfd;
     uint64_t sid;
     uint64_t d_sid;
-    char message[255];
+    char message[MAXLEN];
 
     sid = space_manager_active_space();
     if (!sid || !space_is_user(sid)) return;
@@ -491,7 +491,7 @@ void space_manager_destroy_space(void)
 {
     int sockfd;
     uint64_t sid;
-    char message[255];
+    char message[MAXLEN];
 
     sid = space_manager_active_space();
     if (!sid || !space_is_user(sid)) return;
@@ -508,7 +508,7 @@ void space_manager_add_space(void)
 {
     int sockfd;
     uint64_t sid;
-    char message[255];
+    char message[MAXLEN];
 
     sid = space_manager_active_space();
     if (!sid) return;
@@ -589,7 +589,7 @@ void space_manager_mark_spaces_invalid(struct space_manager *sm)
     free(display_list);
 }
 
-bool space_manager_refresh_application_windows(void)
+bool space_manager_refresh_application_windows(struct space_manager *sm)
 {
     int window_count = g_window_manager.window.count;
     for (int i = 0; i < g_window_manager.application.capacity; ++i) {
@@ -597,7 +597,7 @@ bool space_manager_refresh_application_windows(void)
         while (bucket) {
             if (bucket->value) {
                 struct ax_application *application = bucket->value;
-                window_manager_add_application_windows(&g_window_manager, application);
+                window_manager_add_application_windows(sm, &g_window_manager, application);
             }
             bucket = bucket->next;
         }

@@ -122,4 +122,19 @@ static uint32_t rect_distance(CGRect r1, CGRect r2, int direction)
     return UINT32_MAX;
 }
 
+static int regex_match(regex_t *regex, const char *match, const char *pattern)
+{
+    if (!match || !pattern) return REGEX_MATCH_UD;
+
+    int result = regcomp(regex, pattern, REG_EXTENDED);
+    if (!result) {
+        result = regexec(regex, match, 0, NULL, 0);
+        regfree(regex);
+    } else {
+        warn("yabai: could not compile regex for rule..\n");
+    }
+
+    return result == 0 ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+}
+
 #endif

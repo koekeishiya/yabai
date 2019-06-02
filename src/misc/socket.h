@@ -1,7 +1,7 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#define SOCKET_DAEMON_HANDLER(name) void name(char *message, int sockfd)
+#define SOCKET_DAEMON_HANDLER(name) void name(char *message, int length, int sockfd)
 typedef SOCKET_DAEMON_HANDLER(socket_daemon_handler);
 
 #define FAILURE_MESSAGE "\x07"
@@ -25,7 +25,8 @@ struct daemon
     socket_daemon_handler *handler;
 };
 
-char *socket_read(int sockfd);
+char *socket_read(int sockfd, int *len);
+bool socket_write_bytes(int sockfd, char *message, int len);
 bool socket_write(int sockfd, char *message);
 bool socket_connect_in(int *sockfd, int port);
 bool socket_connect_un(int *sockfd, char *socket_path);

@@ -5,6 +5,12 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
+#define MAXLEN 256
+
+#define REGEX_MATCH_UD  0
+#define REGEX_MATCH_YES 1
+#define REGEX_MATCH_NO  2
+
 #define DIR_NORTH 360
 #define DIR_EAST   90
 #define DIR_SOUTH 180

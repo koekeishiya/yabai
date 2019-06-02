@@ -57,7 +57,7 @@ eventloop_run(void *context)
     while (eventloop->is_running) {
         struct event *event = queue_pop(queue);
         if (event) {
-            int result = event->handler(event->context, event->param1);
+            int result = event->handler(event->context, event->param1, event->param2);
             if (event->status) *event->status = EVENT_PROCESSED;
             if (event->result) *event->result = result;
             free(event);

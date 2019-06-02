@@ -1,19 +1,26 @@
 #include "socket.h"
 
-char *socket_read(int sockfd)
+char *socket_read(int sockfd, int *len)
 {
-    int length = 256;
+    int length = BUFSIZ;
     char *result = malloc(length);
 
     length = recv(sockfd, result, length, 0);
     if (length > 0) {
         result[length] = '\0';
+        *len = length;
     } else {
         free(result);
         result = NULL;
+        *len = 0;
     }
 
     return result;
+}
+
+bool socket_write_bytes(int sockfd, char *message, int len)
+{
+    return send(sockfd, message, len, 0) != -1;
 }
 
 bool socket_write(int sockfd, char *message)
@@ -80,10 +87,11 @@ static void *socket_connection_handler(void *context)
         int sockfd = accept(daemon->sockfd, NULL, 0);
         if (sockfd == -1) continue;
 
-        char *message = socket_read(sockfd);
+        int length;
+        char *message = socket_read(sockfd, &length);
         if (!message) continue;
 
-        daemon->handler(message, sockfd);
+        daemon->handler(message, length, sockfd);
     }
 
     return NULL;

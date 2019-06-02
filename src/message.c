@@ -11,6 +11,7 @@ extern struct mouse_state g_mouse_state;
 #define DOMAIN_SPACE   "space"
 #define DOMAIN_WINDOW  "window"
 #define DOMAIN_QUERY   "query"
+#define DOMAIN_RULE    "rule"
 
 /* --------------------------------DOMAIN CONFIG-------------------------------- */
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
@@ -146,6 +147,26 @@ extern struct mouse_state g_mouse_state;
 #define ARGUMENT_QUERY_WINDOW  "--window"
 /* ----------------------------------------------------------------------------- */
 
+/* --------------------------------DOMAIN RULE--------------------------------- */
+#define COMMAND_RULE_ADD "--add"
+
+#define ARGUMENT_RULE_KEY_APP     "app"
+#define ARGUMENT_RULE_KEY_TITLE   "title"
+#define ARGUMENT_RULE_KEY_DISPLAY "display"
+#define ARGUMENT_RULE_KEY_SPACE   "space"
+#define ARGUMENT_RULE_KEY_ALPHA   "alpha"
+#define ARGUMENT_RULE_KEY_MANAGE  "manage"
+#define ARGUMENT_RULE_KEY_STICKY  "sticky"
+#define ARGUMENT_RULE_KEY_BORDER  "border"
+#define ARGUMENT_RULE_KEY_FULLSCR "fullscreen"
+#define ARGUMENT_RULE_KEY_GRID    "grid"
+
+#define ARGUMENT_RULE_VALUE_ON    "on"
+#define ARGUMENT_RULE_VALUE_OFF   "off"
+#define ARGUMENT_RULE_VALUE_SPACE '^'
+#define ARGUMENT_RULE_VALUE_GRID  "%d:%d:%d:%d:%d:%d"
+/* ----------------------------------------------------------------------------- */
+
 struct token
 {
     char *text;
@@ -203,12 +224,12 @@ static struct token get_token(char **message)
     struct token token;
 
     token.text = *message;
-    while (**message && !isspace(**message)) {
+    while (**message) {
         ++(*message);
     }
     token.length = *message - token.text;
 
-    if (isspace(**message)) {
+    if ((*message)[0] == '\0' && (*message)[1] != '\0') {
         ++(*message);
     } else {
         // NOTE(koekeishiya): don't go past the null-terminator
@@ -996,7 +1017,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_WINDOW_RESIZE)) {
         struct token value = get_token(&message);
-        char handle[BUFSIZ];
+        char handle[MAXLEN];
         float w, h;
         if ((sscanf(value.text, ARGUMENT_WINDOW_RESIZE, handle, &w, &h) == 3)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
@@ -1327,6 +1348,85 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
     }
 }
 
+static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
+{
+    struct token command = get_token(&message);
+    if (token_equals(command, COMMAND_RULE_ADD)) {
+        struct rule *rule = rule_create();
+        struct token token = get_token(&message);
+        while (token.text && token.length > 0) {
+            char *key = strtok(token.text, "=");
+            char *value = strtok(NULL, "=");
+            if (!key || !value) {
+                daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
+                return;
+            }
+
+            if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
+                rule->app = string_copy(value);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_TITLE)) {
+                rule->title = string_copy(value);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_DISPLAY)) {
+                if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
+                    ++value;
+                    rule->follow_space = true;
+                }
+                sscanf(value, "%d", &rule->display);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_SPACE)) {
+                if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
+                    ++value;
+                    rule->follow_space = true;
+                }
+                sscanf(value, "%d", &rule->space);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_ALPHA)) {
+                sscanf(value, "%f", &rule->alpha);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_MANAGE)) {
+                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                    rule->manage = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                    rule->manage = RULE_PROP_OFF;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_STICKY)) {
+                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                    rule->sticky = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                    rule->sticky = RULE_PROP_OFF;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
+                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                    rule->border = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                    rule->border = RULE_PROP_OFF;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_FULLSCR)) {
+                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                    rule->fullscreen = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                    rule->fullscreen = RULE_PROP_OFF;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_GRID)) {
+                if ((sscanf(value, ARGUMENT_RULE_VALUE_GRID,
+                            &rule->grid[0], &rule->grid[1],
+                            &rule->grid[2], &rule->grid[3],
+                            &rule->grid[4], &rule->grid[5]) != 6)) {
+                    memset(rule->grid, 0, sizeof(rule->grid));
+                }
+            }
+
+            token = get_token(&message);
+        }
+
+        if (rule_is_valid(rule)) {
+            rule_add(rule);
+        } else {
+            rule_destroy(rule);
+            daemon_fail(rsp, "a rule must contain at least one of the following key-value pairs: 'app', 'title'\n");
+        }
+    } else {
+        daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
+    }
+}
+
 void handle_message(FILE *rsp, char *message)
 {
     struct token domain = get_token(&message);
@@ -1340,6 +1440,8 @@ void handle_message(FILE *rsp, char *message)
         handle_domain_window(rsp, domain, message);
     } else if (token_equals(domain, DOMAIN_QUERY)) {
         handle_domain_query(rsp, domain, message);
+    } else if (token_equals(domain, DOMAIN_RULE)) {
+        handle_domain_rule(rsp, domain, message);
     } else {
         daemon_fail(rsp, "unknown domain '%.*s'\n", domain.length, domain.text);
     }
@@ -1348,6 +1450,6 @@ void handle_message(FILE *rsp, char *message)
 static SOCKET_DAEMON_HANDLER(message_handler)
 {
     struct event *event;
-    event_create_p1(event, DAEMON_MESSAGE, message, sockfd);
+    event_create_p2(event, DAEMON_MESSAGE, message, length, sockfd);
     eventloop_post(&g_eventloop, event);
 }

@@ -23,7 +23,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
     struct ax_application *application = application_create(process);
     if (application_observe(application)) {
         window_manager_add_application(&g_window_manager, application);
-        window_manager_add_application_windows(&g_window_manager, application);
+        window_manager_add_application_windows(&g_space_manager, &g_window_manager, application);
 
         int window_count = 0;
         struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
@@ -278,6 +278,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     }
 
     struct ax_window *window = window_create(application, context, window_id);
+    window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
     window_manager_set_window_opacity(window, g_window_manager.normal_window_opacity);
     window_manager_purify_window(&g_window_manager, window);
 
@@ -285,18 +286,22 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
 
-        if ((!window_level_is_standard(window)) ||
-            (!window_is_standard(window)) ||
-            (!window_can_move(window)) ||
-            (window_is_sticky(window)) ||
-            (window_is_undersized(window))) {
-            window_manager_make_children_floating(&g_window_manager, window, true);
-            window_manager_make_floating(window->id, true);
-            window->is_floating = true;
+        if (!window->rule_manage) {
+            if (window->rule_fullscreen) {
+                window->rule_fullscreen = false;
+            } else if ((!window_level_is_standard(window)) ||
+                       (!window_is_standard(window)) ||
+                       (!window_can_move(window)) ||
+                       (window_is_sticky(window)) ||
+                       (window_is_undersized(window))) {
+                window_manager_make_children_floating(&g_window_manager, window, true);
+                window_manager_make_floating(window->id, true);
+                window->is_floating = true;
+            }
         }
 
         if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, space_manager_active_space());
+            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
 
@@ -535,7 +540,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
     if (view_is_invalid(view)) view_update(view);
     if (view_is_dirty(view))   view_flush(view);
 
-    if (space_manager_refresh_application_windows()) {
+    if (space_manager_refresh_application_windows(&g_space_manager)) {
         struct ax_window *focused_window = window_manager_focused_window(&g_window_manager);
         if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
             border_window_activate(focused_window);
@@ -566,7 +571,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
     if (view_is_invalid(view)) view_update(view);
     if (view_is_dirty(view))   view_flush(view);
 
-    if (space_manager_refresh_application_windows()) {
+    if (space_manager_refresh_application_windows(&g_space_manager)) {
         struct ax_window *focused_window = window_manager_focused_window(&g_window_manager);
         if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
             border_window_activate(focused_window);
@@ -952,17 +957,22 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
-    FILE *rsp = fdopen(param1, "w");
+    FILE *rsp = fdopen(param2, "w");
     if (!rsp) goto fderr;
 
-    debug("%s: msg '%s'\n", __FUNCTION__, context);
+    debug("%s: msg '", __FUNCTION__);
+    for (int i = 0; i < param1 - 1; ++i) {
+        char c = *((char*)context + i);
+        debug("%c", c == '\0' ? ' ' : c);
+    }
+    debug("'\n");
     handle_message(rsp, context);
 
     fflush(rsp);
     fclose(rsp);
 
 fderr:
-    socket_close(param1);
+    socket_close(param2);
     free(context);
     return EVENT_SUCCESS;
 }

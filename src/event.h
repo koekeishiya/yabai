@@ -1,7 +1,7 @@
 #ifndef EVENTLOOP_EVENT_H
 #define EVENTLOOP_EVENT_H
 
-#define EVENT_CALLBACK(name) int name(void *context, int param1)
+#define EVENT_CALLBACK(name) int name(void *context, int param1, int param2)
 typedef EVENT_CALLBACK(event_callback);
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED);
@@ -49,6 +49,7 @@ struct event
     event_callback *handler;
     void *context;
     int param1;
+    int param2;
     volatile int *status;
     volatile int *result;
 };
@@ -59,6 +60,7 @@ struct event
         e->context = d;\
         e->handler = &EVENT_HANDLER_##t;\
         e->param1 = 0;\
+        e->param2 = 0;\
         e->status = 0;\
         e->result = 0;\
     } while (0)
@@ -69,6 +71,18 @@ struct event
         e->context = d;\
         e->handler = &EVENT_HANDLER_##t;\
         e->param1 = p1;\
+        e->param2 = 0;\
+        e->status = 0;\
+        e->result = 0;\
+    } while (0)
+
+#define event_create_p2(e, t, d, p1, p2)\
+    do {\
+        e = malloc(sizeof(struct event));\
+        e->context = d;\
+        e->handler = &EVENT_HANDLER_##t;\
+        e->param1 = p1;\
+        e->param2 = p2;\
         e->status = 0;\
         e->result = 0;\
     } while (0)

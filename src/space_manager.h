@@ -67,7 +67,7 @@ bool space_manager_is_window_on_active_space(struct ax_window *window);
 bool space_manager_is_window_on_space(uint64_t sid, struct ax_window *window);
 void space_manager_mark_spaces_invalid_for_display(struct space_manager *sm, uint32_t did);
 void space_manager_mark_spaces_invalid(struct space_manager *sm);
-bool space_manager_refresh_application_windows(void);
+bool space_manager_refresh_application_windows(struct space_manager *sm);
 void space_manager_begin(struct space_manager *sm);
 
 #endif

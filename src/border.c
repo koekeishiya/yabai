@@ -213,6 +213,8 @@ void border_window_create(struct ax_window *window)
     if (!g_window_manager.enable_window_border) return;
 
     struct border *border = &window->border;
+    if (border->id) return;
+
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
     border->insert_color = rgba_color_from_hex(g_window_manager.insert_window_border_color);
     border->width = g_window_manager.window_border_width;
@@ -248,5 +250,6 @@ void border_window_destroy(struct ax_window *window)
     if (window->border.id) {
         CGContextRelease(window->border.context);
         SLSReleaseWindow(g_connection, window->border.id);
+        memset(&window->border, 0, sizeof(struct border));
     }
 }

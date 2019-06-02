@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <regex.h>
 #include <execinfo.h>
 #include <signal.h>
 #include <unistd.h>
@@ -13,8 +14,8 @@
 #include <sys/stat.h>
 
 #include "misc/macros.h"
-#include "misc/helpers.h"
 #include "misc/log.h"
+#include "misc/helpers.h"
 #include "misc/cfstring.h"
 #include "misc/sbuffer.h"
 #define HASHTABLE_IMPLEMENTATION
@@ -32,6 +33,7 @@
 #include "process.h"
 #include "workspace.h"
 #include "mouse.h"
+#include "rule.h"
 #include "message.h"
 #include "display.h"
 #include "space.h"
@@ -49,6 +51,7 @@
 #include "event_tap.c"
 #include "process.c"
 #include "workspace.m"
+#include "rule.c"
 #include "message.c"
 #include "display.c"
 #include "space.c"
@@ -112,7 +115,7 @@ static int client_send_message(int argc, char **argv)
     }
 
     int sockfd;
-    char socket_file[255];
+    char socket_file[MAXLEN];
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
 
     if (!socket_connect_un(&sockfd, socket_file)) {
@@ -133,11 +136,10 @@ static int client_send_message(int argc, char **argv)
     for (int i = 1; i < argc; ++i) {
         memcpy(temp, argv[i], argl[i]);
         temp += argl[i];
-        *temp++ = ' ';
+        *temp++ = '\0';
     }
-    *(temp - 1) = '\0';
 
-    if (!socket_write(sockfd, message)) {
+    if (!socket_write_bytes(sockfd, message, message_length)) {
         error("yabai: failed to send data..\n");
     }
 
@@ -179,7 +181,7 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
         error("yabai: 'env USER' not set! abort..\n");
     }
 
-    char lock_file[255];
+    char lock_file[MAXLEN];
     snprintf(lock_file, sizeof(lock_file), LCFILE_PATH_FMT, user);
 
     int handle = open(lock_file, O_CREAT | O_WRONLY, 0600);
@@ -191,14 +193,14 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
         error("yabai: could not acquire lock-file! abort..\n");
     }
 
-    g_sa_socket_path = malloc(255);
+    g_sa_socket_path = malloc(MAXLEN);
     if (g_sa_socket_path) {
-        snprintf(g_sa_socket_path, 255, SA_SOCKET_PATH_FMT, user);
+        snprintf(g_sa_socket_path, MAXLEN, SA_SOCKET_PATH_FMT, user);
     } else {
         error("yabai: could not get memory for path to sa-socket! abort..\n");
     }
 
-    char socket_file[255];
+    char socket_file[MAXLEN];
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
 
     return socket_daemon_begin_un(daemon, socket_file, handler);
@@ -206,7 +208,7 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
 
 static void exec_config_file(char *config)
 {
-    char config_file[BUFSIZ];
+    char config_file[MAXLEN];
 
     if (!config) {
         char *home = getenv("HOME");
@@ -332,7 +334,7 @@ int main(int argc, char **argv)
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     display_manager_begin(&g_display_manager);
     space_manager_begin(&g_space_manager);
-    window_manager_begin(&g_window_manager);
+    window_manager_begin(&g_space_manager, &g_window_manager);
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
