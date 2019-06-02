@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-05-23
+.\"      Date: 2019-06-02
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-05-23" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-06-02" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -83,6 +83,12 @@ WINDOW_SEL  := prev | next | last | DIR_SEL
 DISPLAY_SEL := prev | next | last | arrangement index (1\-based)
 
 SPACE_SEL   := prev | next | last | mission\-control index (1\-based)
+
+FLOAT_SEL   := 0 < value <= 1.0
+
+BOOL_SEL    := on | off
+
+REGEX       := https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended\-regular\-expression\-syntax.html[POSIX extended regular expression syntax]
 .fi
 .if n .RE
 .SH "DOMAINS"
@@ -95,7 +101,7 @@ Get or set the value of <setting>.
 .RE
 .SS "Global Settings"
 .sp
-Colors are in the form \fI#AARRGGBB\fP, booleans are \fIon\fP or \fIoff\fP.
+Colors are in the form \fI#AARRGGBB\fP.
 .sp
 \fImouse_follows_focus\fP
 .RS 4
@@ -185,25 +191,25 @@ Size of the gap that separates windows for the selected space.
 .SS "Display"
 .SS "General Syntax"
 .sp
-yabai \-m display \fICOMMAND\fP
+yabai \-m display \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
-\fB\-\-focus\fP \fIDISPLAY_SEL\fP
+\fB\-\-focus\fP \fI<DISPLAY_SEL>\fP
 .RS 4
 Focus the given display.
 .RE
 .SS "Space"
 .SS "General Syntax"
 .sp
-yabai \-m space \fICOMMAND\fP
+yabai \-m space \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
-\fB\-\-focus\fP \fISPACE_SEL\fP
+\fB\-\-focus\fP \fI<SPACE_SEL>\fP
 .RS 4
 Focus the given space.
 .RE
 .sp
-\fB\-\-move\fP \fIDISPLAY_SEL\fP
+\fB\-\-move\fP \fI<DISPLAY_SEL>\fP
 .RS 4
 Move the active space to the given display.
 .RE
@@ -255,25 +261,25 @@ Set the layout of the space.
 .SS "Window"
 .SS "General Syntax"
 .sp
-yabai \-m window \fICOMMAND\fP
+yabai \-m window \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
-\fB\-\-focus\fP \fIWINDOW_SEL\fP
+\fB\-\-focus\fP \fI<WINDOW_SEL>\fP
 .RS 4
 Focus the window in the given direction.
 .RE
 .sp
-\fB\-\-swap\fP \fIWINDOW_SEL\fP
+\fB\-\-swap\fP \fI<WINDOW_SEL>\fP
 .RS 4
 Swap position with the window in the given direction.
 .RE
 .sp
-\fB\-\-warp\fP \fIWINDOW_SEL\fP
+\fB\-\-warp\fP \fI<WINDOW_SEL>\fP
 .RS 4
 Re\-insert, splitting the window in the given direction.
 .RE
 .sp
-\fB\-\-insert\fP \fIDIR_SEL\fP
+\fB\-\-insert\fP \fI<DIR_SEL>\fP
 .RS 4
 Select the splitting area of the focused window. If the current selection matches \fIDIR_SEL\fP, the action will be undone.
 .RE
@@ -298,19 +304,19 @@ Resize window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\
 Toggle the selected property of a window.
 .RE
 .sp
-\fB\-\-display\fP \fIDISPLAY_SEL\fP
+\fB\-\-display\fP \fI<DISPLAY_SEL>\fP
 .RS 4
 Send the window to the given display.
 .RE
 .sp
-\fB\-\-space\fP \fISPACE_SEL\fP
+\fB\-\-space\fP \fI<SPACE_SEL>\fP
 .RS 4
 Send the window to the given space.
 .RE
 .SS "Query"
 .SS "General Syntax"
 .sp
-yabai \-m query \fICOMMAND\fP [\fIARGUMENT\fP]
+yabai \-m query \fI<COMMAND>\fP [\fI<ARGUMENT>\fP]
 .SS "COMMAND"
 .sp
 \fB\-\-displays\fP
@@ -342,6 +348,67 @@ Constrain matches to the selected space.
 \fB\-\-window\fP
 .RS 4
 Constrain matches to the focused window.
+.RE
+.SS "Rule"
+.SS "General Syntax"
+.sp
+yabai \-m rule \fI<COMMAND>\fP [\fI<ARGUMENT>\fP]
+.SS "COMMAND"
+.sp
+\fB\-\-add\fP
+.RS 4
+Add a new rule.
+.RE
+.SS "ARGUMENT"
+.sp
+\fBapp=\fI<REGEX>\fP\fP
+.RS 4
+Name of application.
+.RE
+.sp
+\fBtitle=\fI<REGEX>\fP\fP
+.RS 4
+Title of window.
+.RE
+.sp
+\fBdisplay=\fI[^]<arrangement index>\fP\fP
+.RS 4
+Send window to display. If \fI^\fP is present, follow focus.
+.RE
+.sp
+\fBspace=\fI[^]<mission\-control index>\fP\fP
+.RS 4
+Send window to space. If \fI^\fP is present, follow focus.
+.RE
+.sp
+\fBalpha=\fI<FLOAT_SEL>\fP\fP
+.RS 4
+Set window opacity.
+.RE
+.sp
+\fBmanage=\fI<BOOL_SEL>\fP\fP
+.RS 4
+Window should be managed (tile vs float)
+.RE
+.sp
+\fBsticky=\fI<BOOL_SEL>\fP\fP
+.RS 4
+Window appears on all spaces.
+.RE
+.sp
+\fBborder=\fI<BOOL_SEL>\fP\fP
+.RS 4
+Window should draw border.
+.RE
+.sp
+\fBfullscreen=\fI<BOOL_SEL>\fP\fP
+.RS 4
+Window should enter native macOS fullscreen mode.
+.RE
+.sp
+\fBgrid=\fI<rows>:<cols>:<start\-x>:<start\-y>:<width>:<height>\fP\fP
+.RS 4
+Set window frame based on a self\-defined grid.
 .RE
 .SH "EXIT CODES"
 .sp

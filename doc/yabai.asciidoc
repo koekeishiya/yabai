@@ -54,6 +54,12 @@ WINDOW_SEL  := prev | next | last | DIR_SEL
 DISPLAY_SEL := prev | next | last | arrangement index (1-based)
 
 SPACE_SEL   := prev | next | last | mission-control index (1-based)
+
+FLOAT_SEL   := 0 < value <= 1.0
+
+BOOL_SEL    := on | off
+
+REGEX       := https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended-regular-expression-syntax.html[POSIX extended regular expression syntax]
 ----
 
 Domains
@@ -71,7 +77,7 @@ yabai -m config [--space '<mission-control index>'] <setting> [<value>]::
 Global Settings
 ^^^^^^^^^^^^^^^
 
-Colors are in the form '#AARRGGBB', booleans are 'on' or 'off'.
+Colors are in the form '#AARRGGBB'.
 
 'mouse_follows_focus'::
     When focusing a window, put the mouse at its center.
@@ -137,12 +143,12 @@ Display
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m display 'COMMAND'
+yabai -m display '<COMMAND>'
 
 COMMAND
 ^^^^^^^
 
-*--focus* 'DISPLAY_SEL'::
+*--focus* '<DISPLAY_SEL>'::
     Focus the given display.
 
 Space
@@ -151,15 +157,15 @@ Space
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m space 'COMMAND'
+yabai -m space '<COMMAND>'
 
 COMMAND
 ^^^^^^^
 
-*--focus* 'SPACE_SEL'::
+*--focus* '<SPACE_SEL>'::
     Focus the given space.
 
-*--move* 'DISPLAY_SEL'::
+*--move* '<DISPLAY_SEL>'::
     Move the active space to the given display.
 
 *--create*::
@@ -195,21 +201,21 @@ Window
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m window 'COMMAND'
+yabai -m window '<COMMAND>'
 
 COMMAND
 ^^^^^^^
 
-*--focus* 'WINDOW_SEL'::
+*--focus* '<WINDOW_SEL>'::
     Focus the window in the given direction.
 
-*--swap* 'WINDOW_SEL'::
+*--swap* '<WINDOW_SEL>'::
     Swap position with the window in the given direction.
 
-*--warp* 'WINDOW_SEL'::
+*--warp* '<WINDOW_SEL>'::
     Re-insert, splitting the window in the given direction.
 
-*--insert* 'DIR_SEL'::
+*--insert* '<DIR_SEL>'::
     Select the splitting area of the focused window. If the current selection matches 'DIR_SEL', the action will be undone.
 
 *--grid* '<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'::
@@ -224,10 +230,10 @@ COMMAND
 *--toggle* 'float|sticky|split|border|fullscreen|native-fullscreen'::
     Toggle the selected property of a window.
 
-*--display* 'DISPLAY_SEL'::
+*--display* '<DISPLAY_SEL>'::
     Send the window to the given display.
 
-*--space* 'SPACE_SEL'::
+*--space* '<SPACE_SEL>'::
     Send the window to the given space.
 
 Query
@@ -236,7 +242,7 @@ Query
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m query 'COMMAND' ['ARGUMENT']
+yabai -m query '<COMMAND>' ['<ARGUMENT>']
 
 COMMAND
 ^^^^^^^
@@ -261,6 +267,53 @@ ARGUMENT
 
 *--window*::
     Constrain matches to the focused window.
+
+Rule
+~~~~
+
+General Syntax
+^^^^^^^^^^^^^^
+
+yabai -m rule '<COMMAND>' ['<ARGUMENT>']
+
+COMMAND
+^^^^^^^
+
+*--add*::
+    Add a new rule.
+
+ARGUMENT
+^^^^^^^^
+
+*app='<REGEX>'*::
+    Name of application.
+
+*title='<REGEX>'*::
+    Title of window.
+
+*display='[^]<arrangement index>'*::
+    Send window to display. If '^' is present, follow focus.
+
+*space='[^]<mission-control index>'*::
+    Send window to space. If '^' is present, follow focus.
+
+*alpha='<FLOAT_SEL>'*::
+    Set window opacity.
+
+*manage='<BOOL_SEL>'*::
+    Window should be managed (tile vs float)
+
+*sticky='<BOOL_SEL>'*::
+    Window appears on all spaces.
+
+*border='<BOOL_SEL>'*::
+    Window should draw border.
+
+*fullscreen='<BOOL_SEL>'*::
+    Window should enter native macOS fullscreen mode.
+
+*grid='<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'*::
+    Set window frame based on a self-defined grid.
 
 Exit Codes
 ----------
