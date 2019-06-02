@@ -304,7 +304,7 @@ ARGUMENT
 *space='[^]<mission-control index>'*::
     Send window to space. If '^' is present, follow focus.
 
-*alpha='<FLOAT_SEL>'*::
+*opacity='<FLOAT_SEL>'*::
     Set window opacity.
 
 *manage='<BOOL_SEL>'*::

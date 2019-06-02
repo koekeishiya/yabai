@@ -160,7 +160,7 @@ extern struct mouse_state g_mouse_state;
 #define ARGUMENT_RULE_KEY_TITLE   "title"
 #define ARGUMENT_RULE_KEY_DISPLAY "display"
 #define ARGUMENT_RULE_KEY_SPACE   "space"
-#define ARGUMENT_RULE_KEY_ALPHA   "alpha"
+#define ARGUMENT_RULE_KEY_ALPHA   "opacity"
 #define ARGUMENT_RULE_KEY_MANAGE  "manage"
 #define ARGUMENT_RULE_KEY_STICKY  "sticky"
 #define ARGUMENT_RULE_KEY_BORDER  "border"
