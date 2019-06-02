@@ -46,6 +46,7 @@ Options
 Definitions
 -----------
 
+[subs=+macros]
 ----
 DIR_SEL     := north | east | south | west
 
