@@ -2,7 +2,9 @@
 
 # global settings
 yabai -m config mouse_follows_focus          on
-yabai -m config focus_follows_mouse          autoraise
+yabai -m config focus_follows_mouse          off
+yabai -m config window_topmost               off
+yabai -m config window_opacity               off
 yabai -m config window_shadow                off
 yabai -m config window_border                on
 yabai -m config window_border_width          4

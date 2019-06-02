@@ -57,6 +57,8 @@ struct window_manager
     bool enable_mff;
     enum ffm_mode ffm_mode;
     enum purify_mode purify_mode;
+    bool enable_window_opacity;
+    bool enable_window_topmost;
     bool enable_window_border;
     int window_border_width;
     uint32_t active_window_border_color;
@@ -110,7 +112,7 @@ void window_manager_set_active_window_opacity(struct window_manager *wm, float o
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_normal_border_window_color(struct window_manager *wm, uint32_t color);
-void window_manager_set_window_opacity(struct ax_window *window, float opacity);
+void window_manager_set_window_opacity(struct window_manager *wm, struct ax_window *window, float opacity);
 void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, int direction);
 void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b);
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b);
@@ -119,7 +121,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
 void window_manager_purify_window(struct window_manager *wm, struct ax_window *window);
 void window_manager_make_children_floating(struct window_manager *wm, struct ax_window *window, bool floating);
-void window_manager_make_floating(uint32_t wid, bool floating);
+void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating);
 void window_manager_make_sticky(uint32_t wid, bool sticky);
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);

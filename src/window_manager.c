@@ -146,7 +146,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (rule->alpha > 0.0f && rule->alpha <= 1.0f) {
-        window_manager_set_window_opacity(window, rule->alpha);
+        window_manager_set_window_opacity(wm, window, rule->alpha);
         window->rule_alpha = rule->alpha;
     }
 
@@ -154,7 +154,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window->rule_manage = true;
     } else if (rule->manage == RULE_PROP_OFF) {
         window_manager_make_children_floating(wm, window, true);
-        window_manager_make_floating(window->id, true);
+        window_manager_make_floating(wm, window->id, true);
         window->is_floating = true;
     }
 
@@ -354,8 +354,9 @@ void window_manager_set_normal_border_window_color(struct window_manager *wm, ui
     }
 }
 
-void window_manager_set_window_opacity(struct ax_window *window, float opacity)
+void window_manager_set_window_opacity(struct window_manager *wm, struct ax_window *window, float opacity)
 {
+    if (!wm->enable_window_opacity) return;
     if (window->rule_alpha != 0.0f) return;
 
     int sockfd;
@@ -373,7 +374,7 @@ void window_manager_set_active_window_opacity(struct window_manager *wm, float o
 {
     wm->active_window_opacity = opacity;
     struct ax_window *window = window_manager_focused_window(wm);
-    if (window) window_manager_set_window_opacity(window, wm->active_window_opacity);
+    if (window) window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
 }
 
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity)
@@ -384,7 +385,7 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
         while (bucket) {
             if (bucket->value) {
                 struct ax_window *window = bucket->value;
-                if (window->id != wm->focused_window_id) window_manager_set_window_opacity(window, wm->normal_window_opacity);
+                if (window->id != wm->focused_window_id) window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
             }
 
             bucket = bucket->next;
@@ -392,8 +393,10 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
     }
 }
 
-void window_manager_make_floating(uint32_t wid, bool floating)
+void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating)
 {
+    if (!wm->enable_window_topmost) return;
+
     int sockfd;
     char message[MAXLEN];
 
@@ -791,7 +794,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         }
 
         window_manager_apply_rules_to_window(sm, wm, window);
-        window_manager_set_window_opacity(window, wm->normal_window_opacity);
+        window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
         window_manager_purify_window(wm, window);
 
         if (window_observe(window)) {
@@ -806,13 +809,13 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
                            (window_is_sticky(window)) ||
                            (window_is_undersized(window))) {
                     window_manager_make_children_floating(wm, window, true);
-                    window_manager_make_floating(window->id, true);
+                    window_manager_make_floating(wm, window->id, true);
                     window->is_floating = true;
                 }
             }
         } else {
             window_manager_make_children_floating(wm, window, true);
-            window_manager_make_floating(window->id, true);
+            window_manager_make_floating(wm, window->id, true);
             window_unobserve(window);
             window_destroy(window);
         }
@@ -980,6 +983,8 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
 
 void window_manager_make_children_floating(struct window_manager *wm, struct ax_window *window, bool floating)
 {
+    if (!wm->enable_window_topmost) return;
+
     uint64_t sid = window_space(window);
     if (!sid) sid = space_manager_active_space();
 
@@ -990,7 +995,7 @@ void window_manager_make_children_floating(struct window_manager *wm, struct ax_
     for (int i = 0; i < count; ++i) {
         struct ax_window *child = window_manager_find_window(wm, window_list[i]);
         if ((!child) || (!window_is_standard(child) && !window_can_move(child))) {
-            window_manager_make_floating(window_list[i], floating);
+            window_manager_make_floating(wm, window_list[i], floating);
         }
     }
 
@@ -1002,7 +1007,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
     if (window->is_floating) {
         window->is_floating = false;
         window_manager_make_children_floating(wm, window, false);
-        window_manager_make_floating(window->id, false);
+        window_manager_make_floating(wm, window->id, false);
         if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
             window_manager_add_managed_window(wm, window, view);
@@ -1014,7 +1019,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
             window_manager_remove_managed_window(wm, window);
         }
         window_manager_make_children_floating(wm, window, true);
-        window_manager_make_floating(window->id, true);
+        window_manager_make_floating(wm, window->id, true);
         window->is_floating = true;
     }
 }
@@ -1242,5 +1247,5 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
     wm->focused_window_id = window->id;
     wm->focused_window_pid = window->application->pid;
     border_window_activate(window);
-    window_manager_set_window_opacity(window, wm->active_window_opacity);
+    window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
 }

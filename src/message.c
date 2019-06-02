@@ -16,6 +16,8 @@ extern struct mouse_state g_mouse_state;
 /* --------------------------------DOMAIN CONFIG-------------------------------- */
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
 #define COMMAND_CONFIG_FFM                   "focus_follows_mouse"
+#define COMMAND_CONFIG_TOPMOST               "window_topmost"
+#define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
@@ -43,6 +45,10 @@ extern struct mouse_state g_mouse_state;
 #define ARGUMENT_CONFIG_FFM_DISABLED         "off"
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
+#define ARGUMENT_CONFIG_TOPMOST_ON           "on"
+#define ARGUMENT_CONFIG_TOPMOST_OFF          "off"
+#define ARGUMENT_CONFIG_OPACITY_ON           "on"
+#define ARGUMENT_CONFIG_OPACITY_OFF          "off"
 #define ARGUMENT_CONFIG_SHADOW_OFF           "off"
 #define ARGUMENT_CONFIG_SHADOW_FLT           "float"
 #define ARGUMENT_CONFIG_SHADOW_ON            "on"
@@ -293,6 +299,28 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_window_manager.ffm_mode = FFM_AUTOFOCUS;
         } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTORAISE)) {
             g_window_manager.ffm_mode = FFM_AUTORAISE;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_TOPMOST)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_topmost]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_TOPMOST_OFF)) {
+            g_window_manager.enable_window_topmost = false;
+        } else if (token_equals(value, ARGUMENT_CONFIG_TOPMOST_ON)) {
+            g_window_manager.enable_window_topmost = true;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_OPACITY)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_opacity]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_OPACITY_OFF)) {
+            g_window_manager.enable_window_opacity = false;
+        } else if (token_equals(value, ARGUMENT_CONFIG_OPACITY_ON)) {
+            g_window_manager.enable_window_opacity = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

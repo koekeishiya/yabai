@@ -86,6 +86,12 @@ Colors are in the form '#AARRGGBB'.
 'focus_follows_mouse'::
     Focus the window under the mouse. Accept the following values: *autofocus*, *autoraise*, *off*.
 
+'window_topmost'::
+    Make floating windows stay on top.
+
+'window_opacity'::
+    Enable opacity for windows.
+
 'window_shadow'::
     Draw shadow for windows. Accept the following values: *on*, *float*, *off*.
 
