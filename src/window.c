@@ -164,7 +164,8 @@ char *window_title(struct ax_window *window)
     char *title = NULL;
     CFTypeRef value = NULL;
 
-    if (SLSCopyWindowProperty(g_connection, window->id, CFSTR("kCGSWindowTitle"), &value) == kCGErrorSuccess) {
+    SLSCopyWindowProperty(g_connection, window->id, CFSTR("kCGSWindowTitle"), &value);
+    if (value) {
         title = cfstring_copy(value);
         CFRelease(value);
     }
