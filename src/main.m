@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <fcntl.h>
 #include <regex.h>
 #include <execinfo.h>
 #include <signal.h>
@@ -189,7 +190,15 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
         error("yabai: could not create lock-file! abort..\n");
     }
 
-    if (flock(handle, LOCK_EX | LOCK_NB) == -1) {
+    struct flock lockfd = {
+        .l_start  = 0,
+        .l_len    = 0,
+        .l_pid    = getpid(),
+        .l_type   = F_WRLCK,
+        .l_whence = SEEK_SET
+    };
+
+    if (fcntl(handle, F_SETLK, &lockfd) == -1) {
         error("yabai: could not acquire lock-file! abort..\n");
     }
 
