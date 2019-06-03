@@ -442,7 +442,7 @@ void view_serialize(FILE *rsp, struct view *view)
     fprintf(rsp,
             "{\n"
             "\t\"index\":%d,\n"
-            "\t\"monitor\":%d,\n"
+            "\t\"display\":%d,\n"
             "\t\"windows\":%d,\n"
             "\t\"type\":\"%s\"\n"
             "}",
