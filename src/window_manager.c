@@ -118,13 +118,11 @@ void window_manager_query_windows_for_displays(FILE *rsp)
 
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, struct rule *rule)
 {
-    regex_t regex;
-
-    if (regex_match(&regex, window->application->name, rule->app) == REGEX_MATCH_NO) {
+    if (regex_match(rule->app_regex_valid, &rule->app_regex, window->application->name) == REGEX_MATCH_NO) {
         return;
     }
 
-    if (regex_match(&regex, window_title(window), rule->title) == REGEX_MATCH_NO) {
+    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window)) == REGEX_MATCH_NO) {
         return;
     }
 

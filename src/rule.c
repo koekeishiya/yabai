@@ -26,7 +26,7 @@ void rule_add(struct rule *rule)
 
 bool rule_is_valid(struct rule *rule)
 {
-    return rule->app || rule->title;
+    return rule->app_regex_valid || rule->title_regex_valid;
 }
 
 struct rule *rule_create(void)
@@ -38,7 +38,7 @@ struct rule *rule_create(void)
 
 void rule_destroy(struct rule *rule)
 {
-    if (rule->app)   free(rule->app);
-    if (rule->title) free(rule->title);
+    if (rule->app_regex_valid)   regfree(&rule->app_regex);
+    if (rule->title_regex_valid) regfree(&rule->title_regex);
     free(rule);
 }

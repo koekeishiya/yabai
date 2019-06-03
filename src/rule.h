@@ -7,8 +7,10 @@
 
 struct rule
 {
-    char *app;
-    char *title;
+    regex_t app_regex;
+    regex_t title_regex;
+    bool app_regex_valid;
+    bool title_regex_valid;
     bool follow_space;
     int display;
     int space;

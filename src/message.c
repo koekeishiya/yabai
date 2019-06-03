@@ -1391,9 +1391,11 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             }
 
             if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
-                rule->app = string_copy(value);
+                rule->app_regex_valid = regcomp(&rule->app_regex, value, REG_EXTENDED) == 0;
+                if (!rule->app_regex_valid) daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
             } else if (string_equals(key, ARGUMENT_RULE_KEY_TITLE)) {
-                rule->title = string_copy(value);
+                rule->title_regex_valid = regcomp(&rule->title_regex, value, REG_EXTENDED) == 0;
+                if (!rule->title_regex_valid) daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
             } else if (string_equals(key, ARGUMENT_RULE_KEY_DISPLAY)) {
                 if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
                     ++value;
