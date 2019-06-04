@@ -27,7 +27,7 @@ The *Mission Control* setting [*displays have separate spaces*](https://support.
 **yabai** stores a unix domain socket at `/tmp/yabai_$USER.socket` to listen for messages.
 
 **DISCLAIMER:** Use at your own discretion. I take no responsibility if anything should happen to your machine while trying to install, test or otherwise use this software in any form.
-You aknowledge that you understand the potential risk that may come from disabling [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) on your system, and I make
+You acknowledge that you understand the potential risk that may come from disabling [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) on your system, and I make
 no recommendation as to whether you should or should not disable SIP.
 
 ### Install
