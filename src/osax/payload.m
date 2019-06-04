@@ -352,9 +352,10 @@ const char *get_set_front_window_pattern(NSOperatingSystemVersion os_version) {
 
 static void init_instances()
 {
+    // TODO(koekeishiya): Do proper version checks with minor and patch version..
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if (os_version.minorVersion != 13 && os_version.minorVersion != 14) {
-        NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra and Mojave!");
+    if (os_version.minorVersion != 13 && os_version.minorVersion != 14 && os_version.minorVersion != 15) {
+        NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra, Mojave and Catalina!");
         return;
     }
 
