@@ -1,7 +1,7 @@
 #ifndef EVENTLOOP_EVENT_H
 #define EVENTLOOP_EVENT_H
 
-#define EVENT_CALLBACK(name) int name(void *context, int param1, int param2)
+#define EVENT_CALLBACK(name) int name(void *context, int param1, void *param2)
 typedef EVENT_CALLBACK(event_callback);
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED);
@@ -38,8 +38,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED);
 static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE);
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE);
 
-#define EVENT_QUEUED    0
-#define EVENT_PROCESSED 1
+#define EVENT_IGNORED   -1
+#define EVENT_QUEUED     0
+#define EVENT_PROCESSED  1
 
 #define EVENT_SUCCESS      0
 #define EVENT_MOUSE_IGNORE 1
@@ -49,7 +50,7 @@ struct event
     event_callback *handler;
     void *context;
     int param1;
-    int param2;
+    void *param2;
     volatile int *status;
     volatile int *result;
 };
@@ -60,17 +61,6 @@ struct event
         e->context = d;\
         e->handler = &EVENT_HANDLER_##t;\
         e->param1 = 0;\
-        e->param2 = 0;\
-        e->status = 0;\
-        e->result = 0;\
-    } while (0)
-
-#define event_create_p1(e, t, d, p1)\
-    do {\
-        e = malloc(sizeof(struct event));\
-        e->context = d;\
-        e->handler = &EVENT_HANDLER_##t;\
-        e->param1 = p1;\
         e->param2 = 0;\
         e->status = 0;\
         e->result = 0;\

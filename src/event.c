@@ -957,22 +957,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
-    FILE *rsp = fdopen(param2, "w");
-    if (!rsp) goto fderr;
-
     debug("%s: msg '", __FUNCTION__);
     for (int i = 0; i < param1 - 1; ++i) {
-        char c = *((char*)context + i);
+        char c = *((char *) context + i);
         debug("%c", c == '\0' ? ' ' : c);
     }
     debug("'\n");
-    handle_message(rsp, context);
-
-    fflush(rsp);
-    fclose(rsp);
-
-fderr:
-    socket_close(param2);
-    free(context);
+    handle_message(param2, context);
     return EVENT_SUCCESS;
 }

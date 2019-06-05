@@ -1480,6 +1480,27 @@ void handle_message(FILE *rsp, char *message)
 static SOCKET_DAEMON_HANDLER(message_handler)
 {
     struct event *event;
-    event_create_p2(event, DAEMON_MESSAGE, message, length, sockfd);
+    volatile int status = EVENT_QUEUED;
+    volatile int result = EVENT_SUCCESS;
+
+    FILE *rsp = fdopen(sockfd, "w");
+    if (!rsp) goto fderr;
+
+    event_create_p2(event, DAEMON_MESSAGE, message, length, rsp);
+    event->status = &status;
+    event->result = &result;
     eventloop_post(&g_eventloop, event);
+    while (status == EVENT_QUEUED);
+
+    if (status == EVENT_IGNORED) {
+        debug("yabai: eventloop is not running! ignoring event..\n");
+        free(event);
+    }
+
+    fflush(rsp);
+    fclose(rsp);
+
+fderr:
+    socket_close(sockfd);
+    free(message);
 }
