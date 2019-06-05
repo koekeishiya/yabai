@@ -1,3 +1,5 @@
+#include "sa.h"
+
 #define OSAX_DIR                  "/System/Library/ScriptingAdditions/yabai.osax"
 #define CONTENTS_DIR              "/System/Library/ScriptingAdditions/yabai.osax/Contents"
 #define CONTENTS_MACOS_DIR        "/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS"
