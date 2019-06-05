@@ -1,6 +1,6 @@
 #include "workspace.h"
 
-extern struct eventloop g_eventloop;
+extern struct event_loop g_event_loop;
 
 void workspace_event_handler_init(void **context)
 {
@@ -75,35 +75,35 @@ void workspace_event_handler_end(void *context)
 {
     struct event *event;
     event_create(event, SYSTEM_WOKE, NULL);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 - (void)didRestartDock:(NSNotification *)notification
 {
     struct event *event;
     event_create(event, DOCK_DID_RESTART, NULL);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 - (void)didChangeMenuBarHiding:(NSNotification *)notification
 {
     struct event *event;
     event_create(event, MENU_BAR_HIDDEN_CHANGED, NULL);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 - (void)activeDisplayDidChange:(NSNotification *)notification
 {
     struct event *event;
     event_create(event, DISPLAY_CHANGED, NULL);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 - (void)activeSpaceDidChange:(NSNotification *)notification
 {
     struct event *event;
     event_create(event, SPACE_CHANGED, NULL);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 - (void)didHideApplication:(NSNotification *)notification
@@ -112,7 +112,7 @@ void workspace_event_handler_end(void *context)
 
     struct event *event;
     event_create(event, APPLICATION_HIDDEN, (void *)(intptr_t) pid);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 - (void)didUnhideApplication:(NSNotification *)notification
@@ -121,7 +121,7 @@ void workspace_event_handler_end(void *context)
 
     struct event *event;
     event_create(event, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 @end

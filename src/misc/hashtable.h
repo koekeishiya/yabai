@@ -34,9 +34,6 @@ void *table_find(struct table *table, void *key);
 #endif
 
 #ifdef HASHTABLE_IMPLEMENTATION
-#include <stdlib.h>
-#include <string.h>
-
 void table_init(struct table *table, int capacity, table_hash_func hash, table_compare_func cmp)
 {
     table->count = 0;

@@ -1,6 +1,6 @@
 #include "display.h"
 
-extern struct eventloop g_eventloop;
+extern struct event_loop g_event_loop;
 extern int g_connection;
 
 static DISPLAY_EVENT_HANDLER(display_handler)
@@ -19,7 +19,7 @@ static DISPLAY_EVENT_HANDLER(display_handler)
         event = NULL;
     }
 
-    if (event) eventloop_post(&g_eventloop, event);
+    if (event) event_loop_post(&g_event_loop, event);
 }
 
 CFStringRef display_uuid(uint32_t display_id)

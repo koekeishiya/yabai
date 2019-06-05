@@ -1,6 +1,6 @@
 #include "message.h"
 
-extern struct eventloop g_eventloop;
+extern struct event_loop g_event_loop;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
@@ -1487,12 +1487,12 @@ static SOCKET_DAEMON_HANDLER(message_handler)
 
     event_create_p2(event, DAEMON_MESSAGE, message, length, rsp);
     event->status = &status;
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
     while (status == EVENT_QUEUED);
 
     if (status == EVENT_IGNORED) {
-        debug("yabai: eventloop is not running! ignoring event..\n");
-        daemon_fail(rsp, "eventloop is not running! ignoring event..\n");
+        debug("yabai: event_loop is not running! ignoring event..\n");
+        daemon_fail(rsp, "event_loop is not running! ignoring event..\n");
     }
 
     fflush(rsp);

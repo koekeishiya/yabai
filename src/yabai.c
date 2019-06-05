@@ -26,7 +26,7 @@
 typedef CONNECTION_CALLBACK(connection_callback);
 extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);
 
-struct eventloop g_eventloop;
+struct event_loop g_event_loop;
 void *g_workspace_context;
 struct process_manager g_process_manager;
 struct display_manager g_display_manager;
@@ -182,7 +182,7 @@ static CONNECTION_CALLBACK(connection_handler)
 {
     struct event *event;
     event_create(event, MISSION_CONTROL_ENTER, NULL);
-    eventloop_post(&g_eventloop, event);
+    event_loop_post(&g_event_loop, event);
 }
 
 static void parse_arguments(int argc, char **argv)
@@ -248,8 +248,8 @@ int main(int argc, char **argv)
         error("yabai: 'display has separate spaces' is disabled! abort..\n");
     }
 
-    if (!eventloop_init(&g_eventloop)) {
-        error("yabai: could not initialize eventloop! abort..\n");
+    if (!event_loop_init(&g_event_loop)) {
+        error("yabai: could not initialize event_loop! abort..\n");
     }
 
     if (!socket_daemon_begin_un(&g_daemon, g_socket_file, message_handler)) {
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
     window_manager_init(&g_window_manager);
     mouse_state_init(&g_mouse_state);
 
-    eventloop_begin(&g_eventloop);
+    event_loop_begin(&g_event_loop);
     exec_config_file();
 
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);

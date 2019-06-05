@@ -1,4 +1,4 @@
-#include "eventloop.h"
+#include "event_loop.h"
 
 static void
 queue_init(struct queue *queue)
@@ -49,12 +49,12 @@ queue_pop(struct queue *queue)
 }
 
 static void *
-eventloop_run(void *context)
+event_loop_run(void *context)
 {
-    struct eventloop *eventloop = (struct eventloop *) context;
-    struct queue *queue = (struct queue *) &eventloop->queue;
+    struct event_loop *event_loop = (struct event_loop *) context;
+    struct queue *queue = (struct queue *) &event_loop->queue;
 
-    while (eventloop->is_running) {
+    while (event_loop->is_running) {
         struct event *event = queue_pop(queue);
         if (event) {
             int result = event->handler(event->context, event->param1, event->param2);
@@ -62,44 +62,44 @@ eventloop_run(void *context)
             if (event->result) *event->result = result;
             free(event);
         } else {
-            sem_wait(eventloop->semaphore);
+            sem_wait(event_loop->semaphore);
         }
     }
 
     return NULL;
 }
 
-void eventloop_post(struct eventloop *eventloop, struct event *event)
+void event_loop_post(struct event_loop *event_loop, struct event *event)
 {
-    if (eventloop->is_running) {
-        queue_push(&eventloop->queue, event);
-        sem_post(eventloop->semaphore);
+    if (event_loop->is_running) {
+        queue_push(&event_loop->queue, event);
+        sem_post(event_loop->semaphore);
     } else if (event->status) {
         *event->status = EVENT_IGNORED;
         free(event);
     }
 }
 
-bool eventloop_init(struct eventloop *eventloop)
+bool event_loop_init(struct event_loop *event_loop)
 {
-    queue_init(&eventloop->queue);
-    eventloop->is_running = 0;
-    eventloop->semaphore = sem_open("eventloop_semaphore", O_CREAT, 0600, 0);
-    return eventloop->semaphore != SEM_FAILED;
+    queue_init(&event_loop->queue);
+    event_loop->is_running = 0;
+    event_loop->semaphore = sem_open("event_loop_semaphore", O_CREAT, 0600, 0);
+    return event_loop->semaphore != SEM_FAILED;
 }
 
-bool eventloop_begin(struct eventloop *eventloop)
+bool event_loop_begin(struct event_loop *event_loop)
 {
-    if (eventloop->is_running) return false;
-    eventloop->is_running = true;
-    pthread_create(&eventloop->thread, NULL, &eventloop_run, eventloop);
+    if (event_loop->is_running) return false;
+    event_loop->is_running = true;
+    pthread_create(&event_loop->thread, NULL, &event_loop_run, event_loop);
     return true;
 }
 
-bool eventloop_end(struct eventloop *eventloop)
+bool event_loop_end(struct event_loop *event_loop)
 {
-    if (!eventloop->is_running) return false;
-    eventloop->is_running = false;
-    pthread_join(eventloop->thread, NULL);
+    if (!event_loop->is_running) return false;
+    event_loop->is_running = false;
+    pthread_join(event_loop->thread, NULL);
     return true;
 }

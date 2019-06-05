@@ -1,6 +1,6 @@
 #include "process.h"
 
-extern struct eventloop g_eventloop;
+extern struct event_loop g_event_loop;
 
 static PROCESS_EVENT_HANDLER(process_handler)
 {
@@ -38,7 +38,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
 
         struct event *event;
         event_create(event, APPLICATION_LAUNCHED, process);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
 
         process_manager_add_process(pm, process);
         goto out;
@@ -55,7 +55,7 @@ out:;
 
         struct event *event;
         event_create(event, APPLICATION_TERMINATED, process);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } break;
     case kEventAppFrontSwitched: {
         struct process *process = process_manager_find_process(pm, &psn);
@@ -63,7 +63,7 @@ out:;
 
         struct event *event;
         event_create(event, APPLICATION_FRONT_SWITCHED, process);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } break;
     }
 

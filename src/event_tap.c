@@ -1,6 +1,6 @@
 #include "event_tap.h"
 
-extern struct eventloop g_eventloop;
+extern struct event_loop g_event_loop;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch"
@@ -21,7 +21,7 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         event_create(event, MOUSE_DOWN, (void *) CFRetain(cgevent));
         event->status = &status;
         event->result = &result;
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
         while (status == EVENT_QUEUED);
 
         if (result == EVENT_MOUSE_IGNORE) return NULL;
@@ -30,18 +30,18 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     case kCGEventRightMouseUp: {
         struct event *event;
         event_create(event, MOUSE_UP, (void *) CFRetain(cgevent));
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } break;
     case kCGEventLeftMouseDragged:
     case kCGEventRightMouseDragged: {
         struct event *event;
         event_create(event, MOUSE_DRAGGED, (void *) CFRetain(cgevent));
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } break;
     case kCGEventMouseMoved: {
         struct event *event;
         event_create(event, MOUSE_MOVED, (void *) CFRetain(cgevent));
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } break;
     }
 

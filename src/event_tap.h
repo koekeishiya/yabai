@@ -1,9 +1,6 @@
 #ifndef EVENT_TAP_H
 #define EVENT_TAP_H
 
-#include <stdbool.h>
-#include <Carbon/Carbon.h>
-
 #define EVENT_MASK_MOUSE (1 << kCGEventMouseMoved) | \
                          (1 << kCGEventLeftMouseDown) | \
                          (1 << kCGEventLeftMouseUp) | \

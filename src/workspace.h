@@ -1,8 +1,6 @@
 #ifndef WORKSPACE_H
 #define WORKSPACE_H
 
-#include <Cocoa/Cocoa.h>
-
 @interface workspace_context : NSObject {
 }
 - (id)init;

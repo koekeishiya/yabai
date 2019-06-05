@@ -1,6 +1,6 @@
 #include "event.h"
 
-extern struct eventloop g_eventloop;
+extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
@@ -47,7 +47,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
             struct event *event;
             event_create(event, APPLICATION_FRONT_SWITCHED, process);
-            eventloop_post(&g_eventloop, event);
+            event_loop_post(&g_event_loop, event);
             window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
         }
     } else {
@@ -60,7 +60,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 struct event *event;
                 event_create(event, APPLICATION_LAUNCHED, process);
-                eventloop_post(&g_eventloop, event);
+                event_loop_post(&g_event_loop, event);
             });
         }
     }
@@ -124,11 +124,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
 
     struct event *de_event;
     event_create(de_event, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid);
-    eventloop_post(&g_eventloop, de_event);
+    event_loop_post(&g_event_loop, de_event);
 
     struct event *re_event;
     event_create(re_event, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid);
-    eventloop_post(&g_eventloop, re_event);
+    event_loop_post(&g_event_loop, re_event);
 
     return EVENT_SUCCESS;
 }
@@ -308,7 +308,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
             struct event *event;
             event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
-            eventloop_post(&g_eventloop, event);
+            event_loop_post(&g_event_loop, event);
             window_manager_remove_lost_focused_event(&g_window_manager, window->id);
         }
     } else {
@@ -507,7 +507,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
     if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
         struct event *event;
         event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
     }
 
@@ -838,7 +838,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         struct event *event;
         event_create(event, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     });
 
     return EVENT_SUCCESS;
@@ -872,13 +872,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             struct event *event;
             event_create(event, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
-            eventloop_post(&g_eventloop, event);
+            event_loop_post(&g_event_loop, event);
         });
     } else {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             struct event *event;
             event_create(event, MISSION_CONTROL_EXIT, NULL);
-            eventloop_post(&g_eventloop, event);
+            event_loop_post(&g_event_loop, event);
         });
     }
 

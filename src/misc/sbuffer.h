@@ -1,9 +1,6 @@
 #ifndef SBUFFER_H
 #define SBUFFER_H
 
-#include <stdlib.h>
-#include <stdint.h>
-
 struct buf_hdr
 {
     size_t len;

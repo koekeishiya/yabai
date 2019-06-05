@@ -1,13 +1,13 @@
 #include "application.h"
 
-extern struct eventloop g_eventloop;
+extern struct event_loop g_event_loop;
 
 static OBSERVER_CALLBACK(application_notification_handler)
 {
     if (CFEqual(notification, kAXCreatedNotification)) {
         struct event *event;
         event_create(event, WINDOW_CREATED, (void *) CFRetain(element));
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXUIElementDestroyedNotification)) {
         uint32_t *window_id_ptr = *(uint32_t **) context;
         if (!window_id_ptr) return;
@@ -17,52 +17,52 @@ static OBSERVER_CALLBACK(application_notification_handler)
 
         struct event *event;
         event_create(event, WINDOW_DESTROYED, (void *)(uintptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXFocusedWindowChangedNotification)) {
         uint32_t window_id = ax_window_id(element);
         if (!window_id) return;
 
         struct event *event;
         event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXWindowMovedNotification)) {
         uint32_t window_id = ax_window_id(element);
         if (!window_id) return;
 
         struct event *event;
         event_create(event, WINDOW_MOVED, (void *)(intptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXWindowResizedNotification)) {
         uint32_t window_id = ax_window_id(element);
         if (!window_id) return;
 
         struct event *event;
         event_create(event, WINDOW_RESIZED, (void *)(intptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXWindowMiniaturizedNotification)) {
         struct event *event;
         uint32_t window_id = **((uint32_t **) context);
         event_create(event, WINDOW_MINIMIZED, (void *)(intptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXWindowDeminiaturizedNotification)) {
         struct event *event;
         uint32_t window_id = **((uint32_t **) context);
         event_create(event, WINDOW_DEMINIMIZED, (void *)(intptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXTitleChangedNotification)) {
         uint32_t window_id = ax_window_id(element);
         if (!window_id) return;
 
         struct event *event;
         event_create(event, WINDOW_TITLE_CHANGED, (void *)(intptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXMenuOpenedNotification)) {
         uint32_t window_id = ax_window_id(element);
         if (!window_id) return;
 
         struct event *event;
         event_create(event, MENU_OPENED, (void *)(intptr_t) window_id);
-        eventloop_post(&g_eventloop, event);
+        event_loop_post(&g_event_loop, event);
     }
 }
 

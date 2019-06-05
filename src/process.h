@@ -1,9 +1,6 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include <Carbon/Carbon.h>
-#include <stdbool.h>
-
 #define PROCESS_EVENT_HANDLER(name) OSStatus name(EventHandlerCallRef ref, EventRef event, void *user_data)
 typedef PROCESS_EVENT_HANDLER(process_event_handler);
 

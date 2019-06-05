@@ -1,12 +1,3 @@
-#include <ScriptingBridge/ScriptingBridge.h>
-#include <string.h>
-#include <dirent.h>
-#include <errno.h>
-
-#include "sa.h"
-#include "sa_loader.c"
-#include "sa_payload.c"
-
 #define OSAX_DIR                  "/System/Library/ScriptingAdditions/yabai.osax"
 #define CONTENTS_DIR              "/System/Library/ScriptingAdditions/yabai.osax/Contents"
 #define CONTENTS_MACOS_DIR        "/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS"

@@ -1,8 +1,6 @@
 #ifndef PROCESS_MANAGER_H
 #define PROCESS_MANAGER_H
 
-#include <Carbon/Carbon.h>
-
 struct process_manager
 {
     struct table process;

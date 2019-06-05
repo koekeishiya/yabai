@@ -10,12 +10,14 @@ enum mouse_mod
     MOUSE_MOD_CTRL  = 0x10,
     MOUSE_MOD_FN    = 0x20
 };
+
 enum mouse_mode
 {
     MOUSE_MODE_NONE,
     MOUSE_MODE_MOVE,
     MOUSE_MODE_RESIZE,
 };
+
 struct mouse_state
 {
     enum mouse_mode current_action;
@@ -57,7 +59,7 @@ static uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
     return flags;
 }
 
-static void mouse_state_init(struct mouse_state *state)
+static inline void mouse_state_init(struct mouse_state *state)
 {
     state->modifier = MOUSE_MOD_NONE;
 }

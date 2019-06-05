@@ -1,5 +1,5 @@
-#ifndef EVENTLOOP_EVENT_H
-#define EVENTLOOP_EVENT_H
+#ifndef EVENT_LOOP_EVENT_H
+#define EVENT_LOOP_EVENT_H
 
 #define EVENT_CALLBACK(name) int name(void *context, int param1, void *param2)
 typedef EVENT_CALLBACK(event_callback);

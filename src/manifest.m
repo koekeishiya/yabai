@@ -1,9 +1,12 @@
+#include <ScriptingBridge/ScriptingBridge.h>
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
+#include <dirent.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <fcntl.h>
@@ -13,6 +16,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <semaphore.h>
+#include <pthread.h>
 
 #include "misc/macros.h"
 #include "misc/log.h"
@@ -26,10 +31,12 @@
 #include "misc/socket.c"
 
 #include "osax/sa.h"
+#include "osax/sa_loader.c"
+#include "osax/sa_payload.c"
 #include "osax/sa.m"
 
 #include "event.h"
-#include "eventloop.h"
+#include "event_loop.h"
 #include "event_tap.h"
 #include "process.h"
 #include "workspace.h"
@@ -48,7 +55,7 @@
 #include "window_manager.h"
 
 #include "event.c"
-#include "eventloop.c"
+#include "event_loop.c"
 #include "event_tap.c"
 #include "process.c"
 #include "workspace.m"
