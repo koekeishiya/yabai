@@ -234,6 +234,11 @@ static void exec_config_file(char *config)
         error("yabai: config '%s' not found!\n", config);
     }
 
+    bool is_executable = buffer.st_mode & S_IXUSR;
+    if (!is_executable && chmod(config, S_IXUSR | buffer.st_mode) != 0) {
+        error("yabai: could not set the executable permission bit! abort..\n");
+    }
+
     if (!fork_exec_wait(config)) {
         error("yabai: failed to execute config '%s'!\n", config);
     }
