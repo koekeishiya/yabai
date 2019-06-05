@@ -1494,7 +1494,7 @@ static SOCKET_DAEMON_HANDLER(message_handler)
 
     if (status == EVENT_IGNORED) {
         debug("yabai: eventloop is not running! ignoring event..\n");
-        free(event);
+        daemon_fail(rsp, "eventloop is not running! ignoring event..\n");
     }
 
     fflush(rsp);

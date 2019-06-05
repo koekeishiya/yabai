@@ -22,7 +22,7 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         event->status = &status;
         event->result = &result;
         eventloop_post(&g_eventloop, event);
-        while (status != EVENT_PROCESSED);
+        while (status == EVENT_QUEUED);
 
         if (result == EVENT_MOUSE_IGNORE) return NULL;
     } break;

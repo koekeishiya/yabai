@@ -76,6 +76,7 @@ void eventloop_post(struct eventloop *eventloop, struct event *event)
         sem_post(eventloop->semaphore);
     } else if (event->status) {
         *event->status = EVENT_IGNORED;
+        free(event);
     }
 }
 
