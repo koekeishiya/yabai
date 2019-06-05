@@ -211,7 +211,7 @@ static void exec_config_file(void)
 
     bool is_executable = buffer.st_mode & S_IXUSR;
     if (!is_executable && chmod(g_config_file, S_IXUSR | buffer.st_mode) != 0) {
-        error("yabai: could not set the executable permission bit! abort..\n");
+        error("yabai: could not set the executable permission bit for config '%s'! abort..\n", g_config_file);
     }
 
     if (!fork_exec_wait(g_config_file)) {
