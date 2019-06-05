@@ -22,7 +22,6 @@
 #include "misc/macros.h"
 #include "misc/log.h"
 #include "misc/helpers.h"
-#include "misc/cfstring.h"
 #include "misc/sbuffer.h"
 #define HASHTABLE_IMPLEMENTATION
 #include "misc/hashtable.h"
