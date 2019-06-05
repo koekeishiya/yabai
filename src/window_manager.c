@@ -1,7 +1,7 @@
 #include "window_manager.h"
 
 extern struct process_manager g_process_manager;
-extern char *g_sa_socket_path;
+extern char g_sa_socket_file[MAXLEN];
 
 static TABLE_HASH_FUNC(hash_wm)
 {
@@ -360,7 +360,7 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct ax_wind
     int sockfd;
     char message[MAXLEN];
 
-    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", window->id, opacity, 0.2f);
         socket_write(sockfd, message);
         socket_wait(sockfd);
@@ -398,7 +398,7 @@ void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool 
     int sockfd;
     char message[MAXLEN];
 
-    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_level %d %d", wid, floating ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
         socket_write(sockfd, message);
         socket_wait(sockfd);
@@ -411,14 +411,14 @@ void window_manager_make_sticky(uint32_t wid, bool sticky)
     int sockfd;
     char message[MAXLEN];
 
-    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_sticky %d %d", wid, sticky);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
     socket_close(sockfd);
 
-    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_level %d %d", wid, sticky ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
         socket_write(sockfd, message);
         socket_wait(sockfd);
@@ -440,7 +440,7 @@ void window_manager_purify_window(struct window_manager *wm, struct ax_window *w
         value = 0;
     }
 
-    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_shadow %d %d", window->id, value);
         socket_write(sockfd, message);
         socket_wait(sockfd);
@@ -640,7 +640,7 @@ void window_manager_focus_window_with_raise(uint32_t window_id)
     int sockfd;
     char message[MAXLEN];
 
-    if (socket_connect_un(&sockfd, g_sa_socket_path)) {
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_focus %d", window_id);
         socket_write(sockfd, message);
         socket_wait(sockfd);

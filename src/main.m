@@ -102,10 +102,13 @@ struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
-bool g_mission_control_active;
-char *g_sa_socket_path;
 int g_connection;
-char *g_config;
+
+bool g_mission_control_active;
+char g_sa_socket_file[MAXLEN];
+char g_socket_file[MAXLEN];
+char g_config_file[MAXLEN];
+char g_lock_file[MAXLEN];
 bool g_verbose;
 
 static int client_send_message(int argc, char **argv)
@@ -175,17 +178,9 @@ static int client_send_message(int argc, char **argv)
     return result;
 }
 
-static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
+static void acquire_lockfile(void)
 {
-    char *user = getenv("USER");
-    if (!user) {
-        error("yabai: 'env USER' not set! abort..\n");
-    }
-
-    char lock_file[MAXLEN];
-    snprintf(lock_file, sizeof(lock_file), LCFILE_PATH_FMT, user);
-
-    int handle = open(lock_file, O_CREAT | O_WRONLY, 0600);
+    int handle = open(g_lock_file, O_CREAT | O_WRONLY, 0600);
     if (handle == -1) {
         error("yabai: could not create lock-file! abort..\n");
     }
@@ -201,46 +196,26 @@ static bool daemon_init(struct daemon *daemon, socket_daemon_handler *handler)
     if (fcntl(handle, F_SETLK, &lockfd) == -1) {
         error("yabai: could not acquire lock-file! abort..\n");
     }
-
-    g_sa_socket_path = malloc(MAXLEN);
-    if (g_sa_socket_path) {
-        snprintf(g_sa_socket_path, MAXLEN, SA_SOCKET_PATH_FMT, user);
-    } else {
-        error("yabai: could not get memory for path to sa-socket! abort..\n");
-    }
-
-    char socket_file[MAXLEN];
-    snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
-
-    return socket_daemon_begin_un(daemon, socket_file, handler);
 }
 
-static void exec_config_file(char *config)
+static void exec_config_file(void)
 {
-    char config_file[MAXLEN];
-
-    if (!config) {
-        char *home = getenv("HOME");
-        if (!home) {
-            error("yabai: 'env HOME' not set! abort..\n");
-        }
-
-        snprintf(config_file, sizeof(config_file), CONFIG_FILE_FMT, home);
-        config = config_file;
+    struct stat buffer;
+    if (stat(g_config_file, &buffer) != 0) {
+        error("yabai: config '%s' not found! abort..\n", g_config_file);
     }
 
-    struct stat buffer;
-    if (stat(config, &buffer) != 0) {
-        error("yabai: config '%s' not found!\n", config);
+    if (buffer.st_mode & S_IFDIR) {
+        error("yabai: config '%s' is a directory! abort..\n", g_config_file);
     }
 
     bool is_executable = buffer.st_mode & S_IXUSR;
-    if (!is_executable && chmod(config, S_IXUSR | buffer.st_mode) != 0) {
+    if (!is_executable && chmod(g_config_file, S_IXUSR | buffer.st_mode) != 0) {
         error("yabai: could not set the executable permission bit! abort..\n");
     }
 
-    if (!fork_exec_wait(config)) {
-        error("yabai: failed to execute config '%s'!\n", config);
+    if (!fork_exec_wait(g_config_file)) {
+        error("yabai: failed to execute config '%s'!\n", g_config_file);
     }
 }
 
@@ -248,6 +223,21 @@ static void exec_config_file(char *config)
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static inline void init_misc_settings(void)
 {
+    char *user = getenv("USER");
+    if (!user) {
+        error("yabai: 'env USER' not set! abort..\n");
+    }
+
+    char *home = getenv("HOME");
+    if (!home) {
+        error("yabai: 'env HOME' not set! abort..\n");
+    }
+
+    if (!g_config_file[0]) snprintf(g_config_file, sizeof(g_config_file), CONFIG_FILE_FMT, home);
+    snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, user);
+    snprintf(g_socket_file, sizeof(g_socket_file), SOCKET_PATH_FMT, user);
+    snprintf(g_lock_file, sizeof(g_lock_file), LCFILE_PATH_FMT, user);
+
     NSApplicationLoad();
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
@@ -297,7 +287,7 @@ static void parse_arguments(int argc, char **argv)
                    (string_equals(opt, CONFIG_OPT_SHRT))) {
             char *val = i < argc - 1 ? argv[++i] : NULL;
             if (!val) error("yabai: option '%s|%s' requires an argument!\n", CONFIG_OPT_LONG, CONFIG_OPT_SHRT);
-            g_config = string_copy(val);
+            snprintf(g_config_file, sizeof(g_config_file), "%s", val);
         } else {
             error("yabai: '%s' is not a valid option!\n", opt);
         }
@@ -310,6 +300,9 @@ int main(int argc, char **argv)
         parse_arguments(argc, argv);
     }
 
+    init_misc_settings();
+    acquire_lockfile();
+
     if (is_root()) {
         error("yabai: running as root is not allowed! abort..\n");
     }
@@ -318,14 +311,16 @@ int main(int argc, char **argv)
         error("yabai: could not access accessibility features! abort..\n");
     }
 
-    init_misc_settings();
-
     if (!space_manager_has_separate_spaces()) {
         error("yabai: 'display has separate spaces' is disabled! abort..\n");
     }
 
     if (!eventloop_init(&g_eventloop)) {
         error("yabai: could not initialize eventloop! abort..\n");
+    }
+
+    if (!socket_daemon_begin_un(&g_daemon, g_socket_file, message_handler)) {
+        error("yabai: could not initialize daemon! abort..\n");
     }
 
     if (scripting_addition_is_installed()) {
@@ -338,12 +333,8 @@ int main(int argc, char **argv)
     window_manager_init(&g_window_manager);
     mouse_state_init(&g_mouse_state);
 
-    if (!daemon_init(&g_daemon, message_handler)) {
-        error("yabai: could not initialize daemon! abort..\n");
-    }
-
     eventloop_begin(&g_eventloop);
-    exec_config_file(g_config);
+    exec_config_file();
 
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     display_manager_begin(&g_display_manager);
