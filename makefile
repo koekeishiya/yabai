@@ -5,7 +5,7 @@ BUILD_PATH     = ./bin
 DOC_PATH       = ./doc
 SMP_PATH       = ./examples
 ARCH_PATH      = ./archive
-YABAI_SRC      = ./src/main.m
+YABAI_SRC      = ./src/manifest.m
 OSAX_PATH      = ./src/osax
 BINS           = $(BUILD_PATH)/yabai
 
