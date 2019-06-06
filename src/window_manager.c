@@ -118,13 +118,8 @@ void window_manager_query_windows_for_displays(FILE *rsp)
 
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, struct rule *rule)
 {
-    if (regex_match(rule->app_regex_valid, &rule->app_regex, window->application->name) == REGEX_MATCH_NO) {
-        return;
-    }
-
-    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window)) == REGEX_MATCH_NO) {
-        return;
-    }
+    if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == REGEX_MATCH_NO) return;
+    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window))      == REGEX_MATCH_NO) return;
 
     if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
         if (rule->display) {
