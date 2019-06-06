@@ -71,6 +71,27 @@ void process_manager_add_process(struct process_manager *pm, struct process *pro
     table_add(&pm->process, &process->psn, process);
 }
 
+bool process_manager_next_process(ProcessSerialNumber *next_psn)
+{
+    CFArrayRef applications =_LSCopyApplicationArrayInFrontToBackOrder(0xFFFFFFFE, 1);
+    if (!applications) return false;
+
+    bool found_front_psn = false;
+    ProcessSerialNumber front_psn;
+    _SLPSGetFrontProcess(&front_psn);
+
+    for (int i = 0; i < CFArrayGetCount(applications); ++i) {
+        CFTypeRef asn = CFArrayGetValueAtIndex(applications, i);
+        assert(CFGetTypeID(asn) == _LSASNGetTypeID());
+        _LSASNExtractHighAndLowParts(asn, &next_psn->highLongOfPSN, &next_psn->lowLongOfPSN);
+        if (found_front_psn) break;
+        found_front_psn = psn_equals(&front_psn, next_psn);
+    }
+
+    CFRelease(applications);
+    return true;
+}
+
 void process_manager_init(struct process_manager *pm)
 {
     pm->target = GetApplicationEventTarget();
