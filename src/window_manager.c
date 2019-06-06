@@ -616,6 +616,7 @@ struct ax_window *window_manager_find_last_managed_window(struct space_manager *
     return window_manager_find_window(wm, node->window_id);
 }
 
+#if 0
 void window_manager_focus_next_window_on_space_by_rank(struct window_manager *wm)
 {
     int count;
@@ -632,6 +633,7 @@ void window_manager_focus_next_window_on_space_by_rank(struct window_manager *wm
 
     free(window_list);
 }
+#endif
 
 void window_manager_focus_window_without_raise(uint32_t window_id)
 {
@@ -952,7 +954,6 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     }
 
     space_manager_move_window_to_space(sid, window);
-    window_manager_focus_next_window_on_space_by_rank(wm);
 
     if (window_manager_should_manage_window(window)) {
         if (space_is_visible(sid)) {
