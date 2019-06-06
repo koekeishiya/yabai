@@ -164,7 +164,7 @@ extern struct mouse_state g_mouse_state;
 #define ARGUMENT_RULE_KEY_MANAGE  "manage"
 #define ARGUMENT_RULE_KEY_STICKY  "sticky"
 #define ARGUMENT_RULE_KEY_BORDER  "border"
-#define ARGUMENT_RULE_KEY_FULLSCR "fullscreen"
+#define ARGUMENT_RULE_KEY_FULLSCR "native-fullscreen"
 #define ARGUMENT_RULE_KEY_GRID    "grid"
 
 #define ARGUMENT_RULE_VALUE_ON    "on"

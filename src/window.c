@@ -137,7 +137,7 @@ void window_serialize(struct ax_window *window, FILE *rsp)
             "\t\"subrole\":\"%s\",\n"
             "\t\"movable\":%d,\n"
             "\t\"resizable\":%d,\n"
-            "\t\"fullscreen\":%d,\n"
+            "\t\"native-fullscreen\":%d,\n"
             "\t\"floating\":%d\n"
             "}",
             window->id,
