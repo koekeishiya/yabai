@@ -126,7 +126,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         return;
     }
 
-    if (!window_is_fullscreen(window)) {
+    if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
         if (rule->display) {
             uint32_t did = display_manager_arrangement_display_id(rule->display);
             if (did) {
@@ -616,12 +616,21 @@ struct ax_window *window_manager_find_last_managed_window(struct space_manager *
     return window_manager_find_window(wm, node->window_id);
 }
 
-void window_manager_focus_next_process(void)
+void window_manager_focus_next_window_on_space_by_rank(struct window_manager *wm)
 {
-    ProcessSerialNumber next_psn;
-    if (process_manager_next_process(&next_psn)) {
-        _SLPSSetFrontProcessWithOptions(&next_psn, 0, kCPSNoWindows);
+    int count;
+    uint32_t *window_list = space_window_list(space_manager_active_space(), &count);
+    if (!window_list) return;
+
+    for (int i = 0; i < count; ++i) {
+        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        if (!window) continue;
+
+        window_manager_focus_window_with_raise(window_list[i]);
+        break;
     }
+
+    free(window_list);
 }
 
 void window_manager_focus_window_without_raise(uint32_t window_id)
@@ -943,7 +952,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     }
 
     space_manager_move_window_to_space(sid, window);
-    window_manager_focus_next_process();
+    window_manager_focus_next_window_on_space_by_rank(wm);
 
     if (window_manager_should_manage_window(window)) {
         if (space_is_visible(sid)) {
