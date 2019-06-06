@@ -71,6 +71,7 @@ void process_manager_add_process(struct process_manager *pm, struct process *pro
     table_add(&pm->process, &process->psn, process);
 }
 
+#if 0
 bool process_manager_next_process(ProcessSerialNumber *next_psn)
 {
     CFArrayRef applications =_LSCopyApplicationArrayInFrontToBackOrder(0xFFFFFFFE, 1);
@@ -91,6 +92,7 @@ bool process_manager_next_process(ProcessSerialNumber *next_psn)
     CFRelease(applications);
     return true;
 }
+#endif
 
 void process_manager_init(struct process_manager *pm)
 {
