@@ -407,8 +407,19 @@ uint64_t space_manager_active_space(void)
     return display_space_id(did);
 }
 
+static void space_manager_move_border_to_space(uint64_t sid, struct ax_window *window)
+{
+    if (!window->border.id) return;
+    CFNumberRef border_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->border.id);
+    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&border_id_ref, 1, NULL);
+    SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
+    CFRelease(window_list_ref);
+    CFRelease(border_id_ref);
+}
+
 void space_manager_move_window_to_space(uint64_t sid, struct ax_window *window)
 {
+    space_manager_move_border_to_space(sid, window);
     CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
     CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
     SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
