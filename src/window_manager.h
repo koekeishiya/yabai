@@ -85,6 +85,7 @@ struct ax_window *window_manager_find_closest_window_in_direction(struct window_
 struct ax_window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 struct ax_window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 struct ax_window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
+void window_manager_focus_next_process(void);
 void window_manager_focus_window_without_raise(uint32_t window_id);
 void window_manager_focus_window_with_raise(uint32_t window_id);
 struct ax_window *window_manager_focused_window(struct window_manager *wm);
