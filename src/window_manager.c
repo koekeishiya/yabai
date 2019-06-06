@@ -126,20 +126,24 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         return;
     }
 
-    if (rule->display) {
-        uint32_t did = display_manager_arrangement_display_id(rule->display);
-        if (did) {
-            uint64_t sid = display_space_id(did);
-            space_manager_move_window_to_space(sid, window);
-            border_window_refresh(window);
-            if (rule->follow_space) space_manager_focus_space(sid);
-        }
-    } else if (rule->space) {
-        uint64_t sid = space_manager_mission_control_space(rule->space);
-        if (sid) {
-            space_manager_move_window_to_space(sid, window);
-            border_window_refresh(window);
-            if (rule->follow_space) space_manager_focus_space(sid);
+    if (!window_is_fullscreen(window)) {
+        if (rule->display) {
+            uint32_t did = display_manager_arrangement_display_id(rule->display);
+            if (did) {
+                uint64_t sid = display_space_id(did);
+                space_manager_move_window_to_space(sid, window);
+                if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
+                    space_manager_focus_space(sid);
+                }
+            }
+        } else if (rule->space) {
+            uint64_t sid = space_manager_mission_control_space(rule->space);
+            if (sid) {
+                space_manager_move_window_to_space(sid, window);
+                if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
+                    space_manager_focus_space(sid);
+                }
+            }
         }
     }
 
@@ -612,6 +616,14 @@ struct ax_window *window_manager_find_last_managed_window(struct space_manager *
     return window_manager_find_window(wm, node->window_id);
 }
 
+void window_manager_focus_next_process(void)
+{
+    ProcessSerialNumber next_psn;
+    if (process_manager_next_process(&next_psn)) {
+        _SLPSSetFrontProcessWithOptions(&next_psn, 0, kCPSNoWindows);
+    }
+}
+
 void window_manager_focus_window_without_raise(uint32_t window_id)
 {
     int window_connection;
@@ -931,7 +943,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     }
 
     space_manager_move_window_to_space(sid, window);
-    border_window_refresh(window);
+    window_manager_focus_next_process();
 
     if (window_manager_should_manage_window(window)) {
         if (space_is_visible(sid)) {
