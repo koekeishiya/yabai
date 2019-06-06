@@ -316,7 +316,7 @@ ARGUMENT
 *border='<BOOL_SEL>'*::
     Window should draw border.
 
-*fullscreen='<BOOL_SEL>'*::
+*native-fullscreen='<BOOL_SEL>'*::
     Window should enter native macOS fullscreen mode.
 
 *grid='<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'*::
