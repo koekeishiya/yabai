@@ -33,7 +33,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
                 struct ax_window *window = window_list[i];
                 if (window) {
                     if (window_manager_should_manage_window(window)) {
-                        struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, space_manager_active_space(), prev_window_id);
+                        struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
                         window_manager_add_managed_window(&g_window_manager, window, view);
                         prev_window_id = window->id;
                     }
@@ -210,13 +210,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         struct ax_window *window = window_list[i];
         if (window) {
             if (window_manager_should_manage_window(window)) {
-                uint64_t sid = window_space(window);
-                assert(sid);
-
-                struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, sid, prev_window_id);
+                struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
                 window_manager_add_managed_window(&g_window_manager, window, view);
                 border_window_show(window);
-
                 prev_window_id = window->id;
             }
         } else {
