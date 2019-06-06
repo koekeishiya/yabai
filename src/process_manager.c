@@ -47,6 +47,11 @@ process_manager_add_running_processes(struct process_manager *pm)
             goto ign;
         }
 
+        if (string_equals(process->name, "Finder")) {
+            debug("%s: %s was found! caching psn..\n", __FUNCTION__, process->name);
+            pm->finder_psn = psn;
+        }
+
         process_manager_add_process(pm, process);
         goto out;
 ign:

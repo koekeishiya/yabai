@@ -452,6 +452,27 @@ void window_manager_purify_window(struct window_manager *wm, struct ax_window *w
     socket_close(sockfd);
 }
 
+struct ax_window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
+{
+    int count;
+    uint32_t *window_list = space_window_list(sid, &count);
+    if (!window_list) return NULL;
+
+    struct ax_window *result = NULL;
+    for (int i = 0, j = 0; i < count; ++i) {
+        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        if (!window) continue;
+
+        if (++j == rank) {
+            result = window;
+            break;
+        }
+    }
+
+    free(window_list);
+    return result;
+}
+
 struct ax_window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid)
 {
     uint32_t window_id = 0;
@@ -615,25 +636,6 @@ struct ax_window *window_manager_find_last_managed_window(struct space_manager *
 
     return window_manager_find_window(wm, node->window_id);
 }
-
-#if 0
-void window_manager_focus_next_window_on_space_by_rank(struct window_manager *wm)
-{
-    int count;
-    uint32_t *window_list = space_window_list(space_manager_active_space(), &count);
-    if (!window_list) return;
-
-    for (int i = 0; i < count; ++i) {
-        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
-        if (!window) continue;
-
-        window_manager_focus_window_with_raise(window_list[i]);
-        break;
-    }
-
-    free(window_list);
-}
-#endif
 
 void window_manager_focus_window_without_raise(uint32_t window_id)
 {
@@ -955,10 +957,18 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
     space_manager_move_window_to_space(sid, window);
 
-    if (window_manager_should_manage_window(window)) {
-        if (space_is_visible(sid)) {
+    if (space_is_visible(sid)) {
+        if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, sid);
             window_manager_add_managed_window(wm, window, view);
+        }
+    } else {
+        struct ax_window *next = window_manager_find_window_on_space_by_rank(wm, space_manager_active_space(), 1);
+        if (next) {
+            AXUIElementPerformAction(next->ref, kAXRaiseAction);
+            _SLPSSetFrontProcessWithOptions(&next->application->psn, 0, kCPSNoWindows);
+        } else {
+            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
         }
     }
 }

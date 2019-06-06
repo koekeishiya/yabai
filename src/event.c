@@ -120,8 +120,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
         return EVENT_SUCCESS;
     }
 
-    debug("%s: %s\n", __FUNCTION__, process->name);
-
     struct event *de_event;
     event_create(de_event, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid);
     event_loop_post(&g_event_loop, de_event);
@@ -129,6 +127,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
     struct event *re_event;
     event_create(re_event, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid);
     event_loop_post(&g_event_loop, re_event);
+
+    debug("%s: %s\n", __FUNCTION__, process->name);
+    g_process_manager.front_pid = process->pid;
 
     return EVENT_SUCCESS;
 }
@@ -140,8 +141,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     if (!application) return EVENT_SUCCESS;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
-    g_process_manager.front_pid = application->pid;
-
     uint32_t application_focused_window_id = application_focused_window(application);
     if (!application_focused_window_id) return EVENT_SUCCESS;
 

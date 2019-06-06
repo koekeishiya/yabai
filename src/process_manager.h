@@ -15,6 +15,7 @@ struct process_manager
     EventTypeSpec type[3];
     EventHandlerRef ref;
     pid_t front_pid;
+    ProcessSerialNumber finder_psn;
 };
 
 struct process *process_manager_find_process(struct process_manager *pm, ProcessSerialNumber *psn);
