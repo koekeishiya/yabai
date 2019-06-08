@@ -187,7 +187,7 @@ void bar_refresh(struct bar *bar)
     if (title) {
         struct bar_line title_line = bar_prepare_line(bar->n_font, title, bar->foreground_color);
         CGPoint pos = bar_align_line(bar, title_line, ALIGN_CENTER, ALIGN_CENTER);
-        bar_draw_line(bar, bar->focus_icon, pos.x - 20, pos.y);
+        bar_draw_line(bar, bar->focus_icon, pos.x - bar->focus_icon.bounds.size.width - 5, pos.y);
         bar_draw_line(bar, title_line, pos.x, pos.y);
         bar_destroy_line(title_line);
     }
