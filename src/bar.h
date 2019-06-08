@@ -38,14 +38,12 @@ struct bar
     char **_space_icon_strip;
     char **_power_icon_strip;
     char *_clock_icon;
-    char *_focus_icon;
     char *_space_icon;
     struct rgba_color foreground_color;
     struct rgba_color background_color;
     struct rgba_color background_color_dim;
     struct bar_line *space_icon_strip;
     struct bar_line space_icon;
-    struct bar_line focus_icon;
     struct bar_line clock_icon;
     struct bar_line battr_icon;
     struct bar_line power_icon;

@@ -179,7 +179,6 @@ void bar_refresh(struct bar *bar)
     if (title) {
         struct bar_line title_line = bar_prepare_line(bar->n_font, title, bar->foreground_color);
         CGPoint pos = bar_align_line(bar, title_line, ALIGN_CENTER, ALIGN_CENTER);
-        bar_draw_line(bar, bar->focus_icon, pos.x - bar->focus_icon.bounds.size.width - 5, pos.y);
         bar_draw_line(bar, title_line, pos.x, pos.y);
         bar_destroy_line(title_line);
         free(title);
@@ -275,12 +274,6 @@ void bar_create(struct bar *bar)
     } else {
         bar->battr_icon = bar_prepare_line(bar->i_font, "", rgba_color_from_hex(0xffd75f5f));
         bar->power_icon = bar_prepare_line(bar->i_font, "", rgba_color_from_hex(0xffcd950c));
-    }
-
-    if (bar->_focus_icon) {
-        bar->focus_icon = bar_prepare_line(bar->i_font, bar->_focus_icon, bar->foreground_color);
-    } else {
-        bar->focus_icon = bar_prepare_line(bar->i_font, "", bar->foreground_color);
     }
 
     if (bar->_clock_icon) {

@@ -107,9 +107,6 @@ Colors are in the form '#AARRGGBB'.
 'status_bar_clock_icon'::
     Specify a symbol to represent the current time.
 
-'status_bar_focus_icon'::
-    Specify a symbol to represent the currently focused window.
-
 'mouse_follows_focus'::
     When focusing a window, put the mouse at its center.
 

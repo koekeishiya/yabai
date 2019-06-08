@@ -10,7 +10,6 @@ yabai -m config status_bar_space_icon_strip  I II III IV V VI VII VIII IX X
 yabai -m config status_bar_power_icon_strip   
 yabai -m config status_bar_space_icon        
 yabai -m config status_bar_clock_icon        
-yabai -m config status_bar_focus_icon        
 
 # global settings
 yabai -m config mouse_follows_focus          off

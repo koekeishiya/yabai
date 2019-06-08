@@ -47,7 +47,6 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_BAR_POWER_STRIP       "status_bar_power_icon_strip"
 #define COMMAND_CONFIG_BAR_SPACE_ICON        "status_bar_space_icon"
 #define COMMAND_CONFIG_BAR_CLOCK_ICON        "status_bar_clock_icon"
-#define COMMAND_CONFIG_BAR_FOCUS_ICON        "status_bar_focus_icon"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
@@ -624,13 +623,6 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             fprintf(rsp, "%s\n", g_bar._clock_icon ? g_bar._clock_icon : "");
         } else {
             g_bar._clock_icon = token_to_string(token);
-        }
-    } else if (token_equals(command, COMMAND_CONFIG_BAR_FOCUS_ICON)) {
-        struct token token = get_token(&message);
-        if (!token_is_valid(token)) {
-            fprintf(rsp, "%s\n", g_bar._focus_icon ? g_bar._focus_icon : "");
-        } else {
-            g_bar._focus_icon = token_to_string(token);
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
