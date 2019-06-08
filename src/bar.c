@@ -194,6 +194,7 @@ void bar_refresh(struct bar *bar)
         bar_draw_line(bar, bar->focus_icon, pos.x - bar->focus_icon.bounds.size.width - 5, pos.y);
         bar_draw_line(bar, title_line, pos.x, pos.y);
         bar_destroy_line(title_line);
+        free(title);
     }
 
     // BAR RIGHT
