@@ -65,9 +65,9 @@ static CTFontRef bar_create_font(char *cstring, float size)
                                                     &kCFTypeDictionaryValueCallBacks);
 
     CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(attributes);
-
     CTFontRef font = CTFontCreateWithFontDescriptor(descriptor, 0.0, NULL);
     CFRelease(descriptor);
+
     return font;
 }
 
@@ -112,8 +112,6 @@ static void bar_destroy_line(struct bar_line line)
 
 static struct bar_line bar_prepare_line(CTFontRef font, char *cstring, struct rgba_color color)
 {
-    CFStringRef string = CFStringCreateWithCString(NULL, cstring, kCFStringEncodingUTF8);
-
     CFStringRef keys[] = { kCTFontAttributeName, kCTForegroundColorFromContextAttributeName };
     CFTypeRef values[] = { font, kCFBooleanTrue };
 
@@ -122,12 +120,13 @@ static struct bar_line bar_prepare_line(CTFontRef font, char *cstring, struct rg
                                                     &kCFTypeDictionaryKeyCallBacks,
                                                     &kCFTypeDictionaryValueCallBacks);
 
-    CFAttributedStringRef attrString = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
+    CFStringRef string = CFStringCreateWithCString(NULL, cstring, kCFStringEncodingUTF8);
+    CFAttributedStringRef attr_string = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
     CFRelease(string);
     CFRelease(attributes);
 
     CGFloat ascent, descent;
-    CTLineRef line = CTLineCreateWithAttributedString(attrString);
+    CTLineRef line = CTLineCreateWithAttributedString(attr_string);
     CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
     CGRect bounds = CTLineGetBoundsWithOptions(line, kCTLineBoundsUseGlyphPathBounds);
 
@@ -243,6 +242,8 @@ void bar_refresh(struct bar *bar)
 
 void bar_resize(struct bar *bar)
 {
+    if (!bar->enabled) return;
+
     CFTypeRef frame_region;
     CGRect bounds = display_bounds(display_manager_main_display_id());
     bar->frame = (CGRect) {{0,0},{bounds.size.width, 26}};
