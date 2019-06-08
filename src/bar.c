@@ -197,7 +197,7 @@ void bar_refresh(struct bar *bar)
         CGPoint t_pos = bar_align_line(bar, time_line, ALIGN_RIGHT, ALIGN_CENTER);
         bar_draw_line(bar, time_line, t_pos.x, t_pos.y);
 
-        CGPoint ti_pos = bar_align_line(bar, time_line, 0, ALIGN_CENTER);
+        CGPoint ti_pos = bar_align_line(bar, bar->clock_icon, 0, ALIGN_CENTER);
         t_pos.x = t_pos.x - bar->clock_icon.bounds.size.width - 5;
 
         CGPoint tu_pos = bar_align_line(bar, bar->clock_underline, 0, ALIGN_BOTTOM);
