@@ -198,15 +198,16 @@ void bar_refresh(struct bar *bar)
         bar_draw_line(bar, time_line, t_pos.x, t_pos.y);
 
         CGPoint ti_pos = bar_align_line(bar, bar->clock_icon, 0, ALIGN_CENTER);
-        t_pos.x = t_pos.x - bar->clock_icon.bounds.size.width - 5;
+        ti_pos.x = t_pos.x - bar->clock_icon.bounds.size.width - 5;
 
         CGPoint tu_pos = bar_align_line(bar, bar->clock_underline, 0, ALIGN_BOTTOM);
         tu_pos.x = tu_pos.x - bar->clock_underline.bounds.size.width / 2 - time_line.bounds.size.width / 2 - (bar->clock_icon.bounds.size.width + 5) / 2;
 
-        bar_draw_line(bar, bar->clock_icon, t_pos.x, ti_pos.y);
+        bar_draw_line(bar, bar->clock_icon, ti_pos.x, ti_pos.y);
         bar_draw_line(bar, bar->clock_underline, tu_pos.x, tu_pos.y);
-        time_line_width = time_line.bounds.size.width;
         bar_destroy_line(time_line);
+
+        time_line_width = time_line.bounds.size.width;
     }
 
     bool charging;
@@ -219,12 +220,12 @@ void bar_refresh(struct bar *bar)
 
     struct bar_line batt_icon = charging ? bar->power_icon : bar->battr_icon;
     CGPoint pi_pos = bar_align_line(bar, batt_icon, 0, ALIGN_CENTER);
-    p_pos.x = p_pos.x - batt_icon.bounds.size.width - 5;
+    pi_pos.x = p_pos.x - batt_icon.bounds.size.width - 5;
 
     CGPoint pu_pos = bar_align_line(bar, bar->power_underline, 0, ALIGN_BOTTOM);
     pu_pos.x = pu_pos.x - bar->power_underline.bounds.size.width / 2 - batt_line.bounds.size.width / 2 - (batt_icon.bounds.size.width + 5) / 2;
 
-    bar_draw_line(bar, batt_icon, p_pos.x, pi_pos.y);
+    bar_draw_line(bar, batt_icon, pi_pos.x, pi_pos.y);
     bar_draw_line(bar, bar->power_underline, pu_pos.x, pu_pos.y);
     bar_destroy_line(batt_line);
 
