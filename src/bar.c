@@ -195,6 +195,7 @@ void bar_refresh(struct bar *bar)
     // BAR RIGHT
     time_t rawtime;
     time(&rawtime);
+    float time_line_width = 0;
     struct tm *timeinfo = localtime(&rawtime);
     if (timeinfo) {
         char time[255];
@@ -211,28 +212,28 @@ void bar_refresh(struct bar *bar)
 
         bar_draw_line(bar, bar->clock_icon, t_pos.x, ti_pos.y);
         bar_draw_line(bar, bar->clock_underline, tu_pos.x, tu_pos.y);
-
-        bool charging;
-        char batt[255];
-        snprintf(batt, sizeof(batt), "%' '3d%%", bar_find_battery_life(&charging));
-        struct bar_line batt_line = bar_prepare_line(bar->n_font, batt, bar->foreground_color);
-        CGPoint p_pos = bar_align_line(bar, batt_line, ALIGN_RIGHT, ALIGN_CENTER);
-        p_pos.x = p_pos.x - time_line.bounds.size.width - bar->clock_underline.bounds.size.width - 20;
-        bar_draw_line(bar, batt_line, p_pos.x, p_pos.y);
-
-        struct bar_line batt_icon = charging ? bar->power_icon : bar->battr_icon;
-        CGPoint pi_pos = bar_align_line(bar, batt_icon, 0, ALIGN_CENTER);
-        p_pos.x = p_pos.x - batt_icon.bounds.size.width - 5;
-
-        CGPoint pu_pos = bar_align_line(bar, bar->power_underline, 0, ALIGN_BOTTOM);
-        pu_pos.x = pu_pos.x - bar->power_underline.bounds.size.width / 2 - batt_line.bounds.size.width / 2 - (batt_icon.bounds.size.width + 5) / 2;
-
-        bar_draw_line(bar, batt_icon, p_pos.x, pi_pos.y);
-        bar_draw_line(bar, bar->power_underline, pu_pos.x, pu_pos.y);
-
+        time_line_width = time_line.bounds.size.width;
         bar_destroy_line(time_line);
-        bar_destroy_line(batt_line);
     }
+
+    bool charging;
+    char batt[255];
+    snprintf(batt, sizeof(batt), "%' '3d%%", bar_find_battery_life(&charging));
+    struct bar_line batt_line = bar_prepare_line(bar->n_font, batt, bar->foreground_color);
+    CGPoint p_pos = bar_align_line(bar, batt_line, ALIGN_RIGHT, ALIGN_CENTER);
+    p_pos.x = p_pos.x - time_line_width - bar->clock_underline.bounds.size.width - 20;
+    bar_draw_line(bar, batt_line, p_pos.x, p_pos.y);
+
+    struct bar_line batt_icon = charging ? bar->power_icon : bar->battr_icon;
+    CGPoint pi_pos = bar_align_line(bar, batt_icon, 0, ALIGN_CENTER);
+    p_pos.x = p_pos.x - batt_icon.bounds.size.width - 5;
+
+    CGPoint pu_pos = bar_align_line(bar, bar->power_underline, 0, ALIGN_BOTTOM);
+    pu_pos.x = pu_pos.x - bar->power_underline.bounds.size.width / 2 - batt_line.bounds.size.width / 2 - (batt_icon.bounds.size.width + 5) / 2;
+
+    bar_draw_line(bar, batt_icon, p_pos.x, pi_pos.y);
+    bar_draw_line(bar, bar->power_underline, pu_pos.x, pu_pos.y);
+    bar_destroy_line(batt_line);
 
     CGContextFlush(bar->context);
     SLSOrderWindow(g_connection, bar->id, 1, 0);
