@@ -268,7 +268,7 @@ void bar_create(struct bar *bar)
     bar->n_font = bar_create_font(bar->n_font_name, bar->n_font_size);
     bar->i_font = bar_create_font(bar->i_font_name, bar->i_font_size);
 
-    if (buf_len(bar->_power_icon_strip) > 1) {
+    if (buf_len(bar->_power_icon_strip) == 2) {
         bar->battr_icon = bar_prepare_line(bar->i_font, bar->_power_icon_strip[0], rgba_color_from_hex(0xffd75f5f));
         bar->power_icon = bar_prepare_line(bar->i_font, bar->_power_icon_strip[1], rgba_color_from_hex(0xffcd950c));
     } else {
