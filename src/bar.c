@@ -65,6 +65,8 @@ static CTFontRef bar_create_font(char *cstring, float size)
                                                     &kCFTypeDictionaryValueCallBacks);
 
     CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(attributes);
+    CFRelease(attributes);
+
     CTFontRef font = CTFontCreateWithFontDescriptor(descriptor, 0.0, NULL);
     CFRelease(descriptor);
 
@@ -122,13 +124,15 @@ static struct bar_line bar_prepare_line(CTFontRef font, char *cstring, struct rg
 
     CFStringRef string = CFStringCreateWithCString(NULL, cstring, kCFStringEncodingUTF8);
     CFAttributedStringRef attr_string = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
-    CFRelease(string);
-    CFRelease(attributes);
 
     CGFloat ascent, descent;
     CTLineRef line = CTLineCreateWithAttributedString(attr_string);
     CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
     CGRect bounds = CTLineGetBoundsWithOptions(line, kCTLineBoundsUseGlyphPathBounds);
+
+    CFRelease(string);
+    CFRelease(attributes);
+    CFRelease(attr_string);
 
     return (struct bar_line) {
         .line = line,
