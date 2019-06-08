@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 # bar settings
 yabai -m config status_bar                   off
@@ -13,7 +13,7 @@ yabai -m config status_bar_clock_icon        
 yabai -m config status_bar_focus_icon        
 
 # global settings
-yabai -m config mouse_follows_focus          on
+yabai -m config mouse_follows_focus          off
 yabai -m config focus_follows_mouse          off
 yabai -m config window_topmost               off
 yabai -m config window_opacity               off
