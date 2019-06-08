@@ -148,8 +148,7 @@ void bar_refresh(struct bar *bar)
     CGContextClearRect(bar->context, bar->frame);
     CGContextSetRGBFillColor(bar->context, bar->background_color.r, bar->background_color.g, bar->background_color.b, bar->background_color.a);
     CGContextFillRect(bar->context, bar->frame);
-    struct rgba_color dim = rgba_color_dim(bar->background_color);
-    CGContextSetRGBStrokeColor(bar->context, dim.r, dim.g, dim.b, dim.a);
+    CGContextSetRGBStrokeColor(bar->context, bar->background_color_dim.r, bar->background_color_dim.g, bar->background_color_dim.b, bar->background_color_dim.a);
     CGContextSetLineWidth(bar->context, 2.0f);
     CGContextMoveToPoint(bar->context, 0, 1);
     CGContextAddLineToPoint(bar->context, bar->frame.size.width, 1);

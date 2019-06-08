@@ -579,6 +579,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             uint32_t color = token_to_uint32t(value);
             if (color) {
                 g_bar.background_color = rgba_color_from_hex(color);
+                g_bar.background_color_dim = rgba_color_dim(g_bar.background_color);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
