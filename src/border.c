@@ -3,17 +3,6 @@
 extern struct window_manager g_window_manager;
 extern int g_connection;
 
-static struct rgba_color
-rgba_color_from_hex(uint32_t color)
-{
-    struct rgba_color result;
-    result.r = ((color >> 16) & 0xff) / 255.0;
-    result.g = ((color >> 8) & 0xff) / 255.0;
-    result.b = ((color >> 0) & 0xff) / 255.0;
-    result.a = ((color >> 24) & 0xff) / 255.0;
-    return result;
-}
-
 static void border_window_ensure_same_space(struct ax_window *window)
 {
     int w_space_count;

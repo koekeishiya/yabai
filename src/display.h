@@ -12,6 +12,7 @@ CFStringRef display_uuid(uint32_t display_id);
 CGRect display_bounds(uint32_t display_id);
 CGRect display_bounds_constrained(uint32_t display_id);
 uint64_t display_space_id(uint32_t display_id);
+int display_space_count(uint32_t display_id);
 uint64_t *display_space_list(uint32_t display_id, int *count);
 int display_arrangement(uint32_t display_id);
 

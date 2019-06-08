@@ -22,14 +22,6 @@ extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *outRegion);
 #define kCGSIgnoreForExposeTagBit       (1 <<  7)
 #define kCGSStickyTagBit                (1 << 11)
 
-struct rgba_color
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
-
 struct border
 {
     CGContextRef context;

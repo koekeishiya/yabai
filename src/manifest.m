@@ -1,6 +1,8 @@
 #include <ScriptingBridge/ScriptingBridge.h>
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
+#include <IOKit/ps/IOPowerSources.h>
+#include <IOKit/ps/IOPSKeys.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,6 +54,7 @@
 #include "display_manager.h"
 #include "space_manager.h"
 #include "window_manager.h"
+#include "bar.h"
 
 #include "event.c"
 #include "event_loop.c"
@@ -70,5 +73,6 @@
 #include "display_manager.c"
 #include "space_manager.c"
 #include "window_manager.c"
+#include "bar.c"
 
 #include "yabai.c"

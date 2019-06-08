@@ -1,6 +1,7 @@
 #include "display.h"
 
 extern struct event_loop g_event_loop;
+extern struct bar g_bar;
 extern int g_connection;
 
 static DISPLAY_EVENT_HANDLER(display_handler)
@@ -42,6 +43,11 @@ CGRect display_bounds_constrained(uint32_t display_id)
     CGRect dock  = display_manager_dock_rect();
     uint32_t did = display_manager_dock_display_id();
 
+    if (g_bar.enabled) {
+        frame.origin.y    += g_bar.frame.size.height;
+        frame.size.height -= g_bar.frame.size.height;
+    }
+
     if (!display_manager_menu_bar_hidden()) {
         frame.origin.y    += menu.size.height;
         frame.size.height -= menu.size.height;
@@ -71,6 +77,26 @@ uint64_t display_space_id(uint32_t display_id)
     uint64_t sid = SLSManagedDisplayGetCurrentSpace(g_connection, uuid);
     CFRelease(uuid);
     return sid;
+}
+
+int display_space_count(uint32_t display_id)
+{
+    int space_count = 0;
+    CFStringRef uuid = display_uuid(display_id);
+    CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
+    int display_spaces_count = CFArrayGetCount(display_spaces_ref);
+    for (int i = 0; i < display_spaces_count; ++i) {
+        CFDictionaryRef display_ref = CFArrayGetValueAtIndex(display_spaces_ref, i);
+        CFStringRef identifier = CFDictionaryGetValue(display_ref, CFSTR("Display Identifier"));
+        if (!CFEqual(uuid, identifier)) continue;
+
+        CFArrayRef spaces_ref = CFDictionaryGetValue(display_ref, CFSTR("Spaces"));
+        space_count = CFArrayGetCount(spaces_ref);
+        break;
+    }
+    CFRelease(display_spaces_ref);
+    CFRelease(uuid);
+    return space_count;
 }
 
 uint64_t *display_space_list(uint32_t display_id, int *count)

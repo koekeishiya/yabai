@@ -35,6 +35,7 @@ struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
+struct bar g_bar;
 int g_connection;
 
 bool g_mission_control_active;
@@ -273,10 +274,12 @@ int main(int argc, char **argv)
     display_manager_begin(&g_display_manager);
     space_manager_begin(&g_space_manager);
     window_manager_begin(&g_space_manager, &g_window_manager);
-    window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+
+    bar_create(&g_bar);
+    window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 
     CFRunLoopRun();
     return 0;

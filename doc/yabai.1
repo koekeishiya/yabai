@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-06-06
+.\"      Date: 2019-06-08
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-06-06" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-06-08" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -103,6 +103,56 @@ Get or set the value of <setting>.
 .SS "Global Settings"
 .sp
 Colors are in the form \fI#AARRGGBB\fP.
+.sp
+\fIstatus_bar\fP
+.RS 4
+Enable custom status bar.
+.RE
+.sp
+\fIstatus_bar_font_family\fP
+.RS 4
+Specify name of font family to use for drawing text. Use \fIFont Book.app\fP to identify the correct name.
+.RE
+.sp
+\fIstatus_bar_icon_font_family\fP
+.RS 4
+Specify name of font family to use for drawing icon symbols, typically FontAwesome. Use \fIFont Book.app\fP to identify the correct name.
+.RE
+.sp
+\fIstatus_bar_background_color\fP
+.RS 4
+Color to use for drawing status bar background.
+.RE
+.sp
+\fIstatus_bar_foreground_color\fP
+.RS 4
+Color to use for drawing status bar elements.
+.RE
+.sp
+\fIstatus_bar_space_icon_strip\fP
+.RS 4
+Specify symbols separated by whitespace to be used for visualizing spaces.
+.RE
+.sp
+\fIstatus_bar_power_icon_strip\fP
+.RS 4
+Specify two symbols separated by whitespace. The first symbol represents battery power and the second symbol indicates AC.
+.RE
+.sp
+\fIstatus_bar_space_icon\fP
+.RS 4
+Specify a general symbol to use for any given space that does not have a match in \fIstatus_bar_space_icon_strip\fP.
+.RE
+.sp
+\fIstatus_bar_clock_icon\fP
+.RS 4
+Specify a symbol to represent the current time.
+.RE
+.sp
+\fIstatus_bar_focus_icon\fP
+.RS 4
+Specify a symbol to represent the currently focused window.
+.RE
 .sp
 \fImouse_follows_focus\fP
 .RS 4

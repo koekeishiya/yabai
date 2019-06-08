@@ -5,6 +5,42 @@ extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 
 static const char *bool_str[] = { "off", "on" };
 
+struct rgba_color
+{
+    bool is_valid;
+    uint32_t p;
+    float r;
+    float g;
+    float b;
+    float a;
+};
+
+static struct rgba_color
+rgba_color_from_hex(uint32_t color)
+{
+    struct rgba_color result;
+    result.is_valid = true;
+    result.p = color;
+    result.r = ((color >> 16) & 0xff) / 255.0;
+    result.g = ((color >> 8) & 0xff) / 255.0;
+    result.b = ((color >> 0) & 0xff) / 255.0;
+    result.a = ((color >> 24) & 0xff) / 255.0;
+    return result;
+}
+
+static struct rgba_color
+rgba_color_dim(struct rgba_color color)
+{
+    struct rgba_color result;
+    result.is_valid = true;
+    result.p = color.p;
+    result.r = 0.25f*color.r;
+    result.g = 0.25f*color.g;
+    result.b = 0.25f*color.b;
+    result.a = 0.25f*color.a;
+    return result;
+}
+
 static inline bool is_root(void)
 {
     return getuid() == 0 || geteuid() == 0;

@@ -5,6 +5,7 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
+extern struct bar g_bar;
 
 #define DOMAIN_CONFIG  "config"
 #define DOMAIN_DISPLAY "display"
@@ -37,6 +38,16 @@ extern struct mouse_state g_mouse_state;
 #define COMMAND_CONFIG_MOUSE_MOD             "mouse_modifier"
 #define COMMAND_CONFIG_MOUSE_ACTION1         "mouse_action1"
 #define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
+#define COMMAND_CONFIG_BAR                   "status_bar"
+#define COMMAND_CONFIG_BAR_FONT              "status_bar_font_family"
+#define COMMAND_CONFIG_BAR_ICON_FONT         "status_bar_icon_font_family"
+#define COMMAND_CONFIG_BAR_BACKGROUND        "status_bar_background_color"
+#define COMMAND_CONFIG_BAR_FOREGROUND        "status_bar_foreground_color"
+#define COMMAND_CONFIG_BAR_SPACE_STRIP       "status_bar_space_icon_strip"
+#define COMMAND_CONFIG_BAR_POWER_STRIP       "status_bar_power_icon_strip"
+#define COMMAND_CONFIG_BAR_SPACE_ICON        "status_bar_space_icon"
+#define COMMAND_CONFIG_BAR_CLOCK_ICON        "status_bar_clock_icon"
+#define COMMAND_CONFIG_BAR_FOCUS_ICON        "status_bar_focus_icon"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
@@ -65,6 +76,8 @@ extern struct mouse_state g_mouse_state;
 #define ARGUMENT_CONFIG_MOUSE_MOD_FN         "fn"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE    "move"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE  "resize"
+#define ARGUMENT_CONFIG_BAR_ON               "on"
+#define ARGUMENT_CONFIG_BAR_OFF              "off"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
@@ -193,6 +206,16 @@ static bool token_equals(struct token token, char *match)
 static bool token_is_valid(struct token token)
 {
     return token.text && token.length > 0;
+}
+
+static char *token_to_string(struct token token)
+{
+    char *result = malloc(token.length + 1);
+    if (!result) return NULL;
+
+    memcpy(result, token.text, token.length);
+    result[token.length] = '\0';
+    return result;
 }
 
 static uint32_t token_to_uint32t(struct token token)
@@ -522,6 +545,91 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_mouse_state.action2 = MOUSE_MODE_RESIZE;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_bar.enabled]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_BAR_OFF)) {
+            g_bar.enabled = false;
+        } else if (token_equals(value, ARGUMENT_CONFIG_BAR_ON)) {
+            g_bar.enabled = true;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_FONT)) {
+        int length = strlen(message);
+        if (length <= 0) {
+            fprintf(rsp, "%s\n", g_bar.n_font_name);
+        } else {
+            g_bar.n_font_name = string_copy(message);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_ICON_FONT)) {
+        int length = strlen(message);
+        if (length <= 0) {
+            fprintf(rsp, "%s\n", g_bar.i_font_name);
+        } else {
+            g_bar.i_font_name = string_copy(message);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_BACKGROUND)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "0x%x\n", g_bar.background_color.p);
+        } else {
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                g_bar.background_color = rgba_color_from_hex(color);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_FOREGROUND)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "0x%x\n", g_bar.foreground_color.p);
+        } else {
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                g_bar.foreground_color = rgba_color_from_hex(color);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_STRIP)) {
+        struct token token = get_token(&message);
+        while (token.text && token.length > 0) {
+            buf_push(g_bar._space_icon_strip, token_to_string(token));
+            token = get_token(&message);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_POWER_STRIP)) {
+        struct token token = get_token(&message);
+        while (token.text && token.length > 0) {
+            buf_push(g_bar._power_icon_strip, token_to_string(token));
+            token = get_token(&message);
+        }
+        if (buf_len(g_bar._power_icon_strip) != 2) {
+            daemon_fail(rsp, "value for '%.*s' must contain exactly two symbols separated by whitespace.\n", command.length, command.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_ICON)) {
+        struct token token = get_token(&message);
+        if (!token_is_valid(token)) {
+            fprintf(rsp, "%s\n", g_bar._space_icon ? g_bar._space_icon : "");
+        } else {
+            g_bar._space_icon = token_to_string(token);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_CLOCK_ICON)) {
+        struct token token = get_token(&message);
+        if (!token_is_valid(token)) {
+            fprintf(rsp, "%s\n", g_bar._clock_icon ? g_bar._clock_icon : "");
+        } else {
+            g_bar._clock_icon = token_to_string(token);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_FOCUS_ICON)) {
+        struct token token = get_token(&message);
+        if (!token_is_valid(token)) {
+            fprintf(rsp, "%s\n", g_bar._focus_icon ? g_bar._focus_icon : "");
+        } else {
+            g_bar._focus_icon = token_to_string(token);
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

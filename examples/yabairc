@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# bar settings
+yabai -m config status_bar                   off
+yabai -m config status_bar_font_family       "Helvetica Neue"
+yabai -m config status_bar_icon_font_family  FontAwesome
+yabai -m config status_bar_background_color  0xff202020
+yabai -m config status_bar_foreground_color  0xffa8a8a8
+yabai -m config status_bar_space_icon_strip  I II III IV V VI VII VIII IX X
+yabai -m config status_bar_power_icon_strip   
+yabai -m config status_bar_space_icon        
+yabai -m config status_bar_clock_icon        
+yabai -m config status_bar_focus_icon        
+
 # global settings
 yabai -m config mouse_follows_focus          on
 yabai -m config focus_follows_mouse          off

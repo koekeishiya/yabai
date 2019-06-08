@@ -80,6 +80,36 @@ Global Settings
 
 Colors are in the form '#AARRGGBB'.
 
+'status_bar'::
+    Enable custom status bar.
+
+'status_bar_font_family'::
+    Specify name of font family to use for drawing text. Use 'Font Book.app' to identify the correct name.
+
+'status_bar_icon_font_family'::
+    Specify name of font family to use for drawing icon symbols, typically FontAwesome. Use 'Font Book.app' to identify the correct name.
+
+'status_bar_background_color'::
+    Color to use for drawing status bar background.
+
+'status_bar_foreground_color'::
+    Color to use for drawing status bar elements.
+
+'status_bar_space_icon_strip'::
+    Specify symbols separated by whitespace to be used for visualizing spaces.
+
+'status_bar_power_icon_strip'::
+    Specify two symbols separated by whitespace. The first symbol represents battery power and the second symbol indicates AC.
+
+'status_bar_space_icon'::
+    Specify a general symbol to use for any given space that does not have a match in 'status_bar_space_icon_strip'.
+
+'status_bar_clock_icon'::
+    Specify a symbol to represent the current time.
+
+'status_bar_focus_icon'::
+    Specify a symbol to represent the currently focused window.
+
 'mouse_follows_focus'::
     When focusing a window, put the mouse at its center.
 

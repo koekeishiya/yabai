@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/koekeishiya/yabai.svg?branch=master)](https://travis-ci.org/koekeishiya/yabai)
 
-![img](https://user-images.githubusercontent.com/6175959/58374447-adace580-7f3e-11e9-9ed7-1146cfac7de4.png)
+![img](https://user-images.githubusercontent.com/6175959/59150816-a6e79d80-8a29-11e9-8455-221901b0e992.png)
 
 **yabai** started as a C99 rewrite of [*chunkwm*](https://github.com/koekeishiya/chunkwm), originally supposed to be its first RC version.
 
@@ -27,7 +27,7 @@ The *Mission Control* setting [*displays have separate spaces*](https://support.
 **yabai** stores a unix domain socket at `/tmp/yabai_$USER.socket` to listen for messages.
 
 **DISCLAIMER:** Use at your own discretion. I take no responsibility if anything should happen to your machine while trying to install, test or otherwise use this software in any form.
-You aknowledge that you understand the potential risk that may come from disabling [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) on your system, and I make
+You acknowledge that you understand the potential risk that may come from disabling [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) on your system, and I make
 no recommendation as to whether you should or should not disable SIP.
 
 ### Install

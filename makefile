@@ -1,5 +1,5 @@
 FRAMEWORK_PATH = -F/System/Library/PrivateFrameworks
-FRAMEWORK      = -framework Carbon -framework Cocoa -framework CoreServices -framework SkyLight -framework ScriptingBridge
+FRAMEWORK      = -framework Carbon -framework Cocoa -framework CoreServices -framework SkyLight -framework ScriptingBridge -framework IOKit
 BUILD_FLAGS    = -std=c99 -Wall -g -O0
 BUILD_PATH     = ./bin
 DOC_PATH       = ./doc
