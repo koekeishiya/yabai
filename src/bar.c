@@ -56,20 +56,13 @@ static int bar_find_battery_life(bool *charging)
 
 static CTFontRef bar_create_font(char *cstring, float size)
 {
-    CFStringRef keys[] = { kCTFontFamilyNameAttribute, kCTFontSizeAttribute };
-    CFTypeRef values[] = { CFStringCreateWithCString(NULL, cstring, kCFStringEncodingUTF8), CFNumberCreate(NULL, kCFNumberFloat32Type, &size) };
-
-    CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, (const void**)&keys,
-                                                    (const void**)&values, sizeof(keys) / sizeof(keys[0]),
-                                                    &kCFTypeDictionaryKeyCallBacks,
-                                                    &kCFTypeDictionaryValueCallBacks);
-
+    const void *keys[] = { kCTFontFamilyNameAttribute, kCTFontSizeAttribute };
+    const void *values[] = { CFStringCreateWithCString(NULL, cstring, kCFStringEncodingUTF8), CFNumberCreate(NULL, kCFNumberFloat32Type, &size) };
+    CFDictionaryRef attributes = CFDictionaryCreate(NULL, keys, values, array_count(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(attributes);
-    CFRelease(attributes);
-
     CTFontRef font = CTFontCreateWithFontDescriptor(descriptor, 0.0, NULL);
+    CFRelease(attributes);
     CFRelease(descriptor);
-
     return font;
 }
 
@@ -114,19 +107,14 @@ static void bar_destroy_line(struct bar_line line)
 
 static struct bar_line bar_prepare_line(CTFontRef font, char *cstring, struct rgba_color color)
 {
-    CFStringRef keys[] = { kCTFontAttributeName, kCTForegroundColorFromContextAttributeName };
-    CFTypeRef values[] = { font, kCFBooleanTrue };
-
-    CFDictionaryRef attributes = CFDictionaryCreate(kCFAllocatorDefault, (const void**)&keys,
-                                                    (const void**)&values, sizeof(keys) / sizeof(keys[0]),
-                                                    &kCFTypeDictionaryKeyCallBacks,
-                                                    &kCFTypeDictionaryValueCallBacks);
-
+    const void *keys[] = { kCTFontAttributeName, kCTForegroundColorFromContextAttributeName };
+    const void *values[] = { font, kCFBooleanTrue };
+    CFDictionaryRef attributes = CFDictionaryCreate(NULL, keys, values, array_count(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CFStringRef string = CFStringCreateWithCString(NULL, cstring, kCFStringEncodingUTF8);
-    CFAttributedStringRef attr_string = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
+    CFAttributedStringRef attr_string = CFAttributedStringCreate(NULL, string, attributes);
+    CTLineRef line = CTLineCreateWithAttributedString(attr_string);
 
     CGFloat ascent, descent;
-    CTLineRef line = CTLineCreateWithAttributedString(attr_string);
     CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
     CGRect bounds = CTLineGetBoundsWithOptions(line, kCTLineBoundsUseGlyphPathBounds);
 

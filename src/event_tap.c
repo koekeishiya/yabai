@@ -67,9 +67,7 @@ bool event_tap_begin(struct event_tap *event_tap, uint32_t mask, event_tap_callb
 
     bool result = event_tap_enabled(event_tap);
     if (result) {
-        event_tap->runloop_source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault,
-                                                                  event_tap->handle,
-                                                                  0);
+        event_tap->runloop_source = CFMachPortCreateRunLoopSource(NULL, event_tap->handle, 0);
         CFRunLoopAddSource(CFRunLoopGetMain(), event_tap->runloop_source, kCFRunLoopCommonModes);
     }
 

@@ -99,9 +99,7 @@ static bool ax_privilege(void)
 {
     const void *keys[] = { kAXTrustedCheckOptionPrompt };
     const void *values[] = { kCFBooleanTrue };
-    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, array_count(keys),
-                                                 &kCFCopyStringDictionaryKeyCallBacks,
-                                                 &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, array_count(keys), &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     bool result = AXIsProcessTrustedWithOptions(options);
     CFRelease(options);
     return result;
