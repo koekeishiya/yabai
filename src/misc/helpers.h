@@ -46,7 +46,7 @@ static inline bool is_root(void)
     return getuid() == 0 || geteuid() == 0;
 }
 
-static inline bool string_equals(char *a, char *b)
+static inline bool string_equals(const char *a, const char *b)
 {
     return a && b && strcmp(a, b) == 0;
 }
@@ -74,6 +74,24 @@ static inline char *string_copy(char *s)
     memcpy(result, s, length);
     result[length] = '\0';
     return result;
+}
+
+static bool fork_exec(char *command)
+{
+    static const char *shell = "/bin/bash";
+    static const char *arg   = "-c";
+
+    int pid = fork();
+    if (pid == -1) {
+        return false;
+    } else if (pid > 0) {
+        return false;
+    } else {
+        char *exec[] = { (char *) shell, (char *) arg, command, NULL};
+        exit(execvp(exec[0], exec));
+    }
+
+    return true;
 }
 
 static bool fork_exec_wait(char *command)

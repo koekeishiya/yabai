@@ -466,6 +466,192 @@ Window should enter native macOS fullscreen mode.
 .RS 4
 Set window frame based on a self\-defined grid.
 .RE
+.SS "Signal"
+.sp
+A signal is simply a way to react to some event that has been processed. It does not transmit any data.
+.SS "General Syntax"
+.sp
+yabai \-m signal \fI<COMMAND>\fP event=\fI<EVENT>\fP action=\fI<ACTION>\fP
+.SS "COMMAND"
+.sp
+\fB\-\-add\fP
+.RS 4
+Add a new signal to execute an action after processing an event of the given type.
+.RE
+.SS "EVENT"
+.sp
+\fBapplication_launched\fP
+.RS 4
+Triggered when a new application is launched.
+.RE
+.sp
+\fBapplication_terminated\fP
+.RS 4
+Triggered when an application is terminated.
+.RE
+.sp
+\fBapplication_front_switched\fP
+.RS 4
+Triggered when the front\-most application changes.
+.RE
+.sp
+\fBapplication_activated\fP
+.RS 4
+Triggered when an application is activated.
+.RE
+.sp
+\fBapplication_deactivated\fP
+.RS 4
+Triggered when an application is deactivated.
+.RE
+.sp
+\fBapplication_visible\fP
+.RS 4
+Triggered when an application is unhidden.
+.RE
+.sp
+\fBapplication_hidden\fP
+.RS 4
+Triggered when an application is hidden.
+.RE
+.sp
+\fBwindow_created\fP
+.RS 4
+Triggered when a window is created.
+.RE
+.sp
+\fBwindow_destroyed\fP
+.RS 4
+Triggered when a window is destroyed.
+.RE
+.sp
+\fBwindow_focused\fP
+.RS 4
+Triggered when a window becomes the key\-window for its application.
+.RE
+.sp
+\fBwindow_moved\fP
+.RS 4
+Triggered when a window changes position.
+.RE
+.sp
+\fBwindow_resized\fP
+.RS 4
+Triggered when a window changes dimensions.
+.RE
+.sp
+\fBwindow_minimized\fP
+.RS 4
+Triggered when a window has been minimized.
+.RE
+.sp
+\fBwindow_deminimized\fP
+.RS 4
+Triggered when a window has been deminimized.
+.RE
+.sp
+\fBwindow_title_changed\fP
+.RS 4
+Triggered when a window changes its title.
+.RE
+.sp
+\fBspace_changed\fP
+.RS 4
+Triggered when the active space has changed.
+.RE
+.sp
+\fBdisplay_added\fP
+.RS 4
+Triggered when a new display has been added.
+.RE
+.sp
+\fBdisplay_removed\fP
+.RS 4
+Triggered when a display has been removed.
+.RE
+.sp
+\fBdisplay_moved\fP
+.RS 4
+Triggered when a change has been made to display arrangement.
+.RE
+.sp
+\fBdisplay_resized\fP
+.RS 4
+Triggered when a display has changed resolution.
+.RE
+.sp
+\fBdisplay_changed\fP
+.RS 4
+Triggered when the active display has changed.
+.RE
+.sp
+\fBmouse_down\fP
+.RS 4
+Triggered when a mouse button has been pressed.
+.RE
+.sp
+\fBmouse_up\fP
+.RS 4
+Triggered when a mouse button has been released.
+.RE
+.sp
+\fBmouse_dragged\fP
+.RS 4
+Triggered when the mouse is moved with one of its buttons pressed.
+.RE
+.sp
+\fBmouse_moved\fP
+.RS 4
+Triggered when the mouse is moved.
+.RE
+.sp
+\fBmission_control_enter\fP
+.RS 4
+Triggered when mission\-control activates.
+.RE
+.sp
+\fBmission_control_check_for_exit\fP
+.RS 4
+Triggered periodically while mission\-control is active.
+.RE
+.sp
+\fBmission_control_exit\fP
+.RS 4
+Triggered when mission\-control deactivates.
+.RE
+.sp
+\fBdock_did_restart\fP
+.RS 4
+Triggered when Dock.app restarts.
+.RE
+.sp
+\fBmenu_opened\fP
+.RS 4
+Triggered when a menu is opened.
+.RE
+.sp
+\fBmenu_bar_hidden_changed\fP
+.RS 4
+Triggered when the macOS menubar \fIautohide\fP setting changes.
+.RE
+.sp
+\fBsystem_woke\fP
+.RS 4
+Triggered when macOS wakes from sleep.
+.RE
+.sp
+\fBbar_refresh\fP
+.RS 4
+Triggered when the yabai status_bar is told to update.
+.RE
+.sp
+\fBdaemon_message\fP
+.RS 4
+Triggered when yabai receives a message on its socket.
+.RE
+.SS "ACTION"
+.sp
+Arbitrary command executed through $SHELL \-c
 .SH "EXIT CODES"
 .sp
 If \fByabai\fP can\(cqt handle a message, it will return a non\-zero exit code.

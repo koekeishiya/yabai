@@ -57,9 +57,12 @@ event_loop_run(void *context)
     while (event_loop->is_running) {
         struct event *event = queue_pop(queue);
         if (event) {
-            int result = event->handler(event->context, event->param1, event->param2);
+            int result = event_handler[event->type](event->context, event->param1, event->param2);
+            event_signal(event->type);
+
             if (event->status) *event->status = EVENT_PROCESSED;
             if (event->result) *event->result = result;
+
             free(event);
         } else {
             sem_wait(event_loop->semaphore);

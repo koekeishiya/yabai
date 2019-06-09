@@ -349,6 +349,132 @@ ARGUMENT
 *grid='<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'*::
     Set window frame based on a self-defined grid.
 
+Signal
+~~~~~~
+
+A signal is simply a way to react to some event that has been processed. It does not transmit any data.
+
+General Syntax
+^^^^^^^^^^^^^^
+
+yabai -m signal '<COMMAND>' event='<EVENT>' action='<ACTION>'
+
+COMMAND
+^^^^^^^
+
+*--add*::
+    Add a new signal to execute an action after processing an event of the given type.
+
+EVENT
+^^^^^
+
+*application_launched*::
+    Triggered when a new application is launched.
+
+*application_terminated*::
+    Triggered when an application is terminated.
+
+*application_front_switched*::
+    Triggered when the front-most application changes.
+
+*application_activated*::
+    Triggered when an application is activated.
+
+*application_deactivated*::
+    Triggered when an application is deactivated.
+
+*application_visible*::
+    Triggered when an application is unhidden.
+
+*application_hidden*::
+    Triggered when an application is hidden.
+
+*window_created*::
+    Triggered when a window is created.
+
+*window_destroyed*::
+    Triggered when a window is destroyed.
+
+*window_focused*::
+    Triggered when a window becomes the key-window for its application.
+
+*window_moved*::
+    Triggered when a window changes position.
+
+*window_resized*::
+    Triggered when a window changes dimensions.
+
+*window_minimized*::
+    Triggered when a window has been minimized.
+
+*window_deminimized*::
+    Triggered when a window has been deminimized.
+
+*window_title_changed*::
+    Triggered when a window changes its title.
+
+*space_changed*::
+    Triggered when the active space has changed.
+
+*display_added*::
+    Triggered when a new display has been added.
+
+*display_removed*::
+    Triggered when a display has been removed.
+
+*display_moved*::
+    Triggered when a change has been made to display arrangement.
+
+*display_resized*::
+    Triggered when a display has changed resolution.
+
+*display_changed*::
+    Triggered when the active display has changed.
+
+*mouse_down*::
+    Triggered when a mouse button has been pressed.
+
+*mouse_up*::
+    Triggered when a mouse button has been released.
+
+*mouse_dragged*::
+    Triggered when the mouse is moved with one of its buttons pressed.
+
+*mouse_moved*::
+    Triggered when the mouse is moved.
+
+*mission_control_enter*::
+    Triggered when mission-control activates.
+
+*mission_control_check_for_exit*::
+    Triggered periodically while mission-control is active.
+
+*mission_control_exit*::
+    Triggered when mission-control deactivates.
+
+*dock_did_restart*::
+    Triggered when Dock.app restarts.
+
+*menu_opened*::
+    Triggered when a menu is opened.
+
+*menu_bar_hidden_changed*::
+    Triggered when the macOS menubar 'autohide' setting changes.
+
+*system_woke*::
+    Triggered when macOS wakes from sleep.
+
+*bar_refresh*::
+    Triggered when the yabai status_bar is told to update.
+
+*daemon_message*::
+    Triggered when yabai receives a message on its socket.
+
+ACTION
+^^^^^^
+
+Arbitrary command executed through $SHELL -c
+
 Exit Codes
 ----------
 

@@ -1,5 +1,6 @@
 #include "event.h"
 
+extern char **g_signal_event[EVENT_TYPE_COUNT];
 extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct display_manager g_display_manager;
@@ -9,6 +10,30 @@ extern struct mouse_state g_mouse_state;
 extern struct bar g_bar;
 extern bool g_mission_control_active;
 extern int g_connection;
+
+enum event_type event_type_from_string(const char *str)
+{
+    for (int i = APPLICATION_LAUNCHED; i < EVENT_TYPE_COUNT; ++i) {
+        if (string_equals(str, event_type_str[i])) return i;
+    }
+
+    return EVENT_TYPE_UNKNOWN;
+}
+
+void event_signal(enum event_type type)
+{
+    int signal_count = buf_len(g_signal_event[type]);
+    if (!signal_count) return;
+
+    if (fork() != 0) return;
+    debug("%s: %s\n", __FUNCTION__, event_type_str[type]);
+
+    for (int i = 0; i < signal_count; ++i) {
+        fork_exec(g_signal_event[type][i]);
+    }
+
+    exit(EXIT_SUCCESS);
+}
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {

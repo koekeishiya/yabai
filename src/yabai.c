@@ -38,6 +38,7 @@ struct daemon g_daemon;
 struct bar g_bar;
 int g_connection;
 
+char **g_signal_event[EVENT_TYPE_COUNT];
 bool g_mission_control_active;
 char g_sa_socket_file[MAXLEN];
 char g_socket_file[MAXLEN];
@@ -173,6 +174,7 @@ static inline void init_misc_settings(void)
     snprintf(g_lock_file, sizeof(g_lock_file), LCFILE_PATH_FMT, user);
 
     NSApplicationLoad();
+    signal(SIGCHLD, SIG_IGN);
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
     g_connection = SLSMainConnectionID();

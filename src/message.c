@@ -1,5 +1,6 @@
 #include "message.h"
 
+extern char **g_signal_event[EVENT_TYPE_COUNT];
 extern struct event_loop g_event_loop;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
@@ -13,6 +14,7 @@ extern struct bar g_bar;
 #define DOMAIN_WINDOW  "window"
 #define DOMAIN_QUERY   "query"
 #define DOMAIN_RULE    "rule"
+#define DOMAIN_SIGNAL  "signal"
 
 /* --------------------------------DOMAIN CONFIG-------------------------------- */
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
@@ -165,7 +167,7 @@ extern struct bar g_bar;
 #define ARGUMENT_QUERY_WINDOW  "--window"
 /* ----------------------------------------------------------------------------- */
 
-/* --------------------------------DOMAIN RULE--------------------------------- */
+/* --------------------------------DOMAIN RULE---------------------------------- */
 #define COMMAND_RULE_ADD "--add"
 
 #define ARGUMENT_RULE_KEY_APP     "app"
@@ -183,6 +185,13 @@ extern struct bar g_bar;
 #define ARGUMENT_RULE_VALUE_OFF   "off"
 #define ARGUMENT_RULE_VALUE_SPACE '^'
 #define ARGUMENT_RULE_VALUE_GRID  "%d:%d:%d:%d:%d:%d"
+/* ----------------------------------------------------------------------------- */
+
+/* --------------------------------DOMAIN SIGNAL-------------------------------- */
+#define COMMAND_SIGNAL_ADD "--add"
+
+#define ARGUMENT_SIGNAL_KEY_EVENT    "event"
+#define ARGUMENT_SIGNAL_KEY_ACTION   "action"
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -1558,6 +1567,44 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
     }
 }
 
+static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
+{
+    struct token command = get_token(&message);
+    if (token_equals(command, COMMAND_SIGNAL_ADD)) {
+        enum event_type signal_type = EVENT_TYPE_UNKNOWN;
+        char *signal_action = NULL;
+
+        struct token token = get_token(&message);
+        while (token.text && token.length > 0) {
+            char *key = strtok(token.text, "=");
+            char *value = strtok(NULL, "=");
+            if (!key || !value) {
+                daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
+                return;
+            }
+
+            if (string_equals(key, ARGUMENT_SIGNAL_KEY_EVENT)) {
+                signal_type = event_type_from_string(value);
+                if (signal_type == EVENT_TYPE_UNKNOWN) {
+                    daemon_fail(rsp, "unknown event-type '%s'\n", value);
+                }
+            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_ACTION)) {
+                signal_action = string_copy(value);
+            }
+
+            token = get_token(&message);
+        }
+
+        if (signal_type > EVENT_TYPE_UNKNOWN && signal_type < EVENT_TYPE_COUNT && signal_action) {
+            buf_push(g_signal_event[signal_type], signal_action);
+        } else {
+            daemon_fail(rsp, "signal was not added.\n");
+        }
+    } else {
+        daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
+    }
+}
+
 void handle_message(FILE *rsp, char *message)
 {
     struct token domain = get_token(&message);
@@ -1573,6 +1620,8 @@ void handle_message(FILE *rsp, char *message)
         handle_domain_query(rsp, domain, message);
     } else if (token_equals(domain, DOMAIN_RULE)) {
         handle_domain_rule(rsp, domain, message);
+    } else if (token_equals(domain, DOMAIN_SIGNAL)) {
+        handle_domain_signal(rsp, domain, message);
     } else {
         daemon_fail(rsp, "unknown domain '%.*s'\n", domain.length, domain.text);
     }
