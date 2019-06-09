@@ -1,6 +1,6 @@
 FRAMEWORK_PATH = -F/System/Library/PrivateFrameworks
 FRAMEWORK      = -framework Carbon -framework Cocoa -framework CoreServices -framework SkyLight -framework ScriptingBridge -framework IOKit
-BUILD_FLAGS    = -std=c99 -Wall -g -O0
+BUILD_FLAGS    = -std=c99 -Wall -g -O0 -fvisibility=hidden
 BUILD_PATH     = ./bin
 DOC_PATH       = ./doc
 SMP_PATH       = ./examples
@@ -13,7 +13,7 @@ BINS           = $(BUILD_PATH)/yabai
 
 all: clean $(BINS)
 
-install: BUILD_FLAGS=-std=c99 -Wall -O2
+install: BUILD_FLAGS=-std=c99 -Wall -O2 -fvisibility=hidden
 install: clean $(BINS)
 
 sa:
