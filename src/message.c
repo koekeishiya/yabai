@@ -8,6 +8,8 @@ extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
 extern struct bar g_bar;
 
+static const char *bool_str[] = { "off", "on" };
+
 #define DOMAIN_CONFIG  "config"
 #define DOMAIN_DISPLAY "display"
 #define DOMAIN_SPACE   "space"
