@@ -236,9 +236,6 @@ int main(int argc, char **argv)
         parse_arguments(argc, argv);
     }
 
-    init_misc_settings();
-    acquire_lockfile();
-
     if (is_root()) {
         error("yabai: running as root is not allowed! abort..\n");
     }
@@ -246,6 +243,9 @@ int main(int argc, char **argv)
     if (!ax_privilege()) {
         error("yabai: could not access accessibility features! abort..\n");
     }
+
+    init_misc_settings();
+    acquire_lockfile();
 
     if (!space_manager_has_separate_spaces()) {
         error("yabai: 'display has separate spaces' is disabled! abort..\n");
