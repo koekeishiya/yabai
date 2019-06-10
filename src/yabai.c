@@ -1,18 +1,18 @@
-#define SA_SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
+#define SA_SOCKET_PATH_FMT      "/tmp/yabai-sa_%s.socket"
 
-#define CONFIG_FILE_FMT "%s/.yabairc"
-#define SOCKET_PATH_FMT "/tmp/yabai_%s.socket"
-#define LCFILE_PATH_FMT "/tmp/yabai_%s.lock"
+#define CONFIG_FILE_FMT         "%s/.yabairc"
+#define SOCKET_PATH_FMT         "/tmp/yabai_%s.socket"
+#define LCFILE_PATH_FMT         "/tmp/yabai_%s.lock"
 
-#define CLIENT_OPT_LONG "--message"
-#define CLIENT_OPT_SHRT "-m"
+#define CLIENT_OPT_LONG         "--message"
+#define CLIENT_OPT_SHRT         "-m"
 
-#define DEBUG_VERBOSE_OPT_LONG "--verbose"
-#define DEBUG_VERBOSE_OPT_SHRT "-V"
-#define VERSION_OPT_LONG       "--version"
-#define VERSION_OPT_SHRT       "-v"
-#define CONFIG_OPT_LONG       "--config"
-#define CONFIG_OPT_SHRT       "-c"
+#define DEBUG_VERBOSE_OPT_LONG  "--verbose"
+#define DEBUG_VERBOSE_OPT_SHRT  "-V"
+#define VERSION_OPT_LONG        "--version"
+#define VERSION_OPT_SHRT        "-v"
+#define CONFIG_OPT_LONG         "--config"
+#define CONFIG_OPT_SHRT         "-c"
 
 #define SCRPT_ADD_INSTALL_OPT   "--install-sa"
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
@@ -50,7 +50,7 @@ static int client_send_message(int argc, char **argv)
 {
     char *user = getenv("USER");
     if (!user) {
-        error("yabai: 'env USER' not set! abort..\n");
+        error("yabai-msg: 'env USER' not set! abort..\n");
     }
 
     int sockfd;
@@ -58,7 +58,7 @@ static int client_send_message(int argc, char **argv)
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
 
     if (!socket_connect_un(&sockfd, socket_file)) {
-        error("yabai: failed to connect to socket..\n");
+        error("yabai-msg: failed to connect to socket..\n");
     }
 
     int message_length = argc - 1;
@@ -79,7 +79,7 @@ static int client_send_message(int argc, char **argv)
     }
 
     if (!socket_write_bytes(sockfd, message, message_length)) {
-        error("yabai: failed to send data..\n");
+        error("yabai-msg: failed to send data..\n");
     }
 
     int result = EXIT_SUCCESS;
