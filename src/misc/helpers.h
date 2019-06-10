@@ -3,8 +3,6 @@
 
 extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 
-extern char *g_shell;
-
 static const char *bool_str[] = { "off", "on" };
 
 struct rgba_color
@@ -83,7 +81,7 @@ static void fork_exec(char *command)
     int pid = fork();
     if (pid != 0) return;
 
-    char *exec[] = { g_shell, "-c", command, NULL};
+    char *exec[] = { "/usr/bin/env", "sh", "-c", command, NULL};
     exit(execvp(exec[0], exec));
 }
 
@@ -96,7 +94,7 @@ static bool fork_exec_wait(char *command)
         int status;
         waitpid(pid, &status, 0);
     } else {
-        char *exec[] = { g_shell, "-c", command, NULL};
+        char *exec[] = { "/usr/bin/env", "sh", "-c", command, NULL};
         exit(execvp(exec[0], exec));
     }
 
