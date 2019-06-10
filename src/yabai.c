@@ -45,6 +45,7 @@ char g_socket_file[MAXLEN];
 char g_config_file[MAXLEN];
 char g_lock_file[MAXLEN];
 bool g_verbose;
+char *g_shell;
 
 static int client_send_message(int argc, char **argv)
 {
@@ -167,6 +168,9 @@ static inline void init_misc_settings(void)
     if (!home) {
         error("yabai: 'env HOME' not set! abort..\n");
     }
+
+    g_shell = getenv("SHELL");
+    if (!g_shell) g_shell = "/bin/bash";
 
     if (!g_config_file[0]) snprintf(g_config_file, sizeof(g_config_file), CONFIG_FILE_FMT, home);
     snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, user);
