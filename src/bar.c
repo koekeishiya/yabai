@@ -317,7 +317,7 @@ void bar_create(struct bar *bar)
     SLSSetWindowTags(g_connection, bar->id, tags, 32);
     SLSSetWindowOpacity(g_connection, bar->id, 0);
     SLSSetMouseEventEnableFlags(g_connection, bar->id, false);
-    SLSSetWindowLevel(g_connection, bar->id, CGWindowLevelForKey(5));
+    SLSSetWindowLevel(g_connection, bar->id, CGWindowLevelForKey(4));
     bar->context = SLWindowContextCreate(g_connection, bar->id, 0);
 
     CFRunLoopAddSource(CFRunLoopGetMain(), IOPSNotificationCreateRunLoopSource(power_handler, NULL), kCFRunLoopCommonModes);
