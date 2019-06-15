@@ -718,12 +718,7 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             uint64_t cur_sid = space_manager_active_space();
             uint64_t pre_sid = space_manager_prev_space(cur_sid);
             if (cur_sid && pre_sid) {
-                uint64_t pre_pre_sid = space_manager_prev_space(pre_sid);
-                if (pre_pre_sid) {
-                    space_manager_move_space_after_space(cur_sid, pre_pre_sid, true);
-                } else {
-                    space_manager_move_space_after_space(pre_sid, cur_sid, false);
-                }
+                space_manager_move_space_after_space(pre_sid, cur_sid, false);
             } else {
                 daemon_fail(rsp, "could not swap places with the previous space.\n");
             }
