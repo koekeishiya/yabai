@@ -205,6 +205,9 @@ COMMAND
 *--destroy*::
     Remove the currently active space.
 
+*--move* 'prev|next'::
+    Swap position of the active space with the prev/next space. The 'prev' selector cannot swap the position of the first space.
+
 *--display* '<DISPLAY_SEL>'::
     Send the active space to the given display.
 

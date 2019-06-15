@@ -474,6 +474,23 @@ void space_manager_focus_space(uint64_t sid)
     socket_close(sockfd);
 }
 
+void space_manager_move_space_after_space(uint64_t n_sid)
+{
+    int sockfd;
+    uint64_t sid;
+    char message[MAXLEN];
+
+    sid = space_manager_active_space();
+    if (!sid || !space_is_user(sid)) return;
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "space_move %lld %lld", sid, n_sid);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
+}
+
 void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did)
 {
     int sockfd;

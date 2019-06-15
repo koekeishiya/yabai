@@ -93,9 +93,10 @@ static const char *bool_str[] = { "off", "on" };
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
 #define COMMAND_SPACE_FOCUS   "--focus"
-#define COMMAND_SPACE_DISPLAY "--display"
 #define COMMAND_SPACE_CREATE  "--create"
 #define COMMAND_SPACE_DESTROY "--destroy"
+#define COMMAND_SPACE_MOVE    "--move"
+#define COMMAND_SPACE_DISPLAY "--display"
 #define COMMAND_SPACE_BALANCE "--balance"
 #define COMMAND_SPACE_MIRROR  "--mirror"
 #define COMMAND_SPACE_ROTATE  "--rotate"
@@ -107,6 +108,8 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_SPACE_FOCUS_PREV   "prev"
 #define ARGUMENT_SPACE_FOCUS_NEXT   "next"
 #define ARGUMENT_SPACE_FOCUS_LAST   "last"
+#define ARGUMENT_SPACE_MOVE_PREV    "prev"
+#define ARGUMENT_SPACE_MOVE_NEXT    "next"
 #define ARGUMENT_SPACE_DISPLAY_PREV "prev"
 #define ARGUMENT_SPACE_DISPLAY_NEXT "next"
 #define ARGUMENT_SPACE_DISPLAY_LAST "last"
@@ -705,6 +708,25 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 space_manager_focus_space(sid);
             } else {
                 daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
+            }
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_SPACE_MOVE_PREV)) {
+            uint64_t sid = space_manager_prev_space(space_manager_prev_space(space_manager_active_space()));
+            if (sid) {
+                space_manager_move_space_after_space(sid);
+            } else {
+                daemon_fail(rsp, "could not swap places with the previous space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_SPACE_MOVE_NEXT)) {
+            uint64_t sid = space_manager_next_space(space_manager_active_space());
+            if (sid) {
+                space_manager_move_space_after_space(sid);
+            } else {
+                daemon_fail(rsp, "could not swap places with the next space.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
