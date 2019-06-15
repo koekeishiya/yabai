@@ -199,14 +199,14 @@ COMMAND
 *--focus* '<SPACE_SEL>'::
     Focus the given space.
 
-*--move* '<DISPLAY_SEL>'::
-    Move the active space to the given display.
-
 *--create*::
     Create a new space on the active display.
 
 *--destroy*::
     Remove the currently active space.
+
+*--display* '<DISPLAY_SEL>'::
+    Send the active space to the given display.
 
 *--balance*::
     Adjust the split ratios of the active space so that all windows occupy the same area.

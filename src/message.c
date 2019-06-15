@@ -93,7 +93,7 @@ static const char *bool_str[] = { "off", "on" };
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
 #define COMMAND_SPACE_FOCUS   "--focus"
-#define COMMAND_SPACE_MOVE    "--move"
+#define COMMAND_SPACE_DISPLAY "--display"
 #define COMMAND_SPACE_CREATE  "--create"
 #define COMMAND_SPACE_DESTROY "--destroy"
 #define COMMAND_SPACE_BALANCE "--balance"
@@ -104,23 +104,23 @@ static const char *bool_str[] = { "off", "on" };
 #define COMMAND_SPACE_TOGGLE  "--toggle"
 #define COMMAND_SPACE_LAYOUT  "--layout"
 
-#define ARGUMENT_SPACE_FOCUS_PREV  "prev"
-#define ARGUMENT_SPACE_FOCUS_NEXT  "next"
-#define ARGUMENT_SPACE_FOCUS_LAST  "last"
-#define ARGUMENT_SPACE_MOVE_PREV   "prev"
-#define ARGUMENT_SPACE_MOVE_NEXT   "next"
-#define ARGUMENT_SPACE_MOVE_LAST   "last"
-#define ARGUMENT_SPACE_MIRROR_X    "x-axis"
-#define ARGUMENT_SPACE_MIRROR_Y    "y-axis"
-#define ARGUMENT_SPACE_ROTATE_90   "90"
-#define ARGUMENT_SPACE_ROTATE_180  "180"
-#define ARGUMENT_SPACE_ROTATE_270  "270"
-#define ARGUMENT_SPACE_PADDING     "%d:%d:%d:%d"
-#define ARGUMENT_SPACE_GAP         "%d"
-#define ARGUMENT_SPACE_TGL_PADDING "padding"
-#define ARGUMENT_SPACE_TGL_GAP     "gap"
-#define ARGUMENT_SPACE_LAYOUT_BSP  "bsp"
-#define ARGUMENT_SPACE_LAYOUT_FLT  "float"
+#define ARGUMENT_SPACE_FOCUS_PREV   "prev"
+#define ARGUMENT_SPACE_FOCUS_NEXT   "next"
+#define ARGUMENT_SPACE_FOCUS_LAST   "last"
+#define ARGUMENT_SPACE_DISPLAY_PREV "prev"
+#define ARGUMENT_SPACE_DISPLAY_NEXT "next"
+#define ARGUMENT_SPACE_DISPLAY_LAST "last"
+#define ARGUMENT_SPACE_MIRROR_X     "x-axis"
+#define ARGUMENT_SPACE_MIRROR_Y     "y-axis"
+#define ARGUMENT_SPACE_ROTATE_90    "90"
+#define ARGUMENT_SPACE_ROTATE_180   "180"
+#define ARGUMENT_SPACE_ROTATE_270   "270"
+#define ARGUMENT_SPACE_PADDING      "%d:%d:%d:%d"
+#define ARGUMENT_SPACE_GAP          "%d"
+#define ARGUMENT_SPACE_TGL_PADDING  "padding"
+#define ARGUMENT_SPACE_TGL_GAP      "gap"
+#define ARGUMENT_SPACE_LAYOUT_BSP   "bsp"
+#define ARGUMENT_SPACE_LAYOUT_FLT   "float"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
@@ -709,23 +709,23 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
-    } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
+    } else if (token_equals(command, COMMAND_SPACE_DISPLAY)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_SPACE_MOVE_PREV)) {
+        if (token_equals(value, ARGUMENT_SPACE_DISPLAY_PREV)) {
             uint32_t did = display_manager_prev_display_id(display_manager_active_display_id());
             if (did) {
                 space_manager_move_space_to_display(&g_space_manager, did);
             } else {
                 daemon_fail(rsp, "could not locate the previous display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_MOVE_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_SPACE_DISPLAY_NEXT)) {
             uint32_t did = display_manager_next_display_id(display_manager_active_display_id());
             if (did) {
                 space_manager_move_space_to_display(&g_space_manager, did);
             } else {
                 daemon_fail(rsp, "could not locate the next display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_MOVE_LAST)) {
+        } else if (token_equals(value, ARGUMENT_SPACE_DISPLAY_LAST)) {
             space_manager_move_space_to_display(&g_space_manager, g_display_manager.last_display_id);
         } else if (token_is_valid(value)) {
             int arrangement_index = token_to_int(value);

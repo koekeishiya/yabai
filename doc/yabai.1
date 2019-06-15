@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-06-09
+.\"      Date: 2019-06-15
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-06-09" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-06-15" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -265,11 +265,6 @@ yabai \-m space \fI<COMMAND>\fP
 Focus the given space.
 .RE
 .sp
-\fB\-\-move\fP \fI<DISPLAY_SEL>\fP
-.RS 4
-Move the active space to the given display.
-.RE
-.sp
 \fB\-\-create\fP
 .RS 4
 Create a new space on the active display.
@@ -278,6 +273,11 @@ Create a new space on the active display.
 \fB\-\-destroy\fP
 .RS 4
 Remove the currently active space.
+.RE
+.sp
+\fB\-\-display\fP \fI<DISPLAY_SEL>\fP
+.RS 4
+Send the active space to the given display.
 .RE
 .sp
 \fB\-\-balance\fP
