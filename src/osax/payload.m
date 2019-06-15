@@ -548,6 +548,9 @@ static void do_space_move(const char *message)
     Token dest_token = get_token(&message);
     uint64_t dest_space_id = token_to_uint64t(dest_token);
 
+    Token focus_token = get_token(&message);
+    bool focus_dest_space = token_to_int(focus_token);
+
     CFStringRef source_display_uuid = CGSCopyManagedDisplayForSpace(_connection, source_space_id);
     id source_space = space_for_display_with_id(source_display_uuid, source_space_id);
     id source_display_space = display_space_for_space_with_id(source_space_id);
@@ -565,15 +568,17 @@ static void do_space_move(const char *message)
     });
     while (!is_finished) { /* maybe spin lock */ }
 
-    uint64_t new_source_space_id = CGSManagedDisplayGetCurrentSpace(_connection, source_display_uuid);
-    id new_source_space = space_for_display_with_id(source_display_uuid, new_source_space_id);
-    set_ivar_value(source_display_space, "_currentSpace", [new_source_space retain]);
+    if (focus_dest_space) {
+        uint64_t new_source_space_id = CGSManagedDisplayGetCurrentSpace(_connection, source_display_uuid);
+        id new_source_space = space_for_display_with_id(source_display_uuid, new_source_space_id);
+        set_ivar_value(source_display_space, "_currentSpace", [new_source_space retain]);
 
-    NSArray *ns_dest_monitor_space = @[ @(dest_space_id) ];
-    CGSHideSpaces(_connection, (__bridge CFArrayRef) ns_dest_monitor_space);
-    CGSManagedDisplaySetCurrentSpace(_connection, dest_display_uuid, source_space_id);
-    set_ivar_value(dest_display_space, "_currentSpace", [source_space retain]);
-    [ns_dest_monitor_space release];
+        NSArray *ns_dest_monitor_space = @[ @(dest_space_id) ];
+        CGSHideSpaces(_connection, (__bridge CFArrayRef) ns_dest_monitor_space);
+        CGSManagedDisplaySetCurrentSpace(_connection, dest_display_uuid, source_space_id);
+        set_ivar_value(dest_display_space, "_currentSpace", [source_space retain]);
+        [ns_dest_monitor_space release];
+    }
 
     CFRelease(source_display_uuid);
     CFRelease(dest_display_uuid);

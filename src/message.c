@@ -715,16 +715,23 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_SPACE_MOVE_PREV)) {
-            uint64_t sid = space_manager_prev_space(space_manager_prev_space(space_manager_active_space()));
-            if (sid) {
-                space_manager_move_space_after_space(sid);
+            uint64_t cur_sid = space_manager_active_space();
+            uint64_t pre_sid = space_manager_prev_space(cur_sid);
+            if (cur_sid && pre_sid) {
+                uint64_t pre_pre_sid = space_manager_prev_space(pre_sid);
+                if (pre_pre_sid) {
+                    space_manager_move_space_after_space(cur_sid, pre_pre_sid, true);
+                } else {
+                    space_manager_move_space_after_space(pre_sid, cur_sid, false);
+                }
             } else {
                 daemon_fail(rsp, "could not swap places with the previous space.\n");
             }
         } else if (token_equals(value, ARGUMENT_SPACE_MOVE_NEXT)) {
-            uint64_t sid = space_manager_next_space(space_manager_active_space());
-            if (sid) {
-                space_manager_move_space_after_space(sid);
+            uint64_t src_sid = space_manager_active_space();
+            uint64_t dst_sid = space_manager_next_space(src_sid);
+            if (src_sid && dst_sid) {
+                space_manager_move_space_after_space(src_sid, dst_sid, true);
             } else {
                 daemon_fail(rsp, "could not swap places with the next space.\n");
             }

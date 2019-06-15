@@ -474,17 +474,16 @@ void space_manager_focus_space(uint64_t sid)
     socket_close(sockfd);
 }
 
-void space_manager_move_space_after_space(uint64_t n_sid)
+void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
 {
     int sockfd;
-    uint64_t sid;
     char message[MAXLEN];
 
-    sid = space_manager_active_space();
-    if (!sid || !space_is_user(sid)) return;
+    if (!src_sid || !space_is_user(src_sid)) return;
+    if (!dst_sid || !space_is_user(dst_sid)) return;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space_move %lld %lld", sid, n_sid);
+        snprintf(message, sizeof(message), "space_move %lld %lld %d", src_sid, dst_sid, focus);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
@@ -505,7 +504,7 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did)
     if (!d_sid) return;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space_move %lld %lld", sid, d_sid);
+        snprintf(message, sizeof(message), "space_move %lld %lld 1", sid, d_sid);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }

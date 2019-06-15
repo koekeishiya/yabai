@@ -58,7 +58,7 @@ void space_manager_move_window_to_space(uint64_t sid, struct ax_window *window);
 void space_manager_remove_window_from_space(uint64_t sid, struct ax_window *window);
 void space_manager_add_window_to_space(uint64_t sid, struct ax_window *window);
 void space_manager_focus_space(uint64_t sid);
-void space_manager_move_space_after_space(uint64_t n_sid);
+void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus);
 void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did);
 void space_manager_destroy_space(void);
 void space_manager_add_space(void);
