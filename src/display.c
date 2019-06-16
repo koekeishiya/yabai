@@ -26,8 +26,11 @@ static DISPLAY_EVENT_HANDLER(display_handler)
 CFStringRef display_uuid(uint32_t display_id)
 {
     CFUUIDRef uuid_ref = CGDisplayCreateUUIDFromDisplayID(display_id);
+    if (!uuid_ref) return NULL;
+
     CFStringRef uuid_str = CFUUIDCreateString(NULL, uuid_ref);
     CFRelease(uuid_ref);
+
     return uuid_str;
 }
 
@@ -74,6 +77,8 @@ CGRect display_bounds_constrained(uint32_t display_id)
 uint64_t display_space_id(uint32_t display_id)
 {
     CFStringRef uuid = display_uuid(display_id);
+    if (!uuid) return 0;
+
     uint64_t sid = SLSManagedDisplayGetCurrentSpace(g_connection, uuid);
     CFRelease(uuid);
     return sid;
@@ -81,9 +86,13 @@ uint64_t display_space_id(uint32_t display_id)
 
 int display_space_count(uint32_t display_id)
 {
-    int space_count = 0;
     CFStringRef uuid = display_uuid(display_id);
+    if (!uuid) return 0;
+
     CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
+    if (!display_spaces_ref) return 0;
+
+    int space_count = 0;
     int display_spaces_count = CFArrayGetCount(display_spaces_ref);
     for (int i = 0; i < display_spaces_count; ++i) {
         CFDictionaryRef display_ref = CFArrayGetValueAtIndex(display_spaces_ref, i);
@@ -94,6 +103,7 @@ int display_space_count(uint32_t display_id)
         space_count = CFArrayGetCount(spaces_ref);
         break;
     }
+
     CFRelease(display_spaces_ref);
     CFRelease(uuid);
     return space_count;
@@ -101,10 +111,13 @@ int display_space_count(uint32_t display_id)
 
 uint64_t *display_space_list(uint32_t display_id, int *count)
 {
-    uint64_t *space_list = NULL;
-
     CFStringRef uuid = display_uuid(display_id);
+    if (!uuid) return NULL;
+
     CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
+    if (!display_spaces_ref) return NULL;
+
+    uint64_t *space_list = NULL;
     int display_spaces_count = CFArrayGetCount(display_spaces_ref);
 
     for (int i = 0; i < display_spaces_count; ++i) {
@@ -133,11 +146,15 @@ uint64_t *display_space_list(uint32_t display_id, int *count)
 
 int display_arrangement(uint32_t display_id)
 {
-    int result = 0;
     CFStringRef uuid = display_uuid(display_id);
-    CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
+    if (!uuid) return 0;
 
+    CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
+    if (!displays) return 0;
+
+    int result = 0;
     int displays_count = CFArrayGetCount(displays);
+
     for (int i = 0; i < displays_count; ++i) {
         if (CFEqual(CFArrayGetValueAtIndex(displays, i), uuid)) {
             result = i + 1;

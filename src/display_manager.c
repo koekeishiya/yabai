@@ -5,10 +5,7 @@ extern int g_connection;
 
 void display_manager_query_display(FILE *rsp, uint32_t did)
 {
-    int count = 0;
-    uint64_t *space_list = display_space_list(did, &count);
-    if (space_list) free(space_list);
-
+    int count = display_space_count(did);
     CGRect frame = display_bounds(did);
 
     fprintf(rsp,
@@ -182,6 +179,8 @@ bool display_manager_active_display_is_animating(void)
 bool display_manager_display_is_animating(uint32_t did)
 {
     CFStringRef uuid = display_uuid(did);
+    if (!uuid) return false;
+
     bool result = SLSManagedDisplayIsAnimating(g_connection, uuid);
     CFRelease(uuid);
     return result;
