@@ -1247,7 +1247,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (did) {
                 struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
-                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(did));
+                    window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
                 } else {
                     daemon_fail(rsp, "could not locate the focused window.\n");
                 }
@@ -1259,7 +1259,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (did) {
                 struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
-                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(did));
+                    window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
                 } else {
                     daemon_fail(rsp, "could not locate the focused window.\n");
                 }
@@ -1269,7 +1269,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_LAST)) {
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
-                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(g_display_manager.last_display_id));
+                window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, g_display_manager.last_display_id);
             } else {
                 daemon_fail(rsp, "could not locate the focused window.\n");
             }
@@ -1279,7 +1279,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (did) {
                 struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
-                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, display_space_id(did));
+                    window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
                 } else {
                     daemon_fail(rsp, "could not locate the focused window.\n");
                 }

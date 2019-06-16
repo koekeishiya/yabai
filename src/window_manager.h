@@ -117,6 +117,7 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct ax_wind
 void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, int direction);
 void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b);
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b);
+void window_manager_send_window_to_display(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint32_t did);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t sid);
 void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct ax_application *application);
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
