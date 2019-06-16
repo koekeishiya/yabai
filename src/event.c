@@ -590,7 +590,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
     g_space_manager.last_space_id = g_space_manager.current_space_id;
     g_space_manager.current_space_id = display_space_id(g_display_manager.current_display_id);
 
-    assert(g_display_manager.current_display_id == space_display_id(g_space_manager.current_space_id));
+    uint32_t expected_display_id = space_display_id(g_space_manager.current_space_id);
+    if (g_display_manager.current_display_id != expected_display_id) {
+        debug("%s: %d %lld did not match %d! ignoring event..\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id, expected_display_id);
+        return EVENT_FAILED;
+    }
+
     debug("%s: %d %lld\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id);
     struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
 
