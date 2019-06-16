@@ -43,7 +43,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
     if ((process->terminated) || (kill(process->pid, 0) == -1)) {
         debug("%s: %s terminated during launch\n", __FUNCTION__, process->name);
         window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
-        return EVENT_FAILED;
+        return EVENT_FAILURE;
     }
 
     struct ax_application *application = application_create(process);
@@ -143,7 +143,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
     struct ax_application *application = window_manager_find_application(&g_window_manager, process->pid);
     if (!application) {
         window_manager_add_lost_front_switched_event(&g_window_manager, process->pid);
-        return EVENT_FAILED;
+        return EVENT_FAILURE;
     }
 
     struct event *de_event;
@@ -165,7 +165,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILED;
+    if (!application) return EVENT_FAILURE;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     uint32_t application_focused_window_id = application_focused_window(application);
@@ -199,7 +199,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILED;
+    if (!application) return EVENT_FAILURE;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
@@ -222,7 +222,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILED;
+    if (!application) return EVENT_FAILURE;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = false;
@@ -253,7 +253,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 {
     struct ax_application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILED;
+    if (!application) return EVENT_FAILURE;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = true;
@@ -284,19 +284,19 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     uint32_t window_id = ax_window_id(context);
     if (!window_id || window_manager_find_window(&g_window_manager, window_id)) {
         CFRelease(context);
-        return EVENT_FAILED;
+        return EVENT_FAILURE;
     }
 
     pid_t window_pid = ax_window_pid(context);
     if (!window_pid) {
         CFRelease(context);
-        return EVENT_FAILED;
+        return EVENT_FAILURE;
     }
 
     struct ax_application *application = window_manager_find_application(&g_window_manager, window_pid);
     if (!application) {
         CFRelease(context);
-        return EVENT_FAILED;
+        return EVENT_FAILURE;
     }
 
     struct ax_window *window = window_create(application, context, window_id);
@@ -349,7 +349,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
 {
     uint32_t window_id = (uint32_t)(uintptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILED;
+    if (!window) return EVENT_FAILURE;
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     assert(!*window->id_ptr);
@@ -376,7 +376,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
 
     if (!window) {
         window_manager_add_lost_focused_event(&g_window_manager, window_id);
-        return EVENT_FAILED;
+        return EVENT_FAILURE;
     }
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
@@ -426,7 +426,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILED;
+    if (!window) return EVENT_FAILURE;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
@@ -451,7 +451,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILED;
+    if (!window) return EVENT_FAILURE;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
@@ -476,7 +476,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILED;
+    if (!window) return EVENT_FAILURE;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
@@ -504,7 +504,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILED;
+    if (!window) return EVENT_FAILURE;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
@@ -541,7 +541,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_TITLE_CHANGED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILED;
+    if (!window) return EVENT_FAILURE;
 
     if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
@@ -593,7 +593,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
     uint32_t expected_display_id = space_display_id(g_space_manager.current_space_id);
     if (g_display_manager.current_display_id != expected_display_id) {
         debug("%s: %d %lld did not match %d! ignoring event..\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id, expected_display_id);
-        return EVENT_FAILED;
+        return EVENT_FAILURE;
     }
 
     debug("%s: %d %lld\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id);
@@ -882,7 +882,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
 static CFStringRef CFSTR_DOCK = CFSTR("Dock");
 static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
 {
-    if (!g_mission_control_active) return EVENT_FAILED;
+    if (!g_mission_control_active) return EVENT_FAILURE;
 
     CFArrayRef window_list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, 0);
     int window_count = CFArrayGetCount(window_list);
