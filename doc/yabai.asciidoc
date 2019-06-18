@@ -315,8 +315,8 @@ ARGUMENT
 *--space* ['<mission-control index>']::
     Constrain matches to the selected space.
 
-*--window*::
-    Constrain matches to the focused window.
+*--window* ['<window id>']::
+    Constrain matches to the selected window.
 
 Rule
 ~~~~
