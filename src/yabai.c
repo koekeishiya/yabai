@@ -38,7 +38,7 @@ struct daemon g_daemon;
 struct bar g_bar;
 int g_connection;
 
-char **g_signal_event[EVENT_TYPE_COUNT];
+struct signal *g_signal_event[EVENT_TYPE_COUNT];
 bool g_mission_control_active;
 char g_sa_socket_file[MAXLEN];
 char g_socket_file[MAXLEN];

@@ -371,13 +371,16 @@ A signal is a simple way for the user to react to some event that has been proce
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m signal '<COMMAND>' event='<EVENT>' action='<ACTION>'
+yabai -m signal '<COMMAND>'
 
 COMMAND
 ^^^^^^^
 
-*--add*::
-    Add a new signal to execute an action after processing an event of the given type.
+*--add label='<LABEL>' event='<EVENT>' action='<ACTION>'*::
+    Add a new labelled signal to execute an action after processing an event of the given type.
+
+*--remove '<LABEL>'*::
+    Remove an existing signal with the given label.
 
 EVENT
 ^^^^^

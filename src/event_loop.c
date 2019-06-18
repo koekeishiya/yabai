@@ -58,7 +58,7 @@ event_loop_run(void *context)
         struct event *event = queue_pop(queue);
         if (event) {
             int result = event_handler[event->type](event->context, event->param1, event->param2);
-            if (result == EVENT_SUCCESS) event_signal(event->context, event->type);
+            if (result == EVENT_SUCCESS) event_signal_transmit(event->context, event->type);
 
             if (event->status) *event->status = EVENT_PROCESSED;
             if (event->result) *event->result = result;

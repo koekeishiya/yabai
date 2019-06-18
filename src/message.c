@@ -1,6 +1,6 @@
 #include "message.h"
 
-extern char **g_signal_event[EVENT_TYPE_COUNT];
+extern struct signal *g_signal_event[EVENT_TYPE_COUNT];
 extern struct event_loop g_event_loop;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
@@ -194,9 +194,11 @@ static const char *bool_str[] = { "off", "on" };
 
 /* --------------------------------DOMAIN SIGNAL-------------------------------- */
 #define COMMAND_SIGNAL_ADD "--add"
+#define COMMAND_SIGNAL_REM "--remove"
 
 #define ARGUMENT_SIGNAL_KEY_EVENT    "event"
 #define ARGUMENT_SIGNAL_KEY_ACTION   "action"
+#define ARGUMENT_SIGNAL_KEY_LABEL    "label"
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -1599,6 +1601,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
     if (token_equals(command, COMMAND_SIGNAL_ADD)) {
         enum event_type signal_type = EVENT_TYPE_UNKNOWN;
         char *signal_action = NULL;
+        char *signal_label  = NULL;
 
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {
@@ -1616,15 +1619,27 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                 }
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_ACTION)) {
                 signal_action = string_copy(value);
+            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_LABEL)) {
+                signal_label = string_copy(value);
             }
 
             token = get_token(&message);
         }
 
         if (signal_type > EVENT_TYPE_UNKNOWN && signal_type < EVENT_TYPE_COUNT && signal_action) {
-            buf_push(g_signal_event[signal_type], signal_action);
+            event_signal_add(signal_type, signal_action, signal_label);
         } else {
             daemon_fail(rsp, "signal was not added.\n");
+        }
+    } else if (token_equals(command, COMMAND_SIGNAL_REM)) {
+        struct token token = get_token(&message);
+        if (token_is_valid(token)) {
+            char *label = token_to_string(token);
+            bool did_remove_signal = event_signal_remove(label);
+            if (!did_remove_signal) daemon_fail(rsp, "signal with label '%s' not found.\n", label);
+            free(label);
+        } else {
+            daemon_fail(rsp, "invalid label specified.\n", token.text);
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

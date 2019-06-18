@@ -1,6 +1,6 @@
 #include "event.h"
 
-extern char **g_signal_event[EVENT_TYPE_COUNT];
+extern struct signal *g_signal_event[EVENT_TYPE_COUNT];
 extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct display_manager g_display_manager;
@@ -10,15 +10,6 @@ extern struct mouse_state g_mouse_state;
 extern struct bar g_bar;
 extern bool g_mission_control_active;
 extern int g_connection;
-
-enum event_type event_type_from_string(const char *str)
-{
-    for (int i = APPLICATION_LAUNCHED; i < EVENT_TYPE_COUNT; ++i) {
-        if (string_equals(str, event_type_str[i])) return i;
-    }
-
-    return EVENT_TYPE_UNKNOWN;
-}
 
 static void event_signal_populate_args(void *context, enum event_type type, char args[][255])
 {
@@ -87,7 +78,7 @@ static void event_signal_populate_args(void *context, enum event_type type, char
     }
 }
 
-void event_signal(void *context, enum event_type type)
+void event_signal_transmit(void *context, enum event_type type)
 {
     int signal_count = buf_len(g_signal_event[type]);
     if (!signal_count) return;
@@ -99,10 +90,44 @@ void event_signal(void *context, enum event_type type)
     debug("%s: %s\n", __FUNCTION__, event_type_str[type]);
 
     for (int i = 0; i < signal_count; ++i) {
-        fork_exec(g_signal_event[type][i], args[0], args[1]);
+        fork_exec(g_signal_event[type][i].command, args[0], args[1]);
     }
 
     exit(EXIT_SUCCESS);
+}
+
+void event_signal_add(enum event_type type, char *action, char *label)
+{
+    if (label) event_signal_remove(label);
+    buf_push(g_signal_event[type], ((struct signal) {
+        .command = action,
+        .label   = label
+    }));
+}
+
+bool event_signal_remove(char *label)
+{
+    for (int i = 0; i < EVENT_TYPE_COUNT; ++i) {
+        for (int j = 0; j < buf_len(g_signal_event[i]); ++j) {
+            if (string_equals(label, g_signal_event[i][j].label)) {
+                free(g_signal_event[i][j].command);
+                free(g_signal_event[i][j].label);
+                buf_del(g_signal_event[i], j);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+enum event_type event_type_from_string(const char *str)
+{
+    for (int i = APPLICATION_LAUNCHED; i < EVENT_TYPE_COUNT; ++i) {
+        if (string_equals(str, event_type_str[i])) return i;
+    }
+
+    return EVENT_TYPE_UNKNOWN;
 }
 
 void event_destroy(struct event *event)

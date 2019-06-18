@@ -179,6 +179,12 @@ struct event
     volatile int *result;
 };
 
+struct signal
+{
+    char *command;
+    char *label;
+};
+
 #define event_create(e, t, d)\
     do {\
         e = malloc(sizeof(struct event));\
@@ -201,7 +207,9 @@ struct event
         e->result  = 0;\
     } while (0)
 
-void event_signal(void *context, enum event_type type);
+void event_signal_transmit(void *context, enum event_type type);
+void event_signal_add(enum event_type type, char *action, char *label);
+bool event_signal_remove(char *label);
 void event_destroy(struct event *event);
 enum event_type event_type_from_string(const char *str);
 

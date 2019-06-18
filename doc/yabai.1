@@ -476,12 +476,17 @@ Set window frame based on a self\-defined grid.
 A signal is a simple way for the user to react to some event that has been processed.
 .SS "General Syntax"
 .sp
-yabai \-m signal \fI<COMMAND>\fP event=\fI<EVENT>\fP action=\fI<ACTION>\fP
+yabai \-m signal \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
-\fB\-\-add\fP
+\fB\-\-add label=\fI<LABEL>\fP event=\fI<EVENT>\fP action=\fI<ACTION>\fP\fP
 .RS 4
-Add a new signal to execute an action after processing an event of the given type.
+Add a new labelled signal to execute an action after processing an event of the given type.
+.RE
+.sp
+\fB\-\-remove \fI<LABEL>\fP\fP
+.RS 4
+Remove an existing signal with the given label.
 .RE
 .SS "EVENT"
 .sp
