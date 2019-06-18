@@ -1294,9 +1294,11 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
     }
 
     struct ax_window *window = window_manager_focused_window(wm);
-    wm->last_window_id = window->id;
-    wm->focused_window_id = window->id;
-    wm->focused_window_pid = window->application->pid;
-    border_window_activate(window);
-    window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
+    if (window) {
+        wm->last_window_id = window->id;
+        wm->focused_window_id = window->id;
+        wm->focused_window_pid = window->application->pid;
+        border_window_activate(window);
+        window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
+    }
 }
