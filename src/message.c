@@ -1639,7 +1639,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
             if (!did_remove_signal) daemon_fail(rsp, "signal with label '%s' not found.\n", label);
             free(label);
         } else {
-            daemon_fail(rsp, "invalid label specified.\n", token.text);
+            daemon_fail(rsp, "invalid label specified.\n");
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
