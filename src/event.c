@@ -142,7 +142,10 @@ void event_destroy(struct event *event)
     } break;
     case WINDOW_DESTROYED: {
         struct ax_window *window = window_manager_find_window(&g_window_manager, (uint32_t)(uintptr_t) event->context);
-        if (window) window_destroy(window);
+        if (window) {
+            window_manager_remove_window(&g_window_manager, window->id);
+            window_destroy(window);
+        }
     } break;
     case MOUSE_DOWN:
     case MOUSE_UP:
@@ -465,19 +468,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
     struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
     if (!window) return EVENT_FAILURE;
 
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     assert(!*window->id_ptr);
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+    window_unobserve(window);
+
+    if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
         space_manager_untile_window(&g_space_manager, view, window);
         window_manager_remove_managed_window(&g_window_manager, window);
     }
-
-    if (g_mouse_state.window == window) g_mouse_state.window = NULL;
-
-    window_manager_remove_window(&g_window_manager, window->id);
-    window_unobserve(window);
 
     return EVENT_SUCCESS;
 }
