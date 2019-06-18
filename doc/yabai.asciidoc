@@ -309,7 +309,7 @@ COMMAND
 ARGUMENT
 ^^^^^^^^
 
-*--display* ['<arrangement index']::
+*--display* ['<arrangement index>']::
     Constrain matches to the selected display.
 
 *--space* ['<mission-control index>']::
