@@ -954,7 +954,6 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
         window_manager_remove_managed_window(wm, window);
     }
 
-
     assert(space_is_visible(dst_sid));
     space_manager_move_window_to_space(dst_sid, window);
 
