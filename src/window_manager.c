@@ -1163,7 +1163,7 @@ void window_manager_validate_windows_on_space(struct space_manager *sm, struct w
         bool found = false;
 
         for (int j = 0; j < window_count; ++j) {
-            if (view_window_list[i]  == window_list[j]) {
+            if (view_window_list[i] == window_list[j]) {
                 found = true;
                 break;
             }
