@@ -18,8 +18,22 @@ void rule_apply(struct rule *rule)
     }
 }
 
+bool rule_remove(char *label)
+{
+    for (int i = 0; i < buf_len(g_window_manager.rules); ++i) {
+        if (string_equals(g_window_manager.rules[i]->label, label)) {
+            rule_destroy(g_window_manager.rules[i]);
+            buf_del(g_window_manager.rules, i);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void rule_add(struct rule *rule)
 {
+    if (rule->label) rule_remove(rule->label);
     buf_push(g_window_manager.rules, rule);
     rule_apply(rule);
 }
@@ -40,5 +54,6 @@ void rule_destroy(struct rule *rule)
 {
     if (rule->app_regex_valid)   regfree(&rule->app_regex);
     if (rule->title_regex_valid) regfree(&rule->title_regex);
+    if (rule->label) free(rule->label);
     free(rule);
 }

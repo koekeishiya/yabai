@@ -90,6 +90,8 @@ BOOL_SEL    := on | off
 
 REGEX       := \c
 .URL "https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended\-regular\-expression\-syntax.html" "POSIX extended regular expression syntax" ""
+
+LABEL       := arbitrary string/text used as an identifier
 .fi
 .if n .RE
 .SH "DOMAINS"
@@ -416,11 +418,21 @@ Constrain matches to the focused window.
 yabai \-m rule \fI<COMMAND>\fP [\fI<ARGUMENT>\fP]
 .SS "COMMAND"
 .sp
-\fB\-\-add\fP
+\fB\-\-add [\fI<ARGUMENT>\fP]\fP
 .RS 4
 Add a new rule.
 .RE
+.sp
+\fB\-\-remove \fI<LABEL>\fP\fP
+.RS 4
+Remove an existing rule with the given label.
+.RE
 .SS "ARGUMENT"
+.sp
+\fBlabel=\fI<LABEL>\fP\fP
+.RS 4
+Label used to identify the rule with a unique name
+.RE
 .sp
 \fBapp=\fI<REGEX>\fP\fP
 .RS 4

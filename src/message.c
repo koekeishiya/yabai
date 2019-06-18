@@ -174,6 +174,7 @@ static const char *bool_str[] = { "off", "on" };
 
 /* --------------------------------DOMAIN RULE---------------------------------- */
 #define COMMAND_RULE_ADD "--add"
+#define COMMAND_RULE_REM "--remove"
 
 #define ARGUMENT_RULE_KEY_APP     "app"
 #define ARGUMENT_RULE_KEY_TITLE   "title"
@@ -185,6 +186,7 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_RULE_KEY_BORDER  "border"
 #define ARGUMENT_RULE_KEY_FULLSCR "native-fullscreen"
 #define ARGUMENT_RULE_KEY_GRID    "grid"
+#define ARGUMENT_RULE_KEY_LABEL   "label"
 
 #define ARGUMENT_RULE_VALUE_ON    "on"
 #define ARGUMENT_RULE_VALUE_OFF   "off"
@@ -1579,6 +1581,8 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                             &rule->grid[4], &rule->grid[5]) != 6)) {
                     memset(rule->grid, 0, sizeof(rule->grid));
                 }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_LABEL)) {
+                rule->label = string_copy(value);
             }
 
             token = get_token(&message);
@@ -1589,6 +1593,16 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
         } else {
             rule_destroy(rule);
             daemon_fail(rsp, "a rule must contain at least one of the following key-value pairs: 'app', 'title'\n");
+        }
+    } else if (token_equals(command, COMMAND_RULE_REM)) {
+        struct token token = get_token(&message);
+        if (token_is_valid(token)) {
+            char *label = token_to_string(token);
+            bool did_remove_rule = rule_remove(label);
+            if (!did_remove_rule) daemon_fail(rsp, "rule with label '%s' not found.\n", label);
+            free(label);
+        } else {
+            daemon_fail(rsp, "invalid label specified.\n");
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

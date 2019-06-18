@@ -72,6 +72,8 @@ FLOAT_SEL   := 0 < value <= 1.0
 BOOL_SEL    := on | off
 
 REGEX       := https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended-regular-expression-syntax.html[POSIX extended regular expression syntax]
+
+LABEL       := arbitrary string/text used as an identifier
 ----
 
 Domains
@@ -327,11 +329,17 @@ yabai -m rule '<COMMAND>' ['<ARGUMENT>']
 COMMAND
 ^^^^^^^
 
-*--add*::
+*--add ['<ARGUMENT>']*::
     Add a new rule.
+
+*--remove '<LABEL>'*::
+    Remove an existing rule with the given label.
 
 ARGUMENT
 ^^^^^^^^
+
+*label='<LABEL>'*::
+    Label used to identify the rule with a unique name
 
 *app='<REGEX>'*::
     Name of application.

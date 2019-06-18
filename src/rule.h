@@ -7,6 +7,7 @@
 
 struct rule
 {
+    char *label;
     regex_t app_regex;
     regex_t title_regex;
     bool app_regex_valid;
@@ -22,6 +23,7 @@ struct rule
     unsigned grid[6];
 };
 
+bool rule_remove(char *label);
 void rule_add(struct rule *rule);
 bool rule_is_valid(struct rule *rule);
 struct rule *rule_create(void);
