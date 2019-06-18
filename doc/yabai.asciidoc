@@ -355,7 +355,7 @@ ARGUMENT
 Signal
 ~~~~~~
 
-A signal is simply a way to react to some event that has been processed. It does not transmit any data.
+A signal is a simple way for the user to react to some event that has been processed.
 
 General Syntax
 ^^^^^^^^^^^^^^
@@ -372,79 +372,79 @@ EVENT
 ^^^^^
 
 *application_launched*::
-    Triggered when a new application is launched.
+    Triggered when a new application is launched. Passes one argument: pid
 
 *application_terminated*::
-    Triggered when an application is terminated.
+    Triggered when an application is terminated. Passes one argument: pid
 
 *application_front_switched*::
-    Triggered when the front-most application changes.
+    Triggered when the front-most application changes. Passes two arguments: front_pid, last_front_pid
 
 *application_activated*::
-    Triggered when an application is activated.
+    Triggered when an application is activated. Passes one argument: pid
 
 *application_deactivated*::
-    Triggered when an application is deactivated.
+    Triggered when an application is deactivated. Passes one argument: pid
 
 *application_visible*::
-    Triggered when an application is unhidden.
+    Triggered when an application is unhidden. Passes one argument: pid
 
 *application_hidden*::
-    Triggered when an application is hidden.
+    Triggered when an application is hidden. Passes one argument: pid
 
 *window_created*::
-    Triggered when a window is created.
+    Triggered when a window is created. Passes two arguments: pid, wid
 
 *window_destroyed*::
-    Triggered when a window is destroyed.
+    Triggered when a window is destroyed. Passes two arguments: pid, wid
 
 *window_focused*::
-    Triggered when a window becomes the key-window for its application.
+    Triggered when a window becomes the key-window for its application. Passes two arguments: pid, wid
 
 *window_moved*::
-    Triggered when a window changes position.
+    Triggered when a window changes position. Passes two arguments: pid, wid
 
 *window_resized*::
-    Triggered when a window changes dimensions.
+    Triggered when a window changes dimensions. Passes two arguments: pid, wid
 
 *window_minimized*::
-    Triggered when a window has been minimized.
+    Triggered when a window has been minimized. Passes two arguments: pid, wid
 
 *window_deminimized*::
-    Triggered when a window has been deminimized.
+    Triggered when a window has been deminimized. Passes two arguments: pid, wid
 
 *window_title_changed*::
-    Triggered when a window changes its title.
+    Triggered when a window changes its title. Passes two arguments: pid, wid
 
 *space_changed*::
-    Triggered when the active space has changed.
+    Triggered when the active space has changed. Passes two arguments: space_id, last_space_id
 
 *display_added*::
-    Triggered when a new display has been added.
+    Triggered when a new display has been added. Passes one argument: display_id
 
 *display_removed*::
-    Triggered when a display has been removed.
+    Triggered when a display has been removed. Passes one argument: display_id
 
 *display_moved*::
-    Triggered when a change has been made to display arrangement.
+    Triggered when a change has been made to display arrangement. Passes one argument: display_id
 
 *display_resized*::
-    Triggered when a display has changed resolution.
+    Triggered when a display has changed resolution. Passes one argument: display_id
 
 *display_changed*::
-    Triggered when the active display has changed.
+    Triggered when the active display has changed. Passes two arguments: display_id, last_display_id
 
 *mouse_down*::
-    Triggered when a mouse button has been pressed.
+    Triggered when a mouse button has been pressed. Passes two arguments: button, coordinates
 
 *mouse_up*::
-    Triggered when a mouse button has been released.
+    Triggered when a mouse button has been released. Passes two arguments: button, coordinates
 
 *mouse_dragged*::
-    Triggered when the mouse is moved with one of its buttons pressed.
+    Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: button, coordinates
 
 *mouse_moved*::
-    Triggered when the mouse is moved.
+    Triggered when the mouse is moved. Passes two arguments: button, coordinates
 
 *mission_control_enter*::
     Triggered when mission-control activates.

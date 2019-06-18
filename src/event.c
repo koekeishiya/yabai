@@ -20,19 +20,114 @@ enum event_type event_type_from_string(const char *str)
     return EVENT_TYPE_UNKNOWN;
 }
 
-void event_signal(enum event_type type)
+static void event_signal_populate_args(void *context, enum event_type type, char args[][255])
+{
+    switch (type) {
+    default: {} break;
+    case APPLICATION_LAUNCHED:
+    case APPLICATION_TERMINATED: {
+        struct process *process = context;
+        snprintf(args[0], sizeof(args[0]), "%d", process->pid);
+    } break;
+    case APPLICATION_FRONT_SWITCHED: {
+        snprintf(args[0], sizeof(args[0]), "%d", g_process_manager.front_pid);
+        snprintf(args[1], sizeof(args[1]), "%d", g_process_manager.last_front_pid);
+    } break;
+    case APPLICATION_ACTIVATED:
+    case APPLICATION_DEACTIVATED:
+    case APPLICATION_VISIBLE:
+    case APPLICATION_HIDDEN: {
+        pid_t pid = (pid_t)(uintptr_t) context;
+        snprintf(args[0], sizeof(args[0]), "%d", pid);
+    } break;
+    case WINDOW_CREATED: {
+        uint32_t wid = ax_window_id(context);
+        pid_t pid = ax_window_pid(context);
+        snprintf(args[0], sizeof(args[0]), "%d", pid);
+        snprintf(args[1], sizeof(args[1]), "%d", wid);
+    } break;
+    case WINDOW_DESTROYED:
+    case WINDOW_FOCUSED:
+    case WINDOW_MOVED:
+    case WINDOW_RESIZED:
+    case WINDOW_MINIMIZED:
+    case WINDOW_DEMINIMIZED:
+    case WINDOW_TITLE_CHANGED: {
+        uint32_t window_id = (uint32_t)(uintptr_t) context;
+        struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
+        if (window) {
+            snprintf(args[0], sizeof(args[0]), "%d", window->application->pid);
+            snprintf(args[1], sizeof(args[1]), "%d", window->id);
+        }
+    } break;
+    case SPACE_CHANGED: {
+        snprintf(args[0], sizeof(args[0]), "%lld", g_space_manager.current_space_id);
+        snprintf(args[1], sizeof(args[1]), "%lld", g_space_manager.last_space_id);
+    } break;
+    case DISPLAY_ADDED:
+    case DISPLAY_REMOVED:
+    case DISPLAY_MOVED:
+    case DISPLAY_RESIZED: {
+        uint32_t did = (uint32_t)(uintptr_t) context;
+        snprintf(args[0], sizeof(args[0]), "%d", did);
+    } break;
+    case DISPLAY_CHANGED: {
+        snprintf(args[0], sizeof(args[0]), "%d", g_display_manager.current_display_id);
+        snprintf(args[1], sizeof(args[1]), "%d", g_display_manager.last_display_id);
+    } break;
+    case MOUSE_DOWN:
+    case MOUSE_UP:
+    case MOUSE_DRAGGED:
+    case MOUSE_MOVED: {
+        CGPoint point = CGEventGetLocation(context);
+        int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
+        snprintf(args[0], sizeof(args[0]), "%lld", button);
+        snprintf(args[1], sizeof(args[1]), "%f %f", point.x, point.y);
+    } break;
+    }
+}
+
+void event_signal(void *context, enum event_type type)
 {
     int signal_count = buf_len(g_signal_event[type]);
     if (!signal_count) return;
+
+    char args[2][255] = { {}, {} };
+    event_signal_populate_args(context, type, args);
 
     if (fork() != 0) return;
     debug("%s: %s\n", __FUNCTION__, event_type_str[type]);
 
     for (int i = 0; i < signal_count; ++i) {
-        fork_exec(g_signal_event[type][i]);
+        fork_exec(g_signal_event[type][i], args[0], args[1]);
     }
 
     exit(EXIT_SUCCESS);
+}
+
+void event_destroy(struct event *event)
+{
+    switch (event->type) {
+    default: {} break;
+    case APPLICATION_TERMINATED: {
+        process_destroy(event->context);
+    } break;
+    case WINDOW_CREATED: {
+        CFRelease(event->context);
+    } break;
+    case WINDOW_DESTROYED: {
+        struct ax_window *window = window_manager_find_window(&g_window_manager, (uint32_t)(uintptr_t) event->context);
+        if (window) window_destroy(window);
+    } break;
+    case MOUSE_DOWN:
+    case MOUSE_UP:
+    case MOUSE_DRAGGED:
+    case MOUSE_MOVED: {
+        CFRelease(event->context);
+    } break;
+    }
+
+    free(event);
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
@@ -130,7 +225,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
         debug("%s: %s (not observed)\n", __FUNCTION__, process->name);
     }
 
-    process_destroy(process);
     return EVENT_SUCCESS;
 }
 
@@ -155,6 +249,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
     event_loop_post(&g_event_loop, re_event);
 
     debug("%s: %s\n", __FUNCTION__, process->name);
+    g_process_manager.last_front_pid = g_process_manager.front_pid;
     g_process_manager.front_pid = process->pid;
     bar_refresh(&g_bar);
 
@@ -282,24 +377,18 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
-    if (!window_id || window_manager_find_window(&g_window_manager, window_id)) {
-        CFRelease(context);
-        return EVENT_FAILURE;
-    }
+    if (!window_id) return EVENT_FAILURE;
+
+    struct ax_window *existing_window = window_manager_find_window(&g_window_manager, window_id);
+    if (existing_window) return EVENT_FAILURE;
 
     pid_t window_pid = ax_window_pid(context);
-    if (!window_pid) {
-        CFRelease(context);
-        return EVENT_FAILURE;
-    }
+    if (!window_pid) return EVENT_FAILURE;
 
     struct ax_application *application = window_manager_find_application(&g_window_manager, window_pid);
-    if (!application) {
-        CFRelease(context);
-        return EVENT_FAILURE;
-    }
+    if (!application) return EVENT_FAILURE;
 
-    struct ax_window *window = window_create(application, context, window_id);
+    struct ax_window *window = window_create(application, CFRetain(context), window_id);
     window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
     window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.normal_window_opacity);
     window_manager_purify_window(&g_window_manager, window);
@@ -364,7 +453,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
 
     window_manager_remove_window(&g_window_manager, window->id);
     window_unobserve(window);
-    window_destroy(window);
 
     return EVENT_SUCCESS;
 }
@@ -669,7 +757,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     CGPoint point = CGEventGetLocation(event);
     int64_t button = CGEventGetIntegerValueField(event, kCGMouseEventButtonNumber);
     uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
-    CFRelease(event);
 
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
     if (g_mission_control_active) return EVENT_SUCCESS;
@@ -698,7 +785,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     int result = EVENT_SUCCESS;
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
-    CFRelease(event);
 
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
     if (g_mission_control_active) return EVENT_SUCCESS;
@@ -771,7 +857,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
     uint64_t event_time = CGEventGetTimestamp(event);
-    CFRelease(event);
 
     if (g_mission_control_active) return EVENT_SUCCESS;
     if (!g_mouse_state.window)    return EVENT_SUCCESS;
@@ -828,7 +913,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     CGEventRef event = context;
     CGPoint point = CGEventGetLocation(event);
     uint64_t event_time = CGEventGetTimestamp(event);
-    CFRelease(event);
 
     if (g_mission_control_active)    return EVENT_SUCCESS;
     if (g_mouse_state.ffm_window_id) return EVENT_SUCCESS;

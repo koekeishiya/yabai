@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-06-15
+.\"      Date: 2019-06-18
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-06-15" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-06-18" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -473,7 +473,7 @@ Set window frame based on a self\-defined grid.
 .RE
 .SS "Signal"
 .sp
-A signal is simply a way to react to some event that has been processed. It does not transmit any data.
+A signal is a simple way for the user to react to some event that has been processed.
 .SS "General Syntax"
 .sp
 yabai \-m signal \fI<COMMAND>\fP event=\fI<EVENT>\fP action=\fI<ACTION>\fP
@@ -487,127 +487,127 @@ Add a new signal to execute an action after processing an event of the given typ
 .sp
 \fBapplication_launched\fP
 .RS 4
-Triggered when a new application is launched.
+Triggered when a new application is launched. Passes one argument: pid
 .RE
 .sp
 \fBapplication_terminated\fP
 .RS 4
-Triggered when an application is terminated.
+Triggered when an application is terminated. Passes one argument: pid
 .RE
 .sp
 \fBapplication_front_switched\fP
 .RS 4
-Triggered when the front\-most application changes.
+Triggered when the front\-most application changes. Passes two arguments: front_pid, last_front_pid
 .RE
 .sp
 \fBapplication_activated\fP
 .RS 4
-Triggered when an application is activated.
+Triggered when an application is activated. Passes one argument: pid
 .RE
 .sp
 \fBapplication_deactivated\fP
 .RS 4
-Triggered when an application is deactivated.
+Triggered when an application is deactivated. Passes one argument: pid
 .RE
 .sp
 \fBapplication_visible\fP
 .RS 4
-Triggered when an application is unhidden.
+Triggered when an application is unhidden. Passes one argument: pid
 .RE
 .sp
 \fBapplication_hidden\fP
 .RS 4
-Triggered when an application is hidden.
+Triggered when an application is hidden. Passes one argument: pid
 .RE
 .sp
 \fBwindow_created\fP
 .RS 4
-Triggered when a window is created.
+Triggered when a window is created. Passes two arguments: pid, wid
 .RE
 .sp
 \fBwindow_destroyed\fP
 .RS 4
-Triggered when a window is destroyed.
+Triggered when a window is destroyed. Passes two arguments: pid, wid
 .RE
 .sp
 \fBwindow_focused\fP
 .RS 4
-Triggered when a window becomes the key\-window for its application.
+Triggered when a window becomes the key\-window for its application. Passes two arguments: pid, wid
 .RE
 .sp
 \fBwindow_moved\fP
 .RS 4
-Triggered when a window changes position.
+Triggered when a window changes position. Passes two arguments: pid, wid
 .RE
 .sp
 \fBwindow_resized\fP
 .RS 4
-Triggered when a window changes dimensions.
+Triggered when a window changes dimensions. Passes two arguments: pid, wid
 .RE
 .sp
 \fBwindow_minimized\fP
 .RS 4
-Triggered when a window has been minimized.
+Triggered when a window has been minimized. Passes two arguments: pid, wid
 .RE
 .sp
 \fBwindow_deminimized\fP
 .RS 4
-Triggered when a window has been deminimized.
+Triggered when a window has been deminimized. Passes two arguments: pid, wid
 .RE
 .sp
 \fBwindow_title_changed\fP
 .RS 4
-Triggered when a window changes its title.
+Triggered when a window changes its title. Passes two arguments: pid, wid
 .RE
 .sp
 \fBspace_changed\fP
 .RS 4
-Triggered when the active space has changed.
+Triggered when the active space has changed. Passes two arguments: space_id, last_space_id
 .RE
 .sp
 \fBdisplay_added\fP
 .RS 4
-Triggered when a new display has been added.
+Triggered when a new display has been added. Passes one argument: display_id
 .RE
 .sp
 \fBdisplay_removed\fP
 .RS 4
-Triggered when a display has been removed.
+Triggered when a display has been removed. Passes one argument: display_id
 .RE
 .sp
 \fBdisplay_moved\fP
 .RS 4
-Triggered when a change has been made to display arrangement.
+Triggered when a change has been made to display arrangement. Passes one argument: display_id
 .RE
 .sp
 \fBdisplay_resized\fP
 .RS 4
-Triggered when a display has changed resolution.
+Triggered when a display has changed resolution. Passes one argument: display_id
 .RE
 .sp
 \fBdisplay_changed\fP
 .RS 4
-Triggered when the active display has changed.
+Triggered when the active display has changed. Passes two arguments: display_id, last_display_id
 .RE
 .sp
 \fBmouse_down\fP
 .RS 4
-Triggered when a mouse button has been pressed.
+Triggered when a mouse button has been pressed. Passes two arguments: button, coordinates
 .RE
 .sp
 \fBmouse_up\fP
 .RS 4
-Triggered when a mouse button has been released.
+Triggered when a mouse button has been released. Passes two arguments: button, coordinates
 .RE
 .sp
 \fBmouse_dragged\fP
 .RS 4
-Triggered when the mouse is moved with one of its buttons pressed.
+Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: button, coordinates
 .RE
 .sp
 \fBmouse_moved\fP
 .RS 4
-Triggered when the mouse is moved.
+Triggered when the mouse is moved. Passes two arguments: button, coordinates
 .RE
 .sp
 \fBmission_control_enter\fP

@@ -120,6 +120,7 @@ bool process_manager_begin(struct process_manager *pm)
     ProcessSerialNumber front_psn;
     _SLPSGetFrontProcess(&front_psn);
     GetProcessPID(&front_psn, &g_process_manager.front_pid);
+    g_process_manager.last_front_pid = g_process_manager.front_pid;
     return InstallEventHandler(pm->target, pm->handler, 3, pm->type, pm, &pm->ref) == noErr;
 }
 #pragma clang diagnostic pop

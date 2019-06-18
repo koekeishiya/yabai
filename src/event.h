@@ -201,7 +201,8 @@ struct event
         e->result  = 0;\
     } while (0)
 
-void event_signal(enum event_type type);
+void event_signal(void *context, enum event_type type);
+void event_destroy(struct event *event);
 enum event_type event_type_from_string(const char *str);
 
 #endif

@@ -74,12 +74,13 @@ static inline char *string_copy(char *s)
     return result;
 }
 
-static void fork_exec(char *command)
+static void fork_exec(char *command, char *arg1, char *arg2)
 {
     int pid = fork();
     if (pid != 0) return;
 
-    char *exec[] = { "/usr/bin/env", "sh", "-c", command, NULL};
+    char *exec[] = { "/usr/bin/env", "sh", command, arg1, arg2, NULL};
+    printf("execcing command '%s' with arg1: '%s' and arg2: '%s'\n", command, arg1, arg2);
     exit(execvp(exec[0], exec));
 }
 
