@@ -842,8 +842,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
                 window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dw, dh);
             }
         }
-
-        result = EVENT_MOUSE_IGNORE;
     }
 
     g_mouse_state.current_action = MOUSE_MODE_NONE;
