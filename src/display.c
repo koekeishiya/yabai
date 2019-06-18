@@ -23,9 +23,26 @@ static DISPLAY_EVENT_HANDLER(display_handler)
     if (event) event_loop_post(&g_event_loop, event);
 }
 
-CFStringRef display_uuid(uint32_t display_id)
+void display_serialize(FILE *rsp, uint32_t did)
 {
-    CFUUIDRef uuid_ref = CGDisplayCreateUUIDFromDisplayID(display_id);
+    int count = display_space_count(did);
+    CGRect frame = display_bounds(did);
+
+    fprintf(rsp,
+            "{\n"
+            "\t\"id\":%d,\n"
+            "\t\"index\":%d,\n"
+            "\t\"spaces\":%d,\n"
+            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}\n"
+            "}",
+            did, display_arrangement(did), count,
+            frame.origin.x, frame.origin.y,
+            frame.size.width, frame.size.height);
+}
+
+CFStringRef display_uuid(uint32_t did)
+{
+    CFUUIDRef uuid_ref = CGDisplayCreateUUIDFromDisplayID(did);
     if (!uuid_ref) return NULL;
 
     CFStringRef uuid_str = CFUUIDCreateString(NULL, uuid_ref);
@@ -34,19 +51,19 @@ CFStringRef display_uuid(uint32_t display_id)
     return uuid_str;
 }
 
-CGRect display_bounds(uint32_t display_id)
+CGRect display_bounds(uint32_t did)
 {
-    return CGDisplayBounds(display_id);
+    return CGDisplayBounds(did);
 }
 
-CGRect display_bounds_constrained(uint32_t display_id)
+CGRect display_bounds_constrained(uint32_t did)
 {
-    CGRect frame = display_bounds(display_id);
-    CGRect menu  = display_manager_menu_bar_rect();
-    CGRect dock  = display_manager_dock_rect();
-    uint32_t did = display_manager_dock_display_id();
+    CGRect frame  = display_bounds(did);
+    CGRect menu   = display_manager_menu_bar_rect();
+    CGRect dock   = display_manager_dock_rect();
+    uint32_t ddid = display_manager_dock_display_id();
 
-    if (g_bar.enabled && display_id == display_manager_main_display_id()) {
+    if (g_bar.enabled && did == display_manager_main_display_id()) {
         frame.origin.y    += g_bar.frame.size.height;
         frame.size.height -= g_bar.frame.size.height;
     }
@@ -56,7 +73,7 @@ CGRect display_bounds_constrained(uint32_t display_id)
         frame.size.height -= menu.size.height;
     }
 
-    if (did == display_id) {
+    if (ddid == did) {
         switch (display_manager_dock_orientation()) {
         case DOCK_ORIENTATION_LEFT: {
             frame.origin.x   += dock.size.width;
@@ -74,9 +91,9 @@ CGRect display_bounds_constrained(uint32_t display_id)
     return frame;
 }
 
-uint64_t display_space_id(uint32_t display_id)
+uint64_t display_space_id(uint32_t did)
 {
-    CFStringRef uuid = display_uuid(display_id);
+    CFStringRef uuid = display_uuid(did);
     if (!uuid) return 0;
 
     uint64_t sid = SLSManagedDisplayGetCurrentSpace(g_connection, uuid);
@@ -84,9 +101,9 @@ uint64_t display_space_id(uint32_t display_id)
     return sid;
 }
 
-int display_space_count(uint32_t display_id)
+int display_space_count(uint32_t did)
 {
-    CFStringRef uuid = display_uuid(display_id);
+    CFStringRef uuid = display_uuid(did);
     if (!uuid) return 0;
 
     CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
@@ -109,9 +126,9 @@ int display_space_count(uint32_t display_id)
     return space_count;
 }
 
-uint64_t *display_space_list(uint32_t display_id, int *count)
+uint64_t *display_space_list(uint32_t did, int *count)
 {
-    CFStringRef uuid = display_uuid(display_id);
+    CFStringRef uuid = display_uuid(did);
     if (!uuid) return NULL;
 
     CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
@@ -144,9 +161,9 @@ uint64_t *display_space_list(uint32_t display_id, int *count)
     return space_list;
 }
 
-int display_arrangement(uint32_t display_id)
+int display_arrangement(uint32_t did)
 {
-    CFStringRef uuid = display_uuid(display_id);
+    CFStringRef uuid = display_uuid(did);
     if (!uuid) return 0;
 
     CFArrayRef displays = SLSCopyManagedDisplays(g_connection);

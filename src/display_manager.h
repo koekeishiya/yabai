@@ -19,7 +19,6 @@ struct display_manager
     uint32_t last_display_id;
 };
 
-void display_manager_query_display(FILE *rsp, uint32_t did);
 bool display_manager_query_displays(FILE *rsp);
 CFStringRef display_manager_main_display_uuid(void);
 uint32_t display_manager_main_display_id(void);

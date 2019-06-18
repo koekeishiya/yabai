@@ -441,11 +441,13 @@ void view_serialize(FILE *rsp, struct view *view)
 
     fprintf(rsp,
             "{\n"
+            "\t\"id\":%lld,\n"
             "\t\"index\":%d,\n"
             "\t\"display\":%d,\n"
             "\t\"windows\":%d,\n"
             "\t\"type\":\"%s\"\n"
             "}",
+            view->sid,
             space_manager_mission_control_index(view->sid),
             display_arrangement(space_display_id(view->sid)),
             windows,

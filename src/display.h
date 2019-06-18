@@ -8,6 +8,7 @@ extern CFUUIDRef CGDisplayCreateUUIDFromDisplayID(uint32_t display_id);
 extern CFArrayRef SLSCopyManagedDisplays(int cid);
 extern uint64_t SLSManagedDisplayGetCurrentSpace(int cid, CFStringRef uuid);
 
+void display_serialize(FILE *rsp, uint32_t did);
 CFStringRef display_uuid(uint32_t display_id);
 CGRect display_bounds(uint32_t display_id);
 CGRect display_bounds_constrained(uint32_t display_id);

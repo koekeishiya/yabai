@@ -3,22 +3,6 @@
 extern struct window_manager g_window_manager;
 extern int g_connection;
 
-void display_manager_query_display(FILE *rsp, uint32_t did)
-{
-    int count = display_space_count(did);
-    CGRect frame = display_bounds(did);
-
-    fprintf(rsp,
-            "{\n"
-            "\t\"index\":%d,\n"
-            "\t\"spaces\":%d,\n"
-            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}\n"
-            "}",
-            display_arrangement(did), count,
-            frame.origin.x, frame.origin.y,
-            frame.size.width, frame.size.height);
-}
-
 bool display_manager_query_displays(FILE *rsp)
 {
     uint32_t count = 0;
@@ -27,7 +11,7 @@ bool display_manager_query_displays(FILE *rsp)
 
     fprintf(rsp, "[");
     for (int i = 0; i < count; ++i) {
-        display_manager_query_display(rsp, display_list[i]);
+        display_serialize(rsp, display_list[i]);
         fprintf(rsp, "%c", i < count - 1 ? ',' : ']');
     }
     fprintf(rsp, "\n");

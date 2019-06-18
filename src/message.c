@@ -1354,13 +1354,13 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                 int arrangement_index = token_to_int(value);
                 uint32_t did = display_manager_arrangement_display_id(arrangement_index);
                 if (did) {
-                    display_manager_query_display(rsp, did);
+                    display_serialize(rsp, did);
                     fprintf(rsp, "\n");
                 } else {
                     daemon_fail(rsp, "could not locate display with arrangement index '%d'.\n", arrangement_index);
                 }
             } else {
-                display_manager_query_display(rsp, display_manager_active_display_id());
+                display_serialize(rsp, display_manager_active_display_id());
                 fprintf(rsp, "\n");
             }
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
@@ -1369,13 +1369,13 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                 int mci = token_to_int(value);
                 uint64_t sid = space_manager_mission_control_space(mci);
                 if (sid) {
-                    display_manager_query_display(rsp, space_display_id(sid));
+                    display_serialize(rsp, space_display_id(sid));
                     fprintf(rsp, "\n");
                 } else {
                     daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
                 }
             } else {
-                display_manager_query_display(rsp, space_display_id(space_manager_active_space()));
+                display_serialize(rsp, space_display_id(space_manager_active_space()));
                 fprintf(rsp, "\n");
             }
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
@@ -1383,7 +1383,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
             if (token_is_valid(value)) {
                 struct ax_window *window = window_manager_find_window(&g_window_manager, token_to_int(value));
                 if (window) {
-                    display_manager_query_display(rsp, window_display_id(window));
+                    display_serialize(rsp, window_display_id(window));
                     fprintf(rsp, "\n");
                 } else {
                     daemon_fail(rsp, "could not find window to retrieve display details\n");
@@ -1391,7 +1391,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
             } else {
                 struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
-                    display_manager_query_display(rsp, window_display_id(window));
+                    display_serialize(rsp, window_display_id(window));
                     fprintf(rsp, "\n");
                 } else {
                     daemon_fail(rsp, "could not find window to retrieve display details\n");
