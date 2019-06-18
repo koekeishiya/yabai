@@ -3,13 +3,18 @@
 :man manual:   Yabai Manual
 
 ifdef::env-github[]
-:toc:
+:toc: 
+:toc-title:
 :toc-placement!:
-toc::[]
+:numbered:
 endif::[]
 
 yabai(1)
 ========
+
+ifdef::env-github[]
+toc::[]
+endif::[]
 
 Name
 ----
