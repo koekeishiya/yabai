@@ -324,7 +324,7 @@ Rule
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m rule '<COMMAND>' ['<ARGUMENT>']
+yabai -m rule '<COMMAND>'
 
 COMMAND
 ^^^^^^^
