@@ -151,7 +151,8 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
 #define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
-#define ARGUMENT_WINDOW_TOGGLE_FULLSC "fullscreen"
+#define ARGUMENT_WINDOW_TOGGLE_PARENT "zoom-parent"
+#define ARGUMENT_WINDOW_TOGGLE_FULLSC "zoom-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_BORDER "border"
 #define ARGUMENT_WINDOW_SPACE_PREV    "prev"
@@ -1217,6 +1218,13 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 space_manager_toggle_window_split(&g_space_manager, window);
+            } else {
+                daemon_fail(rsp, "could not locate the focused window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {
+            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            if (window) {
+                window_manager_toggle_window_parent(&g_space_manager, &g_window_manager, window);
             } else {
                 daemon_fail(rsp, "could not locate the focused window.\n");
             }

@@ -1107,30 +1107,41 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
     AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
 }
 
+void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view || view->type != VIEW_BSP) return;
+
+    struct window_node *node = view_find_window_node(view->root, window->id);
+    if (node->zoom) {
+        float offset = window_node_border_window_offset(window);
+        window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
+        window_manager_resize_window(window, node->area.w - 2*offset, node->area.h - 2*offset);
+        node->zoom = NULL;
+    } else if (node->parent) {
+        float offset = window_node_border_window_offset(window);
+        window_manager_move_window(window, node->parent->area.x + offset, node->parent->area.y + offset);
+        window_manager_resize_window(window, node->parent->area.w - 2*offset, node->parent->area.h - 2*offset);
+        node->zoom = node->parent;
+    }
+}
+
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view || view->type != VIEW_BSP) return;
 
-    if (view->root->zoom && view->root->zoom->window_id != window->id) {
-        struct ax_window *zoomed_window = window_manager_find_window(wm, view->root->zoom->window_id);
-        if (zoomed_window) {
-            float offset = window_node_border_window_offset(zoomed_window);
-            window_manager_move_window(zoomed_window, view->root->zoom->area.x + offset, view->root->zoom->area.y + offset);
-            window_manager_resize_window(zoomed_window, view->root->zoom->area.w - 2*offset, view->root->zoom->area.h - 2*offset);
-        }
-    }
-
-    if (view->root->zoom && view->root->zoom->window_id == window->id) {
+    struct window_node *node = view_find_window_node(view->root, window->id);
+    if (node->zoom) {
         float offset = window_node_border_window_offset(window);
-        window_manager_move_window(window, view->root->zoom->area.x + offset, view->root->zoom->area.y + offset);
-        window_manager_resize_window(window, view->root->zoom->area.w - 2*offset, view->root->zoom->area.h - 2*offset);
-        view->root->zoom = NULL;
+        window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
+        window_manager_resize_window(window, node->area.w - 2*offset, node->area.h - 2*offset);
+        node->zoom = NULL;
     } else {
         float offset = window_node_border_window_offset(window);
         window_manager_move_window(window, view->root->area.x + offset, view->root->area.y + offset);
         window_manager_resize_window(window, view->root->area.w - 2*offset, view->root->area.h - 2*offset);
-        view->root->zoom = view_find_window_node(view->root, window->id);
+        node->zoom = view->root;
     }
 }
 

@@ -127,6 +127,7 @@ void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool 
 void window_manager_make_sticky(uint32_t wid, bool sticky);
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
+void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
 void window_manager_toggle_window_border(struct window_manager *wm, struct ax_window *window);
