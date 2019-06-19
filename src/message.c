@@ -587,7 +587,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_CONFIG_BAR_FONT_SIZE)) {
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
-            fprintf(rsp, "%s\n", g_bar.n_font_name);
+            fprintf(rsp, "%.2f\n", g_bar.n_font_size);
         } else {
             g_bar.n_font_size = token_to_float(value);
         }
@@ -601,7 +601,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_CONFIG_BAR_ICON_FONT_SIZE)) {
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
-            fprintf(rsp, "%s\n", g_bar.i_font_name);
+            fprintf(rsp, "%.2f\n", g_bar.i_font_size);
         } else {
             g_bar.i_font_size = token_to_float(value);
         }
