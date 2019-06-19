@@ -44,7 +44,9 @@ static const char *bool_str[] = { "off", "on" };
 #define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
 #define COMMAND_CONFIG_BAR                   "status_bar"
 #define COMMAND_CONFIG_BAR_FONT              "status_bar_font_family"
+#define COMMAND_CONFIG_BAR_FONT_SIZE         "status_bar_font_size"
 #define COMMAND_CONFIG_BAR_ICON_FONT         "status_bar_icon_font_family"
+#define COMMAND_CONFIG_BAR_ICON_FONT_SIZE    "status_bar_icon_font_size"
 #define COMMAND_CONFIG_BAR_BACKGROUND        "status_bar_background_color"
 #define COMMAND_CONFIG_BAR_FOREGROUND        "status_bar_foreground_color"
 #define COMMAND_CONFIG_BAR_SPACE_STRIP       "status_bar_space_icon_strip"
@@ -582,12 +584,26 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             g_bar.n_font_name = string_copy(message);
         }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_FONT_SIZE)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", g_bar.n_font_name);
+        } else {
+            g_bar.n_font_size = token_to_float(value);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_ICON_FONT)) {
         int length = strlen(message);
         if (length <= 0) {
             fprintf(rsp, "%s\n", g_bar.i_font_name);
         } else {
             g_bar.i_font_name = string_copy(message);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_ICON_FONT_SIZE)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", g_bar.i_font_name);
+        } else {
+            g_bar.i_font_size = token_to_float(value);
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_BACKGROUND)) {
         struct token value = get_token(&message);

@@ -256,14 +256,14 @@ void bar_create(struct bar *bar)
 
     if (!bar->n_font_name) bar->n_font_name = string_copy("Helvetica Neue");
     if (!bar->i_font_name) bar->i_font_name = string_copy("FontAwesome");
+    if (!bar->n_font_size) bar->n_font_size = 13.0f;
+    if (!bar->i_font_size) bar->i_font_size = 13.0f;
 
     if (!bar->background_color.is_valid)     bar->background_color     = rgba_color_from_hex(0xff202020);
     if (!bar->background_color_dim.is_valid) bar->background_color_dim = rgba_color_dim(bar->background_color);
     if (!bar->foreground_color.is_valid)     bar->foreground_color     = rgba_color_from_hex(0xffa8a8a8);
 
     bar->refresh_frequency = 5;
-    bar->n_font_size = 10.0f;
-    bar->i_font_size = 10.0f;
 
     bar->n_font = bar_create_font(bar->n_font_name, bar->n_font_size);
     bar->i_font = bar_create_font(bar->i_font_name, bar->i_font_size);
