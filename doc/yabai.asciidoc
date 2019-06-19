@@ -100,12 +100,12 @@ Colors are in the form '#AARRGGBB'.
     Specify name of font family to use for drawing text. Use 'Font Book.app' to identify the correct name.
 
 'status_bar_font_size'::
-    Specify size of font family to use for drawing text.
+    Specify size of font to use for drawing text.
 
 'status_bar_icon_font_family'::
     Specify name of font family to use for drawing icon symbols, typically FontAwesome. Use 'Font Book.app' to identify the correct name.
 'status_bar_icon_font_size'::
-    Specify name of font family to use for drawing icon symbols.
+    Specify size of font to use for drawing icon symbols.
 
 'status_bar_background_color'::
     Color to use for drawing status bar background.
