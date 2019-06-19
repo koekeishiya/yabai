@@ -256,8 +256,8 @@ void bar_create(struct bar *bar)
 
     if (!bar->n_font_name) bar->n_font_name = string_copy("Helvetica Neue");
     if (!bar->i_font_name) bar->i_font_name = string_copy("FontAwesome");
-    if (!bar->n_font_size) bar->n_font_size = 13.0f;
-    if (!bar->i_font_size) bar->i_font_size = 13.0f;
+    if (!bar->n_font_size) bar->n_font_size = 10.0f;
+    if (!bar->i_font_size) bar->i_font_size = 10.0f;
 
     if (!bar->background_color.is_valid)     bar->background_color     = rgba_color_from_hex(0xff202020);
     if (!bar->background_color_dim.is_valid) bar->background_color_dim = rgba_color_dim(bar->background_color);
