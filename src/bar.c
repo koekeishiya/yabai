@@ -54,15 +54,27 @@ static int bar_find_battery_life(bool *charging)
     return percent;
 }
 
-static CTFontRef bar_create_font(char *cstring, float size)
+static CTFontRef bar_create_font(char *cstring)
 {
-    const void *keys[] = { kCTFontFamilyNameAttribute, kCTFontSizeAttribute };
-    const void *values[] = { CFStringCreateWithCString(NULL, cstring, kCFStringEncodingUTF8), CFNumberCreate(NULL, kCFNumberFloat32Type, &size) };
+    float size = 10.0f;
+    char font_properties[2][255] = { {}, {} };
+    sscanf(cstring, "%255[^:]:%255[^:]:%f", font_properties[0], font_properties[1], &size);
+    CFStringRef font_family_name = CFStringCreateWithCString(NULL, font_properties[0], kCFStringEncodingUTF8);
+    CFStringRef font_style_name = CFStringCreateWithCString(NULL, font_properties[1], kCFStringEncodingUTF8);
+    CFNumberRef font_size = CFNumberCreate(NULL, kCFNumberFloat32Type, &size);
+
+    const void *keys[] = { kCTFontFamilyNameAttribute, kCTFontStyleNameAttribute, kCTFontSizeAttribute };
+    const void *values[] = { font_family_name, font_style_name, font_size };
     CFDictionaryRef attributes = CFDictionaryCreate(NULL, keys, values, array_count(keys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(attributes);
     CTFontRef font = CTFontCreateWithFontDescriptor(descriptor, 0.0, NULL);
-    CFRelease(attributes);
+
     CFRelease(descriptor);
+    CFRelease(attributes);
+    CFRelease(font_size);
+    CFRelease(font_style_name);
+    CFRelease(font_family_name);
+
     return font;
 }
 
@@ -177,7 +189,7 @@ void bar_refresh(struct bar *bar)
     struct ax_window *window = window_manager_focused_window(&g_window_manager);
     char *title = window ? window_title(window) : NULL;
     if (title) {
-        struct bar_line title_line = bar_prepare_line(bar->n_font, title, bar->foreground_color);
+        struct bar_line title_line = bar_prepare_line(bar->t_font, title, bar->foreground_color);
         CGPoint pos = bar_align_line(bar, title_line, ALIGN_CENTER, ALIGN_CENTER);
         bar_draw_line(bar, title_line, pos.x, pos.y);
         bar_destroy_line(title_line);
@@ -192,7 +204,7 @@ void bar_refresh(struct bar *bar)
     if (timeinfo) {
         char time[255];
         snprintf(time, sizeof(time), "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
-        struct bar_line time_line = bar_prepare_line(bar->n_font, time, bar->foreground_color);
+        struct bar_line time_line = bar_prepare_line(bar->t_font, time, bar->foreground_color);
         CGPoint t_pos = bar_align_line(bar, time_line, ALIGN_RIGHT, ALIGN_CENTER);
         bar_draw_line(bar, time_line, t_pos.x, t_pos.y);
 
@@ -212,7 +224,7 @@ void bar_refresh(struct bar *bar)
     bool charging;
     char batt[255];
     snprintf(batt, sizeof(batt), "%' '3d%%", bar_find_battery_life(&charging));
-    struct bar_line batt_line = bar_prepare_line(bar->n_font, batt, bar->foreground_color);
+    struct bar_line batt_line = bar_prepare_line(bar->t_font, batt, bar->foreground_color);
     CGPoint p_pos = bar_align_line(bar, batt_line, ALIGN_RIGHT, ALIGN_CENTER);
     p_pos.x = p_pos.x - time_line_width - bar->clock_underline.bounds.size.width - 20;
     bar_draw_line(bar, batt_line, p_pos.x, p_pos.y);
@@ -254,19 +266,16 @@ void bar_create(struct bar *bar)
 {
     if (!bar->enabled) return;
 
-    if (!bar->n_font_name) bar->n_font_name = string_copy("Helvetica Neue");
-    if (!bar->i_font_name) bar->i_font_name = string_copy("FontAwesome");
+    if (!bar->t_font_prop) bar->t_font_prop = string_copy("Helvetica Neue:Regular:10.0");
+    if (!bar->i_font_prop) bar->i_font_prop = string_copy("FontAwesome:Regular:10.0");
 
     if (!bar->background_color.is_valid)     bar->background_color     = rgba_color_from_hex(0xff202020);
     if (!bar->background_color_dim.is_valid) bar->background_color_dim = rgba_color_dim(bar->background_color);
     if (!bar->foreground_color.is_valid)     bar->foreground_color     = rgba_color_from_hex(0xffa8a8a8);
 
     bar->refresh_frequency = 5;
-    bar->n_font_size = 10.0f;
-    bar->i_font_size = 10.0f;
-
-    bar->n_font = bar_create_font(bar->n_font_name, bar->n_font_size);
-    bar->i_font = bar_create_font(bar->i_font_name, bar->i_font_size);
+    bar->t_font = bar_create_font(bar->t_font_prop);
+    bar->i_font = bar_create_font(bar->i_font_prop);
 
     if (buf_len(bar->_power_icon_strip) == 2) {
         bar->battr_icon = bar_prepare_line(bar->i_font, bar->_power_icon_strip[0], rgba_color_from_hex(0xffd75f5f));
@@ -288,9 +297,9 @@ void bar_create(struct bar *bar)
         bar->space_icon = bar_prepare_line(bar->i_font, "*", bar->foreground_color);
     }
 
-    bar->space_underline = bar_prepare_line(bar->n_font, "______", rgba_color_from_hex(0xffd4d232));
-    bar->power_underline = bar_prepare_line(bar->n_font, "__________", rgba_color_from_hex(0xffd75f5f));
-    bar->clock_underline = bar_prepare_line(bar->n_font, "__________", rgba_color_from_hex(0xff458588));
+    bar->space_underline = bar_prepare_line(bar->t_font, "______", rgba_color_from_hex(0xffd4d232));
+    bar->power_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xffd75f5f));
+    bar->clock_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xff458588));
 
     for (int i = 0; i < buf_len(bar->_space_icon_strip); ++i) {
         struct bar_line space_line = bar_prepare_line(bar->i_font, bar->_space_icon_strip[i], bar->foreground_color);

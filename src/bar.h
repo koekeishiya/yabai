@@ -29,12 +29,10 @@ struct bar
     uint32_t id;
     CGContextRef context;
     CGRect frame;
-    char *n_font_name;
-    char *i_font_name;
-    CTFontRef n_font;
+    char *t_font_prop;
+    char *i_font_prop;
+    CTFontRef t_font;
     CTFontRef i_font;
-    float n_font_size;
-    float i_font_size;
     char **_space_icon_strip;
     char **_power_icon_strip;
     char *_clock_icon;

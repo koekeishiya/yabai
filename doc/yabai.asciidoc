@@ -96,11 +96,11 @@ Colors are in the form '#AARRGGBB'.
 'status_bar'::
     Enable custom status bar.
 
-'status_bar_font_family'::
-    Specify name of font family to use for drawing text. Use 'Font Book.app' to identify the correct name.
+'status_bar_text_font'::
+    Specify name, style and size of font to use for drawing text. Format: '<font_family>:<font_style>:<font_size>'. Use 'Font Book.app' to identify the correct name.
 
-'status_bar_icon_font_family'::
-    Specify name of font family to use for drawing icon symbols, typically FontAwesome. Use 'Font Book.app' to identify the correct name.
+'status_bar_icon_font'::
+    Specify name, style and size of font to use for drawing icon symbols. Format: '<font_family>:<font_style>:<font_size>'. Use 'Font Book.app' to identify the correct name.
 
 'status_bar_background_color'::
     Color to use for drawing status bar background.
