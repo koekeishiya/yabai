@@ -193,7 +193,7 @@ loc_5a14:
 
 uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
     if (os_version.minorVersion == 15) {
-        return 0x8563;
+        return 0x8000;
     } else if (os_version.minorVersion == 14) {
         if (os_version.patchVersion >= 4) {
             return 0x8f00;
@@ -264,7 +264,7 @@ uint64_t get_move_space_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
     if (os_version.minorVersion == 15) {
-        return 0x534C4;
+        return 0x53000;
     } else if (os_version.minorVersion == 14) {
         if (os_version.patchVersion >= 4) {
             return 0x57500;
@@ -279,7 +279,7 @@ uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
 
 const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.minorVersion == 15) {
-        return "21 C3 48 00 49 8B 3F 48 8B 35 2F 51 46 00 44 89 EA 41 FF D4 48 89 C7 E8 59 A4 37 00 48 89 85 40 FE FF FF 48 8B 3D 63 A0 46 00 E8 BC A3 37 00 4C 8B 35 97 51 46 00 48 89 C7 4C 89 F6 31 D2 41 FF D4 48 89 85 78 FE FF FF 49 8B 3F 48 8B 35 6B 96 46 00";
+        return "?? ?? ?? 00 49 8B 3F 48 8B 35 ?? ?? 46 00 44 89 EA 41 FF D4 48 89 C7 E8 ?? ?? 37 00 48 89 85 40 FE FF FF 48 8B 3D ?? ?? 46 00 E8 ?? ?? 37 00 4C 8B 35 ?? ?? 46 00 48 89 C7 4C 89 F6 31 D2 41 FF D4 48 89 85 78 FE FF FF 49 8B 3F 48 8B 35 ?? ?? 46 00";
     } else if (os_version.minorVersion == 14) {
         return "?? ?? ?? 00 49 8B 3C 24 48 8B 35 ?? ?? ?? 00 44 89 BD 94 FE FF FF 44 89 FA 41 FF D5 48 89 C7 E8 ?? ?? ?? 00 48 ?? 85 40 FE FF FF 48 8B 3D ?? ?? ?? 00 48 89 DE 41 FF D5 48 8B 35 ?? ?? ?? 00 31 D2 48 89 C7 41 FF D5 48 89 85 70 FE FF FF 49 8B 3C 24";
     } else if (os_version.minorVersion == 13) {
@@ -305,7 +305,7 @@ const char *get_add_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_remove_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.minorVersion == 15) {
-            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC B8 00 00 00 49 89 CF 48 89 55 80 49 89 F5 48 89 7D B8 48 BB F8 FF FF FF FF FF FF 00 E8 CF 72 F0 FF 49 89 C4 48 B8 01 00 00 00 00 00 00 40 49 85 C4 0F 85 AA 05 00 00 4C 21 E3 4C 8B 73 10 49 83 FE 02 0F 8C B6 02 00 00 4C 89 7D 90 4C 89 AD 50 FF FF FF 4C 89 65 88 48 8D 05 32 04 14 00 48 8B";
+            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC B8 00 00 00 49 89 CF 48 89 55 80 49 89 F5 48 89 7D B8 48 BB F8 FF FF FF FF FF FF 00 E8 ?? 72 F0 FF 49 89 C4 48 B8 01 00 00 00 00 00 00 40 49 85 C4 0F 85 AA 05 00 00 4C 21 E3 4C 8B 73 10 49 83 FE 02 0F 8C B6 02 00 00 4C 89 7D 90 4C 89 AD 50 FF FF FF 4C 89 65 88 48 8D 05 ?? 04 14 00 48 8B";
     } else if (os_version.minorVersion == 14) {
         if (os_version.patchVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC 18 01 00 00 48 89 4D B8 48 89 55 90 49 89 F7 48 89 7D B0 48 BB F8 FF FF FF FF FF FF 00 49 89 F5 E8 FB 8B EF FF 49 89 C4 48 B8 01 00 00 00 00 00 00 40 49 85 C4 0F 85 6F 06 00 00 4C 21 E3 4C 8B 73 10 49 83 FE 02 0F 8C 08 03 00 00 4C 89 7D 80 4C 89 65 98 48 8D 05 E5 A6 14 00 48 8B 00 48 8B 5D B0 48 8B 0C 03 48 89 8D 70 FF FF FF 4C 8B 64 03 08 4C 89 65 C0 4C 8D 35 83 8E 15 00 48 8D B5 F0 FE FF FF 31 D2 31 C9 4C 89 F7 E8 C2 0E 04 00 4D 8B 3E 4C 8B 35 5E 92 13 00 4C 89 E7 E8 C2 0E 04 00 4C 89 FF 4C 89 F6 48 89 DA E8 F6 0B 04 00 4C 8B 35 E1 FA 14 00";
@@ -320,7 +320,7 @@ const char *get_remove_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_move_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.minorVersion == 15) {
-            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 F4 49 89 FE 48 8D 1D 24 25 15 00 48 8B 03 4C 8B 3C 07 4C 89 FF 48 89 4D 98 48 89 CE E8 56 CA 00 00 48 89 55 D0 48 89 45 C8 48 85 C0 0F 84 97 03 00 00 48 8D 05 52 0C 16 00 80 38 01 75 33 4C 8B 7D D0 4D 89 FD 49 83 C5 28 48 8B 5D C8 48 89 DF E8 72 E5 F1 FF 48 89";
+            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 F4 49 89 FE 48 8D 1D ?? ?? 15 00 48 8B 03 4C 8B 3C 07 4C 89 FF 48 89 4D 98 48 89 CE E8 56 CA 00 00 48 89 55 D0 48 89 45 C8 48 85 C0 0F 84 97 03 00 00 48 8D 05 ?? 0C 16 00 80 38 01 75 33 4C 8B 7D D0 4D 89 FD 49 83 C5 28 48 8B 5D C8 48 89 DF E8 ?? E5 F1 FF 48 89";
     } else if (os_version.minorVersion == 14) {
         if (os_version.patchVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC A8 00 00 00 41 89 D7 48 89 75 D0 48 89 FB 4C 8D 35 03 A2 15 00 49 8B 06 4C 8B 24 07 4C 89 E7 4C 89 6D A8 4C 89 EE E8 65 CC 00 00 48 89 55 C0 48 85 C0 0F 84 89 00 00 00 48 89 5D B8 48 89 45 C8 48 8D 1D 6E 85 16 00 48 8D B5 38 FF FF FF 31 D2 31 C9 48 89 DF E8 C8 09 05 00 80 3B 01 75 1C 4C 8B 7D C8 4C 89 FF 48 8B 75 D0 4C 8B 75 C0 4D 89 F5 E8 7A F5 F0 FF E9 6E 05 00 00 48 8B 5D D0 48 85 DB 74 44 49 8B 06 4C 8B 34 03 48 89 DF E8 FB 06 05 00 4C 89 F7 48 8B 75 A8 E8 31 CD 00 00 49 89 C7 48 89 DF E8 DE 06 05 00 4D 85 FF 75 44 48 8B 7D C0 E8 8A 0A 05 00 48 8B 7D C8 E8 C7 06 05 00";
@@ -337,7 +337,7 @@ const char *get_move_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_set_front_window_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.minorVersion == 15) {
-        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 58 48 8B 05 14 0A 3A 00 48 8B 00 48 89 45 D0 85 F6 0F 84 0A 02 00 00 41 89 F5 49 89 FF 49 89 FE 49 C1 EE 20 48 8D 75 AF C6 06 00 E8 E8 CB 02 00 48 8B 3D 5D 0B 3A 00 BE 01 00 00 00 E8 15 F6 32 00 84 C0 74 59 0F B6 5D AF 4C 8D 45";
+        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 58 48 8B 05 ?? ?? 3A 00 48 8B 00 48 89 45 D0 85 F6 0F 84 0A 02 00 00 41 89 F5 49 89 FF 49 89 FE 49 C1 EE 20 48 8D 75 AF C6 06 00 E8 ?? ?? 02 00 48 8B 3D ?? ?? 3A 00 BE 01 00 00 00 E8 ?? ?? 32 00 84 C0 74 59 0F B6 5D AF 4C 8D 45";
     } else if (os_version.minorVersion == 14) {
         if (os_version.patchVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 58 48 8B 05 ?? C8 3E 00 48 8B 00 48 89 45 D0 85 F6 0F 84 0A 02 00 00 41 89 F5 49 89 FE 49 89 FF 49 C1 EF 20 48 8D 75 AF C6 06 00 E8 ?? 16 03 00 48 8B 3D ?? C9 3E 00 BE 01 00 00 00 E8 ?? 6C 37 00 84 C0 74 59 0F B6 5D AF";
