@@ -896,7 +896,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
 
-        if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= 10) {
+        if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= -10) {
             float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
             if (dt < 25.0f) return EVENT_SUCCESS;
 
