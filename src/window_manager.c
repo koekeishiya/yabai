@@ -1264,9 +1264,11 @@ void window_manager_init(struct window_manager *wm)
     AXUIElementSetMessagingTimeout(wm->system_element, 1.0);
 
     wm->ffm_mode = FFM_DISABLED;
-    wm->purify_mode = PURIFY_ALWAYS;
-    wm->enable_mff = true;
-    wm->enable_window_border = true;
+    wm->purify_mode = PURIFY_DISABLED;
+    wm->enable_mff = false;
+    wm->enable_window_opacity = false;
+    wm->enable_window_topmost = false;
+    wm->enable_window_border = false;
     wm->window_border_width = 4;
     wm->active_window_border_color = 0xff775759;
     wm->normal_window_border_color = 0xff555555;

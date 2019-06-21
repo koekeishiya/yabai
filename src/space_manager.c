@@ -643,7 +643,7 @@ void space_manager_init(struct space_manager *sm)
         sm->window_gap[i]     = -1;
     }
 
-    sm->layout[0] = VIEW_BSP;
+    sm->layout[0] = VIEW_FLOAT;
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;
 
