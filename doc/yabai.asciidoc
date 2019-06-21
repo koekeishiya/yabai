@@ -266,7 +266,7 @@ COMMAND
     Re-insert, splitting the window in the given direction.
 
 *--insert* '<DIR_SEL>'::
-    Select the splitting area of the focused window. If the current selection matches 'DIR_SEL', the action will be undone.
+    Select the splitting area of the selected window. If the current selection matches 'DIR_SEL', the action will be undone.
 
 *--grid* '<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'::
     Set the window frame based on a self-defined grid.
