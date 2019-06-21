@@ -1,21 +1,17 @@
 #include "sa.h"
 
-#define OSAX_DIR                  "/System/Library/ScriptingAdditions/yabai.osax"
-#define CONTENTS_DIR              "/System/Library/ScriptingAdditions/yabai.osax/Contents"
-#define CONTENTS_MACOS_DIR        "/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS"
-#define RESOURCES_DIR             "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources"
-#define BUNDLE_DIR                "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle"
-#define BUNDLE_CONTENTS_DIR       "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents"
-#define BUNDLE_CONTENTS_MACOS_DIR "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS"
-
-#define INFO_PLIST_FILE           "/System/Library/ScriptingAdditions/yabai.osax/Contents/Info.plist"
-#define DEFINITION_FILE           "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/yabai.sdef"
-#define BUNDLE_INFO_PLIST_FILE    "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/Info.plist"
-
-#define BIN_INJECTOR              "/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader"
-#define BIN_CORE                  "/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload"
-
-#define CMD_SA_REMOVE             "rm -rf /System/Library/ScriptingAdditions/yabai.osax 2>/dev/null"
+static char osax_base_dir[MAXLEN];
+static char osax_contents_dir[MAXLEN];
+static char osax_contents_macos_dir[MAXLEN];
+static char osax_contents_res_dir[MAXLEN];
+static char osax_payload_dir[MAXLEN];
+static char osax_payload_contents_dir[MAXLEN];
+static char osax_payload_contents_macos_dir[MAXLEN];
+static char osax_info_plist[MAXLEN];
+static char osax_sdefn_file[MAXLEN];
+static char osax_payload_plist[MAXLEN];
+static char osax_bin_loader[MAXLEN];
+static char osax_bin_payload[MAXLEN];
 
 static char sa_def[] =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -97,15 +93,40 @@ static char sa_bundle_plist[] =
     "</dict>\n"
     "</plist>";
 
+static void scripting_addition_set_path(void)
+{
+    NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    if (os_version.minorVersion >= 14) {
+        snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/Library/ScriptingAdditions/yabai.osax");
+    } else {
+        snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/System/Library/ScriptingAdditions/yabai.osax");
+    }
+
+    snprintf(osax_contents_dir, sizeof(osax_contents_dir), "%s/%s", osax_base_dir, "Contents");
+    snprintf(osax_contents_macos_dir, sizeof(osax_contents_macos_dir), "%s/%s", osax_contents_dir, "MacOS");
+    snprintf(osax_contents_res_dir, sizeof(osax_contents_res_dir), "%s/%s", osax_contents_dir, "Resources");
+
+    snprintf(osax_payload_dir, sizeof(osax_payload_dir), "%s/%s", osax_contents_res_dir, "payload.bundle");
+    snprintf(osax_payload_contents_dir, sizeof(osax_payload_contents_dir), "%s/%s", osax_payload_dir, "Contents");
+    snprintf(osax_payload_contents_macos_dir, sizeof(osax_payload_contents_macos_dir), "%s/%s", osax_payload_contents_dir, "MacOS");
+
+    snprintf(osax_info_plist, sizeof(osax_info_plist), "%s/%s", osax_contents_dir, "Info.plist");
+    snprintf(osax_sdefn_file, sizeof(osax_sdefn_file), "%s/%s", osax_contents_res_dir, "yabai.sdef");
+
+    snprintf(osax_payload_plist, sizeof(osax_payload_plist), "%s/%s", osax_payload_contents_dir, "Info.plist");
+    snprintf(osax_bin_loader, sizeof(osax_bin_loader), "%s/%s", osax_contents_macos_dir, "loader");
+    snprintf(osax_bin_payload, sizeof(osax_bin_payload), "%s/%s", osax_payload_contents_macos_dir, "payload");
+}
+
 static bool scripting_addition_create_directory(void)
 {
-    if (mkdir(OSAX_DIR, 0755))                  goto err;
-    if (mkdir(CONTENTS_DIR, 0755))              goto err;
-    if (mkdir(CONTENTS_MACOS_DIR, 0755))        goto err;
-    if (mkdir(RESOURCES_DIR, 0755))             goto err;
-    if (mkdir(BUNDLE_DIR, 0755))                goto err;
-    if (mkdir(BUNDLE_CONTENTS_DIR, 0755))       goto err;
-    if (mkdir(BUNDLE_CONTENTS_MACOS_DIR, 0755)) goto err;
+    if (mkdir(osax_base_dir, 0755))                   goto err;
+    if (mkdir(osax_contents_dir, 0755))               goto err;
+    if (mkdir(osax_contents_macos_dir, 0755))         goto err;
+    if (mkdir(osax_contents_res_dir, 0755))           goto err;
+    if (mkdir(osax_payload_dir, 0755))                goto err;
+    if (mkdir(osax_payload_contents_dir, 0755))       goto err;
+    if (mkdir(osax_payload_contents_macos_dir, 0755)) goto err;
     return true;
 err:
     return false;
@@ -125,15 +146,26 @@ static bool scripting_addition_write_file(char *buffer, unsigned int size, char 
 
 static void scripting_addition_prepare_binaries(void)
 {
-    system("chmod +x \"/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader\"");
-    system("chmod +x \"/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload\"");
-    system("codesign -f -s - \"/System/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader\" 2>/dev/null");
-    system("codesign -f -s - \"/System/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload\" 2>/dev/null");
+    char cmd[MAXLEN];
+
+    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_loader);
+    system(cmd);
+
+    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_loader, "2>/dev/null");
+    system(cmd);
+
+    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_payload);
+    system(cmd);
+
+    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_payload, "2>/dev/null");
+    system(cmd);
 }
 
 bool scripting_addition_is_installed(void)
 {
-    DIR *dir = opendir(OSAX_DIR);
+    if (osax_base_dir[0] == 0) scripting_addition_set_path();
+
+    DIR *dir = opendir(osax_base_dir);
     if (!dir) return false;
 
     closedir(dir);
@@ -142,7 +174,10 @@ bool scripting_addition_is_installed(void)
 
 static bool scripting_addition_remove(void)
 {
-    int code = system(CMD_SA_REMOVE);
+    char cmd[MAXLEN];
+    snprintf(cmd, sizeof(cmd), "%s %s %s", "rm -rf", osax_base_dir, "2>/dev/null");
+
+    int code = system(cmd);
     if (code ==  -1) return false;
     if (code == 127) return false;
     return code == 0;
@@ -159,23 +194,23 @@ int scripting_addition_install(void)
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file(sa_plist, strlen(sa_plist), INFO_PLIST_FILE, "w")) {
+    if (!scripting_addition_write_file(sa_plist, strlen(sa_plist), osax_info_plist, "w")) {
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file(sa_def, strlen(sa_def), DEFINITION_FILE, "w")) {
+    if (!scripting_addition_write_file(sa_def, strlen(sa_def), osax_sdefn_file, "w")) {
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file(sa_bundle_plist, strlen(sa_bundle_plist), BUNDLE_INFO_PLIST_FILE, "w")) {
+    if (!scripting_addition_write_file(sa_bundle_plist, strlen(sa_bundle_plist), osax_payload_plist, "w")) {
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file((char *) __src_osax_loader, __src_osax_loader_len, BIN_INJECTOR, "wb")) {
+    if (!scripting_addition_write_file((char *) __src_osax_loader, __src_osax_loader_len, osax_bin_loader, "wb")) {
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file((char *) __src_osax_payload, __src_osax_payload_len, BIN_CORE, "wb")) {
+    if (!scripting_addition_write_file((char *) __src_osax_payload, __src_osax_payload_len, osax_bin_payload, "wb")) {
         goto cleanup;
     }
 
