@@ -621,7 +621,7 @@ struct ax_window *window_manager_find_next_managed_window(struct space_manager *
     return window_manager_find_window(wm, prev->window_id);
 }
 
-struct ax_window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+struct ax_window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
@@ -957,17 +957,20 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
     assert(space_is_visible(dst_sid));
     space_manager_move_window_to_space(dst_sid, window);
 
+    if (window_manager_should_manage_window(window)) {
+        struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
+        window_manager_add_managed_window(wm, window, view);
+    }
+
+    uint64_t cur_sid = space_manager_active_space();
+    if (cur_sid != src_sid) return;
+
     struct ax_window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
     if (next) {
         AXUIElementPerformAction(next->ref, kAXRaiseAction);
         _SLPSSetFrontProcessWithOptions(&next->application->psn, 0, kCPSNoWindows);
     } else {
         _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
-    }
-
-    if (window_manager_should_manage_window(window)) {
-        struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
-        window_manager_add_managed_window(wm, window, view);
     }
 }
 
@@ -983,6 +986,14 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     }
 
     space_manager_move_window_to_space(dst_sid, window);
+
+    if (window_manager_should_manage_window(window)) {
+        struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
+        window_manager_add_managed_window(wm, window, view);
+    }
+
+    uint64_t cur_sid = space_manager_active_space();
+    if (cur_sid != src_sid) return;
 
     struct ax_window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
     if (next) {
