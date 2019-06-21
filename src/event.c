@@ -1018,7 +1018,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
             event_loop_post(&g_event_loop, event);
         });
     } else {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.0f), dispatch_get_main_queue(), ^{
             struct event *event;
             event_create(event, MISSION_CONTROL_EXIT, NULL);
             event_loop_post(&g_event_loop, event);
