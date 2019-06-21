@@ -251,7 +251,7 @@ Window
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m window '<COMMAND>'
+yabai -m window '[<window-id>]' '<COMMAND>'
 
 COMMAND
 ^^^^^^^

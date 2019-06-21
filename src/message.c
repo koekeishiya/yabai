@@ -857,11 +857,23 @@ static uint8_t parse_resize_handle(char *handle)
 
 static void handle_domain_window(FILE *rsp, struct token domain, char *message)
 {
-    struct token command = get_token(&message);
+    struct token command;
+    struct token selector = get_token(&message);
+
+    struct ax_window *window;
+    uint32_t sel_wid = token_to_int(selector);
+
+    if (sel_wid != 0) {
+        window = window_manager_find_window(&g_window_manager, sel_wid);
+        command = get_token(&message);
+    } else {
+        window = window_manager_focused_window(&g_window_manager);;
+        command = selector;
+    }
+
     if (token_equals(command, COMMAND_WINDOW_FOCUS)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_NORTH);
                 if (closest_window) {
@@ -870,10 +882,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a northward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_EAST);
                 if (closest_window) {
@@ -882,10 +893,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a eastward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_SOUTH);
                 if (closest_window) {
@@ -894,10 +904,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a southward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_WEST);
                 if (closest_window) {
@@ -906,10 +915,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a westward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
@@ -918,10 +926,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate the prev managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
@@ -930,19 +937,14 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate the next managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
-            if (window) {
-                struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager, window);
-                if (last_window) {
-                    window_manager_focus_window_with_raise(last_window->id);
-                } else {
-                    daemon_fail(rsp, "could not locate the last focused window.\n");
-                }
+            struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
+            if (last_window) {
+                window_manager_focus_window_with_raise(last_window->id);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the last focused window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -950,7 +952,6 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_SWAP)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_NORTH);
                 if (closest_window) {
@@ -959,10 +960,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a northward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_EAST);
                 if (closest_window) {
@@ -971,10 +971,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a eastward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_SOUTH);
                 if (closest_window) {
@@ -983,10 +982,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a southward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
                 if (closest_window) {
@@ -995,10 +993,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a westward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
@@ -1007,10 +1004,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate the prev managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
@@ -1019,19 +1015,18 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate the next managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
-                struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager, window);
+                struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
                 if (last_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, last_window);
                 } else {
                     daemon_fail(rsp, "could not locate the last focused window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1039,7 +1034,6 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_WARP)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_NORTH);
                 if (closest_window) {
@@ -1048,10 +1042,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a northward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_EAST);
                 if (closest_window) {
@@ -1060,10 +1053,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a eastward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_SOUTH);
                 if (closest_window) {
@@ -1072,10 +1064,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a southward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
                 if (closest_window) {
@@ -1084,10 +1075,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate a westward managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
@@ -1096,10 +1086,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate the prev managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
@@ -1108,19 +1097,18 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not locate the next managed window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
-                struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager, window);
+                struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
                 if (last_window) {
                     window_manager_warp_window(&g_space_manager, window, last_window);
                 } else {
                     daemon_fail(rsp, "could not locate the last focused window.\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1128,32 +1116,28 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_INSERT)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_NORTH);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_EAST);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_SOUTH);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_set_window_insertion(&g_space_manager, &g_window_manager, window, DIR_WEST);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1162,11 +1146,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         unsigned r, c, x, y, w, h;
         if ((sscanf(value.text, ARGUMENT_WINDOW_GRID, &r, &c, &x, &y, &w, &h) == 6)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_apply_grid(&g_space_manager, &g_window_manager, window, r, c, x, y, w, h);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1175,11 +1158,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         float x, y;
         if ((sscanf(value.text, ARGUMENT_WINDOW_MOVE, &x, &y) == 2)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_move_window_relative(&g_window_manager, window, x, y);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1189,11 +1171,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         char handle[MAXLEN];
         float w, h;
         if ((sscanf(value.text, ARGUMENT_WINDOW_RESIZE, handle, &w, &h) == 3)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_resize_window_relative(&g_window_manager, window, parse_resize_handle(handle), w, h);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1201,53 +1182,46 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_toggle_window_float(&g_space_manager, &g_window_manager, window);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_toggle_window_sticky(&g_space_manager, &g_window_manager, window);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SPLIT)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 space_manager_toggle_window_split(&g_space_manager, window);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_toggle_window_parent(&g_space_manager, &g_window_manager, window);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, window);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_NATIVE)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, window);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_BORDER)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_toggle_window_border(&g_window_manager, window);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1257,11 +1231,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_PREV)) {
             uint32_t did = display_manager_prev_display_id(display_manager_active_display_id());
             if (did) {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
                 } else {
-                    daemon_fail(rsp, "could not locate the focused window.\n");
+                    daemon_fail(rsp, "could not locate the selected window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the previous display.\n");
@@ -1269,31 +1242,28 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_NEXT)) {
             uint32_t did = display_manager_next_display_id(display_manager_active_display_id());
             if (did) {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
                 } else {
-                    daemon_fail(rsp, "could not locate the focused window.\n");
+                    daemon_fail(rsp, "could not locate the selected window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the next display.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_LAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, g_display_manager.last_display_id);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_is_valid(value)) {
             int arrangement_index = token_to_int(value);
             uint32_t did = display_manager_arrangement_display_id(arrangement_index);
             if (did) {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
                 } else {
-                    daemon_fail(rsp, "could not locate the focused window.\n");
+                    daemon_fail(rsp, "could not locate the selected window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate display with arrangement index '%d'.\n", arrangement_index);
@@ -1306,11 +1276,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         if (token_equals(value, ARGUMENT_WINDOW_SPACE_PREV)) {
             uint64_t sid = space_manager_prev_space(space_manager_active_space());
             if (sid) {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
                 } else {
-                    daemon_fail(rsp, "could not locate the focused window.\n");
+                    daemon_fail(rsp, "could not locate the selected window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the previous space.\n");
@@ -1318,31 +1287,28 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_SPACE_NEXT)) {
             uint64_t sid = space_manager_next_space(space_manager_active_space());
             if (sid) {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
                 } else {
-                    daemon_fail(rsp, "could not locate the focused window.\n");
+                    daemon_fail(rsp, "could not locate the selected window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the next space.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SPACE_LAST)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, g_space_manager.last_space_id);
             } else {
-                daemon_fail(rsp, "could not locate the focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_is_valid(value)) {
             int mci = token_to_int(value);
             uint64_t sid = space_manager_mission_control_space(mci);
             if (sid) {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
                 } else {
-                    daemon_fail(rsp, "could not locate the focused window.\n");
+                    daemon_fail(rsp, "could not locate the selected window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", mci);
