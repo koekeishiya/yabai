@@ -18,8 +18,8 @@
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
 #define SCRPT_ADD_LOAD_OPT      "--load-sa"
 
-#define MAJOR 0
-#define MINOR 1
+#define MAJOR 1
+#define MINOR 0
 #define PATCH 0
 
 #define CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context, int cid)
