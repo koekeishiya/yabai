@@ -1347,7 +1347,19 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         wm->last_window_id = window->id;
         wm->focused_window_id = window->id;
         wm->focused_window_psn = window->application->psn;
-        border_window_activate(window);
-        window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
+    }
+
+    uint32_t display_count;
+    uint32_t *display_list = display_manager_active_display_list(&display_count);
+    if (display_list) {
+        for (int i = 0; i < display_count; ++i) {
+            struct ax_window *window = window_manager_find_window_on_display_by_rank(wm, display_list[i], 1);
+            if (window) {
+                border_window_activate(window);
+                window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
+            }
+        }
+
+        free(display_list);
     }
 }
