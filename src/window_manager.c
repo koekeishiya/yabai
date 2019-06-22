@@ -797,6 +797,8 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
         }
     }
 
+    if (!window_count) return NULL;
+
     struct ax_window **result = malloc(sizeof(struct ax_window *) * window_count);
     *count = window_count;
 

@@ -175,24 +175,26 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         window_manager_add_application_windows(&g_space_manager, &g_window_manager, application);
 
         int window_count = 0;
+        uint32_t prev_window_id = g_window_manager.focused_window_id;
         struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-        if (window_list) {
-            uint32_t prev_window_id = g_window_manager.focused_window_id;
-            for (int i = 0; i < window_count; ++i) {
-                struct ax_window *window = window_list[i];
-                if (window) {
-                    if (window_manager_should_manage_window(window)) {
-                        struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
-                        window_manager_add_managed_window(&g_window_manager, window, view);
-                        prev_window_id = window->id;
-                    }
-                } else {
-                    prev_window_id = 0;
+        if (!window_list) goto end;
+
+        for (int i = 0; i < window_count; ++i) {
+            struct ax_window *window = window_list[i];
+            if (window) {
+                if (window_manager_should_manage_window(window)) {
+                    struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
+                    window_manager_add_managed_window(&g_window_manager, window, view);
+                    prev_window_id = window->id;
                 }
+            } else {
+                prev_window_id = 0;
             }
-            free(window_list);
         }
 
+        free(window_list);
+
+end:
         if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
             struct event *event;
             event_create(event, APPLICATION_FRONT_SWITCHED, process);
@@ -228,25 +230,27 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
 
         int window_count = 0;
         struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-        if (window_list) {
-            for (int i = 0; i < window_count; ++i) {
-                struct ax_window *window = window_list[i];
-                if (!window) continue;
+        if (!window_list) goto end;
 
-                struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-                if (view) {
-                    space_manager_untile_window(&g_space_manager, view, window);
-                    window_manager_remove_managed_window(&g_window_manager, window);
-                }
+        for (int i = 0; i < window_count; ++i) {
+            struct ax_window *window = window_list[i];
+            if (!window) continue;
 
-                if (g_mouse_state.window == window) g_mouse_state.window = NULL;
-
-                window_manager_remove_window(&g_window_manager, window->id);
-                window_destroy(window);
+            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+            if (view) {
+                space_manager_untile_window(&g_space_manager, view, window);
+                window_manager_remove_managed_window(&g_window_manager, window);
             }
-            free(window_list);
+
+            if (g_mouse_state.window == window) g_mouse_state.window = NULL;
+
+            window_manager_remove_window(&g_window_manager, window->id);
+            window_destroy(window);
         }
 
+        free(window_list);
+
+end:
         application_unobserve(application);
         application_destroy(application);
     } else {
@@ -352,7 +356,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 
     int window_count = 0;
     struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-    if (!window_count) return EVENT_SUCCESS;
+    if (!window_list) return EVENT_SUCCESS;
 
     uint32_t prev_window_id = g_window_manager.last_window_id;
     for (int i = 0; i < window_count; ++i) {
@@ -383,7 +387,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 
     int window_count = 0;
     struct ax_window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-    if (!window_count) return EVENT_SUCCESS;
+    if (!window_list) return EVENT_SUCCESS;
 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_list[i];
