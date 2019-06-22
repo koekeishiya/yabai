@@ -965,12 +965,6 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
         window_manager_remove_managed_window(wm, window);
     }
 
-    struct ax_window *active_window = window_manager_find_window_on_space_by_rank(wm, dst_sid, 1);
-    if (active_window) {
-        border_window_deactivate(active_window);
-        window_manager_set_window_opacity(wm, active_window, wm->normal_window_opacity);
-    }
-
     assert(space_is_visible(dst_sid));
     space_manager_move_window_to_space(dst_sid, window);
 
@@ -997,12 +991,6 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     if (view) {
         space_manager_untile_window(sm, view, window);
         window_manager_remove_managed_window(wm, window);
-    }
-
-    struct ax_window *active_window = window_manager_find_window_on_space_by_rank(wm, dst_sid, 1);
-    if (active_window) {
-        border_window_deactivate(active_window);
-        window_manager_set_window_opacity(wm, active_window, wm->normal_window_opacity);
     }
 
     space_manager_move_window_to_space(dst_sid, window);
@@ -1347,19 +1335,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         wm->last_window_id = window->id;
         wm->focused_window_id = window->id;
         wm->focused_window_psn = window->application->psn;
-    }
-
-    uint32_t display_count;
-    uint32_t *display_list = display_manager_active_display_list(&display_count);
-    if (display_list) {
-        for (int i = 0; i < display_count; ++i) {
-            struct ax_window *window = window_manager_find_window_on_display_by_rank(wm, display_list[i], 1);
-            if (window) {
-                border_window_activate(window);
-                window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
-            }
-        }
-
-        free(display_list);
+        border_window_activate(window);
+        window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
     }
 }
