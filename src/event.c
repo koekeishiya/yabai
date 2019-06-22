@@ -294,10 +294,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     uint32_t application_focused_window_id = application_focused_window(application);
     if (!application_focused_window_id) return EVENT_SUCCESS;
 
-    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window_id);
-    if (!focused_window) {
+    struct ax_window *window = window_manager_find_window(&g_window_manager, application_focused_window_id);
+    if (!window) {
         window_manager_add_lost_focused_event(&g_window_manager, application_focused_window_id);
         return EVENT_SUCCESS;
+    }
+
+    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
+    if (focused_window && focused_window != window) {
+        border_window_deactivate(focused_window);
+        window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
     }
 
     if (g_window_manager.focused_window_id != application_focused_window_id) {
@@ -305,13 +311,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     }
 
     g_window_manager.focused_window_id = application_focused_window_id;
-    g_window_manager.focused_window_pid = application->pid;
+    g_window_manager.focused_window_psn = application->psn;
 
-    border_window_activate(focused_window);
-    window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
+    border_window_activate(window);
+    window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.active_window_opacity);
 
-    if (g_mouse_state.ffm_window_id != focused_window->id) {
-        window_manager_center_mouse(&g_window_manager, focused_window);
+    if (g_mouse_state.ffm_window_id != window->id) {
+        window_manager_center_mouse(&g_window_manager, window);
     } else {
         g_mouse_state.ffm_window_id = 0;
     }
@@ -530,7 +536,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
         }
 
         g_window_manager.focused_window_id = window->id;
-        g_window_manager.focused_window_pid = window->application->pid;
+        g_window_manager.focused_window_psn = window->application->psn;
     }
 
     return EVENT_SUCCESS;

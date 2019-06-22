@@ -488,62 +488,6 @@ struct ax_window *window_manager_find_window_at_point(struct window_manager *wm,
     return window_manager_find_window(wm, window_id);
 }
 
-static void send_de_event(ProcessSerialNumber *window_psn, uint32_t window_id)
-{
-    uint8_t bytes[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x0d,
-        [0x8a] = 0x02
-    };
-
-    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    SLPSPostEventRecordTo(window_psn, bytes);
-}
-
-static void send_re_event(ProcessSerialNumber *window_psn, uint32_t window_id)
-{
-    uint8_t bytes[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x0d,
-        [0x8a] = 0x01
-    };
-
-    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    SLPSPostEventRecordTo(window_psn, bytes);
-}
-
-static void send_pre_event(ProcessSerialNumber *window_psn, uint32_t window_id)
-{
-    uint8_t bytes[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x0d,
-        [0x8a] = 0x09
-    };
-
-    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    SLPSPostEventRecordTo(window_psn, bytes);
-}
-
-static void send_post_event(ProcessSerialNumber *window_psn, uint32_t window_id)
-{
-    uint8_t bytes1[0xf8] = {
-        [0x04] = 0xF8,
-        [0x08] = 0x01,
-        [0x3a] = 0x10
-    };
-
-    uint8_t bytes2[0xf8] = {
-        [0x04] = 0xF8,
-        [0x08] = 0x02,
-        [0x3a] = 0x10
-    };
-
-    memcpy(bytes1 + 0x3c, &window_id, sizeof(uint32_t));
-    memcpy(bytes2 + 0x3c, &window_id, sizeof(uint32_t));
-    SLPSPostEventRecordTo(window_psn, bytes1);
-    SLPSPostEventRecordTo(window_psn, bytes2);
-}
-
 static struct ax_window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct ax_window *source, int direction, uint32_t *window_list, int window_count)
 {
     CGRect source_frame = window_frame(source);
@@ -632,6 +576,64 @@ struct ax_window *window_manager_find_last_managed_window(struct space_manager *
     return window_manager_find_window(wm, node->window_id);
 }
 
+static void window_manager_defer_window_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
+{
+    uint8_t bytes[0xf8] = {
+        [0x04] = 0xf8,
+        [0x08] = 0x0d,
+        [0x8a] = 0x09
+    };
+
+    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
+    SLPSPostEventRecordTo(window_psn, bytes);
+}
+
+static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint32_t window_id)
+{
+    uint8_t bytes1[0xf8] = {
+        [0x04] = 0xF8,
+        [0x08] = 0x01,
+        [0x3a] = 0x10
+    };
+
+    uint8_t bytes2[0xf8] = {
+        [0x04] = 0xF8,
+        [0x08] = 0x02,
+        [0x3a] = 0x10
+    };
+
+    memcpy(bytes1 + 0x3c, &window_id, sizeof(uint32_t));
+    memset(bytes1 + 0x20, 0xFF, 0x16);
+    memcpy(bytes2 + 0x3c, &window_id, sizeof(uint32_t));
+    memset(bytes2 + 0x20, 0xFF, 0x16);
+    SLPSPostEventRecordTo(window_psn, bytes1);
+    SLPSPostEventRecordTo(window_psn, bytes2);
+}
+
+static void window_manager_deactivate_window(ProcessSerialNumber *window_psn, uint32_t window_id)
+{
+    uint8_t bytes[0xf8] = {
+        [0x04] = 0xf8,
+        [0x08] = 0x0d,
+        [0x8a] = 0x02
+    };
+
+    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
+    SLPSPostEventRecordTo(window_psn, bytes);
+}
+
+static void window_manager_activate_window(ProcessSerialNumber *window_psn, uint32_t window_id)
+{
+    uint8_t bytes[0xf8] = {
+        [0x04] = 0xf8,
+        [0x08] = 0x0d,
+        [0x8a] = 0x01
+    };
+
+    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
+    SLPSPostEventRecordTo(window_psn, bytes);
+}
+
 void window_manager_focus_window_without_raise(uint32_t window_id)
 {
     int window_connection;
@@ -642,16 +644,18 @@ void window_manager_focus_window_without_raise(uint32_t window_id)
     SLSGetConnectionPSN(window_connection, &window_psn);
     SLSConnectionGetPID(window_connection, &window_pid);
 
-    if (g_window_manager.focused_window_pid == window_pid) {
-        send_pre_event(&window_psn, window_id);
-        send_de_event(&window_psn, g_window_manager.focused_window_id);
-        send_re_event(&window_psn, window_id);
-        send_post_event(&window_psn, window_id);
-    } else {
-        send_pre_event(&window_psn, window_id);
-        _SLPSSetFrontProcessWithOptions(&window_psn, window_id, kCPSUserGenerated);
-        send_post_event(&window_psn, window_id);
-    }
+    window_manager_defer_window_raise(&window_psn, window_id);
+    window_manager_deactivate_window(&g_window_manager.focused_window_psn, g_window_manager.focused_window_id);
+
+    // @hack
+    // Artificially delay the activation by 1ms. This is necessary
+    // because some applications appear to be confused if both of
+    // the events appear instantaneously.
+    usleep(10000);
+
+    window_manager_activate_window(&window_psn, window_id);
+    _SLPSSetFrontProcessWithOptions(&window_psn, window_id, kCPSUserGenerated);
+    window_manager_make_key_window(&window_psn, window_id);
 }
 
 void window_manager_focus_window_with_raise(uint32_t window_id)
@@ -1320,7 +1324,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
     if (window) {
         wm->last_window_id = window->id;
         wm->focused_window_id = window->id;
-        wm->focused_window_pid = window->application->pid;
+        wm->focused_window_psn = window->application->psn;
         border_window_activate(window);
         window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
     }

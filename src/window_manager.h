@@ -52,7 +52,7 @@ struct window_manager
     struct table application_lost_front_switched_event;
     struct rule **rules;
     uint32_t focused_window_id;
-    pid_t focused_window_pid;
+    ProcessSerialNumber focused_window_psn;
     uint32_t last_window_id;
     bool enable_mff;
     enum ffm_mode ffm_mode;
