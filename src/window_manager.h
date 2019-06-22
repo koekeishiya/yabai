@@ -84,6 +84,7 @@ void window_manager_tile_window(struct window_manager *wm, struct ax_window *win
 void window_manager_move_window(struct ax_window *window, float x, float y);
 void window_manager_resize_window(struct ax_window *window, float width, float height);
 struct ax_window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank);
+struct ax_window *window_manager_find_window_on_display_by_rank(struct window_manager *wm, uint32_t did, int rank);
 struct ax_window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid);
 struct ax_window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point);
 struct ax_window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction);

@@ -468,6 +468,13 @@ struct ax_window *window_manager_find_window_on_space_by_rank(struct window_mana
     return result;
 }
 
+struct ax_window *window_manager_find_window_on_display_by_rank(struct window_manager *wm, uint32_t did, int rank)
+{
+    uint32_t sid = display_space_id(did);
+    struct ax_window *window = window_manager_find_window_on_space_by_rank(wm, sid, rank);
+    return window;
+}
+
 struct ax_window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid)
 {
     uint32_t window_id = 0;

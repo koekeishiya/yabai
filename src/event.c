@@ -327,14 +327,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
     debug("%s: %s\n", __FUNCTION__, application->name);
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
     if (focused_window) {
-        border_window_deactivate(focused_window);
-        window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
+        struct ax_window *focused_window_on_display = window_manager_find_window_on_display_by_rank(&g_window_manager, window_display_id(focused_window), 1);
+        if (focused_window != focused_window_on_display) {
+            border_window_deactivate(focused_window);
+            window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
 
-        if (!window_level_is_standard(focused_window) || !window_is_standard(focused_window)) {
-            struct ax_window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
-            if (main_window && main_window != focused_window) {
-                border_window_deactivate(main_window);
-                window_manager_set_window_opacity(&g_window_manager, main_window, g_window_manager.normal_window_opacity);
+            if (!window_level_is_standard(focused_window) || !window_is_standard(focused_window)) {
+                struct ax_window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
+                if (main_window && main_window != focused_window) {
+                    border_window_deactivate(main_window);
+                    window_manager_set_window_opacity(&g_window_manager, main_window, g_window_manager.normal_window_opacity);
+                }
             }
         }
     }
@@ -509,8 +512,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
 
     struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
     if (focused_window && focused_window != window) {
-        border_window_deactivate(focused_window);
-        window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
+        struct ax_window *focused_window_on_display = window_manager_find_window_on_display_by_rank(&g_window_manager, window_display_id(focused_window), 1);
+        if (focused_window != focused_window_on_display) {
+            border_window_deactivate(focused_window);
+            window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
+        }
+    }
+
+    struct ax_window *focused_window_on_display = window_manager_find_window_on_display_by_rank(&g_window_manager, window_display_id(window), 2);
+    if  (focused_window_on_display && focused_window_on_display != window) {
+        border_window_deactivate(focused_window_on_display);
+        window_manager_set_window_opacity(&g_window_manager, focused_window_on_display, g_window_manager.normal_window_opacity);
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
