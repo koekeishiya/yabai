@@ -159,30 +159,36 @@ void bar_refresh(struct bar *bar)
     CGContextStrokePath(bar->context);
 
     // BAR LEFT
-    int space_count = display_space_count(display_manager_main_display_id());
-    int mci = space_manager_mission_control_index(display_space_id(display_manager_main_display_id()));
+    int space_count;
+    uint32_t did = display_manager_main_display_id();
+    uint64_t *space_list = display_space_list(did, &space_count);
+    if (space_list) {
+        uint64_t sid = display_space_id(did);
 
-    for (int i = 0; i < space_count; ++i) {
-        CGPoint pos = CGContextGetTextPosition(bar->context);
-        struct bar_line space_line = i >= buf_len(bar->space_icon_strip)
-                                   ? bar->space_icon
-                                   : bar->space_icon_strip[i];
-        if (i == 0) {
-            pos = bar_align_line(bar, space_line, ALIGN_LEFT, ALIGN_CENTER);
-        } else {
-            pos.x += 25;
+        for (int i = 0; i < space_count; ++i) {
+            CGPoint pos = CGContextGetTextPosition(bar->context);
+            struct bar_line space_line = i >= buf_len(bar->space_icon_strip)
+                                       ? bar->space_icon
+                                       : bar->space_icon_strip[i];
+            if (i == 0) {
+                pos = bar_align_line(bar, space_line, ALIGN_LEFT, ALIGN_CENTER);
+            } else {
+                pos.x += 25;
+            }
+
+            bar_draw_line(bar, space_line, pos.x, pos.y);
+
+            if (sid == space_list[i]) {
+                CGPoint new_pos = CGContextGetTextPosition(bar->context);
+                struct bar_line mark_line = bar->space_underline;
+                CGPoint mark_pos = bar_align_line(bar, mark_line, 0, ALIGN_BOTTOM);
+                mark_pos.x = mark_pos.x - mark_line.bounds.size.width / 2 - space_line.bounds.size.width / 2;
+                bar_draw_line(bar, mark_line, mark_pos.x, mark_pos.y);
+                CGContextSetTextPosition(bar->context, new_pos.x, new_pos.y);
+            }
         }
 
-        bar_draw_line(bar, space_line, pos.x, pos.y);
-
-        if ((i+1) == mci) {
-            CGPoint new_pos = CGContextGetTextPosition(bar->context);
-            struct bar_line mark_line = bar->space_underline;
-            CGPoint mark_pos = bar_align_line(bar, mark_line, 0, ALIGN_BOTTOM);
-            mark_pos.x = mark_pos.x - mark_line.bounds.size.width / 2 - space_line.bounds.size.width / 2;
-            bar_draw_line(bar, mark_line, mark_pos.x, mark_pos.y);
-            CGContextSetTextPosition(bar->context, new_pos.x, new_pos.y);
-        }
+        free(space_list);
     }
 
     // BAR CENTER
