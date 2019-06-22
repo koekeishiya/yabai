@@ -973,9 +973,6 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
         window_manager_add_managed_window(wm, window, view);
     }
 
-    uint64_t cur_sid = space_manager_active_space();
-    if (cur_sid != src_sid) return;
-
     struct ax_window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
     if (next) {
         AXUIElementPerformAction(next->ref, kAXRaiseAction);
