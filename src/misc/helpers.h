@@ -49,6 +49,24 @@ static inline bool string_equals(const char *a, const char *b)
     return a && b && strcmp(a, b) == 0;
 }
 
+static CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
+{
+    CFNumberRef *temp = malloc(sizeof(CFNumberRef) * count);
+
+    for (int i = 0; i < count; ++i) {
+        temp[i] = CFNumberCreate(NULL, type, ((char *)values) + (size * i));
+    }
+
+    CFArrayRef result = CFArrayCreate(NULL, (const void **)temp, count, &kCFTypeArrayCallBacks);
+
+    for (int i = 0; i < count; ++i) {
+        CFRelease(temp[i]);
+    }
+
+    free(temp);
+    return result;
+}
+
 static inline char *cfstring_copy(CFStringRef string)
 {
     CFIndex num_bytes = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);

@@ -1057,13 +1057,19 @@ void window_manager_make_children_floating(struct window_manager *wm, struct ax_
     uint32_t *window_list = space_window_list_for_connection(sid, window->connection, &count);
     if (!window_list) return;
 
-    for (int i = 0; i < count; ++i) {
-        struct ax_window *child = window_manager_find_window(wm, window_list[i]);
-        if ((!child) || (!window_is_standard(child) && !window_can_move(child))) {
-            window_manager_make_floating(wm, window_list[i], floating);
-        }
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), count, kCFNumberSInt32Type);
+    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_list_ref, count);
+    CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
+
+    while (SLSWindowIteratorAdvance(iterator)) {
+        uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
+        uint32_t wid = SLSWindowIteratorGetWindowID(iterator);
+        if (parent_wid == window->id) window_manager_make_floating(wm, wid, floating);
     }
 
+    CFRelease(query);
+    CFRelease(iterator);
+    CFRelease(window_list_ref);
     free(window_list);
 }
 

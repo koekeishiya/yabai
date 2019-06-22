@@ -1,6 +1,11 @@
 #ifndef WINDOW_MANAGER_H
 #define WINDOW_MANAGER_H
 
+extern CFTypeRef SLSWindowQueryWindows(int cid, CFArrayRef windows, int count);
+extern CFTypeRef SLSWindowQueryResultCopyWindows(CFTypeRef window_query);
+extern CGError SLSWindowIteratorAdvance(CFTypeRef iterator);
+extern uint32_t SLSWindowIteratorGetParentID(CFTypeRef iterator);
+extern uint32_t SLSWindowIteratorGetWindowID(CFTypeRef iterator);
 extern OSStatus _SLPSGetFrontProcess(ProcessSerialNumber *psn);
 extern CGError SLSGetWindowOwner(int cid, uint32_t wid, int *wcid);
 extern CGError SLSGetConnectionPSN(int cid, ProcessSerialNumber *psn);
