@@ -300,12 +300,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
         return EVENT_SUCCESS;
     }
 
-    struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
-    if (focused_window && focused_window != window) {
-        border_window_deactivate(focused_window);
-        window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
-    }
-
     if (g_window_manager.focused_window_id != application_focused_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
     }
