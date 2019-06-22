@@ -603,9 +603,9 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     };
 
     memcpy(bytes1 + 0x3c, &window_id, sizeof(uint32_t));
-    memset(bytes1 + 0x20, 0xFF, 0x16);
+    memset(bytes1 + 0x20, 0xFF, 0x10);
     memcpy(bytes2 + 0x3c, &window_id, sizeof(uint32_t));
-    memset(bytes2 + 0x20, 0xFF, 0x16);
+    memset(bytes2 + 0x20, 0xFF, 0x10);
     SLPSPostEventRecordTo(window_psn, bytes1);
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
