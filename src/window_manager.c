@@ -965,6 +965,12 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
         window_manager_remove_managed_window(wm, window);
     }
 
+    struct ax_window *active_window = window_manager_find_window_on_space_by_rank(wm, dst_sid, 1);
+    if (active_window) {
+        border_window_deactivate(active_window);
+        window_manager_set_window_opacity(wm, active_window, wm->normal_window_opacity);
+    }
+
     assert(space_is_visible(dst_sid));
     space_manager_move_window_to_space(dst_sid, window);
 
@@ -991,6 +997,12 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     if (view) {
         space_manager_untile_window(sm, view, window);
         window_manager_remove_managed_window(wm, window);
+    }
+
+    struct ax_window *active_window = window_manager_find_window_on_space_by_rank(wm, dst_sid, 1);
+    if (active_window) {
+        border_window_deactivate(active_window);
+        window_manager_set_window_opacity(wm, active_window, wm->normal_window_opacity);
     }
 
     space_manager_move_window_to_space(dst_sid, window);
