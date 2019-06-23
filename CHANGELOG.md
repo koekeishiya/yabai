@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Hide remaining battery percentage from status-bar if a battery could not be found [#60](https://github.com/koekeishiya/yabai/issues/60)
+- Temporarily disable focus follows mouse while the *mouse_modifier* key is held [#62](https://github.com/koekeishiya/yabai/issues/62)
 
 ## [1.0.1] - 2019-06-23
 ### Added
