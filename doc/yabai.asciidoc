@@ -233,10 +233,10 @@ COMMAND
 *--rotate* '90|180|270'::
     Rotate the tree of the active space.
 
-*--padding* '<top>:<bottom>:<left>:<right>'::
+*--padding* 'abs|rel:<top>:<bottom>:<left>:<right>'::
     Padding added at the sides of the space.
 
-*--gap* '<gap>'::
+*--gap* 'abs|rel:<gap>'::
     Size of the gap that separates windows.
 
 *--toggle* 'padding|gap'::
@@ -271,11 +271,11 @@ COMMAND
 *--grid* '<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'::
     Set the window frame based on a self-defined grid.
 
-*--move* '<dx>:<dy>'::
-    Move window by 'dx' pixels horizontally and 'dy' pixels vertically.
+*--move* 'abs|rel:<dx>:<dy>'::
+    If type is 'rel' the window is moved by 'dx' pixels horizontally and 'dy' pixels vertically, otherwise 'dx' and 'dy' will become its new position.
 
-*--resize* 'top|left|bottom|right|top_left|top_right|bottom_right|bottom_left:<dx>:<dy>'::
-    Resize window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically.
+*--resize* 'top|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>'::
+    Resize window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. If handle is 'abs' the new window size will be 'dx' width and 'dy' height.
 
 *--toggle* 'float|sticky|split|border|zoom-parent|zoom-fullscreen|native-fullscreen'::
     Toggle the selected property of a window.

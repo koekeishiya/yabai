@@ -118,8 +118,8 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_SPACE_ROTATE_90    "90"
 #define ARGUMENT_SPACE_ROTATE_180   "180"
 #define ARGUMENT_SPACE_ROTATE_270   "270"
-#define ARGUMENT_SPACE_PADDING      "%d:%d:%d:%d"
-#define ARGUMENT_SPACE_GAP          "%d"
+#define ARGUMENT_SPACE_PADDING      "%[^:]:%d:%d:%d:%d"
+#define ARGUMENT_SPACE_GAP          "%[^:]:%d"
 #define ARGUMENT_SPACE_TGL_PADDING  "padding"
 #define ARGUMENT_SPACE_TGL_GAP      "gap"
 #define ARGUMENT_SPACE_LAYOUT_BSP   "bsp"
@@ -146,7 +146,7 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_WINDOW_DIR_SOUTH     "south"
 #define ARGUMENT_WINDOW_DIR_WEST      "west"
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
-#define ARGUMENT_WINDOW_MOVE          "%f:%f"
+#define ARGUMENT_WINDOW_MOVE          "%[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%[^:]:%f:%f"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
@@ -685,6 +685,17 @@ static void handle_domain_display(FILE *rsp, struct token domain, char *message)
     }
 }
 
+static uint8_t parse_value_type(char *type)
+{
+    if (string_equals(type, "abs")) {
+        return TYPE_ABS;
+    } else if (string_equals(type, "rel")) {
+        return TYPE_REL;
+    } else {
+        return 0;
+    }
+}
+
 static void handle_domain_space(FILE *rsp, struct token domain, char *message)
 {
     struct token command = get_token(&message);
@@ -795,17 +806,19 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_SPACE_PADDING)) {
         struct token value = get_token(&message);
-        unsigned t, b, l, r;
-        if ((sscanf(value.text, ARGUMENT_SPACE_PADDING, &t, &b, &l, &r) == 4)) {
-            space_manager_set_padding_for_space(&g_space_manager, space_manager_active_space(), t, b, l, r);
+        char type[MAXLEN];
+        int t, b, l, r;
+        if ((sscanf(value.text, ARGUMENT_SPACE_PADDING, type, &t, &b, &l, &r) == 5)) {
+            space_manager_set_padding_for_space(&g_space_manager, space_manager_active_space(), parse_value_type(type), t, b, l, r);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
     } else if (token_equals(command, COMMAND_SPACE_GAP)) {
         struct token value = get_token(&message);
-        unsigned gap;
-        if ((sscanf(value.text, ARGUMENT_SPACE_GAP, &gap) == 1)) {
-            space_manager_set_gap_for_space(&g_space_manager, space_manager_active_space(), gap);
+        char type[MAXLEN];
+        int gap;
+        if ((sscanf(value.text, ARGUMENT_SPACE_GAP, type, &gap) == 2)) {
+            space_manager_set_gap_for_space(&g_space_manager, space_manager_active_space(), parse_value_type(type), gap);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -850,6 +863,8 @@ static uint8_t parse_resize_handle(char *handle)
         return HANDLE_BOTTOM | HANDLE_LEFT;
     } else if (string_equals(handle, "bottom_right")) {
         return HANDLE_BOTTOM | HANDLE_RIGHT;
+    } else if (string_equals(handle, "abs")) {
+        return HANDLE_ABS;
     } else {
         return 0;
     }
@@ -1156,10 +1171,11 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_WINDOW_MOVE)) {
         struct token value = get_token(&message);
+        char type[MAXLEN];
         float x, y;
-        if ((sscanf(value.text, ARGUMENT_WINDOW_MOVE, &x, &y) == 2)) {
+        if ((sscanf(value.text, ARGUMENT_WINDOW_MOVE, type, &x, &y) == 3)) {
             if (window) {
-                window_manager_move_window_relative(&g_window_manager, window, x, y);
+                window_manager_move_window_relative(&g_window_manager, window, parse_value_type(type), x, y);
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }

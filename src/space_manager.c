@@ -165,12 +165,17 @@ void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, 
     if (view->type == VIEW_BSP) window_manager_check_for_windows_on_space(sm, &g_window_manager, sid);
 }
 
-void space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, unsigned gap)
+void space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, int type, int gap)
 {
     struct view *view = space_manager_find_view(sm, sid);
     if (view->type != VIEW_BSP) return;
 
-    view->window_gap = gap;
+    if (type == TYPE_ABS) {
+        view->window_gap = gap;
+    } else if (type == TYPE_REL) {
+        view->window_gap += gap;
+    }
+
     view_update(view);
     view_flush(view);
 }
@@ -185,15 +190,23 @@ void space_manager_toggle_gap_for_space(struct space_manager *sm, uint64_t sid)
     view_flush(view);
 }
 
-void space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, unsigned top, unsigned bottom, unsigned left, unsigned right)
+void space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, int type, int top, int bottom, int left, int right)
 {
     struct view *view = space_manager_find_view(sm, sid);
     if (view->type != VIEW_BSP) return;
 
-    view->top_padding = top;
-    view->bottom_padding = bottom;
-    view->left_padding = left;
-    view->right_padding = right;
+    if (type == TYPE_ABS) {
+        view->top_padding    = top;
+        view->bottom_padding = bottom;
+        view->left_padding   = left;
+        view->right_padding  = right;
+    } else if (type == TYPE_REL) {
+        view->top_padding    += top;
+        view->bottom_padding += bottom;
+        view->left_padding   += left;
+        view->right_padding  += right;
+    }
+
     view_update(view);
     view_flush(view);
 }

@@ -112,7 +112,7 @@ struct ax_application *window_manager_find_application(struct window_manager *wm
 void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct ax_application *application);
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count);
-void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, float x, float y);
+void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, int type, float dx, float dy);
 void window_manager_resize_window_relative(struct window_manager *wm, struct ax_window *window, int direction, float dx, float dy);
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode);
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity);

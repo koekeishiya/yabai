@@ -16,9 +16,13 @@
 #define DIR_SOUTH 180
 #define DIR_WEST  270
 
-#define HANDLE_TOP    0x1
-#define HANDLE_BOTTOM 0x2
-#define HANDLE_LEFT   0x4
-#define HANDLE_RIGHT  0x8
+#define TYPE_ABS 0x1
+#define TYPE_REL 0x2
+
+#define HANDLE_TOP    0x01
+#define HANDLE_BOTTOM 0x02
+#define HANDLE_LEFT   0x04
+#define HANDLE_RIGHT  0x08
+#define HANDLE_ABS    0x10
 
 #endif

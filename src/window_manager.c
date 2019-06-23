@@ -237,16 +237,18 @@ void window_manager_add_managed_window(struct window_manager *wm, struct ax_wind
     window_manager_purify_window(wm, window);
 }
 
-void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, float dx, float dy)
+void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, int type, float dx, float dy)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) return;
 
-    CGRect frame = window_frame(window);
-    float fx     = frame.origin.x + dx;
-    float fy     = frame.origin.y + dy;
+    if (type == TYPE_REL) {
+        CGRect frame = window_frame(window);
+        dx += frame.origin.x;
+        dy += frame.origin.y;
+    }
 
-    window_manager_move_window(window, fx, fy);
+    window_manager_move_window(window, dx, dy);
 }
 
 void window_manager_resize_window_relative(struct window_manager *wm, struct ax_window *window, int direction, float dx, float dy)
@@ -278,17 +280,21 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct ax_
         view_update(view);
         view_flush(view);
     } else {
-        int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
-        int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
+        if (direction == HANDLE_ABS) {
+            window_manager_resize_window(window, dx, dy);
+        } else {
+            int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
+            int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
 
-        CGRect frame = window_frame(window);
-        float fw = max(1, frame.size.width  + dx * x_mod);
-        float fh = max(1, frame.size.height + dy * y_mod);
-        float fx = (direction & HANDLE_LEFT) ? frame.origin.x + frame.size.width  - fw : frame.origin.x;
-        float fy = (direction & HANDLE_TOP)  ? frame.origin.y + frame.size.height - fh : frame.origin.y;
+            CGRect frame = window_frame(window);
+            float fw = max(1, frame.size.width  + dx * x_mod);
+            float fh = max(1, frame.size.height + dy * y_mod);
+            float fx = (direction & HANDLE_LEFT) ? frame.origin.x + frame.size.width  - fw : frame.origin.x;
+            float fy = (direction & HANDLE_TOP)  ? frame.origin.y + frame.size.height - fh : frame.origin.y;
 
-        window_manager_move_window(window, fx, fy);
-        window_manager_resize_window(window, fw, fh);
+            window_manager_move_window(window, fx, fy);
+            window_manager_resize_window(window, fw, fh);
+        }
     }
 }
 
