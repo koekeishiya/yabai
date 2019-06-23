@@ -844,8 +844,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         bool did_change_s = did_change_w || did_change_h;
 
         if (did_change_p && !did_change_s) {
-            uint32_t filter_window_id = g_window_manager.focused_window_id == g_mouse_state.window->id ? g_mouse_state.window->id : 0;
-            struct ax_window *window = window_manager_find_window_at_point_filtering_window(&g_window_manager, point, filter_window_id);
+            struct ax_window *window = window_manager_find_window_at_point_filtering_window(&g_window_manager, point, g_mouse_state.window->id);
+            if (!window) window = window_manager_find_window_at_point(&g_window_manager, point);
             struct window_node *a_node = view_find_window_node(view->root, g_mouse_state.window->id);
             struct window_node *b_node = window ? view_find_window_node(view->root, window->id) : NULL;
 
