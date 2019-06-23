@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Hide remaining battery percentage from status-bar if a battery could not be found [#60](https://github.com/koekeishiya/yabai/issues/60)
 
 ## [1.0.1] - 2019-06-23
 ### Added
