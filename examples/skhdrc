@@ -92,10 +92,10 @@ ctrl + cmd - 2  : yabai -m window --display 2; yabai -m display --focus 2
 ctrl + cmd - 3  : yabai -m window --display 3; yabai -m display --focus 3
 
 # move window
-shift + ctrl - a : yabai -m window --move -20:0
-shift + ctrl - s : yabai -m window --move 0:20
-shift + ctrl - w : yabai -m window --move 0:-20
-shift + ctrl - d : yabai -m window --move 20:0
+shift + ctrl - a : yabai -m window --move rel:-20:0
+shift + ctrl - s : yabai -m window --move rel:0:20
+shift + ctrl - w : yabai -m window --move rel:0:-20
+shift + ctrl - d : yabai -m window --move rel:20:0
 
 # increase window size
 shift + alt - a : yabai -m window --resize left:-20:0
