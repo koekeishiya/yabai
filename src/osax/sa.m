@@ -255,7 +255,6 @@ int scripting_addition_load(void)
     [dock sendEvent:'YBSA' id:'load' parameters:0];
     [dock release];
 
-
     //
     // restore stderr back to normal
     //
