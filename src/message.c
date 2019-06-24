@@ -1032,6 +1032,17 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_MOUSE)) {
+            if (window) {
+                struct ax_window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
+                if (mouse_window) {
+                    window_manager_swap_window(&g_space_manager, &g_window_manager, window, mouse_window);
+                } else {
+                    daemon_fail(rsp, "could not locate a window below the cursor.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
             if (window) {
                 struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
@@ -1110,6 +1121,17 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     window_manager_warp_window(&g_space_manager, window, closest_window);
                 } else {
                     daemon_fail(rsp, "could not locate a westward managed window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_MOUSE)) {
+            if (window) {
+                struct ax_window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
+                if (mouse_window) {
+                    window_manager_warp_window(&g_space_manager, window, mouse_window);
+                } else {
+                    daemon_fail(rsp, "could not locate a window below the cursor.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
