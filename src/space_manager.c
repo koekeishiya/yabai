@@ -659,6 +659,7 @@ void space_manager_init(struct space_manager *sm)
     sm->layout[0] = VIEW_FLOAT;
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;
+    sm->window_placement = CHILD_SECOND;
 
     table_init(&sm->view, 23, hash_view, compare_view);
 }

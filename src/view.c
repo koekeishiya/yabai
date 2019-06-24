@@ -18,7 +18,7 @@ static struct area area_from_cgrect(CGRect rect)
 static enum window_node_child window_node_get_child(struct window_node *node)
 {
     if (node->child != CHILD_NONE) return node->child;
-    return CHILD_RIGHT;
+    return g_space_manager.window_placement;
 }
 
 static enum window_node_split window_node_get_split(struct window_node *node)
@@ -141,7 +141,7 @@ static void window_node_split(struct view *view, struct window_node *node, struc
     struct window_node *right = malloc(sizeof(struct window_node));
     memset(right, 0, sizeof(struct window_node));
 
-    if (window_node_get_child(node) == CHILD_RIGHT) {
+    if (window_node_get_child(node) == CHILD_SECOND) {
         left->window_id = node->window_id;
         right->window_id = window->id;
     } else {

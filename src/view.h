@@ -20,8 +20,8 @@ struct equalize_node
 enum window_node_child
 {
     CHILD_NONE,
-    CHILD_RIGHT,
-    CHILD_LEFT,
+    CHILD_SECOND,
+    CHILD_FIRST,
 };
 
 enum window_node_split
@@ -29,6 +29,13 @@ enum window_node_split
     SPLIT_NONE,
     SPLIT_Y,
     SPLIT_X
+};
+
+static const char *window_node_child_str[] =
+{
+    "none",
+    "second_child",
+    "first_child"
 };
 
 struct window_node

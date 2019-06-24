@@ -24,6 +24,7 @@ struct space_manager
     int right_padding[SM_MAX_SPACE];
     int window_gap[SM_MAX_SPACE];
     float split_ratio;
+    enum window_node_child window_placement;
     bool auto_balance;
 };
 

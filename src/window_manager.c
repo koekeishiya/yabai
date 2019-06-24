@@ -886,31 +886,31 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
 
     if (direction == window->border.insert_dir) {
         node->split = SPLIT_NONE;
-        node->child = CHILD_NONE;;
+        node->child = CHILD_NONE;
         window->border.insert_active = false;
         window->border.insert_dir = 0;
         view->insertion_point = 0;
     } else if (direction == DIR_NORTH) {
         node->split = SPLIT_X;
-        node->child = CHILD_LEFT;;
+        node->child = CHILD_FIRST;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
         view->insertion_point = node->window_id;
     } else if (direction == DIR_EAST) {
         node->split = SPLIT_Y;
-        node->child = CHILD_RIGHT;;
+        node->child = CHILD_SECOND;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
         view->insertion_point = node->window_id;
     } else if (direction == DIR_SOUTH) {
         node->split = SPLIT_X;
-        node->child = CHILD_RIGHT;;
+        node->child = CHILD_SECOND;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
         view->insertion_point = node->window_id;
     } else if (direction == DIR_WEST) {
         node->split = SPLIT_Y;
-        node->child = CHILD_LEFT;;
+        node->child = CHILD_FIRST;
         window->border.insert_active = true;
         window->border.insert_dir = direction;
         view->insertion_point = node->window_id;

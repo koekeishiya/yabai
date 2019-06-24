@@ -21,6 +21,7 @@ static const char *bool_str[] = { "off", "on" };
 /* --------------------------------DOMAIN CONFIG-------------------------------- */
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
 #define COMMAND_CONFIG_FFM                   "focus_follows_mouse"
+#define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
 #define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
@@ -59,6 +60,8 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_CONFIG_FFM_DISABLED         "off"
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
+#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST "first_child"
+#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND "second_child"
 #define ARGUMENT_CONFIG_TOPMOST_ON           "on"
 #define ARGUMENT_CONFIG_TOPMOST_OFF          "off"
 #define ARGUMENT_CONFIG_OPACITY_ON           "on"
@@ -340,6 +343,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_window_manager.ffm_mode = FFM_AUTOFOCUS;
         } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTORAISE)) {
             g_window_manager.ffm_mode = FFM_AUTORAISE;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_WINDOW_PLACEMENT)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", window_node_child_str[g_space_manager.window_placement]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST)) {
+            g_space_manager.window_placement = CHILD_FIRST;
+        } else if (token_equals(value, ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND)) {
+            g_space_manager.window_placement = CHILD_SECOND;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

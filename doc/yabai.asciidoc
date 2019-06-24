@@ -126,6 +126,9 @@ Colors are in the form '#AARRGGBB'.
 'focus_follows_mouse'::
     Focus the window under the mouse. Accept the following values: *autofocus*, *autoraise*, *off*.
 
+'window_placement'::
+    Specify whether managed windows should become the first or second leaf-node. Accept the following values: *first_child*, *second_child*.
+
 'window_topmost'::
     Make floating windows stay on top.
 
