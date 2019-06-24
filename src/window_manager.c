@@ -501,6 +501,13 @@ struct ax_window *window_manager_find_window_at_point(struct window_manager *wm,
     return window_manager_find_window(wm, window_id);
 }
 
+struct ax_window *window_manager_find_window_below_cursor(struct window_manager *wm)
+{
+    CGPoint cursor;
+    SLSGetCurrentCursorLocation(g_connection, &cursor);
+    return window_manager_find_window_at_point(wm, cursor);
+}
+
 static struct ax_window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct ax_window *source, int direction, uint32_t *window_list, int window_count)
 {
     CGRect source_frame = window_frame(source);

@@ -141,13 +141,14 @@ static const char *bool_str[] = { "off", "on" };
 #define COMMAND_WINDOW_DISPLAY "--display"
 #define COMMAND_WINDOW_SPACE   "--space"
 
-#define ARGUMENT_WINDOW_SEL_PREV      "prev"
-#define ARGUMENT_WINDOW_SEL_NEXT      "next"
-#define ARGUMENT_WINDOW_SEL_LAST      "last"
 #define ARGUMENT_WINDOW_DIR_NORTH     "north"
 #define ARGUMENT_WINDOW_DIR_EAST      "east"
 #define ARGUMENT_WINDOW_DIR_SOUTH     "south"
 #define ARGUMENT_WINDOW_DIR_WEST      "west"
+#define ARGUMENT_WINDOW_SEL_MOUSE     "mouse"
+#define ARGUMENT_WINDOW_SEL_PREV      "prev"
+#define ARGUMENT_WINDOW_SEL_NEXT      "next"
+#define ARGUMENT_WINDOW_SEL_LAST      "last"
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
 #define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
@@ -945,6 +946,13 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 }
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_MOUSE)) {
+            struct ax_window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
+            if (mouse_window) {
+                window_manager_focus_window_with_raise(mouse_window->id);
+            } else {
+                daemon_fail(rsp, "could not locate a window below the cursor.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
             if (window) {

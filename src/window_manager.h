@@ -87,6 +87,7 @@ struct ax_window *window_manager_find_window_on_space_by_rank(struct window_mana
 struct ax_window *window_manager_find_window_on_display_by_rank(struct window_manager *wm, uint32_t did, int rank);
 struct ax_window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid);
 struct ax_window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point);
+struct ax_window *window_manager_find_window_below_cursor(struct window_manager *wm);
 struct ax_window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction);
 struct ax_window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction);
 struct ax_window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window);
