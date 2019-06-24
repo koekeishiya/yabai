@@ -233,6 +233,16 @@ int scripting_addition_load(void)
 {
     if (!scripting_addition_is_installed()) return 1;
 
+    // temporarily redirect stderr to /dev/null to silence
+    // meaningless warning reported by the scripting-bridge
+    // framework, because Dock.app does not provide a .sdef
+
+    int stderr_fd = dup(2);
+    int null_fd = open("/dev/null", O_WRONLY);
+    fflush(stderr);
+    dup2(null_fd, 2);
+    close(null_fd);
+
     // @memory_leak
     // [SBApplication applicationWithBundleIdentifier] leaks memory and there is nothing we
     // can do about it.. So much for all the automatic memory management techniques in objc
@@ -244,6 +254,15 @@ int scripting_addition_load(void)
     [dock setSendMode:kAEWaitReply];
     [dock sendEvent:'YBSA' id:'load' parameters:0];
     [dock release];
+
+
+    //
+    // restore stderr back to normal
+    //
+
+    fflush(stderr);
+    dup2(stderr_fd, 2);
+    close(stderr_fd);
 
     return 0;
 }
