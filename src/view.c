@@ -451,7 +451,7 @@ void view_serialize(FILE *rsp, struct view *view)
             space_manager_mission_control_index(view->sid),
             display_arrangement(space_display_id(view->sid)),
             windows,
-            view_type_str[view->type]);
+            view_type_str[view->layout]);
 }
 
 void view_update(struct view *view)
@@ -480,16 +480,16 @@ struct view *view_create(uint64_t sid)
     view->root = malloc(sizeof(struct window_node));
     memset(view->root, 0, sizeof(struct window_node));
 
-    int mci = space_manager_mission_control_index(sid);
     view->enable_padding = true;
     view->enable_gap = true;
-    view->top_padding = view_lookup_padding(g_space_manager.top_padding, mci);
-    view->bottom_padding = view_lookup_padding(g_space_manager.bottom_padding, mci);
-    view->left_padding = view_lookup_padding(g_space_manager.left_padding, mci);
-    view->right_padding = view_lookup_padding(g_space_manager.right_padding, mci);
-    view->type = view_lookup_layout(g_space_manager.layout, mci);
-    view->window_gap = view_lookup_gap(g_space_manager.window_gap, mci);
     view->sid = sid;
+
+    if (!view->custom_layout)         view->layout         = g_space_manager.layout;
+    if (!view->custom_top_padding)    view->top_padding    = g_space_manager.top_padding;
+    if (!view->custom_bottom_padding) view->bottom_padding = g_space_manager.bottom_padding;
+    if (!view->custom_left_padding)   view->left_padding   = g_space_manager.left_padding;
+    if (!view->custom_right_padding)  view->right_padding  = g_space_manager.right_padding;
+    if (!view->custom_window_gap)     view->window_gap     = g_space_manager.window_gap;
     view_update(view);
 
     return view;

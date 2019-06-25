@@ -829,7 +829,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
 
-    if ((g_mouse_state.current_action != MOUSE_MODE_RESIZE) && (view && view->type == VIEW_BSP)) {
+    if ((g_mouse_state.current_action != MOUSE_MODE_RESIZE) && (view && view->layout == VIEW_BSP)) {
         CGRect frame = window_ax_frame(g_mouse_state.window);
         float dx = frame.origin.x - g_mouse_state.window_frame.origin.x;
         float dy = frame.origin.y - g_mouse_state.window_frame.origin.y;

@@ -69,23 +69,25 @@ static const char *view_type_str[] =
 struct view
 {
     uint64_t sid;
-    enum view_type type;
     struct window_node *root;
+    enum view_type layout;
     uint32_t insertion_point;
     uint32_t top_padding;
     uint32_t bottom_padding;
     uint32_t left_padding;
     uint32_t right_padding;
     uint32_t window_gap;
+    bool custom_layout;
+    bool custom_top_padding;
+    bool custom_bottom_padding;
+    bool custom_left_padding;
+    bool custom_right_padding;
+    bool custom_window_gap;
     bool enable_padding;
     bool enable_gap;
     bool is_valid;
     bool is_dirty;
 };
-
-#define view_lookup_layout(p, i) (p[i] == VIEW_DEFAULT ? p[0] : p[i])
-#define view_lookup_padding(p, i) (p[i] == -1 ? p[0] : p[i])
-#define view_lookup_gap(p, i) (p[i] == -1 ? p[0] : p[i])
 
 float window_node_border_window_offset(struct ax_window *window);
 void window_node_flush(struct window_node *node);

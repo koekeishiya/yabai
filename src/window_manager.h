@@ -118,6 +118,7 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct ax_
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode);
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);
+void window_manager_set_border_window_width(struct window_manager *wm, int width);
 void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_normal_border_window_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_window_opacity(struct window_manager *wm, struct ax_window *window, float opacity);
