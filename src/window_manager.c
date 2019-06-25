@@ -1264,6 +1264,7 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_manager_find_window(wm, window_list[i]);
         if (!window || !window_manager_should_manage_window(window)) continue;
+        if (window->is_minimized || window->application->is_hidden)  continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
         if (existing_view && existing_view->sid != sid) {
