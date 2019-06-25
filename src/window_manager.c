@@ -355,6 +355,7 @@ void window_manager_set_border_window_width(struct window_manager *wm, int width
         }
     }
 }
+
 void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color)
 {
     wm->active_window_border_color = color;
