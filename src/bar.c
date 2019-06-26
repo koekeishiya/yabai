@@ -20,10 +20,11 @@ static int bar_find_battery_life(bool *has_battery, bool *charging)
     CFTypeRef ps_list = IOPSCopyPowerSourcesList(ps_info);
 
     int ps_count = CFArrayGetCount(ps_list);
-    if (!ps_count) return 0;
 
     *has_battery = false;
     *charging = false;
+    
+    if (!ps_count) return 0;
 
     int cur_capacity = 0;
     int max_capacity = 0;
