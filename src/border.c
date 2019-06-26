@@ -221,7 +221,7 @@ void border_window_create(struct ax_window *window)
     };
 
     uint32_t clear_tags[2] = { 0, 0 };
-    *((int8_t *)(clear_tags) + 0x5) = *((int8_t *)(clear_tags) + 0x5) | 0x20;
+    *((int8_t *)(clear_tags) + 0x5) = 0x20;
 
     SLSNewWindow(g_connection, 2, 0.0f, 0.0f, frame_region, &border->id);
     SLSSetWindowResolution(g_connection, border->id, 2.0f);

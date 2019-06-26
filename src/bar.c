@@ -330,7 +330,7 @@ void bar_create(struct bar *bar)
     };
 
     uint32_t clear_tags[2] = { 0, 0 };
-    *((int8_t *)(clear_tags) + 0x5) = *((int8_t *)(clear_tags) + 0x5) | 0x20;
+    *((int8_t *)(clear_tags) + 0x5) = 0x20;
 
     CFTypeRef frame_region;
     CGRect bounds = display_bounds(display_manager_main_display_id());
