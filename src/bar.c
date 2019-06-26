@@ -22,9 +22,6 @@ static int bar_find_battery_life(bool *has_battery, bool *charging)
     int ps_count = CFArrayGetCount(ps_list);
     if (!ps_count) return 0;
 
-    *has_battery = false;
-    *charging = false;
-
     int cur_capacity = 0;
     int max_capacity = 0;
     int percent = 0;
@@ -231,8 +228,8 @@ void bar_refresh(struct bar *bar)
         time_line_width = time_line.bounds.size.width;
     }
 
-    bool has_batt;
-    bool charging;
+    bool has_batt = false;
+    bool charging = false;
     int percent = bar_find_battery_life(&has_batt, &charging);
     if (has_batt) {
         char batt[255];
