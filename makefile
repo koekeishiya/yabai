@@ -40,8 +40,24 @@ sign:
 	codesign -fs "yabai-cert" $(BUILD_PATH)/yabai
 
 clean:
-	rm -rf $(BUILD_PATH)
+	@if [ -d $(BUILD_PATH) ]; then echo "Removing build path $(BUILD_PATH) ..." && rm -rf $(BUILD_PATH); fi
+	@if [ -L /tmp/yabai_$(USER).lock ]; then echo "Unlinking /tmp/yabai_$(USER).lock ..." && unlink /tmp/yabai_$(USER).lock; fi
+	@if [ -L /tmp/yabai_$(USER).socket ]; then echo "Unlinking /tmp/yabai_$(USER).socket ..." && unlink /tmp/yabai_$(USER).socket; fi
+	@if [ -L /tmp/yabai-sa_$(USER).socket ]; then echo "Unlinking /tmp/yabai-sa_$(USER).socket ..." && unlink /tmp/yabai-sa_$(USER).socket; fi
+	@if [ -L /usr/local/share/man/man1/yabai.1 ]; then echo "Removing man page ..." && unlink /usr/local/share/man/man1/yabai.1; fi
+	@if [ -L /usr/local/bin/yabai ]; then echo "Unlinking binary ..." && unlink /usr/local/bin/yabai; fi
+	@if [ -f ~/.yabairc ]; then echo "Removing configuration file ..." && rm ~/.yabairc; fi
+
 
 $(BUILD_PATH)/yabai: $(YABAI_SRC)
-	mkdir -p $(BUILD_PATH)
+	@echo "Starting build in $(BUILD_PATH) ..."
+	@mkdir -p $(BUILD_PATH)
 	clang $^ $(BUILD_FLAGS) $(FRAMEWORK_PATH) $(FRAMEWORK) -o $@
+	@echo "Creating binary /usr/local/bin/yabai ..."
+	@ln -s ./bin/yabai /usr/local/bin/yabai
+	@echo "Creating man page ..."
+	@ln -s ./doc/yabai.1 /usr/local/share/man/man1/yabai.1
+	@echo "Creating default config file ~/.yabairc ..."
+	@cp ./examples/yabairc ~/.yabairc
+
+
