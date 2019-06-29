@@ -54,10 +54,10 @@ $(BUILD_PATH)/yabai: $(YABAI_SRC)
 	@mkdir -p $(BUILD_PATH)
 	clang $^ $(BUILD_FLAGS) $(FRAMEWORK_PATH) $(FRAMEWORK) -o $@
 	@echo "Creating binary /usr/local/bin/yabai ..."
-	@ln -s ./bin/yabai /usr/local/bin/yabai
+	@ln -s $(PWD)/bin/yabai /usr/local/bin/yabai
 	@echo "Creating man page ..."
-	@ln -s ./doc/yabai.1 /usr/local/share/man/man1/yabai.1
+	@ln -s $(PWD)/doc/yabai.1 /usr/local/share/man/man1/yabai.1
 	@echo "Creating default config file ~/.yabairc ..."
-	@cp ./examples/yabairc ~/.yabairc
+	@cp $(PWD)/examples/yabairc ~/.yabairc
 
 
