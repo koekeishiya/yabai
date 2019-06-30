@@ -162,7 +162,12 @@ void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, 
 {
     struct view *view = space_manager_find_view(sm, sid);
     view->layout = layout;
-    if (view->layout == VIEW_BSP) window_manager_check_for_windows_on_space(sm, &g_window_manager, sid);
+
+    if (view->layout == VIEW_BSP) {
+        window_manager_check_for_windows_on_space(sm, &g_window_manager, sid);
+    } else if (view->layout == VIEW_FLOAT) {
+        view_clear(view);
+    }
 }
 
 void space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, int type, int gap)
@@ -200,7 +205,11 @@ void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view
                 struct view *view = bucket->value;
                 if (!view->custom_layout) {
                     view->layout = layout;
-                    if (view->layout == VIEW_BSP) window_manager_check_for_windows_on_space(sm, &g_window_manager, view->sid);
+                    if (view->layout == VIEW_BSP) {
+                        window_manager_check_for_windows_on_space(sm, &g_window_manager, view->sid);
+                    } else if (view->layout == VIEW_FLOAT) {
+                        view_clear(view);
+                    }
                 }
             }
             bucket = bucket->next;

@@ -79,7 +79,7 @@ void event_loop_post(struct event_loop *event_loop, struct event *event)
         sem_post(event_loop->semaphore);
     } else if (event->status) {
         *event->status = EVENT_IGNORED;
-        free(event);
+        event_destroy(event);
     }
 }
 

@@ -224,10 +224,9 @@ struct view *window_manager_find_managed_window(struct window_manager *wm, struc
     return table_find(&wm->managed_window, &window->id);
 }
 
-void window_manager_remove_managed_window(struct window_manager *wm, struct ax_window *window)
+void window_manager_remove_managed_window(struct window_manager *wm, uint32_t wid)
 {
-    table_remove(&wm->managed_window, &window->id);
-    window_manager_purify_window(wm, window);
+    table_remove(&wm->managed_window, &wid);
 }
 
 void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view)
@@ -999,7 +998,8 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
         space_manager_untile_window(sm, view, window);
-        window_manager_remove_managed_window(wm, window);
+        window_manager_remove_managed_window(wm, window->id);
+        window_manager_purify_window(wm, window);
     }
 
     assert(space_is_visible(dst_sid));
@@ -1027,7 +1027,8 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
         space_manager_untile_window(sm, view, window);
-        window_manager_remove_managed_window(wm, window);
+        window_manager_remove_managed_window(wm, window->id);
+        window_manager_purify_window(wm, window);
     }
 
     space_manager_move_window_to_space(dst_sid, window);
@@ -1128,7 +1129,8 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
         struct view *view = window_manager_find_managed_window(wm, window);
         if (view) {
             space_manager_untile_window(sm, view, window);
-            window_manager_remove_managed_window(wm, window);
+            window_manager_remove_managed_window(wm, window->id);
+            window_manager_purify_window(wm, window);
         }
         window_manager_make_children_floating(wm, window, true);
         window_manager_make_floating(wm, window->id, true);
@@ -1148,7 +1150,8 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
         struct view *view = window_manager_find_managed_window(wm, window);
         if (view) {
             space_manager_untile_window(sm, view, window);
-            window_manager_remove_managed_window(wm, window);
+            window_manager_remove_managed_window(wm, window->id);
+            window_manager_purify_window(wm, window);
         }
         window_manager_make_sticky(window->id, true);
     }
@@ -1164,7 +1167,8 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
         space_manager_untile_window(sm, view, window);
-        window_manager_remove_managed_window(wm, window);
+        window_manager_remove_managed_window(wm, window->id);
+        window_manager_purify_window(wm, window);
     }
     AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
 }
@@ -1247,7 +1251,8 @@ void window_manager_validate_windows_on_space(struct space_manager *sm, struct w
             if (!window) continue;
 
             space_manager_untile_window(sm, view, window);
-            window_manager_remove_managed_window(wm, window);
+            window_manager_remove_managed_window(wm, window->id);
+            window_manager_purify_window(wm, window);
         }
     }
 
@@ -1269,7 +1274,8 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
         if (existing_view && existing_view->sid != sid) {
             space_manager_untile_window(sm, existing_view, window);
-            window_manager_remove_managed_window(wm, window);
+            window_manager_remove_managed_window(wm, window->id);
+            window_manager_purify_window(wm, window);
         }
 
         if (!existing_view || existing_view->sid != sid) {
@@ -1298,7 +1304,8 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
         struct view *existing_view = window_manager_find_managed_window(wm, window);
         if (existing_view && existing_view->layout == VIEW_BSP && existing_view->sid != space_list[0]) {
             space_manager_untile_window(sm, existing_view, window);
-            window_manager_remove_managed_window(wm, window);
+            window_manager_remove_managed_window(wm, window->id);
+            window_manager_purify_window(wm, window);
         }
 
         if (!existing_view || (existing_view->layout == VIEW_BSP && existing_view->sid != space_list[0])) {

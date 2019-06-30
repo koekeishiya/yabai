@@ -105,5 +105,6 @@ bool view_is_dirty(struct view *view);
 void view_flush(struct view *view);
 void view_update(struct view *view);
 struct view *view_create(uint64_t sid);
+void view_clear(struct view *view);
 
 #endif

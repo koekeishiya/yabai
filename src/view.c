@@ -171,6 +171,15 @@ static void window_node_update(struct view *view, struct window_node *node)
     }
 }
 
+static void window_node_destroy(struct window_node *node)
+{
+    if (node->left)  window_node_destroy(node->left);
+    if (node->right) window_node_destroy(node->right);
+
+    if (node->window_id) window_manager_remove_managed_window(&g_window_manager, node->window_id);
+    free(node);
+}
+
 float window_node_border_window_offset(struct ax_window *window)
 {
     float offset = window->border.enabled ? window->border.width : 0.0f;
@@ -493,4 +502,19 @@ struct view *view_create(uint64_t sid)
     view_update(view);
 
     return view;
+}
+
+void view_clear(struct view *view)
+{
+    if (view->root) {
+        if (view->root->left) {
+            window_node_destroy(view->root->left);
+            view->root->left = NULL;
+        }
+
+        if (view->root->right) {
+            window_node_destroy(view->root->right);
+            view->root->right = NULL;
+        }
+    }
 }

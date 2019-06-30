@@ -98,7 +98,7 @@ void window_manager_focus_window_with_raise(uint32_t window_id);
 struct ax_window *window_manager_focused_window(struct window_manager *wm);
 struct ax_application *window_manager_focused_application(struct window_manager *wm);
 struct view *window_manager_find_managed_window(struct window_manager *wm, struct ax_window *window);
-void window_manager_remove_managed_window(struct window_manager *wm, struct ax_window *window);
+void window_manager_remove_managed_window(struct window_manager *wm, uint32_t wid);
 void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view);
 bool window_manager_find_lost_front_switched_event(struct window_manager *wm, pid_t pid);
 void window_manager_remove_lost_front_switched_event(struct window_manager *wm, pid_t pid);

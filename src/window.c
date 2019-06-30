@@ -176,15 +176,18 @@ char *window_title(struct ax_window *window)
 CGRect window_ax_frame(struct ax_window *window)
 {
     CGRect frame = {};
+    CFTypeRef position_ref = NULL;
+    CFTypeRef size_ref = NULL;
 
-    CFTypeRef position_ref;
-    if (AXUIElementCopyAttributeValue(window->ref, kAXPositionAttribute, &position_ref) == kAXErrorSuccess) {
+    AXUIElementCopyAttributeValue(window->ref, kAXPositionAttribute, &position_ref);
+    AXUIElementCopyAttributeValue(window->ref, kAXSizeAttribute, &size_ref);
+
+    if (position_ref != NULL) {
         AXValueGetValue(position_ref, kAXValueTypeCGPoint, &frame.origin);
         CFRelease(position_ref);
     }
 
-    CFTypeRef size_ref;
-    if (AXUIElementCopyAttributeValue(window->ref, kAXSizeAttribute, &size_ref) == kAXErrorSuccess) {
+    if (size_ref != NULL) {
         AXValueGetValue(size_ref, kAXValueTypeCGSize, &frame.size);
         CFRelease(size_ref);
     }
