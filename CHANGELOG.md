@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.3] - 2019-06-30
 ### Changed
 - Prevent *status_bar* and *window borders* from displaying in native fullscreen spaces [#71](https://github.com/koekeishiya/yabai/issues/71)
 - Fixed an issue with the *status_bar* where *has_battery* and *charging* would not be default initialized when macOS report that there are zero power sources [#60](https://github.com/koekeishiya/yabai/issues/60)
@@ -24,6 +26,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/koekeishiya/yabai/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/koekeishiya/yabai/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/koekeishiya/yabai/releases/tag/v1.0.1
