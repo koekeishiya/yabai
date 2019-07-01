@@ -4,34 +4,34 @@
 #define OBSERVER_CALLBACK(name) void name(AXObserverRef observer, AXUIElementRef element, CFStringRef notification, void *context)
 typedef OBSERVER_CALLBACK(observer_callback);
 
-#define application_WINDOW_CREATED_INDEX       0
-#define application_WINDOW_FOCUSED_INDEX       1
-#define application_WINDOW_MOVED_INDEX         2
-#define application_WINDOW_RESIZED_INDEX       3
-#define application_WINDOW_TITLE_CHANGED_INDEX 4
-#define application_WINDOW_MENU_OPENED_INDEX   5
+#define AX_APPLICATION_WINDOW_CREATED_INDEX       0
+#define AX_APPLICATION_WINDOW_FOCUSED_INDEX       1
+#define AX_APPLICATION_WINDOW_MOVED_INDEX         2
+#define AX_APPLICATION_WINDOW_RESIZED_INDEX       3
+#define AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX 4
+#define AX_APPLICATION_WINDOW_MENU_OPENED_INDEX   5
 
-#define application_WINDOW_CREATED       (1 << application_WINDOW_CREATED_INDEX)
-#define application_WINDOW_FOCUSED       (1 << application_WINDOW_FOCUSED_INDEX)
-#define application_WINDOW_MOVED         (1 << application_WINDOW_MOVED_INDEX)
-#define application_WINDOW_RESIZED       (1 << application_WINDOW_RESIZED_INDEX)
-#define application_WINDOW_TITLE_CHANGED (1 << application_WINDOW_TITLE_CHANGED_INDEX)
-#define application_ALL                  (application_WINDOW_CREATED |\
-                                             application_WINDOW_FOCUSED |\
-                                             application_WINDOW_MOVED |\
-                                             application_WINDOW_RESIZED |\
-                                             application_WINDOW_TITLE_CHANGED)
+#define AX_APPLICATION_WINDOW_CREATED       (1 << AX_APPLICATION_WINDOW_CREATED_INDEX)
+#define AX_APPLICATION_WINDOW_FOCUSED       (1 << AX_APPLICATION_WINDOW_FOCUSED_INDEX)
+#define AX_APPLICATION_WINDOW_MOVED         (1 << AX_APPLICATION_WINDOW_MOVED_INDEX)
+#define AX_APPLICATION_WINDOW_RESIZED       (1 << AX_APPLICATION_WINDOW_RESIZED_INDEX)
+#define AX_APPLICATION_WINDOW_TITLE_CHANGED (1 << AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX)
+#define AX_APPLICATION_ALL                  (AX_APPLICATION_WINDOW_CREATED |\
+                                             AX_APPLICATION_WINDOW_FOCUSED |\
+                                             AX_APPLICATION_WINDOW_MOVED |\
+                                             AX_APPLICATION_WINDOW_RESIZED |\
+                                             AX_APPLICATION_WINDOW_TITLE_CHANGED)
 
 static const CFStringRef kAXFocusedTabChangedNotification = CFSTR("AXFocusedTabChanged");
 
-static CFStringRef application_notification[] =
+static CFStringRef ax_application_notification[] =
 {
-    [application_WINDOW_CREATED_INDEX]       = kAXCreatedNotification,
-    [application_WINDOW_FOCUSED_INDEX]       = kAXFocusedWindowChangedNotification,
-    [application_WINDOW_MOVED_INDEX]         = kAXWindowMovedNotification,
-    [application_WINDOW_RESIZED_INDEX]       = kAXWindowResizedNotification,
-    [application_WINDOW_TITLE_CHANGED_INDEX] = kAXTitleChangedNotification,
-    [application_WINDOW_MENU_OPENED_INDEX]   = kAXMenuOpenedNotification
+    [AX_APPLICATION_WINDOW_CREATED_INDEX]       = kAXCreatedNotification,
+    [AX_APPLICATION_WINDOW_FOCUSED_INDEX]       = kAXFocusedWindowChangedNotification,
+    [AX_APPLICATION_WINDOW_MOVED_INDEX]         = kAXWindowMovedNotification,
+    [AX_APPLICATION_WINDOW_RESIZED_INDEX]       = kAXWindowResizedNotification,
+    [AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX] = kAXTitleChangedNotification,
+    [AX_APPLICATION_WINDOW_MENU_OPENED_INDEX]   = kAXMenuOpenedNotification
 };
 
 struct application

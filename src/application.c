@@ -69,7 +69,7 @@ static OBSERVER_CALLBACK(application_notification_handler)
 static void
 application_observe_notification(struct application *application, int notification)
 {
-    AXError result = AXObserverAddNotification(application->observer_ref, application->ref, application_notification[notification], application);
+    AXError result = AXObserverAddNotification(application->observer_ref, application->ref, ax_application_notification[notification], application);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         application->notification |= 1 << notification;
     } else if (result != kAXErrorNotImplemented) {
@@ -80,14 +80,14 @@ application_observe_notification(struct application *application, int notificati
 static void
 application_unobserve_notification(struct application *application, int notification)
 {
-    AXObserverRemoveNotification(application->observer_ref, application->ref, application_notification[notification]);
+    AXObserverRemoveNotification(application->observer_ref, application->ref, ax_application_notification[notification]);
     application->notification &= ~(1 << notification);
 }
 
 bool application_observe(struct application *application)
 {
     if (AXObserverCreate(application->pid, application_notification_handler, &application->observer_ref) == kAXErrorSuccess) {
-        for (int i = 0; i < array_count(application_notification); ++i) {
+        for (int i = 0; i < array_count(ax_application_notification); ++i) {
             application_observe_notification(application, i);
         }
 
@@ -95,13 +95,13 @@ bool application_observe(struct application *application)
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(application->observer_ref), kCFRunLoopDefaultMode);
     }
 
-    return (application->notification & application_ALL) == application_ALL;
+    return (application->notification & AX_APPLICATION_ALL) == AX_APPLICATION_ALL;
 }
 
 void application_unobserve(struct application *application)
 {
     if (application->is_observing) {
-        for (int i = 0; i < array_count(application_notification); ++i) {
+        for (int i = 0; i < array_count(ax_application_notification); ++i) {
             if (!(application->notification & (1 << i))) continue;
             application_unobserve_notification(application, i);
         }

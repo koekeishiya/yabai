@@ -11,30 +11,22 @@ extern CFArrayRef SLSCopySpacesForWindows(int cid, int selector, CFArrayRef wind
 
 const CFStringRef kAXFullscreenAttribute = CFSTR("AXFullScreen");
 
-#define window_MINIMIZED_INDEX      0
-#define window_DEMINIMIZED_INDEX    1
-#define window_SHEET_CREATED_INDEX  2
-#define window_DRAWER_CREATED_INDEX 3
-#define window_DESTROYED_INDEX      4
+#define AX_WINDOW_MINIMIZED_INDEX      0
+#define AX_WINDOW_DEMINIMIZED_INDEX    1
+#define AX_WINDOW_DESTROYED_INDEX      2
 
-#define window_DESTROYED      (1 << window_DESTROYED_INDEX)
-#define window_MINIMIZED      (1 << window_MINIMIZED_INDEX)
-#define window_DEMINIMIZED    (1 << window_DEMINIMIZED_INDEX)
-#define window_SHEET_CREATED  (1 << window_SHEET_CREATED_INDEX)
-#define window_DRAWER_CREATED (1 << window_DRAWER_CREATED_INDEX)
-#define window_ALL            (window_DESTROYED |\
-                                  window_MINIMIZED |\
-                                  window_DEMINIMIZED |\
-                                  window_SHEET_CREATED |\
-                                  window_DRAWER_CREATED)
+#define AX_WINDOW_DESTROYED      (1 << AX_WINDOW_DESTROYED_INDEX)
+#define AX_WINDOW_MINIMIZED      (1 << AX_WINDOW_MINIMIZED_INDEX)
+#define AX_WINDOW_DEMINIMIZED    (1 << AX_WINDOW_DEMINIMIZED_INDEX)
+#define AX_WINDOW_ALL            (AX_WINDOW_DESTROYED |\
+                                  AX_WINDOW_MINIMIZED |\
+                                  AX_WINDOW_DEMINIMIZED)
 
-static CFStringRef window_notification[] =
+static CFStringRef ax_window_notification[] =
 {
-    [window_DESTROYED_INDEX]      = kAXUIElementDestroyedNotification,
-    [window_MINIMIZED_INDEX]      = kAXWindowMiniaturizedNotification,
-    [window_DEMINIMIZED_INDEX]    = kAXWindowDeminiaturizedNotification,
-    [window_SHEET_CREATED_INDEX]  = kAXSheetCreatedNotification,
-    [window_DRAWER_CREATED_INDEX] = kAXDrawerCreatedNotification
+    [AX_WINDOW_DESTROYED_INDEX]      = kAXUIElementDestroyedNotification,
+    [AX_WINDOW_MINIMIZED_INDEX]      = kAXWindowMiniaturizedNotification,
+    [AX_WINDOW_DEMINIMIZED_INDEX]    = kAXWindowDeminiaturizedNotification
 };
 
 struct window
