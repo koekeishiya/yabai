@@ -67,9 +67,9 @@ static OBSERVER_CALLBACK(application_notification_handler)
 }
 
 static void
-application_observe_notification(struct ax_application *application, int notification)
+application_observe_notification(struct application *application, int notification)
 {
-    AXError result = AXObserverAddNotification(application->observer_ref, application->ref, ax_application_notification[notification], application);
+    AXError result = AXObserverAddNotification(application->observer_ref, application->ref, application_notification[notification], application);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         application->notification |= 1 << notification;
     } else if (result != kAXErrorNotImplemented) {
@@ -78,16 +78,16 @@ application_observe_notification(struct ax_application *application, int notific
 }
 
 static void
-application_unobserve_notification(struct ax_application *application, int notification)
+application_unobserve_notification(struct application *application, int notification)
 {
-    AXObserverRemoveNotification(application->observer_ref, application->ref, ax_application_notification[notification]);
+    AXObserverRemoveNotification(application->observer_ref, application->ref, application_notification[notification]);
     application->notification &= ~(1 << notification);
 }
 
-bool application_observe(struct ax_application *application)
+bool application_observe(struct application *application)
 {
     if (AXObserverCreate(application->pid, application_notification_handler, &application->observer_ref) == kAXErrorSuccess) {
-        for (int i = 0; i < array_count(ax_application_notification); ++i) {
+        for (int i = 0; i < array_count(application_notification); ++i) {
             application_observe_notification(application, i);
         }
 
@@ -95,13 +95,13 @@ bool application_observe(struct ax_application *application)
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(application->observer_ref), kCFRunLoopDefaultMode);
     }
 
-    return (application->notification & AX_APPLICATION_ALL) == AX_APPLICATION_ALL;
+    return (application->notification & application_ALL) == application_ALL;
 }
 
-void application_unobserve(struct ax_application *application)
+void application_unobserve(struct application *application)
 {
     if (application->is_observing) {
-        for (int i = 0; i < array_count(ax_application_notification); ++i) {
+        for (int i = 0; i < array_count(application_notification); ++i) {
             if (!(application->notification & (1 << i))) continue;
             application_unobserve_notification(application, i);
         }
@@ -112,7 +112,7 @@ void application_unobserve(struct ax_application *application)
     }
 }
 
-uint32_t application_main_window(struct ax_application *application)
+uint32_t application_main_window(struct application *application)
 {
     CFTypeRef window_ref;
     bool result = AXUIElementCopyAttributeValue(application->ref, kAXMainWindowAttribute, &window_ref) == kAXErrorSuccess;
@@ -124,7 +124,7 @@ uint32_t application_main_window(struct ax_application *application)
     return window_id;
 }
 
-uint32_t application_focused_window(struct ax_application *application)
+uint32_t application_focused_window(struct application *application)
 {
     CFTypeRef window_ref = NULL;
     AXUIElementCopyAttributeValue(application->ref, kAXFocusedWindowAttribute, &window_ref);
@@ -136,7 +136,7 @@ uint32_t application_focused_window(struct ax_application *application)
     return window_id;
 }
 
-bool application_is_frontmost(struct ax_application *application)
+bool application_is_frontmost(struct application *application)
 {
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
@@ -145,20 +145,20 @@ bool application_is_frontmost(struct ax_application *application)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-bool application_is_hidden(struct ax_application *application)
+bool application_is_hidden(struct application *application)
 {
     return IsProcessVisible(&application->psn) == 0;
 }
 #pragma clang diagnostic pop
 
-struct ax_window **application_window_list(struct ax_application *application, int *window_count)
+struct window **application_window_list(struct application *application, int *window_count)
 {
     CFTypeRef window_list_ref = NULL;
     AXUIElementCopyAttributeValue(application->ref, kAXWindowsAttribute, &window_list_ref);
     if (!window_list_ref) return NULL;
 
     *window_count = CFArrayGetCount(window_list_ref);
-    struct ax_window **window_list = malloc((*window_count) * sizeof(struct ax_window *));
+    struct window **window_list = malloc((*window_count) * sizeof(struct window *));
 
     for (int i = 0; i < *window_count; ++i) {
         AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list_ref, i);
@@ -170,10 +170,10 @@ struct ax_window **application_window_list(struct ax_application *application, i
     return window_list;
 }
 
-struct ax_application *application_create(struct process *process)
+struct application *application_create(struct process *process)
 {
-    struct ax_application *application = malloc(sizeof(struct ax_application));
-    memset(application, 0, sizeof(struct ax_application));
+    struct application *application = malloc(sizeof(struct application));
+    memset(application, 0, sizeof(struct application));
     application->ref = AXUIElementCreateApplication(process->pid);
     application->psn = process->psn;
     application->pid = process->pid;
@@ -182,7 +182,7 @@ struct ax_application *application_create(struct process *process)
     return application;
 }
 
-void application_destroy(struct ax_application *application)
+void application_destroy(struct application *application)
 {
     CFRelease(application->ref);
     free(application);

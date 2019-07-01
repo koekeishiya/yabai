@@ -978,7 +978,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     struct token command;
     struct token selector = get_token(&message);
 
-    struct ax_window *window;
+    struct window *window;
     uint32_t sel_wid = token_to_int(selector);
 
     if (sel_wid != 0) {
@@ -993,7 +993,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_NORTH);
+                struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_NORTH);
                 if (closest_window) {
                     window_manager_focus_window_with_raise(closest_window->id);
                 } else {
@@ -1004,7 +1004,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_EAST);
+                struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_EAST);
                 if (closest_window) {
                     window_manager_focus_window_with_raise(closest_window->id);
                 } else {
@@ -1015,7 +1015,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_SOUTH);
+                struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_SOUTH);
                 if (closest_window) {
                     window_manager_focus_window_with_raise(closest_window->id);
                 } else {
@@ -1026,7 +1026,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_WEST);
+                struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_WEST);
                 if (closest_window) {
                     window_manager_focus_window_with_raise(closest_window->id);
                 } else {
@@ -1036,7 +1036,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_MOUSE)) {
-            struct ax_window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
+            struct window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
             if (mouse_window) {
                 window_manager_focus_window_with_raise(mouse_window->id);
             } else {
@@ -1044,7 +1044,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
             if (window) {
-                struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
+                struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
                     window_manager_focus_window_with_raise(prev_window->id);
                 } else {
@@ -1055,7 +1055,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
             if (window) {
-                struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
+                struct window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
                     window_manager_focus_window_with_raise(next_window->id);
                 } else {
@@ -1065,7 +1065,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
-            struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
+            struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
             if (last_window) {
                 window_manager_focus_window_with_raise(last_window->id);
             } else {
@@ -1078,7 +1078,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_NORTH);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_NORTH);
                 if (closest_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
                 } else {
@@ -1089,7 +1089,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_EAST);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_EAST);
                 if (closest_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
                 } else {
@@ -1100,7 +1100,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_SOUTH);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_SOUTH);
                 if (closest_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
                 } else {
@@ -1111,7 +1111,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
                 if (closest_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, closest_window);
                 } else {
@@ -1122,7 +1122,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_MOUSE)) {
             if (window) {
-                struct ax_window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
+                struct window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
                 if (mouse_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, mouse_window);
                 } else {
@@ -1133,7 +1133,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
             if (window) {
-                struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
+                struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, prev_window);
                 } else {
@@ -1144,7 +1144,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
             if (window) {
-                struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
+                struct window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, next_window);
                 } else {
@@ -1155,7 +1155,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
             if (window) {
-                struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
+                struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
                 if (last_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, last_window);
                 } else {
@@ -1171,7 +1171,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_DIR_NORTH)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_NORTH);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_NORTH);
                 if (closest_window) {
                     window_manager_warp_window(&g_space_manager, window, closest_window);
                 } else {
@@ -1182,7 +1182,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_EAST)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_EAST);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_EAST);
                 if (closest_window) {
                     window_manager_warp_window(&g_space_manager, window, closest_window);
                 } else {
@@ -1193,7 +1193,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_SOUTH)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_SOUTH);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_SOUTH);
                 if (closest_window) {
                     window_manager_warp_window(&g_space_manager, window, closest_window);
                 } else {
@@ -1204,7 +1204,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_DIR_WEST)) {
             if (window) {
-                struct ax_window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
+                struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, window, DIR_WEST);
                 if (closest_window) {
                     window_manager_warp_window(&g_space_manager, window, closest_window);
                 } else {
@@ -1215,7 +1215,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_MOUSE)) {
             if (window) {
-                struct ax_window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
+                struct window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
                 if (mouse_window) {
                     window_manager_warp_window(&g_space_manager, window, mouse_window);
                 } else {
@@ -1226,7 +1226,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
             if (window) {
-                struct ax_window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
+                struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
                     window_manager_warp_window(&g_space_manager, window, prev_window);
                 } else {
@@ -1237,7 +1237,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
             if (window) {
-                struct ax_window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
+                struct window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
                     window_manager_warp_window(&g_space_manager, window, next_window);
                 } else {
@@ -1248,7 +1248,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
             if (window) {
-                struct ax_window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
+                struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
                 if (last_window) {
                     window_manager_warp_window(&g_space_manager, window, last_window);
                 } else {
@@ -1507,7 +1507,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
-                struct ax_window *window = window_manager_find_window(&g_window_manager, token_to_int(value));
+                struct window *window = window_manager_find_window(&g_window_manager, token_to_int(value));
                 if (window) {
                     display_serialize(rsp, window_display_id(window));
                     fprintf(rsp, "\n");
@@ -1515,7 +1515,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not find window to retrieve display details\n");
                 }
             } else {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                struct window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     display_serialize(rsp, window_display_id(window));
                     fprintf(rsp, "\n");
@@ -1571,14 +1571,14 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
             struct token value = get_token(&message);
             if (token_is_valid(value)) {
-                struct ax_window *window = window_manager_find_window(&g_window_manager, token_to_int(value));
+                struct window *window = window_manager_find_window(&g_window_manager, token_to_int(value));
                 if (window) {
                     space_manager_query_spaces_for_window(rsp, window);
                 } else {
                     daemon_fail(rsp, "could not find window to retrieve space details\n");
                 }
             } else {
-                struct ax_window *window = window_manager_focused_window(&g_window_manager);
+                struct window *window = window_manager_focused_window(&g_window_manager);
                 if (window) {
                     space_manager_query_spaces_for_window(rsp, window);
                 } else {
@@ -1621,7 +1621,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                 window_manager_query_windows_for_space(rsp, space_manager_active_space());
             }
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
-            struct ax_window *window = window_manager_focused_window(&g_window_manager);
+            struct window *window = window_manager_focused_window(&g_window_manager);
             if (window) {
                 window_serialize(window, rsp);
                 fprintf(rsp, "\n");

@@ -9,7 +9,7 @@ void rule_apply(struct rule *rule)
         struct bucket *bucket = g_window_manager.window.buckets[window_index];
         while (bucket) {
             if (bucket->value) {
-                struct ax_window *window = bucket->value;
+                struct window *window = bucket->value;
                 window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule);
             }
 

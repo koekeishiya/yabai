@@ -36,7 +36,7 @@ bool space_manager_query_active_space(FILE *rsp)
     return true;
 }
 
-bool space_manager_query_spaces_for_window(FILE *rsp, struct ax_window *window)
+bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
 {
     int space_count;
     uint64_t *space_list = window_space_list(window, &space_count);
@@ -146,7 +146,7 @@ void space_manager_mark_view_dirty(struct space_manager *sm,  uint64_t sid)
     view->is_dirty = true;
 }
 
-void space_manager_untile_window(struct space_manager *sm, struct view *view, struct ax_window *window)
+void space_manager_untile_window(struct space_manager *sm, struct view *view, struct window *window)
 {
     if (view->layout != VIEW_BSP) return;
 
@@ -320,7 +320,7 @@ void space_manager_balance_space(struct space_manager *sm, uint64_t sid)
     view_flush(view);
 }
 
-struct view *space_manager_tile_window_on_space_with_insertion_point(struct space_manager *sm, struct ax_window *window, uint64_t sid, uint32_t insertion_point)
+struct view *space_manager_tile_window_on_space_with_insertion_point(struct space_manager *sm, struct window *window, uint64_t sid, uint32_t insertion_point)
 {
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout != VIEW_BSP) return view;
@@ -336,12 +336,12 @@ struct view *space_manager_tile_window_on_space_with_insertion_point(struct spac
     return view;
 }
 
-struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct ax_window *window, uint64_t sid)
+struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct window *window, uint64_t sid)
 {
     return space_manager_tile_window_on_space_with_insertion_point(sm, window, sid, 0);
 }
 
-void space_manager_toggle_window_split(struct space_manager *sm, struct ax_window *window)
+void space_manager_toggle_window_split(struct space_manager *sm, struct window *window)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (view->layout != VIEW_BSP) return;
@@ -480,7 +480,7 @@ out:
 uint64_t space_manager_active_space(void)
 {
     uint32_t did = 0;
-    struct ax_window *window = window_manager_focused_window(&g_window_manager);
+    struct window *window = window_manager_focused_window(&g_window_manager);
 
     if (window) did = window_display_id(window);
     if (!did)   did = display_manager_active_display_id();
@@ -489,7 +489,7 @@ uint64_t space_manager_active_space(void)
     return display_space_id(did);
 }
 
-static void space_manager_move_border_to_space(uint64_t sid, struct ax_window *window)
+static void space_manager_move_border_to_space(uint64_t sid, struct window *window)
 {
     if (!window->border.id) return;
     CFNumberRef border_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->border.id);
@@ -499,7 +499,7 @@ static void space_manager_move_border_to_space(uint64_t sid, struct ax_window *w
     CFRelease(border_id_ref);
 }
 
-void space_manager_move_window_to_space(uint64_t sid, struct ax_window *window)
+void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 {
     space_manager_move_border_to_space(sid, window);
     CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
@@ -509,7 +509,7 @@ void space_manager_move_window_to_space(uint64_t sid, struct ax_window *window)
     CFRelease(window_id_ref);
 }
 
-void space_manager_remove_window_from_space(uint64_t sid, struct ax_window *window)
+void space_manager_remove_window_from_space(uint64_t sid, struct window *window)
 {
     CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
     CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
@@ -522,7 +522,7 @@ void space_manager_remove_window_from_space(uint64_t sid, struct ax_window *wind
     CFRelease(window_id_ref);
 }
 
-void space_manager_add_window_to_space(uint64_t sid, struct ax_window *window)
+void space_manager_add_window_to_space(uint64_t sid, struct window *window)
 {
     CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
     CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
@@ -640,14 +640,14 @@ void space_manager_assign_process_to_all_spaces(pid_t pid)
     SLSProcessAssignToAllSpaces(g_connection, pid);
 }
 
-bool space_manager_is_window_on_active_space(struct ax_window *window)
+bool space_manager_is_window_on_active_space(struct window *window)
 {
     uint64_t sid = space_manager_active_space();
     bool result = space_manager_is_window_on_space(sid, window);
     return result;
 }
 
-bool space_manager_is_window_on_space(uint64_t sid, struct ax_window *window)
+bool space_manager_is_window_on_space(uint64_t sid, struct window *window)
 {
     bool result = false;
 
@@ -705,7 +705,7 @@ bool space_manager_refresh_application_windows(struct space_manager *sm)
         struct bucket *bucket = g_window_manager.application.buckets[i];
         while (bucket) {
             if (bucket->value) {
-                struct ax_application *application = bucket->value;
+                struct application *application = bucket->value;
                 window_manager_add_application_windows(sm, &g_window_manager, application);
             }
             bucket = bucket->next;

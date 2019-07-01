@@ -3,7 +3,7 @@
 extern struct window_manager g_window_manager;
 extern int g_connection;
 
-static void border_window_ensure_same_space(struct ax_window *window)
+static void border_window_ensure_same_space(struct window *window)
 {
     int w_space_count;
     uint64_t *w_space_list = window_space_list(window, &w_space_count);
@@ -103,7 +103,7 @@ static float border_radius_clamp(CGRect frame, float radius)
     return radius;
 }
 
-void border_window_refresh(struct ax_window *window)
+void border_window_refresh(struct window *window)
 {
     if (!window->border.id) return;
     if (!window->border.enabled) return;
@@ -149,7 +149,7 @@ void border_window_refresh(struct ax_window *window)
     CGPathRelease(path);
 }
 
-void border_window_activate(struct ax_window *window)
+void border_window_activate(struct window *window)
 {
     if (!window->border.id) return;
     if (!window->border.enabled) return;
@@ -166,7 +166,7 @@ void border_window_activate(struct ax_window *window)
     }
 }
 
-void border_window_deactivate(struct ax_window *window)
+void border_window_deactivate(struct window *window)
 {
     if (!window->border.id) return;
     if (!window->border.enabled) return;
@@ -183,21 +183,21 @@ void border_window_deactivate(struct ax_window *window)
     }
 }
 
-void border_window_show(struct ax_window *window)
+void border_window_show(struct window *window)
 {
     if (!window->border.id) return;
     if (!window->border.enabled) return;
     SLSOrderWindow(g_connection, window->border.id, 1, window->id);
 }
 
-void border_window_hide(struct ax_window *window)
+void border_window_hide(struct window *window)
 {
     if (!window->border.id) return;
     if (!window->border.enabled) return;
     SLSOrderWindow(g_connection, window->border.id, 0, window->id);
 }
 
-void border_window_create(struct ax_window *window)
+void border_window_create(struct window *window)
 {
     if (!g_window_manager.enable_window_border) return;
 
@@ -238,7 +238,7 @@ void border_window_create(struct ax_window *window)
     CFRelease(frame_region);
 }
 
-void border_window_destroy(struct ax_window *window)
+void border_window_destroy(struct window *window)
 {
     if (window->border.id) {
         CGContextRelease(window->border.context);

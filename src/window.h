@@ -11,35 +11,35 @@ extern CFArrayRef SLSCopySpacesForWindows(int cid, int selector, CFArrayRef wind
 
 const CFStringRef kAXFullscreenAttribute = CFSTR("AXFullScreen");
 
-#define AX_WINDOW_MINIMIZED_INDEX      0
-#define AX_WINDOW_DEMINIMIZED_INDEX    1
-#define AX_WINDOW_SHEET_CREATED_INDEX  2
-#define AX_WINDOW_DRAWER_CREATED_INDEX 3
-#define AX_WINDOW_DESTROYED_INDEX      4
+#define window_MINIMIZED_INDEX      0
+#define window_DEMINIMIZED_INDEX    1
+#define window_SHEET_CREATED_INDEX  2
+#define window_DRAWER_CREATED_INDEX 3
+#define window_DESTROYED_INDEX      4
 
-#define AX_WINDOW_DESTROYED      (1 << AX_WINDOW_DESTROYED_INDEX)
-#define AX_WINDOW_MINIMIZED      (1 << AX_WINDOW_MINIMIZED_INDEX)
-#define AX_WINDOW_DEMINIMIZED    (1 << AX_WINDOW_DEMINIMIZED_INDEX)
-#define AX_WINDOW_SHEET_CREATED  (1 << AX_WINDOW_SHEET_CREATED_INDEX)
-#define AX_WINDOW_DRAWER_CREATED (1 << AX_WINDOW_DRAWER_CREATED_INDEX)
-#define AX_WINDOW_ALL            (AX_WINDOW_DESTROYED |\
-                                  AX_WINDOW_MINIMIZED |\
-                                  AX_WINDOW_DEMINIMIZED |\
-                                  AX_WINDOW_SHEET_CREATED |\
-                                  AX_WINDOW_DRAWER_CREATED)
+#define window_DESTROYED      (1 << window_DESTROYED_INDEX)
+#define window_MINIMIZED      (1 << window_MINIMIZED_INDEX)
+#define window_DEMINIMIZED    (1 << window_DEMINIMIZED_INDEX)
+#define window_SHEET_CREATED  (1 << window_SHEET_CREATED_INDEX)
+#define window_DRAWER_CREATED (1 << window_DRAWER_CREATED_INDEX)
+#define window_ALL            (window_DESTROYED |\
+                                  window_MINIMIZED |\
+                                  window_DEMINIMIZED |\
+                                  window_SHEET_CREATED |\
+                                  window_DRAWER_CREATED)
 
-static CFStringRef ax_window_notification[] =
+static CFStringRef window_notification[] =
 {
-    [AX_WINDOW_DESTROYED_INDEX]      = kAXUIElementDestroyedNotification,
-    [AX_WINDOW_MINIMIZED_INDEX]      = kAXWindowMiniaturizedNotification,
-    [AX_WINDOW_DEMINIMIZED_INDEX]    = kAXWindowDeminiaturizedNotification,
-    [AX_WINDOW_SHEET_CREATED_INDEX]  = kAXSheetCreatedNotification,
-    [AX_WINDOW_DRAWER_CREATED_INDEX] = kAXDrawerCreatedNotification
+    [window_DESTROYED_INDEX]      = kAXUIElementDestroyedNotification,
+    [window_MINIMIZED_INDEX]      = kAXWindowMiniaturizedNotification,
+    [window_DEMINIMIZED_INDEX]    = kAXWindowDeminiaturizedNotification,
+    [window_SHEET_CREATED_INDEX]  = kAXSheetCreatedNotification,
+    [window_DRAWER_CREATED_INDEX] = kAXDrawerCreatedNotification
 };
 
-struct ax_window
+struct window
 {
-    struct ax_application *application;
+    struct application *application;
     AXUIElementRef ref;
     int connection;
     uint32_t id;
@@ -53,29 +53,29 @@ struct ax_window
     bool rule_fullscreen;
 };
 
-CFStringRef window_display_uuid(struct ax_window *window);
-int window_display_id(struct ax_window *window);
-uint64_t window_space(struct ax_window *window);
-uint64_t *window_space_list(struct ax_window *window, int *count);
-void window_serialize(struct ax_window *window, FILE *rsp);
-char *window_title(struct ax_window *window);
-CGRect window_ax_frame(struct ax_window *window);
-CGRect window_frame(struct ax_window *window);
-int window_level(struct ax_window *window);
-CFStringRef window_role(struct ax_window *window);
-CFStringRef window_subrole(struct ax_window *window);
-bool window_can_move(struct ax_window *window);
-bool window_can_resize(struct ax_window *window);
-bool window_level_is_standard(struct ax_window *window);
-bool window_is_undersized(struct ax_window *window);
-bool window_is_minimized(struct ax_window *window);
-bool window_is_fullscreen(struct ax_window *window);
-bool window_is_sticky(struct ax_window *window);
-bool window_is_standard(struct ax_window *window);
-bool window_is_dialog(struct ax_window *window);
-bool window_observe(struct ax_window *window);
-void window_unobserve(struct ax_window *window);
-struct ax_window *window_create(struct ax_application *application, AXUIElementRef window_ref, uint32_t window_id);
-void window_destroy(struct ax_window *window);
+CFStringRef window_display_uuid(struct window *window);
+int window_display_id(struct window *window);
+uint64_t window_space(struct window *window);
+uint64_t *window_space_list(struct window *window, int *count);
+void window_serialize(struct window *window, FILE *rsp);
+char *window_title(struct window *window);
+CGRect window_ax_frame(struct window *window);
+CGRect window_frame(struct window *window);
+int window_level(struct window *window);
+CFStringRef window_role(struct window *window);
+CFStringRef window_subrole(struct window *window);
+bool window_can_move(struct window *window);
+bool window_can_resize(struct window *window);
+bool window_level_is_standard(struct window *window);
+bool window_is_undersized(struct window *window);
+bool window_is_minimized(struct window *window);
+bool window_is_fullscreen(struct window *window);
+bool window_is_sticky(struct window *window);
+bool window_is_standard(struct window *window);
+bool window_is_dialog(struct window *window);
+bool window_observe(struct window *window);
+void window_unobserve(struct window *window);
+struct window *window_create(struct application *application, AXUIElementRef window_ref, uint32_t window_id);
+void window_destroy(struct window *window);
 
 #endif

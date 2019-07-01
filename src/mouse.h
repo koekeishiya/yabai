@@ -26,7 +26,7 @@ struct mouse_state
     uint8_t modifier;
     CGPoint down_location;
     uint64_t last_moved_time;
-    struct ax_window *window;
+    struct window *window;
     CGRect window_frame;
     uint32_t ffm_window_id;
 };

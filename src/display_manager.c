@@ -212,7 +212,7 @@ void display_manager_focus_display(uint32_t display_id)
 {
     int window_count;
     uint32_t *window_list;
-    struct ax_window *window;
+    struct window *window;
 
     CGRect bounds;
     CGPoint point;

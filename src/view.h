@@ -1,7 +1,7 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-struct ax_window;
+struct window;
 
 struct area
 {
@@ -89,14 +89,14 @@ struct view
     bool is_dirty;
 };
 
-float window_node_border_window_offset(struct ax_window *window);
+float window_node_border_window_offset(struct window *window);
 void window_node_flush(struct window_node *node);
 struct window_node *window_node_find_prev_leaf(struct window_node *node);
 struct window_node *window_node_find_next_leaf(struct window_node *node);
 
 struct window_node *view_find_window_node(struct window_node *node, uint32_t window_id);
-void view_remove_window_node(struct view *view, struct ax_window *window);
-void view_add_window_node(struct view *view, struct ax_window *window);
+void view_remove_window_node(struct view *view, struct window *window);
+void view_add_window_node(struct view *view, struct window *window);
 uint32_t *view_find_window_list(struct view *view);
 
 void view_serialize(FILE *rsp, struct view *view);

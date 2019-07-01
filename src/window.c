@@ -6,37 +6,37 @@ int g_normal_window_level;
 int g_floating_window_level;
 
 static void
-window_observe_notification(struct ax_window *window, int notification)
+window_observe_notification(struct window *window, int notification)
 {
-    AXError result = AXObserverAddNotification(window->application->observer_ref, window->ref, ax_window_notification[notification], window->id_ptr);
+    AXError result = AXObserverAddNotification(window->application->observer_ref, window->ref, window_notification[notification], window->id_ptr);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) window->notification |= 1 << notification;
 }
 
 static void
-window_unobserve_notification(struct ax_window *window, int notification)
+window_unobserve_notification(struct window *window, int notification)
 {
-    AXObserverRemoveNotification(window->application->observer_ref, window->ref, ax_window_notification[notification]);
+    AXObserverRemoveNotification(window->application->observer_ref, window->ref, window_notification[notification]);
     window->notification &= ~(1 << notification);
 }
 
-bool window_observe(struct ax_window *window)
+bool window_observe(struct window *window)
 {
-    for (int i = 0; i < array_count(ax_window_notification); ++i) {
+    for (int i = 0; i < array_count(window_notification); ++i) {
         window_observe_notification(window, i);
     }
 
-    return (window->notification & AX_WINDOW_ALL) == AX_WINDOW_ALL;
+    return (window->notification & window_ALL) == window_ALL;
 }
 
-void window_unobserve(struct ax_window *window)
+void window_unobserve(struct window *window)
 {
-    for (int i = 0; i < array_count(ax_window_notification); ++i) {
+    for (int i = 0; i < array_count(window_notification); ++i) {
         if (!(window->notification & (1 << i))) continue;
         window_unobserve_notification(window, i);
     }
 }
 
-CFStringRef window_display_uuid(struct ax_window *window)
+CFStringRef window_display_uuid(struct window *window)
 {
     CFStringRef uuid = SLSCopyManagedDisplayForWindow(g_connection, window->id);
     if (!uuid) {
@@ -46,7 +46,7 @@ CFStringRef window_display_uuid(struct ax_window *window)
     return uuid;
 }
 
-int window_display_id(struct ax_window *window)
+int window_display_id(struct window *window)
 {
     CFStringRef uuid_string = window_display_uuid(window);
     if (!uuid_string) return 0;
@@ -60,7 +60,7 @@ int window_display_id(struct ax_window *window)
     return id;
 }
 
-uint64_t window_space(struct ax_window *window)
+uint64_t window_space(struct window *window)
 {
     uint64_t sid = 0;
     CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
@@ -81,7 +81,7 @@ err:
     return sid;
 }
 
-uint64_t *window_space_list(struct ax_window *window, int *count)
+uint64_t *window_space_list(struct window *window, int *count)
 {
     uint64_t *space_list = NULL;
     CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
@@ -106,7 +106,7 @@ err:
     return space_list;
 }
 
-void window_serialize(struct ax_window *window, FILE *rsp)
+void window_serialize(struct window *window, FILE *rsp)
 {
     CGRect frame = window_frame(window);
     char *title = window_title(window);
@@ -159,7 +159,7 @@ void window_serialize(struct ax_window *window, FILE *rsp)
     if (title) free(title);
 }
 
-char *window_title(struct ax_window *window)
+char *window_title(struct window *window)
 {
     char *title = NULL;
     CFTypeRef value = NULL;
@@ -173,7 +173,7 @@ char *window_title(struct ax_window *window)
     return title;
 }
 
-CGRect window_ax_frame(struct ax_window *window)
+CGRect window_ax_frame(struct window *window)
 {
     CGRect frame = {};
     CFTypeRef position_ref = NULL;
@@ -195,14 +195,14 @@ CGRect window_ax_frame(struct ax_window *window)
     return frame;
 }
 
-CGRect window_frame(struct ax_window *window)
+CGRect window_frame(struct window *window)
 {
     CGRect frame = {};
     SLSGetWindowBounds(g_connection, window->id, &frame);
     return frame;
 }
 
-bool window_can_move(struct ax_window *window)
+bool window_can_move(struct window *window)
 {
     Boolean result;
     if (AXUIElementIsAttributeSettable(window->ref, kAXPositionAttribute, &result) != kAXErrorSuccess) {
@@ -211,7 +211,7 @@ bool window_can_move(struct ax_window *window)
     return result;
 }
 
-bool window_can_resize(struct ax_window *window)
+bool window_can_resize(struct window *window)
 {
     Boolean result;
     if (AXUIElementIsAttributeSettable(window->ref, kAXSizeAttribute, &result) != kAXErrorSuccess) {
@@ -220,7 +220,7 @@ bool window_can_resize(struct ax_window *window)
     return result;
 }
 
-bool window_is_undersized(struct ax_window *window)
+bool window_is_undersized(struct window *window)
 {
     CGRect frame = window_frame(window);
     if (frame.size.width  < 200.0f) return true;
@@ -228,7 +228,7 @@ bool window_is_undersized(struct ax_window *window)
     return false;
 }
 
-bool window_is_minimized(struct ax_window *window)
+bool window_is_minimized(struct window *window)
 {
     Boolean result = 0;
     CFTypeRef value;
@@ -239,7 +239,7 @@ bool window_is_minimized(struct ax_window *window)
     return result || window->is_minimized;
 }
 
-bool window_is_fullscreen(struct ax_window *window)
+bool window_is_fullscreen(struct window *window)
 {
     Boolean result = 0;
     CFTypeRef value;
@@ -250,7 +250,7 @@ bool window_is_fullscreen(struct ax_window *window)
     return result;
 }
 
-bool window_is_sticky(struct ax_window *window)
+bool window_is_sticky(struct window *window)
 {
     bool result = false;
     CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
@@ -267,28 +267,28 @@ err:
     return result;
 }
 
-int window_level(struct ax_window *window)
+int window_level(struct window *window)
 {
     int level = 0;
     SLSGetWindowLevel(g_connection, window->id, &level);
     return level;
 }
 
-CFStringRef window_role(struct ax_window *window)
+CFStringRef window_role(struct window *window)
 {
     const void *role = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXRoleAttribute, &role);
     return role;
 }
 
-CFStringRef window_subrole(struct ax_window *window)
+CFStringRef window_subrole(struct window *window)
 {
     const void *srole = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXSubroleAttribute, &srole);
     return srole;
 }
 
-bool window_level_is_standard(struct ax_window *window)
+bool window_level_is_standard(struct window *window)
 {
     if (!g_normal_window_level)   g_normal_window_level   = CGWindowLevelForKey(4);
     if (!g_floating_window_level) g_floating_window_level = CGWindowLevelForKey(5);
@@ -297,7 +297,7 @@ bool window_level_is_standard(struct ax_window *window)
     return level == g_normal_window_level || level == g_floating_window_level;
 }
 
-bool window_is_standard(struct ax_window *window)
+bool window_is_standard(struct window *window)
 {
     bool standard_win = false;
     CFStringRef role  = NULL;
@@ -316,7 +316,7 @@ out:
     return standard_win;
 }
 
-bool window_is_dialog(struct ax_window *window)
+bool window_is_dialog(struct window *window)
 {
     bool standard_win = false;
     CFStringRef role  = NULL;
@@ -335,10 +335,10 @@ out:
     return standard_win;
 }
 
-struct ax_window *window_create(struct ax_application *application, AXUIElementRef window_ref, uint32_t window_id)
+struct window *window_create(struct application *application, AXUIElementRef window_ref, uint32_t window_id)
 {
-    struct ax_window *window = malloc(sizeof(struct ax_window));
-    memset(window, 0, sizeof(struct ax_window));
+    struct window *window = malloc(sizeof(struct window));
+    memset(window, 0, sizeof(struct window));
 
     window->application = application;
     window->ref = window_ref;
@@ -359,7 +359,7 @@ struct ax_window *window_create(struct ax_application *application, AXUIElementR
     return window;
 }
 
-void window_destroy(struct ax_window *window)
+void window_destroy(struct window *window)
 {
     border_window_destroy(window);
     CFRelease(window->ref);

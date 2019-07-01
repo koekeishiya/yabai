@@ -4,37 +4,37 @@
 #define OBSERVER_CALLBACK(name) void name(AXObserverRef observer, AXUIElementRef element, CFStringRef notification, void *context)
 typedef OBSERVER_CALLBACK(observer_callback);
 
-#define AX_APPLICATION_WINDOW_CREATED_INDEX       0
-#define AX_APPLICATION_WINDOW_FOCUSED_INDEX       1
-#define AX_APPLICATION_WINDOW_MOVED_INDEX         2
-#define AX_APPLICATION_WINDOW_RESIZED_INDEX       3
-#define AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX 4
-#define AX_APPLICATION_WINDOW_MENU_OPENED_INDEX   5
+#define application_WINDOW_CREATED_INDEX       0
+#define application_WINDOW_FOCUSED_INDEX       1
+#define application_WINDOW_MOVED_INDEX         2
+#define application_WINDOW_RESIZED_INDEX       3
+#define application_WINDOW_TITLE_CHANGED_INDEX 4
+#define application_WINDOW_MENU_OPENED_INDEX   5
 
-#define AX_APPLICATION_WINDOW_CREATED       (1 << AX_APPLICATION_WINDOW_CREATED_INDEX)
-#define AX_APPLICATION_WINDOW_FOCUSED       (1 << AX_APPLICATION_WINDOW_FOCUSED_INDEX)
-#define AX_APPLICATION_WINDOW_MOVED         (1 << AX_APPLICATION_WINDOW_MOVED_INDEX)
-#define AX_APPLICATION_WINDOW_RESIZED       (1 << AX_APPLICATION_WINDOW_RESIZED_INDEX)
-#define AX_APPLICATION_WINDOW_TITLE_CHANGED (1 << AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX)
-#define AX_APPLICATION_ALL                  (AX_APPLICATION_WINDOW_CREATED |\
-                                             AX_APPLICATION_WINDOW_FOCUSED |\
-                                             AX_APPLICATION_WINDOW_MOVED |\
-                                             AX_APPLICATION_WINDOW_RESIZED |\
-                                             AX_APPLICATION_WINDOW_TITLE_CHANGED)
+#define application_WINDOW_CREATED       (1 << application_WINDOW_CREATED_INDEX)
+#define application_WINDOW_FOCUSED       (1 << application_WINDOW_FOCUSED_INDEX)
+#define application_WINDOW_MOVED         (1 << application_WINDOW_MOVED_INDEX)
+#define application_WINDOW_RESIZED       (1 << application_WINDOW_RESIZED_INDEX)
+#define application_WINDOW_TITLE_CHANGED (1 << application_WINDOW_TITLE_CHANGED_INDEX)
+#define application_ALL                  (application_WINDOW_CREATED |\
+                                             application_WINDOW_FOCUSED |\
+                                             application_WINDOW_MOVED |\
+                                             application_WINDOW_RESIZED |\
+                                             application_WINDOW_TITLE_CHANGED)
 
 static const CFStringRef kAXFocusedTabChangedNotification = CFSTR("AXFocusedTabChanged");
 
-static CFStringRef ax_application_notification[] =
+static CFStringRef application_notification[] =
 {
-    [AX_APPLICATION_WINDOW_CREATED_INDEX]       = kAXCreatedNotification,
-    [AX_APPLICATION_WINDOW_FOCUSED_INDEX]       = kAXFocusedWindowChangedNotification,
-    [AX_APPLICATION_WINDOW_MOVED_INDEX]         = kAXWindowMovedNotification,
-    [AX_APPLICATION_WINDOW_RESIZED_INDEX]       = kAXWindowResizedNotification,
-    [AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX] = kAXTitleChangedNotification,
-    [AX_APPLICATION_WINDOW_MENU_OPENED_INDEX]   = kAXMenuOpenedNotification
+    [application_WINDOW_CREATED_INDEX]       = kAXCreatedNotification,
+    [application_WINDOW_FOCUSED_INDEX]       = kAXFocusedWindowChangedNotification,
+    [application_WINDOW_MOVED_INDEX]         = kAXWindowMovedNotification,
+    [application_WINDOW_RESIZED_INDEX]       = kAXWindowResizedNotification,
+    [application_WINDOW_TITLE_CHANGED_INDEX] = kAXTitleChangedNotification,
+    [application_WINDOW_MENU_OPENED_INDEX]   = kAXMenuOpenedNotification
 };
 
-struct ax_application
+struct application
 {
     AXUIElementRef ref;
     ProcessSerialNumber psn;
@@ -47,14 +47,14 @@ struct ax_application
     bool retry;
 };
 
-bool application_is_frontmost(struct ax_application *application);
-bool application_is_hidden(struct ax_application *application);
-uint32_t application_main_window(struct ax_application *application);
-uint32_t application_focused_window(struct ax_application *application);
-struct ax_window **application_window_list(struct ax_application *application, int *window_count);
-bool application_observe(struct ax_application *application);
-void application_unobserve(struct ax_application *application);
-struct ax_application *application_create(struct process *process);
-void application_destroy(struct ax_application *application);
+bool application_is_frontmost(struct application *application);
+bool application_is_hidden(struct application *application);
+uint32_t application_main_window(struct application *application);
+uint32_t application_focused_window(struct application *application);
+struct window **application_window_list(struct application *application, int *window_count);
+bool application_observe(struct application *application);
+void application_unobserve(struct application *application);
+struct application *application_create(struct process *process);
+void application_destroy(struct application *application);
 
 #endif

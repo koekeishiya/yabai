@@ -26,15 +26,15 @@ void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid)
     uint32_t *window_list = space_window_list(sid, &window_count);
     if (!window_list) return;
 
-    struct ax_window **window_aggregate_list = NULL;
+    struct window **window_aggregate_list = NULL;
     for (int i = 0; i < window_count; ++i) {
-        struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[i]);
+        struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
         if (window) buf_push(window_aggregate_list, window);
     }
 
     fprintf(rsp, "[");
     for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
-        struct ax_window *window = window_aggregate_list[i];
+        struct window *window = window_aggregate_list[i];
         window_serialize(window, rsp);
         if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
     }
@@ -50,14 +50,14 @@ void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
     uint64_t *space_list = display_space_list(did, &space_count);
     if (!space_list) return;
 
-    struct ax_window **window_aggregate_list = NULL;
+    struct window **window_aggregate_list = NULL;
     for (int i = 0; i < space_count; ++i) {
         int window_count;
         uint32_t *window_list = space_window_list(space_list[i], &window_count);
         if (!window_list) continue;
 
         for (int j = 0; j < window_count; ++j) {
-            struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[j]);
+            struct window *window = window_manager_find_window(&g_window_manager, window_list[j]);
             if (window) buf_push(window_aggregate_list, window);
         }
 
@@ -66,7 +66,7 @@ void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
 
     fprintf(rsp, "[");
     for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
-        struct ax_window *window = window_aggregate_list[i];
+        struct window *window = window_aggregate_list[i];
         window_serialize(window, rsp);
         if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
     }
@@ -82,7 +82,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return;
 
-    struct ax_window **window_aggregate_list = NULL;
+    struct window **window_aggregate_list = NULL;
     for (int i = 0; i < display_count; ++i) {
         int space_count;
         uint64_t *space_list = display_space_list(display_list[i], &space_count);
@@ -94,7 +94,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
             if (!window_list) continue;
 
             for (int k = 0; k < window_count; ++k) {
-                struct ax_window *window = window_manager_find_window(&g_window_manager, window_list[k]);
+                struct window *window = window_manager_find_window(&g_window_manager, window_list[k]);
                 if (window) buf_push(window_aggregate_list, window);
             }
 
@@ -106,7 +106,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
 
     fprintf(rsp, "[");
     for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
-        struct ax_window *window = window_aggregate_list[i];
+        struct window *window = window_aggregate_list[i];
         window_serialize(window, rsp);
         if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
     }
@@ -116,7 +116,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     free(display_list);
 }
 
-void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, struct rule *rule)
+void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
 {
     if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == REGEX_MATCH_NO) return;
     if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window))      == REGEX_MATCH_NO) return;
@@ -177,14 +177,14 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 }
 
-void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     for (int i = 0; i < buf_len(wm->rules); ++i) {
         window_manager_apply_rule_to_window(sm, wm, window, wm->rules[i]);
     }
 }
 
-void window_manager_center_mouse(struct window_manager *wm, struct ax_window *window)
+void window_manager_center_mouse(struct window_manager *wm, struct window *window)
 {
     if (!wm->enable_mff) return;
 
@@ -208,7 +208,7 @@ void window_manager_center_mouse(struct window_manager *wm, struct ax_window *wi
     CGWarpMouseCursorPosition(center);
 }
 
-bool window_manager_should_manage_window(struct ax_window *window)
+bool window_manager_should_manage_window(struct window *window)
 {
     if (window->rule_manage) return true;
 
@@ -219,7 +219,7 @@ bool window_manager_should_manage_window(struct ax_window *window)
             (!window->is_floating));
 }
 
-struct view *window_manager_find_managed_window(struct window_manager *wm, struct ax_window *window)
+struct view *window_manager_find_managed_window(struct window_manager *wm, struct window *window)
 {
     return table_find(&wm->managed_window, &window->id);
 }
@@ -229,14 +229,14 @@ void window_manager_remove_managed_window(struct window_manager *wm, uint32_t wi
     table_remove(&wm->managed_window, &wid);
 }
 
-void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view)
+void window_manager_add_managed_window(struct window_manager *wm, struct window *window, struct view *view)
 {
     if (view->layout != VIEW_BSP) return;
     table_add(&wm->managed_window, &window->id, view);
     window_manager_purify_window(wm, window);
 }
 
-void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, int type, float dx, float dy)
+void window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) return;
@@ -250,7 +250,7 @@ void window_manager_move_window_relative(struct window_manager *wm, struct ax_wi
     window_manager_move_window(window, dx, dy);
 }
 
-void window_manager_resize_window_relative(struct window_manager *wm, struct ax_window *window, int direction, float dx, float dy)
+void window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
@@ -297,7 +297,7 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct ax_
     }
 }
 
-void window_manager_move_window(struct ax_window *window, float x, float y)
+void window_manager_move_window(struct window *window, float x, float y)
 {
     CGPoint position = CGPointMake(x, y);
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
@@ -307,7 +307,7 @@ void window_manager_move_window(struct ax_window *window, float x, float y)
     CFRelease(position_ref);
 }
 
-void window_manager_resize_window(struct ax_window *window, float width, float height)
+void window_manager_resize_window(struct window *window, float width, float height)
 {
     CGSize size = CGSizeMake(width, height);
     CFTypeRef size_ref = AXValueCreate(kAXValueTypeCGSize, (void *) &size);
@@ -324,7 +324,7 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
         struct bucket *bucket = wm->window.buckets[window_index];
         while (bucket) {
             if (bucket->value) {
-                struct ax_window *window = bucket->value;
+                struct window *window = bucket->value;
                 window_manager_purify_window(wm, window);
             }
 
@@ -340,7 +340,7 @@ void window_manager_set_border_window_width(struct window_manager *wm, int width
         struct bucket *bucket = wm->window.buckets[window_index];
         while (bucket) {
             if (bucket->value) {
-                struct ax_window *window = bucket->value;
+                struct window *window = bucket->value;
                 if (window->border.id) {
                     window->border.width = width;
                     if ((!window->application->is_hidden) &&
@@ -358,7 +358,7 @@ void window_manager_set_border_window_width(struct window_manager *wm, int width
 void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color)
 {
     wm->active_window_border_color = color;
-    struct ax_window *window = window_manager_focused_window(wm);
+    struct window *window = window_manager_focused_window(wm);
     if (window) border_window_activate(window);
 }
 
@@ -369,7 +369,7 @@ void window_manager_set_normal_border_window_color(struct window_manager *wm, ui
         struct bucket *bucket = wm->window.buckets[window_index];
         while (bucket) {
             if (bucket->value) {
-                struct ax_window *window = bucket->value;
+                struct window *window = bucket->value;
                 if (window->id != wm->focused_window_id) border_window_deactivate(window);
             }
 
@@ -378,7 +378,7 @@ void window_manager_set_normal_border_window_color(struct window_manager *wm, ui
     }
 }
 
-void window_manager_set_window_opacity(struct window_manager *wm, struct ax_window *window, float opacity)
+void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
 {
     if (!wm->enable_window_opacity) return;
     if (window->rule_alpha != 0.0f) return;
@@ -397,7 +397,7 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct ax_wind
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity)
 {
     wm->active_window_opacity = opacity;
-    struct ax_window *window = window_manager_focused_window(wm);
+    struct window *window = window_manager_focused_window(wm);
     if (window) window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
 }
 
@@ -408,7 +408,7 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
         struct bucket *bucket = wm->window.buckets[window_index];
         while (bucket) {
             if (bucket->value) {
-                struct ax_window *window = bucket->value;
+                struct window *window = bucket->value;
                 if (window->id != wm->focused_window_id) window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
             }
 
@@ -452,7 +452,7 @@ void window_manager_make_sticky(uint32_t wid, bool sticky)
     socket_close(sockfd);
 }
 
-void window_manager_purify_window(struct window_manager *wm, struct ax_window *window)
+void window_manager_purify_window(struct window_manager *wm, struct window *window)
 {
     int value;
     int sockfd;
@@ -474,15 +474,15 @@ void window_manager_purify_window(struct window_manager *wm, struct ax_window *w
     socket_close(sockfd);
 }
 
-struct ax_window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
+struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
 {
     int count;
     uint32_t *window_list = space_window_list(sid, &count);
     if (!window_list) return NULL;
 
-    struct ax_window *result = NULL;
+    struct window *result = NULL;
     for (int i = 0, j = 0; i < count; ++i) {
-        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        struct window *window = window_manager_find_window(wm, window_list[i]);
         if (!window) continue;
 
         if (++j == rank) {
@@ -495,14 +495,14 @@ struct ax_window *window_manager_find_window_on_space_by_rank(struct window_mana
     return result;
 }
 
-struct ax_window *window_manager_find_window_on_display_by_rank(struct window_manager *wm, uint32_t did, int rank)
+struct window *window_manager_find_window_on_display_by_rank(struct window_manager *wm, uint32_t did, int rank)
 {
     uint32_t sid = display_space_id(did);
-    struct ax_window *window = window_manager_find_window_on_space_by_rank(wm, sid, rank);
+    struct window *window = window_manager_find_window_on_space_by_rank(wm, sid, rank);
     return window;
 }
 
-struct ax_window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid)
+struct window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid)
 {
     uint32_t window_id = 0;
     CGPoint window_point;
@@ -512,7 +512,7 @@ struct ax_window *window_manager_find_window_at_point_filtering_window(struct wi
     return window_manager_find_window(wm, window_id);
 }
 
-struct ax_window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point)
+struct window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point)
 {
     uint32_t window_id = 0;
     CGPoint window_point;
@@ -522,21 +522,21 @@ struct ax_window *window_manager_find_window_at_point(struct window_manager *wm,
     return window_manager_find_window(wm, window_id);
 }
 
-struct ax_window *window_manager_find_window_below_cursor(struct window_manager *wm)
+struct window *window_manager_find_window_below_cursor(struct window_manager *wm)
 {
     CGPoint cursor;
     SLSGetCurrentCursorLocation(g_connection, &cursor);
     return window_manager_find_window_at_point(wm, cursor);
 }
 
-static struct ax_window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct ax_window *source, int direction, uint32_t *window_list, int window_count)
+static struct window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct window *source, int direction, uint32_t *window_list, int window_count)
 {
     CGRect source_frame = window_frame(source);
-    struct ax_window *best_window = NULL;
+    struct window *best_window = NULL;
     uint32_t best_distance = UINT32_MAX;
 
     for (int i = 0; i < window_count; ++i) {
-        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        struct window *window = window_manager_find_window(wm, window_list[i]);
         if (!window || !window_is_standard(window) || window == source) continue;
 
         CGRect frame = window_frame(window);
@@ -552,7 +552,7 @@ static struct ax_window *window_manager_find_closest_window_for_direction_in_win
     return best_window;
 }
 
-struct ax_window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction)
+struct window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct window *window, int direction)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view) return NULL;
@@ -560,25 +560,25 @@ struct ax_window *window_manager_find_closest_managed_window_in_direction(struct
     uint32_t *view_window_list = view_find_window_list(view);
     if (!view_window_list) return NULL;
 
-    struct ax_window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, view_window_list, buf_len(view_window_list));
+    struct window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, view_window_list, buf_len(view_window_list));
     buf_free(view_window_list);
 
     return result;
 }
 
-struct ax_window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct ax_window *window, int direction)
+struct window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct window *window, int direction)
 {
     int window_count;
     uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count);
     if (!window_list) return NULL;
 
-    struct ax_window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, window_list, window_count);
+    struct window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, window_list, window_count);
     free(window_list);
 
     return result;
 }
 
-struct ax_window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+struct window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
@@ -592,7 +592,7 @@ struct ax_window *window_manager_find_prev_managed_window(struct space_manager *
     return window_manager_find_window(wm, prev->window_id);
 }
 
-struct ax_window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+struct window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
@@ -606,7 +606,7 @@ struct ax_window *window_manager_find_next_managed_window(struct space_manager *
     return window_manager_find_window(wm, prev->window_id);
 }
 
-struct ax_window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm)
+struct window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
@@ -712,7 +712,7 @@ void window_manager_focus_window_with_raise(uint32_t window_id)
     }
     socket_close(sockfd);
 #else
-    struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
     if (!window) return;
 
     AXUIElementPerformAction(window->ref, kAXRaiseAction);
@@ -722,7 +722,7 @@ void window_manager_focus_window_with_raise(uint32_t window_id)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-struct ax_window *window_manager_focused_window(struct window_manager *wm)
+struct window *window_manager_focused_window(struct window_manager *wm)
 {
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
@@ -730,7 +730,7 @@ struct ax_window *window_manager_focused_window(struct window_manager *wm)
     pid_t pid;
     GetProcessPID(&psn, &pid);
 
-    struct ax_application *application = window_manager_find_application(wm, pid);
+    struct application *application = window_manager_find_application(wm, pid);
     if (!application) return NULL;
 
     uint32_t window_id = application_focused_window(application);
@@ -740,7 +740,7 @@ struct ax_window *window_manager_focused_window(struct window_manager *wm)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-struct ax_application *window_manager_focused_application(struct window_manager *wm)
+struct application *window_manager_focused_application(struct window_manager *wm)
 {
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
@@ -782,7 +782,7 @@ void window_manager_add_lost_focused_event(struct window_manager *wm, uint32_t w
     table_add(&wm->window_lost_focused_event, &window_id, (void *)(intptr_t) 1);
 }
 
-struct ax_window *window_manager_find_window(struct window_manager *wm, uint32_t window_id)
+struct window *window_manager_find_window(struct window_manager *wm, uint32_t window_id)
 {
     return table_find(&wm->window, &window_id);
 }
@@ -792,12 +792,12 @@ void window_manager_remove_window(struct window_manager *wm, uint32_t window_id)
     table_remove(&wm->window, &window_id);
 }
 
-void window_manager_add_window(struct window_manager *wm, struct ax_window *window)
+void window_manager_add_window(struct window_manager *wm, struct window *window)
 {
     table_add(&wm->window, &window->id, window);
 }
 
-struct ax_application *window_manager_find_application(struct window_manager *wm, pid_t pid)
+struct application *window_manager_find_application(struct window_manager *wm, pid_t pid)
 {
     return table_find(&wm->application, &pid);
 }
@@ -807,12 +807,12 @@ void window_manager_remove_application(struct window_manager *wm, pid_t pid)
     table_remove(&wm->application, &pid);
 }
 
-void window_manager_add_application(struct window_manager *wm, struct ax_application *application)
+void window_manager_add_application(struct window_manager *wm, struct application *application)
 {
     table_add(&wm->application, &application->pid, application);
 }
 
-struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count)
+struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application, int *count)
 {
     int window_count = 0;
     uint32_t window_list[MAXLEN];
@@ -821,7 +821,7 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
         struct bucket *bucket = wm->window.buckets[window_index];
         while (bucket) {
             if (bucket->value) {
-                struct ax_window *window = bucket->value;
+                struct window *window = bucket->value;
                 if (window->application == application) {
                     window_list[window_count++] = window->id;
                 }
@@ -833,7 +833,7 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
 
     if (!window_count) return NULL;
 
-    struct ax_window **result = malloc(sizeof(struct ax_window *) * window_count);
+    struct window **result = malloc(sizeof(struct window *) * window_count);
     *count = window_count;
 
     for (int i = 0; i < window_count; ++i) {
@@ -843,14 +843,14 @@ struct ax_window **window_manager_find_application_windows(struct window_manager
     return result;
 }
 
-void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct ax_application *application)
+void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application)
 {
     int window_count;
-    struct ax_window **window_list = application_window_list(application, &window_count);
+    struct window **window_list = application_window_list(application, &window_count);
     if (!window_list) return;
 
     for (int window_index = 0; window_index < window_count; ++window_index) {
-        struct ax_window *window = window_list[window_index];
+        struct window *window = window_list[window_index];
         if (!window) continue;
 
         if (!window->id || window_manager_find_window(wm, window->id)) {
@@ -889,7 +889,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
     free(window_list);
 }
 
-void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, int direction)
+void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (view->layout != VIEW_BSP) return;
@@ -904,7 +904,7 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
             insert_node->child = CHILD_NONE;
         }
 
-        struct ax_window *insert_window = window_manager_find_window(wm, view->insertion_point);
+        struct window *insert_window = window_manager_find_window(wm, view->insertion_point);
         if (insert_window) {
             insert_window->border.insert_active = false;
             insert_window->border.insert_dir = 0;
@@ -947,7 +947,7 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
     border_window_refresh(window);
 }
 
-void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, struct ax_window *b)
+void window_manager_warp_window(struct space_manager *sm, struct window *a, struct window *b)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (view->layout != VIEW_BSP) return;
@@ -971,7 +971,7 @@ void window_manager_warp_window(struct space_manager *sm, struct ax_window *a, s
     }
 }
 
-void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct ax_window *a, struct ax_window *b)
+void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (view->layout != VIEW_BSP) return;
@@ -989,7 +989,7 @@ void window_manager_swap_window(struct space_manager *sm, struct window_manager 
     window_node_flush(b_node);
 }
 
-void window_manager_send_window_to_display(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint32_t did)
+void window_manager_send_window_to_display(struct space_manager *sm, struct window_manager *wm, struct window *window, uint32_t did)
 {
     uint64_t src_sid = window_space(window);
     uint64_t dst_sid = display_space_id(did);
@@ -1010,7 +1010,7 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
         window_manager_add_managed_window(wm, window, view);
     }
 
-    struct ax_window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
+    struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
     if (next) {
         AXUIElementPerformAction(next->ref, kAXRaiseAction);
         _SLPSSetFrontProcessWithOptions(&next->application->psn, 0, kCPSNoWindows);
@@ -1019,7 +1019,7 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
     }
 }
 
-void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, uint64_t dst_sid)
+void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid)
 {
     uint64_t src_sid = window_space(window);
     if (src_sid == dst_sid) return;
@@ -1041,7 +1041,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     uint64_t cur_sid = space_manager_active_space();
     if (cur_sid != src_sid) return;
 
-    struct ax_window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
+    struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
     if (next) {
         AXUIElementPerformAction(next->ref, kAXRaiseAction);
         _SLPSSetFrontProcessWithOptions(&next->application->psn, 0, kCPSNoWindows);
@@ -1050,7 +1050,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     }
 }
 
-void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct ax_window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
+void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) return;
@@ -1088,7 +1088,7 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
     window_manager_resize_window(window, fw, fh);
 }
 
-void window_manager_make_children_floating(struct window_manager *wm, struct ax_window *window, bool floating)
+void window_manager_make_children_floating(struct window_manager *wm, struct window *window, bool floating)
 {
     if (!wm->enable_window_topmost) return;
 
@@ -1115,7 +1115,7 @@ void window_manager_make_children_floating(struct window_manager *wm, struct ax_
     free(window_list);
 }
 
-void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     if (window->is_floating) {
         window->is_floating = false;
@@ -1138,7 +1138,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
     }
 }
 
-void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     if (window_is_sticky(window)) {
         window_manager_make_sticky(window->id, false);
@@ -1157,7 +1157,7 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
     }
 }
 
-void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     if (window_is_fullscreen(window)) {
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanFalse);
@@ -1173,7 +1173,7 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
     AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
 }
 
-void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view || view->layout != VIEW_BSP) return;
@@ -1192,7 +1192,7 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
     }
 }
 
-void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct ax_window *window)
+void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view || view->layout != VIEW_BSP) return;
@@ -1211,7 +1211,7 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     }
 }
 
-void window_manager_toggle_window_border(struct window_manager *wm, struct ax_window *window)
+void window_manager_toggle_window_border(struct window_manager *wm, struct window *window)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     struct window_node *node = view ? view_find_window_node(view->root, window->id) : NULL;
@@ -1247,7 +1247,7 @@ void window_manager_validate_windows_on_space(struct space_manager *sm, struct w
         }
 
         if (!found) {
-            struct ax_window *window = window_manager_find_window(wm, view_window_list[i]);
+            struct window *window = window_manager_find_window(wm, view_window_list[i]);
             if (!window) continue;
 
             space_manager_untile_window(sm, view, window);
@@ -1267,7 +1267,7 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
     if (!window_list) return;
 
     for (int i = 0; i < window_count; ++i) {
-        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        struct window *window = window_manager_find_window(wm, window_list[i]);
         if (!window || !window_manager_should_manage_window(window)) continue;
         if (window->is_minimized || window->application->is_hidden)  continue;
 
@@ -1298,7 +1298,7 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
     if (!window_list) goto sfree;
 
     for (int i = 0; i < window_count; ++i) {
-        struct ax_window *window = window_manager_find_window(wm, window_list[i]);
+        struct window *window = window_manager_find_window(wm, window_list[i]);
         if (!window || !window_manager_should_manage_window(window)) continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
@@ -1360,7 +1360,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         while (bucket) {
             if (bucket->value) {
                 struct process *process = bucket->value;
-                struct ax_application *application = application_create(process);
+                struct application *application = application_create(process);
 
                 if (application_observe(application)) {
                     window_manager_add_application(wm, application);
@@ -1375,7 +1375,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         }
     }
 
-    struct ax_window *window = window_manager_focused_window(wm);
+    struct window *window = window_manager_focused_window(wm);
     if (window) {
         wm->last_window_id = window->id;
         wm->focused_window_id = window->id;

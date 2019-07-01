@@ -34,12 +34,12 @@ struct border
     bool enabled;
 };
 
-struct ax_window;
+struct window;
 
-void border_window_refresh(struct ax_window *window);
-void border_window_activate(struct ax_window *window);
-void border_window_deactivate(struct ax_window *window);
-void border_window_show(struct ax_window *window);
-void border_window_hide(struct ax_window *window);
+void border_window_refresh(struct window *window);
+void border_window_activate(struct window *window);
+void border_window_deactivate(struct window *window);
+void border_window_show(struct window *window);
+void border_window_hide(struct window *window);
 
 #endif

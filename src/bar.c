@@ -193,7 +193,7 @@ void bar_refresh(struct bar *bar)
     }
 
     // BAR CENTER
-    struct ax_window *window = window_manager_focused_window(&g_window_manager);
+    struct window *window = window_manager_focused_window(&g_window_manager);
     char *title = window ? window_title(window) : NULL;
     if (title) {
         struct bar_line title_line = bar_prepare_line(bar->t_font, title, bar->foreground_color);
