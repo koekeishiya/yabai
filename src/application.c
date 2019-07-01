@@ -25,6 +25,13 @@ static OBSERVER_CALLBACK(application_notification_handler)
         struct event *event;
         event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window_id);
         event_loop_post(&g_event_loop, event);
+    } else if (CFEqual(notification, kAXMainWindowChangedNotification)) {
+        uint32_t window_id = ax_window_id(element);
+        if (!window_id) return;
+
+        struct event *event;
+        event_create(event, WINDOW_MAIN_CHANGED, (void *)(intptr_t) window_id);
+        event_loop_post(&g_event_loop, event);
     } else if (CFEqual(notification, kAXWindowMovedNotification)) {
         uint32_t window_id = ax_window_id(element);
         if (!window_id) return;

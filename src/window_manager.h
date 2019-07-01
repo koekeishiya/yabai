@@ -52,6 +52,7 @@ struct window_manager
     AXUIElementRef system_element;
     struct table application;
     struct table window;
+    struct table grouped_window;
     struct table managed_window;
     struct table window_lost_focused_event;
     struct table application_lost_front_switched_event;
@@ -97,7 +98,7 @@ void window_manager_focus_window_without_raise(uint32_t window_id);
 void window_manager_focus_window_with_raise(uint32_t window_id);
 struct ax_window *window_manager_focused_window(struct window_manager *wm);
 struct ax_application *window_manager_focused_application(struct window_manager *wm);
-struct view *window_manager_find_managed_window(struct window_manager *wm, struct ax_window *window);
+struct view *window_manager_find_managed_window(struct window_manager *wm, uint32_t wid);
 void window_manager_remove_managed_window(struct window_manager *wm, uint32_t wid);
 void window_manager_add_managed_window(struct window_manager *wm, struct ax_window *window, struct view *view);
 bool window_manager_find_lost_front_switched_event(struct window_manager *wm, pid_t pid);
@@ -106,6 +107,9 @@ void window_manager_add_lost_front_switched_event(struct window_manager *wm, pid
 bool window_manager_find_lost_focused_event(struct window_manager *wm, uint32_t window_id);
 void window_manager_remove_lost_focused_event(struct window_manager *wm, uint32_t window_id);
 void window_manager_add_lost_focused_event(struct window_manager *wm, uint32_t window_id);
+struct window_group *window_manager_find_grouped_window(struct window_manager *wm, uint32_t wid);
+void window_manager_remove_grouped_window(struct window_manager *wm, uint32_t wid);
+void window_manager_add_grouped_window(struct window_manager *wm, uint32_t wid, struct window_group *group);
 struct ax_window *window_manager_find_window(struct window_manager *wm, uint32_t window_id);
 void window_manager_remove_window(struct window_manager *wm, uint32_t window_id);
 void window_manager_add_window(struct window_manager *wm, struct ax_window *window);
@@ -113,6 +117,7 @@ struct ax_application *window_manager_find_application(struct window_manager *wm
 void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct ax_application *application);
 struct ax_window **window_manager_find_application_windows(struct window_manager *wm, struct ax_application *application, int *count);
+void window_manager_populate_window_group(struct window_manager *wm, struct ax_window *window);
 void window_manager_move_window_relative(struct window_manager *wm, struct ax_window *window, int type, float dx, float dy);
 void window_manager_resize_window_relative(struct window_manager *wm, struct ax_window *window, int direction, float dx, float dy);
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode);

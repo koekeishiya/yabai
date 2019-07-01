@@ -14,6 +14,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN);
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED);
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED);
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED);
+static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MAIN_CHANGED);
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED);
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED);
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED);
@@ -61,6 +62,7 @@ enum event_type
     WINDOW_CREATED,
     WINDOW_DESTROYED,
     WINDOW_FOCUSED,
+    WINDOW_MAIN_CHANGED,
     WINDOW_MOVED,
     WINDOW_RESIZED,
     WINDOW_MINIMIZED,
@@ -103,6 +105,7 @@ static const char *event_type_str[] =
     [WINDOW_CREATED]                 = "window_created",
     [WINDOW_DESTROYED]               = "window_destroyed",
     [WINDOW_FOCUSED]                 = "window_focused",
+    [WINDOW_MAIN_CHANGED]            = "window_main_changed",
     [WINDOW_MOVED]                   = "window_moved",
     [WINDOW_RESIZED]                 = "window_resized",
     [WINDOW_MINIMIZED]               = "window_minimized",
@@ -143,6 +146,7 @@ static event_callback *event_handler[] =
     [WINDOW_CREATED]                 = EVENT_HANDLER_WINDOW_CREATED,
     [WINDOW_DESTROYED]               = EVENT_HANDLER_WINDOW_DESTROYED,
     [WINDOW_FOCUSED]                 = EVENT_HANDLER_WINDOW_FOCUSED,
+    [WINDOW_MAIN_CHANGED]            = EVENT_HANDLER_WINDOW_MAIN_CHANGED,
     [WINDOW_MOVED]                   = EVENT_HANDLER_WINDOW_MOVED,
     [WINDOW_RESIZED]                 = EVENT_HANDLER_WINDOW_RESIZED,
     [WINDOW_MINIMIZED]               = EVENT_HANDLER_WINDOW_MINIMIZED,

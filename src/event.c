@@ -182,6 +182,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         for (int i = 0; i < window_count; ++i) {
             struct ax_window *window = window_list[i];
             if (window) {
+                struct window_group *group = window_manager_find_grouped_window(&g_window_manager, window->id);
+                if (group && group->active_window_id != window->id) continue;
+
                 if (window_manager_should_manage_window(window)) {
                     struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
                     window_manager_add_managed_window(&g_window_manager, window, view);
@@ -236,7 +239,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
             struct ax_window *window = window_list[i];
             if (!window) continue;
 
-            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+            struct view *view = window_manager_find_managed_window(&g_window_manager, window->id);
             if (view) {
                 space_manager_untile_window(&g_space_manager, view, window);
                 window_manager_remove_managed_window(&g_window_manager, window->id);
@@ -363,6 +366,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
     for (int i = 0; i < window_count; ++i) {
         struct ax_window *window = window_list[i];
         if (window) {
+            struct window_group *group = window_manager_find_grouped_window(&g_window_manager, window->id);
+            if (group && group->active_window_id != window->id) continue;
+
             if (window_manager_should_manage_window(window)) {
                 struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
                 window_manager_add_managed_window(&g_window_manager, window, view);
@@ -396,7 +402,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 
         border_window_hide(window);
 
-        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window->id);
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
@@ -423,6 +429,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     if (!application) return EVENT_FAILURE;
 
     struct ax_window *window = window_create(application, CFRetain(context), window_id);
+    window_manager_populate_window_group(&g_window_manager, window);
     window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
     window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.normal_window_opacity);
     window_manager_purify_window(&g_window_manager, window);
@@ -445,16 +452,23 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
             }
         }
 
-        if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
-            window_manager_add_managed_window(&g_window_manager, window, view);
-        }
-
-        if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
+        struct window_group *group = window_manager_find_grouped_window(&g_window_manager, window->id);
+        if (group) {
             struct event *event;
-            event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
+            event_create(event, WINDOW_MAIN_CHANGED, (void *)(intptr_t) window->id);
             event_loop_post(&g_event_loop, event);
-            window_manager_remove_lost_focused_event(&g_window_manager, window->id);
+        } else {
+            if (window_manager_should_manage_window(window)) {
+                struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
+                window_manager_add_managed_window(&g_window_manager, window, view);
+            }
+
+            if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
+                struct event *event;
+                event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
+                event_loop_post(&g_event_loop, event);
+                window_manager_remove_lost_focused_event(&g_window_manager, window->id);
+            }
         }
     } else {
         debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -480,11 +494,37 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
 
     if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-    if (view) {
-        space_manager_untile_window(&g_space_manager, view, window);
-        window_manager_remove_managed_window(&g_window_manager, window->id);
-        window_manager_purify_window(&g_window_manager, window);
+    struct window_group *group = window_manager_find_grouped_window(&g_window_manager, window->id);
+    if (group) {
+        window_group_remove_window(group, window->id);
+        window_manager_remove_grouped_window(&g_window_manager, window->id);
+
+        uint32_t new_wid = (buf_len(group->window_list) == 1) ? group->window_list[0] : window_group_find_active_window(group);
+        struct ax_window *new_window = window_manager_find_window(&g_window_manager, new_wid);
+        assert(new_window);
+
+        struct view *view = window_manager_find_managed_window(&g_window_manager, group->active_window_id);
+        if (view) {
+            window_manager_remove_managed_window(&g_window_manager, group->active_window_id);
+            window_manager_add_managed_window(&g_window_manager, new_window, view);
+            struct window_node *node = view_find_window_node(view->root, group->active_window_id);
+            node->window_id = new_window->id;
+        }
+
+        if (buf_len(group->window_list) == 1) {
+            window_group_remove_window(group, new_window->id);
+            window_manager_remove_grouped_window(&g_window_manager, new_window->id);
+            window_group_destroy(group);
+        } else {
+            group->active_window_id = new_window->id;
+        }
+    } else {
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window->id);
+        if (view) {
+            space_manager_untile_window(&g_space_manager, view, window);
+            window_manager_remove_managed_window(&g_window_manager, window->id);
+            window_manager_purify_window(&g_window_manager, window);
+        }
     }
 
     return EVENT_SUCCESS;
@@ -543,6 +583,65 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
     return EVENT_SUCCESS;
 }
 
+static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MAIN_CHANGED)
+{
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    struct ax_window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return EVENT_FAILURE;
+
+    if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_SUCCESS;
+    }
+
+    if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
+        return EVENT_FAILURE;
+    }
+
+    struct window_group *group = window_manager_find_grouped_window(&g_window_manager, window->id);
+    if (!group) return EVENT_FAILURE;
+
+    printf("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+    struct ax_window *active_window = window_manager_find_window(&g_window_manager, group->active_window_id);
+    assert(active_window);
+
+    if (active_window == window) {
+        struct ax_window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
+        if (focused_window && focused_window != window) {
+            border_window_deactivate(focused_window);
+            window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
+        }
+    } else {
+        border_window_deactivate(active_window);
+        border_window_hide(active_window);
+        window_manager_set_window_opacity(&g_window_manager, active_window, g_window_manager.normal_window_opacity);
+
+        struct view *view = window_manager_find_managed_window(&g_window_manager, group->active_window_id);
+        if (view) {
+            window_manager_remove_managed_window(&g_window_manager, group->active_window_id);
+            window_manager_add_managed_window(&g_window_manager, window, view);
+            struct window_node *node = view_find_window_node(view->root, group->active_window_id);
+            node->window_id = window->id;
+        }
+
+        group->active_window_id = window->id;
+    }
+
+    g_window_manager.focused_window_id = window->id;
+    g_window_manager.focused_window_psn = window->application->psn;
+
+    border_window_activate(window);
+    window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.active_window_opacity);
+
+    if (g_mouse_state.ffm_window_id != window->id) {
+        window_manager_center_mouse(&g_window_manager, window);
+    } else {
+        g_mouse_state.ffm_window_id = 0;
+    }
+
+    return EVENT_SUCCESS;
+}
+
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
@@ -559,7 +658,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
 #if 0
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window->id);
     if (view) view_flush(view);
 #endif
 
@@ -584,7 +683,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
 #if 0
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window->id);
     if (view) view_flush(view);
 #endif
 
@@ -612,7 +711,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
     }
 
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window->id);
     if (view) {
         space_manager_untile_window(&g_space_manager, view, window);
         window_manager_remove_managed_window(&g_window_manager, window->id);
@@ -635,6 +734,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
     }
 
     window->is_minimized = false;
+
+    struct window_group *group = window_manager_find_grouped_window(&g_window_manager, window_id);
+    if (group && group->active_window_id != window_id) return EVENT_FAILURE;
+
     border_window_show(window);
 
     if (space_manager_is_window_on_active_space(window)) {
@@ -831,7 +934,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         return EVENT_SUCCESS;
     }
 
-    struct view *view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
+    struct view *view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window->id);
 
     if ((g_mouse_state.current_action != MOUSE_MODE_RESIZE) && (view && view->layout == VIEW_BSP)) {
         CGRect frame = window_ax_frame(g_mouse_state.window);
@@ -1049,12 +1152,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
         while (bucket) {
             if (bucket->value) {
                 struct ax_window *window = bucket->value;
-                if ((!window->application->is_hidden) &&
-                    (!window->is_minimized)) {
-                    border_window_show(window);
-                }
-            }
+                if (window->application->is_hidden || window->is_minimized) goto next;
 
+                struct window_group *group = window_manager_find_grouped_window(&g_window_manager, window->id);
+                if (group && group->active_window_id != window->id) goto next;
+
+                border_window_show(window);
+            }
+next:
             bucket = bucket->next;
         }
     }
