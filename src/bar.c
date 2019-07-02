@@ -253,7 +253,7 @@ void bar_refresh(struct bar *bar)
     }
 
     CGContextFlush(bar->context);
-    SLSOrderWindow(g_connection, bar->id, 1, 0);
+    SLSOrderWindow(g_connection, bar->id, 1, bar->id);
     SLSReenableUpdate(g_connection);
 }
 
