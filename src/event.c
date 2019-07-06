@@ -855,8 +855,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
                 b_node->window_id = g_mouse_state.window->id;
                 window_node_flush(a_node);
                 window_node_flush(b_node);
+                a_node->zoom = NULL;
+                b_node->zoom = NULL;
             } else if (a_node) {
                 window_node_flush(a_node);
+                a_node->zoom = NULL;
             }
         } else {
             if (did_change_p) {
