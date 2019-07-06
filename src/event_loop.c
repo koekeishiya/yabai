@@ -87,6 +87,7 @@ bool event_loop_init(struct event_loop *event_loop)
 {
     queue_init(&event_loop->queue);
     event_loop->is_running = 0;
+    sem_unlink("event_loop_semaphore");
     event_loop->semaphore = sem_open("event_loop_semaphore", O_CREAT, 0600, 0);
     return event_loop->semaphore != SEM_FAILED;
 }
