@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 - Fixed an issue that prevented *yabai* from running under multiple users simultaneously [#95](https://github.com/koekeishiya/yabai/issues/95)
+- Extend window properties exposed through *query* commands [#90](https://github.com/koekeishiya/yabai/issues/90)
 
 ## [1.0.3] - 2019-06-30
 ### Changed

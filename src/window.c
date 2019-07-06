@@ -125,6 +125,15 @@ void window_serialize(struct window *window, FILE *rsp)
         CFRelease(cfsubrole);
     }
 
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    struct window_node *node = view ? view_find_window_node(view->root, window->id) : NULL;
+
+    char split[MAXLEN];
+    snprintf(split, sizeof(split), "%s", window_node_split_str[node && node->parent ? node->parent->split : 0]);
+    bool zoom_parent = node && node->zoom && node->zoom == node->parent;
+    bool zoom_fullscreen = node && node->zoom && node->zoom == view->root;
+
+
     fprintf(rsp,
             "{\n"
             "\t\"id\":%d,\n"
@@ -137,8 +146,13 @@ void window_serialize(struct window *window, FILE *rsp)
             "\t\"subrole\":\"%s\",\n"
             "\t\"movable\":%d,\n"
             "\t\"resizable\":%d,\n"
-            "\t\"native-fullscreen\":%d,\n"
-            "\t\"floating\":%d\n"
+            "\t\"split\":%s,\n"
+            "\t\"floating\":%d,\n"
+            "\t\"sticky\":%d,\n"
+            "\t\"border\":%d,\n"
+            "\t\"zoom-parent\":%d,\n"
+            "\t\"zoom-fullscreen\":%d,\n"
+            "\t\"native-fullscreen\":%d\n"
             "}",
             window->id,
             window->application->pid,
@@ -151,8 +165,13 @@ void window_serialize(struct window *window, FILE *rsp)
             subrole ? subrole : "",
             window_can_move(window),
             window_can_resize(window),
-            window_is_fullscreen(window),
-            window->is_floating);
+            split,
+            window->is_floating,
+            window_is_sticky(window),
+            window->border.enabled,
+            zoom_parent,
+            zoom_fullscreen,
+            window_is_fullscreen(window));
 
     if (subrole) free(subrole);
     if (role) free(role);

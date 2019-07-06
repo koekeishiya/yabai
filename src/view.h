@@ -24,6 +24,13 @@ enum window_node_child
     CHILD_FIRST,
 };
 
+static const char *window_node_child_str[] =
+{
+    "none",
+    "second_child",
+    "first_child"
+};
+
 enum window_node_split
 {
     SPLIT_NONE,
@@ -31,11 +38,11 @@ enum window_node_split
     SPLIT_X
 };
 
-static const char *window_node_child_str[] =
+static const char *window_node_split_str[] =
 {
     "none",
-    "second_child",
-    "first_child"
+    "vertical",
+    "horizontal"
 };
 
 struct window_node
