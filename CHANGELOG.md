@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.4] - 2019-07-06
 ### Changed
 - Fixed an issue that prevented *yabai* from running under multiple users simultaneously [#95](https://github.com/koekeishiya/yabai/issues/95)
 - Extend window properties exposed through *query* commands [#90](https://github.com/koekeishiya/yabai/issues/90)
@@ -30,7 +32,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.3...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.4...HEAD
+[1.0.4]: https://github.com/koekeishiya/yabai/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/koekeishiya/yabai/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/koekeishiya/yabai/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/koekeishiya/yabai/releases/tag/v1.0.1
