@@ -317,9 +317,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
 
     if (g_mouse_state.ffm_window_id != window->id) {
         window_manager_center_mouse(&g_window_manager, window);
-    } else {
-        g_mouse_state.ffm_window_id = 0;
     }
+
+    g_mouse_state.ffm_window_id = 0;
 
     return EVENT_SUCCESS;
 }
@@ -529,8 +529,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
         if (g_window_manager.focused_window_id != window->id) {
             if (g_mouse_state.ffm_window_id != window->id) {
                 window_manager_center_mouse(&g_window_manager, window);
-            } else {
-                g_mouse_state.ffm_window_id = 0;
             }
 
             g_window_manager.last_window_id = g_window_manager.focused_window_id;
@@ -539,6 +537,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
         g_window_manager.focused_window_id = window->id;
         g_window_manager.focused_window_psn = window->application->psn;
     }
+
+    g_mouse_state.ffm_window_id = 0;
 
     return EVENT_SUCCESS;
 }
@@ -732,10 +732,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
 
             if (g_mouse_state.ffm_window_id != focused_window->id) {
                 window_manager_center_mouse(&g_window_manager, focused_window);
-            } else {
-                g_mouse_state.ffm_window_id = 0;
             }
 
+            g_mouse_state.ffm_window_id = 0;
             window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
         }
     }
@@ -787,14 +786,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
 {
-    CGEventRef event = context;
-    CGPoint point = CGEventGetLocation(event);
-    int64_t button = CGEventGetIntegerValueField(event, kCGMouseEventButtonNumber);
-    uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
-
-    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
-    if (g_mission_control_active) return EVENT_SUCCESS;
+    if (g_mission_control_active)                        return EVENT_SUCCESS;
     if (g_mouse_state.current_action != MOUSE_MODE_NONE) return EVENT_SUCCESS;
+
+    CGPoint point = CGEventGetLocation(context);
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
     g_mouse_state.window = window_manager_find_window_at_point(&g_window_manager, point);
     if (!g_mouse_state.window) g_mouse_state.window = window_manager_focused_window(&g_window_manager);
@@ -802,6 +798,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
 
     g_mouse_state.down_location = point;
     g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
+
+    int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
+    uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(context));
 
     if (button == kCGMouseButtonLeft && g_mouse_state.modifier == mod) {
         g_mouse_state.current_action = g_mouse_state.action1;
@@ -816,11 +815,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
 {
-    int result = EVENT_SUCCESS;
-    CGEventRef event = context;
-    CGPoint point = CGEventGetLocation(event);
-
-    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
     if (g_mission_control_active) return EVENT_SUCCESS;
     if (!g_mouse_state.window)    return EVENT_SUCCESS;
 
@@ -831,8 +825,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         return EVENT_SUCCESS;
     }
 
-    struct view *view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
+    int result = EVENT_SUCCESS;
+    CGPoint point = CGEventGetLocation(context);
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
+    struct view *view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
     if ((g_mouse_state.current_action != MOUSE_MODE_RESIZE) && (view && view->layout == VIEW_BSP)) {
         CGRect frame = window_ax_frame(g_mouse_state.window);
         float dx = frame.origin.x - g_mouse_state.window_frame.origin.x;
@@ -886,10 +883,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 {
-    CGEventRef event = context;
-    CGPoint point = CGEventGetLocation(event);
-    uint64_t event_time = CGEventGetTimestamp(event);
-
     if (g_mission_control_active) return EVENT_SUCCESS;
     if (!g_mouse_state.window)    return EVENT_SUCCESS;
 
@@ -901,27 +894,30 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
     }
 
     if (g_mouse_state.current_action == MOUSE_MODE_MOVE) {
+        uint64_t event_time = CGEventGetTimestamp(context);
+        float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
+        if (dt < 25.0f) return EVENT_SUCCESS;
+
+        CGPoint point = CGEventGetLocation(context);
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
 
         if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= -10) {
-            float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-            if (dt < 25.0f) return EVENT_SUCCESS;
-
             float fx = g_mouse_state.window_frame.origin.x + dx;
             float fy = g_mouse_state.window_frame.origin.y + dy;
             window_manager_move_window(g_mouse_state.window, fx, fy);
-
             g_mouse_state.last_moved_time = event_time;
         }
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
+        uint64_t event_time = CGEventGetTimestamp(context);
+        float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
+        if (dt < 200.0f) return EVENT_SUCCESS;
+
+        CGPoint point = CGEventGetLocation(context);
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
 
         if (dx >= 25 || dx <= -25 || dy >= 25 || dy <= 25) {
-            float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-            if (dt < 200.0f) return EVENT_SUCCESS;
-
             uint8_t direction = 0;
             CGPoint frame_mid = { CGRectGetMidX(g_mouse_state.window_frame), CGRectGetMidY(g_mouse_state.window_frame) };
 
@@ -942,26 +938,27 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
 {
-    CGEventRef event = context;
-    CGPoint point = CGEventGetLocation(event);
-    uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
-    uint64_t event_time = CGEventGetTimestamp(event);
+    if (g_mission_control_active)    return EVENT_SUCCESS;
+    if (g_mouse_state.ffm_window_id) return EVENT_SUCCESS;
 
-    if (g_mission_control_active)      return EVENT_SUCCESS;
-    if (g_mouse_state.ffm_window_id)   return EVENT_SUCCESS;
+    uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(context));
     if (g_mouse_state.modifier == mod) return EVENT_SUCCESS;
 
+    uint64_t event_time = CGEventGetTimestamp(context);
     float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
     if (dt < 25.0f) return EVENT_SUCCESS;
 
     g_mouse_state.last_moved_time = event_time;
+
     if (g_window_manager.ffm_mode == FFM_DISABLED) return EVENT_SUCCESS;
 
+    CGPoint point = CGEventGetLocation(context);
     struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
     if (!window || window->id == g_window_manager.focused_window_id)      return EVENT_SUCCESS;
     if (!window_level_is_standard(window) || !window_is_standard(window)) return EVENT_SUCCESS;
 
     g_mouse_state.ffm_window_id = window->id;
+
     if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
         window_manager_focus_window_without_raise(window->id);
     } else {
