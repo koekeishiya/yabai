@@ -132,7 +132,6 @@ static struct equalize_node window_node_equalize(struct window_node *node)
     return total_leafs;
 }
 
-
 static void window_node_split(struct view *view, struct window_node *node, struct window *window)
 {
     struct window_node *left = malloc(sizeof(struct window_node));

@@ -133,7 +133,6 @@ void window_serialize(struct window *window, FILE *rsp)
     bool zoom_parent = node && node->zoom && node->zoom == node->parent;
     bool zoom_fullscreen = node && node->zoom && node->zoom == view->root;
 
-
     fprintf(rsp,
             "{\n"
             "\t\"id\":%d,\n"
