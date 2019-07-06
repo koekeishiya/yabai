@@ -55,24 +55,11 @@ static const char *bool_str[] = { "off", "on" };
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
-#define ARGUMENT_CONFIG_MFF_ON               "on"
-#define ARGUMENT_CONFIG_MFF_OFF              "off"
-#define ARGUMENT_CONFIG_FFM_DISABLED         "off"
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
 #define ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST "first_child"
 #define ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND "second_child"
-#define ARGUMENT_CONFIG_TOPMOST_ON           "on"
-#define ARGUMENT_CONFIG_TOPMOST_OFF          "off"
-#define ARGUMENT_CONFIG_OPACITY_ON           "on"
-#define ARGUMENT_CONFIG_OPACITY_OFF          "off"
-#define ARGUMENT_CONFIG_SHADOW_OFF           "off"
 #define ARGUMENT_CONFIG_SHADOW_FLT           "float"
-#define ARGUMENT_CONFIG_SHADOW_ON            "on"
-#define ARGUMENT_CONFIG_BORDER_ON            "on"
-#define ARGUMENT_CONFIG_BORDER_OFF           "off"
-#define ARGUMENT_CONFIG_AUTO_BALANCE_ON      "on"
-#define ARGUMENT_CONFIG_AUTO_BALANCE_OFF     "off"
 #define ARGUMENT_CONFIG_LAYOUT_BSP           "bsp"
 #define ARGUMENT_CONFIG_LAYOUT_FLOAT         "float"
 #define ARGUMENT_CONFIG_MOUSE_MOD_ALT        "alt"
@@ -82,8 +69,6 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_CONFIG_MOUSE_MOD_FN         "fn"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE    "move"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE  "resize"
-#define ARGUMENT_CONFIG_BAR_ON               "on"
-#define ARGUMENT_CONFIG_BAR_OFF              "off"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
@@ -173,8 +158,6 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_RULE_KEY_GRID    "grid"
 #define ARGUMENT_RULE_KEY_LABEL   "label"
 
-#define ARGUMENT_RULE_VALUE_ON    "on"
-#define ARGUMENT_RULE_VALUE_OFF   "off"
 #define ARGUMENT_RULE_VALUE_SPACE '^'
 #define ARGUMENT_RULE_VALUE_GRID  "%d:%d:%d:%d:%d:%d"
 /* ----------------------------------------------------------------------------- */
@@ -189,6 +172,8 @@ static const char *bool_str[] = { "off", "on" };
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------COMMON ARGUMENTS----------------------------- */
+#define ARGUMENT_COMMON_VAL_ON     "on"
+#define ARGUMENT_COMMON_VAL_OFF    "off"
 #define ARGUMENT_COMMON_SEL_PREV   "prev"
 #define ARGUMENT_COMMON_SEL_NEXT   "next"
 #define ARGUMENT_COMMON_SEL_FIRST  "first"
@@ -316,9 +301,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_mff]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_MFF_OFF)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_window_manager.enable_mff = false;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MFF_ON)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             g_window_manager.enable_mff = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -327,7 +312,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", ffm_mode_str[g_window_manager.ffm_mode]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_FFM_DISABLED)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_window_manager.ffm_mode = FFM_DISABLED;
         } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTOFOCUS)) {
             g_window_manager.ffm_mode = FFM_AUTOFOCUS;
@@ -351,9 +336,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_topmost]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_TOPMOST_OFF)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_window_manager.enable_window_topmost = false;
-        } else if (token_equals(value, ARGUMENT_CONFIG_TOPMOST_ON)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             g_window_manager.enable_window_topmost = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -362,9 +347,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_opacity]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_OPACITY_OFF)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_window_manager.enable_window_opacity = false;
-        } else if (token_equals(value, ARGUMENT_CONFIG_OPACITY_ON)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             g_window_manager.enable_window_opacity = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -373,11 +358,11 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", purify_mode_str[g_window_manager.purify_mode]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_OFF)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             window_manager_set_purify_mode(&g_window_manager, PURIFY_ALWAYS);
         } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_FLT)) {
             window_manager_set_purify_mode(&g_window_manager, PURIFY_MANAGED);
-        } else if (token_equals(value, ARGUMENT_CONFIG_SHADOW_ON)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             window_manager_set_purify_mode(&g_window_manager, PURIFY_DISABLED);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -386,9 +371,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_BORDER_OFF)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_window_manager.enable_window_border = false;
-        } else if (token_equals(value, ARGUMENT_CONFIG_BORDER_ON)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             g_window_manager.enable_window_border = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -607,9 +592,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_space_manager.auto_balance]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_AUTO_BALANCE_OFF)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_space_manager.auto_balance = false;
-        } else if (token_equals(value, ARGUMENT_CONFIG_AUTO_BALANCE_ON)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             g_space_manager.auto_balance = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -657,9 +642,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_bar.enabled]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_BAR_OFF)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_bar.enabled = false;
-        } else if (token_equals(value, ARGUMENT_CONFIG_BAR_ON)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             g_bar.enabled = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1813,27 +1798,27 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             } else if (string_equals(key, ARGUMENT_RULE_KEY_ALPHA)) {
                 sscanf(value, "%f", &rule->alpha);
             } else if (string_equals(key, ARGUMENT_RULE_KEY_MANAGE)) {
-                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->manage = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->manage = RULE_PROP_OFF;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_STICKY)) {
-                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->sticky = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->sticky = RULE_PROP_OFF;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
-                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->border = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->border = RULE_PROP_OFF;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_FULLSCR)) {
-                if (string_equals(value, ARGUMENT_RULE_VALUE_ON)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->fullscreen = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_RULE_VALUE_OFF)) {
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->fullscreen = RULE_PROP_OFF;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_GRID)) {
