@@ -145,7 +145,7 @@ void window_serialize(struct window *window, FILE *rsp)
             "\t\"subrole\":\"%s\",\n"
             "\t\"movable\":%d,\n"
             "\t\"resizable\":%d,\n"
-            "\t\"split\":%s,\n"
+            "\t\"split\":\"%s\",\n"
             "\t\"floating\":%d,\n"
             "\t\"sticky\":%d,\n"
             "\t\"border\":%d,\n"
