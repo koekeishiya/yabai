@@ -46,7 +46,7 @@ cmd + alt - n : yabai -m space --create;\
 cmd + alt - w : yabai -m space --destroy
 
 # fast focus desktop
-cmd + alt - x : yabai -m space --focus last
+cmd + alt - x : yabai -m space --focus recent
 cmd + alt - z : yabai -m space --focus prev
 cmd + alt - c : yabai -m space --focus next
 cmd + alt - 1 : yabai -m space --focus 1
@@ -61,7 +61,7 @@ cmd + alt - 9 : yabai -m space --focus 9
 cmd + alt - 0 : yabai -m space --focus 10
 
 # send window to desktop and follow focus
-shift + cmd - x : yabai -m window --space last; yabai -m space --focus last
+shift + cmd - x : yabai -m window --space recent; yabai -m space --focus recent
 shift + cmd - z : yabai -m window --space prev; yabai -m space --focus prev
 shift + cmd - c : yabai -m window --space next; yabai -m space --focus next
 shift + cmd - 1 : yabai -m window --space  1; yabai -m space --focus 1
@@ -76,7 +76,7 @@ shift + cmd - 9 : yabai -m window --space  9; yabai -m space --focus 9
 shift + cmd - 0 : yabai -m window --space 10; yabai -m space --focus 10
 
 # focus monitor
-ctrl + alt - x  : yabai -m display --focus last
+ctrl + alt - x  : yabai -m display --focus recent
 ctrl + alt - z  : yabai -m display --focus prev
 ctrl + alt - c  : yabai -m display --focus next
 ctrl + alt - 1  : yabai -m display --focus 1
@@ -84,7 +84,7 @@ ctrl + alt - 2  : yabai -m display --focus 2
 ctrl + alt - 3  : yabai -m display --focus 3
 
 # send window to monitor and follow focus
-ctrl + cmd - x  : yabai -m window --display last; yabai -m display --focus last
+ctrl + cmd - x  : yabai -m window --display recent; yabai -m display --focus recent
 ctrl + cmd - z  : yabai -m window --display prev; yabai -m display --focus prev
 ctrl + cmd - c  : yabai -m window --display next; yabai -m display --focus next
 ctrl + cmd - 1  : yabai -m window --display 1; yabai -m display --focus 1
