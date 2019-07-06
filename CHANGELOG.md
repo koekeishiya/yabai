@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.0.5] - 2019-07-06
+- Fix missing quotation of string value outputted through *window query* commands [#90](https://github.com/koekeishiya/yabai/issues/90)
+
 ## [1.0.4] - 2019-07-06
 ### Changed
 - Fixed an issue that prevented *yabai* from running under multiple users simultaneously [#95](https://github.com/koekeishiya/yabai/issues/95)
@@ -32,7 +35,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.4...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.5...HEAD
+[1.0.5]: https://github.com/koekeishiya/yabai/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/koekeishiya/yabai/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/koekeishiya/yabai/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/koekeishiya/yabai/compare/v1.0.1...v1.0.2
