@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-06-24
+.\"      Date: 2019-07-06
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-06-24" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-07-06" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -78,11 +78,11 @@ Loads the scripting\-addition into Dock.app.
 .nf
 DIR_SEL     := north | east | south | west
 
-WINDOW_SEL  := prev | next | last | mouse | DIR_SEL
+WINDOW_SEL  := prev | next | first | last | recent | mouse | DIR_SEL
 
-DISPLAY_SEL := prev | next | last | arrangement index (1\-based)
+DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1\-based)
 
-SPACE_SEL   := prev | next | last | mission\-control index (1\-based)
+SPACE_SEL   := prev | next | first | last | recent | mission\-control index (1\-based)
 
 FLOAT_SEL   := 0 < value <= 1.0
 

@@ -89,9 +89,6 @@ static const char *bool_str[] = { "off", "on" };
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
 #define COMMAND_DISPLAY_FOCUS "--focus"
 
-#define ARGUMENT_DISPLAY_FOCUS_PREV "prev"
-#define ARGUMENT_DISPLAY_FOCUS_NEXT "next"
-#define ARGUMENT_DISPLAY_FOCUS_LAST "last"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
@@ -108,14 +105,6 @@ static const char *bool_str[] = { "off", "on" };
 #define COMMAND_SPACE_TOGGLE  "--toggle"
 #define COMMAND_SPACE_LAYOUT  "--layout"
 
-#define ARGUMENT_SPACE_FOCUS_PREV   "prev"
-#define ARGUMENT_SPACE_FOCUS_NEXT   "next"
-#define ARGUMENT_SPACE_FOCUS_LAST   "last"
-#define ARGUMENT_SPACE_MOVE_PREV    "prev"
-#define ARGUMENT_SPACE_MOVE_NEXT    "next"
-#define ARGUMENT_SPACE_DISPLAY_PREV "prev"
-#define ARGUMENT_SPACE_DISPLAY_NEXT "next"
-#define ARGUMENT_SPACE_DISPLAY_LAST "last"
 #define ARGUMENT_SPACE_MIRROR_X     "x-axis"
 #define ARGUMENT_SPACE_MIRROR_Y     "y-axis"
 #define ARGUMENT_SPACE_ROTATE_90    "90"
@@ -146,9 +135,6 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_WINDOW_DIR_SOUTH     "south"
 #define ARGUMENT_WINDOW_DIR_WEST      "west"
 #define ARGUMENT_WINDOW_SEL_MOUSE     "mouse"
-#define ARGUMENT_WINDOW_SEL_PREV      "prev"
-#define ARGUMENT_WINDOW_SEL_NEXT      "next"
-#define ARGUMENT_WINDOW_SEL_LAST      "last"
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
 #define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
@@ -159,12 +145,6 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_WINDOW_TOGGLE_FULLSC "zoom-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_BORDER "border"
-#define ARGUMENT_WINDOW_SPACE_PREV    "prev"
-#define ARGUMENT_WINDOW_SPACE_NEXT    "next"
-#define ARGUMENT_WINDOW_SPACE_LAST    "last"
-#define ARGUMENT_WINDOW_DISPLAY_PREV  "prev"
-#define ARGUMENT_WINDOW_DISPLAY_NEXT  "next"
-#define ARGUMENT_WINDOW_DISPLAY_LAST  "last"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN QUERY--------------------------------- */
@@ -206,6 +186,14 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_SIGNAL_KEY_EVENT    "event"
 #define ARGUMENT_SIGNAL_KEY_ACTION   "action"
 #define ARGUMENT_SIGNAL_KEY_LABEL    "label"
+/* ----------------------------------------------------------------------------- */
+
+/* --------------------------------COMMON ARGUMENTS----------------------------- */
+#define ARGUMENT_COMMON_SEL_PREV   "prev"
+#define ARGUMENT_COMMON_SEL_NEXT   "next"
+#define ARGUMENT_COMMON_SEL_FIRST  "first"
+#define ARGUMENT_COMMON_SEL_LAST   "last"
+#define ARGUMENT_COMMON_SEL_RECENT "recent"
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -756,21 +744,35 @@ static void handle_domain_display(FILE *rsp, struct token domain, char *message)
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_DISPLAY_FOCUS)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_DISPLAY_FOCUS_PREV)) {
+        if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             uint32_t did = display_manager_prev_display_id(display_manager_active_display_id());
             if (did) {
                 display_manager_focus_display(did);
             } else {
                 daemon_fail(rsp, "could not locate the previous display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_DISPLAY_FOCUS_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             uint32_t did = display_manager_next_display_id(display_manager_active_display_id());
             if (did) {
                 display_manager_focus_display(did);
             } else {
                 daemon_fail(rsp, "could not locate the next display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_DISPLAY_FOCUS_LAST)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            uint32_t did = display_manager_first_display_id();
+            if (did) {
+                display_manager_focus_display(did);
+            } else {
+                daemon_fail(rsp, "could not locate the first display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
+            uint32_t did = display_manager_last_display_id();
+            if (did) {
+                display_manager_focus_display(did);
+            } else {
+                daemon_fail(rsp, "could not locate the last display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
             display_manager_focus_display(g_display_manager.last_display_id);
         } else if (token_is_valid(value)) {
             int arrangement_index = token_to_int(value);
@@ -804,21 +806,35 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_SPACE_FOCUS)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_SPACE_FOCUS_PREV)) {
+        if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             uint64_t sid = space_manager_prev_space(space_manager_active_space());
             if (sid) {
                 space_manager_focus_space(sid);
             } else {
                 daemon_fail(rsp, "could not locate the previous space.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_FOCUS_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             uint64_t sid = space_manager_next_space(space_manager_active_space());
             if (sid) {
                 space_manager_focus_space(sid);
             } else {
                 daemon_fail(rsp, "could not locate the next space.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_FOCUS_LAST)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            uint64_t sid = space_manager_first_space();
+            if (sid) {
+                space_manager_focus_space(sid);
+            } else {
+                daemon_fail(rsp, "could not locate the first space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
+            uint64_t sid = space_manager_last_space();
+            if (sid) {
+                space_manager_focus_space(sid);
+            } else {
+                daemon_fail(rsp, "could not locate the last space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
             space_manager_focus_space(g_space_manager.last_space_id);
         } else if (token_is_valid(value)) {
             int mci = token_to_int(value);
@@ -833,7 +849,7 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_SPACE_MOVE_PREV)) {
+        if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             uint64_t cur_sid = space_manager_active_space();
             uint64_t pre_sid = space_manager_prev_space(cur_sid);
             if (cur_sid && pre_sid) {
@@ -841,7 +857,7 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not swap places with the previous space.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_MOVE_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             uint64_t src_sid = space_manager_active_space();
             uint64_t dst_sid = space_manager_next_space(src_sid);
             if (src_sid && dst_sid) {
@@ -854,21 +870,35 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_SPACE_DISPLAY)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_SPACE_DISPLAY_PREV)) {
+        if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             uint32_t did = display_manager_prev_display_id(display_manager_active_display_id());
             if (did) {
                 space_manager_move_space_to_display(&g_space_manager, did);
             } else {
                 daemon_fail(rsp, "could not locate the previous display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_DISPLAY_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             uint32_t did = display_manager_next_display_id(display_manager_active_display_id());
             if (did) {
                 space_manager_move_space_to_display(&g_space_manager, did);
             } else {
                 daemon_fail(rsp, "could not locate the next display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_DISPLAY_LAST)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            uint32_t did = display_manager_first_display_id();
+            if (did) {
+                space_manager_move_space_to_display(&g_space_manager, did);
+            } else {
+                daemon_fail(rsp, "could not locate the first display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
+            uint32_t did = display_manager_last_display_id();
+            if (did) {
+                space_manager_move_space_to_display(&g_space_manager, did);
+            } else {
+                daemon_fail(rsp, "could not locate the last display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
             space_manager_move_space_to_display(&g_space_manager, g_display_manager.last_display_id);
         } else if (token_is_valid(value)) {
             int arrangement_index = token_to_int(value);
@@ -1042,7 +1072,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate a window below the cursor.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             if (window) {
                 struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
@@ -1053,7 +1083,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             if (window) {
                 struct window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
@@ -1064,12 +1094,34 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
-            struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
-            if (last_window) {
-                window_manager_focus_window_with_raise(last_window->id);
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            if (window) {
+                struct window *first_window = window_manager_find_first_managed_window(&g_space_manager, &g_window_manager);
+                if (first_window) {
+                    window_manager_focus_window_with_raise(first_window->id);
+                } else {
+                    daemon_fail(rsp, "could not locate the first managed window.\n");
+                }
             } else {
-                daemon_fail(rsp, "could not locate the last focused window.\n");
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
+            if (window) {
+                struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
+                if (last_window) {
+                    window_manager_focus_window_with_raise(last_window->id);
+                } else {
+                    daemon_fail(rsp, "could not locate the last managed window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
+            struct window *recent_window = window_manager_find_recent_managed_window(&g_space_manager, &g_window_manager);
+            if (recent_window) {
+                window_manager_focus_window_with_raise(recent_window->id);
+            } else {
+                daemon_fail(rsp, "could not locate the most recently focused window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1131,7 +1183,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             if (window) {
                 struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
@@ -1142,7 +1194,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             if (window) {
                 struct window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
@@ -1153,13 +1205,35 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            if (window) {
+                struct window *first_window = window_manager_find_first_managed_window(&g_space_manager, &g_window_manager);
+                if (first_window) {
+                    window_manager_swap_window(&g_space_manager, &g_window_manager, window, first_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the first managed window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
             if (window) {
                 struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
                 if (last_window) {
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, last_window);
                 } else {
-                    daemon_fail(rsp, "could not locate the last focused window.\n");
+                    daemon_fail(rsp, "could not locate the last managed window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
+            if (window) {
+                struct window *recent_window = window_manager_find_recent_managed_window(&g_space_manager, &g_window_manager);
+                if (recent_window) {
+                    window_manager_swap_window(&g_space_manager, &g_window_manager, window, recent_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the most recently focused window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
@@ -1224,7 +1298,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_PREV)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             if (window) {
                 struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
@@ -1235,7 +1309,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             if (window) {
                 struct window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
@@ -1246,13 +1320,35 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LAST)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            if (window) {
+                struct window *first_window = window_manager_find_first_managed_window(&g_space_manager, &g_window_manager);
+                if (first_window) {
+                    window_manager_warp_window(&g_space_manager, window, first_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the first managed window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
             if (window) {
                 struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
                 if (last_window) {
                     window_manager_warp_window(&g_space_manager, window, last_window);
                 } else {
-                    daemon_fail(rsp, "could not locate the last focused window.\n");
+                    daemon_fail(rsp, "could not locate the last managed window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
+            if (window) {
+                struct window *recent_window = window_manager_find_recent_managed_window(&g_space_manager, &g_window_manager);
+                if (recent_window) {
+                    window_manager_warp_window(&g_space_manager, window, recent_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the most recently focused window.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
@@ -1376,7 +1472,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_WINDOW_DISPLAY)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_PREV)) {
+        if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             uint32_t did = display_manager_prev_display_id(display_manager_active_display_id());
             if (did) {
                 if (window) {
@@ -1387,7 +1483,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the previous display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             uint32_t did = display_manager_next_display_id(display_manager_active_display_id());
             if (did) {
                 if (window) {
@@ -1398,7 +1494,29 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the next display.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_DISPLAY_LAST)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            uint32_t did = display_manager_first_display_id();
+            if (did) {
+                if (window) {
+                    window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
+                } else {
+                    daemon_fail(rsp, "could not locate the selected window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the first display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
+            uint32_t did = display_manager_last_display_id();
+            if (did) {
+                if (window) {
+                    window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, did);
+                } else {
+                    daemon_fail(rsp, "could not locate the selected window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the last display.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
             if (window) {
                 window_manager_send_window_to_display(&g_space_manager, &g_window_manager, window, g_display_manager.last_display_id);
             } else {
@@ -1421,7 +1539,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_WINDOW_SPACE)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_WINDOW_SPACE_PREV)) {
+        if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             uint64_t sid = space_manager_prev_space(space_manager_active_space());
             if (sid) {
                 if (window) {
@@ -1432,7 +1550,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the previous space.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SPACE_NEXT)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
             uint64_t sid = space_manager_next_space(space_manager_active_space());
             if (sid) {
                 if (window) {
@@ -1443,7 +1561,29 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate the next space.\n");
             }
-        } else if (token_equals(value, ARGUMENT_WINDOW_SPACE_LAST)) {
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_FIRST)) {
+            uint64_t sid = space_manager_first_space();
+            if (sid) {
+                if (window) {
+                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
+                } else {
+                    daemon_fail(rsp, "could not locate the selected window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the first space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_LAST)) {
+            uint64_t sid = space_manager_last_space();
+            if (sid) {
+                if (window) {
+                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, sid);
+                } else {
+                    daemon_fail(rsp, "could not locate the selected window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the last space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
             if (window) {
                 window_manager_send_window_to_space(&g_space_manager, &g_window_manager, window, g_space_manager.last_space_id);
             } else {

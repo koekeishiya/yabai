@@ -98,6 +98,8 @@ struct view
 
 float window_node_border_window_offset(struct window *window);
 void window_node_flush(struct window_node *node);
+struct window_node *window_node_find_first_leaf(struct window_node *root);
+struct window_node *window_node_find_last_leaf(struct window_node *root);
 struct window_node *window_node_find_prev_leaf(struct window_node *node);
 struct window_node *window_node_find_next_leaf(struct window_node *node);
 

@@ -92,7 +92,9 @@ struct window *window_manager_find_closest_managed_window_in_direction(struct wi
 struct window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct window *window, int direction);
 struct window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window);
+struct window *window_manager_find_first_managed_window(struct space_manager *sm, struct window_manager *wm);
 struct window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm);
+struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm);
 void window_manager_focus_window_without_raise(uint32_t window_id);
 void window_manager_focus_window_with_raise(uint32_t window_id);
 struct window *window_manager_focused_window(struct window_manager *wm);

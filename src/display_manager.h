@@ -30,6 +30,8 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement);
 uint32_t display_manager_arrangement_display_id(int arrangement);
 uint32_t display_manager_prev_display_id(uint32_t did);
 uint32_t display_manager_next_display_id(uint32_t did);
+uint32_t display_manager_first_display_id(void);
+uint32_t display_manager_last_display_id(void);
 bool display_manager_menu_bar_hidden(void);
 CGRect display_manager_menu_bar_rect(void);
 bool display_manager_dock_hidden(void);

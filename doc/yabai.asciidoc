@@ -61,11 +61,11 @@ Definitions
 ----
 DIR_SEL     := north | east | south | west
 
-WINDOW_SEL  := prev | next | last | mouse | DIR_SEL
+WINDOW_SEL  := prev | next | first | last | recent | mouse | DIR_SEL
 
-DISPLAY_SEL := prev | next | last | arrangement index (1-based)
+DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1-based)
 
-SPACE_SEL   := prev | next | last | mission-control index (1-based)
+SPACE_SEL   := prev | next | first | last | recent | mission-control index (1-based)
 
 FLOAT_SEL   := 0 < value <= 1.0
 

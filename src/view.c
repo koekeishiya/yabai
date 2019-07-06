@@ -203,11 +203,20 @@ void window_node_flush(struct window_node *node)
     }
 }
 
-static struct window_node *window_node_find_first_leaf(struct window_node *root)
+struct window_node *window_node_find_first_leaf(struct window_node *root)
 {
     struct window_node *node = root;
     while (!window_node_is_leaf(node)) {
         node = node->left;
+    }
+    return node;
+}
+
+struct window_node *window_node_find_last_leaf(struct window_node *root)
+{
+    struct window_node *node = root;
+    while (!window_node_is_leaf(node)) {
+        node = node->right;
     }
     return node;
 }

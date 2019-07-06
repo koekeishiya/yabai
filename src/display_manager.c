@@ -117,6 +117,17 @@ uint32_t display_manager_next_display_id(uint32_t did)
     return display_manager_arrangement_display_id(arrangement + 1);
 }
 
+uint32_t display_manager_first_display_id(void)
+{
+    return display_manager_arrangement_display_id(1);
+}
+
+uint32_t display_manager_last_display_id(void)
+{
+    int arrangement = display_manager_active_display_count();
+    return display_manager_arrangement_display_id(arrangement);
+}
+
 bool display_manager_menu_bar_hidden(void)
 {
     int status = 0;

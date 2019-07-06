@@ -606,7 +606,29 @@ struct window *window_manager_find_next_managed_window(struct space_manager *sm,
     return window_manager_find_window(wm, prev->window_id);
 }
 
+struct window *window_manager_find_first_managed_window(struct space_manager *sm, struct window_manager *wm)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    struct window_node *first = window_node_find_first_leaf(view->root);
+    if (!first) return NULL;
+
+    return window_manager_find_window(wm, first->window_id);
+}
+
 struct window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    struct window_node *last = window_node_find_last_leaf(view->root);
+    if (!last) return NULL;
+
+    return window_manager_find_window(wm, last->window_id);
+}
+
+struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
