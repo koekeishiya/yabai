@@ -3,6 +3,7 @@ FRAMEWORK      = -framework Carbon -framework Cocoa -framework CoreServices -fra
 BUILD_FLAGS    = -std=c99 -Wall -g -O0 -fvisibility=hidden
 BUILD_PATH     = ./bin
 DOC_PATH       = ./doc
+IMG_PATH       = ./img
 SMP_PATH       = ./examples
 ARCH_PATH      = ./archive
 YABAI_SRC      = ./src/manifest.m
@@ -27,7 +28,10 @@ sa:
 man:
 	asciidoctor -b manpage $(DOC_PATH)/yabai.asciidoc -o $(DOC_PATH)/yabai.1
 
-archive: man sa install sign
+logo:
+	python $(IMG_PATH)/seticon.py $(IMG_PATH)/icon.png $(BUILD_PATH)/yabai
+
+archive: man sa install sign logo
 	rm -rf $(ARCH_PATH)
 	mkdir -p $(ARCH_PATH)
 	cp -r $(BUILD_PATH) $(ARCH_PATH)/
