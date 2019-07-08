@@ -963,9 +963,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     g_mouse_state.ffm_window_id = window->id;
 
     if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
-        window_manager_focus_window_without_raise(window->id);
+        window_manager_focus_window_without_raise(&window->application->psn, window->id);
     } else {
-        window_manager_focus_window_with_raise(window->id);
+        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
     }
 
     return EVENT_SUCCESS;

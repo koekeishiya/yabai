@@ -1009,7 +1009,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_NORTH);
                 if (closest_window) {
-                    window_manager_focus_window_with_raise(closest_window->id);
+                    window_manager_focus_window_with_raise(&closest_window->application->psn, closest_window->id, closest_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate a northward managed window.\n");
                 }
@@ -1020,7 +1020,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_EAST);
                 if (closest_window) {
-                    window_manager_focus_window_with_raise(closest_window->id);
+                    window_manager_focus_window_with_raise(&closest_window->application->psn, closest_window->id, closest_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate a eastward managed window.\n");
                 }
@@ -1031,7 +1031,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_SOUTH);
                 if (closest_window) {
-                    window_manager_focus_window_with_raise(closest_window->id);
+                    window_manager_focus_window_with_raise(&closest_window->application->psn, closest_window->id, closest_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate a southward managed window.\n");
                 }
@@ -1042,7 +1042,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, window, DIR_WEST);
                 if (closest_window) {
-                    window_manager_focus_window_with_raise(closest_window->id);
+                    window_manager_focus_window_with_raise(&closest_window->application->psn, closest_window->id, closest_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate a westward managed window.\n");
                 }
@@ -1052,7 +1052,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_WINDOW_SEL_MOUSE)) {
             struct window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
             if (mouse_window) {
-                window_manager_focus_window_with_raise(mouse_window->id);
+                window_manager_focus_window_with_raise(&mouse_window->application->psn, mouse_window->id, mouse_window->ref);
             } else {
                 daemon_fail(rsp, "could not locate a window below the cursor.\n");
             }
@@ -1060,7 +1060,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
                 if (prev_window) {
-                    window_manager_focus_window_with_raise(prev_window->id);
+                    window_manager_focus_window_with_raise(&prev_window->application->psn, prev_window->id, prev_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate the prev managed window.\n");
                 }
@@ -1071,7 +1071,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *next_window = window_manager_find_next_managed_window(&g_space_manager, &g_window_manager, window);
                 if (next_window) {
-                    window_manager_focus_window_with_raise(next_window->id);
+                    window_manager_focus_window_with_raise(&next_window->application->psn, next_window->id, next_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate the next managed window.\n");
                 }
@@ -1082,7 +1082,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *first_window = window_manager_find_first_managed_window(&g_space_manager, &g_window_manager);
                 if (first_window) {
-                    window_manager_focus_window_with_raise(first_window->id);
+                    window_manager_focus_window_with_raise(&first_window->application->psn, first_window->id, first_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate the first managed window.\n");
                 }
@@ -1093,7 +1093,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (window) {
                 struct window *last_window = window_manager_find_last_managed_window(&g_space_manager, &g_window_manager);
                 if (last_window) {
-                    window_manager_focus_window_with_raise(last_window->id);
+                    window_manager_focus_window_with_raise(&last_window->application->psn, last_window->id, last_window->ref);
                 } else {
                     daemon_fail(rsp, "could not locate the last managed window.\n");
                 }
@@ -1103,7 +1103,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(value, ARGUMENT_COMMON_SEL_RECENT)) {
             struct window *recent_window = window_manager_find_recent_managed_window(&g_space_manager, &g_window_manager);
             if (recent_window) {
-                window_manager_focus_window_with_raise(recent_window->id);
+                window_manager_focus_window_with_raise(&recent_window->application->psn, recent_window->id, recent_window->ref);
             } else {
                 daemon_fail(rsp, "could not locate the most recently focused window.\n");
             }

@@ -474,7 +474,7 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
     socket_close(sockfd);
 }
 
-struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
+static struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
 {
     int count;
     uint32_t *window_list = space_window_list(sid, &count);
@@ -493,13 +493,6 @@ struct window *window_manager_find_window_on_space_by_rank(struct window_manager
 
     free(window_list);
     return result;
-}
-
-struct window *window_manager_find_window_on_display_by_rank(struct window_manager *wm, uint32_t did, int rank)
-{
-    uint32_t sid = display_space_id(did);
-    struct window *window = window_manager_find_window_on_space_by_rank(wm, sid, rank);
-    return window;
 }
 
 struct window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid)
@@ -697,33 +690,33 @@ static void window_manager_activate_window(ProcessSerialNumber *window_psn, uint
     SLPSPostEventRecordTo(window_psn, bytes);
 }
 
-void window_manager_focus_window_without_raise(uint32_t window_id)
+void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
-    int window_connection;
-    ProcessSerialNumber window_psn;
-    pid_t window_pid;
+    window_manager_defer_window_raise(window_psn, window_id);
 
-    SLSGetWindowOwner(g_connection, window_id, &window_connection);
-    SLSGetConnectionPSN(window_connection, &window_psn);
-    SLSConnectionGetPID(window_connection, &window_pid);
+    if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
+        window_manager_deactivate_window(&g_window_manager.focused_window_psn, g_window_manager.focused_window_id);
 
-    window_manager_defer_window_raise(&window_psn, window_id);
-    window_manager_deactivate_window(&g_window_manager.focused_window_psn, g_window_manager.focused_window_id);
+        // @hack
+        // Artificially delay the activation by 1ms. This is necessary
+        // because some applications appear to be confused if both of
+        // the events appear instantaneously.
+        usleep(10000);
 
-    // @hack
-    // Artificially delay the activation by 1ms. This is necessary
-    // because some applications appear to be confused if both of
-    // the events appear instantaneously.
-    usleep(10000);
+        window_manager_activate_window(window_psn, window_id);
+    }
 
-    window_manager_activate_window(&window_psn, window_id);
-    _SLPSSetFrontProcessWithOptions(&window_psn, window_id, kCPSUserGenerated);
-    window_manager_make_key_window(&window_psn, window_id);
+    _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
+    window_manager_make_key_window(window_psn, window_id);
 }
 
-void window_manager_focus_window_with_raise(uint32_t window_id)
+void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uint32_t window_id, AXUIElementRef window_ref)
 {
 #if 1
+    _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
+    window_manager_make_key_window(window_psn, window_id);
+    AXUIElementPerformAction(window_ref, kAXRaiseAction);
+#else
     int sockfd;
     char message[MAXLEN];
 
@@ -733,12 +726,6 @@ void window_manager_focus_window_with_raise(uint32_t window_id)
         socket_wait(sockfd);
     }
     socket_close(sockfd);
-#else
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
-
-    AXUIElementPerformAction(window->ref, kAXRaiseAction);
-    _SLPSSetFrontProcessWithOptions(&window->application->psn, 0, kCPSNoWindows);
 #endif
 }
 
@@ -1034,8 +1021,7 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
 
     struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
     if (next) {
-        AXUIElementPerformAction(next->ref, kAXRaiseAction);
-        _SLPSSetFrontProcessWithOptions(&next->application->psn, 0, kCPSNoWindows);
+        window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
     } else {
         _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
     }
@@ -1065,8 +1051,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
     struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
     if (next) {
-        AXUIElementPerformAction(next->ref, kAXRaiseAction);
-        _SLPSSetFrontProcessWithOptions(&next->application->psn, 0, kCPSNoWindows);
+        window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
     } else {
         _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
     }

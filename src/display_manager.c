@@ -227,7 +227,6 @@ void display_manager_focus_display(uint32_t display_id)
 
     CGRect bounds;
     CGPoint point;
-    uint32_t element_id;
     AXUIElementRef element_ref;
 
     window_list = space_window_list(display_space_id(display_id), &window_count);
@@ -237,7 +236,7 @@ void display_manager_focus_display(uint32_t display_id)
         window = window_manager_find_window(&g_window_manager, window_list[i]);
         if (!window || !window_is_standard(window)) continue;
 
-        window_manager_focus_window_with_raise(window->id);
+        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
         free(window_list);
         goto out;
     }
@@ -248,15 +247,22 @@ fallback:
     bounds = display_bounds(display_id);
     point = (CGPoint) { bounds.origin.x + bounds.size.width / 2, bounds.origin.y + bounds.size.height / 2 };
     element_ref = display_manager_find_element_at_point(point);
-    element_id = 0;
 
     if (element_ref) {
-        element_id = ax_window_id(element_ref);
-        CFRelease(element_ref);
-    }
+        uint32_t element_id = ax_window_id(element_ref);
 
-    if (element_id) {
-        window_manager_focus_window_with_raise(element_id);
+        if (element_id) {
+            int element_connection;
+            ProcessSerialNumber element_psn;
+            SLSGetWindowOwner(g_connection, element_id, &element_connection);
+            SLSGetConnectionPSN(element_connection, &element_psn);
+            window_manager_focus_window_with_raise(&element_psn, element_id, element_ref);
+        } else {
+            CGPostMouseEvent(point, true, 1, true);
+            CGPostMouseEvent(point, true, 1, false);
+        }
+
+        CFRelease(element_ref);
     } else {
         CGPostMouseEvent(point, true, 1, true);
         CGPostMouseEvent(point, true, 1, false);
