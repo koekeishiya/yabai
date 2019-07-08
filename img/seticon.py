@@ -8,4 +8,4 @@ binary = sys.argv[2].decode('utf-8');
 options = 0;
 
 result = Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(image, binary, options);
-if result == 0: print("could not set icon for file..")
+if result == 0: print("could not set icon for file..");
