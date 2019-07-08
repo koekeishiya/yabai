@@ -416,10 +416,7 @@ uint32_t *view_find_window_list(struct view *view)
 
     struct window_node *node = window_node_find_first_leaf(view->root);
     while (node) {
-        if (window_node_is_leaf(node)) {
-            buf_push(window_list, node->window_id);
-        }
-
+        buf_push(window_list, node->window_id);
         node = window_node_find_next_leaf(node);
     }
 

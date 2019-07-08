@@ -632,6 +632,44 @@ struct window *window_manager_find_recent_managed_window(struct space_manager *s
     return window_manager_find_window(wm, node->window_id);
 }
 
+struct window *window_manager_find_largest_managed_window(struct space_manager *sm, struct window_manager *wm)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    uint32_t best_id   = 0;
+    uint32_t best_area = 0;
+
+    for (struct window_node *node = window_node_find_first_leaf(view->root); node != NULL; node = window_node_find_next_leaf(node)) {
+        uint32_t area = node->area.w * node->area.h;
+        if (area > best_area) {
+            best_id   = node->window_id;
+            best_area = area;
+        }
+    }
+
+    return best_id ? window_manager_find_window(wm, best_id) : NULL;
+}
+
+struct window *window_manager_find_smallest_managed_window(struct space_manager *sm, struct window_manager *wm)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    uint32_t best_id   = 0;
+    uint32_t best_area = UINT32_MAX;
+
+    for (struct window_node *node = window_node_find_first_leaf(view->root); node != NULL; node = window_node_find_next_leaf(node)) {
+        uint32_t area = node->area.w * node->area.h;
+        if (area <= best_area) {
+            best_id   = node->window_id;
+            best_area = area;
+        }
+    }
+
+    return best_id ? window_manager_find_window(wm, best_id) : NULL;
+}
+
 static void window_manager_defer_window_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     uint8_t bytes[0xf8] = {

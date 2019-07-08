@@ -8,8 +8,6 @@ extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
 extern struct bar g_bar;
 
-static const char *bool_str[] = { "off", "on" };
-
 #define DOMAIN_CONFIG  "config"
 #define DOMAIN_DISPLAY "display"
 #define DOMAIN_SPACE   "space"
@@ -119,6 +117,8 @@ static const char *bool_str[] = { "off", "on" };
 #define ARGUMENT_WINDOW_DIR_SOUTH     "south"
 #define ARGUMENT_WINDOW_DIR_WEST      "west"
 #define ARGUMENT_WINDOW_SEL_MOUSE     "mouse"
+#define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
+#define ARGUMENT_WINDOW_SEL_SMALLEST  "smallest"
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
 #define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
@@ -1056,6 +1056,20 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "could not locate a window below the cursor.\n");
             }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LARGEST)) {
+            struct window *area_window = window_manager_find_largest_managed_window(&g_space_manager, &g_window_manager);
+            if (area_window) {
+                window_manager_focus_window_with_raise(&area_window->application->psn, area_window->id, area_window->ref);
+            } else {
+                daemon_fail(rsp, "could not locate window with the largest area.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_SMALLEST)) {
+            struct window *area_window = window_manager_find_smallest_managed_window(&g_space_manager, &g_window_manager);
+            if (area_window) {
+                window_manager_focus_window_with_raise(&area_window->application->psn, area_window->id, area_window->ref);
+            } else {
+                daemon_fail(rsp, "could not locate window with the smallest area.\n");
+            }
         } else if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
             if (window) {
                 struct window *prev_window = window_manager_find_prev_managed_window(&g_space_manager, &g_window_manager, window);
@@ -1163,6 +1177,28 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     window_manager_swap_window(&g_space_manager, &g_window_manager, window, mouse_window);
                 } else {
                     daemon_fail(rsp, "could not locate a window below the cursor.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LARGEST)) {
+            if (window) {
+                struct window *area_window = window_manager_find_largest_managed_window(&g_space_manager, &g_window_manager);
+                if (area_window) {
+                    window_manager_swap_window(&g_space_manager, &g_window_manager, window, area_window);
+                } else {
+                    daemon_fail(rsp, "could not locate window with the largest area.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_SMALLEST)) {
+            if (window) {
+                struct window *area_window = window_manager_find_smallest_managed_window(&g_space_manager, &g_window_manager);
+                if (area_window) {
+                    window_manager_swap_window(&g_space_manager, &g_window_manager, window, area_window);
+                } else {
+                    daemon_fail(rsp, "could not locate window with the smallest area.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
@@ -1278,6 +1314,28 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     window_manager_warp_window(&g_space_manager, window, mouse_window);
                 } else {
                     daemon_fail(rsp, "could not locate a window below the cursor.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_LARGEST)) {
+            if (window) {
+                struct window *area_window = window_manager_find_largest_managed_window(&g_space_manager, &g_window_manager);
+                if (area_window) {
+                    window_manager_warp_window(&g_space_manager, window, area_window);
+                } else {
+                    daemon_fail(rsp, "could not locate window with the largest area.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_WINDOW_SEL_SMALLEST)) {
+            if (window) {
+                struct window *area_window = window_manager_find_smallest_managed_window(&g_space_manager, &g_window_manager);
+                if (area_window) {
+                    window_manager_warp_window(&g_space_manager, window, area_window);
+                } else {
+                    daemon_fail(rsp, "could not locate window with the smallest area.\n");
                 }
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");
