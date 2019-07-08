@@ -825,7 +825,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         return EVENT_SUCCESS;
     }
 
-    int result = EVENT_SUCCESS;
     CGPoint point = CGEventGetLocation(context);
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
@@ -881,7 +880,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     g_mouse_state.current_action = MOUSE_MODE_NONE;
     g_mouse_state.window = NULL;
 
-    return result;
+    return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
