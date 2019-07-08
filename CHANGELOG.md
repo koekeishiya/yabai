@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.6] - 2019-07-09
 ### Changed
 - No longer necessary to depend on the scripting-addition to focus a window [#102](https://github.com/koekeishiya/yabai/issues/102)
 - Extend definition of *WINDOW_SEL* to include *smallest* and *largest* [#105](https://github.com/koekeishiya/yabai/issues/105)
@@ -39,7 +41,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.6...HEAD
+[1.0.6]: https://github.com/koekeishiya/yabai/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/koekeishiya/yabai/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/koekeishiya/yabai/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/koekeishiya/yabai/compare/v1.0.2...v1.0.3

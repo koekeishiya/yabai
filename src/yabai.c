@@ -20,7 +20,7 @@
 
 #define MAJOR 1
 #define MINOR 0
-#define PATCH 5
+#define PATCH 6
 
 #define CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context, int cid)
 typedef CONNECTION_CALLBACK(connection_callback);
