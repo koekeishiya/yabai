@@ -2,6 +2,7 @@
 #define DISPLAY_MANAGER_H
 
 extern CFStringRef SLSCopyActiveMenuBarDisplayIdentifier(int cid);
+extern CFStringRef SLSCopyBestManagedDisplayForPoint(int cid, CGPoint point);
 extern bool SLSManagedDisplayIsAnimating(int cid, CFStringRef uuid);
 extern CGError SLSGetMenuBarAutohideEnabled(int cid, int *enabled);
 extern CGError SLSGetRevealedMenuBarBounds(CGRect *rect, int cid, uint64_t sid);
@@ -26,6 +27,8 @@ CFStringRef display_manager_active_display_uuid(void);
 uint32_t display_manager_active_display_id(void);
 CFStringRef display_manager_dock_display_uuid(void);
 uint32_t display_manager_dock_display_id(void);
+CFStringRef display_manager_cursor_display_uuid(void);
+uint32_t display_manager_cursor_display_id(void);
 CFStringRef display_manager_arrangement_display_uuid(int arrangement);
 uint32_t display_manager_arrangement_display_id(int arrangement);
 uint32_t display_manager_prev_display_id(uint32_t did);

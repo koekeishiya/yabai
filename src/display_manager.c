@@ -67,6 +67,25 @@ uint32_t display_manager_dock_display_id(void)
     return result;
 }
 
+CFStringRef display_manager_cursor_display_uuid(void)
+{
+    CGPoint cursor;
+    SLSGetCurrentCursorLocation(g_connection, &cursor);
+    return SLSCopyBestManagedDisplayForPoint(g_connection, cursor);
+}
+
+uint32_t display_manager_cursor_display_id(void)
+{
+    CFStringRef uuid = display_manager_cursor_display_uuid();
+    if (!uuid) return 0;
+
+    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid);
+    uint32_t result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
+    CFRelease(uuid_ref);
+    CFRelease(uuid);
+    return result;
+}
+
 CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 {
     CFStringRef result = NULL;

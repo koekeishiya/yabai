@@ -583,6 +583,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
+    if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
+        g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
+    }
+
 #if 0
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) view_flush(view);
@@ -828,8 +832,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     CGPoint point = CGEventGetLocation(context);
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
-    struct view *view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
-    if ((g_mouse_state.current_action != MOUSE_MODE_RESIZE) && (view && view->layout == VIEW_BSP)) {
+    struct view *src_view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
+    if ((g_mouse_state.current_action != MOUSE_MODE_RESIZE) && (src_view && src_view->layout == VIEW_BSP)) {
         CGRect frame = window_ax_frame(g_mouse_state.window);
         float dx = frame.origin.x - g_mouse_state.window_frame.origin.x;
         float dy = frame.origin.y - g_mouse_state.window_frame.origin.y;
@@ -844,21 +848,40 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         bool did_change_s = did_change_w || did_change_h;
 
         if (did_change_p && !did_change_s) {
+            uint64_t cursor_sid = display_space_id(display_manager_cursor_display_id());
+            struct view *dst_view = space_manager_find_view(&g_space_manager, cursor_sid);
+
             struct window *window = window_manager_find_window_at_point_filtering_window(&g_window_manager, point, g_mouse_state.window->id);
             if (!window) window = window_manager_find_window_at_point(&g_window_manager, point);
-            struct window_node *a_node = view_find_window_node(view->root, g_mouse_state.window->id);
-            struct window_node *b_node = window ? view_find_window_node(view->root, window->id) : NULL;
+            if (window == g_mouse_state.window) window = NULL;
 
-            if (a_node && b_node) {
-                a_node->window_id = window->id;
-                b_node->window_id = g_mouse_state.window->id;
-                window_node_flush(a_node);
-                window_node_flush(b_node);
-                a_node->zoom = NULL;
-                b_node->zoom = NULL;
-            } else if (a_node) {
-                window_node_flush(a_node);
-                a_node->zoom = NULL;
+            struct window_node *a_node = view_find_window_node(src_view->root, g_mouse_state.window->id);
+            struct window_node *b_node = window ? view_find_window_node(dst_view->root, window->id) : NULL;
+
+            if (src_view->sid == dst_view->sid) {
+                if (a_node && b_node) {
+                    a_node->window_id = window->id;
+                    b_node->window_id = g_mouse_state.window->id;
+                    window_node_flush(a_node);
+                    window_node_flush(b_node);
+                    a_node->zoom = NULL;
+                    b_node->zoom = NULL;
+                } else {
+                    window_node_flush(a_node);
+                    a_node->zoom = NULL;
+                }
+            } else {
+                space_manager_untile_window(&g_space_manager, src_view, g_mouse_state.window);
+                window_manager_remove_managed_window(&g_window_manager, g_mouse_state.window->id);
+                window_manager_purify_window(&g_window_manager, g_mouse_state.window);
+
+                if (a_node && b_node) {
+                    struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, g_mouse_state.window, dst_view->sid, window->id);
+                    window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, view);
+                } else {
+                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, g_mouse_state.window, dst_view->sid);
+                    window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, view);
+                }
             }
         } else {
             if (did_change_p) {
