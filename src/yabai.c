@@ -259,10 +259,6 @@ int main(int argc, char **argv)
         error("yabai: could not initialize daemon! abort..\n");
     }
 
-    if (scripting_addition_is_installed()) {
-        scripting_addition_load();
-    }
-
     process_manager_init(&g_process_manager);
     workspace_event_handler_init(&g_workspace_context);
     space_manager_init(&g_space_manager);
@@ -271,6 +267,12 @@ int main(int argc, char **argv)
 
     event_loop_begin(&g_event_loop);
     exec_config_file();
+
+    if (scripting_addition_is_installed()) {
+        scripting_addition_load();
+    } else {
+        warn("yabai: scripting-addition is not installed! some functionality will not work as expected..\n");
+    }
 
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     display_manager_begin(&g_display_manager);

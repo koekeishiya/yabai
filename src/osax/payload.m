@@ -21,6 +21,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "common.h"
+
 #define SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 
 #define BUF_SIZE 256
@@ -781,7 +783,31 @@ static inline bool can_focus_window()
     return set_front_window_fp != 0;
 }
 
-static void handle_message(const char *message)
+static void do_handshake(int sockfd)
+{
+    uint32_t attrib = 0;
+
+    if (dock_spaces != nil)                attrib |= OSAX_ATTRIB_DOCK_SPACES;
+    if (dp_desktop_picture_manager != nil) attrib |= OSAX_ATTRIB_DPPM;
+    if (can_create_space())                attrib |= OSAX_ATTRIB_ADD_SPACE;
+    if (can_destroy_space())               attrib |= OSAX_ATTRIB_REM_SPACE;
+    if (can_move_space())                  attrib |= OSAX_ATTRIB_MOV_SPACE;
+    if (can_focus_window())                attrib |= OSAX_ATTRIB_SET_WINDOW;
+
+    char bytes[BUFSIZ] = {};
+    int version_length = strlen(OSAX_VERSION);
+    int attrib_length = sizeof(uint32_t);
+    int bytes_length = version_length + 1 + attrib_length + 1;
+
+    memcpy(bytes, OSAX_VERSION, version_length);
+    memcpy(bytes + version_length + 1, &attrib, attrib_length);
+    bytes[version_length] = '\0';
+    bytes[bytes_length] = '\n';
+
+    send(sockfd, bytes, bytes_length, 0);
+}
+
+static void handle_message(int sockfd, const char *message)
 {
     /*
      * NOTE(koekeishiya): interaction is supposed to happen through an
@@ -790,7 +816,9 @@ static void handle_message(const char *message)
      */
 
     Token token = get_token(&message);
-    if (token_equals(token, "space")) {
+    if (token_equals(token, "handshake")) {
+        do_handshake(sockfd);
+    } else if (token_equals(token, "space")) {
         if (!can_focus_space()) return;
         do_space_change(message);
     } else if (token_equals(token, "space_create")) {
@@ -840,7 +868,7 @@ static void *handle_connection(void *unused)
 
         char message[BUF_SIZE];
         if (recv_socket(sockfd, message, sizeof(message))) {
-            handle_message(message);
+            handle_message(sockfd, message);
         }
 
         shutdown(sockfd, SHUT_RDWR);
@@ -885,8 +913,14 @@ static bool start_daemon(char *socket_path)
 + (void) load
 {
     NSLog(@"[yabai-sa] loaded payload");
+    init_instances();
 
-    char *user = getenv("USER");
+    const char *user = getenv("USER");
+    if (!user) {
+        NSString *ns_user = NSUserName();
+        if (ns_user) user = [ns_user UTF8String];
+    }
+
     if (!user) {
         NSLog(@"[yabai-sa] could not get 'env USER'! abort..");
         return;
@@ -896,7 +930,6 @@ static bool start_daemon(char *socket_path)
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
 
     if (start_daemon(socket_file)) {
-        init_instances();
         NSLog(@"[yabai-sa] now listening..");
     } else {
         NSLog(@"[yabai-sa] failed to spawn thread..");

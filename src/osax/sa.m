@@ -1,5 +1,19 @@
 #include "sa.h"
 
+extern char g_sa_socket_file[MAXLEN];
+
+@interface SALoader : NSObject<SBApplicationDelegate> {}
+- (void) eventDidFail:(const AppleEvent*)event withError:(NSError*)error;
+@end
+
+@implementation SALoader { @public int result; }
+- (void) eventDidFail:(const AppleEvent*)event withError:(NSError*)error
+{
+    NSNumber *errorNumber = [[error userInfo] objectForKey:@"ErrorNumber"];
+    result = [errorNumber intValue];
+}
+@end
+
 static char osax_base_dir[MAXLEN];
 static char osax_contents_dir[MAXLEN];
 static char osax_contents_macos_dir[MAXLEN];
@@ -161,6 +175,46 @@ static void scripting_addition_prepare_binaries(void)
     system(cmd);
 }
 
+static char *scripting_addition_request_handshake(uint32_t *flags)
+{
+    char *result = NULL;
+
+    int sockfd;
+    char message[MAXLEN];
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "handshake");
+        if (socket_write(sockfd, message)) {
+            int length;
+            result = socket_read(sockfd, &length);
+            if (!result) goto out;
+
+            char *attrib = result + 6;
+            assert(attrib[-1] == '\0');
+            memcpy(flags, attrib, sizeof(uint32_t));
+        }
+    }
+
+out:
+    socket_close(sockfd);
+    return result;
+}
+
+static void scripting_addition_perform_validation(void)
+{
+    uint32_t attrib;
+    char *version = scripting_addition_request_handshake(&attrib);
+    if (version) debug("yabai: osax version = %s, osax attrib = 0x%X\n", version, attrib);
+
+    if (!version || !string_equals(version, OSAX_VERSION)) {
+        warn("yabai: scripting-addition payload is outdated, please reinstall!\n");
+    } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
+        warn("yabai: scripting-addition payload failed to locate required resources inside Dock.app!\n");
+    } else {
+        debug("yabai: scripting-addition payload successfully located all requsted resources inside Dock.app..\n");
+    }
+}
+
 bool scripting_addition_is_installed(void)
 {
     if (osax_base_dir[0] == 0) scripting_addition_set_path();
@@ -233,6 +287,9 @@ int scripting_addition_load(void)
 {
     if (!scripting_addition_is_installed()) return 1;
 
+    SALoader *loader = [[SALoader alloc] init];
+    loader->result = OSAX_PAYLOAD_SUCCESS;
+
     // temporarily redirect stderr to /dev/null to silence
     // meaningless warning reported by the scripting-bridge
     // framework, because Dock.app does not provide a .sdef
@@ -251,7 +308,7 @@ int scripting_addition_load(void)
     [dock setTimeout:10*60];
     [dock setSendMode:kAEWaitReply];
     [dock sendEvent:'ascr' id:'gdut' parameters:0];
-    [dock setSendMode:kAEWaitReply];
+    [dock setDelegate:loader];
     [dock sendEvent:'YBSA' id:'load' parameters:0];
     [dock release];
 
@@ -263,5 +320,22 @@ int scripting_addition_load(void)
     dup2(stderr_fd, 2);
     close(stderr_fd);
 
+    if (loader->result == OSAX_PAYLOAD_NOT_FOUND) {
+        warn("yabai: scripting-addition was located, but is not valid - the payload could not be found!\n");
+    } else if (loader->result == OSAX_PAYLOAD_NOT_LOADED) {
+        warn("yabai: scripting-addition was located, but failed to inject payload into Dock.app!\n");
+    } else if (loader->result == OSAX_PAYLOAD_UNAUTHORIZED) {
+        warn("yabai: scripting-addition could not inject payload into Dock.app, make sure SIP is disabled!\n");
+    } else if (loader->result == OSAX_PAYLOAD_ALREADY_LOADED) {
+        warn("yabai: scripting-addition has previously injected the payload into Dock.app!\n");
+        scripting_addition_perform_validation();
+    } else if (loader->result == OSAX_PAYLOAD_SUCCESS) {
+        debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
+        scripting_addition_perform_validation();
+    } else {
+        warn("yabai: scripting-addition could not inject payload into Dock.app due to unknown error (%d)!\n", loader->result);
+    }
+
+    [loader release];
     return 0;
 }
