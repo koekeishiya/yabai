@@ -320,20 +320,20 @@ int scripting_addition_load(void)
     dup2(stderr_fd, 2);
     close(stderr_fd);
 
-    if (loader->result == OSAX_PAYLOAD_NOT_FOUND) {
-        warn("yabai: scripting-addition was located, but is not valid - the payload could not be found!\n");
-    } else if (loader->result == OSAX_PAYLOAD_NOT_LOADED) {
-        warn("yabai: scripting-addition was located, but failed to inject payload into Dock.app!\n");
-    } else if (loader->result == OSAX_PAYLOAD_UNAUTHORIZED) {
-        warn("yabai: scripting-addition could not inject payload into Dock.app, make sure SIP is disabled!\n");
-    } else if (loader->result == OSAX_PAYLOAD_ALREADY_LOADED) {
-        warn("yabai: scripting-addition has previously injected the payload into Dock.app!\n");
-        scripting_addition_perform_validation();
-    } else if (loader->result == OSAX_PAYLOAD_SUCCESS) {
+    if (loader->result == OSAX_PAYLOAD_SUCCESS) {
         debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
         scripting_addition_perform_validation();
+    } else if (loader->result == OSAX_PAYLOAD_ALREADY_LOADED) {
+        warn("yabai: scripting-addition loaded succesfully, but payload was already injected into Dock.app!\n");
+        scripting_addition_perform_validation();
+    } else if (loader->result == OSAX_PAYLOAD_NOT_LOADED) {
+        warn("yabai: scripting-addition loaded successfully, but failed to inject payload into Dock.app!\n");
+    } else if (loader->result == OSAX_PAYLOAD_NOT_FOUND) {
+        warn("yabai: scripting-addition loaded successfully, but the payload could not be found!\n");
+    } else if (loader->result == OSAX_PAYLOAD_UNAUTHORIZED) {
+        warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
     } else {
-        warn("yabai: scripting-addition could not inject payload into Dock.app due to unknown error (%d)!\n", loader->result);
+        warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app due to unknown error: %d\n", loader->result);
     }
 
     [loader release];
