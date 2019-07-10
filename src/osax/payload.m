@@ -797,14 +797,14 @@ static void do_handshake(int sockfd)
     char bytes[BUFSIZ] = {};
     int version_length = strlen(OSAX_VERSION);
     int attrib_length = sizeof(uint32_t);
-    int bytes_length = version_length + 1 + attrib_length + 1;
+    int bytes_length = version_length + 1 + attrib_length;
 
     memcpy(bytes, OSAX_VERSION, version_length);
     memcpy(bytes + version_length + 1, &attrib, attrib_length);
     bytes[version_length] = '\0';
     bytes[bytes_length] = '\n';
 
-    send(sockfd, bytes, bytes_length, 0);
+    send(sockfd, bytes, bytes_length+1, 0);
 }
 
 static void handle_message(int sockfd, const char *message)
