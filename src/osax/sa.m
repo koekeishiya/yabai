@@ -339,7 +339,6 @@ int scripting_addition_load(void)
         scripting_addition_perform_validation();
         return 0;
     } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
-        notify("payload was already injected into Dock.app!", "scripting-addition");
         warn("yabai: scripting-addition payload was already injected into Dock.app!\n");
         scripting_addition_maybe_restart_dock(scripting_addition_perform_validation());
         return 0;
