@@ -223,10 +223,12 @@ static int scripting_addition_perform_validation(void)
         notify("payload is outdated, please reinstall!", "scripting-addition");
         return PAYLOAD_STATUS_OUTDATED;
     } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
-        notify("payload failed to locate required resources inside Dock.app!", "scripting-addition");
+        notify("payload could not resolve addresses in Dock.app!", "scripting-addition");
         return PAYLOAD_STATUS_NO_ATTRIB;
     } else {
-        debug("yabai: scripting-addition payload successfully located all requsted resources inside Dock.app..\n");
+        char message[MAXLEN];
+        snprintf(message, sizeof(message), "payload v%s", version);
+        notify(message, "scripting-addition");
         return PAYLOAD_STATUS_SUCCESS;
     }
 }
