@@ -207,9 +207,9 @@ static void scripting_addition_perform_validation(void)
     if (version) debug("yabai: osax version = %s, osax attrib = 0x%X\n", version, attrib);
 
     if (!version || !string_equals(version, OSAX_VERSION)) {
-        warn("yabai: scripting-addition payload is outdated, please reinstall!\n");
+        notify("payload is outdated, please reinstall!", "scripting-addition");
     } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
-        warn("yabai: scripting-addition payload failed to locate required resources inside Dock.app!\n");
+        notify("payload failed to locate required resources inside Dock.app!", "scripting-addition");
     } else {
         debug("yabai: scripting-addition payload successfully located all requsted resources inside Dock.app..\n");
     }
@@ -324,15 +324,16 @@ int scripting_addition_load(void)
         debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
         scripting_addition_perform_validation();
     } else if (loader->result == OSAX_PAYLOAD_ALREADY_LOADED) {
-        warn("yabai: scripting-addition loaded succesfully, but payload was already injected into Dock.app!\n");
+        notify("payload was already injected into Dock.app!", "scripting-addition");
         scripting_addition_perform_validation();
     } else if (loader->result == OSAX_PAYLOAD_NOT_LOADED) {
-        warn("yabai: scripting-addition loaded successfully, but failed to inject payload into Dock.app!\n");
+        notify("failed to inject payload into Dock.app!", "scripting-addition");
     } else if (loader->result == OSAX_PAYLOAD_NOT_FOUND) {
-        warn("yabai: scripting-addition loaded successfully, but the payload could not be found!\n");
+        notify("payload could not be found!", "scripting-addition");
     } else if (loader->result == OSAX_PAYLOAD_UNAUTHORIZED) {
-        warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
+        notify("could not load, make sure SIP is disabled!", "scripting-addition");
     } else {
+        notify("unknown error - failed to load or inject payload into Dock.app!", "scripting-addition");
         warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app due to unknown error: %d\n", loader->result);
     }
 
