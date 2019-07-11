@@ -371,8 +371,8 @@ int scripting_addition_load(void)
         warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
         return 1;
     } else {
-        notify("unknown error - failed to load or inject payload into Dock.app!", "scripting-addition");
-        warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app due to unknown error: %d\n", loader->result);
+        notify("failed to load or inject payload into Dock.app!", "scripting-addition");
+        warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app! Error: %d\n", result);
         return 1;
     }
 
