@@ -271,7 +271,7 @@ int main(int argc, char **argv)
     if (scripting_addition_is_installed()) {
         scripting_addition_load();
     } else {
-        warn("yabai: scripting-addition is not installed! some functionality will not work as expected..\n");
+        notify("payload is not installed, some features will not work!", "scripting-addition");
     }
 
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
