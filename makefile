@@ -31,7 +31,7 @@ man:
 icon:
 	python $(IMG_PATH)/seticon.py $(IMG_PATH)/icon.png $(BUILD_PATH)/yabai
 
-archive: man sa install icon sign
+archive: man sa install sign icon
 	rm -rf $(ARCH_PATH)
 	mkdir -p $(ARCH_PATH)
 	cp -r $(BUILD_PATH) $(ARCH_PATH)/
