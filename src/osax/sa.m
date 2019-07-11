@@ -331,23 +331,33 @@ int scripting_addition_load(void)
     dup2(stderr_fd, 2);
     close(stderr_fd);
 
-    if (loader->result == OSAX_PAYLOAD_SUCCESS) {
+    int result = loader->result;
+    [loader release];
+
+    if (result == OSAX_PAYLOAD_SUCCESS) {
         debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
         scripting_addition_perform_validation();
-    } else if (loader->result == OSAX_PAYLOAD_ALREADY_LOADED) {
+        return 0;
+    } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
         notify("payload was already injected into Dock.app!", "scripting-addition");
+        warn("yabai: scripting-addition payload was already injected into Dock.app!\n");
         scripting_addition_maybe_restart_dock(scripting_addition_perform_validation());
-    } else if (loader->result == OSAX_PAYLOAD_NOT_LOADED) {
+        return 0;
+    } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
         notify("failed to inject payload into Dock.app!", "scripting-addition");
-    } else if (loader->result == OSAX_PAYLOAD_NOT_FOUND) {
+        warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
+        return 1;
+    } else if (result == OSAX_PAYLOAD_NOT_FOUND) {
         notify("payload could not be found!", "scripting-addition");
-    } else if (loader->result == OSAX_PAYLOAD_UNAUTHORIZED) {
+        warn("yabai: scripting-addition payload could not be found!\n");
+        return 1;
+    } else if (result == OSAX_PAYLOAD_UNAUTHORIZED) {
         notify("could not load, make sure SIP is disabled!", "scripting-addition");
+        warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
+        return 1;
     } else {
         notify("unknown error - failed to load or inject payload into Dock.app!", "scripting-addition");
         warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app due to unknown error: %d\n", loader->result);
+        return 1;
     }
-
-    [loader release];
-    return 0;
 }
