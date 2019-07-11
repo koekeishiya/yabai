@@ -607,18 +607,18 @@ void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bo
     socket_close(sockfd);
 }
 
-void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did)
+void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did)
 {
     int sockfd;
-    uint64_t sid;
     uint64_t d_sid;
     char message[MAXLEN];
 
-    sid = space_manager_active_space();
-    if (!sid || !space_is_user(sid)) return;
+    if (!sid || !space_is_user(sid))  return;
+    if (display_space_id(sid) == did) return;
 
     d_sid = display_space_id(did);
     if (!d_sid) return;
+
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space_move %lld %lld 1", sid, d_sid);
@@ -631,13 +631,11 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did)
     space_manager_focus_space(sid);
 }
 
-void space_manager_destroy_space(void)
+void space_manager_destroy_space(uint64_t sid)
 {
     int sockfd;
-    uint64_t sid;
     char message[MAXLEN];
 
-    sid = space_manager_active_space();
     if (!sid || !space_is_user(sid)) return;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
@@ -648,13 +646,11 @@ void space_manager_destroy_space(void)
     socket_close(sockfd);
 }
 
-void space_manager_add_space(void)
+void space_manager_add_space(uint64_t sid)
 {
     int sockfd;
-    uint64_t sid;
     char message[MAXLEN];
 
-    sid = space_manager_active_space();
     if (!sid) return;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {

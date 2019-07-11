@@ -1153,18 +1153,16 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
-            uint64_t cur_sid = space_manager_active_space();
-            uint64_t pre_sid = space_manager_prev_space(cur_sid);
-            if (cur_sid && pre_sid) {
-                space_manager_move_space_after_space(pre_sid, cur_sid, false);
+            uint64_t pre_sid = space_manager_prev_space(acting_sid);
+            if (acting_sid && pre_sid) {
+                space_manager_move_space_after_space(pre_sid, acting_sid, false);
             } else {
                 daemon_fail(rsp, "could not swap places with the previous space.\n");
             }
         } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
-            uint64_t src_sid = space_manager_active_space();
-            uint64_t dst_sid = space_manager_next_space(src_sid);
-            if (src_sid && dst_sid) {
-                space_manager_move_space_after_space(src_sid, dst_sid, true);
+            uint64_t dst_sid = space_manager_next_space(acting_sid);
+            if (acting_sid && dst_sid) {
+                space_manager_move_space_after_space(acting_sid, dst_sid, acting_sid == space_manager_active_space());
             } else {
                 daemon_fail(rsp, "could not swap places with the next space.\n");
             }
@@ -1174,12 +1172,12 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_SPACE_DISPLAY)) {
         struct selector selector = parse_display_selector(rsp, &message, display_manager_active_display_id());
         if (selector.did_parse && selector.did) {
-            space_manager_move_space_to_display(&g_space_manager, selector.did);
+            space_manager_move_space_to_display(&g_space_manager, acting_sid, selector.did);
         }
     } else if (token_equals(command, COMMAND_SPACE_CREATE)) {
-        space_manager_add_space();
+        space_manager_add_space(acting_sid);
     } else if (token_equals(command, COMMAND_SPACE_DESTROY)) {
-        space_manager_destroy_space();
+        space_manager_destroy_space(acting_sid);
     } else if (token_equals(command, COMMAND_SPACE_BALANCE)) {
         space_manager_balance_space(&g_space_manager, acting_sid);
     } else if (token_equals(command, COMMAND_SPACE_MIRROR)) {

@@ -66,9 +66,9 @@ void space_manager_remove_window_from_space(uint64_t sid, struct window *window)
 void space_manager_add_window_to_space(uint64_t sid, struct window *window);
 void space_manager_focus_space(uint64_t sid);
 void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus);
-void space_manager_move_space_to_display(struct space_manager *sm, uint32_t did);
-void space_manager_destroy_space(void);
-void space_manager_add_space(void);
+void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did);
+void space_manager_destroy_space(uint64_t sid);
+void space_manager_add_space(uint64_t sid);
 void space_manager_assign_process_to_space(pid_t pid, uint64_t sid);
 void space_manager_assign_process_to_all_spaces(pid_t pid);
 bool space_manager_is_window_on_active_space(struct window *window);

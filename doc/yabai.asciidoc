@@ -216,37 +216,37 @@ COMMAND
     Focus the given space.
 
 *--create*::
-    Create a new space on the active display.
+    Create a new space on the display of the selected space.
 
 *--destroy*::
-    Remove the currently active space.
+    Remove the selected space.
 
 *--move* 'prev|next'::
-    Swap position of the active space with the prev/next space.
+    Swap position of the selected space with the prev/next space.
 
 *--display* '<DISPLAY_SEL>'::
-    Send the active space to the given display.
+    Send the selected space to the given display.
 
 *--balance*::
-    Adjust the split ratios of the active space so that all windows occupy the same area.
+    Adjust the split ratios of the selected space so that all windows occupy the same area.
 
 *--mirror* 'x-axis|y-axis'::
-    Flip the tree of the active space.
+    Flip the tree of the selected space.
 
 *--rotate* '90|180|270'::
-    Rotate the tree of the active space.
+    Rotate the tree of the selected space.
 
 *--padding* 'abs|rel:<top>:<bottom>:<left>:<right>'::
-    Padding added at the sides of the space.
+    Padding added at the sides of the selected space.
 
 *--gap* 'abs|rel:<gap>'::
-    Size of the gap that separates windows.
+    Size of the gap that separates windows on the selected space.
 
 *--toggle* 'padding|gap'::
-    Toggle space setting on or off.
+    Toggle space setting on or off for the selected space.
 
 *--layout* 'bsp|float'::
-    Set the layout of the space.
+    Set the layout of the selected space.
 
 Window
 ~~~~~~

@@ -532,6 +532,28 @@ static inline id space_for_display_with_id(CFStringRef display_uuid, uint64_t sp
     return nil;
 }
 
+static inline id display_space_for_display_uuid(CFStringRef display_uuid)
+{
+    id result = nil;
+
+    NSArray *display_spaces = get_ivar_value(dock_spaces, "_displaySpaces");
+    if (display_spaces != nil) {
+        for (id display_space in display_spaces) {
+            id display_source_space = get_ivar_value(display_space, "_currentSpace");
+            uint64_t sid = get_space_id(display_source_space);
+            CFStringRef uuid = CGSCopyManagedDisplayForSpace(_connection, sid);
+            bool match = CFEqual(uuid, display_uuid);
+            CFRelease(uuid);
+            if (match) {
+                result = display_space;
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+
 static inline id display_space_for_space_with_id(uint64_t space_id)
 {
     NSArray *display_spaces = get_ivar_value(dock_spaces, "_displaySpaces");
@@ -561,12 +583,12 @@ static void do_space_move(const char *message)
 
     CFStringRef source_display_uuid = CGSCopyManagedDisplayForSpace(_connection, source_space_id);
     id source_space = space_for_display_with_id(source_display_uuid, source_space_id);
-    id source_display_space = display_space_for_space_with_id(source_space_id);
+    id source_display_space = display_space_for_display_uuid(source_display_uuid);
 
     CFStringRef dest_display_uuid = CGSCopyManagedDisplayForSpace(_connection, dest_space_id);
     id dest_space = space_for_display_with_id(dest_display_uuid, dest_space_id);
     unsigned dest_display_id = ((unsigned (*)(id, SEL, id)) objc_msgSend)(dock_spaces, @selector(displayIDForSpace:), dest_space);
-    id dest_display_space = display_space_for_space_with_id(dest_space_id);
+    id dest_display_space = display_space_for_display_uuid(dest_display_uuid);
 
     volatile bool __block is_finished = false;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
@@ -598,8 +620,8 @@ static void do_space_destroy(const char *message)
     Token space_id_token = get_token(&message);
     uint64_t space_id = token_to_uint64t(space_id_token);
     CFStringRef display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
-    id space = objc_msgSend(dock_spaces, @selector(currentSpaceforDisplayUUID:), display_uuid);
-    id display_space = display_space_for_space_with_id(space_id);
+    id space = space_for_display_with_id(display_uuid, space_id);
+    id display_space = display_space_for_display_uuid(display_uuid);
     ((remove_space_call) remove_space_fp)(space, display_space, dock_spaces, space_id, space_id);
     uint64_t dest_space_id = CGSManagedDisplayGetCurrentSpace(_connection, display_uuid);
     id dest_space = space_for_display_with_id(display_uuid, dest_space_id);
@@ -612,12 +634,14 @@ static void do_space_destroy(const char *message)
 static void do_space_create(const char *message)
 {
     Token space_id_token = get_token(&message);
-    uint64_t __block space_id = token_to_uint64t(space_id_token);
+    uint64_t space_id = token_to_uint64t(space_id_token);
+    CFStringRef __block display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
     volatile bool __block is_finished = false;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
         id new_space = [[managed_space alloc] init];
-        id display_space = display_space_for_space_with_id(space_id);
+        id display_space = display_space_for_display_uuid(display_uuid);
         asm__call_add_space(new_space, display_space, add_space_fp);
+        CFRelease(display_uuid);
         is_finished = true;
     });
     while (!is_finished) { /* maybe spin lock */ }
