@@ -1057,11 +1057,13 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
         window_manager_add_managed_window(wm, window, view);
     }
 
-    struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
-    if (next) {
-        window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
-    } else {
-        _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+    if (space_is_visible(src_sid)) {
+        struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
+        if (next) {
+            window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
+        } else {
+            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+        }
     }
 }
 
