@@ -108,10 +108,12 @@ err:
 
 void window_serialize(struct window *window, FILE *rsp)
 {
-    CGRect frame = window_frame(window);
     char *title = window_title(window);
+    char *escaped_title = string_escape_quote(title);
+    CGRect frame = window_frame(window);
     char *role = NULL;
     char *subrole = NULL;
+
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -156,7 +158,7 @@ void window_serialize(struct window *window, FILE *rsp)
             window->id,
             window->application->pid,
             window->application->name,
-            title ? title : "",
+            escaped_title ? escaped_title : title ? title : "",
             frame.origin.x, frame.origin.y,
             frame.size.width, frame.size.height,
             window_level(window),
@@ -175,6 +177,7 @@ void window_serialize(struct window *window, FILE *rsp)
     if (subrole) free(subrole);
     if (role) free(role);
     if (title) free(title);
+    if (escaped_title) free(escaped_title);
 }
 
 char *window_title(struct window *window)

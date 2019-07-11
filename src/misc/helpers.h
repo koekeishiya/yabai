@@ -51,6 +51,33 @@ static inline bool string_equals(const char *a, const char *b)
     return a && b && strcmp(a, b) == 0;
 }
 
+static inline char *string_escape_quote(char *s)
+{
+    if (!s) return NULL;
+
+    bool found_quote = false;
+    for (char *cursor = s; *cursor; ++cursor) {
+        if (*cursor == '"') {
+            found_quote = true;
+            break;
+        }
+    }
+
+    if (!found_quote) return NULL;
+
+    int size = sizeof(char) * (2*strlen(s));
+    char *result = malloc(size);
+    char *dst = result;
+    memset(result, 0, size);
+
+    for (char *cursor = s; *cursor; ++cursor) {
+        if (*cursor == '"') *dst++ = '\\';
+        *dst++ = *cursor;
+    }
+
+    return result;
+}
+
 static CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
 {
     CFNumberRef *temp = malloc(sizeof(CFNumberRef) * count);
