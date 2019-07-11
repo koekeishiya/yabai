@@ -296,6 +296,8 @@ int scripting_addition_uninstall(void)
 
 int scripting_addition_load(void)
 {
+    @autoreleasepool {
+
     if (!scripting_addition_is_installed()) return 1;
 
     SALoader *loader = [[SALoader alloc] init];
@@ -358,5 +360,7 @@ int scripting_addition_load(void)
         notify("unknown error - failed to load or inject payload into Dock.app!", "scripting-addition");
         warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app due to unknown error: %d\n", loader->result);
         return 1;
+    }
+
     }
 }

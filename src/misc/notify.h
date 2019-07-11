@@ -1,6 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
+static bool g_notify_init;
+static NSImage *g_notify_img;
+
 @implementation NSBundle(swizzle)
 - (NSString *)fake_bundleIdentifier
 {
@@ -11,9 +14,6 @@
     }
 }
 @end
-
-static bool g_notify_init;
-static NSImage *g_notify_img;
 
 static bool notify_init(void)
 {
@@ -29,18 +29,18 @@ static bool notify_init(void)
 
 static void notify(char *message, char *subtitle)
 {
+    @autoreleasepool {
+
     if (!g_notify_init) notify_init();
 
     NSUserNotification *notification = [[NSUserNotification alloc] init];
     notification.title = @"yabai";
     notification.subtitle = subtitle ? [NSString stringWithUTF8String:subtitle] : NULL;
     notification.informativeText = message ? [NSString stringWithUTF8String:message] : NULL;
-
-    if (g_notify_img) {
-        [notification setValue:g_notify_img forKey:@"_identityImage"];
-        [notification setValue:@(false) forKey:@"_identityImageHasBorder"];
-    }
-
+    [notification setValue:g_notify_img forKey:@"_identityImage"];
+    [notification setValue:@(false) forKey:@"_identityImageHasBorder"];
     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
     [notification release];
+
+    }
 }
