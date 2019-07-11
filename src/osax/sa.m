@@ -200,7 +200,7 @@ out:
     return result;
 }
 
-static void scripting_addition_perform_validation(void)
+static int scripting_addition_perform_validation(void)
 {
     uint32_t attrib;
     char *version = scripting_addition_request_handshake(&attrib);
@@ -208,10 +208,21 @@ static void scripting_addition_perform_validation(void)
 
     if (!version || !string_equals(version, OSAX_VERSION)) {
         notify("payload is outdated, please reinstall!", "scripting-addition");
+        return PAYLOAD_STATUS_OUTDATED;
     } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
         notify("payload failed to locate required resources inside Dock.app!", "scripting-addition");
+        return PAYLOAD_STATUS_NO_ATTRIB;
     } else {
         debug("yabai: scripting-addition payload successfully located all requsted resources inside Dock.app..\n");
+        return PAYLOAD_STATUS_SUCCESS;
+    }
+}
+
+static void scripting_addition_maybe_restart_dock(int status)
+{
+    if (status == PAYLOAD_STATUS_NO_ATTRIB) {
+        NSArray *dock = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.dock"];
+        [dock makeObjectsPerformSelector:@selector(terminate)];
     }
 }
 
@@ -325,7 +336,7 @@ int scripting_addition_load(void)
         scripting_addition_perform_validation();
     } else if (loader->result == OSAX_PAYLOAD_ALREADY_LOADED) {
         notify("payload was already injected into Dock.app!", "scripting-addition");
-        scripting_addition_perform_validation();
+        scripting_addition_maybe_restart_dock(scripting_addition_perform_validation());
     } else if (loader->result == OSAX_PAYLOAD_NOT_LOADED) {
         notify("failed to inject payload into Dock.app!", "scripting-addition");
     } else if (loader->result == OSAX_PAYLOAD_NOT_FOUND) {
