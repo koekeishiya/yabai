@@ -61,7 +61,7 @@ Definitions
 ----
 DIR_SEL     := north | east | south | west
 
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | window id
 
 DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1-based)
 
@@ -193,7 +193,7 @@ Display
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m display '<COMMAND>'
+yabai -m display ['<DISPLAY_SEL'>] '<COMMAND>'
 
 COMMAND
 ^^^^^^^
@@ -207,7 +207,7 @@ Space
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m space '<COMMAND>'
+yabai -m space ['<SPACE_SEL>'] '<COMMAND>'
 
 COMMAND
 ^^^^^^^
@@ -254,7 +254,7 @@ Window
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m window '[<window id>]' '<COMMAND>'
+yabai -m window ['<WINDOW_SEL>'] '<COMMAND>'
 
 COMMAND
 ^^^^^^^
@@ -312,13 +312,13 @@ COMMAND
 ARGUMENT
 ^^^^^^^^
 
-*--display* ['<arrangement index>']::
+*--display* ['<DISPLAY_SEL>']::
     Constrain matches to the selected display.
 
-*--space* ['<mission-control index>']::
+*--space* ['<SPACE_SEL>']::
     Constrain matches to the selected space.
 
-*--window* ['<window id>']::
+*--window* ['<WINDOW_SEL>']::
     Constrain matches to the selected window.
 
 Rule

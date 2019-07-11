@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-07-08
+.\"      Date: 2019-07-11
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-07-08" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-07-11" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -78,7 +78,7 @@ Loads the scripting\-addition into Dock.app.
 .nf
 DIR_SEL     := north | east | south | west
 
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | window id
 
 DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1\-based)
 
@@ -254,7 +254,7 @@ Size of the gap that separates windows for the selected space.
 .SS "Display"
 .SS "General Syntax"
 .sp
-yabai \-m display \fI<COMMAND>\fP
+yabai \-m display [\fI<DISPLAY_SEL\fP>] \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
 \fB\-\-focus\fP \fI<DISPLAY_SEL>\fP
@@ -264,7 +264,7 @@ Focus the given display.
 .SS "Space"
 .SS "General Syntax"
 .sp
-yabai \-m space \fI<COMMAND>\fP
+yabai \-m space [\fI<SPACE_SEL>\fP] \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
 \fB\-\-focus\fP \fI<SPACE_SEL>\fP
@@ -329,7 +329,7 @@ Set the layout of the space.
 .SS "Window"
 .SS "General Syntax"
 .sp
-yabai \-m window \fI[<window id>]\fP \fI<COMMAND>\fP
+yabai \-m window [\fI<WINDOW_SEL>\fP] \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
 \fB\-\-focus\fP \fI<WINDOW_SEL>\fP
@@ -403,17 +403,17 @@ Retrieve information about windows.
 .RE
 .SS "ARGUMENT"
 .sp
-\fB\-\-display\fP [\fI<arrangement index>\fP]
+\fB\-\-display\fP [\fI<DISPLAY_SEL>\fP]
 .RS 4
 Constrain matches to the selected display.
 .RE
 .sp
-\fB\-\-space\fP [\fI<mission\-control index>\fP]
+\fB\-\-space\fP [\fI<SPACE_SEL>\fP]
 .RS 4
 Constrain matches to the selected space.
 .RE
 .sp
-\fB\-\-window\fP [\fI<window id>\fP]
+\fB\-\-window\fP [\fI<WINDOW_SEL>\fP]
 .RS 4
 Constrain matches to the selected window.
 .RE
