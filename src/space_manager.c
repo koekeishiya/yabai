@@ -614,7 +614,7 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid,
     char message[MAXLEN];
 
     if (!sid || !space_is_user(sid))  return;
-    if (display_space_id(sid) == did) return;
+    if (space_display_id(sid) == did) return;
 
     d_sid = display_space_id(did);
     if (!d_sid) return;
