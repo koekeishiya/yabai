@@ -15,27 +15,13 @@
 static bool g_notify_init;
 static NSImage *g_notify_img;
 
-static NSImage *notify_load_image(char *url)
-{
-    if (!url) return NULL;
-
-    NSString *ns_url = [NSString stringWithUTF8String:url];
-    NSURL *imageURL = [NSURL URLWithString:ns_url];
-
-    if ([[imageURL scheme] length] == 0) {
-        imageURL = [NSURL fileURLWithPath:ns_url];
-    }
-
-    return [[NSImage alloc] initWithContentsOfURL:imageURL];
-}
-
 static bool notify_init(void)
 {
     Class c = objc_getClass("NSBundle");
     if (!c) return false;
 
     method_exchangeImplementations(class_getInstanceMethod(c, @selector(bundleIdentifier)), class_getInstanceMethod(c, @selector(fake_bundleIdentifier)));
-    g_notify_img = notify_load_image(NULL);
+    g_notify_img = [[NSWorkspace sharedWorkspace] iconForFile:[[[NSBundle mainBundle] executablePath] stringByResolvingSymlinksInPath]];
     g_notify_init = true;
 
     return true;
