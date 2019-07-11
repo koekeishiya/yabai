@@ -619,7 +619,6 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid,
     d_sid = display_space_id(did);
     if (!d_sid) return;
 
-
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space_move %lld %lld 1", sid, d_sid);
         socket_write(sockfd, message);
