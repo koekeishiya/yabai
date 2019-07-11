@@ -175,9 +175,9 @@ static void scripting_addition_prepare_binaries(void)
     system(cmd);
 }
 
-static char *scripting_addition_request_handshake(uint32_t *flags)
+static bool scripting_addition_request_handshake(char *version, uint32_t *attrib)
 {
-    char *result = NULL;
+    bool result = false;
 
     int sockfd;
     char message[MAXLEN];
@@ -185,13 +185,20 @@ static char *scripting_addition_request_handshake(uint32_t *flags)
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "handshake");
         if (socket_write(sockfd, message)) {
-            int length;
-            result = socket_read(sockfd, &length);
-            if (!result) goto out;
+            result = true;
 
-            char *attrib = result + 6;
-            assert(attrib[-1] == '\0');
-            memcpy(flags, attrib, sizeof(uint32_t));
+            int length;
+            char *rsp = socket_read(sockfd, &length);
+            if (!rsp) goto out;
+
+            char *zero = rsp;
+            while (*zero != '\0') ++zero;
+
+            assert(*zero == '\0');
+            memcpy(version, rsp, zero - rsp + 1);
+            memcpy(attrib, zero+1, sizeof(uint32_t));
+
+            free(rsp);
         }
     }
 
@@ -202,11 +209,17 @@ out:
 
 static int scripting_addition_perform_validation(void)
 {
-    uint32_t attrib;
-    char *version = scripting_addition_request_handshake(&attrib);
-    if (version) debug("yabai: osax version = %s, osax attrib = 0x%X\n", version, attrib);
+    uint32_t attrib = 0;
+    char version[MAXLEN] = {};
 
-    if (!version || !string_equals(version, OSAX_VERSION)) {
+    if (!scripting_addition_request_handshake(version, &attrib)) {
+        notify("connection failed!", "scripting-addition");
+        return PAYLOAD_STATUS_CON_ERROR;
+    }
+
+    debug("yabai: osax version = %s, osax attrib = 0x%X\n", version, attrib);
+
+    if (!string_equals(version, OSAX_VERSION)) {
         notify("payload is outdated, please reinstall!", "scripting-addition");
         return PAYLOAD_STATUS_OUTDATED;
     } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
