@@ -268,12 +268,6 @@ int main(int argc, char **argv)
     event_loop_begin(&g_event_loop);
     exec_config_file();
 
-    if (scripting_addition_is_installed()) {
-        scripting_addition_load();
-    } else {
-        notify("payload is not installed, some features will not work!", "scripting-addition");
-    }
-
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     display_manager_begin(&g_display_manager);
     space_manager_begin(&g_space_manager);
@@ -281,6 +275,12 @@ int main(int argc, char **argv)
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+
+    if (scripting_addition_is_installed()) {
+        scripting_addition_load();
+    } else {
+        notify("payload is not installed, some features will not work!", "scripting-addition");
+    }
 
     bar_create(&g_bar);
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
