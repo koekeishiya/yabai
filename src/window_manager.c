@@ -35,7 +35,7 @@ void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid)
     fprintf(rsp, "[");
     for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
         struct window *window = window_aggregate_list[i];
-        window_serialize(window, rsp);
+        window_serialize(rsp, window);
         if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
@@ -67,7 +67,7 @@ void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
     fprintf(rsp, "[");
     for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
         struct window *window = window_aggregate_list[i];
-        window_serialize(window, rsp);
+        window_serialize(rsp, window);
         if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
@@ -107,7 +107,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     fprintf(rsp, "[");
     for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
         struct window *window = window_aggregate_list[i];
-        window_serialize(window, rsp);
+        window_serialize(rsp, window);
         if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");

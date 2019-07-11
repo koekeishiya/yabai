@@ -106,7 +106,7 @@ err:
     return space_list;
 }
 
-void window_serialize(struct window *window, FILE *rsp)
+void window_serialize(FILE *rsp, struct window *window)
 {
     char *title = window_title(window);
     char *escaped_title = string_escape_quote(title);
