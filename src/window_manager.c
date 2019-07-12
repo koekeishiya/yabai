@@ -1090,7 +1090,9 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
 {
     uint64_t src_sid = window_space(window);
     uint64_t dst_sid = display_space_id(did);
+
     if (src_sid == dst_sid) return;
+    if (space_is_fullscreen(dst_sid)) return;
 
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
@@ -1123,7 +1125,9 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid)
 {
     uint64_t src_sid = window_space(window);
+
     if (src_sid == dst_sid) return;
+    if (space_is_fullscreen(dst_sid)) return;
 
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
