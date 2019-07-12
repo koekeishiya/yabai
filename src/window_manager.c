@@ -994,46 +994,101 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
     border_window_refresh(window);
 }
 
-void window_manager_warp_window(struct space_manager *sm, struct window *a, struct window *b)
+void window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
-    struct view *view = space_manager_find_view(sm, space_manager_active_space());
-    if (view->layout != VIEW_BSP) return;
+    uint64_t a_sid = window_space(a);
+    struct view *a_view = space_manager_find_view(sm, a_sid);
+    if (a_view->layout != VIEW_BSP) return;
 
-    struct window_node *a_node = view_find_window_node(view->root, a->id);
+    uint64_t b_sid = window_space(b);
+    struct view *b_view = space_manager_find_view(sm, b_sid);
+    if (b_view->layout != VIEW_BSP) return;
+
+    struct window_node *a_node = view_find_window_node(a_view->root, a->id);
     if (!a_node) return;
 
-    struct window_node *b_node = view_find_window_node(view->root, b->id);
+    struct window_node *b_node = view_find_window_node(b_view->root, b->id);
     if (!b_node) return;
 
     if (a_node->parent == b_node->parent) {
         a_node->window_id = b->id;
+        a_node->zoom = NULL;
+
         b_node->window_id = a->id;
+        b_node->zoom = NULL;
 
         window_node_flush(a_node);
         window_node_flush(b_node);
     } else {
-        space_manager_untile_window(sm, view, a);
-        view->insertion_point = b->id;
-        space_manager_tile_window_on_space(sm, a, view->sid);
+        space_manager_untile_window(sm, a_view, a);
+        space_manager_tile_window_on_space_with_insertion_point(sm, a, b_view->sid, b->id);
+
+        if (a_view->sid != b_view->sid) {
+            window_manager_remove_managed_window(wm, a->id);
+            window_manager_add_managed_window(wm, a, b_view);
+            space_manager_move_window_to_space(b_view->sid, a);
+        }
+
+        if (wm->focused_window_id == a->id) {
+            struct window *next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 1);
+            if (next) {
+                window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
+            } else {
+                _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+            }
+        }
     }
 }
 
 void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
-    struct view *view = space_manager_find_view(sm, space_manager_active_space());
-    if (view->layout != VIEW_BSP) return;
+    uint64_t a_sid = window_space(a);
+    struct view *a_view = space_manager_find_view(sm, a_sid);
+    if (a_view->layout != VIEW_BSP) return;
 
-    struct window_node *a_node = view_find_window_node(view->root, a->id);
+    uint64_t b_sid = window_space(b);
+    struct view *b_view = space_manager_find_view(sm, b_sid);
+    if (b_view->layout != VIEW_BSP) return;
+
+    struct window_node *a_node = view_find_window_node(a_view->root, a->id);
     if (!a_node) return;
 
-    struct window_node *b_node = view_find_window_node(view->root, b->id);
+    struct window_node *b_node = view_find_window_node(b_view->root, b->id);
     if (!b_node) return;
 
     a_node->window_id = b->id;
+    a_node->zoom = NULL;
+
     b_node->window_id = a->id;
+    b_node->zoom = NULL;
 
     window_node_flush(a_node);
     window_node_flush(b_node);
+
+    if (a_view->sid != b_view->sid) {
+        window_manager_remove_managed_window(wm, a->id);
+        window_manager_add_managed_window(wm, a, b_view);
+        window_manager_remove_managed_window(wm, b->id);
+        window_manager_add_managed_window(wm, b, a_view);
+        space_manager_move_window_to_space(b_view->sid, a);
+        space_manager_move_window_to_space(a_view->sid, b);
+    }
+
+    struct window *next = NULL;
+    if (wm->focused_window_id == a->id) {
+        if ((next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 1))) {
+            window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
+        } else {
+            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+        }
+
+    } else if (wm->focused_window_id == b->id) {
+        if ((next = window_manager_find_window_on_space_by_rank(wm, b_view->sid, 1))) {
+            window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
+        } else {
+            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+        }
+    }
 }
 
 void window_manager_send_window_to_display(struct space_manager *sm, struct window_manager *wm, struct window *window, uint32_t did)

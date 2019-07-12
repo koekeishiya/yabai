@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Dragging a tiled window to another display using the mouse will cause the window to be warped to that display upon release [#103](https://github.com/koekeishiya/yabai/issues/103)
 - Make loading scripting-addition more robust - validating version and functionality [#108](https://github.com/koekeishiya/yabai/issues/108)
 - Escape quotes in window titles returned through query commands [#114](https://github.com/koekeishiya/yabai/issues/114)
+- Merge options for query constraints with command selectors to have a unified method for addressing isplay, spaces, and windows,
+  as well as allowing commands to specify both a *selected/acting entity* and a *given entity* of its type [#112](https://github.com/koekeishiya/yabai/issues/112)
 
 ## [1.0.6] - 2019-07-09
 ### Changed

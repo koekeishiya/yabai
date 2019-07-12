@@ -1273,7 +1273,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_WARP)) {
         struct selector selector = parse_window_selector(rsp, &message, acting_window);
         if (selector.did_parse && selector.window) {
-            window_manager_warp_window(&g_space_manager, acting_window, selector.window);
+            window_manager_warp_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
         }
     } else if (token_equals(command, COMMAND_WINDOW_INSERT)) {
         struct selector selector = parse_dir_selector(rsp, &message);
