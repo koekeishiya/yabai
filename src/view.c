@@ -441,7 +441,7 @@ void view_flush(struct view *view)
 
 void view_serialize(FILE *rsp, struct view *view)
 {
-    size_t buffer_size = MAXLEN;
+    int buffer_size = MAXLEN;
     size_t bytes_written = 0;
     char buffer[MAXLEN] = {};
     char *cursor = buffer;

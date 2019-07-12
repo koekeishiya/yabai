@@ -27,7 +27,7 @@ void display_serialize(FILE *rsp, uint32_t did)
 {
     CGRect frame = display_bounds(did);
 
-    size_t buffer_size = MAXLEN;
+    int buffer_size = MAXLEN;
     size_t bytes_written = 0;
     char buffer[MAXLEN] = {};
     char *cursor = buffer;
