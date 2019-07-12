@@ -1072,21 +1072,11 @@ void window_manager_swap_window(struct space_manager *sm, struct window_manager 
         window_manager_add_managed_window(wm, b, a_view);
         space_manager_move_window_to_space(b_view->sid, a);
         space_manager_move_window_to_space(a_view->sid, b);
-    }
 
-    struct window *next = NULL;
-    if (wm->focused_window_id == a->id) {
-        if ((next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 1))) {
-            window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
-        } else {
-            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
-        }
-
-    } else if (wm->focused_window_id == b->id) {
-        if ((next = window_manager_find_window_on_space_by_rank(wm, b_view->sid, 1))) {
-            window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
-        } else {
-            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+        if (wm->focused_window_id == a->id) {
+            window_manager_focus_window_with_raise(&b->application->psn, b->id, b->ref);
+        } else if (wm->focused_window_id == b->id) {
+            window_manager_focus_window_with_raise(&a->application->psn, a->id, a->ref);
         }
     }
 }
