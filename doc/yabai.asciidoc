@@ -263,34 +263,34 @@ COMMAND
 ^^^^^^^
 
 *--focus* '<WINDOW_SEL>'::
-    Focus the window in the given direction.
+    Focus the given window.
 
 *--swap* '<WINDOW_SEL>'::
-    Swap position with the window in the given direction.
+    Swap position of the selected window and the given window.
 
 *--warp* '<WINDOW_SEL>'::
-    Re-insert, splitting the window in the given direction.
+    Re-insert the selected window, splitting the given window.
 
 *--insert* '<DIR_SEL>'::
-    Select the splitting area of the selected window. If the current selection matches 'DIR_SEL', the action will be undone.
+    Set the splitting area of the selected window. If the current splitting area matches 'DIR_SEL', the action will be undone.
 
 *--grid* '<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'::
-    Set the window frame based on a self-defined grid.
+    Set the frame of the selected window based on a self-defined grid.
 
 *--move* 'abs|rel:<dx>:<dy>'::
-    If type is 'rel' the window is moved by 'dx' pixels horizontally and 'dy' pixels vertically, otherwise 'dx' and 'dy' will become its new position.
+    If type is 'rel' the selected window is moved by 'dx' pixels horizontally and 'dy' pixels vertically, otherwise 'dx' and 'dy' will become its new position.
 
 *--resize* 'top|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>'::
-    Resize window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. If handle is 'abs' the new window size will be 'dx' width and 'dy' height.
+    Resize the selected window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. If handle is 'abs' the new size will be 'dx' width and 'dy' height.
 
 *--toggle* 'float|sticky|split|border|zoom-parent|zoom-fullscreen|native-fullscreen'::
-    Toggle the selected property of a window.
+    Toggle the given property of the selected window.
 
 *--display* '<DISPLAY_SEL>'::
-    Send the window to the given display.
+    Send the selected window to the given display.
 
 *--space* '<SPACE_SEL>'::
-    Send the window to the given space.
+    Send the selected window to the given space.
 
 Query
 ~~~~~~

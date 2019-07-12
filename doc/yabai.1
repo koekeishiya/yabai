@@ -339,52 +339,52 @@ yabai \-m window [\fI<WINDOW_SEL>\fP] \fI<COMMAND>\fP
 .sp
 \fB\-\-focus\fP \fI<WINDOW_SEL>\fP
 .RS 4
-Focus the window in the given direction.
+Focus the given window.
 .RE
 .sp
 \fB\-\-swap\fP \fI<WINDOW_SEL>\fP
 .RS 4
-Swap position with the window in the given direction.
+Swap position of the selected window and the given window.
 .RE
 .sp
 \fB\-\-warp\fP \fI<WINDOW_SEL>\fP
 .RS 4
-Re\-insert, splitting the window in the given direction.
+Re\-insert the selected window, splitting the given window.
 .RE
 .sp
 \fB\-\-insert\fP \fI<DIR_SEL>\fP
 .RS 4
-Select the splitting area of the selected window. If the current selection matches \fIDIR_SEL\fP, the action will be undone.
+Set the splitting area of the selected window. If the current splitting area matches \fIDIR_SEL\fP, the action will be undone.
 .RE
 .sp
 \fB\-\-grid\fP \fI<rows>:<cols>:<start\-x>:<start\-y>:<width>:<height>\fP
 .RS 4
-Set the window frame based on a self\-defined grid.
+Set the frame of the selected window based on a self\-defined grid.
 .RE
 .sp
 \fB\-\-move\fP \fIabs|rel:<dx>:<dy>\fP
 .RS 4
-If type is \fIrel\fP the window is moved by \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically, otherwise \fIdx\fP and \fIdy\fP will become its new position.
+If type is \fIrel\fP the selected window is moved by \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically, otherwise \fIdx\fP and \fIdy\fP will become its new position.
 .RE
 .sp
 \fB\-\-resize\fP \fItop|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>\fP
 .RS 4
-Resize window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically. If handle is \fIabs\fP the new window size will be \fIdx\fP width and \fIdy\fP height.
+Resize the selected window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically. If handle is \fIabs\fP the new size will be \fIdx\fP width and \fIdy\fP height.
 .RE
 .sp
 \fB\-\-toggle\fP \fIfloat|sticky|split|border|zoom\-parent|zoom\-fullscreen|native\-fullscreen\fP
 .RS 4
-Toggle the selected property of a window.
+Toggle the given property of the selected window.
 .RE
 .sp
 \fB\-\-display\fP \fI<DISPLAY_SEL>\fP
 .RS 4
-Send the window to the given display.
+Send the selected window to the given display.
 .RE
 .sp
 \fB\-\-space\fP \fI<SPACE_SEL>\fP
 .RS 4
-Send the window to the given space.
+Send the selected window to the given space.
 .RE
 .SS "Query"
 .SS "General Syntax"
