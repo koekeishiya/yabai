@@ -1087,49 +1087,10 @@ void window_manager_swap_window(struct space_manager *sm, struct window_manager 
     }
 }
 
-void window_manager_send_window_to_display(struct space_manager *sm, struct window_manager *wm, struct window *window, uint32_t did)
-{
-    uint64_t src_sid = window_space(window);
-    uint64_t dst_sid = display_space_id(did);
-
-    if (src_sid == dst_sid) return;
-    if (space_is_fullscreen(dst_sid)) return;
-
-    struct view *view = window_manager_find_managed_window(wm, window);
-    if (view) {
-        space_manager_untile_window(sm, view, window);
-        window_manager_remove_managed_window(wm, window->id);
-        window_manager_purify_window(wm, window);
-    }
-
-    assert(space_is_visible(dst_sid));
-    space_manager_move_window_to_space(dst_sid, window);
-
-    if (window_manager_should_manage_window(window)) {
-        struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
-        window_manager_add_managed_window(wm, window, view);
-    }
-
-    if (space_is_visible(src_sid) && wm->focused_window_id == window->id) {
-        struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
-        if (next) {
-            window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
-        } else {
-            g_mouse_state.ffm_window_id = 0;
-            g_window_manager.last_window_id = g_window_manager.focused_window_id;
-            g_window_manager.focused_window_id = 0;
-            g_window_manager.focused_window_psn = g_process_manager.finder_psn;
-            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
-        }
-    }
-}
-
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid)
 {
     uint64_t src_sid = window_space(window);
-
     if (src_sid == dst_sid) return;
-    if (space_is_fullscreen(dst_sid)) return;
 
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {

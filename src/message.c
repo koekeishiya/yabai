@@ -1328,12 +1328,21 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_DISPLAY)) {
         struct selector selector = parse_display_selector(rsp, &message, display_manager_active_display_id());
         if (selector.did_parse && selector.did) {
-            window_manager_send_window_to_display(&g_space_manager, &g_window_manager, acting_window, selector.did);
+            uint64_t sid = display_space_id(selector.did);
+            if (space_is_fullscreen(sid)) {
+                daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
+            } else {
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, sid);
+            }
         }
     } else if (token_equals(command, COMMAND_WINDOW_SPACE)) {
         struct selector selector = parse_space_selector(rsp, &message, space_manager_active_space());
         if (selector.did_parse && selector.sid) {
-            window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid);
+            if (space_is_fullscreen(selector.sid)) {
+                daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
+            } else {
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid);
+            }
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
