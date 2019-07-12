@@ -620,12 +620,24 @@ static void do_space_destroy(const char *message)
     Token space_id_token = get_token(&message);
     uint64_t space_id = token_to_uint64t(space_id_token);
     CFStringRef display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
+    uint64_t active_space_id = CGSManagedDisplayGetCurrentSpace(_connection, display_uuid);
+
     id space = space_for_display_with_id(display_uuid, space_id);
     id display_space = display_space_for_display_uuid(display_uuid);
-    ((remove_space_call) remove_space_fp)(space, display_space, dock_spaces, space_id, space_id);
-    uint64_t dest_space_id = CGSManagedDisplayGetCurrentSpace(_connection, display_uuid);
-    id dest_space = space_for_display_with_id(display_uuid, dest_space_id);
-    set_ivar_value(display_space, "_currentSpace", [dest_space retain]);
+
+    volatile bool __block is_finished = false;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
+        ((remove_space_call) remove_space_fp)(space, display_space, dock_spaces, space_id, space_id);
+        is_finished = true;
+    });
+    while (!is_finished) { /* maybe spin lock */ }
+
+    if (active_space_id == space_id) {
+        uint64_t dest_space_id = CGSManagedDisplayGetCurrentSpace(_connection, display_uuid);
+        id dest_space = space_for_display_with_id(display_uuid, dest_space_id);
+        set_ivar_value(display_space, "_currentSpace", [dest_space retain]);
+    }
+
     CFRelease(display_uuid);
 }
 
