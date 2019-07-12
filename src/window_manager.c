@@ -1,6 +1,7 @@
 #include "window_manager.h"
 
 extern struct process_manager g_process_manager;
+extern struct mouse_state g_mouse_state;
 extern char g_sa_socket_file[MAXLEN];
 
 static TABLE_HASH_FUNC(hash_wm)
@@ -1036,6 +1037,7 @@ void window_manager_warp_window(struct space_manager *sm, struct window_manager 
                 window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
             } else {
                 _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+                g_mouse_state.ffm_window_id = 0;
             }
         }
     }
@@ -1109,6 +1111,7 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
             window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
         } else {
             _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+            g_mouse_state.ffm_window_id = 0;
         }
     }
 }
@@ -1138,6 +1141,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
             window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
         } else {
             _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+            g_mouse_state.ffm_window_id = 0;
         }
     }
 }
