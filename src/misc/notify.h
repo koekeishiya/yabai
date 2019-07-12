@@ -8,7 +8,7 @@ static NSImage *g_notify_img;
 - (NSString *)fake_bundleIdentifier
 {
     if (self == [NSBundle mainBundle]) {
-        return @"com.apple.dock";
+        return @"com.koekeishiya.yabai";
     } else {
         return [self fake_bundleIdentifier];
     }
