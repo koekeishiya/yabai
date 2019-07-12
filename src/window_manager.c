@@ -938,7 +938,8 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
 
 void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
 {
-    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    uint64_t sid = window_space(window);
+    struct view *view = space_manager_find_view(sm, sid);
     if (view->layout != VIEW_BSP) return;
 
     struct window_node *node = view_find_window_node(view->root, window->id);
