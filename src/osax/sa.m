@@ -54,9 +54,9 @@ static char sa_plist[] =
     "<key>CFBundlePackageType</key>\n"
     "<string>osax</string>\n"
     "<key>CFBundleShortVersionString</key>\n"
-    "<string>1.0.1</string>\n"
+    "<string>"OSAX_VERSION"</string>\n"
     "<key>CFBundleVersion</key>\n"
-    "<string>1.0.1</string>\n"
+    "<string>"OSAX_VERSION"</string>\n"
     "<key>NSHumanReadableCopyright</key>\n"
     "<string>Copyright © 2019 Åsmund Vikane. All rights reserved.</string>\n"
     "<key>OSAScriptingDefinition</key>\n"
@@ -97,9 +97,9 @@ static char sa_bundle_plist[] =
     "<key>CFBundlePackageType</key>\n"
     "<string>BNDL</string>\n"
     "<key>CFBundleShortVersionString</key>\n"
-    "<string>1.0.1</string>\n"
+    "<string>"OSAX_VERSION"</string>\n"
     "<key>CFBundleVersion</key>\n"
-    "<string>1.0.1</string>\n"
+    "<string>"OSAX_VERSION"</string>\n"
     "<key>NSHumanReadableCopyright</key>\n"
     "<string>Copyright © 2019 Åsmund Vikane. All rights reserved.</string>\n"
     "<key>NSPrincipalClass</key>\n"
@@ -307,6 +307,22 @@ int scripting_addition_uninstall(void)
     if (!scripting_addition_is_installed()) return  0;
     if (!scripting_addition_remove())       return -1;
     return 0;
+}
+
+int scripting_addition_check(void)
+{
+    @autoreleasepool {
+
+    if (!scripting_addition_is_installed()) return 1;
+
+    NSString *payload_path = [NSString stringWithUTF8String:osax_payload_dir];
+    NSBundle *payload_bundle = [NSBundle bundleWithPath:payload_path];
+    NSString *ns_version = [payload_bundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+
+    bool status = string_equals([ns_version UTF8String], OSAX_VERSION);
+    return status ? 0 : 1;
+
+    }
 }
 
 int scripting_addition_load(void)

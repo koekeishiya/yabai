@@ -24,7 +24,7 @@ yabai
 Synopsis
 --------
 
-*yabai* [*-v*,*--version*|*-V*,*--verbose*|*-m*,*--message* 'msg'|*-c*,*--config* 'config_file'|*--install-sa*|*--uninstall-sa*|*--load-sa*]
+*yabai* [*-v*,*--version*|*-V*,*--verbose*|*-m*,*--message* 'msg'|*-c*,*--config* 'config_file'|*--install-sa*|*--uninstall-sa*|*--check-sa*|*--load-sa*]
 
 Description
 -----------
@@ -50,6 +50,9 @@ Options
 
 *--uninstall-sa*::
     Uninstall scripting-addition. Must be ran as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+
+*--check-sa*::
+    Returns zero if the latest version of the scripting-addition is installed.
 
 *--load-sa*::
     Loads the scripting-addition into Dock.app.

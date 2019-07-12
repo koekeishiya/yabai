@@ -16,6 +16,7 @@
 
 #define SCRPT_ADD_INSTALL_OPT   "--install-sa"
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
+#define SCRPT_ADD_CHECK_OPT     "--check-sa"
 #define SCRPT_ADD_LOAD_OPT      "--load-sa"
 
 #define MAJOR 1
@@ -207,6 +208,10 @@ static void parse_arguments(int argc, char **argv)
 
     if (string_equals(argv[1], SCRPT_ADD_UNINSTALL_OPT)) {
         exit(scripting_addition_uninstall());
+    }
+
+    if (string_equals(argv[1], SCRPT_ADD_CHECK_OPT)) {
+        exit(scripting_addition_check());
     }
 
     if (string_equals(argv[1], SCRPT_ADD_LOAD_OPT)) {
