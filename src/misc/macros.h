@@ -5,7 +5,7 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-#define MAXLEN 256
+#define MAXLEN 512
 
 #define REGEX_MATCH_UD  0
 #define REGEX_MATCH_YES 1

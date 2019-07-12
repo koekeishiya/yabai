@@ -441,31 +441,63 @@ void view_flush(struct view *view)
 
 void view_serialize(FILE *rsp, struct view *view)
 {
-    int windows = 0;
+    size_t buffer_size = MAXLEN;
+    size_t bytes_written = 0;
+    char buffer[MAXLEN] = {};
+    char *cursor = buffer;
+
     int count = 0;
-    uint32_t *window_list = space_window_list(view->sid, &count);
+    uint32_t windows[MAXLEN] = {};
+
+    int window_count = 0;
+    uint32_t *window_list = space_window_list(view->sid, &window_count);
     if (window_list) {
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < window_count; ++i) {
             if (window_manager_find_window(&g_window_manager, window_list[i])) {
-                ++windows;
+                windows[count++] = window_list[i];
             }
         }
         free(window_list);
     }
+
+    for (int i = 0; i < count; ++i) {
+        if (i < count - 1) {
+            bytes_written = snprintf(cursor, buffer_size, "%d, ", windows[i]);
+        } else {
+            bytes_written = snprintf(cursor, buffer_size, "%d", windows[i]);
+        }
+
+        cursor += bytes_written;
+        buffer_size -= bytes_written;
+        if (buffer_size <= 0) break;
+    }
+
+    struct window_node *first_leaf = window_node_find_first_leaf(view->root);
+    struct window_node *last_leaf = window_node_find_last_leaf(view->root);
 
     fprintf(rsp,
             "{\n"
             "\t\"id\":%lld,\n"
             "\t\"index\":%d,\n"
             "\t\"display\":%d,\n"
-            "\t\"windows\":%d,\n"
-            "\t\"type\":\"%s\"\n"
+            "\t\"windows\":[%s],\n"
+            "\t\"type\":\"%s\",\n"
+            "\t\"visible\":%d,\n"
+            "\t\"focused\":%d,\n"
+            "\t\"native-fullscreen\":%d,\n"
+            "\t\"first-window\":%d,\n"
+            "\t\"last-window\":%d\n"
             "}",
             view->sid,
             space_manager_mission_control_index(view->sid),
             display_arrangement(space_display_id(view->sid)),
-            windows,
-            view_type_str[view->layout]);
+            buffer,
+            view_type_str[view->layout],
+            space_is_visible(view->sid),
+            view->sid == g_space_manager.current_space_id,
+            space_is_fullscreen(view->sid),
+            first_leaf ? first_leaf->window_id : 0,
+            last_leaf ? last_leaf->window_id : 0);
 }
 
 void view_update(struct view *view)

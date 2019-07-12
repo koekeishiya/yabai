@@ -25,17 +25,38 @@ static DISPLAY_EVENT_HANDLER(display_handler)
 
 void display_serialize(FILE *rsp, uint32_t did)
 {
-    int count = display_space_count(did);
     CGRect frame = display_bounds(did);
+
+    size_t buffer_size = MAXLEN;
+    size_t bytes_written = 0;
+    char buffer[MAXLEN] = {};
+    char *cursor = buffer;
+
+    int count;
+    uint64_t *space_list = display_space_list(did, &count);
+    if (space_list) {
+        for (int i = 0; i < count; ++i) {
+            if (i < count - 1) {
+                bytes_written = snprintf(cursor, buffer_size, "%d, ", space_manager_mission_control_index(space_list[i]));
+            } else {
+                bytes_written = snprintf(cursor, buffer_size, "%d", space_manager_mission_control_index(space_list[i]));
+            }
+
+            cursor += bytes_written;
+            buffer_size -= bytes_written;
+            if (buffer_size <= 0) break;
+        }
+        free(space_list);
+    }
 
     fprintf(rsp,
             "{\n"
             "\t\"id\":%d,\n"
             "\t\"index\":%d,\n"
-            "\t\"spaces\":%d,\n"
+            "\t\"spaces\":[%s],\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}\n"
             "}",
-            did, display_arrangement(did), count,
+            did, display_arrangement(did), buffer,
             frame.origin.x, frame.origin.y,
             frame.size.width, frame.size.height);
 }

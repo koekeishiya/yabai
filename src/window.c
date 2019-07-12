@@ -1,6 +1,7 @@
 #include "window.h"
 
 extern int g_connection;
+extern struct window_manager g_window_manager;
 
 int g_normal_window_level;
 int g_floating_window_level;
@@ -113,7 +114,9 @@ void window_serialize(FILE *rsp, struct window *window)
     CGRect frame = window_frame(window);
     char *role = NULL;
     char *subrole = NULL;
-
+    uint64_t sid = window_space(window);
+    int space = space_manager_mission_control_index(sid);
+    int display = display_arrangement(space_display_id(sid));
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -147,6 +150,9 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"subrole\":\"%s\",\n"
             "\t\"movable\":%d,\n"
             "\t\"resizable\":%d,\n"
+            "\t\"display\":%d,\n"
+            "\t\"space\":%d,\n"
+            "\t\"focused\":%d,\n"
             "\t\"split\":\"%s\",\n"
             "\t\"floating\":%d,\n"
             "\t\"sticky\":%d,\n"
@@ -166,6 +172,9 @@ void window_serialize(FILE *rsp, struct window *window)
             subrole ? subrole : "",
             window_can_move(window),
             window_can_resize(window),
+            display,
+            space,
+            window->id == g_window_manager.focused_window_id,
             split,
             window->is_floating,
             window_is_sticky(window),
