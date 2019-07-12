@@ -378,7 +378,6 @@ int space_manager_mission_control_index(uint64_t sid)
             CFDictionaryRef space_ref = CFArrayGetValueAtIndex(spaces_ref, j);
             CFNumberRef sid_ref = CFDictionaryGetValue(space_ref, CFSTR("id64"));
             CFNumberGetValue(sid_ref, CFNumberGetType(sid_ref), &result);
-            if (!space_is_user(result)) continue;
             if (sid == result) goto out;
 
             ++desktop_cnt;
@@ -408,7 +407,6 @@ uint64_t space_manager_mission_control_space(int desktop_id)
             CFDictionaryRef space_ref = CFArrayGetValueAtIndex(spaces_ref, j);
             CFNumberRef sid_ref = CFDictionaryGetValue(space_ref, CFSTR("id64"));
             CFNumberGetValue(sid_ref, CFNumberGetType(sid_ref), &result);
-            if (!space_is_user(result))    continue;
             if (desktop_cnt == desktop_id) goto out;
 
             ++desktop_cnt;
@@ -596,8 +594,8 @@ void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bo
     int sockfd;
     char message[MAXLEN];
 
-    if (!src_sid || !space_is_user(src_sid)) return;
-    if (!dst_sid || !space_is_user(dst_sid)) return;
+    if (!src_sid) return;
+    if (!dst_sid) return;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space_move %lld %lld %d", src_sid, dst_sid, focus);
@@ -613,7 +611,7 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid,
     uint64_t d_sid;
     char message[MAXLEN];
 
-    if (!sid || !space_is_user(sid))  return;
+    if (!sid) return;
     if (space_display_id(sid) == did) return;
 
     d_sid = display_space_id(did);

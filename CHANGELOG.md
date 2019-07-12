@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Merge options for query constraints with command selectors to have a unified method for addressing displays, spaces, and windows,
   as well as allowing commands to specify both a *selected/acting entity* and a *given entity* of its type [#112](https://github.com/koekeishiya/yabai/issues/112)
 - Extend window, space and display properties exposed through *query* commands [#116](https://github.com/koekeishiya/yabai/issues/116)
+- Native macOS fullscreen spaces is now addressable using their mission-control index and can also be moved [#117](https://github.com/koekeishiya/yabai/issues/117)
 
 ## [1.0.6] - 2019-07-09
 ### Changed
