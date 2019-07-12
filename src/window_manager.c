@@ -1028,22 +1028,22 @@ void window_manager_warp_window(struct space_manager *sm, struct window_manager 
             window_manager_remove_managed_window(wm, a->id);
             window_manager_add_managed_window(wm, a, b_view);
             space_manager_move_window_to_space(b_view->sid, a);
+
+            if (wm->focused_window_id == a->id) {
+                struct window *next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 1);
+                if (next) {
+                    window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
+                } else {
+                    g_mouse_state.ffm_window_id = 0;
+                    g_window_manager.last_window_id = g_window_manager.focused_window_id;
+                    g_window_manager.focused_window_id = 0;
+                    g_window_manager.focused_window_psn = g_process_manager.finder_psn;
+                    _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+                }
+            }
         }
 
         space_manager_tile_window_on_space_with_insertion_point(sm, a, b_view->sid, b->id);
-
-        if (wm->focused_window_id == a->id) {
-            struct window *next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 1);
-            if (next) {
-                window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
-            } else {
-                g_mouse_state.ffm_window_id = 0;
-                g_window_manager.last_window_id = g_window_manager.focused_window_id;
-                g_window_manager.focused_window_id = 0;
-                g_window_manager.focused_window_psn = g_process_manager.finder_psn;
-                _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
-            }
-        }
     }
 }
 
