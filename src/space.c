@@ -72,7 +72,7 @@ bool space_is_user(uint64_t sid)
 
 bool space_is_fullscreen(uint64_t sid)
 {
-    return space_type(sid) == 3;
+    return space_type(sid) == 4;
 }
 
 bool space_is_system(uint64_t sid)
