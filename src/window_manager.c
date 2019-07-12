@@ -1037,6 +1037,7 @@ void window_manager_warp_window(struct space_manager *sm, struct window_manager 
                 window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
             } else {
                 g_mouse_state.ffm_window_id = 0;
+                g_window_manager.last_window_id = g_window_manager.focused_window_id;
                 g_window_manager.focused_window_id = 0;
                 g_window_manager.focused_window_psn = g_process_manager.finder_psn;
                 _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
@@ -1115,6 +1116,7 @@ void window_manager_send_window_to_display(struct space_manager *sm, struct wind
             window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
         } else {
             g_mouse_state.ffm_window_id = 0;
+            g_window_manager.last_window_id = g_window_manager.focused_window_id;
             g_window_manager.focused_window_id = 0;
             g_window_manager.focused_window_psn = g_process_manager.finder_psn;
             _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
@@ -1149,6 +1151,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
             window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
         } else {
             g_mouse_state.ffm_window_id = 0;
+            g_window_manager.last_window_id = g_window_manager.focused_window_id;
             g_window_manager.focused_window_id = 0;
             g_window_manager.focused_window_psn = g_process_manager.finder_psn;
             _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
