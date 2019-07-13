@@ -1,5 +1,7 @@
 #include "bar.h"
 
+extern struct space_manager g_space_manager;
+
 static POWER_CALLBACK(power_handler)
 {
     struct event *event;
@@ -261,8 +263,10 @@ void bar_resize(struct bar *bar)
 {
     if (!bar->enabled) return;
 
+    bar->did = display_manager_main_display_id();
+    CGRect bounds = display_bounds(bar->did);
+
     CFTypeRef frame_region;
-    CGRect bounds = display_bounds(display_manager_main_display_id());
     bar->frame = (CGRect) {{0,0},{bounds.size.width, 26}};
     CGSNewRegionWithRect(&bar->frame, &frame_region);
     SLSDisableUpdate(g_connection);
@@ -463,8 +467,10 @@ void bar_create(struct bar *bar)
     uint32_t clear_tags[2] = { 0, 0 };
     *((int8_t *)(clear_tags) + 0x5) = 0x20;
 
+    bar->did = display_manager_main_display_id();
+    CGRect bounds = display_bounds(bar->did);
+
     CFTypeRef frame_region;
-    CGRect bounds = display_bounds(display_manager_main_display_id());
     bar->frame = (CGRect) {{0,0},{bounds.size.width, 26}};
 
     CGSNewRegionWithRect(&bar->frame, &frame_region);
@@ -487,6 +493,8 @@ void bar_create(struct bar *bar)
 
     CFRunLoopAddSource(CFRunLoopGetMain(), bar->power_source, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
+
+    space_manager_mark_spaces_invalid_for_display(&g_space_manager, bar->did);
     bar_refresh(bar);
 }
 
@@ -503,5 +511,7 @@ void bar_destroy(struct bar *bar)
         SLSReleaseWindow(g_connection, bar->id);
 
         bar->enabled = false;
+
+        space_manager_mark_spaces_invalid_for_display(&g_space_manager, bar->did);
     }
 }

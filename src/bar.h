@@ -27,6 +27,7 @@ struct bar
 {
     bool enabled;
     uint32_t id;
+    uint32_t did;
     CGContextRef context;
     CFRunLoopSourceRef power_source;
     CFRunLoopTimerRef refresh_timer;
