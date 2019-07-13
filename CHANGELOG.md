@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.0] - 2019-07-14
 ### Added
 - Make loading scripting-addition more robust - validating version and functionality [#108](https://github.com/koekeishiya/yabai/issues/108)
 - Merge options for query constraints with command selectors to have a unified method for addressing displays, spaces, and windows,
@@ -55,7 +57,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/koekeishiya/yabai/compare/v1.0.6...v1.1.0
 [1.0.6]: https://github.com/koekeishiya/yabai/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/koekeishiya/yabai/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/koekeishiya/yabai/compare/v1.0.3...v1.0.4
