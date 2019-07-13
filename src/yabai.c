@@ -294,7 +294,6 @@ int main(int argc, char **argv)
         notify("payload is not installed, some features will not work!", "scripting-addition");
     }
 
-    bar_create(&g_bar);
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     space_manager_refresh_view(&g_space_manager, g_space_manager.current_space_id);
 
