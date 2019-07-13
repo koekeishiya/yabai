@@ -1243,7 +1243,9 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
         window_manager_purify_window(wm, window);
     }
 
+    uint32_t sid = window_space(window);
     window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+    while (sid != space_manager_active_space()) { /* maybe spin lock */ }
     AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
 }
 
