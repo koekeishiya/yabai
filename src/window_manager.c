@@ -383,6 +383,7 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct window 
 {
     if (!wm->enable_window_opacity) return;
     if (window->rule_alpha != 0.0f) return;
+    if ((!window_is_standard(window)) && (!window_is_dialog(window))) return;
 
     int sockfd;
     char message[MAXLEN];
