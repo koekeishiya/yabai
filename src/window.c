@@ -114,9 +114,11 @@ void window_serialize(FILE *rsp, struct window *window)
     CGRect frame = window_frame(window);
     char *role = NULL;
     char *subrole = NULL;
+    bool sticky = window_is_sticky(window);
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
+    bool visible = sticky || space_is_visible(sid);
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -152,6 +154,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"resizable\":%d,\n"
             "\t\"display\":%d,\n"
             "\t\"space\":%d,\n"
+            "\t\"visible\":%d,\n"
             "\t\"focused\":%d,\n"
             "\t\"split\":\"%s\",\n"
             "\t\"floating\":%d,\n"
@@ -174,10 +177,11 @@ void window_serialize(FILE *rsp, struct window *window)
             window_can_resize(window),
             display,
             space,
+            visible,
             window->id == g_window_manager.focused_window_id,
             split,
             window->is_floating,
-            window_is_sticky(window),
+            sticky,
             window->border.enabled,
             zoom_parent,
             zoom_fullscreen,
