@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.1.1] - 2019-07-14
+### Changed
+- The status bar should be disabled by default, if setting is missing from the config [#126](https://github.com/koekeishiya/yabai/issues/126)
+
 ## [1.1.0] - 2019-07-14
 ### Added
 - Make loading scripting-addition more robust - validating version and functionality [#108](https://github.com/koekeishiya/yabai/issues/108)
@@ -57,7 +61,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/koekeishiya/yabai/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/koekeishiya/yabai/compare/v1.0.6...v1.1.0
 [1.0.6]: https://github.com/koekeishiya/yabai/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/koekeishiya/yabai/compare/v1.0.4...v1.0.5
