@@ -334,6 +334,38 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
     }
 }
 
+void window_manager_set_border_window_enabled(struct window_manager *wm, bool enabled)
+{
+    wm->enable_window_border = enabled;
+
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if ((window_is_standard(window)) || (window_is_dialog(window))) {
+                    if (enabled && !window->border.id) {
+                        border_window_create(window);
+
+                        if ((!window->application->is_hidden) &&
+                            (!window->is_minimized)) {
+                            border_window_refresh(window);
+                        }
+
+                        if (window->id == wm->focused_window_id) {
+                            border_window_activate(window);
+                        }
+                    } else if (!enabled && window->border.id) {
+                        border_window_destroy(window);
+                    }
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
 void window_manager_set_border_window_width(struct window_manager *wm, int width)
 {
     wm->window_border_width = width;
@@ -344,6 +376,8 @@ void window_manager_set_border_window_width(struct window_manager *wm, int width
                 struct window *window = bucket->value;
                 if (window->border.id) {
                     window->border.width = width;
+                    CGContextSetLineWidth(window->border.context, width);
+
                     if ((!window->application->is_hidden) &&
                         (!window->is_minimized)) {
                         border_window_refresh(window);

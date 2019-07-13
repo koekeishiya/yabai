@@ -378,9 +378,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-            g_window_manager.enable_window_border = false;
+            window_manager_set_border_window_enabled(&g_window_manager, false);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-            g_window_manager.enable_window_border = true;
+            window_manager_set_border_window_enabled(&g_window_manager, true);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -664,9 +664,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_bar.enabled]);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-            g_bar.enabled = false;
+            bar_destroy(&g_bar);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-            g_bar.enabled = true;
+            bar_create(&g_bar);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -675,14 +675,14 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         if (length <= 0) {
             fprintf(rsp, "%s\n", g_bar.t_font_prop);
         } else {
-            g_bar.t_font_prop = string_copy(message);
+            bar_set_text_font(&g_bar, string_copy(message));
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_ICON_FONT)) {
         int length = strlen(message);
         if (length <= 0) {
             fprintf(rsp, "%s\n", g_bar.i_font_prop);
         } else {
-            g_bar.i_font_prop = string_copy(message);
+            bar_set_icon_font(&g_bar, string_copy(message));
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_BACKGROUND)) {
         struct token value = get_token(&message);
@@ -691,8 +691,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             uint32_t color = token_to_uint32t(value);
             if (color) {
-                g_bar.background_color = rgba_color_from_hex(color);
-                g_bar.background_color_dim = rgba_color_dim(g_bar.background_color);
+                bar_set_background_color(&g_bar, color);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
@@ -704,23 +703,27 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             uint32_t color = token_to_uint32t(value);
             if (color) {
-                g_bar.foreground_color = rgba_color_from_hex(color);
+                bar_set_foreground_color(&g_bar, color);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_STRIP)) {
+        char **icon_strip = NULL;
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {
-            buf_push(g_bar._space_icon_strip, token_to_string(token));
+            buf_push(icon_strip, token_to_string(token));
             token = get_token(&message);
         }
+        bar_set_space_strip(&g_bar, icon_strip);
     } else if (token_equals(command, COMMAND_CONFIG_BAR_POWER_STRIP)) {
+        char **icon_strip = NULL;
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {
-            buf_push(g_bar._power_icon_strip, token_to_string(token));
+            buf_push(icon_strip, token_to_string(token));
             token = get_token(&message);
         }
+        bar_set_power_strip(&g_bar, icon_strip);
         if (buf_len(g_bar._power_icon_strip) != 2) {
             daemon_fail(rsp, "value for '%.*s' must contain exactly two symbols separated by whitespace.\n", command.length, command.text);
         }
@@ -729,14 +732,14 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         if (!token_is_valid(token)) {
             fprintf(rsp, "%s\n", g_bar._space_icon ? g_bar._space_icon : "");
         } else {
-            g_bar._space_icon = token_to_string(token);
+            bar_set_space_icon(&g_bar, token_to_string(token));
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_CLOCK_ICON)) {
         struct token token = get_token(&message);
         if (!token_is_valid(token)) {
             fprintf(rsp, "%s\n", g_bar._clock_icon ? g_bar._clock_icon : "");
         } else {
-            g_bar._clock_icon = token_to_string(token);
+            bar_set_clock_icon(&g_bar, token_to_string(token));
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

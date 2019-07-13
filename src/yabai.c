@@ -162,7 +162,7 @@ static void exec_config_file(void)
             error("yabai: could not set the executable permission bit for config file '%s'! abort..\n", g_config_file);
         }
 
-        if (!fork_exec_wait(g_config_file)) {
+        if (!fork_exec(g_config_file, NULL, NULL)) {
             error("yabai: failed to execute config file '%s'!\n", g_config_file);
         }
     } else {
@@ -278,11 +278,9 @@ int main(int argc, char **argv)
     space_manager_init(&g_space_manager);
     window_manager_init(&g_window_manager);
     mouse_state_init(&g_mouse_state);
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
 
     event_loop_begin(&g_event_loop);
-    exec_config_file();
-
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     display_manager_begin(&g_display_manager);
     space_manager_begin(&g_space_manager);
     window_manager_begin(&g_space_manager, &g_window_manager);
@@ -300,6 +298,7 @@ int main(int argc, char **argv)
     window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     space_manager_refresh_view(&g_space_manager, g_space_manager.current_space_id);
 
+    exec_config_file();
     CFRunLoopRun();
     return 0;
 }

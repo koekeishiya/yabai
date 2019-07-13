@@ -28,6 +28,8 @@ struct bar
     bool enabled;
     uint32_t id;
     CGContextRef context;
+    CFRunLoopSourceRef power_source;
+    CFRunLoopTimerRef refresh_timer;
     CGRect frame;
     char *t_font_prop;
     char *i_font_prop;
@@ -48,11 +50,20 @@ struct bar
     struct bar_line space_underline;
     struct bar_line power_underline;
     struct bar_line clock_underline;
-    float refresh_frequency;
 };
+
+void bar_set_foreground_color(struct bar *bar, uint32_t color);
+void bar_set_background_color(struct bar *bar, uint32_t color);
+void bar_set_text_font(struct bar *bar, char *font_string);
+void bar_set_icon_font(struct bar *bar, char *font_string);
+void bar_set_space_strip(struct bar *bar, char **icon_strip);
+void bar_set_power_strip(struct bar *bar, char **icon_strip);
+void bar_set_clock_icon(struct bar *bar, char *icon);
+void bar_set_space_icon(struct bar *bar, char *icon);
 
 void bar_refresh(struct bar *bar);
 void bar_resize(struct bar *bar);
 void bar_create(struct bar *bar);
+void bar_destroy(struct bar *bar);
 
 #endif

@@ -274,20 +274,122 @@ void bar_resize(struct bar *bar)
     CFRelease(frame_region);
 }
 
-void bar_create(struct bar *bar)
+void bar_set_foreground_color(struct bar *bar, uint32_t color)
 {
-    if (!bar->enabled) return;
+    bar->foreground_color = rgba_color_from_hex(color);
+    if (bar->_space_icon_strip) bar_set_space_strip(bar, bar->_space_icon_strip);
+    if (bar->_power_icon_strip) bar_set_power_strip(bar, bar->_power_icon_strip);
+    if (bar->_clock_icon) bar_set_clock_icon(bar, bar->_clock_icon);
+    if (bar->_space_icon) bar_set_space_icon(bar, bar->_space_icon);
+    bar_refresh(bar);
+}
 
-    if (!bar->t_font_prop) bar->t_font_prop = string_copy("Helvetica Neue:Regular:10.0");
-    if (!bar->i_font_prop) bar->i_font_prop = string_copy("FontAwesome:Regular:10.0");
+void bar_set_background_color(struct bar *bar, uint32_t color)
+{
+    bar->background_color = rgba_color_from_hex(color);
+    bar->background_color_dim = rgba_color_dim(bar->background_color);
+    bar_refresh(bar);
+}
 
-    if (!bar->background_color.is_valid)     bar->background_color     = rgba_color_from_hex(0xff202020);
-    if (!bar->background_color_dim.is_valid) bar->background_color_dim = rgba_color_dim(bar->background_color);
-    if (!bar->foreground_color.is_valid)     bar->foreground_color     = rgba_color_from_hex(0xffa8a8a8);
+void bar_set_text_font(struct bar *bar, char *font_string)
+{
+    if (bar->t_font) {
+        CFRelease(bar->t_font);
+    }
 
-    bar->refresh_frequency = 5;
+    if (bar->space_underline.line) {
+        bar_destroy_line(bar->space_underline);
+    }
+
+    if (bar->power_underline.line) {
+        bar_destroy_line(bar->power_underline);
+    }
+
+    if (bar->clock_underline.line) {
+        bar_destroy_line(bar->clock_underline);
+    }
+
+    if (font_string != bar->t_font_prop) {
+        if (bar->t_font_prop) {
+            free(bar->t_font_prop);
+        }
+
+        bar->t_font_prop = font_string;
+    }
+
     bar->t_font = bar_create_font(bar->t_font_prop);
+    bar->space_underline = bar_prepare_line(bar->t_font, "______", rgba_color_from_hex(0xffd4d232));
+    bar->power_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xffd75f5f));
+    bar->clock_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xff458588));
+    bar_refresh(bar);
+}
+
+void bar_set_icon_font(struct bar *bar, char *font_string)
+{
+    if (bar->i_font) {
+        CFRelease(bar->i_font);
+    }
+
+    if (font_string != bar->i_font_prop) {
+        if (bar->i_font_prop) {
+            free(bar->i_font_prop);
+        }
+
+        bar->i_font_prop = font_string;
+    }
+
     bar->i_font = bar_create_font(bar->i_font_prop);
+    if (bar->_space_icon_strip) bar_set_space_strip(bar, bar->_space_icon_strip);
+    if (bar->_power_icon_strip) bar_set_power_strip(bar, bar->_power_icon_strip);
+    if (bar->_clock_icon) bar_set_clock_icon(bar, bar->_clock_icon);
+    if (bar->_space_icon) bar_set_space_icon(bar, bar->_space_icon);
+    bar_refresh(bar);
+}
+
+void bar_set_space_strip(struct bar *bar, char **icon_strip)
+{
+    for (int i = 0; i < buf_len(bar->space_icon_strip); ++i) {
+        bar_destroy_line(bar->space_icon_strip[i]);
+    }
+
+    buf_free(bar->space_icon_strip);
+    bar->space_icon_strip = NULL;
+
+    if (icon_strip != bar->_space_icon_strip) {
+        for (int i = 0; i < buf_len(bar->_space_icon_strip); ++i) {
+            free(bar->_space_icon_strip[i]);
+        }
+
+        buf_free(bar->_space_icon_strip);
+        bar->_space_icon_strip = icon_strip;
+    }
+
+    for (int i = 0; i < buf_len(bar->_space_icon_strip); ++i) {
+        struct bar_line space_line = bar_prepare_line(bar->i_font, bar->_space_icon_strip[i], bar->foreground_color);
+        buf_push(bar->space_icon_strip, space_line);
+    }
+
+    bar_refresh(bar);
+}
+
+void bar_set_power_strip(struct bar *bar, char **icon_strip)
+{
+    if (bar->battr_icon.line) {
+        bar_destroy_line(bar->battr_icon);
+    }
+
+    if (bar->power_icon.line) {
+        bar_destroy_line(bar->power_icon);
+    }
+
+    if (icon_strip != bar->_power_icon_strip) {
+        for (int i = 0; i < buf_len(bar->_power_icon_strip); ++i) {
+            free(bar->_power_icon_strip[i]);
+        }
+
+        buf_free(bar->_power_icon_strip);
+        bar->_power_icon_strip = icon_strip;
+    }
 
     if (buf_len(bar->_power_icon_strip) == 2) {
         bar->battr_icon = bar_prepare_line(bar->i_font, bar->_power_icon_strip[0], rgba_color_from_hex(0xffd75f5f));
@@ -297,26 +399,58 @@ void bar_create(struct bar *bar)
         bar->power_icon = bar_prepare_line(bar->i_font, "", rgba_color_from_hex(0xffcd950c));
     }
 
-    if (bar->_clock_icon) {
-        bar->clock_icon = bar_prepare_line(bar->i_font, bar->_clock_icon, bar->foreground_color);
-    } else {
-        bar->clock_icon = bar_prepare_line(bar->i_font, "", bar->foreground_color);
+    bar_refresh(bar);
+}
+
+void bar_set_clock_icon(struct bar *bar, char *icon)
+{
+    if (bar->clock_icon.line) {
+        bar_destroy_line(bar->clock_icon);
     }
 
-    if (bar->_space_icon) {
-        bar->space_icon = bar_prepare_line(bar->i_font, bar->_space_icon, bar->foreground_color);
-    } else {
-        bar->space_icon = bar_prepare_line(bar->i_font, "*", bar->foreground_color);
+    if (icon != bar->_clock_icon) {
+        if (bar->_clock_icon) {
+            free(bar->_clock_icon);
+        }
+
+        bar->_clock_icon = icon;
     }
 
-    bar->space_underline = bar_prepare_line(bar->t_font, "______", rgba_color_from_hex(0xffd4d232));
-    bar->power_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xffd75f5f));
-    bar->clock_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xff458588));
+    bar->clock_icon = bar_prepare_line(bar->i_font, bar->_clock_icon, bar->foreground_color);
 
-    for (int i = 0; i < buf_len(bar->_space_icon_strip); ++i) {
-        struct bar_line space_line = bar_prepare_line(bar->i_font, bar->_space_icon_strip[i], bar->foreground_color);
-        buf_push(bar->space_icon_strip, space_line);
+    bar_refresh(bar);
+}
+
+void bar_set_space_icon(struct bar *bar, char *icon)
+{
+    if (bar->space_icon.line) {
+        bar_destroy_line(bar->space_icon);
     }
+
+    if (icon != bar->_space_icon) {
+        if (bar->_space_icon) {
+            free(bar->_space_icon);
+        }
+
+        bar->_space_icon = icon;
+    }
+
+    bar->space_icon = bar_prepare_line(bar->i_font, bar->_space_icon, bar->foreground_color);
+
+    bar_refresh(bar);
+}
+
+void bar_create(struct bar *bar)
+{
+    if (bar->enabled) return;
+
+    if (!bar->t_font_prop) bar_set_text_font(bar, string_copy("Helvetica Neue:Regular:10.0"));
+    if (!bar->i_font_prop) bar_set_icon_font(bar, string_copy("FontAwesome:Regular:10.0"));
+    if (!bar->background_color.is_valid) bar_set_background_color(bar, 0xff202020);
+    if (!bar->foreground_color.is_valid) bar_set_foreground_color(bar, 0xffa8a8a8);
+    if (!bar->_clock_icon) bar_set_clock_icon(bar, string_copy(" "));
+    if (!bar->_space_icon) bar_set_space_icon(bar, string_copy("*"));
+    if (!bar->_power_icon_strip) bar_set_power_strip(bar, NULL);
 
     uint32_t set_tags[2] = {
         kCGSStickyTagBit |
@@ -345,8 +479,29 @@ void bar_create(struct bar *bar)
     SLSSetWindowLevel(g_connection, bar->id, CGWindowLevelForKey(5));
     bar->context = SLWindowContextCreate(g_connection, bar->id, 0);
 
-    CFRunLoopAddSource(CFRunLoopGetMain(), IOPSNotificationCreateRunLoopSource(power_handler, NULL), kCFRunLoopCommonModes);
-    CFRunLoopTimerRef refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + bar->refresh_frequency, bar->refresh_frequency, 0, 0, timer_handler, NULL);
-    CFRunLoopAddTimer(CFRunLoopGetMain(), refresh_timer, kCFRunLoopCommonModes);
+    int refresh_frequency = 5;
+    bar->power_source = IOPSNotificationCreateRunLoopSource(power_handler, NULL);
+    bar->refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + refresh_frequency, refresh_frequency, 0, 0, timer_handler, NULL);
+
+    bar->enabled = true;
+
+    CFRunLoopAddSource(CFRunLoopGetMain(), bar->power_source, kCFRunLoopCommonModes);
+    CFRunLoopAddTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
     bar_refresh(bar);
+}
+
+void bar_destroy(struct bar *bar)
+{
+    if (bar->enabled) {
+        CFRunLoopRemoveSource(CFRunLoopGetMain(), bar->power_source, kCFRunLoopCommonModes);
+        CFRunLoopSourceInvalidate(bar->power_source);
+
+        CFRunLoopRemoveTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
+        CFRunLoopTimerInvalidate(bar->refresh_timer);
+
+        CGContextRelease(bar->context);
+        SLSReleaseWindow(g_connection, bar->id);
+
+        bar->enabled = false;
+    }
 }

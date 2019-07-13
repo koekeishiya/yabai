@@ -152,10 +152,11 @@ static inline bool ensure_executable_permission(char *filename)
     return true;
 }
 
-static void fork_exec(char *command, char *arg1, char *arg2)
+static bool fork_exec(char *command, char *arg1, char *arg2)
 {
     int pid = fork();
-    if (pid != 0) return;
+    if (pid == -1) return false;
+    if (pid !=  0) return true;
 
     int cmd_len  = strlen(command);
     int arg1_len = arg1 ? strlen(arg1) : 0;
@@ -175,22 +176,6 @@ static void fork_exec(char *command, char *arg1, char *arg2)
 
     char *exec[] = { "/usr/bin/env", "sh", "-c", command_with_args, NULL};
     exit(execvp(exec[0], exec));
-}
-
-static bool fork_exec_wait(char *command)
-{
-    int pid = fork();
-    if (pid == -1) {
-        return false;
-    } else if (pid > 0) {
-        int status;
-        waitpid(pid, &status, 0);
-    } else {
-        char *exec[] = { "/usr/bin/env", "sh", "-c", command, NULL};
-        exit(execvp(exec[0], exec));
-    }
-
-    return true;
 }
 
 static bool ax_privilege(void)
