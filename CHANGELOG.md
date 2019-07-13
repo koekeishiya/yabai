@@ -10,11 +10,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Make loading scripting-addition more robust - validating version and functionality [#108](https://github.com/koekeishiya/yabai/issues/108)
 - Escape quotes in window titles returned through query commands [#114](https://github.com/koekeishiya/yabai/issues/114)
 - Merge options for query constraints with command selectors to have a unified method for addressing displays, spaces, and windows,
-  as well as allowing commands to specify both a *selected/acting entity* and a *given entity* of its type [#112](https://github.com/koekeishiya/yabai/issues/112)
+  as well as allowing commands to specify both a *selected* and a *given entity* of its type [#112](https://github.com/koekeishiya/yabai/issues/112)
 - Extend window, space and display properties exposed through *query* commands [#116](https://github.com/koekeishiya/yabai/issues/116)
-- Native macOS fullscreen spaces is now addressable using their mission-control index and can also be moved [#117](https://github.com/koekeishiya/yabai/issues/117)
-- Only apply opacity changes to windows that properly report that they are "standard" or "dialog" windows [#120](https://github.com/koekeishiya/yabai/issues/120)
-- The status bar should now properly draw above any potential window that overlaps its position [#124](https://github.com/koekeishiya/yabai/issues/124)
+- Native macOS fullscreen spaces can now be addressed using their mission-control index, and can also be moved [#117](https://github.com/koekeishiya/yabai/issues/117)
+- Opacity changes only apply to windows that properly identify as  "standard" or "dialog" windows [#120](https://github.com/koekeishiya/yabai/issues/120)
+- The status bar should now properly draw above any potential window that overlaps its frame [#124](https://github.com/koekeishiya/yabai/issues/124)
 
 ## [1.0.6] - 2019-07-09
 ### Changed
