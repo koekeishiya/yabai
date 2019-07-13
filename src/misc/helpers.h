@@ -121,6 +121,37 @@ static inline char *string_copy(char *s)
     return result;
 }
 
+static inline bool file_exists(char *filename)
+{
+    struct stat buffer;
+
+    if (stat(filename, &buffer) != 0) {
+        return false;
+    }
+
+    if (buffer.st_mode & S_IFDIR) {
+        return false;
+    }
+
+    return true;
+}
+
+static inline bool ensure_executable_permission(char *filename)
+{
+    struct stat buffer;
+
+    if (stat(filename, &buffer) != 0) {
+        return false;
+    }
+
+    bool is_executable = buffer.st_mode & S_IXUSR;
+    if (!is_executable && chmod(filename, S_IXUSR | buffer.st_mode) != 0) {
+        return false;
+    }
+
+    return true;
+}
+
 static void fork_exec(char *command, char *arg1, char *arg2)
 {
     int pid = fork();

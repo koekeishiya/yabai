@@ -1,6 +1,5 @@
 #define SA_SOCKET_PATH_FMT      "/tmp/yabai-sa_%s.socket"
 
-#define CONFIG_FILE_FMT         "%s/.yabairc"
 #define SOCKET_PATH_FMT         "/tmp/yabai_%s.socket"
 #define LCFILE_PATH_FMT         "/tmp/yabai_%s.lock"
 
@@ -43,7 +42,7 @@ struct signal *g_signal_event[EVENT_TYPE_COUNT];
 bool g_mission_control_active;
 char g_sa_socket_file[MAXLEN];
 char g_socket_file[MAXLEN];
-char g_config_file[MAXLEN];
+char g_config_file[4096];
 char g_lock_file[MAXLEN];
 bool g_verbose;
 
@@ -134,24 +133,40 @@ static void acquire_lockfile(void)
     }
 }
 
+static bool get_config_file(char *restrict filename, char *restrict buffer, int buffer_size)
+{
+    char *xdg_home = getenv("XDG_CONFIG_HOME");
+    if (xdg_home && *xdg_home) {
+        snprintf(buffer, buffer_size, "%s/yabai/%s", xdg_home, filename);
+        if (file_exists(buffer)) return true;
+    }
+
+    char *home = getenv("HOME");
+    if (!home) return false;
+
+    snprintf(buffer, buffer_size, "%s/.config/yabai/%s", home, filename);
+    if (file_exists(buffer)) return true;
+
+    snprintf(buffer, buffer_size, "%s/.%s", home, filename);
+    return file_exists(buffer);
+}
+
 static void exec_config_file(void)
 {
-    struct stat buffer;
-    if (stat(g_config_file, &buffer) != 0) {
-        error("yabai: config '%s' not found! abort..\n", g_config_file);
-    }
+    if (*g_config_file || get_config_file("yabairc", g_config_file, sizeof(g_config_file))) {
+        if (!file_exists(g_config_file)) {
+            error("yabai: specified config file '%s' does not exist! abort..\n", g_config_file);
+        }
 
-    if (buffer.st_mode & S_IFDIR) {
-        error("yabai: config '%s' is a directory! abort..\n", g_config_file);
-    }
+        if (!ensure_executable_permission(g_config_file)) {
+            error("yabai: could not set the executable permission bit for config file '%s'! abort..\n", g_config_file);
+        }
 
-    bool is_executable = buffer.st_mode & S_IXUSR;
-    if (!is_executable && chmod(g_config_file, S_IXUSR | buffer.st_mode) != 0) {
-        error("yabai: could not set the executable permission bit for config '%s'! abort..\n", g_config_file);
-    }
-
-    if (!fork_exec_wait(g_config_file)) {
-        error("yabai: failed to execute config '%s'!\n", g_config_file);
+        if (!fork_exec_wait(g_config_file)) {
+            error("yabai: failed to execute config file '%s'!\n", g_config_file);
+        }
+    } else {
+        error("yabai: could not locate config file!\n");
     }
 }
 
@@ -164,12 +179,6 @@ static inline void init_misc_settings(void)
         error("yabai: 'env USER' not set! abort..\n");
     }
 
-    char *home = getenv("HOME");
-    if (!home) {
-        error("yabai: 'env HOME' not set! abort..\n");
-    }
-
-    if (!g_config_file[0]) snprintf(g_config_file, sizeof(g_config_file), CONFIG_FILE_FMT, home);
     snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, user);
     snprintf(g_socket_file, sizeof(g_socket_file), SOCKET_PATH_FMT, user);
     snprintf(g_lock_file, sizeof(g_lock_file), LCFILE_PATH_FMT, user);

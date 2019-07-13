@@ -112,7 +112,12 @@ remove the cloned git-repository..
 
 ### Configuration
 
-The default configuration file is a shell-script located at `~/.yabairc`, thus the executable permission-bit must be set.
+The default configuration file is a shell-script located at one of the following places (in order):
+
+ - `$XDG_CONFIG_HOME/yabai/yabairc`
+ - `$HOME/.config/yabai/yabairc`
+ - `$HOME/.yabairc`
+
 A different location can be specified with the *--config | -c* argument. The configuration file consists of commands that
 send messages to the running **yabai** instance. To send a message, invoke **yabai** with the *--message | -m* argument.
 
