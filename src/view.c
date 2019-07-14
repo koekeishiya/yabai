@@ -35,15 +35,14 @@ static float window_node_get_ratio(struct window_node *node)
 
 static float window_node_get_gap(struct view *view)
 {
-    return view->enable_gap ? view->window_gap / 2.0f : 0.0f;
+    return view->enable_gap ? view->window_gap*0.5f : 0.0f;
 }
 
 static void area_make_pair(struct view *view, struct window_node *node)
 {
     enum window_node_split split = window_node_get_split(node);
-    float ratio = window_node_get_ratio(node);
-    float _gap  = window_node_get_gap(view);
-    int gap     = (int)(_gap + 0.5f);
+    float ratio  = window_node_get_ratio(node);
+    float gap    = window_node_get_gap(view);
 
     if (split == SPLIT_Y) {
         node->left->area = node->area;
@@ -53,7 +52,7 @@ static void area_make_pair(struct view *view, struct window_node *node)
         node->right->area = node->area;
         node->right->area.x += (node->area.w * ratio);
         node->right->area.w *= (1 - ratio);
-        node->right->area.x += (gap + _gap != 0.0f ? 1 : 0);
+        node->right->area.x += gap;
         node->right->area.w -= gap;
     } else {
         node->left->area = node->area;
