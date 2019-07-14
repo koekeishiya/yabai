@@ -579,12 +579,20 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 if (!token_is_valid(value)) {
                     fprintf(rsp, "%s\n", view_type_str[view->layout]);
                 } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
-                    view->layout = VIEW_BSP;
-                    view->custom_layout = true;
-                    window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
+                    if (space_is_user(sel_sid)) {
+                        view->layout = VIEW_BSP;
+                        view->custom_layout = true;
+                        window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
+                    } else {
+                        daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
+                    }
                 } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_FLOAT)) {
-                    view->layout = VIEW_FLOAT;
-                    view->custom_layout = true;
+                    if (space_is_user(sel_sid)) {
+                        view->layout = VIEW_FLOAT;
+                        view->custom_layout = true;
+                    } else {
+                        daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
+                    }
                 } else {
                     daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
                 }
@@ -1233,9 +1241,17 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_SPACE_LAYOUT)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_SPACE_LAYOUT_BSP)) {
-            space_manager_set_layout_for_space(&g_space_manager, acting_sid, VIEW_BSP);
+            if (space_is_user(acting_sid)) {
+                space_manager_set_layout_for_space(&g_space_manager, acting_sid, VIEW_BSP);
+            } else {
+                daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
+            }
         } else if (token_equals(value, ARGUMENT_SPACE_LAYOUT_FLT)) {
-            space_manager_set_layout_for_space(&g_space_manager, acting_sid, VIEW_FLOAT);
+            if (space_is_user(acting_sid)) {
+                space_manager_set_layout_for_space(&g_space_manager, acting_sid, VIEW_FLOAT);
+            } else {
+                daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

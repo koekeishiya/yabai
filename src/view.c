@@ -530,13 +530,17 @@ struct view *view_create(uint64_t sid)
     view->enable_gap = true;
     view->sid = sid;
 
-    if (!view->custom_layout)         view->layout         = g_space_manager.layout;
-    if (!view->custom_top_padding)    view->top_padding    = g_space_manager.top_padding;
-    if (!view->custom_bottom_padding) view->bottom_padding = g_space_manager.bottom_padding;
-    if (!view->custom_left_padding)   view->left_padding   = g_space_manager.left_padding;
-    if (!view->custom_right_padding)  view->right_padding  = g_space_manager.right_padding;
-    if (!view->custom_window_gap)     view->window_gap     = g_space_manager.window_gap;
-    view_update(view);
+    if (space_is_user(view->sid)) {
+        if (!view->custom_layout)         view->layout         = g_space_manager.layout;
+        if (!view->custom_top_padding)    view->top_padding    = g_space_manager.top_padding;
+        if (!view->custom_bottom_padding) view->bottom_padding = g_space_manager.bottom_padding;
+        if (!view->custom_left_padding)   view->left_padding   = g_space_manager.left_padding;
+        if (!view->custom_right_padding)  view->right_padding  = g_space_manager.right_padding;
+        if (!view->custom_window_gap)     view->window_gap     = g_space_manager.window_gap;
+        view_update(view);
+    } else {
+        view->layout = VIEW_FLOAT;
+    }
 
     return view;
 }

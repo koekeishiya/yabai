@@ -204,11 +204,13 @@ void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view
             if (bucket->value) {
                 struct view *view = bucket->value;
                 if (!view->custom_layout) {
-                    view->layout = layout;
-                    if (view->layout == VIEW_BSP) {
-                        window_manager_check_for_windows_on_space(sm, &g_window_manager, view->sid);
-                    } else if (view->layout == VIEW_FLOAT) {
-                        view_clear(view);
+                    if (space_is_user(view->sid)) {
+                        view->layout = layout;
+                        if (view->layout == VIEW_BSP) {
+                            window_manager_check_for_windows_on_space(sm, &g_window_manager, view->sid);
+                        } else if (view->layout == VIEW_FLOAT) {
+                            view_clear(view);
+                        }
                     }
                 }
             }
