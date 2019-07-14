@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Float native macOS fullscreen spaces [#130](https://github.com/koekeishiya/yabai/issues/130)
+- Write error messsages returned to the client through *stderr* [#131](https://github.com/koekeishiya/yabai/issues/131)
 
 ## [1.1.1] - 2019-07-14
 ### Changed

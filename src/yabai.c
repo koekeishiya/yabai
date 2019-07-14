@@ -99,13 +99,13 @@ static int client_send_message(int argc, char **argv)
             rsp[byte_count] = '\0';
 
             if (rsp[0] == FAILURE_MESSAGE[0]) {
-                fprintf(stdout, "%s", rsp + 1);
                 result = EXIT_FAILURE;
+                fprintf(stderr, "%s", rsp + 1);
+                fflush(stderr);
             } else {
                 fprintf(stdout, "%s", rsp);
+                fflush(stdout);
             }
-
-            fflush(stdout);
         }
     }
 
