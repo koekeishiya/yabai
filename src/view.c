@@ -41,8 +41,8 @@ static float window_node_get_gap(struct view *view)
 static void area_make_pair(struct view *view, struct window_node *node)
 {
     enum window_node_split split = window_node_get_split(node);
-    float ratio  = window_node_get_ratio(node);
-    float gap    = window_node_get_gap(view);
+    float ratio = window_node_get_ratio(node);
+    float gap   = window_node_get_gap(view);
 
     if (split == SPLIT_Y) {
         node->left->area = node->area;
