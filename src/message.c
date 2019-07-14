@@ -1274,7 +1274,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         command = selector.token;
     }
 
-    if (!acting_window) {
+    if (!acting_window && !token_equals(command, COMMAND_WINDOW_FOCUS)) {
         daemon_fail(rsp, "could not locate the window to act on!\n");
         return;
     }
