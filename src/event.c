@@ -684,26 +684,28 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
 {
     g_space_manager.last_space_id = g_space_manager.current_space_id;
     g_space_manager.current_space_id = space_manager_active_space();
-
     debug("%s: %lld\n", __FUNCTION__, g_space_manager.current_space_id);
-    struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
 
-    if (view_is_invalid(view)) view_update(view);
-    if (view_is_dirty(view))   view_flush(view);
+    if (space_is_user(g_space_manager.current_space_id)) {
+        struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
 
-    if (space_manager_refresh_application_windows(&g_space_manager)) {
-        struct window *focused_window = window_manager_focused_window(&g_window_manager);
-        if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
-            border_window_activate(focused_window);
-            window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
-            window_manager_center_mouse(&g_window_manager, focused_window);
-            window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
+        if (view_is_invalid(view)) view_update(view);
+        if (view_is_dirty(view))   view_flush(view);
+
+        if (space_manager_refresh_application_windows(&g_space_manager)) {
+            struct window *focused_window = window_manager_focused_window(&g_window_manager);
+            if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
+                border_window_activate(focused_window);
+                window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
+                window_manager_center_mouse(&g_window_manager, focused_window);
+                window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
+            }
         }
-    }
 
-    bar_refresh(&g_bar);
-    window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
-    window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+        bar_refresh(&g_bar);
+        window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+        window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+    }
 
     return EVENT_SUCCESS;
 }
@@ -723,29 +725,32 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
     }
 
     debug("%s: %d %lld\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id);
-    struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
 
-    if (view_is_invalid(view)) view_update(view);
-    if (view_is_dirty(view))   view_flush(view);
+    if (space_is_user(g_space_manager.current_space_id)) {
+        struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
 
-    if (space_manager_refresh_application_windows(&g_space_manager)) {
-        struct window *focused_window = window_manager_focused_window(&g_window_manager);
-        if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
-            border_window_activate(focused_window);
-            window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
+        if (view_is_invalid(view)) view_update(view);
+        if (view_is_dirty(view))   view_flush(view);
 
-            if (g_mouse_state.ffm_window_id != focused_window->id) {
-                window_manager_center_mouse(&g_window_manager, focused_window);
+        if (space_manager_refresh_application_windows(&g_space_manager)) {
+            struct window *focused_window = window_manager_focused_window(&g_window_manager);
+            if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
+                border_window_activate(focused_window);
+                window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
+
+                if (g_mouse_state.ffm_window_id != focused_window->id) {
+                    window_manager_center_mouse(&g_window_manager, focused_window);
+                }
+
+                g_mouse_state.ffm_window_id = 0;
+                window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
             }
-
-            g_mouse_state.ffm_window_id = 0;
-            window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
         }
-    }
 
-    bar_refresh(&g_bar);
-    window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
-    window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+        bar_refresh(&g_bar);
+        window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+        window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+    }
 
     return EVENT_SUCCESS;
 }

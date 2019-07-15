@@ -1265,22 +1265,23 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
 
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
-    if (window_is_fullscreen(window)) {
-        AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanFalse);
-        return;
-    }
-
-    struct view *view = window_manager_find_managed_window(wm, window);
-    if (view) {
-        space_manager_untile_window(sm, view, window);
-        window_manager_remove_managed_window(wm, window->id);
-        window_manager_purify_window(wm, window);
-    }
-
     uint32_t sid = window_space(window);
-    window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
-    while (sid != space_manager_active_space()) { /* maybe spin lock */ }
-    AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
+
+    if (!window_is_fullscreen(window)) {
+        struct view *view = window_manager_find_managed_window(wm, window);
+        if (view) {
+            space_manager_untile_window(sm, view, window);
+            window_manager_remove_managed_window(wm, window->id);
+            window_manager_purify_window(wm, window);
+        }
+
+        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+        while (sid != space_manager_active_space()) { /* maybe spin lock */ }
+        AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
+    } else {
+        AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanFalse);
+        while (sid == space_manager_active_space()) { /* maybe spin lock */ }
+    }
 }
 
 void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window)
