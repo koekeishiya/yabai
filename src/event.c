@@ -297,7 +297,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     uint32_t application_focused_window_id = application_focused_window(application);
-    if (!application_focused_window_id) return EVENT_SUCCESS;
+    if (!application_focused_window_id) {
+        g_window_manager.last_window_id = g_window_manager.focused_window_id;
+        g_window_manager.focused_window_id = 0;
+        g_window_manager.focused_window_psn = application->psn;
+        return EVENT_SUCCESS;
+    }
 
     struct window *window = window_manager_find_window(&g_window_manager, application_focused_window_id);
     if (!window) {
