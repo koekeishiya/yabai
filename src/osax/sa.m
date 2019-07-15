@@ -220,10 +220,8 @@ static int scripting_addition_perform_validation(void)
     debug("yabai: osax version = %s, osax attrib = 0x%X\n", version, attrib);
 
     if (!string_equals(version, OSAX_VERSION)) {
-        notify("payload is outdated, please reinstall!", "scripting-addition");
         return PAYLOAD_STATUS_OUTDATED;
     } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
-        notify("payload could not resolve addresses in Dock.app!", "scripting-addition");
         return PAYLOAD_STATUS_NO_ATTRIB;
     } else {
         char message[MAXLEN];
@@ -295,6 +293,7 @@ int scripting_addition_install(void)
     }
 
     scripting_addition_prepare_binaries();
+    scripting_addition_maybe_restart_dock(PAYLOAD_STATUS_NO_ATTRIB);
     return 0;
 
 cleanup:
@@ -368,11 +367,17 @@ int scripting_addition_load(void)
 
     if (result == OSAX_PAYLOAD_SUCCESS) {
         debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
-        scripting_addition_perform_validation();
+        switch (scripting_addition_perform_validation()) {
+        case PAYLOAD_STATUS_OUTDATED:  notify("payload is outdated, please reinstall!", "scripting-addition");           break;
+        case PAYLOAD_STATUS_NO_ATTRIB: notify("payload could not resolve addresses in Dock.app!", "scripting-addition"); break;
+        }
         return 0;
     } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
         warn("yabai: scripting-addition payload was already injected into Dock.app!\n");
-        scripting_addition_maybe_restart_dock(scripting_addition_perform_validation());
+        switch (scripting_addition_perform_validation()) {
+        case PAYLOAD_STATUS_OUTDATED:  notify("an outdated payload is already loaded, please restart Dock.app!", "scripting-addition"); break;
+        case PAYLOAD_STATUS_NO_ATTRIB: notify("an invalid payload is already loaded, please restart Dock.app!", "scripting-addition");  break;
+        }
         return 0;
     } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
         notify("failed to inject payload into Dock.app!", "scripting-addition");

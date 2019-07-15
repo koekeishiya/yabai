@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Automatically restart Dock.app after installing the scripting-addition, and tweak messages shown when a payload is already loaded [#135](https://github.com/koekeishiya/yabai/issues/135)
 
 ## [1.1.2] - 2019-07-15
 ### Changed
