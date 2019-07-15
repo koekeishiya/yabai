@@ -585,6 +585,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     bool is_fullscreen = window_is_fullscreen(window);
 
     if (!window->is_fullscreen && is_fullscreen) {
+        border_window_hide(window);
+
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
@@ -602,11 +604,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
+
+        border_window_show(window);
     }
 
     window->is_fullscreen = is_fullscreen;
 
-    border_window_refresh(window);
+    if (!window->is_fullscreen) {
+        border_window_refresh(window);
+    }
 
     return EVENT_SUCCESS;
 }
@@ -1091,6 +1097,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
             if (bucket->value) {
                 struct window *window = bucket->value;
                 if ((!window->application->is_hidden) &&
+                    (!window->is_fullscreen) &&
                     (!window->is_minimized)) {
                     border_window_show(window);
                 }
