@@ -38,6 +38,7 @@ struct window
     uint32_t **volatile id_ptr;
     uint8_t notification;
     struct border border;
+    bool is_fullscreen;
     bool is_minimized;
     bool is_floating;
     float rule_alpha;

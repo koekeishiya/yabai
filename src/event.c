@@ -558,11 +558,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
-#if 0
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-    if (view) view_flush(view);
-#endif
-
     border_window_refresh(window);
 
     return EVENT_SUCCESS;
@@ -587,10 +582,29 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
     }
 
-#if 0
-    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-    if (view) view_flush(view);
-#endif
+    bool is_fullscreen = window_is_fullscreen(window);
+
+    if (!window->is_fullscreen && is_fullscreen) {
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        if (view) {
+            space_manager_untile_window(&g_space_manager, view, window);
+            window_manager_remove_managed_window(&g_window_manager, window->id);
+            window_manager_purify_window(&g_window_manager, window);
+        }
+    } else if (window->is_fullscreen && !is_fullscreen) {
+        while (!space_is_user(space_manager_active_space())) { /* maybe spin lock */ }
+
+        // @hack
+        // Artificially delay by 50ms. This is necessary because macOS is crazy town.
+        usleep(500000);
+
+        if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
+            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
+            window_manager_add_managed_window(&g_window_manager, window, view);
+        }
+    }
+
+    window->is_fullscreen = is_fullscreen;
 
     border_window_refresh(window);
 
