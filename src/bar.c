@@ -163,10 +163,9 @@ void bar_refresh(struct bar *bar)
 
     // BAR LEFT
     int space_count;
-    uint32_t did = display_manager_main_display_id();
-    uint64_t *space_list = display_space_list(did, &space_count);
+    uint64_t *space_list = display_space_list(bar->did, &space_count);
     if (space_list) {
-        uint64_t sid = display_space_id(did);
+        uint64_t sid = display_space_id(bar->did);
 
         for (int i = 0; i < space_count; ++i) {
             CGPoint pos = CGContextGetTextPosition(bar->context);
