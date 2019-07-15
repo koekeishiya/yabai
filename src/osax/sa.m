@@ -375,8 +375,8 @@ int scripting_addition_load(void)
     } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
         warn("yabai: scripting-addition payload was already injected into Dock.app!\n");
         switch (scripting_addition_perform_validation()) {
-        case PAYLOAD_STATUS_OUTDATED:  notify("an outdated payload is already loaded, please restart Dock.app!", "scripting-addition"); break;
-        case PAYLOAD_STATUS_NO_ATTRIB: notify("an invalid payload is already loaded, please restart Dock.app!", "scripting-addition");  break;
+        case PAYLOAD_STATUS_OUTDATED:  notify("an outdated payload is loaded, restart Dock.app!", "scripting-addition"); break;
+        case PAYLOAD_STATUS_NO_ATTRIB: notify("an invalid payload is loaded, restart Dock.app!", "scripting-addition");  break;
         }
         return 0;
     } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
