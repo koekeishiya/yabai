@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
-- Automatically restart Dock.app after installing the scripting-addition, and tweak messages shown when a payload is already loaded [#135](https://github.com/koekeishiya/yabai/issues/135)
+- Automatically restart Dock.app after installing the scripting-addition, and tweak messages shown when a payload gets loaded, is already loaded or does not support the version of macOS it's running on [#135](https://github.com/koekeishiya/yabai/issues/135)
 
 ## [1.1.2] - 2019-07-15
 ### Changed
