@@ -948,7 +948,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         if (window_observe(window)) {
             window_manager_add_window(wm, window);
 
-            if ((!application->is_hidden) && (!window->is_minimized) && (!window->rule_manage)) {
+            if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
                 if (window->rule_fullscreen) {
                     window->rule_fullscreen = false;
                 } else if ((!window_level_is_standard(window)) ||

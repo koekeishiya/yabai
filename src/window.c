@@ -379,13 +379,14 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->id = window_id;
     SLSGetWindowOwner(g_connection, window->id, &window->connection);
     window->is_minimized = window_is_minimized(window);
+    window->is_fullscreen = window_is_fullscreen(window) || space_is_fullscreen(window_space(window));
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;
 
     if ((window_is_standard(window)) || (window_is_dialog(window))) {
         border_window_create(window);
 
-        if ((!application->is_hidden) && (!window->is_minimized)) {
+        if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen)) {
             border_window_refresh(window);
         }
     }

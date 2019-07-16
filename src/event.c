@@ -436,7 +436,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
 
-        if (!window->rule_manage) {
+        if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
             if (window->rule_fullscreen) {
                 window->rule_fullscreen = false;
             } else if ((!window_level_is_standard(window)) ||
@@ -896,7 +896,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
                     window_node_flush(b_node);
                     a_node->zoom = NULL;
                     b_node->zoom = NULL;
-                } else {
+                } else if (a_node) {
                     window_node_flush(a_node);
                     a_node->zoom = NULL;
                 }
