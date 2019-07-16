@@ -46,8 +46,10 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_BAR_ICON_FONT         "status_bar_icon_font"
 #define COMMAND_CONFIG_BAR_BACKGROUND        "status_bar_background_color"
 #define COMMAND_CONFIG_BAR_FOREGROUND        "status_bar_foreground_color"
+#define COMMAND_CONFIG_BAR_UNDERLINE         "status_bar_underline_color"
 #define COMMAND_CONFIG_BAR_SPACE_STRIP       "status_bar_space_icon_strip"
 #define COMMAND_CONFIG_BAR_POWER_STRIP       "status_bar_power_icon_strip"
+#define COMMAND_CONFIG_BAR_POWER_STRIP_COLOR "status_bar_power_icon_strip_color"
 #define COMMAND_CONFIG_BAR_SPACE_ICON        "status_bar_space_icon"
 #define COMMAND_CONFIG_BAR_CLOCK_ICON        "status_bar_clock_icon"
 
@@ -716,6 +718,20 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_UNDERLINE)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "0x%x\n", g_bar.space_underline.color.p);
+            fprintf(rsp, "0x%x\n", g_bar.power_underline.color.p);
+            fprintf(rsp, "0x%x\n", g_bar.clock_underline.color.p);
+        } else {
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                bar_set_underline_color(&g_bar, color);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_STRIP)) {
         char **icon_strip = NULL;
         struct token token = get_token(&message);
@@ -734,6 +750,19 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         bar_set_power_strip(&g_bar, icon_strip);
         if (buf_len(g_bar._power_icon_strip) != 2) {
             daemon_fail(rsp, "value for '%.*s' must contain exactly two symbols separated by whitespace.\n", command.length, command.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_POWER_STRIP_COLOR)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "0x%x\n", g_bar.power_icon.color.p);
+            fprintf(rsp, "0x%x\n", g_bar.battr_icon.color.p);
+        } else {
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                bar_set_power_strip_color(&g_bar, color);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_ICON)) {
         struct token token = get_token(&message);

@@ -55,10 +55,12 @@ struct bar
 
 void bar_set_foreground_color(struct bar *bar, uint32_t color);
 void bar_set_background_color(struct bar *bar, uint32_t color);
+void bar_set_underline_color(struct bar *bar, uint32_t color);
 void bar_set_text_font(struct bar *bar, char *font_string);
 void bar_set_icon_font(struct bar *bar, char *font_string);
 void bar_set_space_strip(struct bar *bar, char **icon_strip);
 void bar_set_power_strip(struct bar *bar, char **icon_strip);
+void bar_set_power_strip_color(struct bar *bar, uint32_t color);
 void bar_set_clock_icon(struct bar *bar, char *icon);
 void bar_set_space_icon(struct bar *bar, char *icon);
 

@@ -294,11 +294,21 @@ void bar_set_background_color(struct bar *bar, uint32_t color)
     bar_refresh(bar);
 }
 
+void bar_set_underline_color(struct bar *bar, uint32_t color)
+{
+    bar->space_underline = bar_prepare_line(bar->t_font, "______", rgba_color_from_hex(color));
+    bar->power_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(color));
+    bar->clock_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(color));
+    bar_refresh(bar);
+}
+
 void bar_set_text_font(struct bar *bar, char *font_string)
 {
     if (bar->t_font) {
         CFRelease(bar->t_font);
     }
+
+    uint32_t color = bar->space_underline.color.p;
 
     if (bar->space_underline.line) {
         bar_destroy_line(bar->space_underline);
@@ -321,9 +331,9 @@ void bar_set_text_font(struct bar *bar, char *font_string)
     }
 
     bar->t_font = bar_create_font(bar->t_font_prop);
-    bar->space_underline = bar_prepare_line(bar->t_font, "______", rgba_color_from_hex(0xffd4d232));
-    bar->power_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xffd75f5f));
-    bar->clock_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(0xff458588));
+    bar->space_underline = bar_prepare_line(bar->t_font, "______", rgba_color_from_hex(color));
+    bar->power_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(color));
+    bar->clock_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(color));
     bar_refresh(bar);
 }
 
@@ -400,6 +410,20 @@ void bar_set_power_strip(struct bar *bar, char **icon_strip)
     } else {
         bar->battr_icon = bar_prepare_line(bar->i_font, "", rgba_color_from_hex(0xffd75f5f));
         bar->power_icon = bar_prepare_line(bar->i_font, "", rgba_color_from_hex(0xffcd950c));
+    }
+
+    bar_refresh(bar);
+}
+
+
+void bar_set_power_strip_color(struct bar *bar, uint32_t color)
+{
+    if (buf_len(bar->_power_icon_strip) == 2) {
+        bar->battr_icon = bar_prepare_line(bar->i_font, bar->_power_icon_strip[0], rgba_color_from_hex(color));
+        bar->power_icon = bar_prepare_line(bar->i_font, bar->_power_icon_strip[1], rgba_color_from_hex(color));
+    } else {
+        bar->battr_icon = bar_prepare_line(bar->i_font, "", rgba_color_from_hex(color));
+        bar->power_icon = bar_prepare_line(bar->i_font, "", rgba_color_from_hex(color));
     }
 
     bar_refresh(bar);
