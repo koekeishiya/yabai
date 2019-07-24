@@ -120,6 +120,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
 {
     if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == REGEX_MATCH_NO) return;
+    
     if (rule->role_regex_valid) {
         CFStringRef cfrole = window_role(window);
         if (cfrole) {
