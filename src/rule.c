@@ -40,7 +40,7 @@ void rule_add(struct rule *rule)
 
 bool rule_is_valid(struct rule *rule)
 {
-    return rule->app_regex_valid || rule->title_regex_valid;
+    return rule->app_regex_valid || rule->role_regex_valid || rule->subrole_regex_valid || rule->title_regex_valid;
 }
 
 struct rule *rule_create(void)
@@ -53,6 +53,8 @@ struct rule *rule_create(void)
 void rule_destroy(struct rule *rule)
 {
     if (rule->app_regex_valid)   regfree(&rule->app_regex);
+    if (rule->role_regex_valid)   regfree(&rule->role_regex);
+    if (rule->subrole_regex_valid)   regfree(&rule->subrole_regex);
     if (rule->title_regex_valid) regfree(&rule->title_regex);
     if (rule->label) free(rule->label);
     free(rule);

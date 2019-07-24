@@ -146,6 +146,8 @@ extern struct bar g_bar;
 #define COMMAND_RULE_REM "--remove"
 
 #define ARGUMENT_RULE_KEY_APP     "app"
+#define ARGUMENT_RULE_KEY_ROLE   "role"
+#define ARGUMENT_RULE_KEY_SUBROLE   "subrole"
 #define ARGUMENT_RULE_KEY_TITLE   "title"
 #define ARGUMENT_RULE_KEY_DISPLAY "display"
 #define ARGUMENT_RULE_KEY_SPACE   "space"
@@ -1556,6 +1558,12 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
                 rule->app_regex_valid = regcomp(&rule->app_regex, value, REG_EXTENDED) == 0;
                 if (!rule->app_regex_valid) daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_ROLE)) {
+                rule->role_regex_valid = regcomp(&rule->role_regex, value, REG_EXTENDED) == 0;
+                if (!rule->role_regex_valid) daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_SUBROLE)) {
+                rule->subrole_regex_valid = regcomp(&rule->subrole_regex, value, REG_EXTENDED) == 0;
+                if (!rule->subrole_regex_valid) daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
             } else if (string_equals(key, ARGUMENT_RULE_KEY_TITLE)) {
                 rule->title_regex_valid = regcomp(&rule->title_regex, value, REG_EXTENDED) == 0;
                 if (!rule->title_regex_valid) daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);

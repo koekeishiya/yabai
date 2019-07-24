@@ -350,6 +350,12 @@ ARGUMENT
 *app='<REGEX>'*::
     Name of application.
 
+*role='<REGEX>'*::
+    Window role.
+
+*subrole='<REGEX>'*::
+    Window subrole.
+
 *title='<REGEX>'*::
     Title of window.
 

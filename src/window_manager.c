@@ -120,6 +120,23 @@ void window_manager_query_windows_for_displays(FILE *rsp)
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
 {
     if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == REGEX_MATCH_NO) return;
+    if (rule->role_regex_valid) {
+        CFStringRef cfrole = window_role(window);
+        if (cfrole) {
+            char *role = cfstring_copy(cfrole);
+            CFRelease(cfrole);
+            if (regex_match(rule->role_regex_valid,   &rule->role_regex, role) == REGEX_MATCH_NO) return;
+        }
+    }
+    if (rule->subrole_regex_valid) {
+        CFStringRef cfsubrole = window_subrole(window);
+        if (cfsubrole) {
+            char *subrole = cfstring_copy(cfsubrole);
+            CFRelease(cfsubrole);
+            if (regex_match(rule->subrole_regex_valid,   &rule->subrole_regex, subrole) == REGEX_MATCH_NO) return;
+        }
+    }
+    
     if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window))      == REGEX_MATCH_NO) return;
 
     if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {

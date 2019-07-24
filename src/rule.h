@@ -9,8 +9,12 @@ struct rule
 {
     char *label;
     regex_t app_regex;
+    regex_t role_regex;
+    regex_t subrole_regex;
     regex_t title_regex;
     bool app_regex_valid;
+    bool role_regex_valid;
+    bool subrole_regex_valid;
     bool title_regex_valid;
     bool follow_space;
     int display;
