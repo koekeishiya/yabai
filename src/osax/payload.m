@@ -590,13 +590,10 @@ static void do_space_move(const char *message)
     unsigned dest_display_id = ((unsigned (*)(id, SEL, id)) objc_msgSend)(dock_spaces, @selector(displayIDForSpace:), dest_space);
     id dest_display_space = display_space_for_display_uuid(dest_display_uuid);
 
-    volatile bool __block is_finished = false;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
+    dispatch_sync(dispatch_get_main_queue(), ^{
         asm__call_move_space(source_space, dest_space, dest_display_uuid, dock_spaces, move_space_fp);
         objc_msgSend(dp_desktop_picture_manager, @selector(moveSpace:toDisplay:displayUUID:), source_space, dest_display_id, dest_display_uuid);
-        is_finished = true;
     });
-    while (!is_finished) { /* maybe spin lock */ }
 
     if (focus_dest_space) {
         uint64_t new_source_space_id = CGSManagedDisplayGetCurrentSpace(_connection, source_display_uuid);
@@ -625,12 +622,9 @@ static void do_space_destroy(const char *message)
     id space = space_for_display_with_id(display_uuid, space_id);
     id display_space = display_space_for_display_uuid(display_uuid);
 
-    volatile bool __block is_finished = false;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
+    dispatch_sync(dispatch_get_main_queue(), ^{
         ((remove_space_call) remove_space_fp)(space, display_space, dock_spaces, space_id, space_id);
-        is_finished = true;
     });
-    while (!is_finished) { /* maybe spin lock */ }
 
     if (active_space_id == space_id) {
         uint64_t dest_space_id = CGSManagedDisplayGetCurrentSpace(_connection, display_uuid);
@@ -648,15 +642,12 @@ static void do_space_create(const char *message)
     Token space_id_token = get_token(&message);
     uint64_t space_id = token_to_uint64t(space_id_token);
     CFStringRef __block display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
-    volatile bool __block is_finished = false;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
+    dispatch_sync(dispatch_get_main_queue(), ^{
         id new_space = [[managed_space alloc] init];
         id display_space = display_space_for_display_uuid(display_uuid);
         asm__call_add_space(new_space, display_space, add_space_fp);
         CFRelease(display_uuid);
-        is_finished = true;
     });
-    while (!is_finished) { /* maybe spin lock */ }
 }
 
 static void do_space_change(const char *message)
