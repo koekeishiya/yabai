@@ -380,6 +380,17 @@ bool window_is_popover(struct window *window)
     return result;
 }
 
+bool window_is_unknown(struct window *window)
+{
+    CFStringRef subrole = window_subrole(window);
+    if (!subrole) return false;
+
+    bool result = CFEqual(subrole, kAXUnknownSubrole);
+    CFRelease(subrole);
+
+    return result;
+}
+
 struct window *window_create(struct application *application, AXUIElementRef window_ref, uint32_t window_id)
 {
     struct window *window = malloc(sizeof(struct window));
