@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Return an error for queries with invalid, named selectors [#158](https://github.com/koekeishiya/yabai/issues/158)
 - Resolve a potential multi-threaded issue due to "undefined behaviour" regarding x86 instruction ordering [#153](https://github.com/koekeishiya/yabai/issues/153)
 - Fix space padding and gap underflow when modified with a relative value [#141](https://github.com/koekeishiya/yabai/issues/141)
+- window_* signals no longer pass the application pid [#154](https://github.com/koekeishiya/yabai/issues/154)
 
 ## [1.1.2] - 2019-07-15
 ### Changed

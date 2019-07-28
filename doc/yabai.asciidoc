@@ -421,28 +421,28 @@ EVENT
     Triggered when an application is hidden. Passes one argument: pid
 
 *window_created*::
-    Triggered when a window is created. Passes two arguments: pid, wid
+    Triggered when a window is created. Passes one argument: wid
 
 *window_destroyed*::
-    Triggered when a window is destroyed. Passes two arguments: pid, wid
+    Triggered when a window is destroyed. Passes one argument: wid
 
 *window_focused*::
-    Triggered when a window becomes the key-window for its application. Passes two arguments: pid, wid
+    Triggered when a window becomes the key-window for its application. Passes one argument: wid
 
 *window_moved*::
-    Triggered when a window changes position. Passes two arguments: pid, wid
+    Triggered when a window changes position. Passes one argument: wid
 
 *window_resized*::
-    Triggered when a window changes dimensions. Passes two arguments: pid, wid
+    Triggered when a window changes dimensions. Passes one argument: wid
 
 *window_minimized*::
-    Triggered when a window has been minimized. Passes two arguments: pid, wid
+    Triggered when a window has been minimized. Passes one argument: wid
 
 *window_deminimized*::
-    Triggered when a window has been deminimized. Passes two arguments: pid, wid
+    Triggered when a window has been deminimized. Passes one argument: wid
 
 *window_title_changed*::
-    Triggered when a window changes its title. Passes two arguments: pid, wid
+    Triggered when a window changes its title. Passes one argument: wid
 
 *space_changed*::
     Triggered when the active space has changed. Passes two arguments: space_id, last_space_id

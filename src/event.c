@@ -37,19 +37,15 @@ static void event_signal_populate_args(void *context, enum event_type type, char
         snprintf(args[0], sizeof(args[0]), "%d", pid);
         snprintf(args[1], sizeof(args[1]), "%d", wid);
     } break;
-    case WINDOW_DESTROYED:
     case WINDOW_FOCUSED:
     case WINDOW_MOVED:
     case WINDOW_RESIZED:
     case WINDOW_MINIMIZED:
     case WINDOW_DEMINIMIZED:
-    case WINDOW_TITLE_CHANGED: {
+    case WINDOW_TITLE_CHANGED:
+    case WINDOW_DESTROYED: {
         uint32_t window_id = (uint32_t)(uintptr_t) context;
-        struct window *window = window_manager_find_window(&g_window_manager, window_id);
-        if (window) {
-            snprintf(args[0], sizeof(args[0]), "%d", window->application->pid);
-            snprintf(args[1], sizeof(args[1]), "%d", window->id);
-        }
+        snprintf(args[0], sizeof(args[0]), "%d", window_id);
     } break;
     case SPACE_CHANGED: {
         snprintf(args[0], sizeof(args[0]), "%lld", g_space_manager.current_space_id);
@@ -139,13 +135,6 @@ void event_destroy(struct event *event)
     } break;
     case WINDOW_CREATED: {
         CFRelease(event->context);
-    } break;
-    case WINDOW_DESTROYED: {
-        struct window *window = window_manager_find_window(&g_window_manager, (uint32_t)(uintptr_t) event->context);
-        if (window) {
-            window_manager_remove_window(&g_window_manager, window->id);
-            window_destroy(window);
-        }
     } break;
     case MOUSE_DOWN:
     case MOUSE_UP:
@@ -491,6 +480,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
         window_manager_remove_managed_window(&g_window_manager, window->id);
         window_manager_purify_window(&g_window_manager, window);
     }
+
+    window_manager_remove_window(&g_window_manager, window->id);
+    window_destroy(window);
 
     return EVENT_SUCCESS;
 }
