@@ -33,9 +33,7 @@ static void event_signal_populate_args(void *context, enum event_type type, char
     } break;
     case WINDOW_CREATED: {
         uint32_t wid = ax_window_id(context);
-        pid_t pid = ax_window_pid(context);
-        snprintf(args[0], sizeof(args[0]), "%d", pid);
-        snprintf(args[1], sizeof(args[1]), "%d", wid);
+        snprintf(args[0], sizeof(args[0]), "%d", wid);
     } break;
     case WINDOW_FOCUSED:
     case WINDOW_MOVED:
