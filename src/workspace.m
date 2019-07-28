@@ -57,7 +57,12 @@ void workspace_event_handler_end(void *context)
        [[NSDistributedNotificationCenter defaultCenter] addObserver:self
                 selector:@selector(didChangeMenuBarHiding:)
                 name:@"AppleInterfaceMenuBarHidingChangedNotification"
-              object:nil];
+                object:nil];
+
+       [[NSDistributedNotificationCenter defaultCenter] addObserver:self
+                selector:@selector(didChangeDockPref:)
+                name:@"com.apple.dock.prefchanged"
+                object:nil];
     }
 
     return self;
@@ -89,6 +94,13 @@ void workspace_event_handler_end(void *context)
 {
     struct event *event;
     event_create(event, MENU_BAR_HIDDEN_CHANGED, NULL);
+    event_loop_post(&g_event_loop, event);
+}
+
+- (void)didChangeDockPref:(NSNotification *)notification
+{
+    struct event *event;
+    event_create(event, DOCK_DID_CHANGE_PREF, NULL);
     event_loop_post(&g_event_loop, event);
 }
 

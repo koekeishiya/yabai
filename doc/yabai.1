@@ -322,7 +322,7 @@ Padding added at the sides of the selected space.
 Size of the gap that separates windows on the selected space.
 .RE
 .sp
-\fB\-\-toggle\fP \fIpadding|gap\fP
+\fB\-\-toggle\fP \fIpadding|gap|mission\-control|show\-desktop\fP
 .RS 4
 Toggle space setting on or off for the selected space.
 .RE
@@ -372,7 +372,7 @@ If type is \fIrel\fP the selected window is moved by \fIdx\fP pixels horizontall
 Resize the selected window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically. If handle is \fIabs\fP the new size will be \fIdx\fP width and \fIdy\fP height.
 .RE
 .sp
-\fB\-\-toggle\fP \fIfloat|sticky|split|border|zoom\-parent|zoom\-fullscreen|native\-fullscreen\fP
+\fB\-\-toggle\fP \fIfloat|sticky|split|border|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
 .RS 4
 Toggle the given property of the selected window.
 .RE
@@ -665,6 +665,11 @@ Triggered when a menu is opened.
 \fBmenu_bar_hidden_changed\fP
 .RS 4
 Triggered when the macOS menubar \fIautohide\fP setting changes.
+.RE
+.sp
+\fBdock_did_change_pref\fP
+.RS 4
+Triggered when the macOS Dock preferences changes.
 .RE
 .sp
 \fBsystem_woke\fP

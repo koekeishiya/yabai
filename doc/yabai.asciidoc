@@ -245,7 +245,7 @@ COMMAND
 *--gap* 'abs|rel:<gap>'::
     Size of the gap that separates windows on the selected space.
 
-*--toggle* 'padding|gap'::
+*--toggle* 'padding|gap|mission-control|show-desktop'::
     Toggle space setting on or off for the selected space.
 
 *--layout* 'bsp|float'::
@@ -283,7 +283,7 @@ COMMAND
 *--resize* 'top|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>'::
     Resize the selected window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. If handle is 'abs' the new size will be 'dx' width and 'dy' height.
 
-*--toggle* 'float|sticky|split|border|zoom-parent|zoom-fullscreen|native-fullscreen'::
+*--toggle* 'float|sticky|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window.
 
 *--display* '<DISPLAY_SEL>'::
@@ -491,6 +491,9 @@ EVENT
 
 *menu_bar_hidden_changed*::
     Triggered when the macOS menubar 'autohide' setting changes.
+
+*dock_did_change_pref*::
+    Triggered when the macOS Dock preferences changes.
 
 *system_woke*::
     Triggered when macOS wakes from sleep.

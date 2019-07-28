@@ -195,6 +195,18 @@ void space_manager_toggle_gap_for_space(struct space_manager *sm, uint64_t sid)
     view_flush(view);
 }
 
+void space_manager_toggle_mission_control(uint64_t sid)
+{
+    space_manager_focus_space(sid);
+    CoreDockSendNotification(CFSTR("com.apple.expose.awake"), 0);
+}
+
+void space_manager_toggle_show_desktop(uint64_t sid)
+{
+    space_manager_focus_space(sid);
+    CoreDockSendNotification(CFSTR("com.apple.showdesktop.awake"), 0);
+}
+
 void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view_type layout)
 {
     sm->layout = layout;

@@ -96,6 +96,8 @@ extern struct bar g_bar;
 #define ARGUMENT_SPACE_GAP          "%255[^:]:%d"
 #define ARGUMENT_SPACE_TGL_PADDING  "padding"
 #define ARGUMENT_SPACE_TGL_GAP      "gap"
+#define ARGUMENT_SPACE_TGL_MC       "mission-control"
+#define ARGUMENT_SPACE_TGL_SD       "show-desktop"
 #define ARGUMENT_SPACE_LAYOUT_BSP   "bsp"
 #define ARGUMENT_SPACE_LAYOUT_FLT   "float"
 /* ----------------------------------------------------------------------------- */
@@ -129,6 +131,7 @@ extern struct bar g_bar;
 #define ARGUMENT_WINDOW_TOGGLE_FULLSC "zoom-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_BORDER "border"
+#define ARGUMENT_WINDOW_TOGGLE_EXPOSE "expose"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN QUERY--------------------------------- */
@@ -1235,6 +1238,10 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             space_manager_toggle_padding_for_space(&g_space_manager, acting_sid);
         } else if (token_equals(value, ARGUMENT_SPACE_TGL_GAP)) {
             space_manager_toggle_gap_for_space(&g_space_manager, acting_sid);
+        } else if (token_equals(value, ARGUMENT_SPACE_TGL_MC)) {
+            space_manager_toggle_mission_control(acting_sid);
+        } else if (token_equals(value, ARGUMENT_SPACE_TGL_SD)) {
+            space_manager_toggle_show_desktop(acting_sid);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -1341,6 +1348,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, acting_window);
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_BORDER)) {
             window_manager_toggle_window_border(&g_window_manager, acting_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_EXPOSE)) {
+            window_manager_toggle_window_expose(&g_window_manager, acting_window);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

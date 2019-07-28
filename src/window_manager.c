@@ -1340,6 +1340,12 @@ void window_manager_toggle_window_border(struct window_manager *wm, struct windo
     if (node) window_node_flush(node);
 }
 
+void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window)
+{
+    window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+    CoreDockSendNotification(CFSTR("com.apple.expose.front.awake"), 0);
+}
+
 void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
     int window_count;

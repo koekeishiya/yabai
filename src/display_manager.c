@@ -49,8 +49,6 @@ uint32_t display_manager_active_display_id(void)
 
 CFStringRef display_manager_dock_display_uuid(void)
 {
-    if (display_manager_dock_hidden()) return NULL;
-
     CGRect dock = display_manager_dock_rect();
     return SLSCopyBestManagedDisplayForRect(g_connection, dock);
 }

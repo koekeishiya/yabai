@@ -8,6 +8,7 @@ extern CGError SLSProcessAssignToAllSpaces(int cid, pid_t pid);
 extern void SLSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
 extern void SLSRemoveWindowsFromSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
 extern void SLSAddWindowsToSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
+extern CGError CoreDockSendNotification(CFStringRef notification, int unknown);
 
 struct space_manager
 {
@@ -51,6 +52,8 @@ uint64_t space_manager_active_space(void);
 void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, enum view_type type);
 void space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, int type, int gap);
 void space_manager_toggle_gap_for_space(struct space_manager *sm, uint64_t sid);
+void space_manager_toggle_mission_control(uint64_t sid);
+void space_manager_toggle_show_desktop(uint64_t sid);
 void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view_type layout);
 void space_manager_set_window_gap_for_all_spaces(struct space_manager *sm, int window_gap);
 void space_manager_set_top_padding_for_all_spaces(struct space_manager *sm, int top_padding);

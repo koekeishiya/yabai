@@ -5,15 +5,19 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Commands to toggle mission-control, show-desktop, and application expose [#147](https://github.com/koekeishiya/yabai/issues/147)
+
 ### Changed
 - Automatically restart Dock.app after installing the scripting-addition, and tweak messages shown when a payload gets loaded, is already loaded or does not support the version of macOS it's running on [#135](https://github.com/koekeishiya/yabai/issues/135)
 - Work around macOS craziness so that we can properly tile a window after it leaves native fullscreen mode [#36](https://github.com/koekeishiya/yabai/issues/36)
 - Return an error for queries with invalid, named selectors [#158](https://github.com/koekeishiya/yabai/issues/158)
 - Resolve a potential multi-threaded issue due to "undefined behaviour" regarding x86 instruction ordering [#153](https://github.com/koekeishiya/yabai/issues/153)
 - Fix space padding and gap underflow when modified with a relative value [#141](https://github.com/koekeishiya/yabai/issues/141)
-- window_* signals no longer pass the application pid [#154](https://github.com/koekeishiya/yabai/issues/154)
-- ignore all windows that report a main role of AXPopover [#162](https://github.com/koekeishiya/yabai/issues/162)
-- ignore all windows that report a sub role of AXUnknown [#164](https://github.com/koekeishiya/yabai/issues/164)
+- Window_* signals no longer pass the application pid [#154](https://github.com/koekeishiya/yabai/issues/154)
+- Ignore all windows that report a main role of AXPopover [#162](https://github.com/koekeishiya/yabai/issues/162)
+- Ignore all windows that report a sub role of AXUnknown [#164](https://github.com/koekeishiya/yabai/issues/164)
+- Track when the Dock changes preferences [#147](https://github.com/koekeishiya/yabai/issues/147)
 
 ## [1.1.2] - 2019-07-15
 ### Changed

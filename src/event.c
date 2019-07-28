@@ -1156,6 +1156,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
     return EVENT_SUCCESS;
 }
 
+static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_CHANGE_PREF)
+{
+    debug("%s:\n", __FUNCTION__);
+    space_manager_mark_spaces_invalid(&g_space_manager);
+    return EVENT_SUCCESS;
+}
+
 static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
 {
     debug("%s:\n", __FUNCTION__);

@@ -82,7 +82,6 @@ CGRect display_bounds_constrained(uint32_t did)
     CGRect frame  = display_bounds(did);
     CGRect menu   = display_manager_menu_bar_rect();
     CGRect dock   = display_manager_dock_rect();
-    uint32_t ddid = display_manager_dock_display_id();
 
     if (g_bar.enabled && did == display_manager_main_display_id()) {
         frame.origin.y    += g_bar.frame.size.height;
@@ -94,18 +93,20 @@ CGRect display_bounds_constrained(uint32_t did)
         frame.size.height -= menu.size.height;
     }
 
-    if (ddid == did) {
-        switch (display_manager_dock_orientation()) {
-        case DOCK_ORIENTATION_LEFT: {
-            frame.origin.x   += dock.size.width;
-            frame.size.width -= dock.size.width;
-        } break;
-        case DOCK_ORIENTATION_RIGHT: {
-            frame.size.width -= dock.size.width;
-        } break;
-        case DOCK_ORIENTATION_BOTTOM: {
-            frame.size.height -= dock.size.height;
-        } break;
+    if (!display_manager_dock_hidden()) {
+        if (did == display_manager_dock_display_id()) {
+            switch (display_manager_dock_orientation()) {
+            case DOCK_ORIENTATION_LEFT: {
+                frame.origin.x   += dock.size.width;
+                frame.size.width -= dock.size.width;
+            } break;
+            case DOCK_ORIENTATION_RIGHT: {
+                frame.size.width -= dock.size.width;
+            } break;
+            case DOCK_ORIENTATION_BOTTOM: {
+                frame.size.height -= dock.size.height;
+            } break;
+            }
         }
     }
 
