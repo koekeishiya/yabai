@@ -1376,7 +1376,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             uint32_t acting_did = display_manager_active_display_id();
             struct selector selector = parse_display_selector(NULL, &message, acting_did);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.did) {
                     display_serialize(rsp, selector.did);
                     fprintf(rsp, "\n");
@@ -1390,7 +1390,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
             uint64_t acting_sid = space_manager_active_space();
             struct selector selector = parse_space_selector(NULL, &message, acting_sid);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.sid) {
                     display_serialize(rsp, space_display_id(selector.sid));
                     fprintf(rsp, "\n");
@@ -1404,7 +1404,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
             struct window *acting_window = window_manager_focused_window(&g_window_manager);
             struct selector selector = parse_window_selector(NULL, &message, acting_window);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.window) {
                     display_serialize(rsp, window_display_id(selector.window));
                     fprintf(rsp, "\n");
@@ -1429,7 +1429,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             uint32_t acting_did = display_manager_active_display_id();
             struct selector selector = parse_display_selector(NULL, &message, acting_did);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.did) {
                     if (!space_manager_query_spaces_for_display(rsp, selector.did)) {
                         daemon_fail(rsp, "could not retrieve spaces for display\n");
@@ -1445,7 +1445,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
             uint64_t acting_sid = space_manager_active_space();
             struct selector selector = parse_space_selector(NULL, &message, acting_sid);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.sid) {
                     struct view *view = space_manager_query_view(&g_space_manager, selector.sid);
                     if (view) {
@@ -1465,7 +1465,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
             struct window *acting_window = window_manager_focused_window(&g_window_manager);
             struct selector selector = parse_window_selector(NULL, &message, acting_window);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.window) {
                     space_manager_query_spaces_for_window(rsp, selector.window);
                 } else {
@@ -1490,7 +1490,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         if (token_equals(option, ARGUMENT_QUERY_DISPLAY)) {
             uint32_t acting_did = display_manager_active_display_id();
             struct selector selector = parse_display_selector(NULL, &message, acting_did);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.did) {
                     window_manager_query_windows_for_display(rsp, selector.did);
                 } else {
@@ -1502,7 +1502,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
             uint64_t acting_sid = space_manager_active_space();
             struct selector selector = parse_space_selector(NULL, &message, acting_sid);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.sid) {
                     window_manager_query_windows_for_space(rsp, selector.sid);
                 } else {
@@ -1514,7 +1514,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
             struct window *acting_window = window_manager_focused_window(&g_window_manager);
             struct selector selector = parse_window_selector(NULL, &message, acting_window);
-            if (selector.did_parse) {
+            if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.window) {
                     window_serialize(rsp, selector.window);
                     fprintf(rsp, "\n");
