@@ -369,6 +369,17 @@ out:
     return standard_win;
 }
 
+bool window_is_popover(struct window *window)
+{
+    CFStringRef role = window_role(window);
+    if (!role) return false;
+
+    bool result = CFEqual(role, kAXPopoverRole);
+    CFRelease(role);
+
+    return result;
+}
+
 struct window *window_create(struct application *application, AXUIElementRef window_ref, uint32_t window_id)
 {
     struct window *window = malloc(sizeof(struct window));

@@ -417,6 +417,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     if (!application) return EVENT_FAILURE;
 
     struct window *window = window_create(application, CFRetain(context), window_id);
+    if (window_is_popover(window)) {
+        debug("%s: ignoring popover window %s %d\n", __FUNCTION__, window->application->name, window->id);
+        window_manager_make_children_floating(&g_window_manager, window, true);
+        window_manager_make_floating(&g_window_manager, window->id, true);
+        window_manager_remove_lost_focused_event(&g_window_manager, window->id);
+        window_destroy(window);
+        return EVENT_FAILURE;
+    }
+
     window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
     window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.normal_window_opacity);
     window_manager_purify_window(&g_window_manager, window);

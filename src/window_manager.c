@@ -941,6 +941,14 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
             continue;
         }
 
+        if (window_is_popover(window)) {
+            debug("%s: ignoring popover window %s %d\n", __FUNCTION__, window->application->name, window->id);
+            window_manager_make_children_floating(wm, window, true);
+            window_manager_make_floating(wm, window->id, true);
+            window_destroy(window);
+            continue;
+        }
+
         window_manager_apply_rules_to_window(sm, wm, window);
         window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
         window_manager_purify_window(wm, window);

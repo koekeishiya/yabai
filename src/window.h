@@ -66,6 +66,7 @@ bool window_is_fullscreen(struct window *window);
 bool window_is_sticky(struct window *window);
 bool window_is_standard(struct window *window);
 bool window_is_dialog(struct window *window);
+bool window_is_popover(struct window *window);
 bool window_observe(struct window *window);
 void window_unobserve(struct window *window);
 struct window *window_create(struct application *application, AXUIElementRef window_ref, uint32_t window_id);
