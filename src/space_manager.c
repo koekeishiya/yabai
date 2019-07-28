@@ -178,7 +178,7 @@ void space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, int
     if (type == TYPE_ABS) {
         view->window_gap = gap;
     } else if (type == TYPE_REL) {
-        view->window_gap += gap;
+        view->window_gap = add_and_clamp_to_zero(view->window_gap, gap);
     }
 
     view_update(view);
@@ -272,10 +272,10 @@ void space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid,
         view->left_padding   = left;
         view->right_padding  = right;
     } else if (type == TYPE_REL) {
-        view->top_padding    += top;
-        view->bottom_padding += bottom;
-        view->left_padding   += left;
-        view->right_padding  += right;
+        view->top_padding    = add_and_clamp_to_zero(view->top_padding, top);
+        view->bottom_padding = add_and_clamp_to_zero(view->bottom_padding, bottom);
+        view->left_padding   = add_and_clamp_to_zero(view->left_padding, left);
+        view->right_padding  = add_and_clamp_to_zero(view->right_padding, right);
     }
 
     view_update(view);

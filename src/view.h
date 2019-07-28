@@ -79,11 +79,11 @@ struct view
     struct window_node *root;
     enum view_type layout;
     uint32_t insertion_point;
-    uint32_t top_padding;
-    uint32_t bottom_padding;
-    uint32_t left_padding;
-    uint32_t right_padding;
-    uint32_t window_gap;
+    int top_padding;
+    int bottom_padding;
+    int left_padding;
+    int right_padding;
+    int window_gap;
     bool custom_layout;
     bool custom_top_padding;
     bool custom_bottom_padding;
