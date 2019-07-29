@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Track when the Dock changes preferences [#147](https://github.com/koekeishiya/yabai/issues/147)
 - Properly detect when mission-control is deactivated [#169](https://github.com/koekeishiya/yabai/issues/169)
 - Pass arguments to signals through environment variables instead [#167](https://github.com/koekeishiya/yabai/issues/167)
+- Revert change that made the status bar draw above other windows because of compatibility with "windowed fullscreen" applications [#170](https://github.com/koekeishiya/yabai/issues/170)
 
 ## [1.1.2] - 2019-07-15
 ### Changed

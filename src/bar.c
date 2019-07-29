@@ -481,7 +481,7 @@ void bar_create(struct bar *bar)
     SLSClearWindowTags(g_connection, bar->id, clear_tags, 64);
     SLSSetWindowOpacity(g_connection, bar->id, 0);
     SLSSetMouseEventEnableFlags(g_connection, bar->id, false);
-    SLSSetWindowLevel(g_connection, bar->id, CGWindowLevelForKey(5));
+    SLSSetWindowLevel(g_connection, bar->id, CGWindowLevelForKey(4));
     bar->context = SLWindowContextCreate(g_connection, bar->id, 0);
 
     int refresh_frequency = 5;
