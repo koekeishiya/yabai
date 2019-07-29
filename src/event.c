@@ -1048,7 +1048,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
     return EVENT_SUCCESS;
 }
 
-static CFStringRef CFSTR_DOCK = CFSTR("Dock");
 static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
 {
     if (!g_mission_control_active) return EVENT_FAILURE;
@@ -1060,13 +1059,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
     for (int i = 0; i < window_count; ++i) {
         CFDictionaryRef dictionary = CFArrayGetValueAtIndex(window_list, i);
 
+        CFStringRef name = CFDictionaryGetValue(dictionary, kCGWindowName);
+        if (name) continue;
+
         CFStringRef owner = CFDictionaryGetValue(dictionary, kCGWindowOwnerName);
         if (!owner) continue;
 
-        CFStringRef name = CFDictionaryGetValue(dictionary, kCGWindowName);
-        if (!name) continue;
-
-        if (CFEqual(CFSTR_DOCK, owner) && CFEqual(CFSTR_DOCK, name)) {
+        if (CFEqual(CFSTR("Dock"), owner)) {
             found = true;
             break;
         }

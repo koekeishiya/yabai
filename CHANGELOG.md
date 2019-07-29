@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Ignore all windows that report a main role of AXPopover [#162](https://github.com/koekeishiya/yabai/issues/162)
 - Ignore all windows that report a sub role of AXUnknown [#164](https://github.com/koekeishiya/yabai/issues/164)
 - Track when the Dock changes preferences [#147](https://github.com/koekeishiya/yabai/issues/147)
+- Properly detect when mission-control is deactivated [#169](https://github.com/koekeishiya/yabai/issues/169)
 
 ## [1.1.2] - 2019-07-15
 ### Changed
