@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-07-28
+.\"      Date: 2019-07-29
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-07-28" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-07-29" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -496,6 +496,8 @@ Set window frame based on a self\-defined grid.
 .SS "Signal"
 .sp
 A signal is a simple way for the user to react to some event that has been processed.
+.sp
+Events that pass arguments will set the environment variables \fIYABAI_SIGNAL_ARG1\fP and \fIYABAI_SIGNAL_ARG2\fP.
 .SS "General Syntax"
 .sp
 yabai \-m signal \fI<COMMAND>\fP

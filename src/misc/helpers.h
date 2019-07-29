@@ -158,23 +158,18 @@ static bool fork_exec(char *command, char *arg1, char *arg2)
     if (pid == -1) return false;
     if (pid !=  0) return true;
 
-    int cmd_len  = strlen(command);
-    int arg1_len = arg1 ? strlen(arg1) : 0;
-    int arg2_len = arg2 ? strlen(arg2) : 0;
-    int max_len  = cmd_len + arg1_len + arg2_len + 3;
-
-    char *command_with_args = malloc(max_len);
-    if (!command_with_args) exit(EXIT_FAILURE);
-
     if (arg1 && arg2) {
-        snprintf(command_with_args, max_len, "%s %s %s", command, arg1, arg2);
+        setenv("YABAI_SIGNAL_ARG1", arg1, 1);
+        setenv("YABAI_SIGNAL_ARG2", arg2, 1);
     } else if (arg1) {
-        snprintf(command_with_args, max_len, "%s %s", command, arg1);
+        setenv("YABAI_SIGNAL_ARG1", arg1, 1);
+        unsetenv("YABAI_SIGNAL_ARG2");
     } else {
-        snprintf(command_with_args, max_len, "%s", command);
+        unsetenv("YABAI_SIGNAL_ARG1");
+        unsetenv("YABAI_SIGNAL_ARG2");
     }
 
-    char *exec[] = { "/usr/bin/env", "sh", "-c", command_with_args, NULL};
+    char *exec[] = { "/usr/bin/env", "sh", "-c", command, NULL};
     exit(execvp(exec[0], exec));
 }
 

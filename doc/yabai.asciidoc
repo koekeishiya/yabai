@@ -382,6 +382,8 @@ Signal
 
 A signal is a simple way for the user to react to some event that has been processed.
 
+Events that pass arguments will set the environment variables 'YABAI_SIGNAL_ARG1' and 'YABAI_SIGNAL_ARG2'.
+
 General Syntax
 ^^^^^^^^^^^^^^
 
