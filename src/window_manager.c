@@ -1056,14 +1056,23 @@ void window_manager_warp_window(struct space_manager *sm, struct window_manager 
     if (!b_node) return;
 
     if (a_node->parent == b_node->parent) {
-        a_node->window_id = b->id;
-        a_node->zoom = NULL;
+        if (b_view->insertion_point == b_node->window_id) {
+            b_node->parent->split = b_node->split;
+            b_node->parent->child = b_node->child;
+            space_manager_untile_window(sm, a_view, a);
+            window_manager_remove_managed_window(wm, a->id);
+            window_manager_add_managed_window(wm, a, b_view);
+            space_manager_tile_window_on_space_with_insertion_point(sm, a, b_view->sid, b->id);
+        } else {
+            a_node->window_id = b->id;
+            a_node->zoom = NULL;
 
-        b_node->window_id = a->id;
-        b_node->zoom = NULL;
+            b_node->window_id = a->id;
+            b_node->zoom = NULL;
 
-        window_node_flush(a_node);
-        window_node_flush(b_node);
+            window_node_flush(a_node);
+            window_node_flush(b_node);
+        }
     } else {
         space_manager_untile_window(sm, a_view, a);
 
