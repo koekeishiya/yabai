@@ -251,6 +251,8 @@ end:
             event_loop_post(&g_event_loop, event);
             window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
         }
+
+        return EVENT_SUCCESS;
     } else {
         bool retry_ax = application->retry;
         application_unobserve(application);
@@ -264,9 +266,9 @@ end:
                 event_loop_post(&g_event_loop, event);
             });
         }
-    }
 
-    return EVENT_SUCCESS;
+        return EVENT_FAILURE;
+    }
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
