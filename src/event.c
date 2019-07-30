@@ -19,14 +19,18 @@ static bool event_signal_filter(struct signal *signal, enum event_type type, str
     case APPLICATION_LAUNCHED:
     case APPLICATION_TERMINATED: {
         struct process *process = args->entity;
-        return regex_match(signal->app_regex_valid, &signal->app_regex, process->name) != REGEX_MATCH_NO;
+        if (!process) return true;
+
+        return regex_match(signal->app_regex_valid, &signal->app_regex, process->name) == REGEX_MATCH_NO;
     } break;
     case APPLICATION_ACTIVATED:
     case APPLICATION_DEACTIVATED:
     case APPLICATION_VISIBLE:
     case APPLICATION_HIDDEN: {
         struct application *application = args->entity;
-        return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) != REGEX_MATCH_NO;
+        if (!application) return true;
+
+        return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) == REGEX_MATCH_NO;
     } break;
     case WINDOW_CREATED:
     case WINDOW_DESTROYED:
@@ -37,8 +41,10 @@ static bool event_signal_filter(struct signal *signal, enum event_type type, str
     case WINDOW_DEMINIMIZED:
     case WINDOW_TITLE_CHANGED: {
         struct window *window = args->entity;
-        return regex_match(signal->app_regex_valid,   &signal->app_regex,   window->application->name) != REGEX_MATCH_NO &&
-               regex_match(signal->title_regex_valid, &signal->title_regex, window_title(window))      != REGEX_MATCH_NO;
+        if (!window) return true;
+
+        return regex_match(signal->app_regex_valid,   &signal->app_regex,   window->application->name) == REGEX_MATCH_NO ||
+               regex_match(signal->title_regex_valid, &signal->title_regex, window_title(window))      == REGEX_MATCH_NO;
     } break;
     }
 }
@@ -47,6 +53,7 @@ static void event_signal_populate_args(void *context, enum event_type type, stru
 {
     switch (type) {
     default: {} break;
+
     case APPLICATION_LAUNCHED:
     case APPLICATION_TERMINATED: {
         struct process *process = context;
@@ -139,7 +146,7 @@ void event_signal_transmit(void *context, enum event_type type)
 
     for (int i = 0; i < signal_count; ++i) {
         struct signal *signal = &g_signal_event[type][i];
-        if (!args.entity || !event_signal_filter(signal, type, &args)) {
+        if (!event_signal_filter(signal, type, &args)) {
             fork_exec(signal->command, &args);
         }
     }
