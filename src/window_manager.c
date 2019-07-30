@@ -128,6 +128,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
             if (did) {
                 uint64_t sid = display_space_id(did);
                 space_manager_move_window_to_space(sid, window);
+                while (window_space(window) != sid) { /* maybe spin lock */ }
                 if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
                     space_manager_focus_space(sid);
                 }
@@ -136,6 +137,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
             uint64_t sid = space_manager_mission_control_space(rule->space);
             if (sid) {
                 space_manager_move_window_to_space(sid, window);
+                while (window_space(window) != sid) { /* maybe spin lock */ }
                 if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
                     space_manager_focus_space(sid);
                 }
