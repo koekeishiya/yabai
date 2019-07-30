@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-07-29
+.\"      Date: 2019-07-30
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-07-29" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-07-30" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -495,9 +495,7 @@ Set window frame based on a self\-defined grid.
 .RE
 .SS "Signal"
 .sp
-A signal is a simple way for the user to react to some event that has been processed.
-.sp
-Events that pass arguments will set the environment variables \fIYABAI_SIGNAL_ARG1\fP and \fIYABAI_SIGNAL_ARG2\fP.
+A signal is a simple way for the user to react to some event that has been processed. Arguments are passed through environment variables.
 .SS "General Syntax"
 .sp
 yabai \-m signal \fI<COMMAND>\fP
@@ -516,127 +514,127 @@ Remove an existing signal with the given label.
 .sp
 \fBapplication_launched\fP
 .RS 4
-Triggered when a new application is launched. Passes one argument: pid
+Triggered when a new application is launched. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_terminated\fP
 .RS 4
-Triggered when an application is terminated. Passes one argument: pid
+Triggered when an application is terminated. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_front_switched\fP
 .RS 4
-Triggered when the front\-most application changes. Passes two arguments: front_pid, last_front_pid
+Triggered when the front\-most application changes. Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID
 .RE
 .sp
 \fBapplication_activated\fP
 .RS 4
-Triggered when an application is activated. Passes one argument: pid
+Triggered when an application is activated. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_deactivated\fP
 .RS 4
-Triggered when an application is deactivated. Passes one argument: pid
+Triggered when an application is deactivated. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_visible\fP
 .RS 4
-Triggered when an application is unhidden. Passes one argument: pid
+Triggered when an application is unhidden. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_hidden\fP
 .RS 4
-Triggered when an application is hidden. Passes one argument: pid
+Triggered when an application is hidden. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBwindow_created\fP
 .RS 4
-Triggered when a window is created. Passes one argument: wid
+Triggered when a window is created. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_destroyed\fP
 .RS 4
-Triggered when a window is destroyed. Passes one argument: wid
+Triggered when a window is destroyed. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_focused\fP
 .RS 4
-Triggered when a window becomes the key\-window for its application. Passes one argument: wid
+Triggered when a window becomes the key\-window for its application. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_moved\fP
 .RS 4
-Triggered when a window changes position. Passes one argument: wid
+Triggered when a window changes position. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_resized\fP
 .RS 4
-Triggered when a window changes dimensions. Passes one argument: wid
+Triggered when a window changes dimensions. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_minimized\fP
 .RS 4
-Triggered when a window has been minimized. Passes one argument: wid
+Triggered when a window has been minimized. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_deminimized\fP
 .RS 4
-Triggered when a window has been deminimized. Passes one argument: wid
+Triggered when a window has been deminimized. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_title_changed\fP
 .RS 4
-Triggered when a window changes its title. Passes one argument: wid
+Triggered when a window changes its title. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBspace_changed\fP
 .RS 4
-Triggered when the active space has changed. Passes two arguments: space_id, last_space_id
+Triggered when the active space has changed. Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID
 .RE
 .sp
 \fBdisplay_added\fP
 .RS 4
-Triggered when a new display has been added. Passes one argument: display_id
+Triggered when a new display has been added. Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_removed\fP
 .RS 4
-Triggered when a display has been removed. Passes one argument: display_id
+Triggered when a display has been removed. Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_moved\fP
 .RS 4
-Triggered when a change has been made to display arrangement. Passes one argument: display_id
+Triggered when a change has been made to display arrangement. Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_resized\fP
 .RS 4
-Triggered when a display has changed resolution. Passes one argument: display_id
+Triggered when a display has changed resolution. Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_changed\fP
 .RS 4
-Triggered when the active display has changed. Passes two arguments: display_id, last_display_id
+Triggered when the active display has changed. Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
 .RE
 .sp
 \fBmouse_down\fP
 .RS 4
-Triggered when a mouse button has been pressed. Passes two arguments: button, coordinates
+Triggered when a mouse button has been pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmouse_up\fP
 .RS 4
-Triggered when a mouse button has been released. Passes two arguments: button, coordinates
+Triggered when a mouse button has been released. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmouse_dragged\fP
 .RS 4
-Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: button, coordinates
+Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmouse_moved\fP
 .RS 4
-Triggered when the mouse is moved. Passes two arguments: button, coordinates
+Triggered when the mouse is moved. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmission_control_enter\fP

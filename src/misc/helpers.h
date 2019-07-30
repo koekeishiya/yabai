@@ -5,6 +5,12 @@ extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 
 static const char *bool_str[] = { "off", "on" };
 
+struct signal_args
+{
+    char name[2][255];
+    char value[2][255];
+};
+
 struct rgba_color
 {
     bool is_valid;
@@ -152,21 +158,15 @@ static inline bool ensure_executable_permission(char *filename)
     return true;
 }
 
-static bool fork_exec(char *command, char *arg1, char *arg2)
+static bool fork_exec(char *command, struct signal_args *args)
 {
     int pid = fork();
     if (pid == -1) return false;
     if (pid !=  0) return true;
 
-    if (arg1 && arg2) {
-        setenv("YABAI_SIGNAL_ARG1", arg1, 1);
-        setenv("YABAI_SIGNAL_ARG2", arg2, 1);
-    } else if (arg1) {
-        setenv("YABAI_SIGNAL_ARG1", arg1, 1);
-        unsetenv("YABAI_SIGNAL_ARG2");
-    } else {
-        unsetenv("YABAI_SIGNAL_ARG1");
-        unsetenv("YABAI_SIGNAL_ARG2");
+    if (args) {
+        if (*args->name[0]) setenv(args->name[0], args->value[0], 1);
+        if (*args->name[1]) setenv(args->name[1], args->value[1], 1);
     }
 
     char *exec[] = { "/usr/bin/env", "sh", "-c", command, NULL};

@@ -380,9 +380,7 @@ ARGUMENT
 Signal
 ~~~~~~
 
-A signal is a simple way for the user to react to some event that has been processed.
-
-Events that pass arguments will set the environment variables 'YABAI_SIGNAL_ARG1' and 'YABAI_SIGNAL_ARG2'.
+A signal is a simple way for the user to react to some event that has been processed. Arguments are passed through environment variables.
 
 General Syntax
 ^^^^^^^^^^^^^^
@@ -402,79 +400,79 @@ EVENT
 ^^^^^
 
 *application_launched*::
-    Triggered when a new application is launched. Passes one argument: pid
+    Triggered when a new application is launched. Passes one argument: $YABAI_PROCESS_ID
 
 *application_terminated*::
-    Triggered when an application is terminated. Passes one argument: pid
+    Triggered when an application is terminated. Passes one argument: $YABAI_PROCESS_ID
 
 *application_front_switched*::
-    Triggered when the front-most application changes. Passes two arguments: front_pid, last_front_pid
+    Triggered when the front-most application changes. Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID
 
 *application_activated*::
-    Triggered when an application is activated. Passes one argument: pid
+    Triggered when an application is activated. Passes one argument: $YABAI_PROCESS_ID
 
 *application_deactivated*::
-    Triggered when an application is deactivated. Passes one argument: pid
+    Triggered when an application is deactivated. Passes one argument: $YABAI_PROCESS_ID
 
 *application_visible*::
-    Triggered when an application is unhidden. Passes one argument: pid
+    Triggered when an application is unhidden. Passes one argument: $YABAI_PROCESS_ID
 
 *application_hidden*::
-    Triggered when an application is hidden. Passes one argument: pid
+    Triggered when an application is hidden. Passes one argument: $YABAI_PROCESS_ID
 
 *window_created*::
-    Triggered when a window is created. Passes one argument: wid
+    Triggered when a window is created. Passes one argument: $YABAI_WINDOW_ID
 
 *window_destroyed*::
-    Triggered when a window is destroyed. Passes one argument: wid
+    Triggered when a window is destroyed. Passes one argument: $YABAI_WINDOW_ID
 
 *window_focused*::
-    Triggered when a window becomes the key-window for its application. Passes one argument: wid
+    Triggered when a window becomes the key-window for its application. Passes one argument: $YABAI_WINDOW_ID
 
 *window_moved*::
-    Triggered when a window changes position. Passes one argument: wid
+    Triggered when a window changes position. Passes one argument: $YABAI_WINDOW_ID
 
 *window_resized*::
-    Triggered when a window changes dimensions. Passes one argument: wid
+    Triggered when a window changes dimensions. Passes one argument: $YABAI_WINDOW_ID
 
 *window_minimized*::
-    Triggered when a window has been minimized. Passes one argument: wid
+    Triggered when a window has been minimized. Passes one argument: $YABAI_WINDOW_ID
 
 *window_deminimized*::
-    Triggered when a window has been deminimized. Passes one argument: wid
+    Triggered when a window has been deminimized. Passes one argument: $YABAI_WINDOW_ID
 
 *window_title_changed*::
-    Triggered when a window changes its title. Passes one argument: wid
+    Triggered when a window changes its title. Passes one argument: $YABAI_WINDOW_ID
 
 *space_changed*::
-    Triggered when the active space has changed. Passes two arguments: space_id, last_space_id
+    Triggered when the active space has changed. Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID
 
 *display_added*::
-    Triggered when a new display has been added. Passes one argument: display_id
+    Triggered when a new display has been added. Passes one argument: $YABAI_DISPLAY_ID
 
 *display_removed*::
-    Triggered when a display has been removed. Passes one argument: display_id
+    Triggered when a display has been removed. Passes one argument: $YABAI_DISPLAY_ID
 
 *display_moved*::
-    Triggered when a change has been made to display arrangement. Passes one argument: display_id
+    Triggered when a change has been made to display arrangement. Passes one argument: $YABAI_DISPLAY_ID
 
 *display_resized*::
-    Triggered when a display has changed resolution. Passes one argument: display_id
+    Triggered when a display has changed resolution. Passes one argument: $YABAI_DISPLAY_ID
 
 *display_changed*::
-    Triggered when the active display has changed. Passes two arguments: display_id, last_display_id
+    Triggered when the active display has changed. Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
 
 *mouse_down*::
-    Triggered when a mouse button has been pressed. Passes two arguments: button, coordinates
+    Triggered when a mouse button has been pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 
 *mouse_up*::
-    Triggered when a mouse button has been released. Passes two arguments: button, coordinates
+    Triggered when a mouse button has been released. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 
 *mouse_dragged*::
-    Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: button, coordinates
+    Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 
 *mouse_moved*::
-    Triggered when the mouse is moved. Passes two arguments: button, coordinates
+    Triggered when the mouse is moved. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 
 *mission_control_enter*::
     Triggered when mission-control activates.

@@ -11,29 +11,35 @@ extern struct bar g_bar;
 extern bool g_mission_control_active;
 extern int g_connection;
 
-static void event_signal_populate_args(void *context, enum event_type type, char args[][255])
+static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
 {
     switch (type) {
     default: {} break;
     case APPLICATION_LAUNCHED:
     case APPLICATION_TERMINATED: {
         struct process *process = context;
-        snprintf(args[0], sizeof(args[0]), "%d", process->pid);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_PROCESS_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", process->pid);
     } break;
     case APPLICATION_FRONT_SWITCHED: {
-        snprintf(args[0], sizeof(args[0]), "%d", g_process_manager.front_pid);
-        snprintf(args[1], sizeof(args[1]), "%d", g_process_manager.last_front_pid);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_PROCESS_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", g_process_manager.front_pid);
+
+        snprintf(args->name[1], sizeof(args->name[1]), "%s", "YABAI_RECENT_PROCESS_ID");
+        snprintf(args->value[1], sizeof(args->value[1]), "%d", g_process_manager.last_front_pid);
     } break;
     case APPLICATION_ACTIVATED:
     case APPLICATION_DEACTIVATED:
     case APPLICATION_VISIBLE:
     case APPLICATION_HIDDEN: {
         pid_t pid = (pid_t)(uintptr_t) context;
-        snprintf(args[0], sizeof(args[0]), "%d", pid);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_PROCESS_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", pid);
     } break;
     case WINDOW_CREATED: {
         uint32_t wid = ax_window_id(context);
-        snprintf(args[0], sizeof(args[0]), "%d", wid);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_WINDOW_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", wid);
     } break;
     case WINDOW_FOCUSED:
     case WINDOW_MOVED:
@@ -43,22 +49,30 @@ static void event_signal_populate_args(void *context, enum event_type type, char
     case WINDOW_TITLE_CHANGED:
     case WINDOW_DESTROYED: {
         uint32_t window_id = (uint32_t)(uintptr_t) context;
-        snprintf(args[0], sizeof(args[0]), "%d", window_id);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_WINDOW_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", window_id);
     } break;
     case SPACE_CHANGED: {
-        snprintf(args[0], sizeof(args[0]), "%lld", g_space_manager.current_space_id);
-        snprintf(args[1], sizeof(args[1]), "%lld", g_space_manager.last_space_id);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_SPACE_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%lld", g_space_manager.current_space_id);
+
+        snprintf(args->name[1], sizeof(args->name[1]), "%s", "YABAI_RECENT_SPACE_ID");
+        snprintf(args->value[1], sizeof(args->value[1]), "%lld", g_space_manager.last_space_id);
     } break;
     case DISPLAY_ADDED:
     case DISPLAY_REMOVED:
     case DISPLAY_MOVED:
     case DISPLAY_RESIZED: {
         uint32_t did = (uint32_t)(uintptr_t) context;
-        snprintf(args[0], sizeof(args[0]), "%d", did);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_DISPLAY_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", did);
     } break;
     case DISPLAY_CHANGED: {
-        snprintf(args[0], sizeof(args[0]), "%d", g_display_manager.current_display_id);
-        snprintf(args[1], sizeof(args[1]), "%d", g_display_manager.last_display_id);
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_DISPLAY_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", g_display_manager.current_display_id);
+
+        snprintf(args->name[1], sizeof(args->name[1]), "%s", "YABAI_RECENT_DISPLAY_ID");
+        snprintf(args->value[1], sizeof(args->value[1]), "%d", g_display_manager.last_display_id);
     } break;
     case MOUSE_DOWN:
     case MOUSE_UP:
@@ -66,8 +80,12 @@ static void event_signal_populate_args(void *context, enum event_type type, char
     case MOUSE_MOVED: {
         CGPoint point = CGEventGetLocation(context);
         int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
-        snprintf(args[0], sizeof(args[0]), "%lld", button);
-        snprintf(args[1], sizeof(args[1]), "%f %f", point.x, point.y);
+
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_BUTTON");
+        snprintf(args->value[0], sizeof(args->value[0]), "%lld", button);
+
+        snprintf(args->name[1], sizeof(args->name[1]), "%s", "YABAI_POINT");
+        snprintf(args->value[1], sizeof(args->value[1]), "%f %f", point.x, point.y);
     } break;
     }
 }
@@ -77,14 +95,14 @@ void event_signal_transmit(void *context, enum event_type type)
     int signal_count = buf_len(g_signal_event[type]);
     if (!signal_count) return;
 
-    char args[2][255] = { {}, {} };
-    event_signal_populate_args(context, type, args);
+    struct signal_args args = {};
+    event_signal_populate_args(context, type, &args);
 
     if (fork() != 0) return;
     debug("%s: %s\n", __FUNCTION__, event_type_str[type]);
 
     for (int i = 0; i < signal_count; ++i) {
-        fork_exec(g_signal_event[type][i].command, args[0], args[1]);
+        fork_exec(g_signal_event[type][i].command, &args);
     }
 
     exit(EXIT_SUCCESS);

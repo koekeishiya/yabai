@@ -162,7 +162,7 @@ static void exec_config_file(void)
             error("yabai: could not set the executable permission bit for config file '%s'! abort..\n", g_config_file);
         }
 
-        if (!fork_exec(g_config_file, NULL, NULL)) {
+        if (!fork_exec(g_config_file, NULL)) {
             error("yabai: failed to execute config file '%s'!\n", g_config_file);
         }
     } else {
