@@ -127,6 +127,7 @@ extern struct bar g_bar;
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
+#define ARGUMENT_WINDOW_TOGGLE_SHADOW "shadow"
 #define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
 #define ARGUMENT_WINDOW_TOGGLE_PARENT "zoom-parent"
 #define ARGUMENT_WINDOW_TOGGLE_FULLSC "zoom-fullscreen"
@@ -1345,6 +1346,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             window_manager_toggle_window_float(&g_space_manager, &g_window_manager, acting_window);
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
             window_manager_toggle_window_sticky(&g_space_manager, &g_window_manager, acting_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SHADOW)) {
+            window_manager_toggle_window_shadow(&g_space_manager, &g_window_manager, acting_window);
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SPLIT)) {
             space_manager_toggle_window_split(&g_space_manager, acting_window);
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {

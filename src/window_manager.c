@@ -506,6 +506,7 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
         snprintf(message, sizeof(message), "window_shadow %d %d", window->id, value);
         socket_write(sockfd, message);
         socket_wait(sockfd);
+        window->has_shadow = value;
     }
     socket_close(sockfd);
 }
@@ -1290,6 +1291,21 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
         }
         window_manager_make_sticky(window->id, true);
     }
+}
+
+void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window)
+{
+    int sockfd;
+    char message[MAXLEN];
+    bool shadow = !window->has_shadow;
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "window_shadow %d %d", window->id, shadow);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+        window->has_shadow = shadow;
+    }
+    socket_close(sockfd);
 }
 
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)

@@ -160,6 +160,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"floating\":%d,\n"
             "\t\"sticky\":%d,\n"
             "\t\"border\":%d,\n"
+            "\t\"shadow\":%d,\n"
             "\t\"zoom-parent\":%d,\n"
             "\t\"zoom-fullscreen\":%d,\n"
             "\t\"native-fullscreen\":%d\n"
@@ -183,6 +184,7 @@ void window_serialize(FILE *rsp, struct window *window)
             window->is_floating,
             sticky,
             window->border.enabled,
+            window->has_shadow,
             zoom_parent,
             zoom_fullscreen,
             window_is_fullscreen(window));
@@ -404,6 +406,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->is_fullscreen = window_is_fullscreen(window) || space_is_fullscreen(window_space(window));
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;
+    window->has_shadow = true;
 
     if ((window_is_standard(window)) || (window_is_dialog(window))) {
         border_window_create(window);
