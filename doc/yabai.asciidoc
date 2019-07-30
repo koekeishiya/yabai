@@ -283,7 +283,7 @@ COMMAND
 *--resize* 'top|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>'::
     Resize the selected window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. If handle is 'abs' the new size will be 'dx' width and 'dy' height.
 
-*--toggle* 'float|sticky|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
+*--toggle* 'float|sticky|shadow|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window.
 
 *--display* '<DISPLAY_SEL>'::
