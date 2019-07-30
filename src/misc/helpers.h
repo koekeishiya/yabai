@@ -9,6 +9,7 @@ struct signal_args
 {
     char name[2][255];
     char value[2][255];
+    void *entity;
 };
 
 struct rgba_color

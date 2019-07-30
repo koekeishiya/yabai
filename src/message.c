@@ -168,6 +168,8 @@ extern struct bar g_bar;
 #define COMMAND_SIGNAL_ADD "--add"
 #define COMMAND_SIGNAL_REM "--remove"
 
+#define ARGUMENT_SIGNAL_KEY_APP      "app"
+#define ARGUMENT_SIGNAL_KEY_TITLE    "title"
 #define ARGUMENT_SIGNAL_KEY_EVENT    "event"
 #define ARGUMENT_SIGNAL_KEY_ACTION   "action"
 #define ARGUMENT_SIGNAL_KEY_LABEL    "label"
@@ -1646,8 +1648,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_SIGNAL_ADD)) {
         enum event_type signal_type = EVENT_TYPE_UNKNOWN;
-        char *signal_action = NULL;
-        char *signal_label  = NULL;
+        struct signal signal = {};
 
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {
@@ -1658,22 +1659,32 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                 return;
             }
 
-            if (string_equals(key, ARGUMENT_SIGNAL_KEY_EVENT)) {
+            if (string_equals(key, ARGUMENT_SIGNAL_KEY_APP)) {
+                signal.app_regex_valid = regcomp(&signal.app_regex, value, REG_EXTENDED) == 0;
+                if (!signal.app_regex_valid) {
+                    daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
+                }
+            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_TITLE)) {
+                signal.title_regex_valid = regcomp(&signal.title_regex, value, REG_EXTENDED) == 0;
+                if (!signal.title_regex_valid) {
+                    daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
+                }
+            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_EVENT)) {
                 signal_type = event_type_from_string(value);
                 if (signal_type == EVENT_TYPE_UNKNOWN) {
                     daemon_fail(rsp, "unknown event-type '%s'\n", value);
                 }
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_ACTION)) {
-                signal_action = string_copy(value);
+                signal.command = string_copy(value);
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_LABEL)) {
-                signal_label = string_copy(value);
+                signal.label = string_copy(value);
             }
 
             token = get_token(&message);
         }
 
-        if (signal_type > EVENT_TYPE_UNKNOWN && signal_type < EVENT_TYPE_COUNT && signal_action) {
-            event_signal_add(signal_type, signal_action, signal_label);
+        if (signal_type > EVENT_TYPE_UNKNOWN && signal_type < EVENT_TYPE_COUNT && signal.command) {
+            event_signal_add(signal_type, signal);
         } else {
             daemon_fail(rsp, "signal was not added.\n");
         }

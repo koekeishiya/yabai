@@ -11,6 +11,38 @@ extern struct bar g_bar;
 extern bool g_mission_control_active;
 extern int g_connection;
 
+static bool event_signal_filter(struct signal *signal, enum event_type type, struct signal_args *args)
+{
+    switch (type) {
+    default: return false;
+
+    case APPLICATION_LAUNCHED:
+    case APPLICATION_TERMINATED: {
+        struct process *process = args->entity;
+        return regex_match(signal->app_regex_valid, &signal->app_regex, process->name) != REGEX_MATCH_NO;
+    } break;
+    case APPLICATION_ACTIVATED:
+    case APPLICATION_DEACTIVATED:
+    case APPLICATION_VISIBLE:
+    case APPLICATION_HIDDEN: {
+        struct application *application = args->entity;
+        return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) != REGEX_MATCH_NO;
+    } break;
+    case WINDOW_CREATED:
+    case WINDOW_DESTROYED:
+    case WINDOW_FOCUSED:
+    case WINDOW_MOVED:
+    case WINDOW_RESIZED:
+    case WINDOW_MINIMIZED:
+    case WINDOW_DEMINIMIZED:
+    case WINDOW_TITLE_CHANGED: {
+        struct window *window = args->entity;
+        return regex_match(signal->app_regex_valid,   &signal->app_regex,   window->application->name) != REGEX_MATCH_NO &&
+               regex_match(signal->title_regex_valid, &signal->title_regex, window_title(window))      != REGEX_MATCH_NO;
+    } break;
+    }
+}
+
 static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
 {
     switch (type) {
@@ -20,6 +52,7 @@ static void event_signal_populate_args(void *context, enum event_type type, stru
         struct process *process = context;
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_PROCESS_ID");
         snprintf(args->value[0], sizeof(args->value[0]), "%d", process->pid);
+        args->entity = process;
     } break;
     case APPLICATION_FRONT_SWITCHED: {
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_PROCESS_ID");
@@ -35,11 +68,13 @@ static void event_signal_populate_args(void *context, enum event_type type, stru
         pid_t pid = (pid_t)(uintptr_t) context;
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_PROCESS_ID");
         snprintf(args->value[0], sizeof(args->value[0]), "%d", pid);
+        args->entity = window_manager_find_application(&g_window_manager, pid);
     } break;
     case WINDOW_CREATED: {
         uint32_t wid = ax_window_id(context);
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_WINDOW_ID");
         snprintf(args->value[0], sizeof(args->value[0]), "%d", wid);
+        args->entity = window_manager_find_window(&g_window_manager, wid);
     } break;
     case WINDOW_FOCUSED:
     case WINDOW_MOVED:
@@ -48,9 +83,10 @@ static void event_signal_populate_args(void *context, enum event_type type, stru
     case WINDOW_DEMINIMIZED:
     case WINDOW_TITLE_CHANGED:
     case WINDOW_DESTROYED: {
-        uint32_t window_id = (uint32_t)(uintptr_t) context;
+        uint32_t wid = (uint32_t)(uintptr_t) context;
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_WINDOW_ID");
-        snprintf(args->value[0], sizeof(args->value[0]), "%d", window_id);
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", wid);
+        args->entity = window_manager_find_window(&g_window_manager, wid);
     } break;
     case SPACE_CHANGED: {
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_SPACE_ID");
@@ -102,19 +138,19 @@ void event_signal_transmit(void *context, enum event_type type)
     debug("%s: %s\n", __FUNCTION__, event_type_str[type]);
 
     for (int i = 0; i < signal_count; ++i) {
-        fork_exec(g_signal_event[type][i].command, &args);
+        struct signal *signal = &g_signal_event[type][i];
+        if (!args.entity || !event_signal_filter(signal, type, &args)) {
+            fork_exec(signal->command, &args);
+        }
     }
 
     exit(EXIT_SUCCESS);
 }
 
-void event_signal_add(enum event_type type, char *action, char *label)
+void event_signal_add(enum event_type type, struct signal signal)
 {
-    if (label) event_signal_remove(label);
-    buf_push(g_signal_event[type], ((struct signal) {
-        .command = action,
-        .label   = label
-    }));
+    if (signal.label) event_signal_remove(signal.label);
+    buf_push(g_signal_event[type], signal);
 }
 
 bool event_signal_remove(char *label)
@@ -122,6 +158,8 @@ bool event_signal_remove(char *label)
     for (int i = 0; i < EVENT_TYPE_COUNT; ++i) {
         for (int j = 0; j < buf_len(g_signal_event[i]); ++j) {
             if (string_equals(label, g_signal_event[i][j].label)) {
+                if (g_signal_event[i][j].app_regex_valid)   regfree(&g_signal_event[i][j].app_regex);
+                if (g_signal_event[i][j].title_regex_valid) regfree(&g_signal_event[i][j].title_regex);
                 free(g_signal_event[i][j].command);
                 free(g_signal_event[i][j].label);
                 buf_del(g_signal_event[i], j);

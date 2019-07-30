@@ -185,6 +185,10 @@ struct event
 
 struct signal
 {
+    bool app_regex_valid;
+    bool title_regex_valid;
+    regex_t app_regex;
+    regex_t title_regex;
     char *command;
     char *label;
 };
@@ -212,7 +216,7 @@ struct signal
     } while (0)
 
 void event_signal_transmit(void *context, enum event_type type);
-void event_signal_add(enum event_type type, char *action, char *label);
+void event_signal_add(enum event_type type, struct signal signal);
 bool event_signal_remove(char *label);
 void event_destroy(struct event *event);
 enum event_type event_type_from_string(const char *str);

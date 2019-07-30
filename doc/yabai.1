@@ -501,9 +501,9 @@ A signal is a simple way for the user to react to some event that has been proce
 yabai \-m signal \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
-\fB\-\-add label=\fI<LABEL>\fP event=\fI<EVENT>\fP action=\fI<ACTION>\fP\fP
+\fB\-\-add event=\fI<EVENT>\fP action=\fI<ACTION>\fP [label=\fI<LABEL>\fP] [app=\fI<REGEX>\fP] [title=\fI<REGEX>\fP]\fP
 .RS 4
-Add a new labelled signal to execute an action after processing an event of the given type.
+Add an optionally labelled signal to execute an action after processing an event of the given type. Some signals can be specified to trigger based on the application name and/or window title.
 .RE
 .sp
 \fB\-\-remove \fI<LABEL>\fP\fP
@@ -514,12 +514,12 @@ Remove an existing signal with the given label.
 .sp
 \fBapplication_launched\fP
 .RS 4
-Triggered when a new application is launched. Passes one argument: $YABAI_PROCESS_ID
+Triggered when a new application is launched. Eligible for \fBapp=\fP filter. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_terminated\fP
 .RS 4
-Triggered when an application is terminated. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is terminated. Eligible for \fBapp=\fP filter Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_front_switched\fP
@@ -529,27 +529,27 @@ Triggered when the front\-most application changes. Passes two arguments: $YABAI
 .sp
 \fBapplication_activated\fP
 .RS 4
-Triggered when an application is activated. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is activated. Eligible for \fBapp=\fP filter. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_deactivated\fP
 .RS 4
-Triggered when an application is deactivated. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is deactivated. Eligible for \fBapp=\fP filter. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_visible\fP
 .RS 4
-Triggered when an application is unhidden. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is unhidden. Eligible for \fBapp=\fP filter. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_hidden\fP
 .RS 4
-Triggered when an application is hidden. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is hidden. Eligible for \fBapp=\fP filter. Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBwindow_created\fP
 .RS 4
-Triggered when a window is created. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window is created. Eligible for both \fBapp=\fP and \fBtitle=\fP filter. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_destroyed\fP
@@ -559,32 +559,32 @@ Triggered when a window is destroyed. Passes one argument: $YABAI_WINDOW_ID
 .sp
 \fBwindow_focused\fP
 .RS 4
-Triggered when a window becomes the key\-window for its application. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window becomes the key\-window for its application. Eligible for both \fBapp=\fP and \fBtitle=\fP filter. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_moved\fP
 .RS 4
-Triggered when a window changes position. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window changes position. Eligible for both \fBapp=\fP and \fBtitle=\fP filter. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_resized\fP
 .RS 4
-Triggered when a window changes dimensions. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window changes dimensions. Eligible for both \fBapp=\fP and \fBtitle=\fP filter. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_minimized\fP
 .RS 4
-Triggered when a window has been minimized. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window has been minimized. Eligible for both \fBapp=\fP and \fBtitle=\fP filter. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_deminimized\fP
 .RS 4
-Triggered when a window has been deminimized. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window has been deminimized. Eligible for both \fBapp=\fP and \fBtitle=\fP filter. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_title_changed\fP
 .RS 4
-Triggered when a window changes its title. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window changes its title. Eligible for both \fBapp=\fP and \fBtitle=\fP filter. Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBspace_changed\fP

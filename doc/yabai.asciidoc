@@ -390,8 +390,8 @@ yabai -m signal '<COMMAND>'
 COMMAND
 ^^^^^^^
 
-*--add label='<LABEL>' event='<EVENT>' action='<ACTION>'*::
-    Add a new labelled signal to execute an action after processing an event of the given type.
+*--add event='<EVENT>' action='<ACTION>' [label='<LABEL>'] [app='<REGEX>'] [title='<REGEX>']*::
+    Add an optionally labelled signal to execute an action after processing an event of the given type. Some signals can be specified to trigger based on the application name and/or window title.
 
 *--remove '<LABEL>'*::
     Remove an existing signal with the given label.
@@ -400,49 +400,49 @@ EVENT
 ^^^^^
 
 *application_launched*::
-    Triggered when a new application is launched. Passes one argument: $YABAI_PROCESS_ID
+    Triggered when a new application is launched. Eligible for *app=* filter. Passes one argument: $YABAI_PROCESS_ID
 
 *application_terminated*::
-    Triggered when an application is terminated. Passes one argument: $YABAI_PROCESS_ID
+    Triggered when an application is terminated. Eligible for *app=* filter Passes one argument: $YABAI_PROCESS_ID
 
 *application_front_switched*::
     Triggered when the front-most application changes. Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID
 
 *application_activated*::
-    Triggered when an application is activated. Passes one argument: $YABAI_PROCESS_ID
+    Triggered when an application is activated. Eligible for *app=* filter. Passes one argument: $YABAI_PROCESS_ID
 
 *application_deactivated*::
-    Triggered when an application is deactivated. Passes one argument: $YABAI_PROCESS_ID
+    Triggered when an application is deactivated. Eligible for *app=* filter. Passes one argument: $YABAI_PROCESS_ID
 
 *application_visible*::
-    Triggered when an application is unhidden. Passes one argument: $YABAI_PROCESS_ID
+    Triggered when an application is unhidden. Eligible for *app=* filter. Passes one argument: $YABAI_PROCESS_ID
 
 *application_hidden*::
-    Triggered when an application is hidden. Passes one argument: $YABAI_PROCESS_ID
+    Triggered when an application is hidden. Eligible for *app=* filter. Passes one argument: $YABAI_PROCESS_ID
 
 *window_created*::
-    Triggered when a window is created. Passes one argument: $YABAI_WINDOW_ID
+    Triggered when a window is created. Eligible for both *app=* and *title=* filter. Passes one argument: $YABAI_WINDOW_ID
 
 *window_destroyed*::
     Triggered when a window is destroyed. Passes one argument: $YABAI_WINDOW_ID
 
 *window_focused*::
-    Triggered when a window becomes the key-window for its application. Passes one argument: $YABAI_WINDOW_ID
+    Triggered when a window becomes the key-window for its application. Eligible for both *app=* and *title=* filter. Passes one argument: $YABAI_WINDOW_ID
 
 *window_moved*::
-    Triggered when a window changes position. Passes one argument: $YABAI_WINDOW_ID
+    Triggered when a window changes position. Eligible for both *app=* and *title=* filter. Passes one argument: $YABAI_WINDOW_ID
 
 *window_resized*::
-    Triggered when a window changes dimensions. Passes one argument: $YABAI_WINDOW_ID
+    Triggered when a window changes dimensions. Eligible for both *app=* and *title=* filter. Passes one argument: $YABAI_WINDOW_ID
 
 *window_minimized*::
-    Triggered when a window has been minimized. Passes one argument: $YABAI_WINDOW_ID
+    Triggered when a window has been minimized. Eligible for both *app=* and *title=* filter. Passes one argument: $YABAI_WINDOW_ID
 
 *window_deminimized*::
-    Triggered when a window has been deminimized. Passes one argument: $YABAI_WINDOW_ID
+    Triggered when a window has been deminimized. Eligible for both *app=* and *title=* filter. Passes one argument: $YABAI_WINDOW_ID
 
 *window_title_changed*::
-    Triggered when a window changes its title. Passes one argument: $YABAI_WINDOW_ID
+    Triggered when a window changes its title. Eligible for both *app=* and *title=* filter. Passes one argument: $YABAI_WINDOW_ID
 
 *space_changed*::
     Triggered when the active space has changed. Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID
