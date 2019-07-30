@@ -590,8 +590,9 @@ static void do_space_move(const char *message)
     unsigned dest_display_id = ((unsigned (*)(id, SEL, id)) objc_msgSend)(dock_spaces, @selector(displayIDForSpace:), dest_space);
     id dest_display_space = display_space_for_display_uuid(dest_display_uuid);
 
+    asm__call_move_space(source_space, dest_space, dest_display_uuid, dock_spaces, move_space_fp);
+
     dispatch_sync(dispatch_get_main_queue(), ^{
-        asm__call_move_space(source_space, dest_space, dest_display_uuid, dock_spaces, move_space_fp);
         objc_msgSend(dp_desktop_picture_manager, @selector(moveSpace:toDisplay:displayUUID:), source_space, dest_display_id, dest_display_uuid);
     });
 
