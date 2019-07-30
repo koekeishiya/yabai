@@ -765,6 +765,25 @@ void space_manager_init(struct space_manager *sm)
     sm->window_placement = CHILD_SECOND;
 
     table_init(&sm->view, 23, hash_view, compare_view);
+
+    uint32_t display_count;
+    uint32_t *display_list = display_manager_active_display_list(&display_count);
+    if (!display_list) return;
+
+    for (int i = 0; i < display_count; ++i) {
+        int space_count;
+        uint64_t *space_list = display_space_list(display_list[i], &space_count);
+        if (!space_list) continue;
+
+        for (int j = 0; j < space_count; ++j) {
+            struct view *view = view_create(space_list[j]);
+            table_add(&sm->view, &space_list[j], view);
+        }
+
+        free(space_list);
+    }
+
+    free(display_list);
 }
 
 void space_manager_begin(struct space_manager *sm)

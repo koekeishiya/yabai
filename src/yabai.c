@@ -275,8 +275,8 @@ int main(int argc, char **argv)
 
     process_manager_init(&g_process_manager);
     workspace_event_handler_init(&g_workspace_context);
-    space_manager_init(&g_space_manager);
     window_manager_init(&g_window_manager);
+    space_manager_init(&g_space_manager);
     mouse_state_init(&g_mouse_state);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
 

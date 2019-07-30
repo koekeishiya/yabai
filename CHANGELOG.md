@@ -26,6 +26,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Warping a window should respect insert direction in scenarios where the default warp is equal to a swap operation [#146](https://github.com/koekeishiya/yabai/issues/146)
 - Exiting mission-control will invalidate the region assigned to Spaces/Views as because a Space may have been dragged to a different monitor [#](https://github.com/koekeishiya/yabai/issues/118)
 - Application_Launched signal incorrectly fired multiple times due to accessibility retries [#175](https://github.com/koekeishiya/yabai/issues/175)
+- Global space settings should properly apply again [#176](https://github.com/koekeishiya/yabai/issues/176)
 
 ## [1.1.2] - 2019-07-15
 ### Changed
