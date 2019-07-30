@@ -292,6 +292,9 @@ COMMAND
 *--space* '<SPACE_SEL>'::
     Send the selected window to the given space.
 
+*--close*::
+    Closes the selected window. Only works on windows that provide a close button in its titlebar.
+
 Query
 ~~~~~~
 

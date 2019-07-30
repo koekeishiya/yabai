@@ -110,6 +110,7 @@ extern struct bar g_bar;
 #define COMMAND_WINDOW_GRID    "--grid"
 #define COMMAND_WINDOW_MOVE    "--move"
 #define COMMAND_WINDOW_RESIZE  "--resize"
+#define COMMAND_WINDOW_CLOSE   "--close"
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
 #define COMMAND_WINDOW_DISPLAY "--display"
 #define COMMAND_WINDOW_SPACE   "--space"
@@ -1333,6 +1334,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             window_manager_resize_window_relative(&g_window_manager, acting_window, parse_resize_handle(handle), w, h);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_CLOSE)) {
+        if (!window_manager_close_window(acting_window)) {
+            daemon_fail(rsp, "could not close window with id '%d'\n", acting_window->id);
         }
     } else if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
         struct token value = get_token(&message);

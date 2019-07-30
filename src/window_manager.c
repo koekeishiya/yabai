@@ -1131,6 +1131,18 @@ void window_manager_swap_window(struct space_manager *sm, struct window_manager 
     window_node_flush(b_node);
 }
 
+bool window_manager_close_window(struct window *window)
+{
+    CFTypeRef button = NULL;
+    AXUIElementCopyAttributeValue(window->ref, kAXCloseButtonAttribute, &button);
+    if (!button) return false;
+
+    AXUIElementPerformAction(button, kAXPressAction);
+    CFRelease(button);
+
+    return true;
+}
+
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid)
 {
     uint64_t src_sid = window_space(window);
