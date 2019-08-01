@@ -557,5 +557,7 @@ void view_clear(struct view *view)
             window_node_destroy(view->root->right);
             view->root->right = NULL;
         }
+
+        view->root->window_id = 0;
     }
 }
