@@ -325,16 +325,12 @@ struct window_node *view_find_min_depth_leaf_node(struct window_node *node)
     return NULL;
 }
 
-struct window_node *view_find_window_node(struct window_node *node, uint32_t window_id)
+struct window_node *view_find_window_node(struct view *view, uint32_t window_id)
 {
-    if (node->window_id == window_id) return node;
-
-    if (!window_node_is_leaf(node)) {
-        struct window_node *left = view_find_window_node(node->left, window_id);
-        if (left) return left;
-
-        struct window_node *right = view_find_window_node(node->right, window_id);
-        if (right) return right;
+    struct window_node *node = window_node_find_first_leaf(view->root);
+    while (node) {
+        if (node->window_id == window_id) return node;
+        node = window_node_find_next_leaf(node);
     }
 
     return NULL;
@@ -342,7 +338,7 @@ struct window_node *view_find_window_node(struct window_node *node, uint32_t win
 
 void view_remove_window_node(struct view *view, struct window *window)
 {
-    struct window_node *node = view_find_window_node(view->root, window->id);
+    struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return;
 
     if (node == view->root) {
@@ -387,12 +383,13 @@ void view_add_window_node(struct view *view, struct window *window)
         struct window_node *leaf = NULL;
 
         if (view->insertion_point) {
-            leaf = view_find_window_node(view->root, view->insertion_point);
+            leaf = view_find_window_node(view, view->insertion_point);
             view->insertion_point = 0;
         }
 
-        if (!leaf) leaf = view_find_window_node(view->root, g_window_manager.focused_window_id);
+        if (!leaf) leaf = view_find_window_node(view, g_window_manager.focused_window_id);
         if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
+
         struct window *leaf_window = window_manager_find_window(&g_window_manager, leaf->window_id);
         window_node_split(view, leaf, window);
 
@@ -548,16 +545,8 @@ struct view *view_create(uint64_t sid)
 void view_clear(struct view *view)
 {
     if (view->root) {
-        if (view->root->left) {
-            window_node_destroy(view->root->left);
-            view->root->left = NULL;
-        }
-
-        if (view->root->right) {
-            window_node_destroy(view->root->right);
-            view->root->right = NULL;
-        }
-
-        view->root->window_id = 0;
+        if (view->root->left)  window_node_destroy(view->root->left);
+        if (view->root->right) window_node_destroy(view->root->right);
+        memset(view->root, 0, sizeof(struct window_node));
     }
 }

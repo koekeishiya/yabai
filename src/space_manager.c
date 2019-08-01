@@ -360,7 +360,7 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct window *
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (view->layout != VIEW_BSP) return;
 
-    struct window_node *node = view_find_window_node(view->root, window->id);
+    struct window_node *node = view_find_window_node(view, window->id);
     if (node && window_node_is_intermediate(node)) {
         node->parent->split = node->parent->split == SPLIT_Y ? SPLIT_X : SPLIT_Y;
 

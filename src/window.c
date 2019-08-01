@@ -133,7 +133,7 @@ void window_serialize(FILE *rsp, struct window *window)
     }
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-    struct window_node *node = view ? view_find_window_node(view->root, window->id) : NULL;
+    struct window_node *node = view ? view_find_window_node(view, window->id) : NULL;
 
     char split[MAXLEN];
     snprintf(split, sizeof(split), "%s", window_node_split_str[node && node->parent ? node->parent->split : 0]);

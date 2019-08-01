@@ -258,7 +258,7 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct win
         struct window_node *x_fence = NULL;
         struct window_node *y_fence = NULL;
 
-        struct window_node *node = view_find_window_node(view->root, window->id);
+        struct window_node *node = view_find_window_node(view, window->id);
         if (!node) return;
 
         if (direction & HANDLE_TOP)    x_fence = window_node_fence(node, DIR_NORTH);
@@ -613,7 +613,7 @@ struct window *window_manager_find_prev_managed_window(struct space_manager *sm,
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
 
-    struct window_node *node = view_find_window_node(view->root, window->id);
+    struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return NULL;
 
     struct window_node *prev = window_node_find_prev_leaf(node);
@@ -627,7 +627,7 @@ struct window *window_manager_find_next_managed_window(struct space_manager *sm,
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
 
-    struct window_node *node = view_find_window_node(view->root, window->id);
+    struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return NULL;
 
     struct window_node *prev = window_node_find_next_leaf(node);
@@ -663,7 +663,7 @@ struct window *window_manager_find_recent_managed_window(struct space_manager *s
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
     if (!view) return NULL;
 
-    struct window_node *node = view_find_window_node(view->root, wm->last_window_id);
+    struct window_node *node = view_find_window_node(view, wm->last_window_id);
     if (!node) return NULL;
 
     return window_manager_find_window(wm, node->window_id);
@@ -987,11 +987,11 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout != VIEW_BSP) return;
 
-    struct window_node *node = view_find_window_node(view->root, window->id);
+    struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return;
 
     if (view->insertion_point && view->insertion_point != window->id) {
-        struct window_node *insert_node = view_find_window_node(view->root, view->insertion_point);
+        struct window_node *insert_node = view_find_window_node(view, view->insertion_point);
         if (insert_node) {
             insert_node->split = SPLIT_NONE;
             insert_node->child = CHILD_NONE;
@@ -1050,10 +1050,10 @@ void window_manager_warp_window(struct space_manager *sm, struct window_manager 
     struct view *b_view = space_manager_find_view(sm, b_sid);
     if (b_view->layout != VIEW_BSP) return;
 
-    struct window_node *a_node = view_find_window_node(a_view->root, a->id);
+    struct window_node *a_node = view_find_window_node(a_view, a->id);
     if (!a_node) return;
 
-    struct window_node *b_node = view_find_window_node(b_view->root, b->id);
+    struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return;
 
     if (a_node->parent == b_node->parent) {
@@ -1110,10 +1110,10 @@ void window_manager_swap_window(struct space_manager *sm, struct window_manager 
     struct view *b_view = space_manager_find_view(sm, b_sid);
     if (b_view->layout != VIEW_BSP) return;
 
-    struct window_node *a_node = view_find_window_node(a_view->root, a->id);
+    struct window_node *a_node = view_find_window_node(a_view, a->id);
     if (!a_node) return;
 
-    struct window_node *b_node = view_find_window_node(b_view->root, b->id);
+    struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return;
 
     a_node->window_id = b->id;
@@ -1328,7 +1328,7 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view || view->layout != VIEW_BSP) return;
 
-    struct window_node *node = view_find_window_node(view->root, window->id);
+    struct window_node *node = view_find_window_node(view, window->id);
     if (node->zoom) {
         float offset = window_node_border_window_offset(window);
         window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
@@ -1347,7 +1347,7 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view || view->layout != VIEW_BSP) return;
 
-    struct window_node *node = view_find_window_node(view->root, window->id);
+    struct window_node *node = view_find_window_node(view, window->id);
     if (node->zoom) {
         float offset = window_node_border_window_offset(window);
         window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
@@ -1364,7 +1364,7 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
 void window_manager_toggle_window_border(struct window_manager *wm, struct window *window)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
-    struct window_node *node = view ? view_find_window_node(view->root, window->id) : NULL;
+    struct window_node *node = view ? view_find_window_node(view, window->id) : NULL;
 
     if (window->border.enabled) {
         border_window_hide(window);

@@ -950,8 +950,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
             if (!window) window = window_manager_find_window_at_point(&g_window_manager, point);
             if (window == g_mouse_state.window) window = NULL;
 
-            struct window_node *a_node = view_find_window_node(src_view->root, g_mouse_state.window->id);
-            struct window_node *b_node = window ? view_find_window_node(dst_view->root, window->id) : NULL;
+            struct window_node *a_node = view_find_window_node(src_view, g_mouse_state.window->id);
+            struct window_node *b_node = window ? view_find_window_node(dst_view, window->id) : NULL;
 
             if (src_view->sid == dst_view->sid) {
                 if (a_node && b_node) {
