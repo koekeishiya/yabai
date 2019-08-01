@@ -61,7 +61,7 @@ static CTFontRef bar_create_font(char *cstring)
 {
     float size = 10.0f;
     char font_properties[2][255] = { {}, {} };
-    sscanf(cstring, "%255[^:]:%255[^:]:%f", font_properties[0], font_properties[1], &size);
+    sscanf(cstring, "%254[^:]:%254[^:]:%f", font_properties[0], font_properties[1], &size);
     CFStringRef font_family_name = CFStringCreateWithCString(NULL, font_properties[0], kCFStringEncodingUTF8);
     CFStringRef font_style_name = CFStringCreateWithCString(NULL, font_properties[1], kCFStringEncodingUTF8);
     CFNumberRef font_size = CFNumberCreate(NULL, kCFNumberFloat32Type, &size);
