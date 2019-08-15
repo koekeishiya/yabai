@@ -46,10 +46,10 @@ Options
     Use the specified configuration file.
 
 *--install-sa*::
-    Install scripting-addition. Must be ran as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+    Install scripting-addition. Must be run as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
 
 *--uninstall-sa*::
-    Uninstall scripting-addition. Must be ran as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+    Uninstall scripting-addition. Must be run as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
 
 *--check-sa*::
     Returns a zero exit-code if the latest version of the scripting-addition is installed.
