@@ -423,7 +423,7 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct window 
     char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", window->id, opacity, 0.2f);
+        snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", window->id, opacity, wm->window_opacity_duration);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
@@ -1501,6 +1501,7 @@ void window_manager_init(struct window_manager *wm)
     wm->insert_window_border_color = 0xfff57f7f;
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
+    wm->window_opacity_duration = 0.2f;
 
     table_init(&wm->application, 150, hash_wm, compare_wm);
     table_init(&wm->window, 150, hash_wm, compare_wm);

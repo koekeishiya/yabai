@@ -71,6 +71,7 @@ struct window_manager
     uint32_t insert_window_border_color;
     float active_window_opacity;
     float normal_window_opacity;
+    float window_opacity_duration;
 };
 
 void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid);

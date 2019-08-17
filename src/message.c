@@ -22,6 +22,7 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
 #define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
+#define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
@@ -366,6 +367,13 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_window_manager.enable_window_opacity = true;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_OPACITY)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%f\n", g_window_manager.window_opacity_duration);
+        } else {
+            g_window_manager.window_opacity_duration = token_to_float(value);
         }
     } else if (token_equals(command, COMMAND_CONFIG_SHADOW)) {
         struct token value = get_token(&message);
