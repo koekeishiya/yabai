@@ -956,14 +956,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
             if (src_view->sid == dst_view->sid) {
                 if (a_node && b_node) {
                     a_node->window_id = window->id;
+                    a_node->zoom = NULL;
                     b_node->window_id = g_mouse_state.window->id;
+                    b_node->zoom = NULL;
                     window_node_flush(a_node);
                     window_node_flush(b_node);
-                    a_node->zoom = NULL;
-                    b_node->zoom = NULL;
                 } else if (a_node) {
-                    window_node_flush(a_node);
                     a_node->zoom = NULL;
+                    window_node_flush(a_node);
                 }
             } else {
                 space_manager_untile_window(&g_space_manager, src_view, g_mouse_state.window);
