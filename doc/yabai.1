@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-08-01
+.\"      Date: 2019-08-17
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-08-01" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-08-17" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -103,9 +103,14 @@ LABEL       := arbitrary string/text used as an identifier
 .SS "Config"
 .SS "General Syntax"
 .sp
-yabai \-m config [\-\-space \fI<mission\-control index>\fP] <setting> [<value>]
+yabai \-m config <global setting> [<value>]
 .RS 4
-Get or set the value of <setting>.
+Get or set the value of <global setting>.
+.RE
+.sp
+yabai \-m config [\-\-space \fI<mission\-control index>\fP] <space setting> [<value>]
+.RS 4
+Get or set the value of <space setting>.
 .RE
 .SS "Global Settings"
 .sp

@@ -88,8 +88,11 @@ Config
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m config [--space '<mission-control index>'] <setting> [<value>]::
-    Get or set the value of <setting>.
+yabai -m config <global setting> [<value>]::
+    Get or set the value of <global setting>.
+
+yabai -m config [--space '<mission-control index>'] <space setting> [<value>]::
+    Get or set the value of <space setting>.
 
 Global Settings
 ^^^^^^^^^^^^^^^
