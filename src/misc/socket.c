@@ -89,9 +89,11 @@ static void *socket_connection_handler(void *context)
 
         int length;
         char *message = socket_read(sockfd, &length);
-        if (!message) continue;
-
-        daemon->handler(message, length, sockfd);
+        if (message) {
+            daemon->handler(message, length, sockfd);
+        } else {
+            socket_close(sockfd);
+        }
     }
 
     return NULL;

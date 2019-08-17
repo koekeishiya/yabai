@@ -48,6 +48,10 @@ bool g_verbose;
 
 static int client_send_message(int argc, char **argv)
 {
+    if (argc <= 1) {
+        error("yabai-msg: no arguments given! abort..\n");
+    }
+
     char *user = getenv("USER");
     if (!user) {
         error("yabai-msg: 'env USER' not set! abort..\n");
