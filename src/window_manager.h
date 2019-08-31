@@ -84,6 +84,7 @@ bool window_manager_should_manage_window(struct window *window);
 void window_manager_tile_window(struct window_manager *wm, struct window *window);
 void window_manager_move_window(struct window *window, float x, float y);
 void window_manager_resize_window(struct window *window, float width, float height);
+void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height);
 struct window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid);
 struct window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point);
 struct window *window_manager_find_window_below_cursor(struct window_manager *wm);

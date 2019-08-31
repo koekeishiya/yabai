@@ -192,11 +192,9 @@ void window_node_flush(struct window_node *node)
         if (window) {
             float offset = window_node_border_window_offset(window);
             if (node->zoom) {
-                window_manager_move_window(window, node->zoom->area.x + offset, node->zoom->area.y + offset);
-                window_manager_resize_window(window, node->zoom->area.w - 2*offset, node->zoom->area.h - 2*offset);
+                window_manager_set_window_frame(window, node->zoom->area.x + offset, node->zoom->area.y + offset, node->zoom->area.w - 2*offset, node->zoom->area.h - 2*offset);
             } else {
-                window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
-                window_manager_resize_window(window, node->area.w - 2*offset, node->area.h - 2*offset);
+                window_manager_set_window_frame(window, node->area.x + offset, node->area.y + offset, node->area.w - 2*offset, node->area.h - 2*offset);
             }
         }
     }

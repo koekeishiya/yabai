@@ -318,6 +318,13 @@ void window_manager_resize_window(struct window *window, float width, float heig
     CFRelease(size_ref);
 }
 
+void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height)
+{
+    window_manager_resize_window(window, width, height);
+    window_manager_move_window(window, x, y);
+    window_manager_resize_window(window, width, height);
+}
+
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode)
 {
     wm->purify_mode = mode;
