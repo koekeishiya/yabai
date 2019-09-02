@@ -117,6 +117,21 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     free(display_list);
 }
 
+static void window_manager_perform_space_assignment_rule(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule, uint64_t sid)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (view) {
+        space_manager_untile_window(sm, view, window);
+        window_manager_remove_managed_window(wm, window->id);
+        window_manager_purify_window(wm, window);
+    }
+
+    space_manager_move_window_to_space(sid, window);
+    if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
+        space_manager_focus_space(sid);
+    }
+}
+
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
 {
     if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == REGEX_MATCH_NO) return;
@@ -126,19 +141,12 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         if (rule->display) {
             uint32_t did = display_manager_arrangement_display_id(rule->display);
             if (did) {
-                uint64_t sid = display_space_id(did);
-                space_manager_move_window_to_space(sid, window);
-                if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
-                    space_manager_focus_space(sid);
-                }
+                window_manager_perform_space_assignment_rule(sm, wm, window, rule, display_space_id(did));
             }
         } else if (rule->space) {
             uint64_t sid = space_manager_mission_control_space(rule->space);
             if (sid) {
-                space_manager_move_window_to_space(sid, window);
-                if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
-                    space_manager_focus_space(sid);
-                }
+                window_manager_perform_space_assignment_rule(sm, wm, window, rule, sid);
             }
         }
     }
