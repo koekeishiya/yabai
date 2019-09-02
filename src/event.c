@@ -420,6 +420,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
         if (window) {
+            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+            if (view) continue;
+
             if (window_manager_should_manage_window(window)) {
                 struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
                 window_manager_add_managed_window(&g_window_manager, window, view);
