@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.0.0] - 2019-09-03
 ### Added
 - Commands to toggle mission-control, show-desktop, and application expose [#147](https://github.com/koekeishiya/yabai/issues/147)
 - Command to close windows that provide a close button in its titlebar [#84](https://github.com/koekeishiya/yabai/issues/84)
@@ -96,7 +98,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/koekeishiya/yabai/compare/v1.1.2...v2.0.0
 [1.1.2]: https://github.com/koekeishiya/yabai/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/koekeishiya/yabai/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/koekeishiya/yabai/compare/v1.0.6...v1.1.0
