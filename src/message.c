@@ -605,6 +605,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                     if (space_is_user(sel_sid)) {
                         view->layout = VIEW_FLOAT;
                         view->custom_layout = true;
+                        view_clear(view);
                     } else {
                         daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
                     }
