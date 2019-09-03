@@ -551,5 +551,6 @@ void view_clear(struct view *view)
         if (view->root->left)  window_node_destroy(view->root->left);
         if (view->root->right) window_node_destroy(view->root->right);
         memset(view->root, 0, sizeof(struct window_node));
+        view_update(view);
     }
 }
