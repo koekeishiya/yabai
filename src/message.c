@@ -368,7 +368,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
-    } else if (token_equals(command, COMMAND_CONFIG_OPACITY)) {
+    } else if (token_equals(command, COMMAND_CONFIG_OPACITY_DURATION)) {
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%f\n", g_window_manager.window_opacity_duration);

@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.0.1] - 2019-09-04
+### Changed
+- *window_opacity_duration* was a *copy-pasta* job [#208](https://github.com/koekeishiya/yabai/issues/208)
+
 ## [2.0.0] - 2019-09-03
 ### Added
 - Commands to toggle mission-control, show-desktop, and application expose [#147](https://github.com/koekeishiya/yabai/issues/147)
@@ -99,7 +103,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/koekeishiya/yabai/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/koekeishiya/yabai/compare/v1.1.2...v2.0.0
 [1.1.2]: https://github.com/koekeishiya/yabai/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/koekeishiya/yabai/compare/v1.1.0...v1.1.1
