@@ -128,17 +128,14 @@ static uint64_t image_slide(void)
 
 static uint64_t hex_find_seq(uint64_t baddr, const char *c_pattern)
 {
-    if (!baddr)     return 0x0;
-    if (!c_pattern) return 0x0;
+    if (!baddr || !c_pattern) return 0;
 
-    int counter = 0;
     uint64_t addr = baddr;
     uint64_t pattern_length = (strlen(c_pattern) + 1) / 3;
-
     char buffer_a[pattern_length];
     char buffer_b[pattern_length];
-    memset(buffer_a, '\0', sizeof(buffer_a));
-    memset(buffer_b, '\0', sizeof(buffer_b));
+    memset(buffer_a, 0, sizeof(buffer_a));
+    memset(buffer_b, 0, sizeof(buffer_b));
 
     char *pattern = (char *) c_pattern + 1;
     for (int i = 0; i < pattern_length; ++i) {
@@ -146,51 +143,28 @@ static uint64_t hex_find_seq(uint64_t baddr, const char *c_pattern)
         if (c == '?') {
             buffer_b[i] = 1;
         } else {
-            int temp = 9;
-            if (c <= '9') {
-                temp = 0;
-            }
+            int temp = c <= '9' ? 0 : 9;
             temp = (temp + c) << 0x4;
             c = pattern[0];
-            int temp2 = 0xc9;
-            if (c <= '9') {
-                temp2 = 0xd0;
-            }
+            int temp2 = c <= '9' ? 0xd0 : 0xc9;
             buffer_a[i] = temp2 + c + temp;
         }
         pattern += 3;
     }
-    goto loc_59f2;
 
-loc_59f2:
-    if (pattern_length < 3) goto loc_5a14;
+loop:
+    for (int counter = 0; counter < pattern_length; ++counter) {
+        if ((buffer_b[counter] == 0) && (((char *)addr)[counter] != buffer_a[counter])) {
+            addr = (uint64_t)((char *)addr + 1);
+            if (addr - baddr < 0x286a0) {
+                goto loop;
+            } else {
+                return 0;
+            }
+        }
+    }
 
-loc_59f8:
-    counter = 0;
-    goto loc_59fa;
-
-loc_59fa:
-    if (buffer_b[counter] != 0 || ((char *)addr)[counter] == buffer_a[counter]) goto loc_5a0c;
-
-loc_5a19:
-    addr = (uint64_t)((char *)addr + 1);
-    if (addr - baddr < 0x286a0) goto loc_59f2;
-
-loc_5a2a:
-    addr = 0;
-    goto loc_5a2d;
-
-loc_5a2d:
     return addr;
-
-loc_5a0c:
-    counter = counter + 1;
-    if (counter < pattern_length) goto loc_59fa;
-
-loc_5a14:
-    if (addr != 0x0) goto loc_5a2d;
-
-    return 0;
 }
 
 uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
@@ -232,7 +206,7 @@ uint64_t get_add_space_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_remove_space_offset(NSOperatingSystemVersion os_version) {
     if (os_version.minorVersion == 15) {
-        return 0x330000;
+        return 0x320000;
     } else if (os_version.minorVersion == 14) {
         return 0x37fb00;
     } else if (os_version.minorVersion == 13) {
