@@ -165,9 +165,9 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (rule->sticky == RULE_PROP_ON) {
-        window_manager_make_sticky(window->id, true);
+        window_manager_make_sticky(wm, window->id, true);
     } else if (rule->sticky == RULE_PROP_OFF) {
-        window_manager_make_sticky(window->id, false);
+        window_manager_make_sticky(wm, window->id, false);
     }
 
     if (rule->border == RULE_PROP_ON) {
@@ -483,7 +483,7 @@ void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool 
     socket_close(sockfd);
 }
 
-void window_manager_make_sticky(uint32_t wid, bool sticky)
+void window_manager_make_sticky(struct window_manager *wm, uint32_t wid, bool sticky)
 {
     int sockfd;
     char message[MAXLEN];
@@ -495,12 +495,7 @@ void window_manager_make_sticky(uint32_t wid, bool sticky)
     }
     socket_close(sockfd);
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_level %d %d", wid, sticky ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
+    window_manager_make_floating(wm, wid, sticky);
 }
 
 void window_manager_purify_window(struct window_manager *wm, struct window *window)
@@ -1292,7 +1287,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
 void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     if (window_is_sticky(window)) {
-        window_manager_make_sticky(window->id, false);
+        window_manager_make_sticky(wm, window->id, false);
         if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
             window_manager_add_managed_window(wm, window, view);
@@ -1304,7 +1299,7 @@ void window_manager_toggle_window_sticky(struct space_manager *sm, struct window
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
-        window_manager_make_sticky(window->id, true);
+        window_manager_make_sticky(wm, window->id, true);
     }
 }
 
