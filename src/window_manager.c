@@ -1271,7 +1271,7 @@ void window_manager_make_children_floating(struct window_manager *wm, struct win
 
 void window_manager_toggle_window_topmost(struct window *window)
 {
-    bool is_topmost = window_level(window) == CGWindowLevelForKey(kCGFloatingWindowLevelKey);
+    bool is_topmost = window_is_topmost(window);
     window_manager_make_topmost(window->id, !is_topmost);
 }
 

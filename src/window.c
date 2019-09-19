@@ -119,7 +119,7 @@ void window_serialize(FILE *rsp, struct window *window)
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
     bool visible = sticky || space_is_visible(sid);
-    bool is_topmost = window_level(window) == CGWindowLevelForKey(kCGFloatingWindowLevelKey);
+    bool is_topmost = window_is_topmost(window);
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -304,6 +304,12 @@ err:
     CFRelease(window_list_ref);
     CFRelease(window_id_ref);
     return result;
+}
+
+bool window_is_topmost(struct window *window)
+{
+    bool is_topmost = window_level(window) == CGWindowLevelForKey(kCGFloatingWindowLevelKey);
+    return is_topmost;
 }
 
 int window_level(struct window *window)
