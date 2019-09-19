@@ -172,7 +172,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
 
     if (rule->topmost == RULE_PROP_ON) {
         window_manager_make_topmost(window->id, true);
-    } else if (rule->sticky == RULE_PROP_OFF) {
+    } else if (rule->topmost == RULE_PROP_OFF) {
         window_manager_make_topmost(window->id, false);
     }
 
