@@ -18,6 +18,7 @@ struct rule
     float alpha;
     int manage;
     int sticky;
+    int topmost;
     int border;
     int fullscreen;
     unsigned grid[6];

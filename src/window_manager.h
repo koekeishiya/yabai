@@ -137,7 +137,9 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
 void window_manager_purify_window(struct window_manager *wm, struct window *window);
 void window_manager_make_children_floating(struct window_manager *wm, struct window *window, bool floating);
 void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating);
+void window_manager_make_topmost(uint32_t wid, bool topmost);
 void window_manager_make_sticky(uint32_t wid, bool sticky);
+void window_manager_toggle_window_topmost(struct window *window);
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct window *window);
 void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window);
 void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window);

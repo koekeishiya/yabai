@@ -1,35 +1,23 @@
 '\" t
 .\"     Title: yabai
-.\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.6
-.\"      Date: 2019-08-17
+.\"    Author: [see the "AUTHORS" section]
+.\" Generator: Asciidoctor 1.5.4
+.\"      Date: 2019-09-19
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-08-17" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-09-19" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
 .nh
 .ad l
 .de URL
-\fI\\$2\fP <\\$1>\\$3
+\\$2 \(laURL: \\$1 \(ra\\$3
 ..
-.als MTO URL
-.if \n[.g] \{\
-.  mso www.tmac
-.  am URL
-.    ad l
-.  .
-.  am MTO
-.    ad l
-.  .
-.  LINKSTYLE blue R < >
-.\}
-.SH "NAME"
-.sp
-yabai
+.if \n[.g] .mso www.tmac
+.LINKSTYLE blue R < >
 .SH "SYNOPSIS"
 .sp
 \fByabai\fP [\fB\-v\fP,\fB\-\-version\fP|\fB\-V\fP,\fB\-\-verbose\fP|\fB\-m\fP,\fB\-\-message\fP \fImsg\fP|\fB\-c\fP,\fB\-\-config\fP \fIconfig_file\fP|\fB\-\-install\-sa\fP|\fB\-\-uninstall\-sa\fP|\fB\-\-check\-sa\fP|\fB\-\-load\-sa\fP]
@@ -79,7 +67,9 @@ Loads the scripting\-addition into Dock.app.
 .RE
 .SH "DEFINITIONS"
 .sp
-.if n .RS 4
+.if n \{\
+.RS 4
+.\}
 .nf
 DIR_SEL     := north | east | south | west
 
@@ -98,7 +88,9 @@ REGEX       := \c
 
 LABEL       := arbitrary string/text used as an identifier
 .fi
-.if n .RE
+.if n \{\
+.RE
+.\}
 .SH "DOMAINS"
 .SS "Config"
 .SS "General Syntax"
@@ -382,7 +374,7 @@ If type is \fIrel\fP the selected window is moved by \fIdx\fP pixels horizontall
 Resize the selected window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically. If handle is \fIabs\fP the new size will be \fIdx\fP width and \fIdy\fP height.
 .RE
 .sp
-\fB\-\-toggle\fP \fIfloat|sticky|shadow|split|border|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
+\fB\-\-toggle\fP \fIfloat|sticky|topmost|shadow|split|border|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
 .RS 4
 Toggle the given property of the selected window.
 .RE
@@ -492,6 +484,11 @@ Window should be managed (tile vs float)
 \fBsticky=\fI<BOOL_SEL>\fP\fP
 .RS 4
 Window appears on all spaces.
+.RE
+.sp
+\fBtopmost=\fI<BOOL_SEL>\fP\fP
+.RS 4
+Window appears above other windows.
 .RE
 .sp
 \fBborder=\fI<BOOL_SEL>\fP\fP

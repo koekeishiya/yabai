@@ -126,6 +126,7 @@ extern struct bar g_bar;
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
 #define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
+#define ARGUMENT_WINDOW_TOGGLE_ON_TOP "topmost"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
 #define ARGUMENT_WINDOW_TOGGLE_SHADOW "shadow"
@@ -158,6 +159,7 @@ extern struct bar g_bar;
 #define ARGUMENT_RULE_KEY_ALPHA   "opacity"
 #define ARGUMENT_RULE_KEY_MANAGE  "manage"
 #define ARGUMENT_RULE_KEY_STICKY  "sticky"
+#define ARGUMENT_RULE_KEY_ON_TOP  "topmost"
 #define ARGUMENT_RULE_KEY_BORDER  "border"
 #define ARGUMENT_RULE_KEY_FULLSCR "native-fullscreen"
 #define ARGUMENT_RULE_KEY_GRID    "grid"
@@ -1353,6 +1355,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
             window_manager_toggle_window_float(&g_space_manager, &g_window_manager, acting_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_ON_TOP)) {
+            window_manager_toggle_window_topmost(acting_window);
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
             window_manager_toggle_window_sticky(&g_space_manager, &g_window_manager, acting_window);
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SHADOW)) {
@@ -1616,6 +1620,12 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     rule->sticky = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->sticky = RULE_PROP_OFF;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_ON_TOP)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule->topmost = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule->topmost = RULE_PROP_OFF;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {

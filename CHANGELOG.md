@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Don't draw borders for minimized or hidden windows when a display is (dis)connected [#250](https://github.com/koekeishiya/yabai/issues/250)
+- Sticky windows are no longer automatically topmost. New option to toggle window always on top through command or rule [#255](https://github.com/koekeishiya/yabai/issues/255)
 
 ## [2.0.1] - 2019-09-04
 ### Changed

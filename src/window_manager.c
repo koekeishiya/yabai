@@ -170,6 +170,12 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window_manager_make_sticky(window->id, false);
     }
 
+    if (rule->topmost == RULE_PROP_ON) {
+        window_manager_make_topmost(window->id, true);
+    } else if (rule->sticky == RULE_PROP_OFF) {
+        window_manager_make_topmost(window->id, false);
+    }
+
     if (rule->border == RULE_PROP_ON) {
         border_window_create(window);
     } else if (rule->border == RULE_PROP_OFF) {
@@ -468,19 +474,23 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
     }
 }
 
-void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating)
+void window_manager_make_topmost(uint32_t wid, bool topmost)
 {
-    if (!wm->enable_window_topmost) return;
-
     int sockfd;
     char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_level %d %d", wid, floating ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
+        snprintf(message, sizeof(message), "window_level %d %d", wid, topmost ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
     socket_close(sockfd);
+}
+
+void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating)
+{
+    if (!wm->enable_window_topmost) return;
+    window_manager_make_topmost(wid, floating);
 }
 
 void window_manager_make_sticky(uint32_t wid, bool sticky)
@@ -490,13 +500,6 @@ void window_manager_make_sticky(uint32_t wid, bool sticky)
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_sticky %d %d", wid, sticky);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_level %d %d", wid, sticky ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
@@ -1264,6 +1267,12 @@ void window_manager_make_children_floating(struct window_manager *wm, struct win
     CFRelease(iterator);
     CFRelease(window_list_ref);
     free(window_list);
+}
+
+void window_manager_toggle_window_topmost(struct window *window)
+{
+    bool is_topmost = window_level(window) == CGWindowLevelForKey(kCGFloatingWindowLevelKey);
+    window_manager_make_topmost(window->id, !is_topmost);
 }
 
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct window *window)
