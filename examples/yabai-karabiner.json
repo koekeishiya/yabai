@@ -1,0 +1,1554 @@
+{
+    "title": "yabai",
+    "rules": [
+        {
+            "description": "yabai/window/focus (opt - [hjkl])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "h",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --focus west"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "j",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --focus south"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "k",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --focus north"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "l",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --focus east"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/swap (opt + shift - [hjkl])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "h",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --swap west"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "j",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --swap south"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "k",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --swap north"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "l",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --swap east"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/move (cmd + shift - [hjkl])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "h",
+                        "modifiers": {
+                            "mandatory": [
+                                "command",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --warp west"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "j",
+                        "modifiers": {
+                            "mandatory": [
+                                "command",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --warp south"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "k",
+                        "modifiers": {
+                            "mandatory": [
+                                "command",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --warp north"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "l",
+                        "modifiers": {
+                            "mandatory": [
+                                "command",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --warp east"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/balance (opt + cmd - 0)",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "0",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --balance"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/float/place (opt + shift - [arrow])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "up_arrow",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --grid 1:1:0:0:1:1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "left_arrow",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --grid 1:2:0:0:1:1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "right_arrow",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --grid 1:2:1:0:1:1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/desktop/create (shift/opt + cmd - n)",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "n",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --create &&     index=\"$(/usr/local/bin/yabai -m query --spaces --display | jq 'map(select(.\"native-fullscreen\" == 0))[-1].index')\" &&     /usr/local/bin/yabai -m window --space \"${index}\" &&     /usr/local/bin/yabai -m space --focus \"${index}\""
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "n",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --create &&     index=\"$(/usr/local/bin/yabai -m query --spaces --display | jq 'map(select(.\"native-fullscreen\" == 0))[-1].index')\" &&     /usr/local/bin/yabai -m space --focus \"${index}\""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/desktop/delete (opt + cmd + w)",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "w",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --destroy"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/desktop/focus (opt + cmd - [x,z,c,1..9,0])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "x",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus recent"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "z",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus prev"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "c",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus next"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "1",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "2",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 2"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "3",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 3"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "4",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 4"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "5",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 5"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "6",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 6"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "7",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 7"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "8",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 8"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "9",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 9"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "0",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/desktop/send_window (ctrl + opt - [x,z,c,1..9,0])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "x",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus recent; /usr/local/bin/yabai -m space --focus recent"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "z",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus prev;   /usr/local/bin/yabai -m space --focus prev"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "c",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus next;   /usr/local/bin/yabai -m space --focus next"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "1",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 1;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "2",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 2;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "3",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 3;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "4",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 4;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "5",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 5;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "6",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 6;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "7",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 7;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "8",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 8;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "9",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 9;      /usr/local/bin/yabai -m space --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "0",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --focus 10;     /usr/local/bin/yabai -m space --focus 10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/monitor/focus (ctrl + opt - [x,z,c,1..3])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "x",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus recent"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "z",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus prev"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "c",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus next"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "1",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "2",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus 2"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "3",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus 3"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/monitor/focus (ctrl + cmd - [x,z,c,1..3])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "x",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus recent; /usr/local/bin/yabai -m display --focus recent"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "z",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus prev;   /usr/local/bin/yabai -m display --focus prev"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "c",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus next;   /usr/local/bin/yabai -m display --focus next"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "1",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus 1;      /usr/local/bin/yabai -m display --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "2",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus 2;      /usr/local/bin/yabai -m display --focus 1"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "3",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m display --focus 3;      /usr/local/bin/yabai -m display --focus 1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/move (shift + ctrl - [wasd])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "a",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "control"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --move rel:-20:0"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "s",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "control"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --move rel:0:20"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "w",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "control"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --move rel:0:-20"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "d",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "control"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --move rel:20:0"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/size/increase (shift + opt - [wasd])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "a",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize left:-20:0"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "s",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize bottom:0:20"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "w",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize top:0:-20"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "d",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize right:20:0"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/size/decrese (shift + cmd - [wasd])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "a",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize left:20:0"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "s",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize bottom:0:-20"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "w",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize top:0:-20"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "d",
+                        "modifiers": {
+                            "mandatory": [
+                                "shift",
+                                "command"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --resize right:-20:0"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/insert (ctrl + opt - [hjkl])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "a",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --insert west"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "s",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --insert south"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "w",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --insert north"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "d",
+                        "modifiers": {
+                            "mandatory": [
+                                "control",
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --insert east"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/tree (opt - [rxy])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "r",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --rotate 90"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "y",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --mirror y-axis"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "x",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --mirror x-axis"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/toggle/zoom (opt (+ shift) - [df])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "d",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --toggle zoom-parent"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "f",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --toggle zoom-fullscreen"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "f",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --toggle native-fullscreen"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/toggle/view (opt - a, opt + shift - b)",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "a",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --toggle padding; /usr/local/bin/yabai -m space --toggle gap"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "b",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "shift"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --toggle border"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/toggle/and_place (opt - [tsp])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "t",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --toggle float; /usr/local/bin/yabai -m window --grid 4:4:1:1:2:2"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "s",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --toggle topmost"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "p",
+                        "modifiers": {
+                            "mandatory": [
+                                "option"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m window --toggle sticky;\n/usr/local/bin/yabai -m window --toggle topmost;\n/usr/local/bin/yabai -m window --grid 5:5:4:0:1:1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "description": "yabai/window/toggle/layout (opt + ctrl - [ad])",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "a",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "control"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --layout bsp"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "d",
+                        "modifiers": {
+                            "mandatory": [
+                                "option",
+                                "control"
+                            ]
+                        }
+                    },
+                    "to": [
+                        {
+                            "shell_command": "/usr/local/bin/yabai -m space --layout float"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
