@@ -1,23 +1,35 @@
 '\" t
 .\"     Title: yabai
-.\"    Author: [see the "AUTHORS" section]
-.\" Generator: Asciidoctor 1.5.4
-.\"      Date: 2019-09-19
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.6
+.\"      Date: 2019-09-29
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-09-19" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-09-29" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
 .nh
 .ad l
 .de URL
-\\$2 \(laURL: \\$1 \(ra\\$3
+\fI\\$2\fP <\\$1>\\$3
 ..
-.if \n[.g] .mso www.tmac
-.LINKSTYLE blue R < >
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+.sp
+yabai
 .SH "SYNOPSIS"
 .sp
 \fByabai\fP [\fB\-v\fP,\fB\-\-version\fP|\fB\-V\fP,\fB\-\-verbose\fP|\fB\-m\fP,\fB\-\-message\fP \fImsg\fP|\fB\-c\fP,\fB\-\-config\fP \fIconfig_file\fP|\fB\-\-install\-sa\fP|\fB\-\-uninstall\-sa\fP|\fB\-\-check\-sa\fP|\fB\-\-load\-sa\fP]
@@ -67,9 +79,7 @@ Loads the scripting\-addition into Dock.app.
 .RE
 .SH "DEFINITIONS"
 .sp
-.if n \{\
-.RS 4
-.\}
+.if n .RS 4
 .nf
 DIR_SEL     := north | east | south | west
 
@@ -88,9 +98,7 @@ REGEX       := \c
 
 LABEL       := arbitrary string/text used as an identifier
 .fi
-.if n \{\
-.RE
-.\}
+.if n .RE
 .SH "DOMAINS"
 .SS "Config"
 .SS "General Syntax"
