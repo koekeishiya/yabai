@@ -27,6 +27,16 @@ struct space_manager
     bool auto_balance;
 };
 
+enum space_op_error
+{
+    SPACE_OP_ERROR_SUCCESS      = 0,
+    SPACE_OP_ERROR_MISSNG_SRC   = 1,
+    SPACE_OP_ERROR_MISSNG_DST   = 2,
+    SPACE_OP_ERROR_INVALID_SRC  = 3,
+    SPACE_OP_ERROR_INVALID_DST  = 4,
+    SPACE_OP_ERROR_INVALID_TYPE = 5,
+};
+
 bool space_manager_has_separate_spaces(void);
 bool space_manager_query_active_space(FILE *rsp);
 bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window);
@@ -69,8 +79,8 @@ void space_manager_remove_window_from_space(uint64_t sid, struct window *window)
 void space_manager_add_window_to_space(uint64_t sid, struct window *window);
 void space_manager_focus_space(uint64_t sid);
 void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus);
-void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did);
-void space_manager_destroy_space(uint64_t sid);
+enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did);
+enum space_op_error space_manager_destroy_space(uint64_t sid);
 void space_manager_add_space(uint64_t sid);
 void space_manager_assign_process_to_space(pid_t pid, uint64_t sid);
 void space_manager_assign_process_to_all_spaces(pid_t pid);

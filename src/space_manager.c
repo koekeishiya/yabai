@@ -619,17 +619,41 @@ void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bo
     socket_close(sockfd);
 }
 
-void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did)
+static inline bool
+space_manager_is_space_last_user_space(uint64_t sid)
+{
+    bool result = true;
+
+    int count;
+    uint64_t *space_list = display_space_list(space_display_id(sid), &count);
+    if (!space_list) return true;
+
+    for (int i = 0; i < count; ++i) {
+        uint64_t c_sid = space_list[i];
+        if (sid == c_sid) continue;
+
+        if (space_is_user(c_sid)) {
+            result = false;
+            break;
+        }
+    }
+    free(space_list);
+
+    return result;
+}
+
+enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did)
 {
     int sockfd;
     uint64_t d_sid;
     char message[MAXLEN];
 
-    if (!sid) return;
-    if (space_display_id(sid) == did) return;
+    if (!sid) return SPACE_OP_ERROR_MISSING_SRC;
+    if (space_display_id(sid) == did) return SPACE_OP_ERROR_INVALID_DST;
+    if (space_manager_is_space_last_user_space(sid)) return SPACE_OP_ERROR_INVALID_SRC;
 
     d_sid = display_space_id(did);
-    if (!d_sid) return;
+    if (!d_sid) return SPACE_OP_ERROR_MISSING_DST;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space_move %lld %lld 1", sid, d_sid);
@@ -640,14 +664,18 @@ void space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid,
 
     space_manager_mark_view_invalid(sm, sid);
     space_manager_focus_space(sid);
+
+    return SPACE_OP_ERROR_SUCCESS;
 }
 
-void space_manager_destroy_space(uint64_t sid)
+enum space_op_error space_manager_destroy_space(uint64_t sid)
 {
     int sockfd;
     char message[MAXLEN];
 
-    if (!sid || !space_is_user(sid)) return;
+    if (!sid) return SPACE_OP_ERROR_MISSING_SRC;
+    if (!space_is_user(sid)) return SPACE_OP_ERROR_INVALID_TYPE;
+    if (space_manager_is_space_last_user_space(sid)) return SPACE_OP_ERROR_INVALID_SRC;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space_destroy %lld", sid);
@@ -655,6 +683,8 @@ void space_manager_destroy_space(uint64_t sid)
         socket_wait(sockfd);
     }
     socket_close(sockfd);
+
+    return SPACE_OP_ERROR_SUCCESS;
 }
 
 void space_manager_add_space(uint64_t sid)

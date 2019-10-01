@@ -1201,12 +1201,28 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_SPACE_DISPLAY)) {
         struct selector selector = parse_display_selector(rsp, &message, display_manager_active_display_id());
         if (selector.did_parse && selector.did) {
-            space_manager_move_space_to_display(&g_space_manager, acting_sid, selector.did);
+            enum space_op_error result = space_manager_move_space_to_display(&g_space_manager, acting_sid, selector.did);
+            if (result == SPACE_OP_ERROR_MISSING_SRC) {
+                daemon_fail(rsp, "could not locate the space to act on.\n");
+            } else if (result == SPACE_OP_ERROR_MISSING_DST) {
+                daemon_fail(rsp, "could not locate the active space of the given display.\n");
+            } else if (result == SPACE_OP_ERROR_INVALID_SRC) {
+                daemon_fail(rsp, "acting space is the last user-space on the source display and cannot be moved.\n");
+            } else if (result == SPACE_OP_ERROR_INVALID_DST) {
+                daemon_fail(rsp, "acting space is already located on the given display.\n");
+            }
         }
     } else if (token_equals(command, COMMAND_SPACE_CREATE)) {
         space_manager_add_space(acting_sid);
     } else if (token_equals(command, COMMAND_SPACE_DESTROY)) {
-        space_manager_destroy_space(acting_sid);
+        enum space_op_error result = space_manager_destroy_space(acting_sid);
+        if (result == SPACE_OP_ERROR_MISSING_SRC) {
+            daemon_fail(rsp, "could not locate the space to act on.\n");
+        } else if (result == SPACE_OP_ERROR_INVALID_SRC) {
+            daemon_fail(rsp, "acting space is the last user-space on the source display and cannot be destroyed.\n");
+        } else if (result == SPACE_OP_ERROR_INVALID_TYPE) {
+            daemon_fail(rsp, "cannot destroy a macOS fullscreen space.\n");
+        }
     } else if (token_equals(command, COMMAND_SPACE_BALANCE)) {
         space_manager_balance_space(&g_space_manager, acting_sid);
     } else if (token_equals(command, COMMAND_SPACE_MIRROR)) {
