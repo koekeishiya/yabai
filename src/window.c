@@ -203,7 +203,12 @@ char *window_title(struct window *window)
     char *title = NULL;
     CFTypeRef value = NULL;
 
+#if 0
     SLSCopyWindowProperty(g_connection, window->id, CFSTR("kCGSWindowTitle"), &value);
+#else
+    AXUIElementCopyAttributeValue(window->ref, kAXTitleAttribute, &value);
+#endif
+
     if (value) {
         title = cfstring_copy(value);
         CFRelease(value);
