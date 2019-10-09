@@ -16,6 +16,7 @@
 #define DIR_EAST   90
 #define DIR_SOUTH 180
 #define DIR_WEST  270
+#define DIR_ABOVE   1
 
 #define TYPE_ABS 0x1
 #define TYPE_REL 0x2

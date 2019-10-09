@@ -1134,6 +1134,12 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
         window->border.insert_active = true;
         window->border.insert_dir = direction;
         view->insertion_point = node->window_id;
+    } else if (direction == DIR_ABOVE) {
+        node->split = SPLIT_Z;
+        node->child = CHILD_SECOND;
+        window->border.insert_active = true;
+        window->border.insert_dir = direction;
+        view->insertion_point = node->window_id;
     }
 
     border_window_refresh(window);

@@ -44,7 +44,10 @@ static void area_make_pair(struct view *view, struct window_node *node)
     float ratio = window_node_get_ratio(node);
     float gap   = window_node_get_gap(view);
 
-    if (split == SPLIT_Y) {
+    if (split == SPLIT_Z) {
+        node->left->area = node->area;
+        node->right->area = node->area;
+    } else if (split == SPLIT_Y) {
         node->left->area = node->area;
         node->left->area.w *= ratio;
         node->left->area.w -= gap;
