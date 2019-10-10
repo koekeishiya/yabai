@@ -65,25 +65,25 @@ static CGMutablePathRef border_insert_shape(struct border *border, CGRect frame,
         CGPathMoveToPoint(insert, NULL, maxx, midy);
         CGPathAddArcToPoint(insert, NULL, maxx, maxy, midx, maxy, radius);
         CGPathAddArcToPoint(insert, NULL, minx, maxy, minx, midy, radius);
-        CGPathAddArcToPoint(insert, NULL, minx, midy, minx, miny, radius);
+        CGPathAddLineToPoint(insert, NULL, minx, midy);
     } break;
     case DIR_EAST: {
         CGPathMoveToPoint(insert, NULL, midx, miny);
         CGPathAddArcToPoint(insert, NULL, maxx, miny, maxx, midy, radius);
         CGPathAddArcToPoint(insert, NULL, maxx, maxy, midx, maxy, radius);
-        CGPathAddArcToPoint(insert, NULL, midx, maxy, maxx, maxy, radius);
+        CGPathAddLineToPoint(insert, NULL, midx, maxy);
     } break;
     case DIR_SOUTH: {
         CGPathMoveToPoint(insert, NULL, minx, midy);
         CGPathAddArcToPoint(insert, NULL, minx, miny, midx, miny, radius);
         CGPathAddArcToPoint(insert, NULL, maxx, miny, maxx, midy, radius);
-        CGPathAddArcToPoint(insert, NULL, maxx, midy, maxx, maxy, radius);
+        CGPathAddLineToPoint(insert, NULL, maxx, midy);
     } break;
     case DIR_WEST: {
         CGPathMoveToPoint(insert, NULL, midx, miny);
         CGPathAddArcToPoint(insert, NULL, minx, miny, minx, midy, radius);
         CGPathAddArcToPoint(insert, NULL, minx, maxy, midx, maxy, radius);
-        CGPathAddArcToPoint(insert, NULL, midx, maxy, midx, maxy, radius);
+        CGPathAddLineToPoint(insert, NULL, midx, maxy);
     } break;
     }
 
