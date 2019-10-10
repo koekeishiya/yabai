@@ -24,6 +24,7 @@ static enum window_node_child window_node_get_child(struct window_node *node)
 static enum window_node_split window_node_get_split(struct window_node *node)
 {
     if (node->split != SPLIT_NONE) return node->split;
+    if (node->parent != NULL && node->parent->split == SPLIT_Z) return SPLIT_Z;
     return node->area.w / node->area.h >= 1.1618f ? SPLIT_Y : SPLIT_X;
 }
 
