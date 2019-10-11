@@ -959,9 +959,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
             /*
              * @cleanup
              *
-             * NOTE(koekeishiya): The follow section of code contains duplicated code, but is left
-             * inline as-is for readability purposes. Consider possibly replacing with a macro,
-             * because C does not allow for locally-scoped functions.
+             * NOTE(koekeishiya): The following section of code contains duplicated code,
+             * but is left inline as-is for readability purposes. Consider replacing with
+             * macros, because C does not allow for locally-scoped functions.
              * */
 
             if (a_node && b_node) {
