@@ -181,8 +181,11 @@ static void window_node_destroy(struct window_node *node)
 
 float window_node_border_window_offset(struct window *window)
 {
-    float offset = window->border.enabled ? window->border.width : 0.0f;
-    return offset;
+    if (!window->border.enabled) return 0.0f;
+    if (g_window_manager.window_border_placement == BORDER_PLACEMENT_EXTERIOR) return window->border.width;
+    if (g_window_manager.window_border_placement == BORDER_PLACEMENT_INTERIOR) return 0.0f;
+    if (g_window_manager.window_border_placement == BORDER_PLACEMENT_INSET)    return window->border.width*0.5f;
+    return 0.0f; // shutup compiler
 }
 
 void window_node_flush(struct window_node *node)

@@ -90,8 +90,14 @@ static CGMutablePathRef border_insert_shape(struct border *border, CGRect frame,
     return insert;
 }
 
-static float border_radius_clamp(CGRect frame, float radius)
+static inline float border_radius_clamp(CGRect frame, float radius, int width)
 {
+    if (fabs(radius) < 0.01f) {
+      radius = 0.0f;
+    } else if (radius == -1.0f) {
+      radius = 2.0f * width;
+    }
+
     if (radius * 2 > CGRectGetWidth(frame)) {
         radius = CGRectGetWidth(frame) / 2;
     }
@@ -111,6 +117,8 @@ void border_window_refresh(struct window *window)
     border_window_ensure_same_space(window);
 
     CFTypeRef region_ref;
+    CGRect border_frame;
+
     CGRect region = window_ax_frame(window);
     region.origin.x -= border->width;
     region.origin.y -= border->width;
@@ -118,20 +126,17 @@ void border_window_refresh(struct window *window)
     region.size.height += (2*border->width);
     CGSNewRegionWithRect(&region, &region_ref);
 
-    CGRect border_frame = { { 0.5f*border->width, 0.5f*border->width }, { region.size.width - border->width, region.size.height - border->width} };
-    CGRect clear_region = { { 0, 0 }, { region.size.width, region.size.height } };
-
-    float radius;
-
-    if (fabs(border->radius) < 0.01f) {
-      radius = 0.0f;
-    } else if (border->radius == -1.f) {
-      radius = border_radius_clamp(border_frame, 2.0f * border->width);
+    if (g_window_manager.window_border_placement == BORDER_PLACEMENT_EXTERIOR) {
+        border_frame = (CGRect) { { 0.5f*border->width, 0.5f*border->width }, { region.size.width - border->width, region.size.height - border->width} };
+    } else if (g_window_manager.window_border_placement == BORDER_PLACEMENT_INTERIOR) {
+        border_frame = (CGRect) { { 1.5f*border->width, 1.5f*border->width }, { region.size.width - 3*border->width, region.size.height - 3*border->width } };
     } else {
-      radius = border->radius;
+        border_frame = (CGRect) { { border->width, border->width }, { region.size.width - 2*border->width, region.size.height - 2*border->width } };
     }
 
+    float radius = border_radius_clamp(border_frame, border->radius, border->width);
     CGMutablePathRef path = border_normal_shape(border_frame, radius);
+    CGRect clear_region = { { 0, 0 }, { region.size.width, region.size.height } };
 
     SLSDisableUpdate(g_connection);
     SLSOrderWindow(g_connection, border->id, 0, window->id);

@@ -65,6 +65,7 @@ struct window_manager
     bool enable_window_opacity;
     bool enable_window_topmost;
     bool enable_window_border;
+    enum border_placement window_border_placement;
     int window_border_width;
     float window_border_radius;
     uint32_t active_window_border_color;

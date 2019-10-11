@@ -150,6 +150,9 @@ Colors are in the form '#AARRGGBB'.
 'window_border'::
     Draw border for windows.
 
+'window_border_placement'::
+    Position/draw-mode of window border. Accept the following values: *exterior*, *interior*, *inset*.
+
 'window_border_width'::
     Width of window borders.
 

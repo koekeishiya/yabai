@@ -27,6 +27,7 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
 #define COMMAND_CONFIG_BORDER_RADIUS         "window_border_radius"
+#define COMMAND_CONFIG_BORDER_PLACEMENT      "window_border_placement"
 #define COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY "active_window_opacity"
 #define COMMAND_CONFIG_NORMAL_WINDOW_OPACITY "normal_window_opacity"
 #define COMMAND_CONFIG_ACTIVE_BORDER_COLOR   "active_window_border_color"
@@ -69,6 +70,9 @@ extern struct bar g_bar;
 #define ARGUMENT_CONFIG_MOUSE_MOD_FN         "fn"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE    "move"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE  "resize"
+#define ARGUMENT_CONFIG_BORDER_PLACEMENT_EXT "exterior"
+#define ARGUMENT_CONFIG_BORDER_PLACEMENT_INT "interior"
+#define ARGUMENT_CONFIG_BORDER_PLACEMENT_IS  "inset"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
@@ -399,6 +403,19 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             window_manager_set_border_window_enabled(&g_window_manager, false);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             window_manager_set_border_window_enabled(&g_window_manager, true);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BORDER_PLACEMENT)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", border_placement_str[g_window_manager.window_border_placement]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_BORDER_PLACEMENT_EXT)) {
+            g_window_manager.window_border_placement = BORDER_PLACEMENT_EXTERIOR;
+        } else if (token_equals(value, ARGUMENT_CONFIG_BORDER_PLACEMENT_INT)) {
+            g_window_manager.window_border_placement = BORDER_PLACEMENT_INTERIOR;
+        } else if (token_equals(value, ARGUMENT_CONFIG_BORDER_PLACEMENT_IS)) {
+            g_window_manager.window_border_placement = BORDER_PLACEMENT_INSET;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

@@ -1543,6 +1543,7 @@ void window_manager_init(struct window_manager *wm)
     wm->enable_window_opacity = false;
     wm->enable_window_topmost = false;
     wm->enable_window_border = false;
+    wm->window_border_placement = BORDER_PLACEMENT_INSET;
     wm->window_border_width = 4;
     wm->window_border_radius = -1;
     wm->active_window_border_color = 0xff775759;
