@@ -965,6 +965,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
              * */
 
             if (a_node && b_node) {
+                if (a_node->parent == b_node->parent) {
+                    goto do_swap;
+                }
+
                 CGRect frame = window_ax_frame(window);
                 CGPoint point_in_window = {
                     .x = point.x - frame.origin.x,
@@ -1010,6 +1014,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
                 left_triangle[2].y = 0.0f;
 
                 if (CGRectContainsPoint(window_center, point_in_window)) {
+do_swap:
                     a_node->window_id = window->id;
                     a_node->zoom = NULL;
                     b_node->window_id = g_mouse_state.window->id;
