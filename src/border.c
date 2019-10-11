@@ -216,6 +216,7 @@ void border_window_create(struct window *window)
     border->color = rgba_color_from_hex(g_window_manager.normal_window_border_color);
     border->insert_color = rgba_color_from_hex(g_window_manager.insert_window_border_color);
     border->width = g_window_manager.window_border_width;
+    border->radius = g_window_manager.window_border_radius;
     border->enabled = true;
 
     CFTypeRef frame_region;
