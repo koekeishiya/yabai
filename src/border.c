@@ -121,7 +121,16 @@ void border_window_refresh(struct window *window)
     CGRect border_frame = { { 0.5f*border->width, 0.5f*border->width }, { region.size.width - border->width, region.size.height - border->width} };
     CGRect clear_region = { { 0, 0 }, { region.size.width, region.size.height } };
 
-    float radius = border_radius_clamp(border_frame, 2.0f * border->width);
+    float radius;
+
+    if (fabs(border->radius) < 0.01f) {
+      radius = 0.0f;
+    } else if (border->radius == -1.f) {
+      radius = border_radius_clamp(border_frame, 2.0f * border->width);
+    } else {
+      radius = border->radius;
+    }
+
     CGMutablePathRef path = border_normal_shape(border_frame, radius);
 
     SLSDisableUpdate(g_connection);

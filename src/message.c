@@ -26,6 +26,7 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
+#define COMMAND_CONFIG_BORDER_RADIUS         "window_border_radius"
 #define COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY "active_window_opacity"
 #define COMMAND_CONFIG_NORMAL_WINDOW_OPACITY "normal_window_opacity"
 #define COMMAND_CONFIG_ACTIVE_BORDER_COLOR   "active_window_border_color"
@@ -409,6 +410,18 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             int width = 0;
             if (token_to_int(value, &width) && width) {
                 window_manager_set_border_window_width(&g_window_manager, width);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BORDER_RADIUS)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%.4f\n", g_window_manager.window_border_radius);
+        } else {
+            float radius = token_to_float(value);
+            if (radius == -1.f || (radius >= 0.0f && radius <= 20.0f)) {
+                window_manager_set_border_window_radius(&g_window_manager, radius);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

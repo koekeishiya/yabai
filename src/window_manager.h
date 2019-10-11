@@ -66,6 +66,7 @@ struct window_manager
     bool enable_window_topmost;
     bool enable_window_border;
     int window_border_width;
+    float window_border_radius;
     uint32_t active_window_border_color;
     uint32_t normal_window_border_color;
     uint32_t insert_window_border_color;
@@ -124,6 +125,7 @@ void window_manager_set_active_window_opacity(struct window_manager *wm, float o
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_border_window_enabled(struct window_manager *wm, bool enabled);
 void window_manager_set_border_window_width(struct window_manager *wm, int width);
+void window_manager_set_border_window_radius(struct window_manager *wm, float radius);
 void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_normal_border_window_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);

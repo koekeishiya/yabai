@@ -411,6 +411,29 @@ void window_manager_set_border_window_width(struct window_manager *wm, int width
     }
 }
 
+void window_manager_set_border_window_radius(struct window_manager *wm, float radius)
+{
+    wm->window_border_radius = radius;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id) {
+                    window->border.radius = radius;
+
+                    if ((!window->application->is_hidden) &&
+                        (!window->is_minimized)) {
+                        border_window_refresh(window);
+                    }
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
 void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color)
 {
     wm->active_window_border_color = color;
@@ -1521,6 +1544,7 @@ void window_manager_init(struct window_manager *wm)
     wm->enable_window_topmost = false;
     wm->enable_window_border = false;
     wm->window_border_width = 4;
+    wm->window_border_radius = -1;
     wm->active_window_border_color = 0xff775759;
     wm->normal_window_border_color = 0xff555555;
     wm->insert_window_border_color = 0xfff57f7f;

@@ -27,6 +27,7 @@ struct border
     CGContextRef context;
     uint32_t id;
     int width;
+    float radius;
     struct rgba_color color;
     struct rgba_color insert_color;
     bool insert_active;
