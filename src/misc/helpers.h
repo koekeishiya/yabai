@@ -249,6 +249,15 @@ static uint32_t rect_distance(CGRect r1, CGRect r2, int direction)
     return UINT32_MAX;
 }
 
+static bool triangle_contains_point(CGPoint t[3], CGPoint p)
+{
+    float l1 = (p.x - t[0].x) * (t[2].y - t[0].y) - (t[2].x - t[0].x) * (p.y - t[0].y);
+    float l2 = (p.x - t[1].x) * (t[0].y - t[1].y) - (t[0].x - t[1].x) * (p.y - t[1].y);
+    float l3 = (p.x - t[2].x) * (t[1].y - t[2].y) - (t[1].x - t[2].x) * (p.y - t[2].y);
+
+    return (l1 > 0.0f && l2 > 0.0f && l3 > 0.0f) || (l1 < 0.0f && l2 < 0.0f && l3 < 0.0f);
+}
+
 static int regex_match(bool valid, regex_t *regex, const char *match)
 {
     if (!valid || !match) return REGEX_MATCH_UD;
