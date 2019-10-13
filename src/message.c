@@ -131,6 +131,7 @@ extern bool g_verbose;
 #define ARGUMENT_WINDOW_DIR_SOUTH     "south"
 #define ARGUMENT_WINDOW_DIR_WEST      "west"
 #define ARGUMENT_WINDOW_DIR_ABOVE     "above"
+#define ARGUMENT_WINDOW_DIR_BELOW     "below"
 #define ARGUMENT_WINDOW_SEL_MOUSE     "mouse"
 #define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
 #define ARGUMENT_WINDOW_SEL_SMALLEST  "smallest"
@@ -1236,6 +1237,8 @@ static struct selector parse_dir_selector(FILE *rsp, char **message)
         result.dir = DIR_WEST;
     } else if (token_equals(result.token, ARGUMENT_WINDOW_DIR_ABOVE)) {
         result.dir = DIR_ABOVE;
+    } else if (token_equals(result.token, ARGUMENT_WINDOW_DIR_BELOW)) {
+        result.dir = DIR_BELOW;
     } else {
         result.did_parse = false;
         daemon_fail(rsp, "value '%.*s' is not a valid option for DIR_SEL\n", result.token.length, result.token.text);

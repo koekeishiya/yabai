@@ -85,7 +85,7 @@ static CGMutablePathRef border_insert_shape(struct border *border, CGRect frame,
         CGPathAddArcToPoint(insert, NULL, minx, maxy, midx, maxy, radius);
         CGPathAddLineToPoint(insert, NULL, midx, maxy);
     } break;
-    case DIR_ABOVE: {
+    case DIR_ABOVE: case DIR_BELOW: {
         CGPathMoveToPoint(insert, NULL, maxx, midy);
         CGPathAddArcToPoint(insert, NULL, maxx, maxy, midx, maxy, radius);
         CGPathAddArcToPoint(insert, NULL, minx, maxy, minx, midy, radius);
