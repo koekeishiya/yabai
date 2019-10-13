@@ -271,6 +271,29 @@ struct window_node *window_node_find_next_leaf(struct window_node *node)
     return window_node_find_first_leaf(node->parent->right->left);
 }
 
+struct window_node *window_node_find_common_ancestor(struct window_node *node, struct window_node *a, struct window_node *b) {
+    if (!node) return NULL;
+    if (node == a || node == b) return node;
+
+    struct window_node *left = window_node_find_common_ancestor(node->left, a, b);
+    struct window_node *right = window_node_find_common_ancestor(node->right, a, b);
+
+    if (left && right) return node;
+
+    return left ? left : right;
+}
+
+bool window_nodes_are_stacked(struct window_node *ancestor, struct window_node *node) {
+    do {
+        node = node->parent;
+
+        if (node->split != SPLIT_Z)
+            return false;
+    } while (node != ancestor);
+
+    return true;
+}
+
 void window_node_rotate(struct window_node *node, int degrees)
 {
     if ((degrees ==  90 && node->split == SPLIT_Y) ||

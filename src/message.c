@@ -1131,6 +1131,28 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
         } else {
             daemon_fail(rsp, "could not locate the selected window.\n");
         }
+    } else if (token_equals(result.token, ARGUMENT_WINDOW_DIR_ABOVE)) {
+        if (acting_window) {
+            struct window *closest_window = window_manager_find_managed_window_above(&g_space_manager, &g_window_manager, acting_window);
+            if (closest_window) {
+                result.window = closest_window;
+            } else {
+                daemon_fail(rsp, "could not locate a managed window above.\n");
+            }
+        } else {
+            daemon_fail(rsp, "could not locate the selected window.\n");
+        }
+    } else if (token_equals(result.token, ARGUMENT_WINDOW_DIR_BELOW)) {
+        if (acting_window) {
+            struct window *closest_window = window_manager_find_managed_window_below(&g_space_manager, &g_window_manager, acting_window);
+            if (closest_window) {
+                result.window = closest_window;
+            } else {
+                daemon_fail(rsp, "could not locate a managed window below.\n");
+            }
+        } else {
+            daemon_fail(rsp, "could not locate the selected window.\n");
+        }
     } else if (token_equals(result.token, ARGUMENT_WINDOW_SEL_MOUSE)) {
         struct window *mouse_window = window_manager_find_window_below_cursor(&g_window_manager);
         if (mouse_window) {
