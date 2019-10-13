@@ -62,7 +62,7 @@ Definitions
 
 [subs=+macros]
 ----
-DIR_SEL     := north | east | south | west
+DIR_SEL     := north | east | south | west | above | below
 
 WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | window id
 
