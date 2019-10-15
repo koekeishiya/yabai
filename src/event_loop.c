@@ -60,10 +60,18 @@ event_loop_run(void *context)
             int result = event_handler[event->type](event->context, event->param1, event->param2);
             if (result == EVENT_SUCCESS) event_signal_transmit(event->context, event->type);
 
+            if (event->result) *event->result = result;
+
+            /*
+             * NOTE(koekeishiya): We REQUIRE the result to be updated BEFORE the event is marked as processed,
+             * because the calling thread should be allowed to spin-lock on the passed variable to halt until
+             * the event has been processed. This is because it may be useful or even necessary to check the
+             * result of the event before proceeding. Emit mfence for this purpose.
+             * */
+
             __asm__ __volatile__ ("mfence" ::: "memory");
 
             if (event->status) *event->status = EVENT_PROCESSED;
-            if (event->result) *event->result = result;
 
             event_destroy(event);
         } else {
