@@ -10,6 +10,12 @@ extern void SLSRemoveWindowsFromSpaces(int cid, CFArrayRef window_list, CFArrayR
 extern void SLSAddWindowsToSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
 extern CGError CoreDockSendNotification(CFStringRef notification, int unknown);
 
+struct space_label
+{
+    uint64_t sid;
+    char *label;
+};
+
 struct space_manager
 {
     struct table view;
@@ -25,6 +31,7 @@ struct space_manager
     float split_ratio;
     enum window_node_child window_placement;
     bool auto_balance;
+    struct space_label *labels;
 };
 
 enum space_op_error
@@ -59,6 +66,8 @@ uint64_t space_manager_next_space(uint64_t sid);
 uint64_t space_manager_first_space(void);
 uint64_t space_manager_last_space(void);
 uint64_t space_manager_active_space(void);
+struct space_label *space_manager_get_space_for_label(struct space_manager *sm, struct token label);
+void space_manager_set_label_for_space(struct space_manager *sm, uint64_t sid, char *label);
 void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, enum view_type type);
 void space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, int type, int gap);
 void space_manager_toggle_gap_for_space(struct space_manager *sm, uint64_t sid);

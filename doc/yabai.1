@@ -87,7 +87,7 @@ WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest 
 
 DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1\-based)
 
-SPACE_SEL   := prev | next | first | last | recent | mission\-control index (1\-based)
+SPACE_SEL   := prev | next | first | last | recent | mission\-control index (1\-based) | LABEL
 
 FLOAT_SEL   := 0 < value <= 1.0
 
@@ -355,6 +355,11 @@ Toggle space setting on or off for the selected space.
 \fB\-\-layout\fP \fIbsp|float\fP
 .RS 4
 Set the layout of the selected space.
+.RE
+.sp
+\fB\-\-label\fP \fI<LABEL>\fP
+.RS 4
+Label the selected space, allowing that label to be used as an alias in commands that take a \f(CRSPACE_SEL\fP parameter.
 .RE
 .SS "Window"
 .SS "General Syntax"

@@ -158,6 +158,44 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     }
 }
 
+struct space_label *space_manager_get_space_for_label(struct space_manager *sm, struct token label)
+{
+    for (int i = 0; i < buf_len(sm->labels); ++i) {
+        struct space_label *space_label = &sm->labels[i];
+        if (token_equals(label, space_label->label)) {
+            return space_label;
+        }
+    }
+
+    return NULL;
+}
+
+void space_manager_set_label_for_space(struct space_manager *sm, uint64_t sid, char *label)
+{
+    for (int i = 0; i < buf_len(sm->labels); ++i) {
+        struct space_label *space_label = &sm->labels[i];
+        if (space_label->sid == sid) {
+            free(space_label->label);
+            buf_del(sm->labels, i);
+            break;
+        }
+    }
+
+    for (int i = 0; i < buf_len(sm->labels); ++i) {
+        struct space_label *space_label = &sm->labels[i];
+        if (string_equals(space_label->label, label)) {
+            free(space_label->label);
+            buf_del(sm->labels, i);
+            break;
+        }
+    }
+
+    buf_push(sm->labels, ((struct space_label) {
+        .sid   = sid,
+        .label = label
+    }));
+}
+
 void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, enum view_type layout)
 {
     struct view *view = space_manager_find_view(sm, sid);
@@ -793,6 +831,7 @@ void space_manager_init(struct space_manager *sm)
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;
     sm->window_placement = CHILD_SECOND;
+    sm->labels = NULL;
 
     table_init(&sm->view, 23, hash_view, compare_view);
 

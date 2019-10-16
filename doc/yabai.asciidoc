@@ -68,7 +68,7 @@ WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest 
 
 DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1-based)
 
-SPACE_SEL   := prev | next | first | last | recent | mission-control index (1-based)
+SPACE_SEL   := prev | next | first | last | recent | mission-control index (1-based) | LABEL
 
 FLOAT_SEL   := 0 < value <= 1.0
 
@@ -265,6 +265,9 @@ COMMAND
 
 *--layout* 'bsp|float'::
     Set the layout of the selected space.
+
+*--label* '<LABEL>'::
+    Label the selected space, allowing that label to be used as an alias in commands that take a `SPACE_SEL` parameter.
 
 Window
 ~~~~~~
