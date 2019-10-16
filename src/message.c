@@ -30,6 +30,7 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_BORDER_PLACEMENT      "window_border_placement"
 #define COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY "active_window_opacity"
 #define COMMAND_CONFIG_NORMAL_WINDOW_OPACITY "normal_window_opacity"
+#define COMMAND_CONFIG_ACTIVE_BORDER_TOPMOST "active_window_border_topmost"
 #define COMMAND_CONFIG_ACTIVE_BORDER_COLOR   "active_window_border_color"
 #define COMMAND_CONFIG_NORMAL_BORDER_COLOR   "normal_window_border_color"
 #define COMMAND_CONFIG_INSERT_BORDER_COLOR   "insert_window_border_color"
@@ -466,6 +467,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_ACTIVE_BORDER_TOPMOST)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_window_manager.active_window_border_topmost]);
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+            g_window_manager.active_window_border_topmost = false;
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+            g_window_manager.active_window_border_topmost = true;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
     } else if (token_equals(command, COMMAND_CONFIG_ACTIVE_BORDER_COLOR)) {
         struct token value = get_token(&message);

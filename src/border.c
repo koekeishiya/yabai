@@ -171,7 +171,7 @@ void border_window_activate(struct window *window)
     struct border *border = &window->border;
     border->color = rgba_color_from_hex(g_window_manager.active_window_border_color);
     CGContextSetRGBStrokeColor(border->context, border->color.r, border->color.g, border->color.b, border->color.a);
-    int level = g_window_manager.window_border_placement == BORDER_PLACEMENT_EXTERIOR ? window_level(window) : CGWindowLevelForKey(kCGModalPanelWindowLevelKey);
+    int level = g_window_manager.active_window_border_topmost ? CGWindowLevelForKey(kCGModalPanelWindowLevelKey) : window_level(window);
     SLSSetWindowLevel(g_connection, window->border.id, level);
 
     if (window_is_fullscreen(window)) {

@@ -68,6 +68,7 @@ struct window_manager
     enum border_placement window_border_placement;
     int window_border_width;
     float window_border_radius;
+    bool active_window_border_topmost;
     uint32_t active_window_border_color;
     uint32_t normal_window_border_color;
     uint32_t insert_window_border_color;

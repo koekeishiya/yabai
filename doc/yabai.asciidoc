@@ -159,6 +159,9 @@ Colors are in the form '#AARRGGBB'.
 'window_border_radius'::
     Radius of window border corners.
 
+'active_window_border_topmost'::
+    Make the active border stay on top of other windows.
+
 'active_window_border_color'::
     Color of the border of the focused window.
 
