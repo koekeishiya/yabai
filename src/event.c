@@ -1018,6 +1018,14 @@ do_swap:
                     a_node->zoom = NULL;
                     b_node->window_id = g_mouse_state.window->id;
                     b_node->zoom = NULL;
+
+                    if (src_view->sid != dst_view->sid) {
+                        window_manager_remove_managed_window(&g_window_manager, a_node->window_id);
+                        window_manager_remove_managed_window(&g_window_manager, b_node->window_id);
+                        window_manager_add_managed_window(&g_window_manager, window, src_view);
+                        window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, dst_view);
+                    }
+
                     window_node_flush(a_node);
                     window_node_flush(b_node);
                     goto end;
