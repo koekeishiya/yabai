@@ -158,6 +158,18 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     }
 }
 
+struct space_label *space_manager_get_label_for_space(struct space_manager *sm, uint64_t sid)
+{
+    for (int i = 0; i < buf_len(sm->labels); ++i) {
+        struct space_label *space_label = &sm->labels[i];
+        if (space_label->sid == sid) {
+            return space_label;
+        }
+    }
+
+    return NULL;
+}
+
 struct space_label *space_manager_get_space_for_label(struct space_manager *sm, struct token label)
 {
     for (int i = 0; i < buf_len(sm->labels); ++i) {

@@ -475,12 +475,14 @@ void view_serialize(FILE *rsp, struct view *view)
         if (buffer_size <= 0) break;
     }
 
+    struct space_label *space_label = space_manager_get_label_for_space(&g_space_manager, view->sid);
     struct window_node *first_leaf = window_node_find_first_leaf(view->root);
     struct window_node *last_leaf = window_node_find_last_leaf(view->root);
 
     fprintf(rsp,
             "{\n"
             "\t\"id\":%lld,\n"
+            "\t\"label\":\"%s\",\n"
             "\t\"index\":%d,\n"
             "\t\"display\":%d,\n"
             "\t\"windows\":[%s],\n"
@@ -492,6 +494,7 @@ void view_serialize(FILE *rsp, struct view *view)
             "\t\"last-window\":%d\n"
             "}",
             view->sid,
+            space_label ? space_label->label : "",
             space_manager_mission_control_index(view->sid),
             display_arrangement(space_display_id(view->sid)),
             buffer,

@@ -66,6 +66,7 @@ uint64_t space_manager_next_space(uint64_t sid);
 uint64_t space_manager_first_space(void);
 uint64_t space_manager_last_space(void);
 uint64_t space_manager_active_space(void);
+struct space_label *space_manager_get_label_for_space(struct space_manager *sm, uint64_t sid);
 struct space_label *space_manager_get_space_for_label(struct space_manager *sm, struct token label);
 void space_manager_set_label_for_space(struct space_manager *sm, uint64_t sid, char *label);
 void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, enum view_type type);
