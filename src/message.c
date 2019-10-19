@@ -50,6 +50,9 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_BAR_ICON_FONT         "status_bar_icon_font"
 #define COMMAND_CONFIG_BAR_BACKGROUND        "status_bar_background_color"
 #define COMMAND_CONFIG_BAR_FOREGROUND        "status_bar_foreground_color"
+#define COMMAND_CONFIG_BAR_SPACE_UNDERLINE_COLOR "status_bar_space_underline_color"
+#define COMMAND_CONFIG_BAR_POWER_UNDERLINE_COLOR "status_bar_power_underline_color"
+#define COMMAND_CONFIG_BAR_CLOCK_UNDERLINE_COLOR "status_bar_clock_underline_color"
 #define COMMAND_CONFIG_BAR_SPACE_STRIP       "status_bar_space_icon_strip"
 #define COMMAND_CONFIG_BAR_POWER_STRIP       "status_bar_power_icon_strip"
 #define COMMAND_CONFIG_BAR_SPACE_ICON        "status_bar_space_icon"
@@ -771,7 +774,43 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         }
-    } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_STRIP)) {
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_UNDERLINE_COLOR)) {
+				struct token value = get_token(&message);
+				if(!token_is_valid(value)) {
+						fprintf(rsp, "0x%x\n", g_bar.space_underline_color.p);
+				} else {
+						uint32_t color = token_to_uint32t(value);
+						if (color) {
+								bar_set_space_line_color(&g_bar, color);
+						} else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+						}
+				}
+		} else if (token_equals(command, COMMAND_CONFIG_BAR_POWER_UNDERLINE_COLOR)) {
+				struct token value = get_token(&message);
+				if(!token_is_valid(value)) {
+						fprintf(rsp, "0x%x\n", g_bar.power_underline_color.p);
+				} else {
+						uint32_t color = token_to_uint32t(value);
+						if (color) {
+								bar_set_power_line_color(&g_bar, color);
+						} else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+						}
+				}
+		} else if (token_equals(command, COMMAND_CONFIG_BAR_CLOCK_UNDERLINE_COLOR)) {
+				struct token value = get_token(&message);
+				if(!token_is_valid(value)) {
+						fprintf(rsp, "0x%x\n", g_bar.clock_underline_color.p);
+				} else {
+						uint32_t color = token_to_uint32t(value);
+						if (color) {
+								bar_set_clock_line_color(&g_bar, color);
+						} else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+						}
+				}
+		} else if (token_equals(command, COMMAND_CONFIG_BAR_SPACE_STRIP)) {
         char **icon_strip = NULL;
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {

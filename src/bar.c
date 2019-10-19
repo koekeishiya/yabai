@@ -327,6 +327,25 @@ void bar_set_text_font(struct bar *bar, char *font_string)
     bar_refresh(bar);
 }
 
+void bar_set_space_line_color(struct bar *bar, uint32_t color)
+{
+		bar->space_underline = bar_prepare_line(bar->t_font, "______", rgba_color_from_hex(color));
+		bar_refresh(bar);
+}
+
+void bar_set_power_line_color(struct bar *bar, uint32_t color)
+{
+		bar->power_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(color));
+		bar_refresh(bar);
+}
+
+void bar_set_clock_line_color(struct bar *bar, uint32_t color)
+{
+
+		bar->clock_underline = bar_prepare_line(bar->t_font, "__________", rgba_color_from_hex(color));
+		bar_refresh(bar);
+}
+
 void bar_set_icon_font(struct bar *bar, char *font_string)
 {
     if (bar->i_font) {
