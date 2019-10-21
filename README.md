@@ -36,7 +36,7 @@ Requires xcode-10 command-line tools.
 
 **Homebrew**:
 
-```
+```sh
 # clone tap
 brew tap koekeishiya/formulae
 
@@ -49,7 +49,7 @@ brew install --HEAD yabai
 
 **Source**:
 
-```
+```sh
 # clone repo and build binary
 git clone https://github.com/koekeishiya/yabai
 make install      # release version
@@ -64,7 +64,7 @@ ln -s $PWD/doc/yabai.1 /usr/local/share/man/man1/yabai.1
 
 **Install scripting-addition**:
 
-```
+```sh
 sudo yabai --install-sa
 ```
 
@@ -74,13 +74,13 @@ sudo yabai --install-sa
 
 **Uninstall scripting-addition**:
 
-```
+```sh
 sudo yabai --uninstall-sa
 ```
 
 **Remove config and tmp files**:
 
-```
+```sh
 rm ~/.yabairc
 rm /tmp/yabai_$USER.lock
 rm /tmp/yabai_$USER.socket
@@ -89,7 +89,7 @@ rm /tmp/yabai-sa_$USER.socket
 
 **Homebrew**:
 
-```
+```sh
 # if you were using brew services to manage yabai
 brew services stop yabai
 rm -rf /usr/local/var/log/yabai
@@ -100,7 +100,7 @@ brew uninstall yabai
 
 **Source**:
 
-```
+```sh
 # remove binary symlink
 rm /usr/local/bin/yabai
 
