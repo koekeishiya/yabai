@@ -33,7 +33,7 @@ no recommendation as to whether you should or should not disable SIP.
 
 Requires xcode-10 command-line tools.
 
-### Homebrew
+### Install with Homebrew
 
 ```sh
 # clone tap
@@ -46,7 +46,7 @@ brew install yabai
 brew install --HEAD yabai
 ```
 
-### Source
+### Install with Source
 
 ```sh
 # clone repo and build binary
@@ -67,7 +67,7 @@ ln -s $PWD/doc/yabai.1 /usr/local/share/man/man1/yabai.1
 sudo yabai --install-sa
 ```
 
-### Uninstallation
+## Uninstallation
 
 **yabai** is a single binary application and is trivial to uninstall.
 
@@ -86,7 +86,7 @@ rm /tmp/yabai_$USER.socket
 rm /tmp/yabai-sa_$USER.socket
 ```
 
-### Homebrew
+### Uninstall with Homebrew
 
 ```sh
 # if you were using brew services to manage yabai
@@ -97,7 +97,7 @@ rm -rf /usr/local/var/log/yabai
 brew uninstall yabai
 ```
 
-### Source
+### Uninstall with Source
 
 ```sh
 # remove binary symlink
