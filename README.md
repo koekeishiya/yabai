@@ -1,16 +1,15 @@
+
+# yabai
+
 [![Build Status](https://travis-ci.org/koekeishiya/yabai.svg?branch=master)](https://travis-ci.org/koekeishiya/yabai)
 
 ![img](assets/screenshot.png)
 
 **yabai** started as a C99 rewrite of [*chunkwm*](https://github.com/koekeishiya/chunkwm), originally supposed to be its first RC version.
 
-However due to major architectural changes, supported systems, and changes to functionality, it is being released separately.
-There are multiple reasons behind these changes, based on the experience I've gained through experimenting with, designing, and using both *kwm*
-and *chunkwm*. Some of these changes are performance related while other changes have been made to keep the user experience simple and more complete,
-attempts to achieve a seamless integration with the operating system (when possible), proper error reporting, and yet still keep the property of being
-customizable.
+However due to major architectural changes, supported systems, and changes to functionality, it is being released separately. There are multiple reasons behind these changes, based on the experience I've gained through experimenting with, designing, and using both *kwm* and *chunkwm*. Some of these changes are performance related while other changes have been made to keep the user experience simple and more complete, including seamless operating system integration (when possible) and proper error reporting, all while maintaining customizability.
 
-### Requirements
+## Requirements
 
 **yabai** is officially supported on **macOS High Sierra 10.13.6** and **macOS Mojave 10.14.4-6**. It uses a *scripting-addition*, which is a bundle of code
 that we inject into *Dock.app* to elevate our privileges when communicating with the *WindowServer*. The *WindowServer* is a single point of contact for all applications.
@@ -30,13 +29,13 @@ The *Mission Control* setting [*displays have separate spaces*](https://support.
 You acknowledge that you understand the potential risk that may come from disabling [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) on your system, and I make
 no recommendation as to whether you should or should not disable SIP.
 
-### Install
+## Installation
 
 Requires xcode-10 command-line tools.
 
-**Homebrew**:
+### Homebrew
 
-```
+```sh
 # clone tap
 brew tap koekeishiya/formulae
 
@@ -47,9 +46,9 @@ brew install yabai
 brew install --HEAD yabai
 ```
 
-**Source**:
+### Source
 
-```
+```sh
 # clone repo and build binary
 git clone https://github.com/koekeishiya/yabai
 make install      # release version
@@ -62,34 +61,34 @@ ln -s $PWD/bin/yabai /usr/local/bin/yabai
 ln -s $PWD/doc/yabai.1 /usr/local/share/man/man1/yabai.1
 ```
 
-**Install scripting-addition**:
+### Install scripting-addition
 
-```
+```sh
 sudo yabai --install-sa
 ```
 
-### Uninstall
+### Uninstallation
 
 **yabai** is a single binary application and is trivial to uninstall.
 
-**Uninstall scripting-addition**:
+### Uninstall scripting-addition
 
-```
+```sh
 sudo yabai --uninstall-sa
 ```
 
-**Remove config and tmp files**:
+### Remove config and tmp files
 
-```
+```sh
 rm ~/.yabairc
 rm /tmp/yabai_$USER.lock
 rm /tmp/yabai_$USER.socket
 rm /tmp/yabai-sa_$USER.socket
 ```
 
-**Homebrew**:
+### Homebrew
 
-```
+```sh
 # if you were using brew services to manage yabai
 brew services stop yabai
 rm -rf /usr/local/var/log/yabai
@@ -98,9 +97,9 @@ rm -rf /usr/local/var/log/yabai
 brew uninstall yabai
 ```
 
-**Source**:
+### Source
 
-```
+```sh
 # remove binary symlink
 rm /usr/local/bin/yabai
 
@@ -114,9 +113,9 @@ remove the cloned git-repository..
 
 The default configuration file is a shell-script located at one of the following places (in order):
 
- - `$XDG_CONFIG_HOME/yabai/yabairc`
- - `$HOME/.config/yabai/yabairc`
- - `$HOME/.yabairc`
+- `$XDG_CONFIG_HOME/yabai/yabairc`
+- `$HOME/.config/yabai/yabairc`
+- `$HOME/.yabairc`
 
 A different location can be specified with the *--config | -c* argument. The configuration file consists of commands that
 send messages to the running **yabai** instance. To send a message, invoke **yabai** with the *--message | -m* argument.
