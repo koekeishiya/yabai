@@ -67,7 +67,7 @@ ln -s $PWD/doc/yabai.1 /usr/local/share/man/man1/yabai.1
 sudo yabai --install-sa
 ```
 
-### Configuration
+## Configuration
 
 The default configuration file is a shell-script located at one of the following places (in order):
 
