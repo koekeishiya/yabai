@@ -67,6 +67,23 @@ ln -s $PWD/doc/yabai.1 /usr/local/share/man/man1/yabai.1
 sudo yabai --install-sa
 ```
 
+### Configuration
+
+The default configuration file is a shell-script located at one of the following places (in order):
+
+- `$XDG_CONFIG_HOME/yabai/yabairc`
+- `$HOME/.config/yabai/yabairc`
+- `$HOME/.yabairc`
+
+A different location can be specified with the *--config | -c* argument. The configuration file consists of commands that
+send messages to the running **yabai** instance. To send a message, invoke **yabai** with the *--message | -m* argument.
+
+Keyboard shortcuts can be defined with [*skhd*](https://github.com/koekeishiya/skhd) or any other suitable software you may prefer.
+
+Sample configuration files can be found in the [examples](https://github.com/koekeishiya/yabai/tree/master/examples) directory.
+
+Refer to the [*documentation*](https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc) for further information.
+
 ## Uninstallation
 
 **yabai** is a single binary application and is trivial to uninstall.
@@ -108,20 +125,3 @@ rm /usr/local/share/man/man1/yabai.1
 
 remove the cloned git-repository..
 ```
-
-### Configuration
-
-The default configuration file is a shell-script located at one of the following places (in order):
-
-- `$XDG_CONFIG_HOME/yabai/yabairc`
-- `$HOME/.config/yabai/yabairc`
-- `$HOME/.yabairc`
-
-A different location can be specified with the *--config | -c* argument. The configuration file consists of commands that
-send messages to the running **yabai** instance. To send a message, invoke **yabai** with the *--message | -m* argument.
-
-Keyboard shortcuts can be defined with [*skhd*](https://github.com/koekeishiya/skhd) or any other suitable software you may prefer.
-
-Sample configuration files can be found in the [examples](https://github.com/koekeishiya/yabai/tree/master/examples) directory.
-
-Refer to the [*documentation*](https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc) for further information.
