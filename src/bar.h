@@ -23,9 +23,15 @@ struct bar_line
     struct rgba_color color;
 };
 
+enum bar_position {
+    Top = 0,
+    Bottom = 1
+};
+
 struct bar
 {
     bool enabled;
+    enum bar_position position;
     uint32_t id;
     uint32_t did;
     CGContextRef context;
@@ -53,6 +59,7 @@ struct bar
     struct bar_line clock_underline;
 };
 
+void bar_set_position(struct bar *bar, enum bar_position position);
 void bar_set_foreground_color(struct bar *bar, uint32_t color);
 void bar_set_background_color(struct bar *bar, uint32_t color);
 void bar_set_text_font(struct bar *bar, char *font_string);

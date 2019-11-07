@@ -46,6 +46,7 @@ extern struct bar g_bar;
 #define COMMAND_CONFIG_MOUSE_ACTION1         "mouse_action1"
 #define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
 #define COMMAND_CONFIG_BAR                   "status_bar"
+#define COMMAND_CONFIG_BAR_POSITION          "status_bar_position"
 #define COMMAND_CONFIG_BAR_TEXT_FONT         "status_bar_text_font"
 #define COMMAND_CONFIG_BAR_ICON_FONT         "status_bar_icon_font"
 #define COMMAND_CONFIG_BAR_BACKGROUND        "status_bar_background_color"
@@ -733,6 +734,12 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_POSITION)) {
+      if (strcmp(message, "bottom") == 0) {
+          bar_set_position(&g_bar, Bottom);
+      } else {
+          bar_set_position(&g_bar, Top);
+      }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_TEXT_FONT)) {
         int length = strlen(message);
         if (length <= 0) {

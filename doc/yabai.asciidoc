@@ -102,6 +102,9 @@ Colors are in the form '#AARRGGBB'.
 'status_bar'::
     Enable custom status bar.
 
+'status_bar_position'::
+    Specify the position on the screen of the status bar. Accept the following values: *top*, *bottom*.
+
 'status_bar_text_font'::
     Specify name, style and size of font to use for drawing text. Format: '<font_family>:<font_style>:<font_size>'. Use 'Font Book.app' to identify the correct name.
 

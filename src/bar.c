@@ -270,11 +270,23 @@ void bar_resize(struct bar *bar)
     CGSNewRegionWithRect(&bar->frame, &frame_region);
     SLSDisableUpdate(g_connection);
     SLSOrderWindow(g_connection, bar->id, -1, 0);
-    SLSSetWindowShape(g_connection, bar->id, 0.0f, 0.0f, frame_region);
+
+    if (bar->position == Top) {
+      SLSSetWindowShape(g_connection, bar->id, 0.0f, 0.0f, frame_region);
+    } else {
+      SLSSetWindowShape(g_connection, bar->id, 0.0f, bounds.size.height - 26.0f, frame_region);
+    }
+
     bar_refresh(bar);
     SLSOrderWindow(g_connection, bar->id, 1, 0);
     SLSReenableUpdate(g_connection);
     CFRelease(frame_region);
+}
+
+void bar_set_position(struct bar *bar, enum bar_position position)
+{
+    bar->position = position;
+    bar_refresh(bar);
 }
 
 void bar_set_foreground_color(struct bar *bar, uint32_t color)
@@ -447,6 +459,7 @@ void bar_create(struct bar *bar)
 {
     if (bar->enabled) return;
 
+    if (!bar->position)    bar_set_position(bar, Top);
     if (!bar->t_font_prop) bar_set_text_font(bar, string_copy("Helvetica Neue:Regular:10.0"));
     if (!bar->i_font_prop) bar_set_icon_font(bar, string_copy("FontAwesome:Regular:10.0"));
     if (!bar->background_color.is_valid) bar_set_background_color(bar, 0xff202020);
@@ -473,7 +486,13 @@ void bar_create(struct bar *bar)
     bar->frame = (CGRect) {{0,0},{bounds.size.width, 26}};
 
     CGSNewRegionWithRect(&bar->frame, &frame_region);
-    SLSNewWindow(g_connection, 2, 0.0f, 0.0f, frame_region, &bar->id);
+
+    if (bar->position == Top) {
+      SLSNewWindow(g_connection, 2, 0.0f, 0.0f, frame_region, &bar->id);
+    } else {
+      SLSNewWindow(g_connection, 2, 0.0f, bounds.size.height - 26.0f, frame_region, &bar->id);
+    }
+
     CFRelease(frame_region);
 
     SLSSetWindowResolution(g_connection, bar->id, 2.0f);
