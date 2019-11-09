@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.1.1] - 2019-11-10
 ### Changed
 - Remove buffer-size restriction when reading data from socket [#221](https://github.com/koekeishiya/yabai/issues/221)
 - Replace strtok with custom function to parse key-value arguments in rules and signals [#307](https://github.com/koekeishiya/yabai/issues/307)
@@ -126,7 +128,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/koekeishiya/yabai/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/koekeishiya/yabai/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/koekeishiya/yabai/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/koekeishiya/yabai/compare/v1.1.2...v2.0.0
