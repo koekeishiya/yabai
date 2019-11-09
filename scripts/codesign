@@ -1,0 +1,47 @@
+#! /usr/bin/env bash
+
+identities="$(security find-identity -v -p codesigning | sed '$d')"
+id_count="$(echo "${identities}" | wc -l)"
+target="$(command -v "${1:-}")"
+
+function error() {
+	{
+		echo "$(tput bold)Error: ${@}$(tput sgr0)"
+		echo
+		echo "Usage: ./scripts/codesign <path/to/executable> [<certificate>]"
+		echo "Available codesigning certificates:"
+		echo "${identities}"
+	} >&2
+	exit 1
+}
+
+if [ "${id_count}" -lt 1 ]; then
+	>&2 echo "Unable to find a codesigning identity"
+	exit 1
+elif [ "${id_count}" -eq 1 ]; then
+	selection="1"
+elif [ "${id_count}" -gt 1 ] && [ "${#}" -eq 2 ]; then
+	selection="${2}"
+elif [ -x "${target}" ]; then
+	error "Unable to auto-select codesigning certificate"
+else
+	error "Unable to find executable \"${target}\""
+fi
+
+if [[ "${selection}" =~ ^[0-9]+$ ]]; then
+	certificate="$(echo "${identities}" \
+		| awk "NR==${selection} {print \$2}")"
+else
+	certificate="$(echo "${identities}" \
+		| awk 'BEGIN{FS=OFS="\""} {gsub(/ /,"_",$2)} 1' \
+		| awk "\$3 ~ /${selection// /_}/ {print \$2}")"
+fi
+
+if [ -z "${certificate}" ]; then
+	error "Unable to find codesigning certificate \"${selection}\""
+elif [ "$(echo "${certificate}" | wc -l)" -ne 1 ]; then
+	error "Unable to uniquely identify codesigning certificate \"${selection}\""
+fi
+
+command codesign --deep --force --verbose --sign "${certificate}" "${target}"
+
