@@ -158,7 +158,22 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
 
     if (rule->manage == RULE_PROP_ON) {
         window->rule_manage = true;
+        window->is_floating = false;
+        window_manager_make_children_floating(wm, window, false);
+        window_manager_make_floating(wm, window->id, false);
+        if ((window_manager_should_manage_window(window)) &&
+            (!window_manager_find_managed_window(wm, window))) {
+            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
+            window_manager_add_managed_window(wm, window, view);
+        }
     } else if (rule->manage == RULE_PROP_OFF) {
+        window->rule_manage = false;
+        struct view *view = window_manager_find_managed_window(wm, window);
+        if (view) {
+            space_manager_untile_window(sm, view, window);
+            window_manager_remove_managed_window(wm, window->id);
+            window_manager_purify_window(wm, window);
+        }
         window_manager_make_children_floating(wm, window, true);
         window_manager_make_floating(wm, window->id, true);
         window->is_floating = true;
