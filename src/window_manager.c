@@ -1049,12 +1049,12 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
             continue;
         }
 
-        window_manager_apply_rules_to_window(sm, wm, window);
         window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
         window_manager_purify_window(wm, window);
 
         if (window_observe(window)) {
             window_manager_add_window(wm, window);
+            window_manager_apply_rules_to_window(sm, wm, window);
 
             if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
                 if (window->rule_fullscreen) {
