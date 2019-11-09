@@ -28,17 +28,19 @@ else
 	error "Unable to find executable \"${target}\""
 fi
 
-if [ -z "${selection##[0-9]*}" ]; then
+if [[ "${selection}" =~ ^[0-9]+$ ]]; then
 	certificate="$(echo "${identities}" \
 		| awk "NR==${selection} {print \$2}")"
 else
 	certificate="$(echo "${identities}" \
-		| awk 'BEGIN{FS=OFS="\""} {gsub(/ /,"\\ ",$2)} 1' \
-		| awk "\$3==\"\\\"${selection// /_}\\\"\" {print \$2}")"
+		| awk 'BEGIN{FS=OFS="\""} {gsub(/ /,"_",$2)} 1' \
+		| awk "\$3 ~ /${selection// /_}/ {print \$2}")"
 fi
 
 if [ -z "${certificate}" ]; then
 	error "Unable to find codesigning certificate \"${selection}\""
+elif [ "$(echo "${certificate}" | wc -l)" -ne 1 ]; then
+	error "Unable to uniquely identify codesigning certificate \"${selection}\""
 fi
 
 command codesign --deep --force --verbose --sign "${certificate}" "${target}"
