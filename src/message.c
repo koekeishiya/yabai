@@ -875,17 +875,6 @@ static uint8_t parse_value_type(char *type)
     }
 }
 
-static uint8_t parse_ratio_action(char *action)
-{
-    if (string_equals(action, "inc")) {
-        return RATIO_INCREASE;
-    } else if (string_equals(action, "dec")) {
-        return RATIO_DECREASE;
-    } else {
-        return 0;
-    }
-}
-
 static uint8_t parse_resize_handle(char *handle)
 {
     if (string_equals(handle, "top")) {
@@ -1464,10 +1453,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_WINDOW_RATIO)) {
         float r;
-        char action[MAXLEN];
+        char type[MAXLEN];
         struct token value = get_token(&message);
-        if ((sscanf(value.text, ARGUMENT_WINDOW_RATIO, action, &r) == 2)) {
-            window_manager_adjust_window_ratio(&g_window_manager, acting_window, parse_ratio_action(action), r);
+        if ((sscanf(value.text, ARGUMENT_WINDOW_RATIO, type, &r) == 2)) {
+            window_manager_adjust_window_ratio(&g_window_manager, acting_window, parse_value_type(type), r);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
