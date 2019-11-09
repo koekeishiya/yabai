@@ -26,4 +26,7 @@
 #define HANDLE_RIGHT  0x08
 #define HANDLE_ABS    0x10
 
+#define RATIO_INCREASE 0x01
+#define RATIO_DECREASE 0x02
+
 #endif

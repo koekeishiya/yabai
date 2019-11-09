@@ -265,4 +265,11 @@ static int regex_match(bool valid, regex_t *regex, const char *match)
     return result == 0 ? REGEX_MATCH_YES : REGEX_MATCH_NO;
 }
 
+static inline float clampf_range(float value, float min, float max)
+{
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
 #endif

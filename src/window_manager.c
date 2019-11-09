@@ -251,6 +251,27 @@ void window_manager_add_managed_window(struct window_manager *wm, struct window 
     window_manager_purify_window(wm, window);
 }
 
+void window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int action, float ratio)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (view) {
+        struct window_node *node = view_find_window_node(view, window->id);
+        if (!node || !node->parent) return;
+
+        switch (action) {
+        case RATIO_INCREASE: {
+            node->parent->ratio = clampf_range(node->parent->ratio + ratio, 0.1f, 0.9f);
+        } break;
+        case RATIO_DECREASE: {
+            node->parent->ratio = clampf_range(node->parent->ratio - ratio, 0.1f, 0.9f);
+        } break;
+        }
+
+        window_node_update(view, node->parent);
+        window_node_flush(node->parent);
+    }
+}
+
 void window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
