@@ -21,6 +21,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 
+#include "misc/timing.h"
 #include "misc/macros.h"
 #include "misc/notify.h"
 #include "misc/log.h"
