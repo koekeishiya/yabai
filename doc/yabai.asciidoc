@@ -301,6 +301,9 @@ COMMAND
 *--resize* 'top|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>'::
     Resize the selected window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. If handle is 'abs' the new size will be 'dx' width and 'dy' height.
 
+*--ratio* 'inc|dec:<dr>'::
+    Adjust the split ratio for the parent node of the selected window by 'dr' percentage. Action 'inc' with a positive delta will increase the size of the left-child and 'dec' with a positive delta will decrease the size of the left-child.
+
 *--toggle* 'float|sticky|topmost|shadow|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window.
 

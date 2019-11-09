@@ -121,6 +121,7 @@ extern struct bar g_bar;
 #define COMMAND_WINDOW_GRID    "--grid"
 #define COMMAND_WINDOW_MOVE    "--move"
 #define COMMAND_WINDOW_RESIZE  "--resize"
+#define COMMAND_WINDOW_RATIO   "--ratio"
 #define COMMAND_WINDOW_CLOSE   "--close"
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
 #define COMMAND_WINDOW_DISPLAY "--display"
@@ -136,6 +137,7 @@ extern struct bar g_bar;
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
 #define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
+#define ARGUMENT_WINDOW_RATIO         "%255[^:]:%f"
 #define ARGUMENT_WINDOW_TOGGLE_ON_TOP "topmost"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
@@ -912,6 +914,17 @@ static uint8_t parse_value_type(char *type)
     }
 }
 
+static uint8_t parse_ratio_action(char *action)
+{
+    if (string_equals(action, "inc")) {
+        return RATIO_INCREASE;
+    } else if (string_equals(action, "dec")) {
+        return RATIO_DECREASE;
+    } else {
+        return 0;
+    }
+}
+
 static uint8_t parse_resize_handle(char *handle)
 {
     if (string_equals(handle, "top")) {
@@ -1485,6 +1498,15 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if ((sscanf(value.text, ARGUMENT_WINDOW_RESIZE, handle, &w, &h) == 3)) {
             window_manager_resize_window_relative(&g_window_manager, acting_window, parse_resize_handle(handle), w, h);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_RATIO)) {
+        float r;
+        char action[MAXLEN];
+        struct token value = get_token(&message);
+        if ((sscanf(value.text, ARGUMENT_WINDOW_RATIO, action, &r) == 2)) {
+            window_manager_adjust_window_ratio(&g_window_manager, acting_window, parse_ratio_action(action), r);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
