@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.1.2] - 2019-11-10
+### Changed
+- Fix regression causing windows to be added more than once in some circumstances [#297](https://github.com/koekeishiya/yabai/issues/297)
+
 ## [2.1.1] - 2019-11-10
 ### Changed
 - Remove buffer-size restriction when reading data from socket [#221](https://github.com/koekeishiya/yabai/issues/221)
@@ -128,7 +132,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/koekeishiya/yabai/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/koekeishiya/yabai/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/koekeishiya/yabai/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/koekeishiya/yabai/compare/v2.0.0...v2.0.1
