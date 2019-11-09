@@ -161,7 +161,11 @@ void bar_refresh(struct bar *bar)
     CGContextAddLineToPoint(bar->context, bar->frame.size.width, 1);
     CGContextStrokePath(bar->context);
 
+    //
     // BAR LEFT
+    //
+
+    int final_bar_left_x = 10;
     int space_count;
     uint64_t *space_list = display_space_list(bar->did, &space_count);
     if (space_list) {
@@ -188,23 +192,18 @@ void bar_refresh(struct bar *bar)
                 bar_draw_line(bar, mark_line, mark_pos.x, mark_pos.y);
                 CGContextSetTextPosition(bar->context, new_pos.x, new_pos.y);
             }
+
+            final_bar_left_x = pos.x + space_line.bounds.size.width + 10;
         }
 
         free(space_list);
     }
 
-    // BAR CENTER
-    struct window *window = window_manager_focused_window(&g_window_manager);
-    char *title = window ? window_title(window) : NULL;
-    if (title) {
-        struct bar_line title_line = bar_prepare_line(bar->t_font, title, bar->foreground_color);
-        CGPoint pos = bar_align_line(bar, title_line, ALIGN_CENTER, ALIGN_CENTER);
-        bar_draw_line(bar, title_line, pos.x, pos.y);
-        bar_destroy_line(title_line);
-        free(title);
-    }
-
+    //
     // BAR RIGHT
+    //
+
+    int initial_bar_right_x = bar->frame.size.width - 10;
     time_t rawtime;
     time(&rawtime);
     float time_line_width = 0;
@@ -226,7 +225,7 @@ void bar_refresh(struct bar *bar)
         bar_draw_line(bar, bar->clock_underline, tu_pos.x, tu_pos.y);
         bar_destroy_line(time_line);
 
-        time_line_width = time_line.bounds.size.width;
+        initial_bar_right_x = tu_pos.x - 10;
     }
 
     bool has_batt = false;
@@ -251,6 +250,44 @@ void bar_refresh(struct bar *bar)
         bar_draw_line(bar, batt_icon, pi_pos.x, pi_pos.y);
         bar_draw_line(bar, bar->power_underline, pu_pos.x, pu_pos.y);
         bar_destroy_line(batt_line);
+
+        initial_bar_right_x = pu_pos.x - 10;
+    }
+
+    // BAR CENTER
+    struct window *window = window_manager_focused_window(&g_window_manager);
+    char *title = window ? window_title(window) : NULL;
+    if (title) {
+        int overlap_left = 0;
+        int overlap_right = 0;
+
+        struct bar_line title_line = bar_prepare_line(bar->t_font, title, bar->foreground_color);
+        CGPoint pos = bar_align_line(bar, title_line, ALIGN_CENTER, ALIGN_CENTER);
+
+        if (final_bar_left_x >= pos.x) {
+            overlap_left = final_bar_left_x - pos.x;
+        }
+
+        if (initial_bar_right_x <= pos.x + title_line.bounds.size.width) {
+            overlap_right = pos.x + title_line.bounds.size.width - initial_bar_right_x;
+        }
+
+        assert(overlap_left >= 0);
+        assert(overlap_right >= 0);
+
+        int total_overlap = overlap_left + overlap_right;
+        if (total_overlap > 0) {
+            CTLineRef truncated_line = CTLineCreateTruncatedLine(title_line.line, title_line.bounds.size.width - total_overlap, kCTLineTruncationEnd, NULL);
+            CFRelease(title_line.line);
+            title_line.line = truncated_line;
+            if (overlap_left > 0) {
+                pos.x = final_bar_left_x;
+            }
+        }
+
+        bar_draw_line(bar, title_line, pos.x, pos.y);
+        bar_destroy_line(title_line);
+        free(title);
     }
 
     CGContextFlush(bar->context);
