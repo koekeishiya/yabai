@@ -275,6 +275,25 @@ static struct token get_token(char **message)
     return token;
 }
 
+static void get_key_value_pair(char *token, char **key, char **value)
+{
+    *key = token;
+
+    while (*token && *token != '=') {
+        ++token;
+    }
+
+    if (*token != '=') {
+        *key = NULL;
+        *value = NULL;
+    } else if (token[1]) {
+        *token = '\0';
+        *value = token+1;
+    } else {
+        *value = NULL;
+    }
+}
+
 static void daemon_fail(FILE *rsp, char *fmt, ...)
 {
     if (!rsp) return;
@@ -1691,8 +1710,10 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
         struct rule *rule = rule_create();
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {
-            char *key = strtok(token.text, "=");
-            char *value = strtok(NULL, "=");
+            char *key = NULL;
+            char *value = NULL;
+            get_key_value_pair(token.text, &key, &value);
+
             if (!key || !value) {
                 daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
                 return;
@@ -1796,8 +1817,10 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
 
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {
-            char *key = strtok(token.text, "=");
-            char *value = strtok(NULL, "=");
+            char *key = NULL;
+            char *value = NULL;
+            get_key_value_pair(token.text, &key, &value);
+
             if (!key || !value) {
                 daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
                 return;
