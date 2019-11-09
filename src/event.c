@@ -1136,7 +1136,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
 
-        if (dx >= 25 || dx <= -25 || dy >= 25 || dy <= 25) {
+        if (dx >= 25 || dx <= -25 || dy >= 25 || dy <= -25) {
             uint8_t direction = 0;
             CGPoint frame_mid = { CGRectGetMidX(g_mouse_state.window_frame), CGRectGetMidY(g_mouse_state.window_frame) };
 
