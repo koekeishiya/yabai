@@ -2,17 +2,24 @@
 
 char *socket_read(int sockfd, int *len)
 {
-    int length = BUFSIZ;
-    char *result = malloc(length);
+    int cursor = 0;
+    int bytes_read = 0;
+    char *result = NULL;
+    char buffer[BUFSIZ];
 
-    length = recv(sockfd, result, length, 0);
-    if (length > 0) {
-        result[length] = '\0';
-        *len = length;
-    } else {
+    while ((bytes_read = read(sockfd, buffer, sizeof(buffer)-1)) > 0) {
+        result = realloc(result, cursor+bytes_read+1);
+        memcpy(result+cursor, buffer, bytes_read);
+        cursor += bytes_read;
+    }
+
+    if (bytes_read == -1) {
         free(result);
         result = NULL;
         *len = 0;
+    } else {
+        result[cursor] = '\0';
+        *len = cursor;
     }
 
     return result;

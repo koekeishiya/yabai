@@ -86,6 +86,8 @@ static int client_send_message(int argc, char **argv)
         error("yabai-msg: failed to send data..\n");
     }
 
+    shutdown(sockfd, SHUT_WR);
+
     int result = EXIT_SUCCESS;
     int byte_count = 0;
     char rsp[BUFSIZ];
