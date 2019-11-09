@@ -495,13 +495,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         return EVENT_FAILURE;
     }
 
-    window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
     window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.normal_window_opacity);
     window_manager_purify_window(&g_window_manager, window);
 
     if (window_observe(window)) {
         debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(&g_window_manager, window);
+        window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
 
         if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
             if (window->rule_fullscreen) {
