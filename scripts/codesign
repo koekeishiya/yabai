@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+
+identities="$(security find-identity -v -p codesigning | sed '$d')"
+id_count="$(echo "${identities}" | wc -l)"
+target="$(command -v "${1:-}")"
+
+if [ "${id_count}" -lt 1 ]; then
+	>&2 echo "Unable to find a codesigning identity"
+	exit 1
+elif [ "${id_count}" -eq 1 ]; then
+	selection="1"
+elif [ "${id_count}" -gt 1 ] && [ "${#}" -eq 2 ]; then
+	selection="${2}"
+elif [ -x "${target}" ]; then
+	{
+		echo "Usage: ./scripts/codesign <path/to/bin> <certificate index>"
+		echo "Found multiple codesigning certificates. Please select:"
+		echo "${identities}"
+	} >&2
+	exit 2
+else
+	>&2 echo "Usage: ./scripts/codesign <path/to/bin> [<certificate index>]"
+	exit 1
+fi
+
+certificate="$(echo "${identities}" | awk "NR==${selection} {print \$2}")"
+command codesign --deep --force --verbose --sign "${certificate}" "${target}"
+
