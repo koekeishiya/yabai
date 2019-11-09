@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.1.0] - 2019-11-09
 ### Added
 - Config option *window_border_radius* to specify roundness of corners [#281](https://github.com/koekeishiya/yabai/issues/281)
 - Config option *window_border_placement* to specify placement of window borders (exterior, interior, inset) [#216](https://github.com/koekeishiya/yabai/issues/216)
@@ -121,7 +123,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/koekeishiya/yabai/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/koekeishiya/yabai/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/koekeishiya/yabai/compare/v1.1.2...v2.0.0
 [1.1.2]: https://github.com/koekeishiya/yabai/compare/v1.1.1...v1.1.2
