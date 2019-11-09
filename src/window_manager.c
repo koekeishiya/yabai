@@ -369,7 +369,8 @@ void window_manager_set_border_window_enabled(struct window_manager *wm, bool en
                         border_window_create(window);
 
                         if ((!window->application->is_hidden) &&
-                            (!window->is_minimized)) {
+                            (!window->is_minimized) &&
+                            (!window->is_fullscreen)) {
                             border_window_refresh(window);
                         }
 
@@ -400,7 +401,8 @@ void window_manager_set_border_window_width(struct window_manager *wm, int width
                     CGContextSetLineWidth(window->border.context, width);
 
                     if ((!window->application->is_hidden) &&
-                        (!window->is_minimized)) {
+                        (!window->is_minimized) &&
+                        (!window->is_fullscreen)) {
                         border_window_refresh(window);
                     }
                 }
@@ -423,7 +425,8 @@ void window_manager_set_border_window_radius(struct window_manager *wm, float ra
                     window->border.radius = radius;
 
                     if ((!window->application->is_hidden) &&
-                        (!window->is_minimized)) {
+                        (!window->is_minimized) &&
+                        (!window->is_fullscreen)) {
                         border_window_refresh(window);
                     }
                 }
@@ -449,7 +452,13 @@ void window_manager_set_normal_border_window_color(struct window_manager *wm, ui
         while (bucket) {
             if (bucket->value) {
                 struct window *window = bucket->value;
-                if (window->id != wm->focused_window_id) border_window_deactivate(window);
+                if (window->id != wm->focused_window_id) {
+                    if ((!window->application->is_hidden) &&
+                        (!window->is_minimized) &&
+                        (!window->is_fullscreen)) {
+                        border_window_deactivate(window);
+                    }
+                }
             }
 
             bucket = bucket->next;

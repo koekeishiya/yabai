@@ -276,10 +276,12 @@ bool window_is_minimized(struct window *window)
 {
     Boolean result = 0;
     CFTypeRef value;
+
     if (AXUIElementCopyAttributeValue(window->ref, kAXMinimizedAttribute, &value) == kAXErrorSuccess) {
         result = CFBooleanGetValue(value);
         CFRelease(value);
     }
+
     return result || window->is_minimized;
 }
 
@@ -425,7 +427,9 @@ struct window *window_create(struct application *application, AXUIElementRef win
     if ((window_is_standard(window)) || (window_is_dialog(window))) {
         border_window_create(window);
 
-        if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen)) {
+        if ((!window->application->is_hidden) &&
+            (!window->is_minimized) &&
+            (!window->is_fullscreen)) {
             border_window_refresh(window);
         }
     }
