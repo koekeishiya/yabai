@@ -1113,43 +1113,34 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
     }
 
     if (g_mouse_state.current_action == MOUSE_MODE_MOVE) {
-        uint64_t event_time = CGEventGetTimestamp(context);
-        float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-        if (dt < 25.0f) return EVENT_SUCCESS;
-
         CGPoint point = CGEventGetLocation(context);
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
-
-        if (dx >= 10 || dx <= -10 || dy >= 10 || dy <= -10) {
-            float fx = g_mouse_state.window_frame.origin.x + dx;
-            float fy = g_mouse_state.window_frame.origin.y + dy;
-            window_manager_move_window(g_mouse_state.window, fx, fy);
-            g_mouse_state.last_moved_time = event_time;
-        }
+        float fx = g_mouse_state.window_frame.origin.x + dx;
+        float fy = g_mouse_state.window_frame.origin.y + dy;
+        window_manager_move_window_cgs(g_mouse_state.window, fx, fy);
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         uint64_t event_time = CGEventGetTimestamp(context);
         float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-        if (dt < 200.0f) return EVENT_SUCCESS;
+        float threshold = g_mouse_state.window->is_floating ? 66.666f : 150.0f;
+        if (dt < threshold) return EVENT_SUCCESS;
 
         CGPoint point = CGEventGetLocation(context);
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
 
-        if (dx >= 25 || dx <= -25 || dy >= 25 || dy <= -25) {
-            uint8_t direction = 0;
-            CGPoint frame_mid = { CGRectGetMidX(g_mouse_state.window_frame), CGRectGetMidY(g_mouse_state.window_frame) };
+        uint8_t direction = 0;
+        CGPoint frame_mid = { CGRectGetMidX(g_mouse_state.window_frame), CGRectGetMidY(g_mouse_state.window_frame) };
 
-            if (point.x < frame_mid.x) direction |= HANDLE_LEFT;
-            if (point.y < frame_mid.y) direction |= HANDLE_TOP;
-            if (point.x > frame_mid.x) direction |= HANDLE_RIGHT;
-            if (point.y > frame_mid.y) direction |= HANDLE_BOTTOM;
-            window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
+        if (point.x < frame_mid.x) direction |= HANDLE_LEFT;
+        if (point.y < frame_mid.y) direction |= HANDLE_TOP;
+        if (point.x > frame_mid.x) direction |= HANDLE_RIGHT;
+        if (point.y > frame_mid.y) direction |= HANDLE_BOTTOM;
+        window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
 
-            g_mouse_state.last_moved_time = event_time;
-            g_mouse_state.down_location = point;
-            g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
-        }
+        g_mouse_state.last_moved_time = event_time;
+        g_mouse_state.down_location = point;
+        g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
     }
 
     return EVENT_SUCCESS;
