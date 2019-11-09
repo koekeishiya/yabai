@@ -333,6 +333,19 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct win
     }
 }
 
+void window_manager_move_window_cgs(struct window *window, float x, float y)
+{
+    int sockfd;
+    char message[MAXLEN];
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "window_move %d %d %d", window->id, (int)x, (int)y);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
+}
+
 void window_manager_move_window(struct window *window, float x, float y)
 {
     CGPoint position = CGPointMake(x, y);
