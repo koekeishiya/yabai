@@ -33,7 +33,6 @@ static bool event_signal_filter(struct signal *signal, enum event_type type, str
         return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) == REGEX_MATCH_NO;
     } break;
     case WINDOW_CREATED:
-    case WINDOW_DESTROYED:
     case WINDOW_FOCUSED:
     case WINDOW_MOVED:
     case WINDOW_RESIZED:
