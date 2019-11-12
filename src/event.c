@@ -1048,7 +1048,8 @@ do_swap:
                     goto end;
                 }
 
-                if (a_node->parent == b_node->parent) {
+                if ((a_node->parent && b_node->parent) &&
+                    (a_node->parent == b_node->parent)) {
                     if (b_node->parent->split == new_split) {
                         goto do_swap;
                     } else {
