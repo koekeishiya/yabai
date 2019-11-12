@@ -148,12 +148,13 @@ static void window_node_split(struct view *view, struct window_node *node, struc
         left->window_id = window->id;
     }
 
-    left->parent = node;
+    left->parent  = node;
     right->parent = node;
 
     node->window_id = 0;
-    node->left = left;
+    node->left  = left;
     node->right = right;
+    node->zoom  = NULL;
 
     area_make_pair(view, node);
 }
@@ -177,6 +178,16 @@ static void window_node_destroy(struct window_node *node)
 
     if (node->window_id) window_manager_remove_managed_window(&g_window_manager, node->window_id);
     free(node);
+}
+
+static void window_node_clear_zoom(struct window_node *node)
+{
+    node->zoom = NULL;
+
+    if (!window_node_is_leaf(node)) {
+        window_node_clear_zoom(node->left);
+        window_node_clear_zoom(node->right);
+    }
 }
 
 float window_node_border_window_offset(struct window *window)
@@ -360,14 +371,18 @@ void view_remove_window_node(struct view *view, struct window *window)
     parent->window_id = child->window_id;
     parent->left      = NULL;
     parent->right     = NULL;
+    parent->zoom      = NULL;
 
     if (window_node_is_intermediate(child) && !window_node_is_leaf(child)) {
         parent->left = child->left;
         parent->left->parent = parent;
+        parent->left->zoom = NULL;
 
         parent->right = child->right;
         parent->right->parent = parent;
+        parent->right->zoom = NULL;
 
+        window_node_clear_zoom(parent);
         window_node_update(view, parent);
     }
 
