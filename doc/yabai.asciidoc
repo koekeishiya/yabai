@@ -99,6 +99,9 @@ Global Settings
 
 Colors are in the form '#AARRGGBB'.
 
+'debug_output'::
+    Enable output of debug information to stdout.
+
 'status_bar'::
     Enable custom status bar.
 

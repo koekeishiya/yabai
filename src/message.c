@@ -7,6 +7,7 @@ extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
 extern struct bar g_bar;
+extern bool g_verbose;
 
 #define DOMAIN_CONFIG  "config"
 #define DOMAIN_DISPLAY "display"
@@ -17,6 +18,7 @@ extern struct bar g_bar;
 #define DOMAIN_SIGNAL  "signal"
 
 /* --------------------------------DOMAIN CONFIG-------------------------------- */
+#define COMMAND_CONFIG_DEBUG_OUTPUT          "debug_output"
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
 #define COMMAND_CONFIG_FFM                   "focus_follows_mouse"
 #define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
@@ -335,7 +337,18 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 
     if (found_selector) command = get_token(&message);
 
-    if (token_equals(command, COMMAND_CONFIG_MFF)) {
+    if (token_equals(command, COMMAND_CONFIG_DEBUG_OUTPUT)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_verbose]);
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+            g_verbose = false;
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+            g_verbose = true;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_MFF)) {
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_mff]);
