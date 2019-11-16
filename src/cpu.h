@@ -8,8 +8,9 @@ struct cpu_info
 {
     int32_t nphys_cpu;
     unsigned int nlog_cpu;
-    float load_avg[CPU_MAX_NUM_CPUS][CPU_WINDOW_SZ];
+    float user_avg[CPU_MAX_NUM_CPUS][CPU_WINDOW_SZ];
     float sys_avg[CPU_MAX_NUM_CPUS][CPU_WINDOW_SZ];
+    float load_avg[CPU_MAX_NUM_CPUS][CPU_WINDOW_SZ];
     CFRunLoopTimerRef refresh_timer;
     processor_cpu_load_info_t prev_load;
     processor_cpu_load_info_t curr_load;

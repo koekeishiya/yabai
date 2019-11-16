@@ -54,6 +54,7 @@ void cpu_update(struct cpu_info* cpui) {
     for (size_t cpu = 0; cpu < cpui->nlog_cpu; ++cpu) {
         memmove(cpui->load_avg[cpu], &cpui->load_avg[cpu][1], sizeof(*cpui->load_avg[cpu]) * (CPU_WINDOW_SZ - 1));
         memmove(cpui->sys_avg[cpu], &cpui->sys_avg[cpu][1], sizeof(*cpui->sys_avg[cpu]) * (CPU_WINDOW_SZ - 1));
+        memmove(cpui->user_avg[cpu], &cpui->user_avg[cpu][1], sizeof(*cpui->user_avg[cpu]) * (CPU_WINDOW_SZ - 1));
     }
     if (cpui->prev_load) {
         for (size_t cpu = 0; cpu < cpui->nlog_cpu; ++cpu) {
@@ -61,12 +62,15 @@ void cpu_update(struct cpu_info* cpui) {
             for (size_t s = 0; s < CPU_STATE_MAX; ++s) {
                 total_ticks += cpui->curr_load[cpu].cpu_ticks[s] - cpui->prev_load[cpu].cpu_ticks[s];
             }
-            cpui->load_avg[cpu][CPU_WINDOW_SZ - 1] =
+            cpui->user_avg[cpu][CPU_WINDOW_SZ - 1] =
                 (cpui->curr_load[cpu].cpu_ticks[CPU_STATE_USER] -
                  cpui->prev_load[cpu].cpu_ticks[CPU_STATE_USER]) / total_ticks;
             cpui->sys_avg[cpu][CPU_WINDOW_SZ - 1] =
                 (cpui->curr_load[cpu].cpu_ticks[CPU_STATE_SYSTEM] -
                  cpui->prev_load[cpu].cpu_ticks[CPU_STATE_SYSTEM]) / total_ticks;
+            cpui->load_avg[cpu][CPU_WINDOW_SZ - 1] =
+                cpui->user_avg[cpu][CPU_WINDOW_SZ - 1] +
+                cpui->sys_avg[cpu][CPU_WINDOW_SZ - 1];
         }
     }
 }
