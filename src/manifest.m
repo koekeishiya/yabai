@@ -76,5 +76,6 @@
 #include "space_manager.c"
 #include "window_manager.c"
 #include "bar.c"
+#include "cpu.c"
 
 #include "yabai.c"
