@@ -56,6 +56,9 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_BAR_POWER_STRIP       "status_bar_power_icon_strip"
 #define COMMAND_CONFIG_BAR_SPACE_ICON        "status_bar_space_icon"
 #define COMMAND_CONFIG_BAR_CLOCK_ICON        "status_bar_clock_icon"
+#define COMMAND_CONFIG_BAR_CPU_METER         "status_bar_cpu_meter"
+#define COMMAND_CONFIG_BAR_CPU_USER_COLOR    "status_bar_cpu_user_color"
+#define COMMAND_CONFIG_BAR_CPU_SYS_COLOR     "status_bar_cpu_sys_color"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
@@ -837,6 +840,35 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             fprintf(rsp, "%s\n", g_bar._clock_icon ? g_bar._clock_icon : "");
         } else {
             bar_set_clock_icon(&g_bar, token_to_string(token));
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_CPU_METER)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+            g_bar.enable_cpu_meter = false;
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+            g_bar.enable_cpu_meter = true;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_CPU_USER_COLOR)) {
+        struct token value = get_token(&message);
+        if (token_is_valid(value)) {
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                bar_set_cpu_user_color(&g_bar, color);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_CPU_SYS_COLOR)) {
+        struct token value = get_token(&message);
+        if (token_is_valid(value)) {
+            uint32_t color = token_to_uint32t(value);
+            if (color) {
+                bar_set_cpu_sys_color(&g_bar, color);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

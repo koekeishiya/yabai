@@ -115,13 +115,14 @@ static void bar_draw_line(struct bar *bar, struct bar_line line, float x, float 
     CTLineDraw(line.line, bar->context);
 }
 
-static float bar_draw_cpu_line(struct bar *bar, const float data[], size_t ndata, float x, float y) {
+static float bar_draw_cpu_line(struct bar *bar, const float data[], size_t ndata, float x, float y, struct rgba_color *color, bool fill) {
+    color = color ? color : &bar->cpu_user_color;
     const float height = bar->frame.size.height * 0.95f;
 
     CGContextSaveGState(bar->context);
-    CGContextSetRGBStrokeColor(bar->context, 1.0, 0.0, 0.0, 1.0);
-    CGContextSetRGBFillColor(bar->context, 1.0, 0.0, 0.0, 0.2);
-    CGContextSetLineWidth(bar->context, 0.5);
+    CGContextSetRGBStrokeColor(bar->context, color->r, color->g, color->b, 1.0);
+    CGContextSetRGBFillColor(bar->context, color->r, color->g, color->b, 0.2);
+    CGContextSetLineWidth(bar->context, fill ? 0.5 : 0.75);
     CGMutablePathRef p = CGPathCreateMutable();
     float start_x = x;
     CGPathMoveToPoint(p, NULL, x, y + data[ndata - 1] * height);
@@ -130,11 +131,13 @@ static float bar_draw_cpu_line(struct bar *bar, const float data[], size_t ndata
     }
     CGContextAddPath(bar->context, p);
     CGContextStrokePath(bar->context);
-    CGPathAddLineToPoint(p, NULL, x + 2.0f, 0);
-    CGPathAddLineToPoint(p, NULL, start_x, 0);
-    CGPathCloseSubpath(p);
-    CGContextAddPath(bar->context, p);
-    CGContextFillPath(bar->context);
+    if (fill) {
+        CGPathAddLineToPoint(p, NULL, x + 2.0f, 0);
+        CGPathAddLineToPoint(p, NULL, start_x, 0);
+        CGPathCloseSubpath(p);
+        CGContextAddPath(bar->context, p);
+        CGContextFillPath(bar->context);
+    }
     CGPathRelease(p);
     CGContextRestoreGState(bar->context);
     return x + 2.0f;
@@ -279,8 +282,11 @@ void bar_refresh(struct bar *bar)
         initial_bar_right_x = pu_pos.x - 10;
     }
 
-    for (int i = 0; i < bar->cpu_info.nlog_cpu; ++i) {
-        initial_bar_right_x = bar_draw_cpu_line(bar, bar->cpu_info.load_avg[i], CPU_WINDOW_SZ, initial_bar_right_x, 0);
+    if (bar->enable_cpu_meter) {
+        for (int i = 0; i < bar->cpu_info.nlog_cpu; ++i) {
+            bar_draw_cpu_line(bar, bar->cpu_info.load_avg[i], CPU_WINDOW_SZ, initial_bar_right_x, 0, &bar->cpu_user_color, true);
+            initial_bar_right_x = bar_draw_cpu_line(bar, bar->cpu_info.sys_avg[i], CPU_WINDOW_SZ, initial_bar_right_x, 0, &bar->cpu_sys_color, false);
+        }
     }
 
     // BAR CENTER
@@ -357,6 +363,16 @@ void bar_set_background_color(struct bar *bar, uint32_t color)
 {
     bar->background_color = rgba_color_from_hex(color);
     bar->background_color_dim = rgba_color_dim(bar->background_color);
+    bar_refresh(bar);
+}
+
+void bar_set_cpu_user_color(struct bar *bar, uint32_t color) {
+    bar->cpu_user_color = rgba_color_from_hex(color);
+    bar_refresh(bar);
+}
+
+void bar_set_cpu_sys_color(struct bar *bar, uint32_t color) {
+    bar->cpu_sys_color = rgba_color_from_hex(color);
     bar_refresh(bar);
 }
 
@@ -520,6 +536,8 @@ void bar_create(struct bar *bar)
     if (!bar->_clock_icon) bar_set_clock_icon(bar, string_copy(" "));
     if (!bar->_space_icon) bar_set_space_icon(bar, string_copy("*"));
     if (!bar->_power_icon_strip) bar_set_power_strip(bar, NULL);
+    if (!bar->cpu_user_color.is_valid) bar_set_cpu_user_color(bar, 0xcccccc);
+    if (!bar->cpu_sys_color.is_valid) bar_set_cpu_sys_color(bar, 0x86a9c4);
 
     uint32_t set_tags[2] = {
         kCGSStickyTagBit |
