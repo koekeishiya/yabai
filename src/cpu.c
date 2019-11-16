@@ -41,7 +41,7 @@ void cpu_update(struct cpu_info* cpui) {
     assert("cpui is not NULL" && cpui);
     mach_msg_type_number_t info_size = sizeof(processor_cpu_load_info_t);
     if (cpui->prev_load) {
-        // munmap(cpui->prev_load, vm_page_size);
+        munmap(cpui->prev_load, vm_page_size);
     }
     cpui->prev_load = cpui->curr_load;
     if (host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &cpui->nlog_cpu,
