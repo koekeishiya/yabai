@@ -1,6 +1,8 @@
 #ifndef BAR_H
 #define BAR_H
 
+#include "cpu.h"
+
 #define POWER_CALLBACK(name) void name(void *context)
 typedef POWER_CALLBACK(power_callback);
 
@@ -51,6 +53,7 @@ struct bar
     struct bar_line space_underline;
     struct bar_line power_underline;
     struct bar_line clock_underline;
+    struct cpu_info cpu_info;
 };
 
 void bar_set_foreground_color(struct bar *bar, uint32_t color);

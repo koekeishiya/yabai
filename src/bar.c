@@ -115,6 +115,31 @@ static void bar_draw_line(struct bar *bar, struct bar_line line, float x, float 
     CTLineDraw(line.line, bar->context);
 }
 
+static float bar_draw_cpu_line(struct bar *bar, const float data[], size_t ndata, float x, float y) {
+    const float height = bar->frame.size.height * 0.95f;
+
+    CGContextSaveGState(bar->context);
+    CGContextSetRGBStrokeColor(bar->context, 1.0, 0.0, 0.0, 1.0);
+    CGContextSetRGBFillColor(bar->context, 1.0, 0.0, 0.0, 0.2);
+    CGContextSetLineWidth(bar->context, 0.5);
+    CGMutablePathRef p = CGPathCreateMutable();
+    float start_x = x;
+    CGPathMoveToPoint(p, NULL, x, y + data[ndata - 1] * height);
+    for (int i = ndata - 1; i > 0; --i, x -= 2.0f) {
+        CGPathAddLineToPoint(p, NULL, x, y + data[i] * height);
+    }
+    CGContextAddPath(bar->context, p);
+    CGContextStrokePath(bar->context);
+    CGPathAddLineToPoint(p, NULL, x + 2.0f, 0);
+    CGPathAddLineToPoint(p, NULL, start_x, 0);
+    CGPathCloseSubpath(p);
+    CGContextAddPath(bar->context, p);
+    CGContextFillPath(bar->context);
+    CGPathRelease(p);
+    CGContextRestoreGState(bar->context);
+    return x + 2.0f;
+}
+
 static void bar_destroy_line(struct bar_line line)
 {
     CFRelease(line.line);
@@ -252,6 +277,10 @@ void bar_refresh(struct bar *bar)
         bar_destroy_line(batt_line);
 
         initial_bar_right_x = pu_pos.x - 10;
+    }
+
+    for (int i = 0; i < bar->cpu_info.nlog_cpu; ++i) {
+        initial_bar_right_x = bar_draw_cpu_line(bar, bar->cpu_info.load_avg[i], CPU_WINDOW_SZ, initial_bar_right_x, 0);
     }
 
     // BAR CENTER
@@ -531,6 +560,8 @@ void bar_create(struct bar *bar)
     CFRunLoopAddTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
 
     space_manager_mark_spaces_invalid_for_display(&g_space_manager, bar->did);
+
+    cpu_create(&bar->cpu_info);
     bar_refresh(bar);
 }
 
@@ -549,5 +580,6 @@ void bar_destroy(struct bar *bar)
         bar->enabled = false;
 
         space_manager_mark_spaces_invalid_for_display(&g_space_manager, bar->did);
+        cpu_destroy(&bar->cpu_info);
     }
 }
