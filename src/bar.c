@@ -560,9 +560,6 @@ static void bar_start_update(struct bar *bar)
             NULL);
     CFRunLoopAddTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
     bar->enabled = true;
-    char tmp[255];
-    snprintf(tmp, sizeof(tmp), "bar redraws every %.3f seconds", bar->refresh_frequency);
-    notify(tmp, NULL);
 }
 
 void bar_set_refresh_frequency(struct bar *bar, float freq)
