@@ -525,6 +525,43 @@ void bar_set_space_icon(struct bar *bar, char *icon)
     bar_refresh(bar);
 }
 
+static void bar_stop_update(struct bar *bar)
+{
+    if (bar->enabled) {
+        CFRunLoopRemoveTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
+        CFRunLoopTimerInvalidate(bar->refresh_timer);
+        bar->enabled = false;
+    }
+}
+
+static void bar_start_update(struct bar *bar)
+{
+    if (bar->enabled) {
+        bar_stop_update(bar);
+    }
+    bar->refresh_timer = CFRunLoopTimerCreate(
+            NULL,
+            CFAbsoluteTimeGetCurrent() + bar->refresh_frequency,
+            bar->refresh_frequency,
+            0,
+            0,
+            timer_handler,
+            NULL);
+    CFRunLoopAddTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
+    bar->enabled = true;
+    char tmp[255];
+    snprintf(tmp, sizeof(tmp), "bar redraws every %.3f seconds", bar->refresh_frequency);
+    notify(tmp, NULL);
+}
+
+void bar_set_refresh_frequency(struct bar *bar, float freq)
+{
+    bar->refresh_frequency = freq;
+    if (bar->enabled) {
+        bar_start_update(bar);
+    }
+}
+
 void bar_create(struct bar *bar)
 {
     if (bar->enabled) return;
@@ -538,6 +575,7 @@ void bar_create(struct bar *bar)
     if (!bar->_power_icon_strip) bar_set_power_strip(bar, NULL);
     if (!bar->cpu_user_color.is_valid) bar_set_cpu_user_color(bar, 0xcccccc);
     if (!bar->cpu_sys_color.is_valid) bar_set_cpu_sys_color(bar, 0x86a9c4);
+    if (bar->refresh_frequency <= 0) bar_set_refresh_frequency(bar, 5.0f);
 
     uint32_t set_tags[2] = {
         kCGSStickyTagBit |
@@ -568,14 +606,10 @@ void bar_create(struct bar *bar)
     SLSSetWindowLevel(g_connection, bar->id, CGWindowLevelForKey(4));
     bar->context = SLWindowContextCreate(g_connection, bar->id, 0);
 
-    int refresh_frequency = 5;
     bar->power_source = IOPSNotificationCreateRunLoopSource(power_handler, NULL);
-    bar->refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + refresh_frequency, refresh_frequency, 0, 0, timer_handler, NULL);
-
-    bar->enabled = true;
+    bar_start_update(bar);
 
     CFRunLoopAddSource(CFRunLoopGetMain(), bar->power_source, kCFRunLoopCommonModes);
-    CFRunLoopAddTimer(CFRunLoopGetMain(), bar->refresh_timer, kCFRunLoopCommonModes);
 
     space_manager_mark_spaces_invalid_for_display(&g_space_manager, bar->did);
 

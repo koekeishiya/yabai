@@ -48,6 +48,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_MOUSE_ACTION1         "mouse_action1"
 #define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
 #define COMMAND_CONFIG_BAR                   "status_bar"
+#define COMMAND_CONFIG_BAR_REFRESH_FREQ      "status_bar_refresh_freq"
 #define COMMAND_CONFIG_BAR_TEXT_FONT         "status_bar_text_font"
 #define COMMAND_CONFIG_BAR_ICON_FONT         "status_bar_icon_font"
 #define COMMAND_CONFIG_BAR_BACKGROUND        "status_bar_background_color"
@@ -769,6 +770,18 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             bar_create(&g_bar);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_REFRESH_FREQ)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%.4f\n", g_bar.refresh_frequency);
+        } else {
+            float rf = token_to_float(value);
+            if (rf > 0.0f) {
+                bar_set_refresh_frequency(&g_bar, rf);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_TEXT_FONT)) {
         int length = strlen(message);

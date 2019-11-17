@@ -33,6 +33,7 @@ struct bar
     CGContextRef context;
     CFRunLoopSourceRef power_source;
     CFRunLoopTimerRef refresh_timer;
+    float refresh_frequency;
     CGRect frame;
     char *t_font_prop;
     char *i_font_prop;
@@ -67,6 +68,7 @@ void bar_set_space_strip(struct bar *bar, char **icon_strip);
 void bar_set_power_strip(struct bar *bar, char **icon_strip);
 void bar_set_clock_icon(struct bar *bar, char *icon);
 void bar_set_space_icon(struct bar *bar, char *icon);
+void bar_set_refresh_frequency(struct bar *bar, float freq);
 void bar_set_cpu_user_color(struct bar *bar, uint32_t color);
 void bar_set_cpu_sys_color(struct bar *bar, uint32_t color);
 
