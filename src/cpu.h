@@ -1,7 +1,11 @@
 #ifndef CPU_H
 #define CPU_H
 
-#define CPU_MAX_NUM_CPUS		    32
+// 2019-11-17: max. number of cores in a Mac is 28 (Mac Pro);
+// with Hyper-Threading this give 56 logical processors, so
+// let's leave headroom to grow:
+// TODO check if it's worth the effort to allocate dynamically
+#define CPU_MAX_NUM_CPUS		            128
 #define CPU_WINDOW_SZ                       20
 
 struct cpu_info
