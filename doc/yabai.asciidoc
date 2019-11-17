@@ -132,7 +132,7 @@ Colors are in the form '#AARRGGBB'.
 'status_bar_clock_icon'::
     Specify a symbol to represent the current time.
 
-'status_bar_enable_cpu_meter'::
+'status_bar_cpu_meter'::
     Enable per CPU load line graph in status bar.
 
 'status_bar_cpu_update_freq'::

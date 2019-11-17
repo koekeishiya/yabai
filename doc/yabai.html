@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>yabai(1)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment @import statement to use as custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite::before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+:not(pre)>code.nobreak{word-wrap:normal}
+:not(pre)>code.nowrap{white-space:nowrap}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details>summary:first-of-type{cursor:pointer;display:list-item;outline:none;margin-bottom:.75em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class="highlight"],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+table.tableblock{max-width:100%;border-collapse:separate}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+td.tableblock>.content>:last-child.sidebarblock{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot,table.frame-ends{border-width:1px 0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="article">
+<div id="header">
+<h1>yabai(1)</h1>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>yabai</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">Synopsis</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>yabai</strong> [<strong>-v</strong>,<strong>--version</strong>|<strong>-V</strong>,<strong>--verbose</strong>|<strong>-m</strong>,<strong>--message</strong> <em>msg</em>|<strong>-c</strong>,<strong>--config</strong> <em>config_file</em>|<strong>--install-sa</strong>|<strong>--uninstall-sa</strong>|<strong>--check-sa</strong>|<strong>--load-sa</strong>]</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>yabai</strong> is a tiling window manager for macOS based on binary space partitioning.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">Options</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>-v</strong>, <strong>--version</strong></dt>
+<dd>
+<p>Print the version and exit.</p>
+</dd>
+<dt class="hdlist1"><strong>-V</strong>, <strong>--verbose</strong></dt>
+<dd>
+<p>Output debug information to stdout.</p>
+</dd>
+<dt class="hdlist1"><strong>-m</strong>, <strong>--message</strong> <em>&lt;msg&gt;</em></dt>
+<dd>
+<p>Send message to a running instance of yabai.</p>
+</dd>
+<dt class="hdlist1"><strong>-c</strong>, <strong>--config</strong> <em>&lt;config_file&gt;</em></dt>
+<dd>
+<p>Use the specified configuration file.</p>
+</dd>
+<dt class="hdlist1"><strong>--install-sa</strong></dt>
+<dd>
+<p>Install scripting-addition. Must be run as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.</p>
+</dd>
+<dt class="hdlist1"><strong>--uninstall-sa</strong></dt>
+<dd>
+<p>Uninstall scripting-addition. Must be run as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.</p>
+</dd>
+<dt class="hdlist1"><strong>--check-sa</strong></dt>
+<dd>
+<p>Returns a zero exit-code if the latest version of the scripting-addition is installed.</p>
+</dd>
+<dt class="hdlist1"><strong>--load-sa</strong></dt>
+<dd>
+<p>Loads the scripting-addition into Dock.app.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_definitions">Definitions</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre>DIR_SEL     := north | east | south | west
+
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | window id
+
+DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1-based)
+
+SPACE_SEL   := prev | next | first | last | recent | mission-control index (1-based) | LABEL
+
+FLOAT_SEL   := 0 &lt; value &lt;= 1.0
+
+BOOL_SEL    := on | off
+
+REGEX       := <a href="https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended-regular-expression-syntax.html">POSIX extended regular expression syntax</a>
+
+LABEL       := arbitrary string/text used as an identifier</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_domains">Domains</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_config">Config</h3>
+<div class="sect3">
+<h4 id="_general_syntax">General Syntax</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">yabai -m config &lt;global setting&gt; [&lt;value&gt;]</dt>
+<dd>
+<p>Get or set the value of &lt;global setting&gt;.</p>
+</dd>
+<dt class="hdlist1">yabai -m config [--space <em>&lt;mission-control index&gt;</em>] &lt;space setting&gt; [&lt;value&gt;]</dt>
+<dd>
+<p>Get or set the value of &lt;space setting&gt;.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_global_settings">Global Settings</h4>
+<div class="paragraph">
+<p>Colors are in the form <em>#AARRGGBB</em>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><em>debug_output</em></dt>
+<dd>
+<p>Enable output of debug information to stdout.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar</em></dt>
+<dd>
+<p>Enable custom status bar.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_refresh_freq</em></dt>
+<dd>
+<p>Specify the status bar refresh frequency in seconds (1.0s &#8658; 1Hz, 10.0s &#8658; 0.1Hz, &#8230;&#8203;). To get smooth drawing of the CPU load lines, set to at least <strong>status_bar_cpu_update_freq</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_text_font</em></dt>
+<dd>
+<p>Specify name, style and size of font to use for drawing text. Format: <em>&lt;font_family&gt;:&lt;font_style&gt;:&lt;font_size&gt;</em>. Use <em>Font Book.app</em> to identify the correct name.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_icon_font</em></dt>
+<dd>
+<p>Specify name, style and size of font to use for drawing icon symbols. Format: <em>&lt;font_family&gt;:&lt;font_style&gt;:&lt;font_size&gt;</em>. Use <em>Font Book.app</em> to identify the correct name.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_background_color</em></dt>
+<dd>
+<p>Color to use for drawing status bar background.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_foreground_color</em></dt>
+<dd>
+<p>Color to use for drawing status bar elements.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_space_icon_strip</em></dt>
+<dd>
+<p>Specify symbols separated by whitespace to be used for visualizing spaces.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_power_icon_strip</em></dt>
+<dd>
+<p>Specify two symbols separated by whitespace. The first symbol represents battery power and the second symbol indicates AC.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_space_icon</em></dt>
+<dd>
+<p>Specify a general symbol to use for any given space that does not have a match in <em>status_bar_space_icon_strip</em>.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_clock_icon</em></dt>
+<dd>
+<p>Specify a symbol to represent the current time.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_cpu_meter</em></dt>
+<dd>
+<p>Enable per CPU load line graph in status bar.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_cpu_update_freq</em></dt>
+<dd>
+<p>Specify update frequency of CPU load data in seconds (1.0s &#8658; 1Hz, 0.5s, 2Hz, &#8230;&#8203;). Note: Higher update rates will require higher redraw frequency, see <strong>status_bar_refresh_frequency</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_cpu_user_color</em></dt>
+<dd>
+<p>Color to use for drawing the user load in CPU load line graphs.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_cpu_sys_color</em></dt>
+<dd>
+<p>Color to use for drawing the kernel/OS load in CPU load line graphs.</p>
+</dd>
+<dt class="hdlist1"><em>status_bar_cpu_sample_width</em></dt>
+<dd>
+<p>Width of each sample in CPU load line graphs (20 samples per graph, controls overall width).</p>
+</dd>
+<dt class="hdlist1"><em>mouse_follows_focus</em></dt>
+<dd>
+<p>When focusing a window, put the mouse at its center.</p>
+</dd>
+<dt class="hdlist1"><em>focus_follows_mouse</em></dt>
+<dd>
+<p>Focus the window under the mouse. Accept the following values: <strong>autofocus</strong>, <strong>autoraise</strong>, <strong>off</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>window_placement</em></dt>
+<dd>
+<p>Specify whether managed windows should become the first or second leaf-node. Accept the following values: <strong>first_child</strong>, <strong>second_child</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>window_topmost</em></dt>
+<dd>
+<p>Make floating windows stay on top.</p>
+</dd>
+<dt class="hdlist1"><em>window_opacity</em></dt>
+<dd>
+<p>Enable opacity for windows.</p>
+</dd>
+<dt class="hdlist1"><em>window_opacity_duration</em></dt>
+<dd>
+<p>Duration of transition between active / normal opacity.</p>
+</dd>
+<dt class="hdlist1"><em>window_shadow</em></dt>
+<dd>
+<p>Draw shadow for windows. Accept the following values: <strong>on</strong>, <strong>float</strong>, <strong>off</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>window_border</em></dt>
+<dd>
+<p>Draw border for windows.</p>
+</dd>
+<dt class="hdlist1"><em>window_border_placement</em></dt>
+<dd>
+<p>Position/draw-mode of window border. Accept the following values: <strong>exterior</strong>, <strong>interior</strong>, <strong>inset</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>window_border_width</em></dt>
+<dd>
+<p>Width of window borders.</p>
+</dd>
+<dt class="hdlist1"><em>window_border_radius</em></dt>
+<dd>
+<p>Radius of window border corners.</p>
+</dd>
+<dt class="hdlist1"><em>active_window_border_topmost</em></dt>
+<dd>
+<p>Make the active border stay on top of other windows.</p>
+</dd>
+<dt class="hdlist1"><em>active_window_border_color</em></dt>
+<dd>
+<p>Color of the border of the focused window.</p>
+</dd>
+<dt class="hdlist1"><em>normal_window_border_color</em></dt>
+<dd>
+<p>Color of the border of an unfocused window.</p>
+</dd>
+<dt class="hdlist1"><em>insert_window_border_color</em></dt>
+<dd>
+<p>Color of the <strong>window --insert</strong> message selection.</p>
+</dd>
+<dt class="hdlist1"><em>active_window_opacity</em></dt>
+<dd>
+<p>Opacity of the focused window.</p>
+</dd>
+<dt class="hdlist1"><em>normal_window_opacity</em></dt>
+<dd>
+<p>Opacity of an unfocused window.</p>
+</dd>
+<dt class="hdlist1"><em>split_ratio</em></dt>
+<dd>
+<p>Default split ratio.</p>
+</dd>
+<dt class="hdlist1"><em>auto_balance</em></dt>
+<dd>
+<p>Balance the window tree upon change, so that all windows occupy the same area.</p>
+</dd>
+<dt class="hdlist1"><em>mouse_modifier</em></dt>
+<dd>
+<p>Keyboard modifier used for moving and resizing windows. Accept the following values: <strong>cmd</strong>, <strong>alt</strong>, <strong>shift</strong>, <strong>ctrl</strong>, <strong>fn</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>mouse_action1</em></dt>
+<dt class="hdlist1"><em>mouse_action2</em></dt>
+<dd>
+<p>Action performed when pressing <em>mouse_modifier</em> + <em>button&lt;n&gt;</em>. Accept the following values: <strong>move</strong>, <strong>resize</strong>.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_space_settings">Space Settings</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><em>layout</em></dt>
+<dd>
+<p>Set the layout of the selected space. Accept the following values: <strong>bsp</strong>, <strong>float</strong>.</p>
+</dd>
+<dt class="hdlist1"><em>top_padding</em></dt>
+<dt class="hdlist1"><em>bottom_padding</em></dt>
+<dt class="hdlist1"><em>left_padding</em></dt>
+<dt class="hdlist1"><em>right_padding</em></dt>
+<dd>
+<p>Padding added at the sides of the selected space.</p>
+</dd>
+<dt class="hdlist1"><em>window_gap</em></dt>
+<dd>
+<p>Size of the gap that separates windows for the selected space.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_display">Display</h3>
+<div class="sect3">
+<h4 id="_general_syntax_2">General Syntax</h4>
+<div class="paragraph">
+<p>yabai -m display [<em>&lt;DISPLAY_SEL</em>&gt;] <em>&lt;COMMAND&gt;</em></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_command">COMMAND</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>--focus</strong> <em>&lt;DISPLAY_SEL&gt;</em></dt>
+<dd>
+<p>Focus the given display.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_space">Space</h3>
+<div class="sect3">
+<h4 id="_general_syntax_3">General Syntax</h4>
+<div class="paragraph">
+<p>yabai -m space [<em>&lt;SPACE_SEL&gt;</em>] <em>&lt;COMMAND&gt;</em></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_command_2">COMMAND</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>--focus</strong> <em>&lt;SPACE_SEL&gt;</em></dt>
+<dd>
+<p>Focus the given space.</p>
+</dd>
+<dt class="hdlist1"><strong>--create</strong></dt>
+<dd>
+<p>Create a new space on the display of the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--destroy</strong></dt>
+<dd>
+<p>Remove the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--move</strong> <em>prev|next</em></dt>
+<dd>
+<p>Swap position of the selected space with the prev/next space.</p>
+</dd>
+<dt class="hdlist1"><strong>--display</strong> <em>&lt;DISPLAY_SEL&gt;</em></dt>
+<dd>
+<p>Send the selected space to the given display.</p>
+</dd>
+<dt class="hdlist1"><strong>--balance</strong></dt>
+<dd>
+<p>Adjust the split ratios of the selected space so that all windows occupy the same area.</p>
+</dd>
+<dt class="hdlist1"><strong>--mirror</strong> <em>x-axis|y-axis</em></dt>
+<dd>
+<p>Flip the tree of the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--rotate</strong> <em>90|180|270</em></dt>
+<dd>
+<p>Rotate the tree of the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--padding</strong> <em>abs|rel:&lt;top&gt;:&lt;bottom&gt;:&lt;left&gt;:&lt;right&gt;</em></dt>
+<dd>
+<p>Padding added at the sides of the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--gap</strong> <em>abs|rel:&lt;gap&gt;</em></dt>
+<dd>
+<p>Size of the gap that separates windows on the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--toggle</strong> <em>padding|gap|mission-control|show-desktop</em></dt>
+<dd>
+<p>Toggle space setting on or off for the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--layout</strong> <em>bsp|float</em></dt>
+<dd>
+<p>Set the layout of the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--label</strong> <em>&lt;LABEL&gt;</em></dt>
+<dd>
+<p>Label the selected space, allowing that label to be used as an alias in commands that take a <code>SPACE_SEL</code> parameter.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_window">Window</h3>
+<div class="sect3">
+<h4 id="_general_syntax_4">General Syntax</h4>
+<div class="paragraph">
+<p>yabai -m window [<em>&lt;WINDOW_SEL&gt;</em>] <em>&lt;COMMAND&gt;</em></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_command_3">COMMAND</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>--focus</strong> <em>&lt;WINDOW_SEL&gt;</em></dt>
+<dd>
+<p>Focus the given window.</p>
+</dd>
+<dt class="hdlist1"><strong>--swap</strong> <em>&lt;WINDOW_SEL&gt;</em></dt>
+<dd>
+<p>Swap position of the selected window and the given window.</p>
+</dd>
+<dt class="hdlist1"><strong>--warp</strong> <em>&lt;WINDOW_SEL&gt;</em></dt>
+<dd>
+<p>Re-insert the selected window, splitting the given window.</p>
+</dd>
+<dt class="hdlist1"><strong>--insert</strong> <em>&lt;DIR_SEL&gt;</em></dt>
+<dd>
+<p>Set the splitting area of the selected window. If the current splitting area matches <em>DIR_SEL</em>, the action will be undone.</p>
+</dd>
+<dt class="hdlist1"><strong>--grid</strong> <em>&lt;rows&gt;:&lt;cols&gt;:&lt;start-x&gt;:&lt;start-y&gt;:&lt;width&gt;:&lt;height&gt;</em></dt>
+<dd>
+<p>Set the frame of the selected window based on a self-defined grid.</p>
+</dd>
+<dt class="hdlist1"><strong>--move</strong> <em>abs|rel:&lt;dx&gt;:&lt;dy&gt;</em></dt>
+<dd>
+<p>If type is <em>rel</em> the selected window is moved by <em>dx</em> pixels horizontally and <em>dy</em> pixels vertically, otherwise <em>dx</em> and <em>dy</em> will become its new position.</p>
+</dd>
+<dt class="hdlist1"><strong>--resize</strong> <em>top|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:&lt;dx&gt;:&lt;dy&gt;</em></dt>
+<dd>
+<p>Resize the selected window by moving the given handle <em>dx</em> pixels horizontally and <em>dy</em> pixels vertically. If handle is <em>abs</em> the new size will be <em>dx</em> width and <em>dy</em> height.</p>
+</dd>
+<dt class="hdlist1"><strong>--ratio</strong> <em>rel|abs:&lt;dr&gt;</em></dt>
+<dd>
+<p>If type is <em>rel</em> the split ratio of the selected window is changed by <em>dr</em>, otherwise <em>dr</em> will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.</p>
+</dd>
+<dt class="hdlist1"><strong>--toggle</strong> <em>float|sticky|topmost|shadow|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose</em></dt>
+<dd>
+<p>Toggle the given property of the selected window.</p>
+</dd>
+<dt class="hdlist1"><strong>--display</strong> <em>&lt;DISPLAY_SEL&gt;</em></dt>
+<dd>
+<p>Send the selected window to the given display.</p>
+</dd>
+<dt class="hdlist1"><strong>--space</strong> <em>&lt;SPACE_SEL&gt;</em></dt>
+<dd>
+<p>Send the selected window to the given space.</p>
+</dd>
+<dt class="hdlist1"><strong>--close</strong></dt>
+<dd>
+<p>Closes the selected window. Only works on windows that provide a close button in its titlebar.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_query">Query</h3>
+<div class="sect3">
+<h4 id="_general_syntax_5">General Syntax</h4>
+<div class="paragraph">
+<p>yabai -m query <em>&lt;COMMAND&gt;</em> [<em>&lt;ARGUMENT&gt;</em>]</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_command_4">COMMAND</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>--displays</strong></dt>
+<dd>
+<p>Retrieve information about displays.</p>
+</dd>
+<dt class="hdlist1"><strong>--spaces</strong></dt>
+<dd>
+<p>Retrieve information about spaces.</p>
+</dd>
+<dt class="hdlist1"><strong>--windows</strong></dt>
+<dd>
+<p>Retrieve information about windows.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_argument">ARGUMENT</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>--display</strong> [<em>&lt;DISPLAY_SEL&gt;</em>]</dt>
+<dd>
+<p>Constrain matches to the selected display.</p>
+</dd>
+<dt class="hdlist1"><strong>--space</strong> [<em>&lt;SPACE_SEL&gt;</em>]</dt>
+<dd>
+<p>Constrain matches to the selected space.</p>
+</dd>
+<dt class="hdlist1"><strong>--window</strong> [<em>&lt;WINDOW_SEL&gt;</em>]</dt>
+<dd>
+<p>Constrain matches to the selected window.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_rule">Rule</h3>
+<div class="sect3">
+<h4 id="_general_syntax_6">General Syntax</h4>
+<div class="paragraph">
+<p>yabai -m rule <em>&lt;COMMAND&gt;</em></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_command_5">COMMAND</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>--add [<em>&lt;ARGUMENT&gt;</em>]</strong></dt>
+<dd>
+<p>Add a new rule.</p>
+</dd>
+<dt class="hdlist1"><strong>--remove <em>&lt;LABEL&gt;</em></strong></dt>
+<dd>
+<p>Remove an existing rule with the given label.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_argument_2">ARGUMENT</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>label=<em>&lt;LABEL&gt;</em></strong></dt>
+<dd>
+<p>Label used to identify the rule with a unique name</p>
+</dd>
+<dt class="hdlist1"><strong>app=<em>&lt;REGEX&gt;</em></strong></dt>
+<dd>
+<p>Name of application.</p>
+</dd>
+<dt class="hdlist1"><strong>title=<em>&lt;REGEX&gt;</em></strong></dt>
+<dd>
+<p>Title of window.</p>
+</dd>
+<dt class="hdlist1"><strong>display=<em>[^]&lt;arrangement index&gt;</em></strong></dt>
+<dd>
+<p>Send window to display. If <em>^</em> is present, follow focus.</p>
+</dd>
+<dt class="hdlist1"><strong>space=<em>[^]&lt;mission-control index&gt;</em></strong></dt>
+<dd>
+<p>Send window to space. If <em>^</em> is present, follow focus.</p>
+</dd>
+<dt class="hdlist1"><strong>opacity=<em>&lt;FLOAT_SEL&gt;</em></strong></dt>
+<dd>
+<p>Set window opacity.</p>
+</dd>
+<dt class="hdlist1"><strong>manage=<em>&lt;BOOL_SEL&gt;</em></strong></dt>
+<dd>
+<p>Window should be managed (tile vs float)</p>
+</dd>
+<dt class="hdlist1"><strong>sticky=<em>&lt;BOOL_SEL&gt;</em></strong></dt>
+<dd>
+<p>Window appears on all spaces.</p>
+</dd>
+<dt class="hdlist1"><strong>topmost=<em>&lt;BOOL_SEL&gt;</em></strong></dt>
+<dd>
+<p>Window appears above other windows.</p>
+</dd>
+<dt class="hdlist1"><strong>border=<em>&lt;BOOL_SEL&gt;</em></strong></dt>
+<dd>
+<p>Window should draw border.</p>
+</dd>
+<dt class="hdlist1"><strong>native-fullscreen=<em>&lt;BOOL_SEL&gt;</em></strong></dt>
+<dd>
+<p>Window should enter native macOS fullscreen mode.</p>
+</dd>
+<dt class="hdlist1"><strong>grid=<em>&lt;rows&gt;:&lt;cols&gt;:&lt;start-x&gt;:&lt;start-y&gt;:&lt;width&gt;:&lt;height&gt;</em></strong></dt>
+<dd>
+<p>Set window frame based on a self-defined grid.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_signal">Signal</h3>
+<div class="paragraph">
+<p>A signal is a simple way for the user to react to some event that has been processed. Arguments are passed through environment variables.</p>
+</div>
+<div class="sect3">
+<h4 id="_general_syntax_7">General Syntax</h4>
+<div class="paragraph">
+<p>yabai -m signal <em>&lt;COMMAND&gt;</em></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_command_6">COMMAND</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>--add event=<em>&lt;EVENT&gt;</em> action=<em>&lt;ACTION&gt;</em> [label=<em>&lt;LABEL&gt;</em>] [app=<em>&lt;REGEX&gt;</em>] [title=<em>&lt;REGEX&gt;</em>]</strong></dt>
+<dd>
+<p>Add an optionally labelled signal to execute an action after processing an event of the given type. Some signals can be specified to trigger based on the application name and/or window title.</p>
+</dd>
+<dt class="hdlist1"><strong>--remove <em>&lt;LABEL&gt;</em></strong></dt>
+<dd>
+<p>Remove an existing signal with the given label.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_event">EVENT</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>application_launched</strong></dt>
+<dd>
+<p>Triggered when a new application is launched. Eligible for <strong>app=</strong> filter. Passes one argument: $YABAI_PROCESS_ID</p>
+</dd>
+<dt class="hdlist1"><strong>application_terminated</strong></dt>
+<dd>
+<p>Triggered when an application is terminated. Eligible for <strong>app=</strong> filter Passes one argument: $YABAI_PROCESS_ID</p>
+</dd>
+<dt class="hdlist1"><strong>application_front_switched</strong></dt>
+<dd>
+<p>Triggered when the front-most application changes. Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID</p>
+</dd>
+<dt class="hdlist1"><strong>application_activated</strong></dt>
+<dd>
+<p>Triggered when an application is activated. Eligible for <strong>app=</strong> filter. Passes one argument: $YABAI_PROCESS_ID</p>
+</dd>
+<dt class="hdlist1"><strong>application_deactivated</strong></dt>
+<dd>
+<p>Triggered when an application is deactivated. Eligible for <strong>app=</strong> filter. Passes one argument: $YABAI_PROCESS_ID</p>
+</dd>
+<dt class="hdlist1"><strong>application_visible</strong></dt>
+<dd>
+<p>Triggered when an application is unhidden. Eligible for <strong>app=</strong> filter. Passes one argument: $YABAI_PROCESS_ID</p>
+</dd>
+<dt class="hdlist1"><strong>application_hidden</strong></dt>
+<dd>
+<p>Triggered when an application is hidden. Eligible for <strong>app=</strong> filter. Passes one argument: $YABAI_PROCESS_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_created</strong></dt>
+<dd>
+<p>Triggered when a window is created. Eligible for both <strong>app=</strong> and <strong>title=</strong> filter. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_destroyed</strong></dt>
+<dd>
+<p>Triggered when a window is destroyed. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_focused</strong></dt>
+<dd>
+<p>Triggered when a window becomes the key-window for its application. Eligible for both <strong>app=</strong> and <strong>title=</strong> filter. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_moved</strong></dt>
+<dd>
+<p>Triggered when a window changes position. Eligible for both <strong>app=</strong> and <strong>title=</strong> filter. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_resized</strong></dt>
+<dd>
+<p>Triggered when a window changes dimensions. Eligible for both <strong>app=</strong> and <strong>title=</strong> filter. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_minimized</strong></dt>
+<dd>
+<p>Triggered when a window has been minimized. Eligible for both <strong>app=</strong> and <strong>title=</strong> filter. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_deminimized</strong></dt>
+<dd>
+<p>Triggered when a window has been deminimized. Eligible for both <strong>app=</strong> and <strong>title=</strong> filter. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>window_title_changed</strong></dt>
+<dd>
+<p>Triggered when a window changes its title. Eligible for both <strong>app=</strong> and <strong>title=</strong> filter. Passes one argument: $YABAI_WINDOW_ID</p>
+</dd>
+<dt class="hdlist1"><strong>space_changed</strong></dt>
+<dd>
+<p>Triggered when the active space has changed. Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID</p>
+</dd>
+<dt class="hdlist1"><strong>display_added</strong></dt>
+<dd>
+<p>Triggered when a new display has been added. Passes one argument: $YABAI_DISPLAY_ID</p>
+</dd>
+<dt class="hdlist1"><strong>display_removed</strong></dt>
+<dd>
+<p>Triggered when a display has been removed. Passes one argument: $YABAI_DISPLAY_ID</p>
+</dd>
+<dt class="hdlist1"><strong>display_moved</strong></dt>
+<dd>
+<p>Triggered when a change has been made to display arrangement. Passes one argument: $YABAI_DISPLAY_ID</p>
+</dd>
+<dt class="hdlist1"><strong>display_resized</strong></dt>
+<dd>
+<p>Triggered when a display has changed resolution. Passes one argument: $YABAI_DISPLAY_ID</p>
+</dd>
+<dt class="hdlist1"><strong>display_changed</strong></dt>
+<dd>
+<p>Triggered when the active display has changed. Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID</p>
+</dd>
+<dt class="hdlist1"><strong>mouse_down</strong></dt>
+<dd>
+<p>Triggered when a mouse button has been pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT</p>
+</dd>
+<dt class="hdlist1"><strong>mouse_up</strong></dt>
+<dd>
+<p>Triggered when a mouse button has been released. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT</p>
+</dd>
+<dt class="hdlist1"><strong>mouse_dragged</strong></dt>
+<dd>
+<p>Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT</p>
+</dd>
+<dt class="hdlist1"><strong>mouse_moved</strong></dt>
+<dd>
+<p>Triggered when the mouse is moved. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT</p>
+</dd>
+<dt class="hdlist1"><strong>mission_control_enter</strong></dt>
+<dd>
+<p>Triggered when mission-control activates.</p>
+</dd>
+<dt class="hdlist1"><strong>mission_control_check_for_exit</strong></dt>
+<dd>
+<p>Triggered periodically while mission-control is active.</p>
+</dd>
+<dt class="hdlist1"><strong>mission_control_exit</strong></dt>
+<dd>
+<p>Triggered when mission-control deactivates.</p>
+</dd>
+<dt class="hdlist1"><strong>dock_did_restart</strong></dt>
+<dd>
+<p>Triggered when Dock.app restarts.</p>
+</dd>
+<dt class="hdlist1"><strong>menu_opened</strong></dt>
+<dd>
+<p>Triggered when a menu is opened.</p>
+</dd>
+<dt class="hdlist1"><strong>menu_bar_hidden_changed</strong></dt>
+<dd>
+<p>Triggered when the macOS menubar <em>autohide</em> setting changes.</p>
+</dd>
+<dt class="hdlist1"><strong>dock_did_change_pref</strong></dt>
+<dd>
+<p>Triggered when the macOS Dock preferences changes.</p>
+</dd>
+<dt class="hdlist1"><strong>system_woke</strong></dt>
+<dd>
+<p>Triggered when macOS wakes from sleep.</p>
+</dd>
+<dt class="hdlist1"><strong>bar_refresh</strong></dt>
+<dd>
+<p>Triggered when the yabai status_bar is told to update.</p>
+</dd>
+<dt class="hdlist1"><strong>daemon_message</strong></dt>
+<dd>
+<p>Triggered when yabai receives a message on its socket.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_action">ACTION</h4>
+<div class="paragraph">
+<p>Arbitrary command executed through <strong>/usr/bin/env sh -c</strong></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exit_codes">Exit Codes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If <strong>yabai</strong> can&#8217;t handle a message, it will return a non-zero exit code.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_author">Author</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Åsmund Vikane &lt;aasvi93 at gmail.com&gt;</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2019-11-17 14:32:07 +0100
+</div>
+</div>
+</body>
+</html>
