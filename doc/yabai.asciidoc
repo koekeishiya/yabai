@@ -105,6 +105,9 @@ Colors are in the form '#AARRGGBB'.
 'status_bar'::
     Enable custom status bar.
 
+'status_bar_refresh_freq'::
+    Specify the status bar refresh frequency in seconds (1.0s => 1Hz, 10.0s => 0.1Hz, ...). To get smooth drawing of the CPU load lines, set to at least *status_bar_cpu_update_freq*.
+
 'status_bar_text_font'::
     Specify name, style and size of font to use for drawing text. Format: '<font_family>:<font_style>:<font_size>'. Use 'Font Book.app' to identify the correct name.
 
@@ -128,6 +131,21 @@ Colors are in the form '#AARRGGBB'.
 
 'status_bar_clock_icon'::
     Specify a symbol to represent the current time.
+
+'status_bar_enable_cpu_meter'::
+    Enable per CPU load line graph in status bar.
+
+'status_bar_cpu_update_freq'::
+    Specify update frequency of CPU load data in seconds (1.0s => 1Hz, 0.5s, 2Hz, ...). Note: Higher update rates will require higher redraw frequency, see *status_bar_refresh_frequency*.
+
+'status_bar_cpu_user_color'::
+    Color to use for drawing the user load in CPU load line graphs.
+
+'status_bar_cpu_sys_color'::
+    Color to use for drawing the kernel/OS load in CPU load line graphs.
+
+'status_bar_cpu_sample_width'::
+    Width of each sample in CPU load line graphs (20 samples per graph, controls overall width).
 
 'mouse_follows_focus'::
     When focusing a window, put the mouse at its center.

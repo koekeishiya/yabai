@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2019-11-14
+.\"      Date: 2019-11-17
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2019-11-14" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2019-11-17" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -126,6 +126,11 @@ Enable output of debug information to stdout.
 Enable custom status bar.
 .RE
 .sp
+\fIstatus_bar_refresh_freq\fP
+.RS 4
+Specify the status bar refresh frequency in seconds (1.0s \(rA 1Hz, 10.0s \(rA 0.1Hz, ...). To get smooth drawing of the CPU load lines, set to at least \fBstatus_bar_cpu_update_freq\fP.
+.RE
+.sp
 \fIstatus_bar_text_font\fP
 .RS 4
 Specify name, style and size of font to use for drawing text. Format: \fI<font_family>:<font_style>:<font_size>\fP. Use \fIFont Book.app\fP to identify the correct name.
@@ -164,6 +169,31 @@ Specify a general symbol to use for any given space that does not have a match i
 \fIstatus_bar_clock_icon\fP
 .RS 4
 Specify a symbol to represent the current time.
+.RE
+.sp
+\fIstatus_bar_enable_cpu_meter\fP
+.RS 4
+Enable per CPU load line graph in status bar.
+.RE
+.sp
+\fIstatus_bar_cpu_update_freq\fP
+.RS 4
+Specify update frequency of CPU load data in seconds (1.0s \(rA 1Hz, 0.5s, 2Hz, ...). Note: Higher update rates will require higher redraw frequency, see \fBstatus_bar_refresh_frequency\fP.
+.RE
+.sp
+\fIstatus_bar_cpu_user_color\fP
+.RS 4
+Color to use for drawing the user load in CPU load line graphs.
+.RE
+.sp
+\fIstatus_bar_cpu_sys_color\fP
+.RS 4
+Color to use for drawing the kernel/OS load in CPU load line graphs.
+.RE
+.sp
+\fIstatus_bar_cpu_sample_width\fP
+.RS 4
+Width of each sample in CPU load line graphs (20 samples per graph, controls overall width).
 .RE
 .sp
 \fImouse_follows_focus\fP
