@@ -15,15 +15,7 @@ static void cpu_refresh_handler(CFRunLoopTimerRef timer, void *ctx) {
     }
 }
 
-void cpu_create(struct cpu_info* cpui) {
-    assert("cpui is not NULL" && cpui);
-    char tmp[255];
-    size_t len = sizeof(cpui->nphys_cpu);
-    if (sysctlbyname("hw.physicalcpu", &cpui->nphys_cpu, &len, NULL, 0)) {
-        snprintf(tmp, sizeof(tmp), "could not retrieve hw.physicalcpu: %s", strerror(errno));
-        notify(tmp, "error!");
-    }
-
+void cpu_start_update(struct cpu_info* cpui) {
     // setup timer to update values
     CFRunLoopTimerContext ctx = {
         .version = 0,
@@ -32,10 +24,48 @@ void cpu_create(struct cpu_info* cpui) {
         .retain = NULL,
         .release = NULL,
     };
-    cpui->refresh_timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + 1, 1, 0, 0, cpu_refresh_handler, &ctx);
+    cpui->update_freq = cpui->update_freq > 0.0 ? cpui->update_freq : 1.0;
+    cpui->refresh_timer = CFRunLoopTimerCreate(
+            NULL,
+            CFAbsoluteTimeGetCurrent() + cpui->update_freq,
+            cpui->update_freq,
+            0,
+            0,
+            cpu_refresh_handler,
+            &ctx
+    );
     CFRunLoopAddTimer(CFRunLoopGetMain(), cpui->refresh_timer, kCFRunLoopCommonModes);
+    cpui->is_running = true;
+    char tmp[255];
+    snprintf(tmp, sizeof(tmp), "CPU updates started with updates every %3.2fsec.", cpui->update_freq);
+    notify(tmp, NULL);
 }
 
+void cpu_stop_update(struct cpu_info* cpui) {
+    assert("cpui is not NULL" && cpui);
+    CFRunLoopRemoveTimer(CFRunLoopGetMain(), cpui->refresh_timer, kCFRunLoopCommonModes);
+    CFRunLoopTimerInvalidate(cpui->refresh_timer);
+}
+
+void cpu_set_update_frequency(struct cpu_info* cpui, float seconds) {
+    bool was_running = cpui->is_running;
+    cpui->update_freq = seconds;
+    if (was_running) {
+        cpu_stop_update(cpui);
+        cpu_start_update(cpui);
+    }
+}
+
+void cpu_create(struct cpu_info* cpui) {
+    assert("cpui is not NULL" && cpui);
+    char tmp[255];
+    size_t len = sizeof(cpui->nphys_cpu);
+    if (sysctlbyname("hw.physicalcpu", &cpui->nphys_cpu, &len, NULL, 0)) {
+        snprintf(tmp, sizeof(tmp), "could not retrieve hw.physicalcpu: %s", strerror(errno));
+        notify(tmp, "error!");
+    }
+    cpu_start_update(cpui);
+}
 
 void cpu_update(struct cpu_info* cpui) {
     assert("cpui is not NULL" && cpui);
@@ -77,6 +107,5 @@ void cpu_update(struct cpu_info* cpui) {
 
 void cpu_destroy(struct cpu_info* cpui) {
     assert("cpui is not NULL" && cpui);
-    CFRunLoopRemoveTimer(CFRunLoopGetMain(), cpui->refresh_timer, kCFRunLoopCommonModes);
-    CFRunLoopTimerInvalidate(cpui->refresh_timer);
+    cpu_stop_update(cpui);
 }

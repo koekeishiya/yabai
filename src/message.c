@@ -60,6 +60,8 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_BAR_CPU_METER         "status_bar_cpu_meter"
 #define COMMAND_CONFIG_BAR_CPU_USER_COLOR    "status_bar_cpu_user_color"
 #define COMMAND_CONFIG_BAR_CPU_SYS_COLOR     "status_bar_cpu_sys_color"
+#define COMMAND_CONFIG_BAR_CPU_UPDATE_FREQ   "status_bar_cpu_update_freq"
+#define COMMAND_CONFIG_BAR_CPU_SAMPLE_WIDTH  "status_bar_cpu_sample_width"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
@@ -856,7 +858,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_BAR_CPU_METER)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_bar.enable_cpu_meter]);
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_bar.enable_cpu_meter = false;
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
             g_bar.enable_cpu_meter = true;
@@ -879,6 +883,30 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             uint32_t color = token_to_uint32t(value);
             if (color) {
                 bar_set_cpu_sys_color(&g_bar, color);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_CPU_UPDATE_FREQ)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%.4f\n", g_bar.cpu_info.update_freq);
+        } else {
+            float freq = token_to_float(value);
+            if (freq > 0.0 && freq < 60.0) {
+                cpu_set_update_frequency(&g_bar.cpu_info, freq);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BAR_CPU_SAMPLE_WIDTH)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%.4f\n", g_bar.cpu_sample_width);
+        } else {
+            float width = token_to_float(value);
+            if (width > 0.001 && width < 60.0) {
+                bar_set_cpu_sample_width(&g_bar, width);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

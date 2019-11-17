@@ -58,6 +58,7 @@ struct bar
     struct cpu_info cpu_info;
     struct rgba_color cpu_user_color;
     struct rgba_color cpu_sys_color;
+    float cpu_sample_width;
 };
 
 void bar_set_foreground_color(struct bar *bar, uint32_t color);
@@ -71,6 +72,7 @@ void bar_set_space_icon(struct bar *bar, char *icon);
 void bar_set_refresh_frequency(struct bar *bar, float freq);
 void bar_set_cpu_user_color(struct bar *bar, uint32_t color);
 void bar_set_cpu_sys_color(struct bar *bar, uint32_t color);
+void bar_set_cpu_sample_width(struct bar *bar, float width);
 
 void bar_refresh(struct bar *bar);
 void bar_resize(struct bar *bar);
