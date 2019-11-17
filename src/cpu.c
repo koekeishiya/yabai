@@ -82,16 +82,16 @@ void cpu_update(struct cpu_info* cpui)
     cpui->prev_load = cpui->curr_load;
     if (host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &cpui->nlog_cpu,
                 (processor_info_array_t *)&cpui->curr_load, &info_size)) {
-        char tmp[255];
-        snprintf(tmp, sizeof(tmp), "error! could not get processor load info");
-        notify(tmp, NULL);
+        notify("error! could not get processor load info", NULL);
     }
 
+    // shift buffers to the left
     for (size_t cpu = 0; cpu < cpui->nlog_cpu; ++cpu) {
         memmove(cpui->load_avg[cpu], &cpui->load_avg[cpu][1], sizeof(*cpui->load_avg[cpu]) * (CPU_WINDOW_SZ - 1));
         memmove(cpui->sys_avg[cpu], &cpui->sys_avg[cpu][1], sizeof(*cpui->sys_avg[cpu]) * (CPU_WINDOW_SZ - 1));
         memmove(cpui->user_avg[cpu], &cpui->user_avg[cpu][1], sizeof(*cpui->user_avg[cpu]) * (CPU_WINDOW_SZ - 1));
     }
+
     if (cpui->prev_load) {
         for (size_t cpu = 0; cpu < cpui->nlog_cpu; ++cpu) {
             double total_ticks = 0.0;
