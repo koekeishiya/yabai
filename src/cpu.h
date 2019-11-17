@@ -5,8 +5,8 @@
 // with Hyper-Threading this give 56 logical processors, so
 // let's leave headroom to grow:
 // TODO check if it's worth the effort to allocate dynamically
-#define CPU_MAX_NUM_CPUS		            128
-#define CPU_WINDOW_SZ                       20
+#define CPU_MAX_NUM_CPUS                            128
+#define CPU_WINDOW_SZ                               20
 
 struct cpu_info
 {
