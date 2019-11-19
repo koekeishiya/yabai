@@ -268,24 +268,31 @@ void bar_refresh(struct bar *bar)
             overlap_left = final_bar_left_x - pos.x;
         }
 
+        assert(overlap_left >= 0);
+
+        if (overlap_left > 0) {
+            pos.x = final_bar_left_x;
+        }
+
         if (initial_bar_right_x <= pos.x + title_line.bounds.size.width) {
             overlap_right = pos.x + title_line.bounds.size.width - initial_bar_right_x;
         }
 
-        assert(overlap_left >= 0);
         assert(overlap_right >= 0);
 
-        int total_overlap = overlap_left + overlap_right;
-        if (total_overlap > 0) {
-            CTLineRef truncated_line = CTLineCreateTruncatedLine(title_line.line, title_line.bounds.size.width - total_overlap, kCTLineTruncationEnd, NULL);
-            CFRelease(title_line.line);
-            title_line.line = truncated_line;
-            if (overlap_left > 0) {
-                pos.x = final_bar_left_x;
+        if (overlap_right > 0) {
+            int truncated_width = (int)title_line.bounds.size.width - overlap_right;
+            if (truncated_width > 0) {
+                CTLineRef truncated_line = CTLineCreateTruncatedLine(title_line.line, truncated_width, kCTLineTruncationEnd, NULL);
+                CFRelease(title_line.line);
+                title_line.line = truncated_line;
+            } else {
+                goto free_title;
             }
         }
 
         bar_draw_line(bar, title_line, pos.x, pos.y);
+free_title:
         bar_destroy_line(title_line);
         free(title);
     }
