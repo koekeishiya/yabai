@@ -152,10 +152,9 @@ bool display_manager_menu_bar_hidden(void)
     return status;
 }
 
-CGRect display_manager_menu_bar_rect(void)
+CGRect display_manager_menu_bar_rect(uint32_t did)
 {
     CGRect bounds = {};
-    uint32_t did = display_manager_active_display_id();
     SLSGetRevealedMenuBarBounds(&bounds, g_connection, display_space_id(did));
     return bounds;
 }

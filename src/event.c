@@ -1311,6 +1311,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
 {
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
+    bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 

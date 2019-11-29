@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Adding/removing nodes to/from the tree should properly reset the zoom-state [#227](https://github.com/koekeishiya/yabai/issues/227)
 - Ability to enable/disable debug output at runtime [#312](https://github.com/koekeishiya/yabai/issues/312)
 - Fix improper calculation of overlapping parts of status_bar when truncating title, and resolve an invalid free if the title could not be truncated [#313](https://github.com/koekeishiya/yabai/issues/313)
+- Automatically offset the position of the status_bar if the macOS Menubar is not set to autohide [#220](https://github.com/koekeishiya/yabai/issues/220)
+- Remove the line drawn at the bottom of the status_bar in a *poorly dimmed* version of the background color.
 
 ## [2.1.2] - 2019-11-10
 ### Changed

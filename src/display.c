@@ -80,10 +80,10 @@ CGRect display_bounds(uint32_t did)
 CGRect display_bounds_constrained(uint32_t did)
 {
     CGRect frame  = display_bounds(did);
-    CGRect menu   = display_manager_menu_bar_rect();
+    CGRect menu   = display_manager_menu_bar_rect(did);
     CGRect dock   = display_manager_dock_rect();
 
-    if (g_bar.enabled && did == display_manager_main_display_id()) {
+    if (g_bar.enabled && g_bar.did == did) {
         frame.origin.y    += g_bar.frame.size.height;
         frame.size.height -= g_bar.frame.size.height;
     }

@@ -35,19 +35,6 @@ rgba_color_from_hex(uint32_t color)
     return result;
 }
 
-static struct rgba_color
-rgba_color_dim(struct rgba_color color)
-{
-    struct rgba_color result;
-    result.is_valid = true;
-    result.p = color.p;
-    result.r = 0.25f*color.r;
-    result.g = 0.25f*color.g;
-    result.b = 0.25f*color.b;
-    result.a = 0.25f*color.a;
-    return result;
-}
-
 static inline bool is_root(void)
 {
     return getuid() == 0 || geteuid() == 0;
