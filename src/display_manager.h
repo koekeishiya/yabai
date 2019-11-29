@@ -36,7 +36,7 @@ uint32_t display_manager_next_display_id(uint32_t did);
 uint32_t display_manager_first_display_id(void);
 uint32_t display_manager_last_display_id(void);
 bool display_manager_menu_bar_hidden(void);
-CGRect display_manager_menu_bar_rect(void);
+CGRect display_manager_menu_bar_rect(uint32_t did);
 bool display_manager_dock_hidden(void);
 int display_manager_dock_orientation(void);
 CGRect display_manager_dock_rect(void);

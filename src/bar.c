@@ -155,10 +155,6 @@ void bar_refresh(struct bar *bar)
     CGContextClearRect(bar->context, bar->frame);
     CGContextSetRGBFillColor(bar->context, bar->background_color.r, bar->background_color.g, bar->background_color.b, bar->background_color.a);
     CGContextFillRect(bar->context, bar->frame);
-    CGContextSetRGBStrokeColor(bar->context, bar->background_color_dim.r, bar->background_color_dim.g, bar->background_color_dim.b, bar->background_color_dim.a);
-    CGContextSetLineWidth(bar->context, 2.0f);
-    CGContextMoveToPoint(bar->context, 0, 1);
-    CGContextAddLineToPoint(bar->context, bar->frame.size.width, 1);
     CGContextStrokePath(bar->context);
 
     //
@@ -302,25 +298,6 @@ free_title:
     SLSReenableUpdate(g_connection);
 }
 
-void bar_resize(struct bar *bar)
-{
-    if (!bar->enabled) return;
-
-    bar->did = display_manager_main_display_id();
-    CGRect bounds = display_bounds(bar->did);
-
-    CFTypeRef frame_region;
-    bar->frame = (CGRect) {{0,0},{bounds.size.width, 26}};
-    CGSNewRegionWithRect(&bar->frame, &frame_region);
-    SLSDisableUpdate(g_connection);
-    SLSOrderWindow(g_connection, bar->id, -1, 0);
-    SLSSetWindowShape(g_connection, bar->id, 0.0f, 0.0f, frame_region);
-    bar_refresh(bar);
-    SLSOrderWindow(g_connection, bar->id, 1, 0);
-    SLSReenableUpdate(g_connection);
-    CFRelease(frame_region);
-}
-
 void bar_set_foreground_color(struct bar *bar, uint32_t color)
 {
     bar->foreground_color = rgba_color_from_hex(color);
@@ -334,7 +311,6 @@ void bar_set_foreground_color(struct bar *bar, uint32_t color)
 void bar_set_background_color(struct bar *bar, uint32_t color)
 {
     bar->background_color = rgba_color_from_hex(color);
-    bar->background_color_dim = rgba_color_dim(bar->background_color);
     bar_refresh(bar);
 }
 
@@ -487,6 +463,39 @@ void bar_set_space_icon(struct bar *bar, char *icon)
     bar_refresh(bar);
 }
 
+static float bar_create_frame(struct bar *bar, CFTypeRef *frame_region)
+{
+    bar->did = display_manager_main_display_id();
+    CGRect bounds = display_bounds(bar->did);
+
+    float y_offset = 0.0f;
+    if (!display_manager_menu_bar_hidden()) {
+        CGRect menu = display_manager_menu_bar_rect(bar->did);
+        y_offset    = menu.size.height;
+    }
+
+    bar->frame = (CGRect) {{0, 0},{bounds.size.width, 26}};
+    CGSNewRegionWithRect(&bar->frame, frame_region);
+
+    return y_offset;
+}
+
+void bar_resize(struct bar *bar)
+{
+    if (!bar->enabled) return;
+
+    CFTypeRef frame_region;
+    float y_offset = bar_create_frame(bar, &frame_region);
+
+    SLSDisableUpdate(g_connection);
+    SLSOrderWindow(g_connection, bar->id, -1, 0);
+    SLSSetWindowShape(g_connection, bar->id, 0.0f, y_offset, frame_region);
+    bar_refresh(bar);
+    SLSOrderWindow(g_connection, bar->id, 1, 0);
+    SLSReenableUpdate(g_connection);
+    CFRelease(frame_region);
+}
+
 void bar_create(struct bar *bar)
 {
     if (bar->enabled) return;
@@ -510,14 +519,10 @@ void bar_create(struct bar *bar)
     uint32_t clear_tags[2] = { 0, 0 };
     *((int8_t *)(clear_tags) + 0x5) = 0x20;
 
-    bar->did = display_manager_main_display_id();
-    CGRect bounds = display_bounds(bar->did);
-
     CFTypeRef frame_region;
-    bar->frame = (CGRect) {{0,0},{bounds.size.width, 26}};
+    float y_offset = bar_create_frame(bar, &frame_region);
 
-    CGSNewRegionWithRect(&bar->frame, &frame_region);
-    SLSNewWindow(g_connection, 2, 0.0f, 0.0f, frame_region, &bar->id);
+    SLSNewWindow(g_connection, 2, 0.0f, y_offset, frame_region, &bar->id);
     CFRelease(frame_region);
 
     SLSSetWindowResolution(g_connection, bar->id, 2.0f);
