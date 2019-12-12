@@ -307,7 +307,7 @@ COMMAND
 *--ratio* 'rel|abs:<dr>'::
     If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.
 
-*--toggle* 'float|sticky|topmost|shadow|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
+*--toggle* 'float|sticky|topmost|pip|shadow|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window.
 
 *--display* '<DISPLAY_SEL>'::

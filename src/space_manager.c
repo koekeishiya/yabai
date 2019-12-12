@@ -414,7 +414,7 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct window *
     if (node && window_node_is_intermediate(node)) {
         node->parent->split = node->parent->split == SPLIT_Y ? SPLIT_X : SPLIT_Y;
 
-        if (g_space_manager.auto_balance) {
+        if (sm->auto_balance) {
             window_node_equalize(view->root);
             view_update(view);
             view_flush(view);

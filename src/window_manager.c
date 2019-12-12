@@ -729,10 +729,10 @@ struct window *window_manager_find_next_managed_window(struct space_manager *sm,
     struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return NULL;
 
-    struct window_node *prev = window_node_find_next_leaf(node);
-    if (!prev) return NULL;
+    struct window_node *next = window_node_find_next_leaf(node);
+    if (!next) return NULL;
 
-    return window_manager_find_window(wm, prev->window_id);
+    return window_manager_find_window(wm, next->window_id);
 }
 
 struct window *window_manager_find_first_managed_window(struct space_manager *sm, struct window_manager *wm)
@@ -905,24 +905,6 @@ void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uin
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-struct window *window_manager_focused_window(struct window_manager *wm)
-{
-    ProcessSerialNumber psn = {};
-    _SLPSGetFrontProcess(&psn);
-
-    pid_t pid;
-    GetProcessPID(&psn, &pid);
-
-    struct application *application = window_manager_find_application(wm, pid);
-    if (!application) return NULL;
-
-    uint32_t window_id = application_focused_window(application);
-    return window_manager_find_window(wm, window_id);
-}
-#pragma clang diagnostic pop
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 struct application *window_manager_focused_application(struct window_manager *wm)
 {
     ProcessSerialNumber psn = {};
@@ -932,6 +914,15 @@ struct application *window_manager_focused_application(struct window_manager *wm
     GetProcessPID(&psn, &pid);
 
     return window_manager_find_application(wm, pid);
+}
+
+struct window *window_manager_focused_window(struct window_manager *wm)
+{
+    struct application *application = window_manager_focused_application(wm);
+    if (!application) return NULL;
+
+    uint32_t window_id = application_focused_window(application);
+    return window_manager_find_window(wm, window_id);
 }
 #pragma clang diagnostic pop
 
@@ -1486,6 +1477,33 @@ void window_manager_toggle_window_expose(struct window_manager *wm, struct windo
 {
     window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
     CoreDockSendNotification(CFSTR("com.apple.expose.front.awake"), 0);
+}
+
+void window_manager_toggle_window_pip(struct space_manager *sm, struct window_manager *wm, struct window *window)
+{
+    uint32_t did = window_display_id(window);
+    if (!did) return;
+
+    uint64_t sid = display_space_id(did);
+    struct view *dview = space_manager_find_view(sm, sid);
+
+    CGRect bounds = display_bounds_constrained(did);
+    if (dview && dview->enable_padding) {
+        bounds.origin.x    += dview->left_padding;
+        bounds.size.width  -= (dview->left_padding + dview->right_padding);
+        bounds.origin.y    += dview->top_padding;
+        bounds.size.height -= (dview->top_padding + dview->bottom_padding);
+    }
+
+    int sockfd;
+    char message[MAXLEN];
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "window_scale %d %f %f %f %f", window->id, bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
 }
 
 void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)

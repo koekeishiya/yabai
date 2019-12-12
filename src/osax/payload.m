@@ -41,6 +41,9 @@ extern CGError CGSSetWindowShadowParameters(int cid, CGWindowID wid, CGFloat sta
 extern CGError CGSInvalidateWindowShadow(int cid, CGWindowID wid);
 extern CGError CGSSetWindowTags(int cid, uint32_t wid, const int tags[2], size_t maxTagSize);
 extern CGError CGSClearWindowTags(int cid, uint32_t wid, const int tags[2], size_t maxTagSize);
+extern CGError CGSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
+extern CGError CGSGetWindowTransform(int cid, uint32_t wid, CGAffineTransform *t);
+extern CGError CGSSetWindowTransform(int cid, uint32_t wid, CGAffineTransform t);
 
 extern void CGSManagedDisplaySetCurrentSpace(int cid, CFStringRef display_ref, uint64_t spid);
 extern uint64_t CGSManagedDisplayGetCurrentSpace(int cid, CFStringRef display_ref);
@@ -654,6 +657,46 @@ static void do_space_change(const char *message)
     }
 }
 
+static void do_window_scale(const char *message)
+{
+    Token wid_token = get_token(&message);
+    uint32_t wid = token_to_uint32t(wid_token);
+    if (!wid) return;
+
+    CGRect frame = {};
+    CGSGetWindowBounds(_connection, wid, &frame);
+    CGAffineTransform original_transform = CGAffineTransformMakeTranslation(-frame.origin.x, -frame.origin.y);
+
+    CGAffineTransform current_transform;
+    CGSGetWindowTransform(_connection, wid, &current_transform);
+
+    if (CGAffineTransformEqualToTransform(current_transform, original_transform)) {
+        Token dx_token = get_token(&message);
+        float dx = token_to_float(dx_token);
+        Token dy_token = get_token(&message);
+        float dy = token_to_float(dy_token);
+        Token dw_token = get_token(&message);
+        float dw = token_to_float(dw_token);
+        Token dh_token = get_token(&message);
+        float dh = token_to_float(dh_token);
+
+        int target_width  = dw / 4;
+        int target_height = target_width / (frame.size.width/frame.size.height);
+
+        float x_scale = frame.size.width/target_width;
+        float y_scale = frame.size.height/target_height;
+
+        CGFloat transformed_x = -(dx+dw) + (frame.size.width * (1/x_scale));
+        CGFloat transformed_y = -dy;
+
+        CGAffineTransform scale = CGAffineTransformConcat(CGAffineTransformIdentity, CGAffineTransformMakeScale(x_scale, y_scale));
+        CGAffineTransform transform = CGAffineTransformTranslate(scale, transformed_x, transformed_y);
+        CGSSetWindowTransform(_connection, wid, transform);
+    } else {
+        CGSSetWindowTransform(_connection, wid, original_transform);
+    }
+}
+
 static void do_window_move(const char *message)
 {
     Token wid_token = get_token(&message);
@@ -832,6 +875,8 @@ static void handle_message(int sockfd, const char *message)
     } else if (token_equals(token, "space_move")) {
         if (!can_move_space()) return;
         do_space_move(message);
+    } else if (token_equals(token, "window_scale")) {
+        do_window_scale(message);
     } else if (token_equals(token, "window_move")) {
         do_window_move(message);
     } else if (token_equals(token, "window_alpha")) {
