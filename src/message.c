@@ -147,6 +147,7 @@ extern bool g_verbose;
 #define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_BORDER "border"
 #define ARGUMENT_WINDOW_TOGGLE_EXPOSE "expose"
+#define ARGUMENT_WINDOW_TOGGLE_PIP    "pip"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN QUERY--------------------------------- */
@@ -1518,6 +1519,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             window_manager_toggle_window_border(&g_window_manager, acting_window);
         } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_EXPOSE)) {
             window_manager_toggle_window_expose(&g_window_manager, acting_window);
+        } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PIP)) {
+            window_manager_toggle_window_pip(&g_space_manager, &g_window_manager, acting_window);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
