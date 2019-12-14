@@ -1408,15 +1408,23 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
 {
     uint32_t sid = window_space(window);
 
+    // NOTE(koekeishiya): The window must become the focused window
+    // before we can change its fullscreen attribute. We focus the
+    // window and spin lock until a potential space animation has finished.
+    window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+    while (sid != space_manager_active_space()) { printf("%s: focus change spin lock\n", __FUNCTION__); usleep(100000); }
+    printf("%s: focus change finished\n", __FUNCTION__);
+
     if (!window_is_fullscreen(window)) {
-        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
-        while (sid != space_manager_active_space()) { /* maybe spin lock */ }
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
-        while (sid == space_manager_active_space()) { /* maybe spin lock */ }
     } else {
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanFalse);
-        while (sid == space_manager_active_space()) { /* maybe spin lock */ }
     }
+
+    // NOTE(koekeishiya): We toggled the fullscreen attribute and must
+    // now spin lock until the post-exit space animation has finished.
+    while (sid == space_manager_active_space()) { printf("%s: post animation spin lock\n", __FUNCTION__); usleep(100000); }
+    printf("%s: post animation finished\n", __FUNCTION__);
 }
 
 void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window)

@@ -669,11 +669,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             window_manager_purify_window(&g_window_manager, window);
         }
     } else if (window->is_fullscreen && !is_fullscreen) {
-        while (!space_is_user(space_manager_active_space())) { /* maybe spin lock */ }
+        uint32_t did = window_display_id(window);
 
-        // @hack
-        // Artificially delay by 50ms. This is necessary because macOS is crazy town.
-        usleep(500000);
+        while (display_manager_display_is_animating(did)) {
+
+            //
+            // NOTE(koekeishiya): Window has exited native-fullscreen mode.
+            // We need to spin lock until the display is finished animating
+            // because we are not actually able to interact with the window.
+            //
+
+            printf("%s: Display is animating\n", __FUNCTION__);
+            usleep(100000);
+        }
+        printf("%s: Display finished animating\n", __FUNCTION__);
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
