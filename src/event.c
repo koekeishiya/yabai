@@ -1135,7 +1135,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         uint64_t event_time = CGEventGetTimestamp(context);
         float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
-        if (dt < 33.33f) return EVENT_SUCCESS;
+        if (dt < 66.67f) return EVENT_SUCCESS;
 
         CGPoint point = CGEventGetLocation(context);
         int dx = point.x - g_mouse_state.down_location.x;
