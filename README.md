@@ -25,7 +25,7 @@ The *Mission Control* setting [*displays have separate spaces*](https://support.
 
 **yabai** stores a lock file at `/tmp/yabai_$USER.lock` to keep multiple instances from launching by the same user.
 
-**yabai** stores a unix domain socket at `/tmp/yabai_$USER.socket` to listen for messages.
+**yabai** stores a unix domain socket at `/tmp/yabai_$USER.socket` and `/tmp/yabai-sa_$USER.socket` to listen for messages.
 
 **DISCLAIMER:** Use at your own discretion. I take no responsibility if anything should happen to your machine while trying to install, test or otherwise use this software in any form.
 You acknowledge that you understand the potential risk that may come from disabling [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) on your system, and I make
