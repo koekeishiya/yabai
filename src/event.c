@@ -679,10 +679,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             // because we are not actually able to interact with the window.
             //
 
-            printf("%s: Display is animating\n", __FUNCTION__);
             usleep(100000);
         }
-        printf("%s: Display finished animating\n", __FUNCTION__);
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
