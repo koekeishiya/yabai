@@ -27,6 +27,13 @@ void display_serialize(FILE *rsp, uint32_t did)
 {
     CGRect frame = display_bounds(did);
 
+    char *uuid = NULL;
+    CFStringRef uuid_ref = display_uuid(did);
+    if (uuid_ref) {
+        uuid = cfstring_copy(uuid_ref);
+        CFRelease(uuid_ref);
+    }
+
     int buffer_size = MAXLEN;
     size_t bytes_written = 0;
     char buffer[MAXLEN] = {};
@@ -52,13 +59,18 @@ void display_serialize(FILE *rsp, uint32_t did)
     fprintf(rsp,
             "{\n"
             "\t\"id\":%d,\n"
+            "\t\"uuid\":\"%s\",\n"
             "\t\"index\":%d,\n"
             "\t\"spaces\":[%s],\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}\n"
             "}",
-            did, display_arrangement(did), buffer,
+            did, uuid ? uuid : "<unknown>", display_arrangement(did), buffer,
             frame.origin.x, frame.origin.y,
             frame.size.width, frame.size.height);
+
+    if (uuid) {
+        free(uuid);
+    }
 }
 
 CFStringRef display_uuid(uint32_t did)
