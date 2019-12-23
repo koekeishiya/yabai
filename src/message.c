@@ -1719,6 +1719,11 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
     }
 }
 
+static void bad_rule_argument_value(FILE *rsp, char *key, char *value)
+{
+    daemon_fail(rsp, "unknown value '%s' for argument '%s'\n", value, key);
+}
+
 static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 {
     struct token command = get_token(&message);
@@ -1764,30 +1769,45 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     rule->manage = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->manage = RULE_PROP_OFF;
+                } else {
+                    bad_rule_argument_value(rsp, key, value);
+                    return;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_STICKY)) {
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->sticky = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->sticky = RULE_PROP_OFF;
+                } else {
+                    bad_rule_argument_value(rsp, key, value);
+                    return;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_ON_TOP)) {
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->topmost = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->topmost = RULE_PROP_OFF;
+                } else {
+                    bad_rule_argument_value(rsp, key, value);
+                    return;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->border = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->border = RULE_PROP_OFF;
+                } else {
+                    bad_rule_argument_value(rsp, key, value);
+                    return;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_FULLSCR)) {
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     rule->fullscreen = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule->fullscreen = RULE_PROP_OFF;
+                } else {
+                    bad_rule_argument_value(rsp, key, value);
+                    return;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_GRID)) {
                 if ((sscanf(value, ARGUMENT_RULE_VALUE_GRID,
