@@ -633,7 +633,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
-    border_window_refresh(window);
+    if (!window->is_fullscreen) {
+        border_window_refresh(window);
+    }
 
     return EVENT_SUCCESS;
 }
