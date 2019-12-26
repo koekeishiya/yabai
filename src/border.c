@@ -229,20 +229,16 @@ void border_window_create(struct window *window)
     CGRect frame = window_frame(window);
     CGSNewRegionWithRect(&frame, &frame_region);
 
-    uint32_t set_tags[2] = {
+    uint32_t tags[2] = {
         kCGSModalWindowTagBit |
         kCGSDisableShadowTagBit |
         kCGSHighQualityResamplingTagBit |
         kCGSIgnoreForExposeTagBit
     };
 
-    uint32_t clear_tags[2] = { 0, 0 };
-    *((int8_t *)(clear_tags) + 0x5) = 0x20;
-
     SLSNewWindow(g_connection, 2, 0.0f, 0.0f, frame_region, &border->id);
     SLSSetWindowResolution(g_connection, border->id, 2.0f);
-    SLSSetWindowTags(g_connection, border->id, set_tags, 64);
-    SLSClearWindowTags(g_connection, border->id, clear_tags, 64);
+    SLSSetWindowTags(g_connection, border->id, tags, 64);
     SLSSetWindowOpacity(g_connection, border->id, 0);
     SLSSetMouseEventEnableFlags(g_connection, border->id, false);
     SLSSetWindowLevel(g_connection, border->id, window_level(window));
