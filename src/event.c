@@ -907,10 +907,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     CGPoint point = CGEventGetLocation(context);
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
-    g_mouse_state.window = window_manager_find_window_at_point(&g_window_manager, point);
-    if (!g_mouse_state.window) g_mouse_state.window = window_manager_focused_window(&g_window_manager);
-    if (!g_mouse_state.window) return EVENT_SUCCESS;
+    struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
+    if (!window) window = window_manager_focused_window(&g_window_manager);
+    if (!window || window_is_fullscreen(window)) return EVENT_SUCCESS;
 
+    g_mouse_state.window = window;
     g_mouse_state.down_location = point;
     g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
 
@@ -933,6 +934,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     if (g_mission_control_active) return EVENT_SUCCESS;
     if (!g_mouse_state.window)    return EVENT_SUCCESS;
 
+    CGPoint point = CGEventGetLocation(context);
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
+
     if (!__sync_bool_compare_and_swap(g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         goto out;
@@ -942,9 +946,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         debug("%s: %d is transitioning into native-fullscreen mode, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         goto out;
     }
-
-    CGPoint point = CGEventGetLocation(context);
-    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
     struct view *src_view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
     if (src_view && src_view->layout == VIEW_BSP) {
