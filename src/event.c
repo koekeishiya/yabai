@@ -935,9 +935,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
 
     if (!__sync_bool_compare_and_swap(g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
-        g_mouse_state.window = NULL;
-        g_mouse_state.current_action = MOUSE_MODE_NONE;
-        return EVENT_SUCCESS;
+        goto out;
+    }
+
+    if (window_is_fullscreen(g_mouse_state.window)) {
+        debug("%s: %d is transitioning into native-fullscreen mode, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
+        goto out;
     }
 
     CGPoint point = CGEventGetLocation(context);
@@ -1108,6 +1111,7 @@ end:;
         }
     }
 
+out:
     g_mouse_state.current_action = MOUSE_MODE_NONE;
     g_mouse_state.window = NULL;
 
