@@ -922,6 +922,8 @@ static char *parse_label(FILE *rsp, char **message, enum label_type type)
     }
 
     switch (type) {
+    default: break;
+
     case LABEL_SPACE: {
         for (int i = 0; i < array_count(reserved_space_identifiers); ++i) {
             if (token_equals(value, reserved_space_identifiers[i])) {
@@ -930,7 +932,6 @@ static char *parse_label(FILE *rsp, char **message, enum label_type type)
             }
         }
     } break;
-    default: {} break;
     }
 
     return token_to_string(value);
