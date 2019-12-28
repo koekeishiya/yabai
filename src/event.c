@@ -51,7 +51,7 @@ static bool event_signal_filter(struct signal *signal, enum event_type type, str
 static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
 {
     switch (type) {
-    default: {} break;
+    default: break;
 
     case APPLICATION_LAUNCHED:
     case APPLICATION_TERMINATED: {
@@ -189,7 +189,8 @@ enum event_type event_type_from_string(const char *str)
 void event_destroy(struct event *event)
 {
     switch (event->type) {
-    default: {} break;
+    default: break;
+
     case APPLICATION_TERMINATED: {
         process_destroy(event->context);
     } break;
