@@ -55,7 +55,7 @@ struct window_manager
     struct table managed_window;
     struct table window_lost_focused_event;
     struct table application_lost_front_switched_event;
-    struct rule **rules;
+    struct rule *rules;
     uint32_t focused_window_id;
     ProcessSerialNumber focused_window_psn;
     uint32_t last_window_id;
