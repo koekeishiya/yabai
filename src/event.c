@@ -163,8 +163,8 @@ void event_signal_destroy(struct signal *signal)
 {
     if (signal->app_regex_valid)   regfree(&signal->app_regex);
     if (signal->title_regex_valid) regfree(&signal->title_regex);
-    free(signal->command);
-    free(signal->label);
+    if (signal->command) free(signal->command);
+    if (signal->label)   free(signal->label);
 }
 
 bool event_signal_remove(char *label)
