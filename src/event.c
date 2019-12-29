@@ -153,10 +153,18 @@ void event_signal_transmit(void *context, enum event_type type)
     exit(EXIT_SUCCESS);
 }
 
-void event_signal_add(enum event_type type, struct signal signal)
+void event_signal_add(enum event_type type, struct signal *signal)
 {
-    if (signal.label) event_signal_remove(signal.label);
-    buf_push(g_signal_event[type], signal);
+    if (signal->label) event_signal_remove(signal->label);
+    buf_push(g_signal_event[type], *signal);
+}
+
+void event_signal_destroy(struct signal *signal)
+{
+    if (signal->app_regex_valid)   regfree(&signal->app_regex);
+    if (signal->title_regex_valid) regfree(&signal->title_regex);
+    free(signal->command);
+    free(signal->label);
 }
 
 bool event_signal_remove(char *label)
@@ -164,10 +172,7 @@ bool event_signal_remove(char *label)
     for (int i = 0; i < EVENT_TYPE_COUNT; ++i) {
         for (int j = 0; j < buf_len(g_signal_event[i]); ++j) {
             if (string_equals(label, g_signal_event[i][j].label)) {
-                if (g_signal_event[i][j].app_regex_valid)   regfree(&g_signal_event[i][j].app_regex);
-                if (g_signal_event[i][j].title_regex_valid) regfree(&g_signal_event[i][j].title_regex);
-                free(g_signal_event[i][j].command);
-                free(g_signal_event[i][j].label);
+                event_signal_destroy(&g_signal_event[i][j]);
                 buf_del(g_signal_event[i], j);
                 return true;
             }

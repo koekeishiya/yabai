@@ -26,8 +26,6 @@ struct rule
 
 bool rule_remove(char *label);
 void rule_add(struct rule *rule);
-bool rule_is_valid(struct rule *rule);
-struct rule *rule_create(void);
 void rule_destroy(struct rule *rule);
 
 #endif

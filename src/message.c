@@ -1763,7 +1763,10 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 {
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_RULE_ADD)) {
-        struct rule *rule = rule_create();
+        bool did_parse = true;
+        bool has_filter = false;
+        struct rule rule = {};
+
         struct token token = get_token(&message);
         while (token.text && token.length > 0) {
             char *key = NULL;
@@ -1772,82 +1775,122 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
             if (!key || !value) {
                 daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
-                return;
+                did_parse = false;
+                goto rnext;
             }
 
-            if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
-                rule->app_regex_valid = regcomp(&rule->app_regex, value, REG_EXTENDED) == 0;
-                if (!rule->app_regex_valid) {
-                    daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
+            if (string_equals(key, ARGUMENT_RULE_KEY_LABEL)) {
+                rule.label = string_copy(value);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
+                has_filter = true;
+                rule.app_regex_valid = regcomp(&rule.app_regex, value, REG_EXTENDED) == 0;
+                if (!rule.app_regex_valid) {
+                    daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
+                    did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_TITLE)) {
-                rule->title_regex_valid = regcomp(&rule->title_regex, value, REG_EXTENDED) == 0;
-                if (!rule->title_regex_valid) {
-                    daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
+                has_filter = true;
+                rule.title_regex_valid = regcomp(&rule.title_regex, value, REG_EXTENDED) == 0;
+                if (!rule.title_regex_valid) {
+                    daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
+                    did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_DISPLAY)) {
                 if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
                     ++value;
-                    rule->follow_space = true;
+                    rule.follow_space = true;
                 }
-                sscanf(value, "%d", &rule->display);
+
+                if (sscanf(value, "%d", &rule.display) != 1) {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_SPACE)) {
                 if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
                     ++value;
-                    rule->follow_space = true;
+                    rule.follow_space = true;
                 }
-                sscanf(value, "%d", &rule->space);
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_ALPHA)) {
-                sscanf(value, "%f", &rule->alpha);
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_MANAGE)) {
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule->manage = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule->manage = RULE_PROP_OFF;
-                }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_STICKY)) {
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule->sticky = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule->sticky = RULE_PROP_OFF;
-                }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_ON_TOP)) {
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule->topmost = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule->topmost = RULE_PROP_OFF;
-                }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule->border = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule->border = RULE_PROP_OFF;
-                }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_FULLSCR)) {
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule->fullscreen = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule->fullscreen = RULE_PROP_OFF;
+
+                if (sscanf(value, "%d", &rule.space) != 1) {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_GRID)) {
                 if ((sscanf(value, ARGUMENT_RULE_VALUE_GRID,
-                            &rule->grid[0], &rule->grid[1],
-                            &rule->grid[2], &rule->grid[3],
-                            &rule->grid[4], &rule->grid[5]) != 6)) {
-                    memset(rule->grid, 0, sizeof(rule->grid));
+                            &rule.grid[0], &rule.grid[1],
+                            &rule.grid[2], &rule.grid[3],
+                            &rule.grid[4], &rule.grid[5]) != 6)) {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
                 }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_LABEL)) {
-                rule->label = string_copy(value);
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_ALPHA)) {
+                if (sscanf(value, "%f", &rule.alpha) != 1) {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_MANAGE)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule.manage = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule.manage = RULE_PROP_OFF;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_STICKY)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule.sticky = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule.sticky = RULE_PROP_OFF;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_ON_TOP)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule.topmost = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule.topmost = RULE_PROP_OFF;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule.border = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule.border = RULE_PROP_OFF;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_FULLSCR)) {
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule.fullscreen = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule.fullscreen = RULE_PROP_OFF;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else {
+                daemon_fail(rsp, "unknown key '%s'\n", key);
+                did_parse = false;
             }
 
+rnext:
             token = get_token(&message);
         }
 
-        if (rule_is_valid(rule)) {
-            rule_add(rule);
+        if (!has_filter) {
+            daemon_fail(rsp, "missing required key-value pair 'app=..' or 'title=..'\n");
+            did_parse = false;
+        }
+
+        if (did_parse) {
+            rule_add(&rule);
         } else {
-            rule_destroy(rule);
-            daemon_fail(rsp, "a rule must contain at least one of the following key-value pairs: 'app', 'title'\n");
+            rule_destroy(&rule);
         }
     } else if (token_equals(command, COMMAND_RULE_REM)) {
         struct token token = get_token(&message);
@@ -1868,6 +1911,9 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
 {
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_SIGNAL_ADD)) {
+        bool did_parse = true;
+        bool has_command = false;
+        bool has_signal_type = false;
         enum event_type signal_type = EVENT_TYPE_UNKNOWN;
         struct signal signal = {};
 
@@ -1879,37 +1925,57 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
 
             if (!key || !value) {
                 daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
-                return;
+                did_parse = false;
+                goto snext;
             }
 
-            if (string_equals(key, ARGUMENT_SIGNAL_KEY_APP)) {
+            if (string_equals(key, ARGUMENT_SIGNAL_KEY_LABEL)) {
+                signal.label = string_copy(value);
+            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_APP)) {
                 signal.app_regex_valid = regcomp(&signal.app_regex, value, REG_EXTENDED) == 0;
                 if (!signal.app_regex_valid) {
-                    daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
+                    daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
+                    did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_TITLE)) {
                 signal.title_regex_valid = regcomp(&signal.title_regex, value, REG_EXTENDED) == 0;
                 if (!signal.title_regex_valid) {
-                    daemon_fail(rsp, "could not compile regex for pattern '%s'\n", value);
-                }
-            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_EVENT)) {
-                signal_type = event_type_from_string(value);
-                if (signal_type == EVENT_TYPE_UNKNOWN) {
-                    daemon_fail(rsp, "unknown event-type '%s'\n", value);
+                    daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
+                    did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_ACTION)) {
+                has_command = true;
                 signal.command = string_copy(value);
-            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_LABEL)) {
-                signal.label = string_copy(value);
+            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_EVENT)) {
+                has_signal_type = true;
+                signal_type = event_type_from_string(value);
+                if (signal_type == EVENT_TYPE_UNKNOWN) {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else {
+                daemon_fail(rsp, "unknown key '%s'\n", key);
+                did_parse = false;
             }
 
+snext:
             token = get_token(&message);
         }
 
-        if (signal_type > EVENT_TYPE_UNKNOWN && signal_type < EVENT_TYPE_COUNT && signal.command) {
-            event_signal_add(signal_type, signal);
+        if (!has_signal_type) {
+            daemon_fail(rsp, "missing required key-value pair 'event=..'\n");
+            did_parse = false;
+        }
+
+        if (!has_command) {
+            daemon_fail(rsp, "missing required key-value pair 'action=..'\n");
+            did_parse = false;
+        }
+
+        if (did_parse) {
+            event_signal_add(signal_type, &signal);
         } else {
-            daemon_fail(rsp, "signal was not added.\n");
+            event_signal_destroy(&signal);
         }
     } else if (token_equals(command, COMMAND_SIGNAL_REM)) {
         struct token token = get_token(&message);

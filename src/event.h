@@ -216,7 +216,8 @@ struct signal
     } while (0)
 
 void event_signal_transmit(void *context, enum event_type type);
-void event_signal_add(enum event_type type, struct signal signal);
+void event_signal_add(enum event_type type, struct signal *signal);
+void event_signal_destroy(struct signal *signal);
 bool event_signal_remove(char *label);
 void event_destroy(struct event *event);
 enum event_type event_type_from_string(const char *str);

@@ -210,7 +210,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
 void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     for (int i = 0; i < buf_len(wm->rules); ++i) {
-        window_manager_apply_rule_to_window(sm, wm, window, wm->rules[i]);
+        window_manager_apply_rule_to_window(sm, wm, window, &wm->rules[i]);
     }
 }
 
