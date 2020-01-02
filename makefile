@@ -20,7 +20,7 @@ install: clean $(BINS)
 
 sa:
 	clang $(OSAX_PATH)/loader.m -shared -O2 -o $(OSAX_PATH)/loader -framework Cocoa
-	clang $(OSAX_PATH)/payload.m -shared -fPIC -O2 -o $(OSAX_PATH)/payload -framework Cocoa -framework Carbon
+	clang $(OSAX_PATH)/payload.m -DOBJC_OLD_DISPATCH_PROTOTYPES=1 -shared -fPIC -O2 -o $(OSAX_PATH)/payload -framework Cocoa -framework Carbon
 	xxd -i -a $(OSAX_PATH)/loader $(OSAX_PATH)/sa_loader.c
 	xxd -i -a $(OSAX_PATH)/payload $(OSAX_PATH)/sa_payload.c
 	rm -f $(OSAX_PATH)/loader
