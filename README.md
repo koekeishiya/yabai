@@ -12,7 +12,7 @@ customizable.
 
 ### Requirements
 
-**yabai** is officially supported on **macOS High Sierra 10.13.6**, **Mojave 10.14.4-6** and **Catalina 10.15.0**. It uses a *scripting-addition*, which is a bundle of code
+**yabai** is officially supported on **macOS High Sierra 10.13.6**, **Mojave 10.14.4-6** and **Catalina 10.15.0-2**. It uses a *scripting-addition*, which is a bundle of code
 that we inject into *Dock.app* to elevate our privileges when communicating with the *WindowServer*. The *WindowServer* is a single point of contact for all applications.
 It is central to the implementation of the GUI frameworks and many other services. Because of this, [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) must be disabled for **yabai** to function properly.
 If you are running on macOS High Sierra 10.13.6, you can reenable SIP after the scripting-addition has been installed.
