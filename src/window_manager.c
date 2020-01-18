@@ -1572,10 +1572,10 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
     free(window_list);
 }
 
-void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t display_id, uint64_t sid)
+void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did)
 {
     int space_count;
-    uint64_t *space_list = display_space_list(display_id, &space_count);
+    uint64_t *space_list = display_space_list(did, &space_count);
     if (!space_list) goto out;
 
     int window_count;
@@ -1600,6 +1600,7 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
         }
     }
 
+    uint64_t sid = display_space_id(did);
     for (int i = 0; i < space_count; ++i) {
         if (space_list[i] == sid) {
             space_manager_refresh_view(sm, sid);
