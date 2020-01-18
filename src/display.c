@@ -9,13 +9,13 @@ static DISPLAY_EVENT_HANDLER(display_handler)
     struct event *event;
 
     if (flags & kCGDisplayAddFlag) {
-        event_create(event, DISPLAY_ADDED, (void *)(intptr_t) display_id);
+        event_create(event, DISPLAY_ADDED, (void *)(intptr_t) did);
     } else if (flags & kCGDisplayRemoveFlag) {
-        event_create(event, DISPLAY_REMOVED, (void *)(intptr_t) display_id);
+        event_create(event, DISPLAY_REMOVED, (void *)(intptr_t) did);
     } else if (flags & kCGDisplayMovedFlag) {
-        event_create(event, DISPLAY_MOVED, (void *)(intptr_t) display_id);
+        event_create(event, DISPLAY_MOVED, (void *)(intptr_t) did);
     } else if (flags & kCGDisplayDesktopShapeChangedFlag) {
-        event_create(event, DISPLAY_RESIZED, (void *)(intptr_t) display_id);
+        event_create(event, DISPLAY_RESIZED, (void *)(intptr_t) did);
     } else {
         event = NULL;
     }
