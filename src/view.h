@@ -75,6 +75,7 @@ static const char *view_type_str[] =
 
 struct view
 {
+    CFStringRef suuid;
     uint64_t sid;
     struct window_node *root;
     enum view_type layout;

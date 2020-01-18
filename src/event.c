@@ -868,28 +868,27 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_ADDED)
 {
-    uint32_t display_id = (uint32_t)(intptr_t) context;
-    uint32_t sid = display_space_id(display_id);
-    debug("%s: %d\n", __FUNCTION__, display_id);
-    window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, display_id, sid);
+    uint32_t did = (uint32_t)(intptr_t) context;
+    debug("%s: %d\n", __FUNCTION__, did);
+    space_manager_handle_display_add(&g_space_manager, did);
+    window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
     bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_REMOVED)
 {
-    uint32_t display_id = display_manager_main_display_id();
-    uint32_t sid = display_space_id(display_id);
-    debug("%s: %d\n", __FUNCTION__, display_id);
-    window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, display_id, sid);
+    uint32_t did = display_manager_main_display_id();
+    debug("%s: %d\n", __FUNCTION__, did);
+    window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
     bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_MOVED)
 {
-    uint32_t display_id = (uint32_t)(intptr_t) context;
-    debug("%s: %d\n", __FUNCTION__, display_id);
+    uint32_t did = (uint32_t)(intptr_t) context;
+    debug("%s: %d\n", __FUNCTION__, did);
     space_manager_mark_spaces_invalid(&g_space_manager);
     bar_resize(&g_bar);
     return EVENT_SUCCESS;
@@ -897,9 +896,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_MOVED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED)
 {
-    uint32_t display_id = (uint32_t)(intptr_t) context;
-    debug("%s: %d\n", __FUNCTION__, display_id);
-    space_manager_mark_spaces_invalid_for_display(&g_space_manager, display_id);
+    uint32_t did = (uint32_t)(intptr_t) context;
+    debug("%s: %d\n", __FUNCTION__, did);
+    space_manager_mark_spaces_invalid_for_display(&g_space_manager, did);
     bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }

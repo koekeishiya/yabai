@@ -837,6 +837,51 @@ bool space_manager_refresh_application_windows(struct space_manager *sm)
     return window_count != g_window_manager.window.count;
 }
 
+void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
+{
+    int space_count;
+    uint64_t *space_list = display_space_list(did, &space_count);
+    if (!space_list) return;
+
+    int list_count = 0;
+    struct view *view_list[sm->view.count];
+    CFStringRef uuid_list[sm->view.count];
+
+    for (int i = 0; i < sm->view.capacity; ++i) {
+        struct bucket *bucket = sm->view.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct view *view = bucket->value;
+                view_list[list_count] = view;
+                uuid_list[list_count] = view->suuid;
+                ++list_count;
+            }
+            bucket = bucket->next;
+        }
+    }
+
+    for (int i = 0; i < space_count; ++i) {
+        uint64_t sid = space_list[i];
+        CFStringRef uuid = space_uuid(sid);
+        if (!uuid) continue;
+
+        for (int j = 0; j < list_count; ++j) {
+            if (CFEqual(uuid_list[j], uuid)) {
+                view_list[j]->sid = sid;
+                view_list[j]->suuid = CFRetain(uuid);
+                CFRelease(uuid_list[j]);
+            }
+        }
+
+        CFRelease(uuid);
+    }
+
+    sm->current_space_id = space_manager_active_space();
+    sm->last_space_id = sm->current_space_id;
+
+    free(space_list);
+}
+
 void space_manager_init(struct space_manager *sm)
 {
     sm->layout = VIEW_FLOAT;
