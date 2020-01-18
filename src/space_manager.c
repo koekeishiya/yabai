@@ -867,9 +867,15 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
 
         for (int j = 0; j < list_count; ++j) {
             if (CFEqual(uuid_list[j], uuid)) {
-                view_list[j]->sid = sid;
-                view_list[j]->suuid = CFRetain(uuid);
-                CFRelease(uuid_list[j]);
+                struct view *view = view_list[j];
+
+                table_remove(&sm->view, &view->sid);
+                CFRelease(view->suuid);
+
+                view->sid = sid;
+                view->suuid = CFRetain(uuid);
+
+                table_add(&sm->view, &sid, view);
             }
         }
 
