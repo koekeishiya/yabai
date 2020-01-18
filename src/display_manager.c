@@ -22,8 +22,8 @@ bool display_manager_query_displays(FILE *rsp)
 
 CFStringRef display_manager_main_display_uuid(void)
 {
-    uint32_t display_id = display_manager_main_display_id();
-    return display_uuid(display_id);
+    uint32_t did = display_manager_main_display_id();
+    return display_uuid(did);
 }
 
 uint32_t display_manager_main_display_id(void)
@@ -236,7 +236,7 @@ static AXUIElementRef display_manager_find_element_at_point(CGPoint point)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-void display_manager_focus_display(uint32_t display_id)
+void display_manager_focus_display(uint32_t did)
 {
     int window_count;
     uint32_t *window_list;
@@ -246,7 +246,7 @@ void display_manager_focus_display(uint32_t display_id)
     CGPoint point;
     AXUIElementRef element_ref;
 
-    window_list = space_window_list(display_space_id(display_id), &window_count);
+    window_list = space_window_list(display_space_id(did), &window_count);
     if (!window_list) goto fallback;
 
     for (int i = 0; i < window_count; ++i) {
@@ -261,7 +261,7 @@ void display_manager_focus_display(uint32_t display_id)
     free(window_list);
 
 fallback:
-    bounds = display_bounds(display_id);
+    bounds = display_bounds(did);
     point = (CGPoint) { bounds.origin.x + bounds.size.width / 2, bounds.origin.y + bounds.size.height / 2 };
     element_ref = display_manager_find_element_at_point(point);
 
