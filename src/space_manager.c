@@ -876,6 +876,7 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
                 view->suuid = CFRetain(uuid);
 
                 table_add(&sm->view, &sid, view);
+                break;
             }
         }
 
