@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.2.0] - 2020-01-19
 ### Added
 - Ability to do real picture-in-picture of any arbitrary window [#286](https://github.com/koekeishiya/yabai/issues/286)
 
@@ -157,7 +159,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.1.3...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/koekeishiya/yabai/compare/v2.1.3...v2.2.0
 [2.1.3]: https://github.com/koekeishiya/yabai/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/koekeishiya/yabai/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/koekeishiya/yabai/compare/v2.1.0...v2.1.1
