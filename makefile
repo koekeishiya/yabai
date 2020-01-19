@@ -1,6 +1,6 @@
 FRAMEWORK_PATH = -F/System/Library/PrivateFrameworks
 FRAMEWORK      = -framework Carbon -framework Cocoa -framework CoreServices -framework SkyLight -framework ScriptingBridge -framework IOKit
-BUILD_FLAGS    = -std=c99 -Wall -g -O0 -fvisibility=hidden
+BUILD_FLAGS    = -std=c99 -Wall -g -O0 -fvisibility=hidden -mmacosx-version-min=10.13
 BUILD_PATH     = ./bin
 DOC_PATH       = ./doc
 SCRIPT_PATH    = ./scripts
@@ -15,12 +15,12 @@ BINS           = $(BUILD_PATH)/yabai
 
 all: clean $(BINS)
 
-install: BUILD_FLAGS=-std=c99 -Wall -O2 -fvisibility=hidden
+install: BUILD_FLAGS=-std=c99 -Wall -O2 -fvisibility=hidden -mmacosx-version-min=10.13
 install: clean $(BINS)
 
 sa:
-	clang $(OSAX_PATH)/loader.m -shared -O2 -o $(OSAX_PATH)/loader -framework Cocoa
-	clang $(OSAX_PATH)/payload.m -DOBJC_OLD_DISPATCH_PROTOTYPES=1 -shared -fPIC -O2 -o $(OSAX_PATH)/payload -framework Cocoa -framework Carbon
+	clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/loader -framework Cocoa
+	clang $(OSAX_PATH)/payload.m -DOBJC_OLD_DISPATCH_PROTOTYPES=1 -shared -fPIC -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/payload -framework Cocoa -framework Carbon
 	xxd -i -a $(OSAX_PATH)/loader $(OSAX_PATH)/sa_loader.c
 	xxd -i -a $(OSAX_PATH)/payload $(OSAX_PATH)/sa_payload.c
 	rm -f $(OSAX_PATH)/loader
