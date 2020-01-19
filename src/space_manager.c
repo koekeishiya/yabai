@@ -872,6 +872,9 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
                 table_remove(&sm->view, &view->sid);
                 CFRelease(view->suuid);
 
+                struct space_label *label = space_manager_get_label_for_space(sm, view->sid);
+                if (label) label->sid = sid;
+
                 view->sid = sid;
                 view->suuid = CFRetain(uuid);
 
