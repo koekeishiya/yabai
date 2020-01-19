@@ -1252,6 +1252,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
         CFStringRef owner = CFDictionaryGetValue(dictionary, kCGWindowOwnerName);
         if (!owner) continue;
 
+        CFNumberRef layer_ref = CFDictionaryGetValue(dictionary, kCGWindowLayer);
+        if (!layer_ref) continue;
+
+        uint64_t layer = 0;
+        CFNumberGetValue(layer_ref, CFNumberGetType(layer_ref), &layer);
+        if (layer != 18) continue;
+
         if (CFEqual(CFSTR("Dock"), owner)) {
             found = true;
             break;
