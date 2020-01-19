@@ -1557,13 +1557,13 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
         if (window->is_minimized || window->application->is_hidden)  continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
-        if (existing_view && existing_view->sid != sid) {
+        if (existing_view && existing_view->layout == VIEW_BSP && existing_view->sid != sid) {
             space_manager_untile_window(sm, existing_view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
 
-        if (!existing_view || existing_view->sid != sid) {
+        if (!existing_view || (existing_view->layout == VIEW_BSP && existing_view->sid != sid)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, sid);
             window_manager_add_managed_window(wm, window, view);
         }
@@ -1576,27 +1576,12 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
 {
     int space_count;
     uint64_t *space_list = display_space_list(did, &space_count);
-    if (!space_list) goto out;
+    if (!space_list) return;
 
-    int window_count;
-    uint32_t *window_list = space_window_list(space_list[0], &window_count);
-    if (!window_list) goto sfree;
-
-    for (int i = 0; i < window_count; ++i) {
-        struct window *window = window_manager_find_window(wm, window_list[i]);
-        if (!window || !window_manager_should_manage_window(window)) continue;
-        if (window->is_minimized || window->application->is_hidden)  continue;
-
-        struct view *existing_view = window_manager_find_managed_window(wm, window);
-        if (existing_view && existing_view->layout == VIEW_BSP && existing_view->sid != space_list[0]) {
-            space_manager_untile_window(sm, existing_view, window);
-            window_manager_remove_managed_window(wm, window->id);
-            window_manager_purify_window(wm, window);
-        }
-
-        if (!existing_view || (existing_view->layout == VIEW_BSP && existing_view->sid != space_list[0])) {
-            struct view *view = space_manager_tile_window_on_space(sm, window, space_list[0]);
-            window_manager_add_managed_window(wm, window, view);
+    for (int i = 0; i < space_count; ++i) {
+        if (space_is_user(space_list[i])) {
+            window_manager_check_for_windows_on_space(sm, wm, space_list[i]);
+            break;
         }
     }
 
@@ -1609,10 +1594,7 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
         }
     }
 
-    free(window_list);
-sfree:
     free(space_list);
-out:;
 }
 
 void window_manager_init(struct window_manager *wm)
