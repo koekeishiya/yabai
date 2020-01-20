@@ -866,8 +866,14 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
         if (!uuid) continue;
 
         for (int j = 0; j < list_count; ++j) {
-            if (CFEqual(uuid_list[j], uuid)) {
+            CFStringRef view_uuid = uuid_list[j];
+            if (!view_uuid) continue;
+
+            if (CFEqual(view_uuid, uuid)) {
                 struct view *view = view_list[j];
+
+                uuid_list[j] = NULL;
+                view_list[j] = NULL;
 
                 table_remove(&sm->view, &view->sid);
                 CFRelease(view->suuid);
