@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Ignore minimized windows when an application is unhidden (required by some applications like Chrome..) [#300](https://github.com/koekeishiya/yabai/issues/300)
 
 ## [2.2.2] - 2020-01-20
 ### Changed
