@@ -12,7 +12,7 @@
   <a href="https://github.com/koekeishiya/yabai/blob/master/LICENSE.txt">
     <img src="https://img.shields.io/github/license/koekeishiya/yabai.svg?color=green" alt="License Badge">
   </a>
-  <a href="https://github.com/koekeishiya/yabai/blob/master/README.md#changelog">
+  <a href="https://github.com/koekeishiya/yabai/blob/master/CHANGELOG.md">
     <img src="https://img.shields.io/badge/view-changelog-green.svg" alt="Changelog Badge">
   </a>
   <a href="https://github.com/koekeishiya/yabai/releases">
