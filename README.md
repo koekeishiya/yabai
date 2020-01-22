@@ -1,129 +1,86 @@
-[![Build Status](https://travis-ci.org/koekeishiya/yabai.svg?branch=master)](https://travis-ci.org/koekeishiya/yabai)
+<!-- Please be careful editing the below HTML, as GitHub is quite finicky with anything that looks like an HTML tag in GitHub Flavored Markdown. -->
+<p align="center">
+  <img width="75%" src="assets/banner/banner.svg" alt="Banner">
+</p>
+<p align="center">
+  <b>Tiling window management for the Mac.</b>
+</p>
+<p align="center">
+  <a href="https://travis-ci.org/koekeishiya/yabai">
+    <img src="https://travis-ci.org/koekeishiya/yabai.svg?branch=master" alt="CI Status Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/blob/master/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/koekeishiya/yabai.svg?color=green" alt="License Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/blob/master/README.md#changelog">
+    <img src="https://img.shields.io/badge/view-changelog-green.svg" alt="Changelog Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/releases">
+    <img src="https://img.shields.io/github/commits-since/koekeishiya/yabai/latest.svg?color=green" alt="Version Badge">
+  </a>
+</p>
 
-![img](assets/screenshot.png)
+## About
 
-**yabai** started as a C99 rewrite of [*chunkwm*](https://github.com/koekeishiya/chunkwm), originally supposed to be its first RC version.
+<img align="right" width="40%" src="assets/screenshot.png" alt="Screenshot">
 
-However due to major architectural changes, supported systems, and changes to functionality, it is being released separately.
-There are multiple reasons behind these changes, based on the experience I've gained through experimenting with, designing, and using both *kwm*
-and *chunkwm*. Some of these changes are performance related while other changes have been made to keep the user experience simple and more complete,
-attempts to achieve a seamless integration with the operating system (when possible), proper error reporting, and yet still keep the property of being
-customizable.
+yabai is a window management utility that is designed to work as an extension to the built-in window manager of macOS.
+yabai allows you to control your windows, spaces and displays freely using an intuitive command line interface and optionally set user-defined keyboard shortcuts using tight integration with [&nearr;&nbsp;skhd](gh-skhd) and other third-party software.
 
-### Requirements
+The primary function of yabai is tiling window management; automatically modifying your window layout using a binary space partitioning algorithm to allow you to focus on the content of your windows without distractions.
+Additional features of yabai include focus-follows-mouse, disabling animations for switching spaces, creating spaces past the limit of 16 spaces, and much more.
 
-**yabai** is officially supported on **macOS High Sierra 10.13.6**, **Mojave 10.14.4-6** and **Catalina 10.15.0-2**. It uses a *scripting-addition*, which is a bundle of code
-that we inject into *Dock.app* to elevate our privileges when communicating with the *WindowServer*. The *WindowServer* is a single point of contact for all applications.
-It is central to the implementation of the GUI frameworks and many other services. Because of this, [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) must be disabled for **yabai** to function properly.
-If you are running on macOS High Sierra 10.13.6, you can reenable SIP after the scripting-addition has been installed.
+## Installation and Configuration
 
-**yabai** must be given permission to utilize the *Accessibility API*, and will request access upon launch. The application must be restarted after access has been granted.
-If you are building from source or using the *brew --HEAD option*, it is recommended to first [*codesign*](https://github.com/koekeishiya/yabai/blob/master/CODESIGN.md) the binary such that access can persist through builds/updates.
-You can read more about codesigning [here](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW2).
+- The [&nearr;&nbsp;yabai&nbsp;wiki][yabai-wiki] has both brief and detailed installation instructions for multiple installation methods, and also explains how to uninstall yabai completely.
+- Sample configuration files can be found in the [&nearr;&nbsp;examples][yabai-examples] directory. Refer to the [&nearr;&nbsp;documentation][yabai-docs] or the wiki for further information.
+- Keyboard shortcuts can be defined with [&nearr;&nbsp;skhd][gh-skhd] or any other suitable software you may prefer.
 
-The *Mission Control* setting [*displays have separate spaces*](https://support.apple.com/library/content/dam/edam/applecare/images/en_US/osx/separate_spaces.png) must be enabled.
+## Requirements and Caveats
 
-**yabai** stores a lock file at `/tmp/yabai_$USER.lock` to keep multiple instances from launching by the same user.
+Please read the below requirements carefully.
+Make sure you fulfil all of them before filing an issue.
 
-**yabai** stores a unix domain socket at `/tmp/yabai_$USER.socket` and `/tmp/yabai-sa_$USER.socket` to listen for messages.
+|Requirement|Note|
+|-:|:-|
+|Operating&nbsp;System|macOS&nbsp;High&nbsp;Sierra&nbsp;10.13.6, Mojave&nbsp;10.14.4+ and Catalina 10.15.0+ is supported.|
+|Accessibility&nbsp;API|yabai must be given permission to utilize the Accessibility API and will request access upon launch. The application must be restarted after access has been granted.|
+|Mission&nbsp;Control|In the Mission Control preferences pane in System Preferences, the setting "Displays have separate Spaces" must be enabled.|
 
-**DISCLAIMER:** Use at your own discretion. I take no responsibility if anything should happen to your machine while trying to install, test or otherwise use this software in any form.
-You acknowledge that you understand the potential risk that may come from disabling [*System Integrity Protection*](https://support.apple.com/en-us/HT204899) on your system, and I make
-no recommendation as to whether you should or should not disable SIP.
+Please also take note of the following caveats.
 
-### Install
+|Caveat|Note|
+|-:|:-|
+|System&nbsp;Integrity&nbsp;Protection|System Integrity Protection needs to be (partially) disabled for yabai to inject a scripting addition into Dock.app for controlling windows with functions that require elevated privileges. This enables control of the window server, which is the sole owner of all window connections, and enables additional features of yabai. If you are running on macOS High Sierra 10.13.6, you can reenable SIP after the scripting addition has been installed.|
+|Code&nbsp;Signing|When building from source (or installing from HEAD), it is recommended to codesign the binary so it retains its accessibility and automation privileges when updated or rebuilt.|
+|Mission&nbsp;Control|In the Mission Control preferences pane in System Preferences, the setting "Automatically rearrange Spaces based on most recent use" should be disabled for commands that rely on the ordering of spaces to work reliably.|
 
-Requires xcode-10 command-line tools.
+## License and Attribution
 
-**Homebrew**:
+yabai is licensed under the [&nearr;&nbsp;MIT&nbsp;License][yabai-license], a short and simple permissive license with conditions only requiring preservation of copyright and license notices.
+Licensed works, modifications, and larger works may be distributed under different terms and without source code.
 
-```
-# clone tap
-brew tap koekeishiya/formulae
+Thanks to [@fools-mate](gh-fools-mate) for creating a logo and banner for this project and making them available for free.
 
-# install latest stable version
-brew install yabai
+Thanks to [@dominiklohmann](gh-dominiklohmann) for contributing great documentation, support, and more, for free.
 
-# install from git master branch
-brew install --HEAD yabai
-```
+## Disclaimer
 
-**Source**:
+Use at your own discretion.
+I take no responsibility if anything should happen to your machine while trying to install, test or otherwise use this software in any form.
+You acknowledge that you understand the potential risk that may come from disabling [&nearr;&nbsp;System&nbsp;Integrity&nbsp;Protection][external-about-sip] on your system, and I make no recommendation as to whether you should or should not disable System Integrity Protection.
 
-```
-# clone repo and build binary
-git clone https://github.com/koekeishiya/yabai
-make install      # release version
-make              # debug version
+<!-- Project internal links -->
+[yabai-license]: LICENSE.txt
+[yabai-examples]: https://github.com/koekeishiya/yabai/tree/master/examples
+[yabai-wiki]: https://github.com/koekeishiya/yabai/wiki
+[yabai-docs]: https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc
 
-# symlink binary to a location in $PATH
-ln -s $PWD/bin/yabai /usr/local/bin/yabai
+<!-- Links to other GitHub projects/users -->
+[gh-skhd]: https://github.com/koekeishiya/skhd
+[gh-chunkwm]: https://github.com/koekeishiya/chunkwm
+[gh-fools-mate]: https://github.com/fools-mate
+[gh-dominiklohmann]: https://github.com/dominiklohmann
 
-# symlink manpage
-ln -s $PWD/doc/yabai.1 /usr/local/share/man/man1/yabai.1
-```
-
-**Install scripting-addition**:
-
-```
-sudo yabai --install-sa
-```
-
-### Uninstall
-
-**yabai** is a single binary application and is trivial to uninstall.
-
-**Uninstall scripting-addition**:
-
-```
-sudo yabai --uninstall-sa
-```
-
-**Remove config and tmp files**:
-
-```
-rm ~/.yabairc
-rm /tmp/yabai_$USER.lock
-rm /tmp/yabai_$USER.socket
-rm /tmp/yabai-sa_$USER.socket
-```
-
-**Homebrew**:
-
-```
-# if you were using brew services to manage yabai
-brew services stop yabai
-rm -rf /usr/local/var/log/yabai
-
-# uninstall binary, manpage and plist
-brew uninstall yabai
-```
-
-**Source**:
-
-```
-# remove binary symlink
-rm /usr/local/bin/yabai
-
-# remove manpage symlink
-rm /usr/local/share/man/man1/yabai.1
-
-remove the cloned git-repository..
-```
-
-### Configuration
-
-The default configuration file is a shell-script located at one of the following places (in order):
-
- - `$XDG_CONFIG_HOME/yabai/yabairc`
- - `$HOME/.config/yabai/yabairc`
- - `$HOME/.yabairc`
-
-A different location can be specified with the *--config | -c* argument. The configuration file consists of commands that
-send messages to the running **yabai** instance. To send a message, invoke **yabai** with the *--message | -m* argument.
-
-Keyboard shortcuts can be defined with [*skhd*](https://github.com/koekeishiya/skhd) or any other suitable software you may prefer.
-
-Sample configuration files can be found in the [examples](https://github.com/koekeishiya/yabai/tree/master/examples) directory.
-
-Refer to the [*documentation*](https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc) for further information.
+<!-- External links -->
+[external-about-sip]: https://support.apple.com/en-us/HT204899
