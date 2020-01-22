@@ -60,9 +60,9 @@ Please also take note of the following caveats.
 yabai is licensed under the [&nearr;&nbsp;MIT&nbsp;License][yabai-license], a short and simple permissive license with conditions only requiring preservation of copyright and license notices.
 Licensed works, modifications, and larger works may be distributed under different terms and without source code.
 
-Thanks to [@fools-mate](gh-fools-mate) for creating a logo and banner for this project and making them available for free.
+Thanks to [@fools-mate][gh-fools-mate] for creating a logo and banner for this project and making them available for free.
 
-Thanks to [@dominiklohmann](gh-dominiklohmann) for contributing great documentation, support, and more, for free.
+Thanks to [@dominiklohmann][gh-dominiklohmann] for contributing great documentation, support, and more, for free.
 
 ## Disclaimer
 
