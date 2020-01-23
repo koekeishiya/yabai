@@ -25,7 +25,7 @@
 <img align="right" width="40%" src="assets/screenshot.png" alt="Screenshot">
 
 yabai is a window management utility that is designed to work as an extension to the built-in window manager of macOS.
-yabai allows you to control your windows, spaces and displays freely using an intuitive command line interface and optionally set user-defined keyboard shortcuts using tight integration with [&nearr;&nbsp;skhd](gh-skhd) and other third-party software.
+yabai allows you to control your windows, spaces and displays freely using an intuitive command line interface and optionally set user-defined keyboard shortcuts using tight integration with [&nearr;&nbsp;skhd][gh-skhd] and other third-party software.
 
 The primary function of yabai is tiling window management; automatically modifying your window layout using a binary space partitioning algorithm to allow you to focus on the content of your windows without distractions.
 Additional features of yabai include focus-follows-mouse, disabling animations for switching spaces, creating spaces past the limit of 16 spaces, and much more.
