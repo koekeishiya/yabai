@@ -84,13 +84,9 @@ event_loop_run(void *context)
 
 void event_loop_post(struct event_loop *event_loop, struct event *event)
 {
-    if (event_loop->is_running) {
-        queue_push(&event_loop->queue, event);
-        sem_post(event_loop->semaphore);
-    } else if (event->status) {
-        *event->status = EVENT_IGNORED;
-        event_destroy(event);
-    }
+    assert(event_loop->is_running);
+    queue_push(&event_loop->queue, event);
+    sem_post(event_loop->semaphore);
 }
 
 bool event_loop_init(struct event_loop *event_loop)

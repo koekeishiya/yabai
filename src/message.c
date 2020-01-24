@@ -1988,11 +1988,6 @@ static SOCKET_DAEMON_HANDLER(message_handler)
     event_loop_post(&g_event_loop, event);
     while (status == EVENT_QUEUED);
 
-    if (status == EVENT_IGNORED) {
-        debug("yabai: event_loop is not running! ignoring event..\n");
-        daemon_fail(rsp, "event_loop is not running! ignoring event..\n");
-    }
-
     fflush(rsp);
     fclose(rsp);
 

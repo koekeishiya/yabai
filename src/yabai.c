@@ -275,16 +275,11 @@ int main(int argc, char **argv)
         error("yabai: could not initialize event_loop! abort..\n");
     }
 
-    if (!socket_daemon_begin_un(&g_daemon, g_socket_file, message_handler)) {
-        error("yabai: could not initialize daemon! abort..\n");
-    }
-
     process_manager_init(&g_process_manager);
     workspace_event_handler_init(&g_workspace_context);
     space_manager_init(&g_space_manager);
     window_manager_init(&g_window_manager);
     mouse_state_init(&g_mouse_state);
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
 
     event_loop_begin(&g_event_loop);
     display_manager_begin(&g_display_manager);
@@ -293,6 +288,11 @@ int main(int argc, char **argv)
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
+
+    if (!socket_daemon_begin_un(&g_daemon, g_socket_file, message_handler)) {
+        error("yabai: could not initialize daemon! abort..\n");
+    }
 
     if (scripting_addition_is_installed()) {
         scripting_addition_load();
