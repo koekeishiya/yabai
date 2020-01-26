@@ -1377,13 +1377,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH)
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
     if (g_verbose) {
-        char buffer[param1];
-        buffer[param1-1] = '\0';
+        fprintf(stdout, "%s: ", __FUNCTION__);
         for (int i = 0; i < param1 - 1; ++i) {
             char c = *((char *) context + i);
-            buffer[i] = c == '\0' ? ' ' : c;
+            putc(c == '\0' ? ' ' : c, stdout);
         }
-        fprintf(stdout, "%s: '%s'\n", __FUNCTION__, buffer);
+        putc('\n', stdout);
+        fflush(stdout);
     }
 
     handle_message(param2, context);
