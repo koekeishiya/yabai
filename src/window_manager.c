@@ -1257,7 +1257,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
     space_manager_move_window_to_space(dst_sid, window);
 
-    if (window_manager_should_manage_window(window)) {
+    if (window_manager_should_manage_window(window) && !window->is_minimized) {
         struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
         window_manager_add_managed_window(wm, window, view);
     }
