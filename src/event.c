@@ -1376,12 +1376,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
-    debug("%s: msg '", __FUNCTION__);
-    for (int i = 0; i < param1 - 1; ++i) {
-        char c = *((char *) context + i);
-        debug("%c", c == '\0' ? ' ' : c);
+    if (g_verbose) {
+        char buffer[param1];
+        buffer[param1-1] = '\0';
+        for (int i = 0; i < param1 - 1; ++i) {
+            char c = *((char *) context + i);
+            buffer[i] = c == '\0' ? ' ' : c;
+        }
+        fprintf(stdout, "%s: '%s'\n", __FUNCTION__, buffer);
     }
-    debug("'\n");
+
     handle_message(param2, context);
     return EVENT_SUCCESS;
 }
