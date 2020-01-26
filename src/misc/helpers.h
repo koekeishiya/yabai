@@ -49,22 +49,21 @@ static inline char *string_escape_quote(char *s)
 {
     if (!s) return NULL;
 
-    bool found_quote = false;
-    for (char *cursor = s; *cursor; ++cursor) {
-        if (*cursor == '"') {
-            found_quote = true;
-            break;
-        }
+    char *cursor = s;
+    int num_quotes = 0;
+
+    while (*cursor) {
+        if (*cursor == '"') ++num_quotes;
+        ++cursor;
     }
 
-    if (!found_quote) return NULL;
+    if (!num_quotes) return NULL;
 
-    int size = sizeof(char) * (2*strlen(s));
-    char *result = malloc(size);
-    char *dst = result;
-    memset(result, 0, size);
+    int size_in_bytes = (int)(cursor - s) + num_quotes;
+    char *result = malloc(sizeof(char) * (size_in_bytes+1));
+    result[size_in_bytes] = '\0';
 
-    for (char *cursor = s; *cursor; ++cursor) {
+    for (char *dst = result, *cursor = s; *cursor; ++cursor) {
         if (*cursor == '"') *dst++ = '\\';
         *dst++ = *cursor;
     }
