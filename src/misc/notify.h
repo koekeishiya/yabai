@@ -27,20 +27,21 @@ static bool notify_init(void)
     return true;
 }
 
-static void notify(char *message, char *subtitle)
+static void notify(const char *subtitle, const char *format, ...)
 {
     @autoreleasepool {
-
     if (!g_notify_init) notify_init();
 
+    va_list args;
+    va_start(args, format);
     NSUserNotification *notification = [[NSUserNotification alloc] init];
     notification.title = @"yabai";
-    notification.subtitle = subtitle ? [NSString stringWithUTF8String:subtitle] : NULL;
-    notification.informativeText = message ? [NSString stringWithUTF8String:message] : NULL;
+    notification.subtitle = [NSString stringWithUTF8String:subtitle];
+    notification.informativeText = [[[NSString alloc] initWithFormat:[NSString stringWithUTF8String:format] arguments:args] autorelease];
     [notification setValue:g_notify_img forKey:@"_identityImage"];
     [notification setValue:@(false) forKey:@"_identityImageHasBorder"];
     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
     [notification release];
-
+    va_end(args);
     }
 }

@@ -159,20 +159,24 @@ static bool get_config_file(char *restrict filename, char *restrict buffer, int 
 
 static void exec_config_file(void)
 {
-    if (*g_config_file || get_config_file("yabairc", g_config_file, sizeof(g_config_file))) {
-        if (!file_exists(g_config_file)) {
-            error("yabai: specified config file '%s' does not exist! abort..\n", g_config_file);
-        }
+    if (!*g_config_file && !get_config_file("yabairc", g_config_file, sizeof(g_config_file))) {
+        notify("configuration", "could not locate config file..");
+        return;
+    }
 
-        if (!ensure_executable_permission(g_config_file)) {
-            error("yabai: could not set the executable permission bit for config file '%s'! abort..\n", g_config_file);
-        }
+    if (!file_exists(g_config_file)) {
+        notify("configuration", "file '%s' does not exist..", g_config_file);
+        return;
+    }
 
-        if (!fork_exec(g_config_file, NULL)) {
-            error("yabai: failed to execute config file '%s'!\n", g_config_file);
-        }
-    } else {
-        error("yabai: could not locate config file!\n");
+    if (!ensure_executable_permission(g_config_file)) {
+        notify("configuration", "could not set the executable permission bit for '%s'", g_config_file);
+        return;
+    }
+
+    if (!fork_exec(g_config_file, NULL)) {
+        notify("configuration", "failed to execute file '%s'", g_config_file);
+        return;
     }
 }
 
@@ -297,7 +301,7 @@ int main(int argc, char **argv)
     if (scripting_addition_is_installed()) {
         scripting_addition_load();
     } else {
-        notify("payload is not installed, some features will not work!", "scripting-addition");
+        notify("scripting-addition", "payload is not installed, some features will not work!");
     }
 
     exec_config_file();

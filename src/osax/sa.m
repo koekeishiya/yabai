@@ -213,7 +213,7 @@ static int scripting_addition_perform_validation(bool loaded)
     char version[MAXLEN] = {};
 
     if (!scripting_addition_request_handshake(version, &attrib)) {
-        notify("connection failed!", "scripting-addition");
+        notify("scripting-addition", "connection failed!");
         return PAYLOAD_STATUS_CON_ERROR;
     }
 
@@ -222,19 +222,17 @@ static int scripting_addition_perform_validation(bool loaded)
 
     if (!string_equals(version, OSAX_VERSION)) {
         if (loaded && is_latest_version_installed) {
-            notify("payload is outdated, restart Dock.app!", "scripting-addition");
+            notify("scripting-addition", "payload is outdated, restart Dock.app!");
         } else {
-            notify("payload is outdated, please reinstall!", "scripting-addition");
+            notify("scripting-addition", "payload is outdated, please reinstall!");
         }
 
         return PAYLOAD_STATUS_OUTDATED;
     } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
-        notify("payload doesn't support this macOS version!", "scripting-addition");
+        notify("scripting-addition", "payload doesn't support this macOS version!");
         return PAYLOAD_STATUS_NO_ATTRIB;
     } else {
-        char message[MAXLEN];
-        snprintf(message, sizeof(message), "payload v%s", version);
-        notify(message, "scripting-addition");
+        notify("scripting-addition", "payload v%s", version);
         return PAYLOAD_STATUS_SUCCESS;
     }
 }
@@ -380,19 +378,19 @@ int scripting_addition_load(void)
         scripting_addition_perform_validation(true);
         return 0;
     } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
-        notify("failed to inject payload into Dock.app!", "scripting-addition");
+        notify("scripting-addition", "failed to inject payload into Dock.app!");
         warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
         return 1;
     } else if (result == OSAX_PAYLOAD_NOT_FOUND) {
-        notify("payload could not be found!", "scripting-addition");
+        notify("scripting-addition", "payload could not be found!");
         warn("yabai: scripting-addition payload could not be found!\n");
         return 1;
     } else if (result == OSAX_PAYLOAD_UNAUTHORIZED) {
-        notify("could not load, make sure SIP is disabled!", "scripting-addition");
+        notify("scripting-addition", "could not load, make sure SIP is disabled!");
         warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
         return 1;
     } else {
-        notify("failed to load or inject payload into Dock.app!", "scripting-addition");
+        notify("scripting-addition", "failed to load or inject payload into Dock.app!");
         warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app! Error: %d\n", result);
         return 1;
     }
