@@ -1,3 +1,12 @@
+################################################################################
+# This is a sample file meant to familiarize you with the configuration syntax
+# of skhd.  This file is NOT meant to be used as a working default.  This file
+# in fact contains bindings which conflict with default MacOS shortcut
+# keybindings.  Please do not use this file as-is for your config.  
+#
+# You have been warned!
+################################################################################
+
 # open terminal
 cmd - return : /Applications/Kitty.app/Contents/MacOS/kitty --single-instance -d ~
 
