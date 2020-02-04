@@ -267,6 +267,8 @@ static bool scripting_addition_remove(void)
 
 int scripting_addition_install(void)
 {
+    umask(S_IWGRP | S_IWOTH);
+
     if ((scripting_addition_is_installed()) &&
         (!scripting_addition_remove())) {
         return 1;
