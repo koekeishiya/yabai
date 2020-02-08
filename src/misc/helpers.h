@@ -73,7 +73,7 @@ static inline char *string_escape_quote(char *s)
 
 static CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
 {
-    CFNumberRef *temp = malloc(sizeof(CFNumberRef) * count);
+    CFNumberRef temp[count];
 
     for (int i = 0; i < count; ++i) {
         temp[i] = CFNumberCreate(NULL, type, ((char *)values) + (size * i));
@@ -85,7 +85,6 @@ static CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFN
         CFRelease(temp[i]);
     }
 
-    free(temp);
     return result;
 }
 

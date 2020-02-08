@@ -586,24 +586,13 @@ uint64_t space_manager_active_space(void)
     return display_space_id(did);
 }
 
-static void space_manager_move_border_to_space(uint64_t sid, struct window *window)
-{
-    if (!window->border.id) return;
-    CFNumberRef border_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->border.id);
-    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&border_id_ref, 1, NULL);
-    SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
-    CFRelease(window_list_ref);
-    CFRelease(border_id_ref);
-}
-
 void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 {
-    space_manager_move_border_to_space(sid, window);
-    CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
-    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
+    uint32_t window_list[2] = { window->id, window->border.id };
+    int window_count = window->border.id ? 2 : 1;
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), window_count, kCFNumberSInt32Type);
     SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
     CFRelease(window_list_ref);
-    CFRelease(window_id_ref);
 }
 
 void space_manager_focus_space(uint64_t sid)

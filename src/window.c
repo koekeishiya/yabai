@@ -64,8 +64,7 @@ int window_display_id(struct window *window)
 uint64_t window_space(struct window *window)
 {
     uint64_t sid = 0;
-    CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
-    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
     if (!space_list_ref) goto err;
 
@@ -78,15 +77,13 @@ uint64_t window_space(struct window *window)
     CFRelease(space_list_ref);
 err:
     CFRelease(window_list_ref);
-    CFRelease(window_id_ref);
     return sid;
 }
 
 uint64_t *window_space_list(struct window *window, int *count)
 {
     uint64_t *space_list = NULL;
-    CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
-    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
     if (!space_list_ref) goto err;
 
@@ -103,7 +100,6 @@ out:
     CFRelease(space_list_ref);
 err:
     CFRelease(window_list_ref);
-    CFRelease(window_id_ref);
     return space_list;
 }
 
@@ -299,8 +295,7 @@ bool window_is_fullscreen(struct window *window)
 bool window_is_sticky(struct window *window)
 {
     bool result = false;
-    CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
-    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
     if (!space_list_ref) goto err;
 
@@ -309,7 +304,6 @@ bool window_is_sticky(struct window *window)
     CFRelease(space_list_ref);
 err:
     CFRelease(window_list_ref);
-    CFRelease(window_id_ref);
     return result;
 }
 

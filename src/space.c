@@ -27,8 +27,7 @@ uint32_t *space_window_list_for_connection(uint64_t sid, int cid, int *count)
     uint64_t set_tags = 0;
     uint64_t clear_tags = 0;
 
-    CFNumberRef space_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &sid);
-    CFArrayRef space_list_ref = CFArrayCreate(NULL, (void *)&space_id_ref, 1, NULL);
+    CFArrayRef space_list_ref = cfarray_of_cfnumbers(&sid, sizeof(uint64_t), 1, kCFNumberSInt64Type);
     CFArrayRef window_list_ref = SLSCopyWindowsWithOptionsAndTags(g_connection, cid, space_list_ref, 0x2, &set_tags, &clear_tags);
     if (!window_list_ref) goto err;
 
@@ -46,7 +45,6 @@ out:
     CFRelease(window_list_ref);
 err:
     CFRelease(space_list_ref);
-    CFRelease(space_id_ref);
     return window_list;
 }
 

@@ -24,8 +24,7 @@ static void border_window_ensure_same_space(struct window *window)
     bool found = false;
     uint64_t b_sid = 0;
 
-    CFNumberRef border_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->border.id);
-    CFArrayRef border_list_ref = CFArrayCreate(NULL, (void *)&border_id_ref, 1, NULL);
+    CFArrayRef border_list_ref = cfarray_of_cfnumbers(&window->border.id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CFArrayRef border_space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, border_list_ref);
 
     for (int i = 0; i < CFArrayGetCount(border_space_list_ref); ++i) {
@@ -43,7 +42,6 @@ static void border_window_ensure_same_space(struct window *window)
     }
 
     CFRelease(border_list_ref);
-    CFRelease(border_id_ref);
     CFRelease(border_space_list_ref);
 }
 
