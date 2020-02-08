@@ -606,32 +606,6 @@ void space_manager_move_window_to_space(uint64_t sid, struct window *window)
     CFRelease(window_id_ref);
 }
 
-void space_manager_remove_window_from_space(uint64_t sid, struct window *window)
-{
-    CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
-    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
-    CFNumberRef space_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &sid);
-    CFArrayRef space_list_ref = CFArrayCreate(NULL, (void *)&space_id_ref, 1, NULL);
-    SLSRemoveWindowsFromSpaces(g_connection, window_list_ref, space_list_ref);
-    CFRelease(space_list_ref);
-    CFRelease(space_id_ref);
-    CFRelease(window_list_ref);
-    CFRelease(window_id_ref);
-}
-
-void space_manager_add_window_to_space(uint64_t sid, struct window *window)
-{
-    CFNumberRef window_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &window->id);
-    CFArrayRef window_list_ref = CFArrayCreate(NULL, (void *)&window_id_ref, 1, NULL);
-    CFNumberRef space_id_ref = CFNumberCreate(NULL, kCFNumberSInt32Type, &sid);
-    CFArrayRef space_list_ref = CFArrayCreate(NULL, (void *)&space_id_ref, 1, NULL);
-    SLSAddWindowsToSpaces(g_connection, window_list_ref, space_list_ref);
-    CFRelease(space_list_ref);
-    CFRelease(space_id_ref);
-    CFRelease(window_list_ref);
-    CFRelease(window_id_ref);
-}
-
 void space_manager_focus_space(uint64_t sid)
 {
     int sockfd;

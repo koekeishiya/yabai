@@ -6,8 +6,6 @@ extern CFArrayRef SLSCopyManagedDisplaySpaces(int cid);
 extern CGError SLSProcessAssignToSpace(int cid, pid_t pid, uint64_t sid);
 extern CGError SLSProcessAssignToAllSpaces(int cid, pid_t pid);
 extern void SLSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
-extern void SLSRemoveWindowsFromSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
-extern void SLSAddWindowsToSpaces(int cid, CFArrayRef window_list, CFArrayRef space_list);
 extern CGError CoreDockSendNotification(CFStringRef notification, int unknown);
 
 struct space_label
@@ -85,8 +83,6 @@ void space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t s
 void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees);
 void space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis);
 void space_manager_move_window_to_space(uint64_t sid, struct window *window);
-void space_manager_remove_window_from_space(uint64_t sid, struct window *window);
-void space_manager_add_window_to_space(uint64_t sid, struct window *window);
 void space_manager_focus_space(uint64_t sid);
 void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus);
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did);
