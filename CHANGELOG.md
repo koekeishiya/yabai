@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Don't add window to the window tree when moved to a different space when the window is minimized (required by some applications like Chrome..) [#382](https://github.com/koekeishiya/yabai/issues/382)
 - Config file is no longer required for yabai to start [#393](https://github.com/koekeishiya/yabai/issues/393)
 - Clear umask before trying to install scripting addition [#400](https://github.com/koekeishiya/yabai/issues/400)
+- Update scripting addition to work with macos Catalina 10.15.4 Beta [#404](https://github.com/koekeishiya/yabai/issues/404)
 
 ## [2.2.2] - 2020-01-20
 ### Changed
