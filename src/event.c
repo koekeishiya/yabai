@@ -1112,8 +1112,12 @@ end:;
     }
 
 out:
-    g_mouse_state.current_action = MOUSE_MODE_NONE;
     g_mouse_state.window = NULL;
+
+    if (g_mouse_state.current_action != MOUSE_MODE_NONE) {
+        g_mouse_state.current_action = MOUSE_MODE_NONE;
+        return EVENT_MOUSE_IGNORE;
+    }
 
     return EVENT_SUCCESS;
 }

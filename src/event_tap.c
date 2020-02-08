@@ -28,9 +28,17 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     } break;
     case kCGEventLeftMouseUp:
     case kCGEventRightMouseUp: {
+        volatile int status = EVENT_QUEUED;
+        volatile int result = EVENT_SUCCESS;
+
         struct event *event;
         event_create(event, MOUSE_UP, (void *) CFRetain(cgevent));
+        event->status = &status;
+        event->result = &result;
         event_loop_post(&g_event_loop, event);
+        while (status == EVENT_QUEUED);
+
+        if (result == EVENT_MOUSE_IGNORE) return NULL;
     } break;
     case kCGEventLeftMouseDragged:
     case kCGEventRightMouseDragged: {
