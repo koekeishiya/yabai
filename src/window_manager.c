@@ -1054,7 +1054,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
                            (!window_is_standard(window)) ||
                            (!window_can_move(window)) ||
                            (window_is_sticky(window)) ||
-                           (window_is_undersized(window))) {
+                           (!window_can_resize(window) && window_is_undersized(window))) {
                     window_manager_make_children_floating(wm, window, true);
                     window_manager_make_floating(wm, window->id, true);
                     window->is_floating = true;

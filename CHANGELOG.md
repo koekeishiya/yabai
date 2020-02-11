@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Clear umask before trying to install scripting addition [#400](https://github.com/koekeishiya/yabai/issues/400)
 - Update scripting addition to work with macos Catalina 10.15.4 Beta [#404](https://github.com/koekeishiya/yabai/issues/404)
 - Don't forward MOUSE_UP event to the target application if we consumed the corresponding MOUSE_DOWN event [#376](https://github.com/koekeishiya/yabai/issues/376)
+- Only float small windows if they are NOT resizable [#179](https://github.com/koekeishiya/yabai/issues/179)
 
 ## [2.2.2] - 2020-01-20
 ### Changed
