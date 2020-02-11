@@ -1,8 +1,5 @@
 #include "event_loop.h"
 
-#define QUEUE_POOL_SIZE KILOBYTES(16)
-#define QUEUE_MAX_COUNT ((QUEUE_POOL_SIZE) / (sizeof(struct queue_item)))
-
 static bool queue_init(struct queue *queue)
 {
     if (!memory_pool_init(&queue->pool, QUEUE_POOL_SIZE)) return false;
@@ -80,7 +77,7 @@ static void *event_loop_run(void *context)
 
             if (event->status) *event->status = EVENT_PROCESSED;
 
-            event_destroy(event);
+            event_destroy(event_loop, event);
         } else {
             sem_wait(event_loop->semaphore);
         }
@@ -99,7 +96,11 @@ void event_loop_post(struct event_loop *event_loop, struct event *event)
 bool event_loop_init(struct event_loop *event_loop)
 {
     if (!queue_init(&event_loop->queue)) return false;
+    if (!memory_pool_init(&event_loop->pool, EVENT_POOL_SIZE)) return false;
     event_loop->is_running = false;
+#ifdef DEBUG
+    event_loop->count = 0;
+#endif
     event_loop->semaphore = sem_open("yabai_event_loop_semaphore", O_CREAT, 0600, 0);
     sem_unlink("yabai_event_loop_semaphore");
     return event_loop->semaphore != SEM_FAILED;

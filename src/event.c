@@ -191,7 +191,39 @@ enum event_type event_type_from_string(const char *str)
     return EVENT_TYPE_UNKNOWN;
 }
 
-void event_destroy(struct event *event)
+struct event *event_create(struct event_loop *event_loop, enum event_type type, void *context)
+{
+    struct event *event = memory_pool_push(&event_loop->pool, struct event);
+    event->type = type;
+    event->context = context;
+    event->param1 = 0;
+    event->param2 = 0;
+    event->status = 0;
+    event->result = 0;
+#ifdef DEBUG
+    uint64_t count = __sync_add_and_fetch(&event_loop->count, 1);
+    assert(count > 0 && count < EVENT_MAX_COUNT);
+#endif
+    return event;
+}
+
+struct event *event_create_p2(struct event_loop *event_loop, enum event_type type, void *context, int param1, void *param2)
+{
+    struct event *event = memory_pool_push(&event_loop->pool, struct event);
+    event->type = type;
+    event->context = context;
+    event->param1 = param1;
+    event->param2 = param2;
+    event->status = 0;
+    event->result = 0;
+#ifdef DEBUG
+    uint64_t count = __sync_add_and_fetch(&event_loop->count, 1);
+    assert(count > 0 && count < EVENT_MAX_COUNT);
+#endif
+    return event;
+}
+
+void event_destroy(struct event_loop *event_loop, struct event *event)
 {
     switch (event->type) {
     default: break;
@@ -210,7 +242,10 @@ void event_destroy(struct event *event)
     } break;
     }
 
-    free(event);
+#ifdef DEBUG
+    uint64_t count = __sync_sub_and_fetch(&event_loop->count, 1);
+    assert(count >= 0 && count < EVENT_MAX_COUNT);
+#endif
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
@@ -252,8 +287,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 
 end:
         if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
-            struct event *event;
-            event_create(event, APPLICATION_FRONT_SWITCHED, process);
+            struct event *event = event_create(&g_event_loop, APPLICATION_FRONT_SWITCHED, process);
             event_loop_post(&g_event_loop, event);
             window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
         }
@@ -267,8 +301,7 @@ end:
 
         if (retry_ax) {
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                struct event *event;
-                event_create(event, APPLICATION_LAUNCHED, process);
+                struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
                 event_loop_post(&g_event_loop, event);
             });
         }
@@ -331,12 +364,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
         return EVENT_FAILURE;
     }
 
-    struct event *de_event;
-    event_create(de_event, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid);
+    struct event *de_event = event_create(&g_event_loop, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid);
     event_loop_post(&g_event_loop, de_event);
 
-    struct event *re_event;
-    event_create(re_event, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid);
+    struct event *re_event = event_create(&g_event_loop, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid);
     event_loop_post(&g_event_loop, re_event);
 
     debug("%s: %s\n", __FUNCTION__, process->name);
@@ -524,8 +555,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         }
 
         if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
-            struct event *event;
-            event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
+            struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
             event_loop_post(&g_event_loop, event);
             window_manager_remove_lost_focused_event(&g_window_manager, window->id);
         }
@@ -759,8 +789,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
     }
 
     if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
-        struct event *event;
-        event_create(event, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
+        struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
         event_loop_post(&g_event_loop, event);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
     }
@@ -1227,8 +1256,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
     }
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        struct event *event;
-        event_create(event, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
+        struct event *event = event_create(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
         event_loop_post(&g_event_loop, event);
     });
 
@@ -1267,14 +1295,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
 
     if (found) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            struct event *event;
-            event_create(event, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
+            struct event *event = event_create(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
             event_loop_post(&g_event_loop, event);
         });
     } else {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.0f), dispatch_get_main_queue(), ^{
-            struct event *event;
-            event_create(event, MISSION_CONTROL_EXIT, NULL);
+            struct event *event = event_create(&g_event_loop, MISSION_CONTROL_EXIT, NULL);
             event_loop_post(&g_event_loop, event);
         });
     }

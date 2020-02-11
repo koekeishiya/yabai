@@ -39,8 +39,8 @@
 #include "osax/sa_payload.c"
 #include "osax/sa.m"
 
-#include "event.h"
 #include "event_loop.h"
+#include "event.h"
 #include "event_tap.h"
 #include "workspace.h"
 #include "mouse.h"
@@ -58,8 +58,8 @@
 #include "window_manager.h"
 #include "bar.h"
 
-#include "event.c"
 #include "event_loop.c"
+#include "event.c"
 #include "event_tap.c"
 #include "workspace.m"
 #include "rule.c"

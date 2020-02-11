@@ -1,18 +1,17 @@
 #include "bar.h"
 
+extern struct event_loop g_event_loop;
 extern struct space_manager g_space_manager;
 
 static POWER_CALLBACK(power_handler)
 {
-    struct event *event;
-    event_create(event, BAR_REFRESH, NULL);
+    struct event *event = event_create(&g_event_loop, BAR_REFRESH, NULL);
     event_loop_post(&g_event_loop, event);
 }
 
 static TIMER_CALLBACK(timer_handler)
 {
-    struct event *event;
-    event_create(event, BAR_REFRESH, NULL);
+    struct event *event = event_create(&g_event_loop, BAR_REFRESH, NULL);
     event_loop_post(&g_event_loop, event);
 }
 

@@ -1977,13 +1977,11 @@ void handle_message(FILE *rsp, char *message)
 
 static SOCKET_DAEMON_HANDLER(message_handler)
 {
-    struct event *event;
-    volatile int status = EVENT_QUEUED;
-
     FILE *rsp = fdopen(sockfd, "w");
     if (!rsp) goto fderr;
 
-    event_create_p2(event, DAEMON_MESSAGE, message, length, rsp);
+    volatile int status = EVENT_QUEUED;
+    struct event *event = event_create_p2(&g_event_loop, DAEMON_MESSAGE, message, length, rsp);
     event->status = &status;
     event_loop_post(&g_event_loop, event);
     while (status == EVENT_QUEUED);

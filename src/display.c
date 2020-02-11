@@ -6,21 +6,19 @@ extern int g_connection;
 
 static DISPLAY_EVENT_HANDLER(display_handler)
 {
-    struct event *event;
-
     if (flags & kCGDisplayAddFlag) {
-        event_create(event, DISPLAY_ADDED, (void *)(intptr_t) did);
+        struct event *event = event_create(&g_event_loop, DISPLAY_ADDED, (void *)(intptr_t) did);
+        event_loop_post(&g_event_loop, event);
     } else if (flags & kCGDisplayRemoveFlag) {
-        event_create(event, DISPLAY_REMOVED, (void *)(intptr_t) did);
+        struct event *event = event_create(&g_event_loop, DISPLAY_REMOVED, (void *)(intptr_t) did);
+        event_loop_post(&g_event_loop, event);
     } else if (flags & kCGDisplayMovedFlag) {
-        event_create(event, DISPLAY_MOVED, (void *)(intptr_t) did);
+        struct event *event = event_create(&g_event_loop, DISPLAY_MOVED, (void *)(intptr_t) did);
+        event_loop_post(&g_event_loop, event);
     } else if (flags & kCGDisplayDesktopShapeChangedFlag) {
-        event_create(event, DISPLAY_RESIZED, (void *)(intptr_t) did);
-    } else {
-        event = NULL;
+        struct event *event = event_create(&g_event_loop, DISPLAY_RESIZED, (void *)(intptr_t) did);
+        event_loop_post(&g_event_loop, event);
     }
-
-    if (event) event_loop_post(&g_event_loop, event);
 }
 
 void display_serialize(FILE *rsp, uint32_t did)

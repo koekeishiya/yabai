@@ -17,8 +17,7 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         volatile int status = EVENT_QUEUED;
         volatile int result = EVENT_SUCCESS;
 
-        struct event *event;
-        event_create(event, MOUSE_DOWN, (void *) CFRetain(cgevent));
+        struct event *event = event_create(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent));
         event->status = &status;
         event->result = &result;
         event_loop_post(&g_event_loop, event);
@@ -31,8 +30,7 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         volatile int status = EVENT_QUEUED;
         volatile int result = EVENT_SUCCESS;
 
-        struct event *event;
-        event_create(event, MOUSE_UP, (void *) CFRetain(cgevent));
+        struct event *event = event_create(&g_event_loop, MOUSE_UP, (void *) CFRetain(cgevent));
         event->status = &status;
         event->result = &result;
         event_loop_post(&g_event_loop, event);
@@ -42,13 +40,11 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     } break;
     case kCGEventLeftMouseDragged:
     case kCGEventRightMouseDragged: {
-        struct event *event;
-        event_create(event, MOUSE_DRAGGED, (void *) CFRetain(cgevent));
+        struct event *event = event_create(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(cgevent));
         event_loop_post(&g_event_loop, event);
     } break;
     case kCGEventMouseMoved: {
-        struct event *event;
-        event_create(event, MOUSE_MOVED, (void *) CFRetain(cgevent));
+        struct event *event = event_create(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(cgevent));
         event_loop_post(&g_event_loop, event);
     } break;
     }

@@ -1,6 +1,12 @@
 #ifndef EVENT_LOOP_H
 #define EVENT_LOOP_H
 
+#define EVENT_POOL_SIZE KILOBYTES(60)
+#define EVENT_MAX_COUNT ((EVENT_POOL_SIZE) / (sizeof(struct event)))
+
+#define QUEUE_POOL_SIZE KILOBYTES(16)
+#define QUEUE_MAX_COUNT ((QUEUE_POOL_SIZE) / (sizeof(struct queue_item)))
+
 struct queue_item
 {
     struct event *data;
@@ -23,6 +29,10 @@ struct event_loop
     pthread_t thread;
     sem_t *semaphore;
     struct queue queue;
+    struct memory_pool pool;
+#ifdef DEBUG
+    volatile uint64_t count;
+#endif
 };
 
 bool event_loop_init(struct event_loop *event_loop);

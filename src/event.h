@@ -192,33 +192,14 @@ struct signal
     char *label;
 };
 
-#define event_create(e, t, d)\
-    do {\
-        e = malloc(sizeof(struct event));\
-        e->type    = t;\
-        e->context = d;\
-        e->param1  = 0;\
-        e->param2  = 0;\
-        e->status  = 0;\
-        e->result  = 0;\
-    } while (0)
-
-#define event_create_p2(e, t, d, p1, p2)\
-    do {\
-        e = malloc(sizeof(struct event));\
-        e->type    = t;\
-        e->context = d;\
-        e->param1  = p1;\
-        e->param2  = p2;\
-        e->status  = 0;\
-        e->result  = 0;\
-    } while (0)
+struct event *event_create(struct event_loop *event_loop, enum event_type type, void *context);
+struct event *event_create_p2(struct event_loop *event_loop, enum event_type type, void *context, int param1, void *param2);
+void event_destroy(struct event_loop *event_loop, struct event *event);
+enum event_type event_type_from_string(const char *str);
 
 void event_signal_transmit(void *context, enum event_type type);
 void event_signal_add(enum event_type type, struct signal *signal);
 void event_signal_destroy(struct signal *signal);
 bool event_signal_remove(char *label);
-void event_destroy(struct event *event);
-enum event_type event_type_from_string(const char *str);
 
 #endif

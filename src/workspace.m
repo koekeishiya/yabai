@@ -78,43 +78,37 @@ void workspace_event_handler_end(void *context)
 
 - (void)didWake:(NSNotification *)notification
 {
-    struct event *event;
-    event_create(event, SYSTEM_WOKE, NULL);
+    struct event *event = event_create(&g_event_loop, SYSTEM_WOKE, NULL);
     event_loop_post(&g_event_loop, event);
 }
 
 - (void)didRestartDock:(NSNotification *)notification
 {
-    struct event *event;
-    event_create(event, DOCK_DID_RESTART, NULL);
+    struct event *event = event_create(&g_event_loop, DOCK_DID_RESTART, NULL);
     event_loop_post(&g_event_loop, event);
 }
 
 - (void)didChangeMenuBarHiding:(NSNotification *)notification
 {
-    struct event *event;
-    event_create(event, MENU_BAR_HIDDEN_CHANGED, NULL);
+    struct event *event = event_create(&g_event_loop, MENU_BAR_HIDDEN_CHANGED, NULL);
     event_loop_post(&g_event_loop, event);
 }
 
 - (void)didChangeDockPref:(NSNotification *)notification
 {
-    struct event *event;
-    event_create(event, DOCK_DID_CHANGE_PREF, NULL);
+    struct event *event = event_create(&g_event_loop, DOCK_DID_CHANGE_PREF, NULL);
     event_loop_post(&g_event_loop, event);
 }
 
 - (void)activeDisplayDidChange:(NSNotification *)notification
 {
-    struct event *event;
-    event_create(event, DISPLAY_CHANGED, NULL);
+    struct event *event = event_create(&g_event_loop, DISPLAY_CHANGED, NULL);
     event_loop_post(&g_event_loop, event);
 }
 
 - (void)activeSpaceDidChange:(NSNotification *)notification
 {
-    struct event *event;
-    event_create(event, SPACE_CHANGED, NULL);
+    struct event *event = event_create(&g_event_loop, SPACE_CHANGED, NULL);
     event_loop_post(&g_event_loop, event);
 }
 
@@ -122,8 +116,7 @@ void workspace_event_handler_end(void *context)
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
 
-    struct event *event;
-    event_create(event, APPLICATION_HIDDEN, (void *)(intptr_t) pid);
+    struct event *event = event_create(&g_event_loop, APPLICATION_HIDDEN, (void *)(intptr_t) pid);
     event_loop_post(&g_event_loop, event);
 }
 
@@ -131,8 +124,7 @@ void workspace_event_handler_end(void *context)
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
 
-    struct event *event;
-    event_create(event, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
+    struct event *event = event_create(&g_event_loop, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
     event_loop_post(&g_event_loop, event);
 }
 
