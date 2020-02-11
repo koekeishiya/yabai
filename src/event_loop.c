@@ -1,12 +1,19 @@
 #include "event_loop.h"
 
+#define QUEUE_POOL_SIZE KILOBYTES(16)
+#define QUEUE_MAX_COUNT ((QUEUE_POOL_SIZE) / (sizeof(struct queue_item)))
+
 static void
 queue_init(struct queue *queue)
 {
-    queue->head = malloc(sizeof(struct queue_item));
+    memory_pool_init(&queue->pool, QUEUE_POOL_SIZE);
+    queue->head = memory_pool_push(&queue->pool, struct queue_item);
     queue->head->data = NULL;
     queue->head->next = NULL;
     queue->tail = queue->head;
+#ifdef DEBUG
+    queue->count = 0;
+#endif
 };
 
 static void
@@ -15,7 +22,7 @@ queue_push(struct queue *queue, struct event *event)
     bool success;
     struct queue_item *tail, *new_tail;
 
-    new_tail = malloc(sizeof(struct queue_item));
+    new_tail = memory_pool_push(&queue->pool, struct queue_item);
     new_tail->data = event;
     new_tail->next = NULL;
     __asm__ __volatile__ ("" ::: "memory");
@@ -23,29 +30,32 @@ queue_push(struct queue *queue, struct event *event)
     do {
         tail = queue->tail;
         success = __sync_bool_compare_and_swap(&tail->next, NULL, new_tail);
-        if (!success) {
-            __sync_bool_compare_and_swap(&queue->tail, tail, tail->next);
-        }
+        if (!success) __sync_bool_compare_and_swap(&queue->tail, tail, tail->next);
     } while (!success);
     __sync_bool_compare_and_swap(&queue->tail, tail, new_tail);
+
+#ifdef DEBUG
+    uint64_t count = __sync_add_and_fetch(&queue->count, 1);
+    assert(count < QUEUE_MAX_COUNT);
+#endif
 }
 
 static struct event *
 queue_pop(struct queue *queue)
 {
-    struct queue_item *head, *next;
+    struct queue_item *head;
 
     do {
         head = queue->head;
-        if (!head->next) {
-            return NULL;
-        }
+        if (!head->next) return NULL;
     } while (!__sync_bool_compare_and_swap(&queue->head, head, head->next));
 
-    next = head->next;
-    free(head);
+#ifdef DEBUG
+    uint64_t count = __sync_sub_and_fetch(&queue->count, 1);
+    assert(count < QUEUE_MAX_COUNT);
+#endif
 
-    return next->data;
+    return head->next->data;
 }
 
 static void *
@@ -92,7 +102,7 @@ void event_loop_post(struct event_loop *event_loop, struct event *event)
 bool event_loop_init(struct event_loop *event_loop)
 {
     queue_init(&event_loop->queue);
-    event_loop->is_running = 0;
+    event_loop->is_running = false;
     event_loop->semaphore = sem_open("yabai_event_loop_semaphore", O_CREAT, 0600, 0);
     sem_unlink("yabai_event_loop_semaphore");
     return event_loop->semaphore != SEM_FAILED;

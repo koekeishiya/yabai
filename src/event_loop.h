@@ -9,8 +9,12 @@ struct queue_item
 
 struct queue
 {
+    struct memory_pool pool;
     struct queue_item *head;
     struct queue_item *tail;
+#ifdef DEBUG
+    volatile uint64_t count;
+#endif
 };
 
 struct event_loop
