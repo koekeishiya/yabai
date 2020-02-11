@@ -61,6 +61,31 @@ void process_destroy(struct process *process)
     free(process);
 }
 
+static bool process_is_observable(struct process *process)
+{
+    if (process->lsbackground) {
+        debug("%s: %s was marked as background only! ignoring..\n", __FUNCTION__, process->name);
+        return false;
+    }
+
+    if (process->lsuielement) {
+        debug("%s: %s was marked as agent! ignoring..\n", __FUNCTION__, process->name);
+        return false;
+    }
+
+    if (process->background) {
+        debug("%s: %s was marked as daemon! ignoring..\n", __FUNCTION__, process->name);
+        return false;
+    }
+
+    if (process->xpc) {
+        debug("%s: %s was marked as xpc service! ignoring..\n", __FUNCTION__, process->name);
+        return false;
+    }
+
+    return true;
+}
+
 static PROCESS_EVENT_HANDLER(process_handler)
 {
     struct process_manager *pm = (struct process_manager *) user_data;
@@ -75,35 +100,14 @@ static PROCESS_EVENT_HANDLER(process_handler)
         struct process *process = process_create(psn);
         if (!process) return noErr;
 
-        if (process->lsbackground) {
-            debug("%s: %s was marked as background only! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
+        if (process_is_observable(process)) {
+            struct event *event;
+            event_create(event, APPLICATION_LAUNCHED, process);
+            event_loop_post(&g_event_loop, event);
+            process_manager_add_process(pm, process);
+        } else {
+            process_destroy(process);
         }
-
-        if (process->lsuielement) {
-            debug("%s: %s was marked as agent! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
-        }
-
-        if (process->background) {
-            debug("%s: %s was marked as daemon! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
-        }
-
-        if (process->xpc) {
-            debug("%s: %s was marked as xpc service! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
-        }
-
-        struct event *event;
-        event_create(event, APPLICATION_LAUNCHED, process);
-        event_loop_post(&g_event_loop, event);
-
-        process_manager_add_process(pm, process);
-        goto out;
-ign:
-        process_destroy(process);
-out:;
     } break;
     case kEventAppTerminated: {
         struct process *process = process_manager_find_process(pm, &psn);
@@ -137,36 +141,16 @@ process_manager_add_running_processes(struct process_manager *pm)
         struct process *process = process_create(psn);
         if (!process) continue;
 
-        if (process->lsbackground) {
-            debug("%s: %s was marked as background only! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
-        }
+        if (process_is_observable(process)) {
+            if (string_equals(process->name, "Finder")) {
+                debug("%s: %s was found! caching psn..\n", __FUNCTION__, process->name);
+                pm->finder_psn = psn;
+            }
 
-        if (process->lsuielement) {
-            debug("%s: %s was marked as agent! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
+            process_manager_add_process(pm, process);
+        } else {
+            process_destroy(process);
         }
-
-        if (process->background) {
-            debug("%s: %s was marked as daemon! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
-        }
-
-        if (process->xpc) {
-            debug("%s: %s was marked as xpc service! ignoring..\n", __FUNCTION__, process->name);
-            goto ign;
-        }
-
-        if (string_equals(process->name, "Finder")) {
-            debug("%s: %s was found! caching psn..\n", __FUNCTION__, process->name);
-            pm->finder_psn = psn;
-        }
-
-        process_manager_add_process(pm, process);
-        goto out;
-ign:
-        process_destroy(process);
-out:;
     }
 }
 #pragma clang diagnostic pop
