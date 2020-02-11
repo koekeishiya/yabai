@@ -3,10 +3,9 @@
 #define QUEUE_POOL_SIZE KILOBYTES(16)
 #define QUEUE_MAX_COUNT ((QUEUE_POOL_SIZE) / (sizeof(struct queue_item)))
 
-static void
-queue_init(struct queue *queue)
+static bool queue_init(struct queue *queue)
 {
-    memory_pool_init(&queue->pool, QUEUE_POOL_SIZE);
+    if (!memory_pool_init(&queue->pool, QUEUE_POOL_SIZE)) return false;
     queue->head = memory_pool_push(&queue->pool, struct queue_item);
     queue->head->data = NULL;
     queue->head->next = NULL;
@@ -14,10 +13,10 @@ queue_init(struct queue *queue)
 #ifdef DEBUG
     queue->count = 0;
 #endif
+    return true;
 };
 
-static void
-queue_push(struct queue *queue, struct event *event)
+static void queue_push(struct queue *queue, struct event *event)
 {
     bool success;
     struct queue_item *tail, *new_tail;
@@ -36,12 +35,11 @@ queue_push(struct queue *queue, struct event *event)
 
 #ifdef DEBUG
     uint64_t count = __sync_add_and_fetch(&queue->count, 1);
-    assert(count < QUEUE_MAX_COUNT);
+    assert(count > 0 && count < QUEUE_MAX_COUNT);
 #endif
 }
 
-static struct event *
-queue_pop(struct queue *queue)
+static struct event *queue_pop(struct queue *queue)
 {
     struct queue_item *head;
 
@@ -52,14 +50,13 @@ queue_pop(struct queue *queue)
 
 #ifdef DEBUG
     uint64_t count = __sync_sub_and_fetch(&queue->count, 1);
-    assert(count < QUEUE_MAX_COUNT);
+    assert(count >= 0 && count < QUEUE_MAX_COUNT);
 #endif
 
     return head->next->data;
 }
 
-static void *
-event_loop_run(void *context)
+static void *event_loop_run(void *context)
 {
     struct event_loop *event_loop = (struct event_loop *) context;
     struct queue *queue = (struct queue *) &event_loop->queue;
@@ -101,7 +98,7 @@ void event_loop_post(struct event_loop *event_loop, struct event *event)
 
 bool event_loop_init(struct event_loop *event_loop)
 {
-    queue_init(&event_loop->queue);
+    if (!queue_init(&event_loop->queue)) return false;
     event_loop->is_running = false;
     event_loop->semaphore = sem_open("yabai_event_loop_semaphore", O_CREAT, 0600, 0);
     sem_unlink("yabai_event_loop_semaphore");

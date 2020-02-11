@@ -12,11 +12,12 @@ struct memory_pool
     volatile uint64_t used;
 };
 
-void memory_pool_init(struct memory_pool *pool, uint64_t size)
+bool memory_pool_init(struct memory_pool *pool, uint64_t size)
 {
     pool->used = 0;
     pool->size = size;
     pool->memory = mmap(0, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    return pool->memory != NULL;
 }
 
 #define memory_pool_push(p, t) memory_pool_push_size(p, sizeof(t))
