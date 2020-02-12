@@ -1762,8 +1762,10 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     rule.follow_space = true;
                 }
 
-                if (sscanf(value, "%d", &rule.display) != 1) {
-                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                struct selector selector = parse_display_selector(rsp, &value, display_manager_active_display_id());
+                if (selector.did_parse && selector.did) {
+                    rule.did = selector.did;
+                } else {
                     did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_SPACE)) {
@@ -1772,8 +1774,10 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     rule.follow_space = true;
                 }
 
-                if (sscanf(value, "%d", &rule.space) != 1) {
-                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                struct selector selector = parse_space_selector(rsp, &value, space_manager_active_space());
+                if (selector.did_parse && selector.sid) {
+                    rule.sid = selector.sid;
+                } else {
                     did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_GRID)) {

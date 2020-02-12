@@ -13,8 +13,8 @@ struct rule
     bool app_regex_valid;
     bool title_regex_valid;
     bool follow_space;
-    int display;
-    int space;
+    uint32_t did;
+    uint64_t sid;
     float alpha;
     int manage;
     int sticky;

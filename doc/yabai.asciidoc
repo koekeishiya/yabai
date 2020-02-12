@@ -380,10 +380,10 @@ ARGUMENT
 *title='<REGEX>'*::
     Title of window.
 
-*display='[^]<arrangement index>'*::
+*display='[^]<DISPLAY_SEL>'*::
     Send window to display. If '^' is present, follow focus.
 
-*space='[^]<mission-control index>'*::
+*space='[^]<SPACE_SEL>'*::
     Send window to space. If '^' is present, follow focus.
 
 *opacity='<FLOAT_SEL>'*::

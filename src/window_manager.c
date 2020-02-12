@@ -138,16 +138,10 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window))      == REGEX_MATCH_NO) return;
 
     if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
-        if (rule->display) {
-            uint32_t did = display_manager_arrangement_display_id(rule->display);
-            if (did) {
-                window_manager_perform_space_assignment_rule(sm, wm, window, rule, display_space_id(did));
-            }
-        } else if (rule->space) {
-            uint64_t sid = space_manager_mission_control_space(rule->space);
-            if (sid) {
-                window_manager_perform_space_assignment_rule(sm, wm, window, rule, sid);
-            }
+        if (rule->did) {
+            window_manager_perform_space_assignment_rule(sm, wm, window, rule, display_space_id(rule->did));
+        } else if (rule->sid) {
+            window_manager_perform_space_assignment_rule(sm, wm, window, rule, rule->sid);
         }
     }
 

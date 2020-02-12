@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Allow use of *DISPLAY_SEL* and *SPACE_SEL* for specifying display and space in rules [#378](https://github.com/koekeishiya/yabai/issues/378)
 
 ## [2.2.3] - 2020-02-12
 ### Changed
