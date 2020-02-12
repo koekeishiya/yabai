@@ -11,43 +11,6 @@ extern struct bar g_bar;
 extern bool g_mission_control_active;
 extern int g_connection;
 
-static bool event_signal_filter(struct signal *signal, enum event_type type, struct signal_args *args)
-{
-    switch (type) {
-    default: return false;
-
-    case APPLICATION_LAUNCHED:
-    case APPLICATION_TERMINATED: {
-        struct process *process = args->entity;
-        if (!process) return true;
-
-        return regex_match(signal->app_regex_valid, &signal->app_regex, process->name) == REGEX_MATCH_NO;
-    } break;
-    case APPLICATION_ACTIVATED:
-    case APPLICATION_DEACTIVATED:
-    case APPLICATION_VISIBLE:
-    case APPLICATION_HIDDEN: {
-        struct application *application = args->entity;
-        if (!application) return true;
-
-        return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) == REGEX_MATCH_NO;
-    } break;
-    case WINDOW_CREATED:
-    case WINDOW_FOCUSED:
-    case WINDOW_MOVED:
-    case WINDOW_RESIZED:
-    case WINDOW_MINIMIZED:
-    case WINDOW_DEMINIMIZED:
-    case WINDOW_TITLE_CHANGED: {
-        struct window *window = args->entity;
-        if (!window) return true;
-
-        return regex_match(signal->app_regex_valid,   &signal->app_regex,   window->application->name) == REGEX_MATCH_NO ||
-               regex_match(signal->title_regex_valid, &signal->title_regex, window_title(window))      == REGEX_MATCH_NO;
-    } break;
-    }
-}
-
 static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
 {
     switch (type) {
@@ -81,18 +44,24 @@ static void event_signal_populate_args(void *context, enum event_type type, stru
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_WINDOW_ID");
         snprintf(args->value[0], sizeof(args->value[0]), "%d", wid);
         args->entity = window_manager_find_window(&g_window_manager, wid);
+        args->param1 = window_title(args->entity);
+    } break;
+    case WINDOW_DESTROYED: {
+        uint32_t wid = (uint32_t)(uintptr_t) context;
+        snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_WINDOW_ID");
+        snprintf(args->value[0], sizeof(args->value[0]), "%d", wid);
     } break;
     case WINDOW_FOCUSED:
     case WINDOW_MOVED:
     case WINDOW_RESIZED:
     case WINDOW_MINIMIZED:
     case WINDOW_DEMINIMIZED:
-    case WINDOW_TITLE_CHANGED:
-    case WINDOW_DESTROYED: {
+    case WINDOW_TITLE_CHANGED: {
         uint32_t wid = (uint32_t)(uintptr_t) context;
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_WINDOW_ID");
         snprintf(args->value[0], sizeof(args->value[0]), "%d", wid);
         args->entity = window_manager_find_window(&g_window_manager, wid);
+        args->param1 = window_title(args->entity);
     } break;
     case SPACE_CHANGED: {
         snprintf(args->name[0], sizeof(args->name[0]), "%s", "YABAI_SPACE_ID");
@@ -132,6 +101,60 @@ static void event_signal_populate_args(void *context, enum event_type type, stru
     }
 }
 
+static void event_signal_destroy_args(enum event_type type, struct signal_args *args)
+{
+    switch (type) {
+    default: break;
+
+    case WINDOW_CREATED:
+    case WINDOW_FOCUSED:
+    case WINDOW_MOVED:
+    case WINDOW_RESIZED:
+    case WINDOW_MINIMIZED:
+    case WINDOW_DEMINIMIZED:
+    case WINDOW_TITLE_CHANGED: {
+        if (args->param1) free(args->param1);
+    } break;
+    }
+}
+
+static bool event_signal_filter(struct signal *signal, enum event_type type, struct signal_args *args)
+{
+    switch (type) {
+    default: return false;
+
+    case APPLICATION_LAUNCHED:
+    case APPLICATION_TERMINATED: {
+        struct process *process = args->entity;
+        if (!process) return true;
+
+        return regex_match(signal->app_regex_valid, &signal->app_regex, process->name) == REGEX_MATCH_NO;
+    } break;
+    case APPLICATION_ACTIVATED:
+    case APPLICATION_DEACTIVATED:
+    case APPLICATION_VISIBLE:
+    case APPLICATION_HIDDEN: {
+        struct application *application = args->entity;
+        if (!application) return true;
+
+        return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) == REGEX_MATCH_NO;
+    } break;
+    case WINDOW_CREATED:
+    case WINDOW_FOCUSED:
+    case WINDOW_MOVED:
+    case WINDOW_RESIZED:
+    case WINDOW_MINIMIZED:
+    case WINDOW_DEMINIMIZED:
+    case WINDOW_TITLE_CHANGED: {
+        struct window *window = args->entity;
+        if (!window) return true;
+
+        return regex_match(signal->app_regex_valid,   &signal->app_regex,   window->application->name) == REGEX_MATCH_NO ||
+               regex_match(signal->title_regex_valid, &signal->title_regex, args->param1)              == REGEX_MATCH_NO;
+    } break;
+    }
+}
+
 void event_signal_transmit(void *context, enum event_type type)
 {
     int signal_count = buf_len(g_signal_event[type]);
@@ -139,9 +162,12 @@ void event_signal_transmit(void *context, enum event_type type)
 
     struct signal_args args = {};
     event_signal_populate_args(context, type, &args);
+    debug("%s: transmitting %s to %d subscribers\n", __FUNCTION__, event_type_str[type], signal_count);
 
-    if (fork() != 0) return;
-    debug("%s: %s\n", __FUNCTION__, event_type_str[type]);
+    if (fork() != 0) {
+        event_signal_destroy_args(type, &args);
+        return;
+    }
 
     for (int i = 0; i < signal_count; ++i) {
         struct signal *signal = &g_signal_event[type][i];

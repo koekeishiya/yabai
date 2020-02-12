@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Update scripting addition to work with macos Catalina 10.15.4 Beta [#404](https://github.com/koekeishiya/yabai/issues/404)
 - Don't forward MOUSE_UP event to the target application if we consumed the corresponding MOUSE_DOWN event [#376](https://github.com/koekeishiya/yabai/issues/376)
 - Only float small windows if they are NOT resizable [#179](https://github.com/koekeishiya/yabai/issues/179)
+- Fixed an issue that caused filtering signals by window title to not work properly [#410](https://github.com/koekeishiya/yabai/issues/410)
 
 ## [2.2.2] - 2020-01-20
 ### Changed
