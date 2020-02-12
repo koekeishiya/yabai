@@ -162,7 +162,7 @@ void event_signal_transmit(void *context, enum event_type type)
 
     struct signal_args args = {};
     event_signal_populate_args(context, type, &args);
-    debug("%s: transmitting %s to %d subscribers\n", __FUNCTION__, event_type_str[type], signal_count);
+    debug("%s: transmitting %s to %d subscriber(s)\n", __FUNCTION__, event_type_str[type], signal_count);
 
     if (fork() != 0) {
         event_signal_destroy_args(type, &args);
