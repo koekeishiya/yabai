@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.2.3] - 2020-02-12
 ### Changed
 - Ignore minimized windows when an application is unhidden (required by some applications like Chrome..) [#300](https://github.com/koekeishiya/yabai/issues/300)
 - Don't add window to the window tree when moved to a different space when the window is minimized (required by some applications like Chrome..) [#382](https://github.com/koekeishiya/yabai/issues/382)
@@ -176,7 +178,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.2.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.2.3...HEAD
+[2.2.3]: https://github.com/koekeishiya/yabai/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/koekeishiya/yabai/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/koekeishiya/yabai/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/koekeishiya/yabai/compare/v2.1.3...v2.2.0
