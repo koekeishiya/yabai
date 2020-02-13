@@ -1365,7 +1365,7 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                     space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
                     space_manager_move_space_after_space(selector.sid, acting_prev_sid, false);
                 } else if (!acting_sid_is_first && !selector_sid_is_first) {
-                    if (space_manager_mission_control_index(acting_sid) > space_manager_mission_control_index(selector.sid)) {
+                    if (acting_mci > selector_mci) {
                         space_manager_move_space_after_space(selector.sid, acting_sid, false);
                         space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
                     } else {
