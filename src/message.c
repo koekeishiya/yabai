@@ -1300,8 +1300,10 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         struct selector selector = parse_space_selector(rsp, &message, acting_sid);
         if (selector.did_parse && selector.sid) {
             if (acting_sid == selector.sid) {
-                daemon_fail(rsp, "cannot move a space with itself.\n");
-            } else if (space_display_id(acting_sid) == space_display_id(selector.sid)) {
+                daemon_fail(rsp, "cannot move space to itself.\n");
+            } else if (space_display_id(acting_sid) != space_display_id(selector.sid)) {
+                daemon_fail(rsp, "cannot move space across display boundaries. use --display instead.\n");
+            } else {
                 int acting_mci = space_manager_mission_control_index(acting_sid);
                 int selector_mci = space_manager_mission_control_index(selector.sid);
                 if (selector_mci == 1 && acting_mci == 2) {
@@ -1315,8 +1317,6 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 } else {
                     space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
                 }
-            } else {
-                daemon_fail(rsp, "cannot move space across display boundaries. use --display instead.\n");
             }
         }
     } else if (token_equals(command, COMMAND_SPACE_DISPLAY)) {
