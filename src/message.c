@@ -87,6 +87,7 @@ extern bool g_verbose;
 #define COMMAND_SPACE_CREATE  "--create"
 #define COMMAND_SPACE_DESTROY "--destroy"
 #define COMMAND_SPACE_MOVE    "--move"
+#define COMMAND_SPACE_SWAP    "--swap"
 #define COMMAND_SPACE_DISPLAY "--display"
 #define COMMAND_SPACE_BALANCE "--balance"
 #define COMMAND_SPACE_MIRROR  "--mirror"
@@ -1316,6 +1317,37 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                     space_manager_move_space_after_space(acting_sid, prev_space, acting_sid == space_manager_active_space());
                 } else {
                     space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
+                }
+            }
+        }
+    } else if (token_equals(command, COMMAND_SPACE_SWAP)) {
+        struct selector selector = parse_space_selector(rsp, &message, acting_sid);
+        if (selector.did_parse && selector.sid) {
+            if (acting_sid == selector.sid) {
+                daemon_fail(rsp, "cannot swap space with itself.\n");
+            } else if (space_display_id(acting_sid) != space_display_id(selector.sid)) {
+                daemon_fail(rsp, "cannot swap space across display boundaries. use --display instead.\n");
+            } else {
+                int acting_mci = space_manager_mission_control_index(acting_sid);
+                int selector_mci = space_manager_mission_control_index(selector.sid);
+                if (selector_mci == 1 && acting_mci == 2) {
+                    space_manager_move_space_after_space(selector.sid, acting_sid, false);
+                } else if (selector_mci == 1 && acting_mci > 2) {
+                    uint64_t prev_space = space_manager_prev_space(acting_sid);
+                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
+                    space_manager_move_space_after_space(selector.sid, prev_space, false);
+                } else if (acting_mci == 1 && selector_mci > 2) {
+                    uint64_t prev_space = space_manager_prev_space(selector.sid);
+                    space_manager_move_space_after_space(selector.sid, acting_sid, false);
+                    space_manager_move_space_after_space(acting_sid, prev_space, acting_sid == space_manager_active_space());
+                } else if (acting_mci > selector_mci) {
+                    uint64_t prev_space = space_manager_prev_space(selector.sid);
+                    space_manager_move_space_after_space(selector.sid, acting_sid, false);
+                    space_manager_move_space_after_space(acting_sid, prev_space, acting_sid == space_manager_active_space());
+                } else {
+                    uint64_t prev_space = space_manager_prev_space(acting_sid);
+                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
+                    space_manager_move_space_after_space(selector.sid, prev_space, false);
                 }
             }
         }

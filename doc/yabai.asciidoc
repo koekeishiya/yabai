@@ -245,6 +245,9 @@ COMMAND
 *--move* '<SPACE_SEL>'::
     Move position of the selected space to the position of the given space. The selected space and given space must both belong to the same display.
 
+*--swap* '<SPACE_SEL>'::
+    Swap the selected space with the given space. The selected space and given space must both belong to the same display.
+
 *--display* '<DISPLAY_SEL>'::
     Send the selected space to the given display.
 
