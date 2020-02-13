@@ -40,6 +40,8 @@ enum space_op_error
     SPACE_OP_ERROR_INVALID_SRC  = 3,
     SPACE_OP_ERROR_INVALID_DST  = 4,
     SPACE_OP_ERROR_INVALID_TYPE = 5,
+    SPACE_OP_ERROR_SAME_SPACE   = 6,
+    SPACE_OP_ERROR_SAME_DISPLAY = 7,
 };
 
 bool space_manager_has_separate_spaces(void);
@@ -84,7 +86,8 @@ void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degr
 void space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis);
 void space_manager_move_window_to_space(uint64_t sid, struct window *window);
 void space_manager_focus_space(uint64_t sid);
-void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus);
+enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid);
+enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint64_t selector_sid);
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did);
 enum space_op_error space_manager_destroy_space(uint64_t sid);
 void space_manager_add_space(uint64_t sid);

@@ -1300,79 +1300,21 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
         struct selector selector = parse_space_selector(rsp, &message, acting_sid);
         if (selector.did_parse && selector.sid) {
-            uint32_t acting_did = space_display_id(acting_sid);
-            uint32_t selector_did = space_display_id(selector.sid);
-
-            if (acting_sid == selector.sid) {
+            enum space_op_error result = space_manager_move_space_to_space(acting_sid, selector.sid);
+            if (result == SPACE_OP_ERROR_SAME_SPACE) {
                 daemon_fail(rsp, "cannot move space to itself.\n");
-            } else if (acting_did != selector_did) {
+            } else if (result == SPACE_OP_ERROR_SAME_DISPLAY) {
                 daemon_fail(rsp, "cannot move space across display boundaries. use --display instead.\n");
-            } else {
-                uint64_t acting_prev_sid = space_manager_prev_space(acting_sid);
-                uint64_t selector_prev_sid = space_manager_prev_space(selector.sid);
-
-                uint32_t acting_prev_did = acting_prev_sid ? space_display_id(acting_prev_sid) : 0;
-                uint32_t selector_prev_did = selector_prev_sid ? space_display_id(selector_prev_sid) : 0;
-
-                bool acting_sid_is_first = !acting_prev_sid || acting_prev_did != acting_did;
-                bool selector_sid_is_first = !selector_prev_sid || selector_prev_did != selector_did;
-
-                if (acting_sid_is_first && !selector_sid_is_first) {
-                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
-                } else if (!acting_sid_is_first && selector_sid_is_first) {
-                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
-                    space_manager_move_space_after_space(selector.sid, acting_sid, false);
-                } else if (!acting_sid_is_first && !selector_sid_is_first) {
-                    if (space_manager_mission_control_index(acting_sid) > space_manager_mission_control_index(selector.sid)) {
-                        space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
-                    } else {
-                        space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
-                    }
-                }
             }
         }
     } else if (token_equals(command, COMMAND_SPACE_SWAP)) {
         struct selector selector = parse_space_selector(rsp, &message, acting_sid);
         if (selector.did_parse && selector.sid) {
-            uint32_t acting_did = space_display_id(acting_sid);
-            uint32_t selector_did = space_display_id(selector.sid);
-
-            if (acting_sid == selector.sid) {
+            enum space_op_error result = space_manager_swap_space_with_space(acting_sid, selector.sid);
+            if (result == SPACE_OP_ERROR_SAME_SPACE) {
                 daemon_fail(rsp, "cannot swap space with itself.\n");
-            } else if (acting_did != selector_did) {
+            } else if (result == SPACE_OP_ERROR_SAME_DISPLAY) {
                 daemon_fail(rsp, "cannot swap space across display boundaries. use --display instead.\n");
-            } else {
-                uint64_t acting_prev_sid = space_manager_prev_space(acting_sid);
-                uint64_t selector_prev_sid = space_manager_prev_space(selector.sid);
-
-                uint32_t acting_prev_did = acting_prev_sid ? space_display_id(acting_prev_sid) : 0;
-                uint32_t selector_prev_did = selector_prev_sid ? space_display_id(selector_prev_sid) : 0;
-
-                bool acting_sid_is_first = !acting_prev_sid || acting_prev_did != acting_did;
-                bool selector_sid_is_first = !selector_prev_sid || selector_prev_did != selector_did;
-
-                int acting_mci = space_manager_mission_control_index(acting_sid);
-                int selector_mci = space_manager_mission_control_index(selector.sid);
-
-                if (acting_sid_is_first && !selector_sid_is_first && selector_mci - acting_mci == 1) {
-                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
-                } else if (!acting_sid_is_first && selector_sid_is_first && acting_mci - selector_mci == 1) {
-                    space_manager_move_space_after_space(selector.sid, acting_sid, selector.sid == space_manager_active_space());
-                } else if (acting_sid_is_first && !selector_sid_is_first) {
-                    space_manager_move_space_after_space(selector.sid, acting_sid, false);
-                    space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
-                } else if (!acting_sid_is_first && selector_sid_is_first) {
-                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
-                    space_manager_move_space_after_space(selector.sid, acting_prev_sid, false);
-                } else if (!acting_sid_is_first && !selector_sid_is_first) {
-                    if (acting_mci > selector_mci) {
-                        space_manager_move_space_after_space(selector.sid, acting_sid, false);
-                        space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
-                    } else {
-                        space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
-                        space_manager_move_space_after_space(selector.sid, acting_prev_sid, false);
-                    }
-                }
             }
         }
     } else if (token_equals(command, COMMAND_SPACE_DISPLAY)) {

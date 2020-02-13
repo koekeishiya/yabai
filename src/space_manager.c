@@ -616,24 +616,7 @@ void space_manager_focus_space(uint64_t sid)
     socket_close(sockfd);
 }
 
-void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
-{
-    int sockfd;
-    char message[MAXLEN];
-
-    if (!src_sid) return;
-    if (!dst_sid) return;
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space_move %lld %lld %d", src_sid, dst_sid, focus);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-}
-
-static inline bool
-space_manager_is_space_last_user_space(uint64_t sid)
+static inline bool space_manager_is_space_last_user_space(uint64_t sid)
 {
     bool result = true;
 
@@ -653,6 +636,98 @@ space_manager_is_space_last_user_space(uint64_t sid)
     free(space_list);
 
     return result;
+}
+
+static void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
+{
+    int sockfd;
+    char message[MAXLEN];
+
+    if (!src_sid) return;
+    if (!dst_sid) return;
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "space_move %lld %lld %d", src_sid, dst_sid, focus);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
+}
+
+enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid)
+{
+    uint32_t acting_did = space_display_id(acting_sid);
+    uint32_t selector_did = space_display_id(selector_sid);
+
+    if (acting_sid == selector_sid) return SPACE_OP_ERROR_SAME_SPACE;
+    if (acting_did != selector_did) return SPACE_OP_ERROR_SAME_DISPLAY;
+
+    uint64_t acting_prev_sid = space_manager_prev_space(acting_sid);
+    uint64_t selector_prev_sid = space_manager_prev_space(selector_sid);
+
+    uint32_t acting_prev_did = acting_prev_sid ? space_display_id(acting_prev_sid) : 0;
+    uint32_t selector_prev_did = selector_prev_sid ? space_display_id(selector_prev_sid) : 0;
+
+    bool acting_sid_is_first = !acting_prev_sid || acting_prev_did != acting_did;
+    bool selector_sid_is_first = !selector_prev_sid || selector_prev_did != selector_did;
+
+    int acting_mci = space_manager_mission_control_index(acting_sid);
+    int selector_mci = space_manager_mission_control_index(selector_sid);
+
+    if (acting_sid_is_first && !selector_sid_is_first && selector_mci - acting_mci == 1) {
+        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+    } else if (!acting_sid_is_first && selector_sid_is_first && acting_mci - selector_mci == 1) {
+        space_manager_move_space_after_space(selector_sid, acting_sid, selector_sid == space_manager_active_space());
+    } else if (acting_sid_is_first && !selector_sid_is_first) {
+        space_manager_move_space_after_space(selector_sid, acting_sid, false);
+        space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+    } else if (!acting_sid_is_first && selector_sid_is_first) {
+        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        space_manager_move_space_after_space(selector_sid, acting_prev_sid, false);
+    } else if (!acting_sid_is_first && !selector_sid_is_first) {
+        if (acting_mci > selector_mci) {
+            space_manager_move_space_after_space(selector_sid, acting_sid, false);
+            space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+        } else {
+            space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+            space_manager_move_space_after_space(selector_sid, acting_prev_sid, false);
+        }
+    }
+
+    return SPACE_OP_ERROR_SUCCESS;
+}
+
+enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint64_t selector_sid)
+{
+    uint32_t acting_did = space_display_id(acting_sid);
+    uint32_t selector_did = space_display_id(selector_sid);
+
+    if (acting_sid == selector_sid) return SPACE_OP_ERROR_SAME_SPACE;
+    if (acting_did != selector_did) return SPACE_OP_ERROR_SAME_DISPLAY;
+
+    uint64_t acting_prev_sid = space_manager_prev_space(acting_sid);
+    uint64_t selector_prev_sid = space_manager_prev_space(selector_sid);
+
+    uint32_t acting_prev_did = acting_prev_sid ? space_display_id(acting_prev_sid) : 0;
+    uint32_t selector_prev_did = selector_prev_sid ? space_display_id(selector_prev_sid) : 0;
+
+    bool acting_sid_is_first = !acting_prev_sid || acting_prev_did != acting_did;
+    bool selector_sid_is_first = !selector_prev_sid || selector_prev_did != selector_did;
+
+    if (acting_sid_is_first && !selector_sid_is_first) {
+        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+    } else if (!acting_sid_is_first && selector_sid_is_first) {
+        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        space_manager_move_space_after_space(selector_sid, acting_sid, false);
+    } else if (!acting_sid_is_first && !selector_sid_is_first) {
+        if (space_manager_mission_control_index(acting_sid) > space_manager_mission_control_index(selector_sid)) {
+            space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+        } else {
+            space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        }
+    }
+
+    return SPACE_OP_ERROR_SUCCESS;
 }
 
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did)
