@@ -242,8 +242,8 @@ COMMAND
 *--destroy*::
     Remove the selected space.
 
-*--move* 'prev|next'::
-    Swap position of the selected space with the prev/next space.
+*--move* '<SPACE_SEL>'::
+    Move position of the selected space to the position of the given space. The selected space and given space must both belong to the same display.
 
 *--display* '<DISPLAY_SEL>'::
     Send the selected space to the given display.

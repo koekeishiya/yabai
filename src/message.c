@@ -1297,23 +1297,27 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             space_manager_focus_space(selector.sid);
         }
     } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
-        struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_COMMON_SEL_PREV)) {
-            uint64_t pre_sid = space_manager_prev_space(acting_sid);
-            if (acting_sid && pre_sid) {
-                space_manager_move_space_after_space(pre_sid, acting_sid, false);
+        struct selector selector = parse_space_selector(rsp, &message, acting_sid);
+        if (selector.did_parse && selector.sid) {
+            if (acting_sid == selector.sid) {
+                daemon_fail(rsp, "cannot move a space with itself.\n");
+            } else if (space_display_id(acting_sid) == space_display_id(selector.sid)) {
+                int acting_mci = space_manager_mission_control_index(acting_sid);
+                int selector_mci = space_manager_mission_control_index(selector.sid);
+                if (selector_mci == 1 && acting_mci == 2) {
+                    space_manager_move_space_after_space(selector.sid, acting_sid, false);
+                } else if (selector_mci == 1 && acting_mci > 2) {
+                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
+                    space_manager_move_space_after_space(selector.sid, acting_sid, false);
+                } else if (acting_mci > selector_mci) {
+                    uint64_t prev_space = space_manager_prev_space(selector.sid);
+                    space_manager_move_space_after_space(acting_sid, prev_space, acting_sid == space_manager_active_space());
+                } else {
+                    space_manager_move_space_after_space(acting_sid, selector.sid, acting_sid == space_manager_active_space());
+                }
             } else {
-                daemon_fail(rsp, "could not swap places with the previous space.\n");
+                daemon_fail(rsp, "cannot move space across display boundaries. use --display instead.\n");
             }
-        } else if (token_equals(value, ARGUMENT_COMMON_SEL_NEXT)) {
-            uint64_t dst_sid = space_manager_next_space(acting_sid);
-            if (acting_sid && dst_sid) {
-                space_manager_move_space_after_space(acting_sid, dst_sid, acting_sid == space_manager_active_space());
-            } else {
-                daemon_fail(rsp, "could not swap places with the next space.\n");
-            }
-        } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
     } else if (token_equals(command, COMMAND_SPACE_DISPLAY)) {
         struct selector selector = parse_display_selector(rsp, &message, display_manager_active_display_id());

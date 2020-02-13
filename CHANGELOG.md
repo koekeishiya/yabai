@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Allow use of *DISPLAY_SEL* and *SPACE_SEL* for specifying display and space in rules [#378](https://github.com/koekeishiya/yabai/issues/378)
+- Extend *space --move* command to operate on *SPACE_SEL* instead of prev/next. However, the selected and given space must belong to the same display [#127](https://github.com/koekeishiya/yabai/issues/127)
 
 ## [2.2.3] - 2020-02-12
 ### Changed
