@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.3.0] - 2020-02-14
 ### Added
-- New command *space --swap SPACE_SEL* command to swap the position of a selected space with the position of a given space. The selected and given space must belong to the same display [#127](https://github.com/koekeishiya/yabai/issues/127)
+- New command *space --swap SPACE_SEL* command to swap the selected space with a given space. The selected and given space must belong to the same display [#127](https://github.com/koekeishiya/yabai/issues/127)
 
 ### Changed
 - Allow use of *DISPLAY_SEL* and *SPACE_SEL* for specifying display and space in rules [#378](https://github.com/koekeishiya/yabai/issues/378)
@@ -185,7 +187,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.2.3...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/koekeishiya/yabai/compare/v2.2.3...v2.3.0
 [2.2.3]: https://github.com/koekeishiya/yabai/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/koekeishiya/yabai/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/koekeishiya/yabai/compare/v2.2.0...v2.2.1
