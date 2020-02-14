@@ -1,163 +1,149 @@
-# open terminal
-cmd - return : /Applications/Kitty.app/Contents/MacOS/kitty --single-instance -d ~
+# ################################################################ #
+# THE FOLLOWING IS AN EXPLANATION OF THE GRAMMAR THAT SKHD PARSES. #
+# FOR SIMPLE EXAMPLE MAPPINGS LOOK FURTHER DOWN THIS FILE..        #
+# ################################################################ #
+
+# A list of all built-in modifier and literal keywords can
+# be found at https://github.com/koekeishiya/skhd/issues/1
+#
+# A hotkey is written according to the following rules:
+#
+#   hotkey       = <mode> '<' <action> | <action>
+#
+#   mode         = 'name of mode' | <mode> ',' <mode>
+#
+#   action       = <keysym> '[' <proc_map_lst> ']' | <keysym> '->' '[' <proc_map_lst> ']'
+#                  <keysym> ':' <command>          | <keysym> '->' ':' <command>
+#                  <keysym> ';' <mode>             | <keysym> '->' ';' <mode>
+#
+#   keysym       = <mod> '-' <key> | <key>
+#
+#   mod          = 'modifier keyword' | <mod> '+' <mod>
+#
+#   key          = <literal> | <keycode>
+#
+#   literal      = 'single letter or built-in keyword'
+#
+#   keycode      = 'apple keyboard kVK_<Key> values (0x3C)'
+#
+#   proc_map_lst = * <proc_map>
+#
+#   proc_map     = <string> ':' <command> | <string>     '~' |
+#                  '*'      ':' <command> | '*'          '~'
+#
+#   string       = '"' 'sequence of characters' '"'
+#
+#   command      = command is executed through '$SHELL -c' and
+#                  follows valid shell syntax. if the $SHELL environment
+#                  variable is not set, it will default to '/bin/bash'.
+#                  when bash is used, the ';' delimeter can be specified
+#                  to chain commands.
+#
+#                  to allow a command to extend into multiple lines,
+#                  prepend '\' at the end of the previous line.
+#
+#                  an EOL character signifies the end of the bind.
+#
+#   ->           = keypress is not consumed by skhd
+#
+#   *            = matches every application not specified in <proc_map_lst>
+#
+#   ~            = application is unbound and keypress is forwarded per usual, when specified in a <proc_map>
+#
+# A mode is declared according to the following rules:
+#
+#   mode_decl = '::' <name> '@' ':' <command> | '::' <name> ':' <command> |
+#               '::' <name> '@'               | '::' <name>
+#
+#   name      = desired name for this mode,
+#
+#   @         = capture keypresses regardless of being bound to an action
+#
+#   command   = command is executed through '$SHELL -c' and
+#               follows valid shell syntax. if the $SHELL environment
+#               variable is not set, it will default to '/bin/bash'.
+#               when bash is used, the ';' delimeter can be specified
+#               to chain commands.
+#
+#               to allow a command to extend into multiple lines,
+#               prepend '\' at the end of the previous line.
+#
+#               an EOL character signifies the end of the bind.
+
+# ############################################################### #
+# THE FOLLOWING SECTION CONTAIN SIMPLE MAPPINGS DEMONSTRATING HOW #
+# TO INTERACT WITH THE YABAI WM. THESE ARE SUPPOSED TO BE USED AS #
+# A REFERENCE ONLY, WHEN MAKING YOUR OWN CONFIGURATION..          #
+# ############################################################### #
 
 # focus window
-alt - h : yabai -m window --focus west
-alt - j : yabai -m window --focus south
-alt - k : yabai -m window --focus north
-alt - l : yabai -m window --focus east
+# alt - h : yabai -m window --focus west
 
-# swap window
-shift + alt - h : yabai -m window --swap west
-shift + alt - j : yabai -m window --swap south
-shift + alt - k : yabai -m window --swap north
-shift + alt - l : yabai -m window --swap east
+# swap managed window
+# shift + alt - h : yabai -m window --swap north
 
-# move window
-shift + cmd - h : yabai -m window --warp west
-shift + cmd - j : yabai -m window --warp south
-shift + cmd - k : yabai -m window --warp north
-shift + cmd - l : yabai -m window --warp east
+# move managed window
+# shift + cmd - h : yabai -m window --warp east
 
 # balance size of windows
-shift + alt - 0 : yabai -m space --balance
+# shift + alt - 0 : yabai -m space --balance
 
 # make floating window fill screen
-shift + alt - up     : yabai -m window --grid 1:1:0:0:1:1
+# shift + alt - up     : yabai -m window --grid 1:1:0:0:1:1
 
 # make floating window fill left-half of screen
-shift + alt - left   : yabai -m window --grid 1:2:0:0:1:1
-
-# make floating window fill right-half of screen
-shift + alt - right  : yabai -m window --grid 1:2:1:0:1:1
+# shift + alt - left   : yabai -m window --grid 1:2:0:0:1:1
 
 # create desktop, move window and follow focus - uses jq for parsing json (brew install jq)
-shift + cmd - n : yabai -m space --create && \
-                  index="$(yabai -m query --spaces --display | jq 'map(select(."native-fullscreen" == 0))[-1].index')" && \
-                  yabai -m window --space "${index}" && \
-                  yabai -m space --focus "${index}"
-
-# create desktop and follow focus - uses jq for parsing json (brew install jq)
-cmd + alt - n : yabai -m space --create && \
-                index="$(yabai -m query --spaces --display | jq 'map(select(."native-fullscreen" == 0))[-1].index')" && \
-                yabai -m space --focus "${index}"
-
-# destroy desktop
-cmd + alt - w : yabai -m space --destroy
+# shift + cmd - n : yabai -m space --create && \
+#                   index="$(yabai -m query --spaces --display | jq 'map(select(."native-fullscreen" == 0))[-1].index')" && \
+#                   yabai -m window --space "${index}" && \
+#                   yabai -m space --focus "${index}"
 
 # fast focus desktop
-cmd + alt - x : yabai -m space --focus recent
-cmd + alt - z : yabai -m space --focus prev
-cmd + alt - c : yabai -m space --focus next
-cmd + alt - 1 : yabai -m space --focus 1
-cmd + alt - 2 : yabai -m space --focus 2
-cmd + alt - 3 : yabai -m space --focus 3
-cmd + alt - 4 : yabai -m space --focus 4
-cmd + alt - 5 : yabai -m space --focus 5
-cmd + alt - 6 : yabai -m space --focus 6
-cmd + alt - 7 : yabai -m space --focus 7
-cmd + alt - 8 : yabai -m space --focus 8
-cmd + alt - 9 : yabai -m space --focus 9
-cmd + alt - 0 : yabai -m space --focus 10
+# cmd + alt - x : yabai -m space --focus recent
+# cmd + alt - 1 : yabai -m space --focus 1
 
 # send window to desktop and follow focus
-shift + cmd - x : yabai -m window --space recent; yabai -m space --focus recent
-shift + cmd - z : yabai -m window --space prev; yabai -m space --focus prev
-shift + cmd - c : yabai -m window --space next; yabai -m space --focus next
-shift + cmd - 1 : yabai -m window --space  1; yabai -m space --focus 1
-shift + cmd - 2 : yabai -m window --space  2; yabai -m space --focus 2
-shift + cmd - 3 : yabai -m window --space  3; yabai -m space --focus 3
-shift + cmd - 4 : yabai -m window --space  4; yabai -m space --focus 4
-shift + cmd - 5 : yabai -m window --space  5; yabai -m space --focus 5
-shift + cmd - 6 : yabai -m window --space  6; yabai -m space --focus 6
-shift + cmd - 7 : yabai -m window --space  7; yabai -m space --focus 7
-shift + cmd - 8 : yabai -m window --space  8; yabai -m space --focus 8
-shift + cmd - 9 : yabai -m window --space  9; yabai -m space --focus 9
-shift + cmd - 0 : yabai -m window --space 10; yabai -m space --focus 10
+# shift + cmd - z : yabai -m window --space next; yabai -m space --focus next
+# shift + cmd - 2 : yabai -m window --space  2; yabai -m space --focus 2
 
 # focus monitor
-ctrl + alt - x  : yabai -m display --focus recent
-ctrl + alt - z  : yabai -m display --focus prev
-ctrl + alt - c  : yabai -m display --focus next
-ctrl + alt - 1  : yabai -m display --focus 1
-ctrl + alt - 2  : yabai -m display --focus 2
-ctrl + alt - 3  : yabai -m display --focus 3
+# ctrl + alt - z  : yabai -m display --focus prev
+# ctrl + alt - 3  : yabai -m display --focus 3
 
 # send window to monitor and follow focus
-ctrl + cmd - x  : yabai -m window --display recent; yabai -m display --focus recent
-ctrl + cmd - z  : yabai -m window --display prev; yabai -m display --focus prev
-ctrl + cmd - c  : yabai -m window --display next; yabai -m display --focus next
-ctrl + cmd - 1  : yabai -m window --display 1; yabai -m display --focus 1
-ctrl + cmd - 2  : yabai -m window --display 2; yabai -m display --focus 2
-ctrl + cmd - 3  : yabai -m window --display 3; yabai -m display --focus 3
+# ctrl + cmd - c  : yabai -m window --display next; yabai -m display --focus next
+# ctrl + cmd - 1  : yabai -m window --display 1; yabai -m display --focus 1
 
-# move window
-shift + ctrl - a : yabai -m window --move rel:-20:0
-shift + ctrl - s : yabai -m window --move rel:0:20
-shift + ctrl - w : yabai -m window --move rel:0:-20
-shift + ctrl - d : yabai -m window --move rel:20:0
+# move floating window
+# shift + ctrl - a : yabai -m window --move rel:-20:0
+# shift + ctrl - s : yabai -m window --move rel:0:20
 
 # increase window size
-shift + alt - a : yabai -m window --resize left:-20:0
-shift + alt - s : yabai -m window --resize bottom:0:20
-shift + alt - w : yabai -m window --resize top:0:-20
-shift + alt - d : yabai -m window --resize right:20:0
+# shift + alt - a : yabai -m window --resize left:-20:0
+# shift + alt - w : yabai -m window --resize top:0:-20
 
 # decrease window size
-shift + cmd - a : yabai -m window --resize left:20:0
-shift + cmd - s : yabai -m window --resize bottom:0:-20
-shift + cmd - w : yabai -m window --resize top:0:20
-shift + cmd - d : yabai -m window --resize right:-20:0
+# shift + cmd - s : yabai -m window --resize bottom:0:-20
+# shift + cmd - w : yabai -m window --resize top:0:20
 
 # set insertion point in focused container
-ctrl + alt - h : yabai -m window --insert west
-ctrl + alt - j : yabai -m window --insert south
-ctrl + alt - k : yabai -m window --insert north
-ctrl + alt - l : yabai -m window --insert east
+# ctrl + alt - h : yabai -m window --insert west
 
-# rotate tree
-alt - r : yabai -m space --rotate 90
-
-# mirror tree y-axis
-alt - y : yabai -m space --mirror y-axis
-
-# mirror tree x-axis
-alt - x : yabai -m space --mirror x-axis
-
-# toggle desktop offset
-alt - a : yabai -m space --toggle padding; yabai -m space --toggle gap
-
-# toggle window parent zoom
-alt - d : yabai -m window --toggle zoom-parent
-
-# toggle window fullscreen zoom
-alt - f : yabai -m window --toggle zoom-fullscreen
-
-# toggle window native fullscreen
-shift + alt - f : yabai -m window --toggle native-fullscreen
-
-# toggle window border
-shift + alt - b : yabai -m window --toggle border
+# toggle window zoom
+# alt - d : yabai -m window --toggle zoom-parent
+# alt - f : yabai -m window --toggle zoom-fullscreen
 
 # toggle window split type
-alt - e : yabai -m window --toggle split
+# alt - e : yabai -m window --toggle split
 
 # float / unfloat window and center on screen
-alt - t : yabai -m window --toggle float;\
-          yabai -m window --grid 4:4:1:1:2:2
-
-# toggle sticky (show on all spaces)
-alt - s : yabai -m window --toggle sticky
-
-# toggle topmost (keep above other windows)
-alt - o : yabai -m window --toggle topmost
+# alt - t : yabai -m window --toggle float;\
+#           yabai -m window --grid 4:4:1:1:2:2
 
 # toggle sticky(+float), topmost, border and picture-in-picture
-alt - p : yabai -m window --toggle sticky;\
-          yabai -m window --toggle topmost;\
-          yabai -m window --toggle border;\
-          yabai -m window --toggle pip
-
-# change layout of desktop
-ctrl + alt - a : yabai -m space --layout bsp
-ctrl + alt - d : yabai -m space --layout float
+# alt - p : yabai -m window --toggle sticky;\
+#           yabai -m window --toggle topmost;\
+#           yabai -m window --toggle border;\
+#           yabai -m window --toggle pip
