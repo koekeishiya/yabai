@@ -19,8 +19,8 @@
 #define SCRPT_ADD_LOAD_OPT      "--load-sa"
 
 #define MAJOR 2
-#define MINOR 2
-#define PATCH 3
+#define MINOR 3
+#define PATCH 0
 
 #define CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context, int cid)
 typedef CONNECTION_CALLBACK(connection_callback);
