@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Properly return focus to the active window on the current space when a window is moved through a rule [#418](https://github.com/koekeishiya/yabai/issues/418)
 
 ## [2.3.0] - 2020-02-14
 ### Added

@@ -1534,7 +1534,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (space_is_fullscreen(sid)) {
                 daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
             } else {
-                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, sid);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, sid, false);
             }
         }
     } else if (token_equals(command, COMMAND_WINDOW_SPACE)) {
@@ -1543,7 +1543,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (space_is_fullscreen(selector.sid)) {
                 daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
             } else {
-                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid);
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid, false);
             }
         }
     } else {

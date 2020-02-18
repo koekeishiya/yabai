@@ -117,31 +117,18 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     free(display_list);
 }
 
-static void window_manager_perform_space_assignment_rule(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule, uint64_t sid)
-{
-    struct view *view = window_manager_find_managed_window(wm, window);
-    if (view) {
-        space_manager_untile_window(sm, view, window);
-        window_manager_remove_managed_window(wm, window->id);
-        window_manager_purify_window(wm, window);
-    }
-
-    space_manager_move_window_to_space(sid, window);
-    if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
-        space_manager_focus_space(sid);
-    }
-}
-
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
 {
     if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == REGEX_MATCH_NO) return;
     if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window))      == REGEX_MATCH_NO) return;
 
-    if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
-        if (rule->did) {
-            window_manager_perform_space_assignment_rule(sm, wm, window, rule, display_space_id(rule->did));
-        } else if (rule->sid) {
-            window_manager_perform_space_assignment_rule(sm, wm, window, rule, rule->sid);
+    if (rule->sid || rule->did) {
+        if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
+            uint64_t sid = rule->did ? display_space_id(rule->did) : rule->sid;
+            window_manager_send_window_to_space(sm, wm, window, sid, true);
+            if (rule->follow_space || rule->fullscreen == RULE_PROP_ON) {
+                space_manager_focus_space(sid);
+            }
         }
     }
 
@@ -1237,7 +1224,7 @@ bool window_manager_close_window(struct window *window)
     return true;
 }
 
-void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid)
+void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid, bool moved_by_rule)
 {
     uint64_t src_sid = window_space(window);
     if (src_sid == dst_sid) return;
@@ -1256,7 +1243,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
         window_manager_add_managed_window(wm, window, view);
     }
 
-    if (space_is_visible(src_sid) && wm->focused_window_id == window->id) {
+    if ((space_is_visible(src_sid) && (moved_by_rule || wm->focused_window_id == window->id))) {
         struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
         if (next) {
             window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
