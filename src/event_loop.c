@@ -58,8 +58,8 @@ static void queue_push(struct queue *queue, struct event *event)
 #endif
 
 #ifdef STATS
-    queue_counters[0].hit_count++;
-    queue_counters[0].cycle_count += (__rdtsc() - begin_cycles);
+    __sync_add_and_fetch(&queue_counters[0].cycle_count, (__rdtsc() - begin_cycles));
+    __sync_add_and_fetch(&queue_counters[0].hit_count, 1);
     cycle_counter_report(__FUNCTION__, &queue_counters[0]);
 #endif
 }
@@ -83,8 +83,8 @@ static struct event *queue_pop(struct queue *queue)
 #endif
 
 #ifdef STATS
-    queue_counters[1].hit_count++;
     queue_counters[1].cycle_count += (__rdtsc() - begin_cycles);
+    queue_counters[1].hit_count++;
     cycle_counter_report(__FUNCTION__, &queue_counters[1]);
 #endif
 
@@ -104,8 +104,8 @@ static void *event_loop_run(void *context)
 #endif
             int result = event_handler[event->type](event->context, event->param1, event->param2);
 #ifdef STATS
-            event_counters[event->type].hit_count++;
             event_counters[event->type].cycle_count += (__rdtsc() - begin_cycles);
+            event_counters[event->type].hit_count++;
             cycle_counter_report(event_type_str[event->type], &event_counters[event->type]);
 #endif
             if (result == EVENT_SUCCESS) event_signal_transmit(event->context, event->type);
