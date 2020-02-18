@@ -18,6 +18,9 @@ all: clean $(BINS)
 install: BUILD_FLAGS=-std=c99 -Wall -DNDEBUG -O2 -fvisibility=hidden -mmacosx-version-min=10.13
 install: clean $(BINS)
 
+stats: BUILD_FLAGS=-std=c99 -Wall -DSTATS -DNDEBUG -O2 -fvisibility=hidden -mmacosx-version-min=10.13
+stats: clean $(BINS)
+
 sa:
 	clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/loader -framework Cocoa
 	clang $(OSAX_PATH)/payload.m -DOBJC_OLD_DISPATCH_PROTOTYPES=1 -shared -fPIC -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/payload -framework Cocoa -framework Carbon
