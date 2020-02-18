@@ -12,7 +12,7 @@ static struct cycle_counter event_counters[EVENT_TYPE_COUNT];
 
 static inline void cycle_counter_report(const char *name, struct cycle_counter *counter)
 {
-    fprintf(stdout, "%30s: cycles = %20lld, hits = %20lld, c/h = %lld\n",
+    fprintf(stdout, "%30s: cycles %'20lld, hits %'20lld, c/h %'20lld\n",
             name, counter->cycle_count, counter->hit_count,
             counter->cycle_count / counter->hit_count);
 }
@@ -146,6 +146,9 @@ bool event_loop_init(struct event_loop *event_loop)
     event_loop->is_running = false;
 #ifdef DEBUG
     event_loop->count = 0;
+#endif
+#ifdef STATS
+    setlocale(LC_ALL, ""); // For fprintf digit grouping
 #endif
     event_loop->semaphore = sem_open("yabai_event_loop_semaphore", O_CREAT, 0600, 0);
     sem_unlink("yabai_event_loop_semaphore");
