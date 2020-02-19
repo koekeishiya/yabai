@@ -1983,12 +1983,6 @@ void handle_message(FILE *rsp, char *message)
 
 static SOCKET_DAEMON_HANDLER(message_handler)
 {
-    FILE *rsp = fdopen(sockfd, "w");
-    if (rsp) {
-        struct event *event = event_create_p3(&g_event_loop, DAEMON_MESSAGE, message, rsp, length, sockfd);
-        event_loop_post(&g_event_loop, event);
-    } else {
-        socket_close(sockfd);
-        free(message);
-    }
+    struct event *event = event_create_p1(&g_event_loop, DAEMON_MESSAGE, message, sockfd);
+    event_loop_post(&g_event_loop, event);
 }

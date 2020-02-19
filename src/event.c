@@ -223,8 +223,6 @@ struct event *event_create(struct event_loop *event_loop, enum event_type type, 
     event->type = type;
     event->context = context;
     event->param1 = 0;
-    event->param2 = 0;
-    event->param3 = 0;
     event->status = 0;
     event->result = 0;
 #ifdef DEBUG
@@ -234,14 +232,12 @@ struct event *event_create(struct event_loop *event_loop, enum event_type type, 
     return event;
 }
 
-struct event *event_create_p3(struct event_loop *event_loop, enum event_type type, void *context, void *param1, int param2, int param3)
+struct event *event_create_p1(struct event_loop *event_loop, enum event_type type, void *context, int param1)
 {
     struct event *event = memory_pool_push(&event_loop->pool, struct event);
     event->type = type;
     event->context = context;
     event->param1 = param1;
-    event->param2 = param2;
-    event->param3 = param3;
     event->status = 0;
     event->result = 0;
 #ifdef DEBUG
@@ -1436,22 +1432,25 @@ static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
+    FILE *rsp = fdopen(param1, "w");
+    if (!rsp) goto out;
+
     if (g_verbose) {
-        fprintf(stdout, "%s: ", __FUNCTION__);
-        for (int i = 0; i < param2 - 1; ++i) {
-            char c = *((char *) context + i);
-            putc(c == '\0' ? ' ' : c, stdout);
-        }
+        fprintf(stdout, "%s:", __FUNCTION__);
+        char *message = context;
+        do {
+            message += fprintf(stdout, " %s", message);
+        } while (*message);
         putc('\n', stdout);
         fflush(stdout);
     }
 
-    handle_message(param1, context);
+    handle_message(rsp, context);
+    fflush(rsp);
+    fclose(rsp);
 
-    fflush(param1);
-    fclose(param1);
-
-    socket_close(param3);
+out:
+    socket_close(param1);
     free(context);
 
     return EVENT_SUCCESS;

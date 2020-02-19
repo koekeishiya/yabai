@@ -1,7 +1,7 @@
 #ifndef EVENT_LOOP_H
 #define EVENT_LOOP_H
 
-#define EVENT_POOL_SIZE KILOBYTES(60)
+#define EVENT_POOL_SIZE KILOBYTES(36)
 #define EVENT_MAX_COUNT ((EVENT_POOL_SIZE) / (sizeof(struct event)))
 
 #define QUEUE_POOL_SIZE KILOBYTES(16)
