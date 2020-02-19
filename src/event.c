@@ -1437,10 +1437,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 
     if (g_verbose) {
         fprintf(stdout, "%s:", __FUNCTION__);
-        char *message = context;
-        do {
+        for (char *message = context; *message;) {
             message += fprintf(stdout, " %s", message);
-        } while (*message);
+        }
         putc('\n', stdout);
         fflush(stdout);
     }
