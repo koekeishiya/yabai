@@ -3,29 +3,29 @@
 #ifdef STATS
 struct cycle_counter
 {
-    volatile uint64_t total_cycle_count;
-    volatile uint64_t hit_count;
+    uint64_t total_cycle_count;
+    uint64_t hit_count;
 };
 
 static struct cycle_counter queue_counters[2];
 static struct cycle_counter event_counters[EVENT_TYPE_COUNT];
 
-#define cycle_counter_report(name, counter, elapsed_cycles) \
+#define cycle_counter_report(name, hit_count, total_cycles, elapsed_cycles) \
     fprintf(stdout, "%30s: hits %'25lld | cur %'25lld | avg %'25lld\n",\
-            name, counter->hit_count, elapsed_cycles, counter->total_cycle_count / counter->hit_count);
+            name, hit_count, elapsed_cycles, total_cycles / hit_count);
 
 static inline void cycle_counter_tick(const char *name, struct cycle_counter *counter, uint64_t elapsed_cycles)
 {
     counter->total_cycle_count += elapsed_cycles;
     ++counter->hit_count;
-    cycle_counter_report(name, counter, elapsed_cycles)
+    cycle_counter_report(name, counter->hit_count, counter->total_cycle_count, elapsed_cycles)
 }
 
 static inline void cycle_counter_tick_atomic(const char *name, struct cycle_counter *counter, uint64_t elapsed_cycles)
 {
-    __sync_add_and_fetch(&counter->total_cycle_count, elapsed_cycles);
-    __sync_add_and_fetch(&counter->hit_count, 1);
-    cycle_counter_report(name, counter, elapsed_cycles)
+    uint64_t total_cycle_count = __sync_add_and_fetch(&counter->total_cycle_count, elapsed_cycles);
+    uint64_t hit_count = __sync_add_and_fetch(&counter->hit_count, 1);
+    cycle_counter_report(name, hit_count, total_cycle_count, elapsed_cycles)
 }
 
 #endif
