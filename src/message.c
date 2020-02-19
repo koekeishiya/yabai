@@ -1984,18 +1984,11 @@ void handle_message(FILE *rsp, char *message)
 static SOCKET_DAEMON_HANDLER(message_handler)
 {
     FILE *rsp = fdopen(sockfd, "w");
-    if (!rsp) goto fderr;
-
-    volatile int status = EVENT_QUEUED;
-    struct event *event = event_create_p2(&g_event_loop, DAEMON_MESSAGE, message, length, rsp);
-    event->status = &status;
-    event_loop_post(&g_event_loop, event);
-    while (status == EVENT_QUEUED);
-
-    fflush(rsp);
-    fclose(rsp);
-
-fderr:
-    socket_close(sockfd);
-    free(message);
+    if (rsp) {
+        struct event *event = event_create_p3(&g_event_loop, DAEMON_MESSAGE, message, rsp, length, sockfd);
+        event_loop_post(&g_event_loop, event);
+    } else {
+        socket_close(sockfd);
+        free(message);
+    }
 }

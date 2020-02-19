@@ -102,7 +102,7 @@ static void *event_loop_run(void *context)
 #ifdef STATS
             uint64_t begin_cycles = __rdtsc();
 #endif
-            int result = event_handler[event->type](event->context, event->param1, event->param2);
+            int result = event_handler[event->type](event->context, event->param1, event->param2, event->param3);
 #ifdef STATS
             event_counters[event->type].cycle_count += (__rdtsc() - begin_cycles);
             event_counters[event->type].hit_count++;

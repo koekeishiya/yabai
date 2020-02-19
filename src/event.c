@@ -224,6 +224,7 @@ struct event *event_create(struct event_loop *event_loop, enum event_type type, 
     event->context = context;
     event->param1 = 0;
     event->param2 = 0;
+    event->param3 = 0;
     event->status = 0;
     event->result = 0;
 #ifdef DEBUG
@@ -233,13 +234,14 @@ struct event *event_create(struct event_loop *event_loop, enum event_type type, 
     return event;
 }
 
-struct event *event_create_p2(struct event_loop *event_loop, enum event_type type, void *context, int param1, void *param2)
+struct event *event_create_p3(struct event_loop *event_loop, enum event_type type, void *context, void *param1, int param2, int param3)
 {
     struct event *event = memory_pool_push(&event_loop->pool, struct event);
     event->type = type;
     event->context = context;
     event->param1 = param1;
     event->param2 = param2;
+    event->param3 = param3;
     event->status = 0;
     event->result = 0;
 #ifdef DEBUG
@@ -1436,7 +1438,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
     if (g_verbose) {
         fprintf(stdout, "%s: ", __FUNCTION__);
-        for (int i = 0; i < param1 - 1; ++i) {
+        for (int i = 0; i < param2 - 1; ++i) {
             char c = *((char *) context + i);
             putc(c == '\0' ? ' ' : c, stdout);
         }
@@ -1444,6 +1446,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
         fflush(stdout);
     }
 
-    handle_message(param2, context);
+    handle_message(param1, context);
+
+    fflush(param1);
+    fclose(param1);
+
+    socket_close(param3);
+    free(context);
+
     return EVENT_SUCCESS;
 }

@@ -1,7 +1,7 @@
 #ifndef EVENT_LOOP_EVENT_H
 #define EVENT_LOOP_EVENT_H
 
-#define EVENT_CALLBACK(name) int name(void *context, int param1, void *param2)
+#define EVENT_CALLBACK(name) int name(void *context, void *param1, int param2, int param3)
 typedef EVENT_CALLBACK(event_callback);
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED);
@@ -176,8 +176,9 @@ struct event
 {
     enum event_type type;
     void *context;
-    int param1;
-    void *param2;
+    void *param1;
+    int param2;
+    int param3;
     volatile int *status;
     volatile int *result;
 };
@@ -193,7 +194,7 @@ struct signal
 };
 
 struct event *event_create(struct event_loop *event_loop, enum event_type type, void *context);
-struct event *event_create_p2(struct event_loop *event_loop, enum event_type type, void *context, int param1, void *param2);
+struct event *event_create_p3(struct event_loop *event_loop, enum event_type type, void *context, void *param1, int param2, int param3);
 void event_destroy(struct event_loop *event_loop, struct event *event);
 enum event_type event_type_from_string(const char *str);
 
