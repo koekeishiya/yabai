@@ -3,19 +3,31 @@
 #ifdef STATS
 struct cycle_counter
 {
-    uint64_t cycle_count;
-    uint64_t hit_count;
+    volatile uint64_t total_cycle_count;
+    volatile uint64_t hit_count;
 };
 
 static struct cycle_counter queue_counters[2];
 static struct cycle_counter event_counters[EVENT_TYPE_COUNT];
 
-static inline void cycle_counter_report(const char *name, struct cycle_counter *counter)
+#define cycle_counter_report(name, counter, elapsed_cycles) \
+    fprintf(stdout, "%30s: hits %'25lld | cur %'25lld | avg %'25lld\n",\
+            name, counter->hit_count, elapsed_cycles, counter->total_cycle_count / counter->hit_count);
+
+static inline void cycle_counter_tick(const char *name, struct cycle_counter *counter, uint64_t elapsed_cycles)
 {
-    fprintf(stdout, "%30s: cycles %'20lld, hits %'20lld, c/h %'20lld\n",
-            name, counter->cycle_count, counter->hit_count,
-            counter->cycle_count / counter->hit_count);
+    counter->total_cycle_count += elapsed_cycles;
+    ++counter->hit_count;
+    cycle_counter_report(name, counter, elapsed_cycles)
 }
+
+static inline void cycle_counter_tick_atomic(const char *name, struct cycle_counter *counter, uint64_t elapsed_cycles)
+{
+    __sync_add_and_fetch(&counter->total_cycle_count, elapsed_cycles);
+    __sync_add_and_fetch(&counter->hit_count, 1);
+    cycle_counter_report(name, counter, elapsed_cycles)
+}
+
 #endif
 
 static bool queue_init(struct queue *queue)
@@ -58,9 +70,7 @@ static void queue_push(struct queue *queue, struct event *event)
 #endif
 
 #ifdef STATS
-    __sync_add_and_fetch(&queue_counters[0].cycle_count, (__rdtsc() - begin_cycles));
-    __sync_add_and_fetch(&queue_counters[0].hit_count, 1);
-    cycle_counter_report(__FUNCTION__, &queue_counters[0]);
+    cycle_counter_tick_atomic(__FUNCTION__, &queue_counters[0], __rdtsc() - begin_cycles);
 #endif
 }
 
@@ -83,9 +93,7 @@ static struct event *queue_pop(struct queue *queue)
 #endif
 
 #ifdef STATS
-    queue_counters[1].cycle_count += (__rdtsc() - begin_cycles);
-    queue_counters[1].hit_count++;
-    cycle_counter_report(__FUNCTION__, &queue_counters[1]);
+    cycle_counter_tick(__FUNCTION__, &queue_counters[1], __rdtsc() - begin_cycles);
 #endif
 
     return head->next->data;
@@ -104,9 +112,7 @@ static void *event_loop_run(void *context)
 #endif
             int result = event_handler[event->type](event->context, event->param1);
 #ifdef STATS
-            event_counters[event->type].cycle_count += (__rdtsc() - begin_cycles);
-            event_counters[event->type].hit_count++;
-            cycle_counter_report(event_type_str[event->type], &event_counters[event->type]);
+            cycle_counter_tick(event_type_str[event->type], &event_counters[event->type], __rdtsc() - begin_cycles);
 #endif
             if (result == EVENT_SUCCESS) event_signal_transmit(event->context, event->type);
 
