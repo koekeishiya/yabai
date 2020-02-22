@@ -61,7 +61,6 @@ static uint64_t move_space_fp;
 static uint64_t set_front_window_fp;
 static Class managed_space;
 
-static socklen_t sin_size = sizeof(struct sockaddr);
 static pthread_t daemon_thread;
 static int daemon_sockfd;
 
