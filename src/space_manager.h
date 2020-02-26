@@ -34,14 +34,16 @@ struct space_manager
 
 enum space_op_error
 {
-    SPACE_OP_ERROR_SUCCESS      = 0,
-    SPACE_OP_ERROR_MISSING_SRC  = 1,
-    SPACE_OP_ERROR_MISSING_DST  = 2,
-    SPACE_OP_ERROR_INVALID_SRC  = 3,
-    SPACE_OP_ERROR_INVALID_DST  = 4,
-    SPACE_OP_ERROR_INVALID_TYPE = 5,
-    SPACE_OP_ERROR_SAME_SPACE   = 6,
-    SPACE_OP_ERROR_SAME_DISPLAY = 7,
+    SPACE_OP_ERROR_SUCCESS              = 0,
+    SPACE_OP_ERROR_MISSING_SRC          = 1,
+    SPACE_OP_ERROR_MISSING_DST          = 2,
+    SPACE_OP_ERROR_INVALID_SRC          = 3,
+    SPACE_OP_ERROR_INVALID_DST          = 4,
+    SPACE_OP_ERROR_INVALID_TYPE         = 5,
+    SPACE_OP_ERROR_SAME_SPACE           = 6,
+    SPACE_OP_ERROR_SAME_DISPLAY         = 7,
+    SPACE_OP_ERROR_DISPLAY_IS_ANIMATING = 8,
+    SPACE_OP_ERROR_IN_MISSION_CONTROL   = 9,
 };
 
 bool space_manager_has_separate_spaces(void);
@@ -85,12 +87,12 @@ void space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t s
 void space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees);
 void space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis);
 void space_manager_move_window_to_space(uint64_t sid, struct window *window);
-void space_manager_focus_space(uint64_t sid);
+enum space_op_error space_manager_focus_space(uint64_t sid);
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid);
 enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint64_t selector_sid);
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did);
 enum space_op_error space_manager_destroy_space(uint64_t sid);
-void space_manager_add_space(uint64_t sid);
+enum space_op_error space_manager_add_space(uint64_t sid);
 void space_manager_assign_process_to_space(pid_t pid, uint64_t sid);
 void space_manager_assign_process_to_all_spaces(pid_t pid);
 bool space_manager_is_window_on_active_space(struct window *window);

@@ -2,6 +2,7 @@
 
 extern struct window_manager g_window_manager;
 extern char g_sa_socket_file[MAXLEN];
+extern bool g_mission_control_active;
 extern int g_connection;
 
 static TABLE_HASH_FUNC(hash_view)
@@ -595,25 +596,34 @@ void space_manager_move_window_to_space(uint64_t sid, struct window *window)
     CFRelease(window_list_ref);
 }
 
-void space_manager_focus_space(uint64_t sid)
+enum space_op_error space_manager_focus_space(uint64_t sid)
 {
     int sockfd;
     char message[MAXLEN];
 
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
     uint64_t cur_sid = space_manager_active_space();
+    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
+
     uint32_t cur_did = space_display_id(cur_sid);
     uint32_t new_did = space_display_id(sid);
+    bool focus_display = cur_did != new_did;
+
+    bool is_animating = display_manager_display_is_animating(new_did);
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space %lld", sid);
         socket_write(sockfd, message);
         socket_wait(sockfd);
 
-        if (cur_did != new_did) {
-            display_manager_focus_display(new_did);
-        }
+        if (focus_display) display_manager_focus_display(new_did);
     }
     socket_close(sockfd);
+
+    return SPACE_OP_ERROR_SUCCESS;
 }
 
 static inline bool space_manager_is_space_last_user_space(uint64_t sid)
@@ -656,11 +666,17 @@ static void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_
 
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid)
 {
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
     uint32_t acting_did = space_display_id(acting_sid);
     uint32_t selector_did = space_display_id(selector_sid);
 
     if (acting_sid == selector_sid) return SPACE_OP_ERROR_SAME_SPACE;
     if (acting_did != selector_did) return SPACE_OP_ERROR_SAME_DISPLAY;
+
+    bool is_animating = display_manager_display_is_animating(acting_did);
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
     uint64_t acting_prev_sid = space_manager_prev_space(acting_sid);
     uint64_t selector_prev_sid = space_manager_prev_space(selector_sid);
@@ -699,11 +715,17 @@ enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uin
 
 enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint64_t selector_sid)
 {
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
     uint32_t acting_did = space_display_id(acting_sid);
     uint32_t selector_did = space_display_id(selector_sid);
 
     if (acting_sid == selector_sid) return SPACE_OP_ERROR_SAME_SPACE;
     if (acting_did != selector_did) return SPACE_OP_ERROR_SAME_DISPLAY;
+
+    bool is_animating = display_manager_display_is_animating(acting_did);
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
     uint64_t acting_prev_sid = space_manager_prev_space(acting_sid);
     uint64_t selector_prev_sid = space_manager_prev_space(selector_sid);
@@ -733,14 +755,25 @@ enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint6
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did)
 {
     int sockfd;
-    uint64_t d_sid;
     char message[MAXLEN];
 
-    if (!sid) return SPACE_OP_ERROR_MISSING_SRC;
-    if (space_display_id(sid) == did) return SPACE_OP_ERROR_INVALID_DST;
-    if (space_manager_is_space_last_user_space(sid)) return SPACE_OP_ERROR_INVALID_SRC;
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+    if (!sid)     return SPACE_OP_ERROR_MISSING_SRC;
 
-    d_sid = display_space_id(did);
+    uint32_t s_did = space_display_id(sid);
+    if (s_did == did) return SPACE_OP_ERROR_INVALID_DST;
+
+    bool is_src_animating = display_manager_display_is_animating(s_did);
+    if (is_src_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    bool last_space = space_manager_is_space_last_user_space(sid);
+    if (last_space) return SPACE_OP_ERROR_INVALID_SRC;
+
+    bool is_dst_animating = display_manager_display_is_animating(did);
+    if (is_dst_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    uint64_t d_sid = display_space_id(did);
     if (!d_sid) return SPACE_OP_ERROR_MISSING_DST;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
@@ -761,9 +794,15 @@ enum space_op_error space_manager_destroy_space(uint64_t sid)
     int sockfd;
     char message[MAXLEN];
 
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
     if (!sid) return SPACE_OP_ERROR_MISSING_SRC;
     if (!space_is_user(sid)) return SPACE_OP_ERROR_INVALID_TYPE;
     if (space_manager_is_space_last_user_space(sid)) return SPACE_OP_ERROR_INVALID_SRC;
+
+    bool is_animating = display_manager_display_is_animating(space_display_id(sid));
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space_destroy %lld", sid);
@@ -775,12 +814,17 @@ enum space_op_error space_manager_destroy_space(uint64_t sid)
     return SPACE_OP_ERROR_SUCCESS;
 }
 
-void space_manager_add_space(uint64_t sid)
+enum space_op_error space_manager_add_space(uint64_t sid)
 {
     int sockfd;
     char message[MAXLEN];
 
-    if (!sid) return;
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+    if (!sid)     return SPACE_OP_ERROR_MISSING_SRC;
+
+    bool is_animating = display_manager_display_is_animating(space_display_id(sid));
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "space_create %lld", sid);
@@ -788,6 +832,8 @@ void space_manager_add_space(uint64_t sid)
         socket_wait(sockfd);
     }
     socket_close(sockfd);
+
+    return SPACE_OP_ERROR_SUCCESS;
 }
 
 void space_manager_assign_process_to_space(pid_t pid, uint64_t sid)
