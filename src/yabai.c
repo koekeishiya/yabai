@@ -195,6 +195,7 @@ static inline void init_misc_settings(void)
 
     NSApplicationLoad();
     signal(SIGCHLD, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
     g_connection = SLSMainConnectionID();

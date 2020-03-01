@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.4.1] - 2020-03-01
+### Changed
+- Fixed a crash that could occur when reading from a socket (EBADF) or writing to a socket (SIGPIPE) [#430](https://github.com/koekeishiya/yabai/issues/430)
+
 ## [2.4.0] - 2020-03-01
 ### Added
 - Support exclusion for command arguments of type REGEX [#173](https://github.com/koekeishiya/yabai/issues/173)
@@ -196,7 +200,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.4.1...HEAD
+[2.4.1]: https://github.com/koekeishiya/yabai/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/koekeishiya/yabai/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/koekeishiya/yabai/compare/v2.2.3...v2.3.0
 [2.2.3]: https://github.com/koekeishiya/yabai/compare/v2.2.2...v2.2.3

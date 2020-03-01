@@ -8,18 +8,22 @@ char *socket_read(int sockfd, int *len)
     char buffer[BUFSIZ];
 
     while ((bytes_read = read(sockfd, buffer, sizeof(buffer)-1)) > 0) {
-        result = realloc(result, cursor+bytes_read+1);
+        char *temp = realloc(result, cursor+bytes_read+1);
+        if (!temp) goto err;
+
+        result = temp;
         memcpy(result+cursor, buffer, bytes_read);
         cursor += bytes_read;
     }
 
-    if (bytes_read == -1) {
-        free(result);
-        result = NULL;
-        *len = 0;
-    } else {
+    if (result && bytes_read != -1) {
         result[cursor] = '\0';
         *len = cursor;
+    } else {
+        if (result) free(result);
+err:
+        result = NULL;
+        *len = 0;
     }
 
     return result;
