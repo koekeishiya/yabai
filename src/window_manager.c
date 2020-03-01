@@ -1052,26 +1052,27 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
         window_manager_purify_window(wm, window);
 
-        if (window_observe(window)) {
-            window_manager_add_window(wm, window);
-            window_manager_apply_rules_to_window(sm, wm, window);
-
-            if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
-                if (window->rule_fullscreen) {
-                    window->rule_fullscreen = false;
-                } else if ((!window_level_is_standard(window)) ||
-                           (!window_is_standard(window)) ||
-                           (!window_can_move(window)) ||
-                           (window_is_sticky(window)) ||
-                           (!window_can_resize(window) && window_is_undersized(window))) {
-                    window_manager_make_floating(wm, window, true);
-                    window->is_floating = true;
-                }
-            }
-        } else {
+        if (!window_observe(window)) {
             window_manager_make_floating(wm, window, true);
             window_unobserve(window);
             window_destroy(window);
+            continue;
+        }
+
+        window_manager_add_window(wm, window);
+        window_manager_apply_rules_to_window(sm, wm, window);
+
+        if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
+            if (window->rule_fullscreen) {
+                window->rule_fullscreen = false;
+            } else if ((!window_level_is_standard(window)) ||
+                       (!window_is_standard(window)) ||
+                       (!window_can_move(window)) ||
+                       (window_is_sticky(window)) ||
+                       (!window_can_resize(window) && window_is_undersized(window))) {
+                window_manager_make_floating(wm, window, true);
+                window->is_floating = true;
+            }
         }
     }
 
