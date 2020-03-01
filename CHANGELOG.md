@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.4.0] - 2020-03-01
 ### Added
 - Support exclusion for command arguments of type REGEX [#173](https://github.com/koekeishiya/yabai/issues/173)
 - Add ability to specify window layers; below (desktop), normal, and above (topmost) [#429](https://github.com/koekeishiya/yabai/issues/429)
@@ -194,7 +196,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/koekeishiya/yabai/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/koekeishiya/yabai/compare/v2.2.3...v2.3.0
 [2.2.3]: https://github.com/koekeishiya/yabai/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/koekeishiya/yabai/compare/v2.2.1...v2.2.2
