@@ -473,6 +473,9 @@ Constrain matches to the selected space.
 Constrain matches to the selected window.
 .RE
 .SS "Rule"
+.sp
+All registered rules that match the given filter will apply to a window, in the order they were added.
+If multiple rules specify a value for the same argument, the latter rule will override that value as it was applied last.
 .SS "General Syntax"
 .sp
 yabai \-m rule \fI<COMMAND>\fP
