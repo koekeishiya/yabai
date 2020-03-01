@@ -123,6 +123,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_RESIZE  "--resize"
 #define COMMAND_WINDOW_RATIO   "--ratio"
 #define COMMAND_WINDOW_CLOSE   "--close"
+#define COMMAND_WINDOW_LAYER   "--layer"
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
 #define COMMAND_WINDOW_DISPLAY "--display"
 #define COMMAND_WINDOW_SPACE   "--space"
@@ -138,6 +139,9 @@ extern bool g_verbose;
 #define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RATIO         "%255[^:]:%f"
+#define ARGUMENT_WINDOW_LAYER_BELOW   "below"
+#define ARGUMENT_WINDOW_LAYER_NORMAL  "normal"
+#define ARGUMENT_WINDOW_LAYER_ABOVE   "above"
 #define ARGUMENT_WINDOW_TOGGLE_ON_TOP "topmost"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
@@ -172,14 +176,18 @@ extern bool g_verbose;
 #define ARGUMENT_RULE_KEY_ALPHA   "opacity"
 #define ARGUMENT_RULE_KEY_MANAGE  "manage"
 #define ARGUMENT_RULE_KEY_STICKY  "sticky"
+#define ARGUMENT_RULE_KEY_LAYER   "layer"
 #define ARGUMENT_RULE_KEY_ON_TOP  "topmost"
 #define ARGUMENT_RULE_KEY_BORDER  "border"
 #define ARGUMENT_RULE_KEY_FULLSCR "native-fullscreen"
 #define ARGUMENT_RULE_KEY_GRID    "grid"
 #define ARGUMENT_RULE_KEY_LABEL   "label"
 
-#define ARGUMENT_RULE_VALUE_SPACE '^'
-#define ARGUMENT_RULE_VALUE_GRID  "%d:%d:%d:%d:%d:%d"
+#define ARGUMENT_RULE_VALUE_SPACE  '^'
+#define ARGUMENT_RULE_VALUE_GRID   "%d:%d:%d:%d:%d:%d"
+#define ARGUMENT_RULE_VALUE_BELOW  "below"
+#define ARGUMENT_RULE_VALUE_NORMAL "normal"
+#define ARGUMENT_RULE_VALUE_ABOVE  "above"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN SIGNAL-------------------------------- */
@@ -316,6 +324,18 @@ static void daemon_fail(FILE *rsp, char *fmt, ...)
     if (!rsp) return;
 
     fprintf(rsp, FAILURE_MESSAGE);
+
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(rsp, fmt, ap);
+    va_end(ap);
+}
+
+static void daemon_deprecated(FILE *rsp, char *fmt, ...)
+{
+    if (!rsp) return;
+
+    fprintf(rsp, "deprecation warning: ");
 
     va_list ap;
     va_start(ap, fmt);
@@ -1543,6 +1563,17 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         if (!window_manager_close_window(acting_window)) {
             daemon_fail(rsp, "could not close window with id '%d'\n", acting_window->id);
         }
+    } else if (token_equals(command, COMMAND_WINDOW_LAYER)) {
+        struct token value = get_token(&message);
+        if (token_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
+            window_manager_set_layer(acting_window->id, LAYER_BELOW);
+        } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_NORMAL)) {
+            window_manager_set_layer(acting_window->id, LAYER_NORMAL);
+        } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
+            window_manager_set_layer(acting_window->id, LAYER_ABOVE);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
@@ -1873,17 +1904,43 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_ON_TOP)) {
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_LAYER)) {
                 if (exclusion) unsupported_exclusion = key;
 
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.topmost = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.topmost = RULE_PROP_OFF;
+                if (string_equals(value, ARGUMENT_RULE_VALUE_BELOW)) {
+                    rule.layer = LAYER_BELOW;
+                } else if (string_equals(value, ARGUMENT_RULE_VALUE_NORMAL)) {
+                    rule.layer = LAYER_NORMAL;
+                } else if (string_equals(value, ARGUMENT_RULE_VALUE_ABOVE)) {
+                    rule.layer = LAYER_ABOVE;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_ON_TOP)) {
+
+                //
+                // @deprecated
+                //
+                // Kept for backwards compatibility for now, but will be removed in the future.
+                // The actual implementation of this option uses the new layer system internally.
+                //
+
+                daemon_deprecated(rsp, "key '%s=%s' has been replaced by '%s=%s' and will be removed in the future\n",
+                                  ARGUMENT_RULE_KEY_ON_TOP, ARGUMENT_COMMON_VAL_ON,
+                                  ARGUMENT_RULE_KEY_LAYER, ARGUMENT_RULE_VALUE_ABOVE);
+
+                if (exclusion) unsupported_exclusion = key;
+
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule.layer = LAYER_ABOVE;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule.layer = LAYER_NORMAL;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+
             } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
                 if (exclusion) unsupported_exclusion = key;
 

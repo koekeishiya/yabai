@@ -5,10 +5,13 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support exclusion for command arguments of type REGEX [#173](https://github.com/koekeishiya/yabai/issues/173)
+- Add ability to specify window layers; below (desktop), normal, and above (topmost) [#429](https://github.com/koekeishiya/yabai/issues/429)
+
 ### Changed
 - Properly return focus to the active window on the current space when a window is moved through a rule [#418](https://github.com/koekeishiya/yabai/issues/418)
 - Prevent space operations (create, destroy, focus, swap, move and send to display) from applying while mission-control is active or the display is animating [#417](https://github.com/koekeishiya/yabai/issues/417)
-- Support exclusion for command arguments of type REGEX [#173](https://github.com/koekeishiya/yabai/issues/173)
 
 ## [2.3.0] - 2020-02-14
 ### Added

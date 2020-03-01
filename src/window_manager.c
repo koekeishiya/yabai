@@ -169,10 +169,8 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window_manager_make_sticky(window->id, false);
     }
 
-    if (rule->topmost == RULE_PROP_ON) {
-        window_manager_make_topmost(window->id, true);
-    } else if (rule->topmost == RULE_PROP_OFF) {
-        window_manager_make_topmost(window->id, false);
+    if (rule->layer) {
+        window_manager_set_layer(window->id, rule->layer);
     }
 
     if (rule->border == RULE_PROP_ON) {
@@ -539,13 +537,13 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
     }
 }
 
-void window_manager_make_topmost(uint32_t wid, bool topmost)
+void window_manager_set_layer(uint32_t wid, int layer_key)
 {
     int sockfd;
     char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_level %d %d", wid, topmost ? kCGFloatingWindowLevelKey : kCGNormalWindowLevelKey);
+        snprintf(message, sizeof(message), "window_level %d %d", wid, layer_key);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
@@ -555,7 +553,7 @@ void window_manager_make_topmost(uint32_t wid, bool topmost)
 void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating)
 {
     if (!wm->enable_window_topmost) return;
-    window_manager_make_topmost(wid, floating);
+    window_manager_set_layer(wid, floating ? LAYER_ABOVE : LAYER_NORMAL);
 }
 
 void window_manager_make_sticky(uint32_t wid, bool sticky)
@@ -1328,7 +1326,7 @@ void window_manager_make_children_floating(struct window_manager *wm, struct win
 void window_manager_toggle_window_topmost(struct window *window)
 {
     bool is_topmost = window_is_topmost(window);
-    window_manager_make_topmost(window->id, !is_topmost);
+    window_manager_set_layer(window->id, is_topmost ? LAYER_NORMAL : LAYER_ABOVE);
 }
 
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct window *window)

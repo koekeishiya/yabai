@@ -20,7 +20,7 @@ struct rule
     float alpha;
     int manage;
     int sticky;
-    int topmost;
+    int layer;
     int border;
     int fullscreen;
     unsigned grid[6];

@@ -309,7 +309,7 @@ err:
 
 bool window_is_topmost(struct window *window)
 {
-    bool is_topmost = window_level(window) == CGWindowLevelForKey(kCGFloatingWindowLevelKey);
+    bool is_topmost = window_level(window) == CGWindowLevelForKey(LAYER_ABOVE);
     return is_topmost;
 }
 

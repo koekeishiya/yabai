@@ -93,6 +93,8 @@ DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1\-based
 
 SPACE_SEL   := prev | next | first | last | recent | mission\-control index (1\-based) | LABEL
 
+LAYER       := below | normal | above
+
 FLOAT_SEL   := 0 < value <= 1.0
 
 BOOL_SEL    := on | off
@@ -456,6 +458,11 @@ If type is \fIrel\fP the split ratio of the selected window is changed by \fIdr\
 Toggle the given property of the selected window.
 .RE
 .sp
+\fB\-\-layer\fP \fI<LAYER>\fP
+.RS 4
+Set the stacking layer of the selected window.
+.RE
+.sp
 \fB\-\-display\fP \fI<DISPLAY_SEL>\fP
 .RS 4
 Send the selected window to the given display.
@@ -559,12 +566,17 @@ Set window opacity.
 .sp
 \fBmanage=\fI<BOOL_SEL>\fP\fP
 .RS 4
-Window should be managed (tile vs float)
+Window should be managed (tile vs float).
 .RE
 .sp
 \fBsticky=\fI<BOOL_SEL>\fP\fP
 .RS 4
 Window appears on all spaces.
+.RE
+.sp
+\fBlayer=\fI<LAYER>\fP\fP
+.RS 4
+Window is ordered within the given stacking layer.
 .RE
 .sp
 \fBtopmost=\fI<BOOL_SEL>\fP\fP

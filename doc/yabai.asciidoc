@@ -72,6 +72,8 @@ DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1-based)
 
 SPACE_SEL   := prev | next | first | last | recent | mission-control index (1-based) | LABEL
 
+LAYER       := below | normal | above
+
 FLOAT_SEL   := 0 < value <= 1.0
 
 BOOL_SEL    := on | off
@@ -330,6 +332,9 @@ COMMAND
 *--toggle* 'float|sticky|topmost|pip|shadow|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window.
 
+*--layer* '<LAYER>'::
+    Set the stacking layer of the selected window.
+
 *--display* '<DISPLAY_SEL>'::
     Send the selected window to the given display.
 
@@ -413,10 +418,13 @@ ARGUMENT
     Set window opacity.
 
 *manage='<BOOL_SEL>'*::
-    Window should be managed (tile vs float)
+    Window should be managed (tile vs float).
 
 *sticky='<BOOL_SEL>'*::
     Window appears on all spaces.
+
+*layer='<LAYER>'*::
+    Window is ordered within the given stacking layer.
 
 *topmost='<BOOL_SEL>'*::
     Window appears above other windows.
