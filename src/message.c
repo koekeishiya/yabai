@@ -1563,11 +1563,11 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_LAYER)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
-            window_manager_set_layer(acting_window->id, LAYER_BELOW);
+            window_manager_set_window_layer(acting_window, LAYER_BELOW);
         } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_NORMAL)) {
-            window_manager_set_layer(acting_window->id, LAYER_NORMAL);
+            window_manager_set_window_layer(acting_window, LAYER_NORMAL);
         } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
-            window_manager_set_layer(acting_window->id, LAYER_ABOVE);
+            window_manager_set_window_layer(acting_window, LAYER_ABOVE);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

@@ -168,7 +168,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (rule->layer) {
-        window_manager_set_layer(window->id, rule->layer);
+        window_manager_set_window_layer(window, rule->layer);
     }
 
     if (rule->border == RULE_PROP_ON) {
@@ -535,13 +535,13 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
     }
 }
 
-void window_manager_set_layer(uint32_t wid, int layer_key)
+void window_manager_set_layer(uint32_t wid, int layer)
 {
     int sockfd;
     char message[MAXLEN];
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_level %d %d", wid, layer_key);
+        snprintf(message, sizeof(message), "window_level %d %d", wid, layer);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
@@ -574,14 +574,21 @@ static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_
     free(window_list);
 }
 
+void window_manager_set_window_layer(struct window *window, int layer)
+{
+    uint64_t sid = window_space(window);
+    if (!sid) sid = space_manager_active_space();
+
+    window_manager_set_layer(window->id, layer);
+    window_manager_set_layer_for_children(window->connection, window->id, sid, layer);
+}
+
 void window_manager_make_floating(struct window_manager *wm, struct window *window, bool floating)
 {
     if (!wm->enable_window_topmost) return;
-    uint64_t sid = window_space(window);
-    if (!sid) sid = space_manager_active_space();
+
     int layer = floating ? LAYER_ABOVE : LAYER_NORMAL;
-    window_manager_set_layer(window->id, layer);
-    window_manager_set_layer_for_children(window->connection, window->id, sid, layer);
+    window_manager_set_window_layer(window, layer);
 }
 
 void window_manager_make_sticky(uint32_t wid, bool sticky)
@@ -1325,7 +1332,7 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
 void window_manager_toggle_window_topmost(struct window *window)
 {
     bool is_topmost = window_is_topmost(window);
-    window_manager_set_layer(window->id, is_topmost ? LAYER_NORMAL : LAYER_ABOVE);
+    window_manager_set_window_layer(window, is_topmost ? LAYER_NORMAL : LAYER_ABOVE);
 }
 
 void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct window *window)
