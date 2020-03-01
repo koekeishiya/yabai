@@ -12,6 +12,8 @@ struct rule
     regex_t title_regex;
     bool app_regex_valid;
     bool title_regex_valid;
+    bool app_regex_exclude;
+    bool title_regex_exclude;
     bool follow_space;
     uint32_t did;
     uint64_t sid;

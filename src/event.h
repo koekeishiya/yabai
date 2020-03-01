@@ -185,6 +185,8 @@ struct signal
 {
     bool app_regex_valid;
     bool title_regex_valid;
+    bool app_regex_exclude;
+    bool title_regex_exclude;
     regex_t app_regex;
     regex_t title_regex;
     char *command;

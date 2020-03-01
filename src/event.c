@@ -128,7 +128,8 @@ static bool event_signal_filter(struct signal *signal, enum event_type type, str
         struct process *process = args->entity;
         if (!process) return true;
 
-        return regex_match(signal->app_regex_valid, &signal->app_regex, process->name) == REGEX_MATCH_NO;
+        int regex_match_app = signal->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+        return regex_match(signal->app_regex_valid, &signal->app_regex, process->name) == regex_match_app;
     } break;
     case APPLICATION_ACTIVATED:
     case APPLICATION_DEACTIVATED:
@@ -137,7 +138,8 @@ static bool event_signal_filter(struct signal *signal, enum event_type type, str
         struct application *application = args->entity;
         if (!application) return true;
 
-        return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) == REGEX_MATCH_NO;
+        int regex_match_app = signal->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+        return regex_match(signal->app_regex_valid, &signal->app_regex, application->name) == regex_match_app;
     } break;
     case WINDOW_CREATED:
     case WINDOW_FOCUSED:
@@ -149,8 +151,13 @@ static bool event_signal_filter(struct signal *signal, enum event_type type, str
         struct window *window = args->entity;
         if (!window) return true;
 
-        return regex_match(signal->app_regex_valid,   &signal->app_regex,   window->application->name) == REGEX_MATCH_NO ||
-               regex_match(signal->title_regex_valid, &signal->title_regex, args->param1)              == REGEX_MATCH_NO;
+        int regex_match_app = signal->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+        bool app_no_match = regex_match(signal->app_regex_valid,   &signal->app_regex,   window->application->name) == regex_match_app;
+
+        int regex_match_title = signal->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+        bool title_no_match = regex_match(signal->title_regex_valid, &signal->title_regex, args->param1)            == regex_match_title;
+
+        return app_no_match || title_no_match;
     } break;
     }
 }
