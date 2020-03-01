@@ -60,12 +60,16 @@ Use the specified configuration file.
 .sp
 \fB\-\-install\-sa\fP
 .RS 4
-Install scripting\-addition. Must be run as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+Install scripting\-addition. Must be run as root.
+.br
+Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
 .RE
 .sp
 \fB\-\-uninstall\-sa\fP
 .RS 4
-Uninstall scripting\-addition. Must be run as root. Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+Uninstall scripting\-addition. Must be run as root.
+.br
+Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
 .RE
 .sp
 \fB\-\-check\-sa\fP
@@ -128,12 +132,20 @@ Enable custom status bar.
 .sp
 \fIstatus_bar_text_font\fP
 .RS 4
-Specify name, style and size of font to use for drawing text. Format: \fI<font_family>:<font_style>:<font_size>\fP. Use \fIFont Book.app\fP to identify the correct name.
+Specify name, style and size of font to use for drawing text.
+.br
+Format: \fI<font_family>:<font_style>:<font_size>\fP.
+.br
+Use \fIFont Book.app\fP to identify the correct name.
 .RE
 .sp
 \fIstatus_bar_icon_font\fP
 .RS 4
-Specify name, style and size of font to use for drawing icon symbols. Format: \fI<font_family>:<font_style>:<font_size>\fP. Use \fIFont Book.app\fP to identify the correct name.
+Specify name, style and size of font to use for drawing icon symbols.
+.br
+Format: \fI<font_family>:<font_style>:<font_size>\fP.
+.br
+Use \fIFont Book.app\fP to identify the correct name.
 .RE
 .sp
 \fIstatus_bar_background_color\fP
@@ -153,7 +165,9 @@ Specify symbols separated by whitespace to be used for visualizing spaces.
 .sp
 \fIstatus_bar_power_icon_strip\fP
 .RS 4
-Specify two symbols separated by whitespace. The first symbol represents battery power and the second symbol indicates AC.
+Specify two symbols separated by whitespace.
+.br
+The first symbol represents battery power and the second symbol indicates AC.
 .RE
 .sp
 \fIstatus_bar_space_icon\fP
@@ -173,12 +187,16 @@ When focusing a window, put the mouse at its center.
 .sp
 \fIfocus_follows_mouse\fP
 .RS 4
-Focus the window under the mouse. Accept the following values: \fBautofocus\fP, \fBautoraise\fP, \fBoff\fP.
+Focus the window under the mouse.
+.br
+Accept the following values: \fBautofocus\fP, \fBautoraise\fP, \fBoff\fP.
 .RE
 .sp
 \fIwindow_placement\fP
 .RS 4
-Specify whether managed windows should become the first or second leaf\-node. Accept the following values: \fBfirst_child\fP, \fBsecond_child\fP.
+Specify whether managed windows should become the first or second leaf\-node.
+.br
+Accept the following values: \fBfirst_child\fP, \fBsecond_child\fP.
 .RE
 .sp
 \fIwindow_topmost\fP
@@ -198,7 +216,9 @@ Duration of transition between active / normal opacity.
 .sp
 \fIwindow_shadow\fP
 .RS 4
-Draw shadow for windows. Accept the following values: \fBon\fP, \fBfloat\fP, \fBoff\fP.
+Draw shadow for windows.
+.br
+Accept the following values: \fBon\fP, \fBfloat\fP, \fBoff\fP.
 .RE
 .sp
 \fIwindow_border\fP
@@ -208,7 +228,9 @@ Draw border for windows.
 .sp
 \fIwindow_border_placement\fP
 .RS 4
-Position/draw\-mode of window border. Accept the following values: \fBexterior\fP, \fBinterior\fP, \fBinset\fP.
+Position/draw\-mode of window border.
+.br
+Accept the following values: \fBexterior\fP, \fBinterior\fP, \fBinset\fP.
 .RE
 .sp
 \fIwindow_border_width\fP
@@ -263,18 +285,24 @@ Balance the window tree upon change, so that all windows occupy the same area.
 .sp
 \fImouse_modifier\fP
 .RS 4
-Keyboard modifier used for moving and resizing windows. Accept the following values: \fBcmd\fP, \fBalt\fP, \fBshift\fP, \fBctrl\fP, \fBfn\fP.
+Keyboard modifier used for moving and resizing windows.
+.br
+Accept the following values: \fBcmd\fP, \fBalt\fP, \fBshift\fP, \fBctrl\fP, \fBfn\fP.
 .RE
 .sp
 \fImouse_action1\fP, \fImouse_action2\fP
 .RS 4
-Action performed when pressing \fImouse_modifier\fP + \fIbutton<n>\fP. Accept the following values: \fBmove\fP, \fBresize\fP.
+Action performed when pressing \fImouse_modifier\fP + \fIbutton<n>\fP.
+.br
+Accept the following values: \fBmove\fP, \fBresize\fP.
 .RE
 .SS "Space Settings"
 .sp
 \fIlayout\fP
 .RS 4
-Set the layout of the selected space. Accept the following values: \fBbsp\fP, \fBfloat\fP.
+Set the layout of the selected space.
+.br
+Accept the following values: \fBbsp\fP, \fBfloat\fP.
 .RE
 .sp
 \fItop_padding\fP, \fIbottom_padding\fP, \fIleft_padding\fP, \fIright_padding\fP
@@ -319,12 +347,16 @@ Remove the selected space.
 .sp
 \fB\-\-move\fP \fI<SPACE_SEL>\fP
 .RS 4
-Move position of the selected space to the position of the given space. The selected space and given space must both belong to the same display.
+Move position of the selected space to the position of the given space.
+.br
+The selected space and given space must both belong to the same display.
 .RE
 .sp
 \fB\-\-swap\fP \fI<SPACE_SEL>\fP
 .RS 4
-Swap the selected space with the given space. The selected space and given space must both belong to the same display.
+Swap the selected space with the given space.
+.br
+The selected space and given space must both belong to the same display.
 .RE
 .sp
 \fB\-\-display\fP \fI<DISPLAY_SEL>\fP
@@ -394,7 +426,9 @@ Re\-insert the selected window, splitting the given window.
 .sp
 \fB\-\-insert\fP \fI<DIR_SEL>\fP
 .RS 4
-Set the splitting area of the selected window. If the current splitting area matches \fIDIR_SEL\fP, the action will be undone.
+Set the splitting area of the selected window.
+.br
+If the current splitting area matches \fIDIR_SEL\fP, the action will be undone.
 .RE
 .sp
 \fB\-\-grid\fP \fI<rows>:<cols>:<start\-x>:<start\-y>:<width>:<height>\fP
@@ -475,6 +509,7 @@ Constrain matches to the selected window.
 .SS "Rule"
 .sp
 All registered rules that match the given filter will apply to a window, in the order they were added.
+.br
 If multiple rules specify a value for the same argument, the latter rule will override that value as it was applied last.
 .SS "General Syntax"
 .sp
@@ -553,7 +588,9 @@ Set window frame based on a self\-defined grid.
 .RE
 .SS "Signal"
 .sp
-A signal is a simple way for the user to react to some event that has been processed. Arguments are passed through environment variables.
+A signal is a simple way for the user to react to some event that has been processed.
+.br
+Arguments are passed through environment variables.
 .SS "General Syntax"
 .sp
 yabai \-m signal \fI<COMMAND>\fP
@@ -561,7 +598,9 @@ yabai \-m signal \fI<COMMAND>\fP
 .sp
 \fB\-\-add event=\fI<EVENT>\fP action=\fI<ACTION>\fP [label=\fI<LABEL>\fP] [app[!]=\fI<REGEX>\fP] [title[!]=\fI<REGEX>\fP]\fP
 .RS 4
-Add an optionally labelled signal to execute an action after processing an event of the given type. Some signals can be specified to trigger based on the application name and/or window title.
+Add an optionally labelled signal to execute an action after processing an event of the given type.
+.br
+Some signals can be specified to trigger based on the application name and/or window title.
 .RE
 .sp
 \fB\-\-remove \fI<LABEL>\fP\fP
@@ -572,127 +611,203 @@ Remove an existing signal with the given label.
 .sp
 \fBapplication_launched\fP
 .RS 4
-Triggered when a new application is launched. Eligible for \fBapp\fP filter. Passes one argument: $YABAI_PROCESS_ID
+Triggered when a new application is launched.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_terminated\fP
 .RS 4
-Triggered when an application is terminated. Eligible for \fBapp\fP filter Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is terminated.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_front_switched\fP
 .RS 4
-Triggered when the front\-most application changes. Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID
+Triggered when the front\-most application changes.
+.br
+Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID
 .RE
 .sp
 \fBapplication_activated\fP
 .RS 4
-Triggered when an application is activated. Eligible for \fBapp\fP filter. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is activated.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_deactivated\fP
 .RS 4
-Triggered when an application is deactivated. Eligible for \fBapp\fP filter. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is deactivated.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_visible\fP
 .RS 4
-Triggered when an application is unhidden. Eligible for \fBapp\fP filter. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is unhidden.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_hidden\fP
 .RS 4
-Triggered when an application is hidden. Eligible for \fBapp\fP filter. Passes one argument: $YABAI_PROCESS_ID
+Triggered when an application is hidden.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBwindow_created\fP
 .RS 4
-Triggered when a window is created. Eligible for both \fBapp\fP and \fBtitle\fP filter. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window is created.
+.br
+Eligible for both \fBapp\fP and \fBtitle\fP filter.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_destroyed\fP
 .RS 4
-Triggered when a window is destroyed. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window is destroyed.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_focused\fP
 .RS 4
-Triggered when a window becomes the key\-window for its application. Eligible for both \fBapp\fP and \fBtitle\fP filter. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window becomes the key\-window for its application.
+.br
+Eligible for both \fBapp\fP and \fBtitle\fP filter.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_moved\fP
 .RS 4
-Triggered when a window changes position. Eligible for both \fBapp\fP and \fBtitle\fP filter. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window changes position.
+.br
+Eligible for both \fBapp\fP and \fBtitle\fP filter.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_resized\fP
 .RS 4
-Triggered when a window changes dimensions. Eligible for both \fBapp\fP and \fBtitle\fP filter. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window changes dimensions.
+.br
+Eligible for both \fBapp\fP and \fBtitle\fP filter.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_minimized\fP
 .RS 4
-Triggered when a window has been minimized. Eligible for both \fBapp\fP and \fBtitle\fP filter. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window has been minimized.
+.br
+Eligible for both \fBapp\fP and \fBtitle\fP filter.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_deminimized\fP
 .RS 4
-Triggered when a window has been deminimized. Eligible for both \fBapp\fP and \fBtitle\fP filter. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window has been deminimized.
+.br
+Eligible for both \fBapp\fP and \fBtitle\fP filter.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_title_changed\fP
 .RS 4
-Triggered when a window changes its title. Eligible for both \fBapp\fP and \fBtitle\fP filter. Passes one argument: $YABAI_WINDOW_ID
+Triggered when a window changes its title.
+.br
+Eligible for both \fBapp\fP and \fBtitle\fP filter.
+.br
+Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBspace_changed\fP
 .RS 4
-Triggered when the active space has changed. Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID
+Triggered when the active space has changed.
+.br
+Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID
 .RE
 .sp
 \fBdisplay_added\fP
 .RS 4
-Triggered when a new display has been added. Passes one argument: $YABAI_DISPLAY_ID
+Triggered when a new display has been added.
+.br
+Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_removed\fP
 .RS 4
-Triggered when a display has been removed. Passes one argument: $YABAI_DISPLAY_ID
+Triggered when a display has been removed.
+.br
+Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_moved\fP
 .RS 4
-Triggered when a change has been made to display arrangement. Passes one argument: $YABAI_DISPLAY_ID
+Triggered when a change has been made to display arrangement.
+.br
+Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_resized\fP
 .RS 4
-Triggered when a display has changed resolution. Passes one argument: $YABAI_DISPLAY_ID
+Triggered when a display has changed resolution.
+.br
+Passes one argument: $YABAI_DISPLAY_ID
 .RE
 .sp
 \fBdisplay_changed\fP
 .RS 4
-Triggered when the active display has changed. Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
+Triggered when the active display has changed.
+.br
+Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
 .RE
 .sp
 \fBmouse_down\fP
 .RS 4
-Triggered when a mouse button has been pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
+Triggered when a mouse button has been pressed.
+.br
+Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmouse_up\fP
 .RS 4
-Triggered when a mouse button has been released. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
+Triggered when a mouse button has been released.
+.br
+Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmouse_dragged\fP
 .RS 4
-Triggered when the mouse is moved with one of its buttons pressed. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
+Triggered when the mouse is moved with one of its buttons pressed.
+.br
+Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmouse_moved\fP
 .RS 4
-Triggered when the mouse is moved. Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
+Triggered when the mouse is moved.
+.br
+Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
 .RE
 .sp
 \fBmission_control_enter\fP
