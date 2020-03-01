@@ -552,8 +552,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     struct window *window = window_create(application, CFRetain(context), window_id);
     if (window_is_popover(window) || window_is_unknown(window)) {
         debug("%s: ignoring window %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_make_children_floating(&g_window_manager, window, true);
-        window_manager_make_floating(&g_window_manager, window->id, true);
+        window_manager_make_floating(&g_window_manager, window, true);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
         window_destroy(window);
         return EVENT_FAILURE;
@@ -564,8 +563,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 
     if (!window_observe(window)) {
         debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_make_children_floating(&g_window_manager, window, true);
-        window_manager_make_floating(&g_window_manager, window->id, true);
+        window_manager_make_floating(&g_window_manager, window, true);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
         window_unobserve(window);
         window_destroy(window);
@@ -584,8 +582,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
                    (!window_can_move(window)) ||
                    (window_is_sticky(window)) ||
                    (!window_can_resize(window) && window_is_undersized(window))) {
-            window_manager_make_children_floating(&g_window_manager, window, true);
-            window_manager_make_floating(&g_window_manager, window->id, true);
+            window_manager_make_floating(&g_window_manager, window, true);
             window->is_floating = true;
         }
     }
@@ -1399,7 +1396,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_OPENED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
-    window_manager_make_floating(&g_window_manager, window_id, true);
+
+    if (g_window_manager.enable_window_topmost) {
+        window_manager_set_layer(window_id, LAYER_ABOVE);
+    }
+
     return EVENT_SUCCESS;
 }
 

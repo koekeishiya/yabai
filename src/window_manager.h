@@ -141,8 +141,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application);
 void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
 void window_manager_purify_window(struct window_manager *wm, struct window *window);
-void window_manager_make_children_floating(struct window_manager *wm, struct window *window, bool floating);
-void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating);
+void window_manager_make_floating(struct window_manager *wm, struct window *window, bool floating);
 void window_manager_make_sticky(uint32_t wid, bool sticky);
 void window_manager_set_layer(uint32_t wid, int layer_key);
 void window_manager_toggle_window_topmost(struct window *window);

@@ -143,8 +143,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     if (rule->manage == RULE_PROP_ON) {
         window->rule_manage = true;
         window->is_floating = false;
-        window_manager_make_children_floating(wm, window, false);
-        window_manager_make_floating(wm, window->id, false);
+        window_manager_make_floating(wm, window, false);
         if ((window_manager_should_manage_window(window)) &&
             (!window_manager_find_managed_window(wm, window))) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
@@ -158,8 +157,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
-        window_manager_make_children_floating(wm, window, true);
-        window_manager_make_floating(wm, window->id, true);
+        window_manager_make_floating(wm, window, true);
         window->is_floating = true;
     }
 
@@ -550,10 +548,40 @@ void window_manager_set_layer(uint32_t wid, int layer_key)
     socket_close(sockfd);
 }
 
-void window_manager_make_floating(struct window_manager *wm, uint32_t wid, bool floating)
+static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_t sid, int layer)
+{
+    int count;
+    uint32_t *window_list = space_window_list_for_connection(sid, cid, &count);
+    if (!window_list) return;
+
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), count, kCFNumberSInt32Type);
+    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_list_ref, count);
+    CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
+
+    while (SLSWindowIteratorAdvance(iterator)) {
+        uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
+        uint32_t child_wid = SLSWindowIteratorGetWindowID(iterator);
+
+        if (parent_wid == wid) {
+            window_manager_set_layer(child_wid, layer);
+            window_manager_set_layer_for_children(cid, child_wid, sid, layer);
+        }
+    }
+
+    CFRelease(query);
+    CFRelease(iterator);
+    CFRelease(window_list_ref);
+    free(window_list);
+}
+
+void window_manager_make_floating(struct window_manager *wm, struct window *window, bool floating)
 {
     if (!wm->enable_window_topmost) return;
-    window_manager_set_layer(wid, floating ? LAYER_ABOVE : LAYER_NORMAL);
+    uint64_t sid = window_space(window);
+    if (!sid) sid = space_manager_active_space();
+    int layer = floating ? LAYER_ABOVE : LAYER_NORMAL;
+    window_manager_set_layer(window->id, layer);
+    window_manager_set_layer_for_children(window->connection, window->id, sid, layer);
 }
 
 void window_manager_make_sticky(uint32_t wid, bool sticky)
@@ -1016,8 +1044,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
 
         if (window_is_popover(window) || window_is_unknown(window)) {
             debug("%s: ignoring window %s %d\n", __FUNCTION__, window->application->name, window->id);
-            window_manager_make_children_floating(wm, window, true);
-            window_manager_make_floating(wm, window->id, true);
+            window_manager_make_floating(wm, window, true);
             window_destroy(window);
             continue;
         }
@@ -1037,14 +1064,12 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
                            (!window_can_move(window)) ||
                            (window_is_sticky(window)) ||
                            (!window_can_resize(window) && window_is_undersized(window))) {
-                    window_manager_make_children_floating(wm, window, true);
-                    window_manager_make_floating(wm, window->id, true);
+                    window_manager_make_floating(wm, window, true);
                     window->is_floating = true;
                 }
             }
         } else {
-            window_manager_make_children_floating(wm, window, true);
-            window_manager_make_floating(wm, window->id, true);
+            window_manager_make_floating(wm, window, true);
             window_unobserve(window);
             window_destroy(window);
         }
@@ -1296,33 +1321,6 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
     window_manager_resize_window(window, fw, fh);
 }
 
-void window_manager_make_children_floating(struct window_manager *wm, struct window *window, bool floating)
-{
-    if (!wm->enable_window_topmost) return;
-
-    uint64_t sid = window_space(window);
-    if (!sid) sid = space_manager_active_space();
-
-    int count;
-    uint32_t *window_list = space_window_list_for_connection(sid, window->connection, &count);
-    if (!window_list) return;
-
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), count, kCFNumberSInt32Type);
-    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_list_ref, count);
-    CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
-
-    while (SLSWindowIteratorAdvance(iterator)) {
-        uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
-        uint32_t wid = SLSWindowIteratorGetWindowID(iterator);
-        if (parent_wid == window->id) window_manager_make_floating(wm, wid, floating);
-    }
-
-    CFRelease(query);
-    CFRelease(iterator);
-    CFRelease(window_list_ref);
-    free(window_list);
-}
-
 void window_manager_toggle_window_topmost(struct window *window)
 {
     bool is_topmost = window_is_topmost(window);
@@ -1333,8 +1331,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
 {
     if (window->is_floating) {
         window->is_floating = false;
-        window_manager_make_children_floating(wm, window, false);
-        window_manager_make_floating(wm, window->id, false);
+        window_manager_make_floating(wm, window, false);
         if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
             window_manager_add_managed_window(wm, window, view);
@@ -1346,8 +1343,7 @@ void window_manager_toggle_window_float(struct space_manager *sm, struct window_
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
-        window_manager_make_children_floating(wm, window, true);
-        window_manager_make_floating(wm, window->id, true);
+        window_manager_make_floating(wm, window, true);
         window->is_floating = true;
     }
 }

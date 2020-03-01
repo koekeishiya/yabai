@@ -183,11 +183,8 @@ extern bool g_verbose;
 #define ARGUMENT_RULE_KEY_GRID    "grid"
 #define ARGUMENT_RULE_KEY_LABEL   "label"
 
-#define ARGUMENT_RULE_VALUE_SPACE  '^'
-#define ARGUMENT_RULE_VALUE_GRID   "%d:%d:%d:%d:%d:%d"
-#define ARGUMENT_RULE_VALUE_BELOW  "below"
-#define ARGUMENT_RULE_VALUE_NORMAL "normal"
-#define ARGUMENT_RULE_VALUE_ABOVE  "above"
+#define ARGUMENT_RULE_VALUE_SPACE '^'
+#define ARGUMENT_RULE_VALUE_GRID  "%d:%d:%d:%d:%d:%d"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN SIGNAL-------------------------------- */
@@ -1907,11 +1904,11 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             } else if (string_equals(key, ARGUMENT_RULE_KEY_LAYER)) {
                 if (exclusion) unsupported_exclusion = key;
 
-                if (string_equals(value, ARGUMENT_RULE_VALUE_BELOW)) {
+                if (string_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
                     rule.layer = LAYER_BELOW;
-                } else if (string_equals(value, ARGUMENT_RULE_VALUE_NORMAL)) {
+                } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_NORMAL)) {
                     rule.layer = LAYER_NORMAL;
-                } else if (string_equals(value, ARGUMENT_RULE_VALUE_ABOVE)) {
+                } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
                     rule.layer = LAYER_ABOVE;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
@@ -1928,7 +1925,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
                 daemon_deprecated(rsp, "key '%s=%s' has been replaced by '%s=%s' and will be removed in the future\n",
                                   ARGUMENT_RULE_KEY_ON_TOP, ARGUMENT_COMMON_VAL_ON,
-                                  ARGUMENT_RULE_KEY_LAYER, ARGUMENT_RULE_VALUE_ABOVE);
+                                  ARGUMENT_RULE_KEY_LAYER, ARGUMENT_WINDOW_LAYER_ABOVE);
 
                 if (exclusion) unsupported_exclusion = key;
 
