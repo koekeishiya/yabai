@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-03-01
+.\"      Date: 2020-03-03
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-03-01" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-03-03" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -99,6 +99,8 @@ FLOAT_SEL   := 0 < value <= 1.0
 
 BOOL_SEL    := on | off
 
+COLOR       := #AARRGGBB
+
 REGEX       := \c
 .URL "https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended\-regular\-expression\-syntax.html" "POSIX extended regular expression syntax" ""
 
@@ -109,210 +111,210 @@ LABEL       := arbitrary string/text used as an identifier
 .SS "Config"
 .SS "General Syntax"
 .sp
-yabai \-m config <global setting> [<value>]
+yabai \-m config <global setting>
 .RS 4
 Get or set the value of <global setting>.
 .RE
 .sp
-yabai \-m config [\-\-space \fI<mission\-control index>\fP] <space setting> [<value>]
+yabai \-m config [\-\-space \fI<mission\-control index>\fP] <space setting>
 .RS 4
 Get or set the value of <space setting>.
 .RE
 .SS "Global Settings"
 .sp
-Colors are in the form \fI#AARRGGBB\fP.
-.sp
-\fIdebug_output\fP
+\fBdebug_output\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Enable output of debug information to stdout.
 .RE
 .sp
-\fIstatus_bar\fP
+\fBstatus_bar\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Enable custom status bar.
 .RE
 .sp
-\fIstatus_bar_text_font\fP
+\fBstatus_bar_text_font\fP [\fI<font_family>:<font_style>:<font_size>\fP]
 .RS 4
 Specify name, style and size of font to use for drawing text.
 .br
-Format: \fI<font_family>:<font_style>:<font_size>\fP.
-.br
 Use \fIFont Book.app\fP to identify the correct name.
 .RE
 .sp
-\fIstatus_bar_icon_font\fP
+\fBstatus_bar_icon_font\fP [\fI<font_family>:<font_style>:<font_size>\fP]
 .RS 4
 Specify name, style and size of font to use for drawing icon symbols.
 .br
-Format: \fI<font_family>:<font_style>:<font_size>\fP.
-.br
 Use \fIFont Book.app\fP to identify the correct name.
 .RE
 .sp
-\fIstatus_bar_background_color\fP
+\fBstatus_bar_background_color\fP [\fI<COLOR>\fP]
 .RS 4
 Color to use for drawing status bar background.
 .RE
 .sp
-\fIstatus_bar_foreground_color\fP
+\fBstatus_bar_foreground_color\fP [\fI<COLOR>\fP]
 .RS 4
 Color to use for drawing status bar elements.
 .RE
 .sp
-\fIstatus_bar_space_icon_strip\fP
+\fBstatus_bar_space_icon_strip\fP [\fI<sym_1> <sym_2> <sym_n>\fP]
 .RS 4
 Specify symbols separated by whitespace to be used for visualizing spaces.
 .RE
 .sp
-\fIstatus_bar_power_icon_strip\fP
+\fBstatus_bar_power_icon_strip\fP [\fI<sym_battery> <sym_ac>\fP]
 .RS 4
 Specify two symbols separated by whitespace.
 .br
 The first symbol represents battery power and the second symbol indicates AC.
 .RE
 .sp
-\fIstatus_bar_space_icon\fP
+\fBstatus_bar_space_icon\fP [\fI<sym>\fP]
 .RS 4
 Specify a general symbol to use for any given space that does not have a match in \fIstatus_bar_space_icon_strip\fP.
 .RE
 .sp
-\fIstatus_bar_clock_icon\fP
+\fBstatus_bar_clock_icon\fP [\fI<sym>\fP]
 .RS 4
 Specify a symbol to represent the current time.
 .RE
 .sp
-\fImouse_follows_focus\fP
+\fBmouse_follows_focus\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 When focusing a window, put the mouse at its center.
 .RE
 .sp
-\fIfocus_follows_mouse\fP
+\fBfocus_follows_mouse\fP [\fIautofocus|autoraise|off\fP]
 .RS 4
-Focus the window under the mouse.
-.br
-Accept the following values: \fBautofocus\fP, \fBautoraise\fP, \fBoff\fP.
+Automatically focus the window under the mouse.
 .RE
 .sp
-\fIwindow_placement\fP
+\fBwindow_placement\fP [\fIfirst_child|second_child\fP]
 .RS 4
 Specify whether managed windows should become the first or second leaf\-node.
-.br
-Accept the following values: \fBfirst_child\fP, \fBsecond_child\fP.
 .RE
 .sp
-\fIwindow_topmost\fP
+\fBwindow_topmost\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Make floating windows stay on top.
 .RE
 .sp
-\fIwindow_opacity\fP
+\fBwindow_opacity\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Enable opacity for windows.
 .RE
 .sp
-\fIwindow_opacity_duration\fP
+\fBwindow_opacity_duration\fP [\fI<floating point number>\fP]
 .RS 4
 Duration of transition between active / normal opacity.
 .RE
 .sp
-\fIwindow_shadow\fP
+\fBwindow_shadow\fP [\fI<BOOL_SEL>|float\fP]
 .RS 4
 Draw shadow for windows.
-.br
-Accept the following values: \fBon\fP, \fBfloat\fP, \fBoff\fP.
 .RE
 .sp
-\fIwindow_border\fP
+\fBwindow_border\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Draw border for windows.
 .RE
 .sp
-\fIwindow_border_placement\fP
+\fBwindow_border_placement\fP [\fIexterior|interior|inset\fP]
 .RS 4
 Position/draw\-mode of window border.
-.br
-Accept the following values: \fBexterior\fP, \fBinterior\fP, \fBinset\fP.
 .RE
 .sp
-\fIwindow_border_width\fP
+\fBwindow_border_width\fP [\fI<integer number>\fP]
 .RS 4
 Width of window borders.
 .RE
 .sp
-\fIwindow_border_radius\fP
+\fBwindow_border_radius\fP [\fI<floating point number>\fP]
 .RS 4
 Radius of window border corners.
 .RE
 .sp
-\fIactive_window_border_topmost\fP
+\fBactive_window_border_topmost\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Make the active border stay on top of other windows.
 .RE
 .sp
-\fIactive_window_border_color\fP
+\fBactive_window_border_color\fP [\fI<COLOR>\fP]
 .RS 4
 Color of the border of the focused window.
 .RE
 .sp
-\fInormal_window_border_color\fP
+\fBnormal_window_border_color\fP [\fI<COLOR>\fP]
 .RS 4
 Color of the border of an unfocused window.
 .RE
 .sp
-\fIinsert_window_border_color\fP
+\fBinsert_window_border_color\fP [\fI<COLOR>\fP]
 .RS 4
 Color of the \fBwindow \-\-insert\fP message selection.
 .RE
 .sp
-\fIactive_window_opacity\fP
+\fBactive_window_opacity\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Opacity of the focused window.
 .RE
 .sp
-\fInormal_window_opacity\fP
+\fBnormal_window_opacity\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Opacity of an unfocused window.
 .RE
 .sp
-\fIsplit_ratio\fP
+\fBsplit_ratio\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Default split ratio.
 .RE
 .sp
-\fIauto_balance\fP
+\fBauto_balance\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Balance the window tree upon change, so that all windows occupy the same area.
 .RE
 .sp
-\fImouse_modifier\fP
+\fBmouse_modifier\fP [\fIcmd|alt|shift|ctrl|fn\fP]
 .RS 4
 Keyboard modifier used for moving and resizing windows.
-.br
-Accept the following values: \fBcmd\fP, \fBalt\fP, \fBshift\fP, \fBctrl\fP, \fBfn\fP.
 .RE
 .sp
-\fImouse_action1\fP, \fImouse_action2\fP
+\fBmouse_action1\fP [\fImove|resize\fP]
 .RS 4
-Action performed when pressing \fImouse_modifier\fP + \fIbutton<n>\fP.
-.br
-Accept the following values: \fBmove\fP, \fBresize\fP.
+Action performed when pressing \fImouse_modifier\fP + \fIbutton1\fP.
+.RE
+.sp
+\fBmouse_action2\fP [\fImove|resize\fP]
+.RS 4
+Action performed when pressing \fImouse_modifier\fP + \fIbutton2\fP.
 .RE
 .SS "Space Settings"
 .sp
-\fIlayout\fP
+\fBlayout\fP [\fIbsp|float\fP]
 .RS 4
 Set the layout of the selected space.
-.br
-Accept the following values: \fBbsp\fP, \fBfloat\fP.
 .RE
 .sp
-\fItop_padding\fP, \fIbottom_padding\fP, \fIleft_padding\fP, \fIright_padding\fP
+\fBtop_padding\fP [\fI<integer number>\fP]
 .RS 4
-Padding added at the sides of the selected space.
+Padding added at the upper side of the selected space.
 .RE
 .sp
-\fIwindow_gap\fP
+\fBbottom_padding\fP [\fI<integer number>\fP]
+.RS 4
+Padding added at the lower side of the selected space.
+.RE
+.sp
+\fBleft_padding\fP [\fI<integer number>\fP]
+.RS 4
+Padding added at the left side of the selected space.
+.RE
+.sp
+\fBright_padding\fP [\fI<integer number>\fP]
+.RS 4
+Padding added at the right side of the selected space.
+.RE
+.sp
+\fBwindow_gap\fP [\fI<integer number>\fP]
 .RS 4
 Size of the gap that separates windows for the selected space.
 .RE

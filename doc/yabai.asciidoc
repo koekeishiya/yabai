@@ -78,6 +78,8 @@ FLOAT_SEL   := 0 < value <= 1.0
 
 BOOL_SEL    := on | off
 
+COLOR       := #AARRGGBB
+
 REGEX       := https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended-regular-expression-syntax.html[POSIX extended regular expression syntax]
 
 LABEL       := arbitrary string/text used as an identifier
@@ -92,136 +94,133 @@ Config
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m config <global setting> [<value>]::
+yabai -m config <global setting>::
     Get or set the value of <global setting>.
 
-yabai -m config [--space '<mission-control index>'] <space setting> [<value>]::
+yabai -m config [--space '<mission-control index>'] <space setting>::
     Get or set the value of <space setting>.
 
 Global Settings
 ^^^^^^^^^^^^^^^
 
-Colors are in the form '#AARRGGBB'.
-
-'debug_output'::
+*debug_output* ['<BOOL_SEL>']::
     Enable output of debug information to stdout.
 
-'status_bar'::
+*status_bar* ['<BOOL_SEL>']::
     Enable custom status bar.
 
-'status_bar_text_font'::
+*status_bar_text_font* ['<font_family>:<font_style>:<font_size>']::
     Specify name, style and size of font to use for drawing text. +
-    Format: '<font_family>:<font_style>:<font_size>'. +
     Use 'Font Book.app' to identify the correct name.
 
-'status_bar_icon_font'::
+*status_bar_icon_font* ['<font_family>:<font_style>:<font_size>']::
     Specify name, style and size of font to use for drawing icon symbols. +
-    Format: '<font_family>:<font_style>:<font_size>'. +
     Use 'Font Book.app' to identify the correct name.
 
-'status_bar_background_color'::
+*status_bar_background_color* ['<COLOR>']::
     Color to use for drawing status bar background.
 
-'status_bar_foreground_color'::
+*status_bar_foreground_color* ['<COLOR>']::
     Color to use for drawing status bar elements.
 
-'status_bar_space_icon_strip'::
+*status_bar_space_icon_strip* ['<sym_1> <sym_2> <sym_n>']::
     Specify symbols separated by whitespace to be used for visualizing spaces.
 
-'status_bar_power_icon_strip'::
+*status_bar_power_icon_strip* ['<sym_battery> <sym_ac>']::
     Specify two symbols separated by whitespace. +
     The first symbol represents battery power and the second symbol indicates AC.
 
-'status_bar_space_icon'::
+*status_bar_space_icon* ['<sym>']::
     Specify a general symbol to use for any given space that does not have a match in 'status_bar_space_icon_strip'.
 
-'status_bar_clock_icon'::
+*status_bar_clock_icon* ['<sym>']::
     Specify a symbol to represent the current time.
 
-'mouse_follows_focus'::
+*mouse_follows_focus* ['<BOOL_SEL>']::
     When focusing a window, put the mouse at its center.
 
-'focus_follows_mouse'::
-    Focus the window under the mouse. +
-    Accept the following values: *autofocus*, *autoraise*, *off*.
+*focus_follows_mouse* ['autofocus|autoraise|off']::
+    Automatically focus the window under the mouse.
 
-'window_placement'::
-    Specify whether managed windows should become the first or second leaf-node. +
-    Accept the following values: *first_child*, *second_child*.
+*window_placement* ['first_child|second_child']::
+    Specify whether managed windows should become the first or second leaf-node.
 
-'window_topmost'::
+*window_topmost* ['<BOOL_SEL>']::
     Make floating windows stay on top.
 
-'window_opacity'::
+*window_opacity* ['<BOOL_SEL>']::
     Enable opacity for windows.
 
-'window_opacity_duration'::
+*window_opacity_duration* ['<floating point number>']::
     Duration of transition between active / normal opacity.
 
-'window_shadow'::
-    Draw shadow for windows. +
-    Accept the following values: *on*, *float*, *off*.
+*window_shadow* ['<BOOL_SEL>|float']::
+    Draw shadow for windows.
 
-'window_border'::
+*window_border* ['<BOOL_SEL>']::
     Draw border for windows.
 
-'window_border_placement'::
-    Position/draw-mode of window border. +
-    Accept the following values: *exterior*, *interior*, *inset*.
+*window_border_placement* ['exterior|interior|inset']::
+    Position/draw-mode of window border.
 
-'window_border_width'::
+*window_border_width* ['<integer number>']::
     Width of window borders.
 
-'window_border_radius'::
+*window_border_radius* ['<floating point number>']::
     Radius of window border corners.
 
-'active_window_border_topmost'::
+*active_window_border_topmost* ['<BOOL_SEL>']::
     Make the active border stay on top of other windows.
 
-'active_window_border_color'::
+*active_window_border_color* ['<COLOR>']::
     Color of the border of the focused window.
 
-'normal_window_border_color'::
+*normal_window_border_color* ['<COLOR>']::
     Color of the border of an unfocused window.
 
-'insert_window_border_color'::
+*insert_window_border_color* ['<COLOR>']::
     Color of the *window --insert* message selection.
 
-'active_window_opacity'::
+*active_window_opacity* ['<FLOAT_SEL>']::
     Opacity of the focused window.
 
-'normal_window_opacity'::
+*normal_window_opacity* ['<FLOAT_SEL>']::
     Opacity of an unfocused window.
 
-'split_ratio'::
+*split_ratio* ['<FLOAT_SEL>']::
     Default split ratio.
 
-'auto_balance'::
+*auto_balance* ['<BOOL_SEL>']::
     Balance the window tree upon change, so that all windows occupy the same area.
 
-'mouse_modifier'::
-    Keyboard modifier used for moving and resizing windows. +
-    Accept the following values: *cmd*, *alt*, *shift*, *ctrl*, *fn*.
+*mouse_modifier* ['cmd|alt|shift|ctrl|fn']::
+    Keyboard modifier used for moving and resizing windows.
 
-'mouse_action1'::
-'mouse_action2'::
-    Action performed when pressing 'mouse_modifier' + 'button<n>'. +
-    Accept the following values: *move*, *resize*.
+*mouse_action1* ['move|resize']::
+    Action performed when pressing 'mouse_modifier' + 'button1'.
+
+*mouse_action2* ['move|resize']::
+    Action performed when pressing 'mouse_modifier' + 'button2'.
 
 Space Settings
 ^^^^^^^^^^^^^^
 
-'layout'::
-    Set the layout of the selected space. +
-    Accept the following values: *bsp*, *float*.
+*layout* ['bsp|float']::
+    Set the layout of the selected space.
 
-'top_padding'::
-'bottom_padding'::
-'left_padding'::
-'right_padding'::
-    Padding added at the sides of the selected space.
+*top_padding* ['<integer number>']::
+    Padding added at the upper side of the selected space.
 
-'window_gap'::
+*bottom_padding* ['<integer number>']::
+    Padding added at the lower side of the selected space.
+
+*left_padding* ['<integer number>']::
+    Padding added at the left side of the selected space.
+
+*right_padding* ['<integer number>']::
+    Padding added at the right side of the selected space.
+
+*window_gap* ['<integer number>']::
     Size of the gap that separates windows for the selected space.
 
 Display
