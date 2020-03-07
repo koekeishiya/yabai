@@ -20,8 +20,8 @@ char *socket_read(int sockfd, int *len)
         result[cursor] = '\0';
         *len = cursor;
     } else {
-        if (result) free(result);
 err:
+        if (result) free(result);
         result = NULL;
         *len = 0;
     }
