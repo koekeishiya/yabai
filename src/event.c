@@ -1238,6 +1238,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
 {
+    if (g_window_manager.ffm_mode == FFM_DISABLED) return EVENT_SUCCESS;
+
     if (g_mission_control_active)    return EVENT_SUCCESS;
     if (g_mouse_state.ffm_window_id) return EVENT_SUCCESS;
 
@@ -1248,11 +1250,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
     if (dt < 25.0f) return EVENT_SUCCESS;
 
+    CGPoint point = CGEventGetLocation(context);
     g_mouse_state.last_moved_time = event_time;
 
-    if (g_window_manager.ffm_mode == FFM_DISABLED) return EVENT_SUCCESS;
-
-    CGPoint point = CGEventGetLocation(context);
     struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
     if (!window || window->id == g_window_manager.focused_window_id)      return EVENT_SUCCESS;
     if (!window_level_is_standard(window) || !window_is_standard(window)) return EVENT_SUCCESS;
