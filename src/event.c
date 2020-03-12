@@ -230,8 +230,7 @@ struct event *event_create(struct event_loop *event_loop, enum event_type type, 
     event->type = type;
     event->context = context;
     event->param1 = 0;
-    event->status = 0;
-    event->result = 0;
+    event->info = 0;
 #ifdef DEBUG
     uint64_t count = __sync_add_and_fetch(&event_loop->count, 1);
     assert(count > 0 && count < EVENT_MAX_COUNT);
@@ -245,8 +244,7 @@ struct event *event_create_p1(struct event_loop *event_loop, enum event_type typ
     event->type = type;
     event->context = context;
     event->param1 = param1;
-    event->status = 0;
-    event->result = 0;
+    event->info = 0;
 #ifdef DEBUG
     uint64_t count = __sync_add_and_fetch(&event_loop->count, 1);
     assert(count > 0 && count < EVENT_MAX_COUNT);

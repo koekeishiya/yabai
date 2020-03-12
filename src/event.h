@@ -1,7 +1,7 @@
 #ifndef EVENT_LOOP_EVENT_H
 #define EVENT_LOOP_EVENT_H
 
-#define EVENT_CALLBACK(name) int name(void *context, int param1)
+#define EVENT_CALLBACK(name) uint32_t name(void *context, int param1)
 typedef EVENT_CALLBACK(event_callback);
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED);
@@ -40,12 +40,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE);
 static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH);
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE);
 
-#define EVENT_QUEUED     0
-#define EVENT_PROCESSED  1
+#define EVENT_QUEUED     0x0
+#define EVENT_PROCESSED  0x1
 
-#define EVENT_FAILURE     -1
-#define EVENT_SUCCESS      0
-#define EVENT_MOUSE_IGNORE 1
+#define EVENT_SUCCESS      0x0
+#define EVENT_FAILURE      0x1
+#define EVENT_MOUSE_IGNORE 0x2
+
+#define event_status(e) ((e)  & 0x1)
+#define event_result(e) ((e) >> 0x1)
 
 enum event_type
 {
@@ -175,8 +178,7 @@ static event_callback *event_handler[] =
 struct event
 {
     void *context;
-    volatile int *status;
-    volatile int *result;
+    volatile uint32_t *info;
     enum event_type type;
     int param1;
 };
