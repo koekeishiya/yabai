@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Fix memory leak that would occur if realloc failed when reading from a socket [#436](https://github.com/koekeishiya/yabai/issues/436)
+- Increase number of window commands that return a non-zero exit code upon failure [#187](https://github.com/koekeishiya/yabai/issues/187)
 
 ## [2.4.1] - 2020-03-01
 ### Changed

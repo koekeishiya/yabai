@@ -19,6 +19,16 @@ extern CGError SLSGetCurrentCursorLocation(int cid, CGPoint *point);
 #define kCPSUserGenerated 0x200
 #define kCPSNoWindows     0x400
 
+enum window_op_error
+{
+    WINDOW_OP_ERROR_SUCCESS,
+    WINDOW_OP_ERROR_INVALID_SRC_VIEW,
+    WINDOW_OP_ERROR_INVALID_SRC_NODE,
+    WINDOW_OP_ERROR_INVALID_DST_VIEW,
+    WINDOW_OP_ERROR_INVALID_DST_NODE,
+    WINDOW_OP_ERROR_SAME_WINDOW
+};
+
 enum purify_mode
 {
     PURIFY_DISABLED,
@@ -88,7 +98,7 @@ void window_manager_tile_window(struct window_manager *wm, struct window *window
 void window_manager_move_window(struct window *window, float x, float y);
 void window_manager_move_window_cgs(struct window *window, float x, float y);
 void window_manager_resize_window(struct window *window, float width, float height);
-void window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int action, float ratio);
+enum window_op_error window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int action, float ratio);
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height);
 struct window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid);
 struct window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point);
@@ -122,8 +132,8 @@ struct application *window_manager_find_application(struct window_manager *wm, p
 void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct application *application);
 struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application, int *count);
-void window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy);
-void window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy);
+enum window_op_error window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy);
+enum window_op_error window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy);
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode);
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);
@@ -133,13 +143,13 @@ void window_manager_set_border_window_radius(struct window_manager *wm, float ra
 void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_normal_border_window_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
-void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
-void window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
-void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
+enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
+enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
+enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 bool window_manager_close_window(struct window *window);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t sid, bool moved_by_rule);
 void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application);
-void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
+enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
 void window_manager_purify_window(struct window_manager *wm, struct window *window);
 void window_manager_make_floating(struct window_manager *wm, struct window *window, bool floating);
 void window_manager_make_sticky(uint32_t wid, bool sticky);

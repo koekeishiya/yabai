@@ -1509,23 +1509,53 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_SWAP)) {
         struct selector selector = parse_window_selector(rsp, &message, acting_window);
         if (selector.did_parse && selector.window) {
-            window_manager_swap_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
+            enum window_op_error result = window_manager_swap_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
+                daemon_fail(rsp, "the acting window is not within a bsp space.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_DST_VIEW) {
+                daemon_fail(rsp, "the selected window is not within a bsp space.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                daemon_fail(rsp, "the acting window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+                daemon_fail(rsp, "the selected window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
+                daemon_fail(rsp, "cannot swap a window with itself.\n");
+            }
         }
     } else if (token_equals(command, COMMAND_WINDOW_WARP)) {
         struct selector selector = parse_window_selector(rsp, &message, acting_window);
         if (selector.did_parse && selector.window) {
-            window_manager_warp_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
+            enum window_op_error result = window_manager_warp_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
+                daemon_fail(rsp, "the acting window is not within a bsp space.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_DST_VIEW) {
+                daemon_fail(rsp, "the selected window is not within a bsp space.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                daemon_fail(rsp, "the acting window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+                daemon_fail(rsp, "the selected window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
+                daemon_fail(rsp, "cannot warp a window onto itself.\n");
+            }
         }
     } else if (token_equals(command, COMMAND_WINDOW_INSERT)) {
         struct selector selector = parse_dir_selector(rsp, &message);
         if (selector.did_parse && selector.dir) {
-            window_manager_set_window_insertion(&g_space_manager, &g_window_manager, acting_window, selector.dir);
+            enum window_op_error result = window_manager_set_window_insertion(&g_space_manager, &g_window_manager, acting_window, selector.dir);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
+                daemon_fail(rsp, "the acting window is not within a bsp space.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                daemon_fail(rsp, "the acting window is not managed.\n");
+            }
         }
     } else if (token_equals(command, COMMAND_WINDOW_GRID)) {
         unsigned r, c, x, y, w, h;
         struct token value = get_token(&message);
         if ((sscanf(value.text, ARGUMENT_WINDOW_GRID, &r, &c, &x, &y, &w, &h) == 6)) {
-            window_manager_apply_grid(&g_space_manager, &g_window_manager, acting_window, r, c, x, y, w, h);
+            enum window_op_error result = window_manager_apply_grid(&g_space_manager, &g_window_manager, acting_window, r, c, x, y, w, h);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
+                daemon_fail(rsp, "cannot apply grid layout to a managed window.\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -1534,7 +1564,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         char type[MAXLEN];
         struct token value = get_token(&message);
         if ((sscanf(value.text, ARGUMENT_WINDOW_MOVE, type, &x, &y) == 3)) {
-            window_manager_move_window_relative(&g_window_manager, acting_window, parse_value_type(type), x, y);
+            enum window_op_error result = window_manager_move_window_relative(&g_window_manager, acting_window, parse_value_type(type), x, y);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
+                daemon_fail(rsp, "cannot move a managed window.\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -1543,7 +1576,12 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         char handle[MAXLEN];
         struct token value = get_token(&message);
         if ((sscanf(value.text, ARGUMENT_WINDOW_RESIZE, handle, &w, &h) == 3)) {
-            window_manager_resize_window_relative(&g_window_manager, acting_window, parse_resize_handle(handle), w, h);
+            enum window_op_error result = window_manager_resize_window_relative(&g_window_manager, acting_window, parse_resize_handle(handle), w, h);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                daemon_fail(rsp, "cannot locate bsp node for the managed window.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+                daemon_fail(rsp, "cannot locate a bsp node fence");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -1552,7 +1590,12 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         char type[MAXLEN];
         struct token value = get_token(&message);
         if ((sscanf(value.text, ARGUMENT_WINDOW_RATIO, type, &r) == 2)) {
-            window_manager_adjust_window_ratio(&g_window_manager, acting_window, parse_value_type(type), r);
+            enum window_op_error result = window_manager_adjust_window_ratio(&g_window_manager, acting_window, parse_value_type(type), r);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
+                daemon_fail(rsp, "cannot adjust ratio of a non-managed window.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                daemon_fail(rsp, "cannot adjust ratio of a root node\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

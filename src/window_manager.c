@@ -246,31 +246,33 @@ void window_manager_add_managed_window(struct window_manager *wm, struct window 
     window_manager_purify_window(wm, window);
 }
 
-void window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int type, float ratio)
+enum window_op_error window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int type, float ratio)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
-    if (view) {
-        struct window_node *node = view_find_window_node(view, window->id);
-        if (!node || !node->parent) return;
+    if (!view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
-        switch (type) {
-        case TYPE_REL: {
-            node->parent->ratio = clampf_range(node->parent->ratio + ratio, 0.1f, 0.9f);
-        } break;
-        case TYPE_ABS: {
-            node->parent->ratio = clampf_range(ratio, 0.1f, 0.9f);
-        } break;
-        }
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node || !node->parent) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
 
-        window_node_update(view, node->parent);
-        window_node_flush(node->parent);
+    switch (type) {
+    case TYPE_REL: {
+        node->parent->ratio = clampf_range(node->parent->ratio + ratio, 0.1f, 0.9f);
+    } break;
+    case TYPE_ABS: {
+        node->parent->ratio = clampf_range(ratio, 0.1f, 0.9f);
+    } break;
     }
+
+    window_node_update(view, node->parent);
+    window_node_flush(node->parent);
+
+    return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy)
+enum window_op_error window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
-    if (view) return;
+    if (view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     if (type == TYPE_REL) {
         CGRect frame = window_frame(window);
@@ -279,9 +281,11 @@ void window_manager_move_window_relative(struct window_manager *wm, struct windo
     }
 
     window_manager_move_window(window, dx, dy);
+
+    return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy)
+enum window_op_error window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
@@ -289,13 +293,13 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct win
         struct window_node *y_fence = NULL;
 
         struct window_node *node = view_find_window_node(view, window->id);
-        if (!node) return;
+        if (!node) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
 
         if (direction & HANDLE_TOP)    x_fence = window_node_fence(node, DIR_NORTH);
         if (direction & HANDLE_BOTTOM) x_fence = window_node_fence(node, DIR_SOUTH);
         if (direction & HANDLE_LEFT)   y_fence = window_node_fence(node, DIR_WEST);
         if (direction & HANDLE_RIGHT)  y_fence = window_node_fence(node, DIR_EAST);
-        if (!x_fence && !y_fence)      return;
+        if (!x_fence && !y_fence)      return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
         if (y_fence) {
             float sr = y_fence->ratio + (float) dx / (float) y_fence->area.w;
@@ -326,6 +330,8 @@ void window_manager_resize_window_relative(struct window_manager *wm, struct win
             window_manager_resize_window(window, fw, fh);
         }
     }
+
+    return WINDOW_OP_ERROR_SUCCESS;
 }
 
 void window_manager_move_window_cgs(struct window *window, float x, float y)
@@ -1086,14 +1092,14 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
     free(window_list);
 }
 
-void window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
+enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
 {
     uint64_t sid = window_space(window);
     struct view *view = space_manager_find_view(sm, sid);
-    if (view->layout != VIEW_BSP) return;
+    if (view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     struct window_node *node = view_find_window_node(view, window->id);
-    if (!node) return;
+    if (!node) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
 
     if (view->insertion_point && view->insertion_point != window->id) {
         struct window_node *insert_node = view_find_window_node(view, view->insertion_point);
@@ -1143,23 +1149,27 @@ void window_manager_set_window_insertion(struct space_manager *sm, struct window
     }
 
     border_window_refresh(window);
+
+    return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
+enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
+    if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
+
     uint64_t a_sid = window_space(a);
     struct view *a_view = space_manager_find_view(sm, a_sid);
-    if (a_view->layout != VIEW_BSP) return;
+    if (a_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     uint64_t b_sid = window_space(b);
     struct view *b_view = space_manager_find_view(sm, b_sid);
-    if (b_view->layout != VIEW_BSP) return;
+    if (b_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_DST_VIEW;
 
     struct window_node *a_node = view_find_window_node(a_view, a->id);
-    if (!a_node) return;
+    if (!a_node) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
 
     struct window_node *b_node = view_find_window_node(b_view, b->id);
-    if (!b_node) return;
+    if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
     if (a_node->parent == b_node->parent) {
         if (b_view->insertion_point == b_node->window_id) {
@@ -1203,23 +1213,27 @@ void window_manager_warp_window(struct space_manager *sm, struct window_manager 
 
         space_manager_tile_window_on_space_with_insertion_point(sm, a, b_view->sid, b->id);
     }
+
+    return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
+enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
+    if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
+
     uint64_t a_sid = window_space(a);
     struct view *a_view = space_manager_find_view(sm, a_sid);
-    if (a_view->layout != VIEW_BSP) return;
+    if (a_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     uint64_t b_sid = window_space(b);
     struct view *b_view = space_manager_find_view(sm, b_sid);
-    if (b_view->layout != VIEW_BSP) return;
+    if (b_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_DST_VIEW;
 
     struct window_node *a_node = view_find_window_node(a_view, a->id);
-    if (!a_node) return;
+    if (!a_node) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
 
     struct window_node *b_node = view_find_window_node(b_view, b->id);
-    if (!b_node) return;
+    if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
     a_node->window_id = b->id;
     a_node->zoom = NULL;
@@ -1244,6 +1258,8 @@ void window_manager_swap_window(struct space_manager *sm, struct window_manager 
 
     window_node_flush(a_node);
     window_node_flush(b_node);
+
+    return WINDOW_OP_ERROR_SUCCESS;
 }
 
 bool window_manager_close_window(struct window *window)
@@ -1291,13 +1307,13 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     }
 }
 
-void window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
+enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
-    if (view) return;
+    if (view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     uint32_t did = window_display_id(window);
-    if (!did) return;
+    if (!did) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     if (x >= c)    x = c - 1;
     if (y >= r)    y = r - 1;
@@ -1327,6 +1343,8 @@ void window_manager_apply_grid(struct space_manager *sm, struct window_manager *
 
     window_manager_move_window(window, fx, fy);
     window_manager_resize_window(window, fw, fh);
+
+    return WINDOW_OP_ERROR_SUCCESS;
 }
 
 void window_manager_toggle_window_topmost(struct window *window)
