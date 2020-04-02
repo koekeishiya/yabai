@@ -231,10 +231,6 @@ struct event *event_create(struct event_loop *event_loop, enum event_type type, 
     event->context = context;
     event->param1 = 0;
     event->info = 0;
-#ifdef DEBUG
-    uint64_t count = __sync_add_and_fetch(&event_loop->count, 1);
-    assert(count > 0 && count < EVENT_MAX_COUNT);
-#endif
     return event;
 }
 
@@ -245,10 +241,6 @@ struct event *event_create_p1(struct event_loop *event_loop, enum event_type typ
     event->context = context;
     event->param1 = param1;
     event->info = 0;
-#ifdef DEBUG
-    uint64_t count = __sync_add_and_fetch(&event_loop->count, 1);
-    assert(count > 0 && count < EVENT_MAX_COUNT);
-#endif
     return event;
 }
 
@@ -270,11 +262,6 @@ void event_destroy(struct event_loop *event_loop, struct event *event)
         CFRelease(event->context);
     } break;
     }
-
-#ifdef DEBUG
-    uint64_t count = __sync_sub_and_fetch(&event_loop->count, 1);
-    assert(count >= 0 && count < EVENT_MAX_COUNT);
-#endif
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)

@@ -18,9 +18,6 @@ struct queue
     struct memory_pool pool;
     struct queue_item *head;
     struct queue_item *tail;
-#ifdef DEBUG
-    volatile uint64_t count;
-#endif
 };
 
 struct event_loop
@@ -30,9 +27,6 @@ struct event_loop
     sem_t *semaphore;
     struct queue queue;
     struct memory_pool pool;
-#ifdef DEBUG
-    volatile uint64_t count;
-#endif
 };
 
 bool event_loop_init(struct event_loop *event_loop);

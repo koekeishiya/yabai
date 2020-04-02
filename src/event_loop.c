@@ -7,9 +7,6 @@ static bool queue_init(struct queue *queue)
     queue->head->data = NULL;
     queue->head->next = NULL;
     queue->tail = queue->head;
-#ifdef DEBUG
-    queue->count = 0;
-#endif
     return true;
 };
 
@@ -29,11 +26,6 @@ static void queue_push(struct queue *queue, struct event *event)
         if (!success) __sync_bool_compare_and_swap(&queue->tail, tail, tail->next);
     } while (!success);
     __sync_bool_compare_and_swap(&queue->tail, tail, new_tail);
-
-#ifdef DEBUG
-    uint64_t count = __sync_add_and_fetch(&queue->count, 1);
-    assert(count > 0 && count < QUEUE_MAX_COUNT);
-#endif
 }
 
 static struct event *queue_pop(struct queue *queue)
@@ -44,11 +36,6 @@ static struct event *queue_pop(struct queue *queue)
         head = queue->head;
         if (!head->next) return NULL;
     } while (!__sync_bool_compare_and_swap(&queue->head, head, head->next));
-
-#ifdef DEBUG
-    uint64_t count = __sync_sub_and_fetch(&queue->count, 1);
-    assert(count >= 0 && count < QUEUE_MAX_COUNT);
-#endif
 
     return head->next->data;
 }
@@ -88,9 +75,6 @@ bool event_loop_init(struct event_loop *event_loop)
     if (!queue_init(&event_loop->queue)) return false;
     if (!memory_pool_init(&event_loop->pool, EVENT_POOL_SIZE)) return false;
     event_loop->is_running = false;
-#ifdef DEBUG
-    event_loop->count = 0;
-#endif
     event_loop->semaphore = sem_open("yabai_event_loop_semaphore", O_CREAT, 0600, 0);
     sem_unlink("yabai_event_loop_semaphore");
     return event_loop->semaphore != SEM_FAILED;
