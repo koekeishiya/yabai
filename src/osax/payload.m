@@ -37,7 +37,6 @@ extern CGError CGSSetWindowListAlpha(int cid, const uint32_t *window_list, int w
 extern CGError CGSSetWindowLevel(int cid, uint32_t wid, int level);
 extern OSStatus CGSMoveWindow(const int cid, const uint32_t wid, CGPoint *point);
 extern CGError CGSGetWindowOwner(int cid, uint32_t wid, int *window_cid);
-extern CGError CGSSetWindowShadowParameters(int cid, CGWindowID wid, CGFloat standardDeviation, CGFloat density, int offsetX, int offsetY);
 extern CGError CGSInvalidateWindowShadow(int cid, CGWindowID wid);
 extern CGError CGSSetWindowTags(int cid, uint32_t wid, const int tags[2], size_t maxTagSize);
 extern CGError CGSClearWindowTags(int cid, uint32_t wid, const int tags[2], size_t maxTagSize);
@@ -809,15 +808,6 @@ static void do_window_shadow(const char *message)
     CGSInvalidateWindowShadow(_connection, wid);
 }
 
-static void do_window_shadow_irreversible(const char *message)
-{
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
-    if (!wid) return;
-
-    CGSSetWindowShadowParameters(_connection, wid, 0, 0, 0, 0);
-}
-
 static inline bool can_focus_space()
 {
     return dock_spaces != nil;
@@ -907,8 +897,6 @@ static void handle_message(int sockfd, const char *message)
         do_window_focus(message);
     } else if (token_equals(token, "window_shadow")) {
         do_window_shadow(message);
-    } else if (token_equals(token, "window_shadow_irreversible")) {
-        do_window_shadow_irreversible(message);
     }
 }
 
