@@ -1403,24 +1403,36 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             daemon_fail(rsp, "cannot destroy space because mission-control is active.\n");
         }
     } else if (token_equals(command, COMMAND_SPACE_BALANCE)) {
-        space_manager_balance_space(&g_space_manager, acting_sid);
+        if (!space_manager_balance_space(&g_space_manager, acting_sid)) {
+            daemon_fail(rsp, "cannot balance a non-managed space.\n");
+        }
     } else if (token_equals(command, COMMAND_SPACE_MIRROR)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_SPACE_MIRROR_X)) {
-            space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_X);
+            if (!space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_X)) {
+                daemon_fail(rsp, "cannot mirror a non-managed space.\n");
+            }
         } else if (token_equals(value, ARGUMENT_SPACE_MIRROR_Y)) {
-            space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_Y);
+            if (!space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_Y)) {
+                daemon_fail(rsp, "cannot mirror a non-managed space.\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
     } else if (token_equals(command, COMMAND_SPACE_ROTATE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_SPACE_ROTATE_90)) {
-            space_manager_rotate_space(&g_space_manager, acting_sid, 90);
+            if (!space_manager_rotate_space(&g_space_manager, acting_sid, 90)) {
+                daemon_fail(rsp, "cannot rotate a non-managed space.\n");
+            }
         } else if (token_equals(value, ARGUMENT_SPACE_ROTATE_180)) {
-            space_manager_rotate_space(&g_space_manager, acting_sid, 180);
+            if (!space_manager_rotate_space(&g_space_manager, acting_sid, 180)) {
+                daemon_fail(rsp, "cannot rotate a non-managed space.\n");
+            }
         } else if (token_equals(value, ARGUMENT_SPACE_ROTATE_270)) {
-            space_manager_rotate_space(&g_space_manager, acting_sid, 270);
+            if (!space_manager_rotate_space(&g_space_manager, acting_sid, 270)) {
+                daemon_fail(rsp, "cannot rotate a non-managed space.\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -1429,7 +1441,9 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         char type[MAXLEN];
         struct token value = get_token(&message);
         if ((sscanf(value.text, ARGUMENT_SPACE_PADDING, type, &t, &b, &l, &r) == 5)) {
-            space_manager_set_padding_for_space(&g_space_manager, acting_sid, parse_value_type(type), t, b, l, r);
+            if (!space_manager_set_padding_for_space(&g_space_manager, acting_sid, parse_value_type(type), t, b, l, r)) {
+                daemon_fail(rsp, "cannot set padding for a non-managed space.\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -1438,16 +1452,22 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         char type[MAXLEN];
         struct token value = get_token(&message);
         if ((sscanf(value.text, ARGUMENT_SPACE_GAP, type, &gap) == 2)) {
-            space_manager_set_gap_for_space(&g_space_manager, acting_sid, parse_value_type(type), gap);
+            if (!space_manager_set_gap_for_space(&g_space_manager, acting_sid, parse_value_type(type), gap)) {
+                daemon_fail(rsp, "cannot set gap for a non-managed space.\n");
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
     } else if (token_equals(command, COMMAND_SPACE_TOGGLE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_SPACE_TGL_PADDING)) {
-            space_manager_toggle_padding_for_space(&g_space_manager, acting_sid);
+            if (!space_manager_toggle_padding_for_space(&g_space_manager, acting_sid)) {
+                daemon_fail(rsp, "cannot toggle padding for a non-managed space.\n");
+            }
         } else if (token_equals(value, ARGUMENT_SPACE_TGL_GAP)) {
-            space_manager_toggle_gap_for_space(&g_space_manager, acting_sid);
+            if (!space_manager_toggle_gap_for_space(&g_space_manager, acting_sid)) {
+                daemon_fail(rsp, "cannot toggle gap for a non-managed space.\n");
+            }
         } else if (token_equals(value, ARGUMENT_SPACE_TGL_MC)) {
             space_manager_toggle_mission_control(acting_sid);
         } else if (token_equals(value, ARGUMENT_SPACE_TGL_SD)) {
