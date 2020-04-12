@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.4.2] - 2020-04-12
 ### Changed
 - Fix memory leak that would occur if realloc failed when reading from a socket [#436](https://github.com/koekeishiya/yabai/issues/436)
 - Increase number of window and space commands that return a non-zero exit code upon failure [#187](https://github.com/koekeishiya/yabai/issues/187)
@@ -204,7 +206,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.4.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.4.2...HEAD
+[2.4.2]: https://github.com/koekeishiya/yabai/compare/v2.4.1...v2.4.2
 [2.4.1]: https://github.com/koekeishiya/yabai/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/koekeishiya/yabai/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/koekeishiya/yabai/compare/v2.2.3...v2.3.0
