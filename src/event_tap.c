@@ -4,6 +4,7 @@ extern struct event_loop g_event_loop;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch"
+static bool consume_mouse_click;
 static EVENT_TAP_CALLBACK(mouse_handler)
 {
     switch (type) {
@@ -21,18 +22,14 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         event_loop_post(&g_event_loop, event);
         while (event_status(info) == EVENT_QUEUED);
 
-        if (event_result(info) == EVENT_MOUSE_IGNORE) return NULL;
+        consume_mouse_click = (event_result(info) == EVENT_MOUSE_IGNORE);
+        if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseUp:
     case kCGEventRightMouseUp: {
-        volatile uint32_t info = EVENT_QUEUED;
-
         struct event *event = event_create(&g_event_loop, MOUSE_UP, (void *) CFRetain(cgevent));
-        event->info = &info;
         event_loop_post(&g_event_loop, event);
-        while (event_status(info) == EVENT_QUEUED);
-
-        if (event_result(info) == EVENT_MOUSE_IGNORE) return NULL;
+        if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseDragged:
     case kCGEventRightMouseDragged: {
