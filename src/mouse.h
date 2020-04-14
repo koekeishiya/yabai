@@ -23,7 +23,7 @@ struct mouse_state
     enum mouse_mode current_action;
     enum mouse_mode action1;
     enum mouse_mode action2;
-    uint8_t modifier;
+    volatile uint8_t modifier;
     CGPoint down_location;
     uint64_t last_moved_time;
     struct window *window;

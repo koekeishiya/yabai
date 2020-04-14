@@ -963,10 +963,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
 
     if (button == kCGMouseButtonLeft && g_mouse_state.modifier == mod) {
         g_mouse_state.current_action = g_mouse_state.action1;
-        return EVENT_MOUSE_IGNORE;
     } else if (button == kCGMouseButtonRight && g_mouse_state.modifier == mod) {
         g_mouse_state.current_action = g_mouse_state.action2;
-        return EVENT_MOUSE_IGNORE;
     }
 
     return EVENT_SUCCESS;

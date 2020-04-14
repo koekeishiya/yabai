@@ -40,12 +40,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE);
 static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH);
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE);
 
-#define EVENT_QUEUED     0x0
-#define EVENT_PROCESSED  0x1
+#define EVENT_QUEUED    0x0
+#define EVENT_PROCESSED 0x1
 
-#define EVENT_SUCCESS      0x0
-#define EVENT_FAILURE      0x1
-#define EVENT_MOUSE_IGNORE 0x2
+#define EVENT_SUCCESS 0x0
+#define EVENT_FAILURE 0x1
 
 #define event_status(e) ((e)  & 0x1)
 #define event_result(e) ((e) >> 0x1)

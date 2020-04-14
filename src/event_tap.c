@@ -1,6 +1,7 @@
 #include "event_tap.h"
 
 extern struct event_loop g_event_loop;
+extern struct mouse_state g_mouse_state;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch"
@@ -15,14 +16,12 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     } break;
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {
-        volatile uint32_t info = EVENT_QUEUED;
+        uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
+        consume_mouse_click = mod == g_mouse_state.modifier;
 
         struct event *event = event_create(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent));
-        event->info = &info;
         event_loop_post(&g_event_loop, event);
-        while (event_status(info) == EVENT_QUEUED);
 
-        consume_mouse_click = (event_result(info) == EVENT_MOUSE_IGNORE);
         if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseUp:
