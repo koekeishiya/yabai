@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Changed how *mouse down* events are handled to reduce cycles spent in macOS event tap callback [#376](https://github.com/koekeishiya/yabai/issues/376)
+- Fixed an issue that would cause a border to persist on fullscreen videos playing in Safari [#360](https://github.com/koekeishiya/yabai/issues/360)
 
 ## [2.4.2] - 2020-04-12
 ### Changed

@@ -1330,7 +1330,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
                 struct window *window = bucket->value;
                 if ((!window->application->is_hidden) &&
                     (!window->is_fullscreen) &&
-                    (!window->is_minimized)) {
+                    (!window->is_minimized) &&
+                    (!window_is_fullscreen(window))) {
                     border_window_show(window);
                 }
             }
