@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.4.3] - 2020-04-14
 ### Changed
 - Changed how *mouse down* events are handled to reduce cycles spent in macOS event tap callback [#376](https://github.com/koekeishiya/yabai/issues/376)
 - Fixed an issue that would cause a border to persist on fullscreen videos playing in Safari [#360](https://github.com/koekeishiya/yabai/issues/360)
@@ -209,7 +211,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.4.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v2.4.3...HEAD
+[2.4.3]: https://github.com/koekeishiya/yabai/compare/v2.4.2...v2.4.3
 [2.4.2]: https://github.com/koekeishiya/yabai/compare/v2.4.1...v2.4.2
 [2.4.1]: https://github.com/koekeishiya/yabai/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/koekeishiya/yabai/compare/v2.3.0...v2.4.0
