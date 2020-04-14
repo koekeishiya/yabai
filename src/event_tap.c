@@ -19,7 +19,7 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
         consume_mouse_click = mod == g_mouse_state.modifier;
 
-        struct event *event = event_create(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent));
+        struct event *event = event_create_p1(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod);
         event_loop_post(&g_event_loop, event);
 
         if (consume_mouse_click) return NULL;

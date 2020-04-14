@@ -959,7 +959,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
 
     int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
-    uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(context));
+    uint8_t mod = (uint8_t) param1;
 
     if (button == kCGMouseButtonLeft && g_mouse_state.modifier == mod) {
         g_mouse_state.current_action = g_mouse_state.action1;
