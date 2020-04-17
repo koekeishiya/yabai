@@ -8,7 +8,7 @@ static bool queue_init(struct queue *queue)
     queue->head->next = NULL;
     queue->tail = queue->head;
     return true;
-};
+}
 
 static void queue_push(struct queue *queue, struct event *event)
 {
