@@ -4,14 +4,7 @@ extern struct event_loop g_event_loop;
 
 static TABLE_HASH_FUNC(hash_psn)
 {
-    unsigned long result = ((ProcessSerialNumber*) key)->lowLongOfPSN;
-    result = (result + 0x7ed55d16) + (result << 12);
-    result = (result ^ 0xc761c23c) ^ (result >> 19);
-    result = (result + 0x165667b1) + (result << 5);
-    result = (result + 0xd3a2646c) ^ (result << 9);
-    result = (result + 0xfd7046c5) + (result << 3);
-    result = (result ^ 0xb55a4f09) ^ (result >> 16);
-    return result;
+    return ((ProcessSerialNumber *) key)->lowLongOfPSN;
 }
 
 static TABLE_COMPARE_FUNC(compare_psn)

@@ -6,14 +6,7 @@ extern char g_sa_socket_file[MAXLEN];
 
 static TABLE_HASH_FUNC(hash_wm)
 {
-    unsigned long result = *(uint32_t *) key;
-    result = (result + 0x7ed55d16) + (result << 12);
-    result = (result ^ 0xc761c23c) ^ (result >> 19);
-    result = (result + 0x165667b1) + (result << 5);
-    result = (result + 0xd3a2646c) ^ (result << 9);
-    result = (result + 0xfd7046c5) + (result << 3);
-    result = (result ^ 0xb55a4f09) ^ (result >> 16);
-    return result;
+    return *(uint32_t *) key;
 }
 
 static TABLE_COMPARE_FUNC(compare_wm)
