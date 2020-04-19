@@ -563,6 +563,8 @@ static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_
 
         if (parent_wid == wid) {
             window_manager_set_layer(child_wid, layer);
+
+            // @speed: doing this recursively is more inefficient than it has to be..
             window_manager_set_layer_for_children(cid, child_wid, sid, layer);
         }
     }
