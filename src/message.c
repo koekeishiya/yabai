@@ -122,6 +122,8 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_MOVE    "--move"
 #define COMMAND_WINDOW_RESIZE  "--resize"
 #define COMMAND_WINDOW_RATIO   "--ratio"
+#define COMMAND_WINDOW_MIN     "--minimize"
+#define COMMAND_WINDOW_DEMIN   "--deminimize"
 #define COMMAND_WINDOW_CLOSE   "--close"
 #define COMMAND_WINDOW_LAYER   "--layer"
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
@@ -909,7 +911,7 @@ static char *parse_label(FILE *rsp, char **message, enum label_type type)
     struct token value = get_token(message);
 
     if ((!token_is_valid(value)) || (value.text[0] >= '0' && value.text[0] <= '9')) {
-        daemon_fail(rsp, "'%.*s' is not a valid label\n", value.length, value.text);
+        daemon_fail(rsp, "'%.*s' is not a valid label.\n", value.length, value.text);
         return NULL;
     }
 
@@ -919,7 +921,7 @@ static char *parse_label(FILE *rsp, char **message, enum label_type type)
     case LABEL_SPACE: {
         for (int i = 0; i < array_count(reserved_space_identifiers); ++i) {
             if (token_equals(value, reserved_space_identifiers[i])) {
-                daemon_fail(rsp, "'%.*s' is a reserved keyword and cannot be used as a label\n", value.length, value.text);
+                daemon_fail(rsp, "'%.*s' is a reserved keyword and cannot be used as a label.\n", value.length, value.text);
                 return NULL;
             }
         }
@@ -1600,7 +1602,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
                 daemon_fail(rsp, "cannot locate bsp node for the managed window.\n");
             } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
-                daemon_fail(rsp, "cannot locate a bsp node fence");
+                daemon_fail(rsp, "cannot locate a bsp node fence.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -1614,14 +1616,30 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
                 daemon_fail(rsp, "cannot adjust ratio of a non-managed window.\n");
             } else if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
-                daemon_fail(rsp, "cannot adjust ratio of a root node\n");
+                daemon_fail(rsp, "cannot adjust ratio of a root node.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_WINDOW_MIN)) {
+        enum window_op_error result = window_manager_minimize_window(acting_window);
+        if (result == WINDOW_OP_ERROR_CANT_MINIMIZE) {
+            daemon_fail(rsp, "window with id '%d' does not support the minimize operation.\n", acting_window->id);
+        } else if (result == WINDOW_OP_ERROR_ALREADY_MINIMIZED) {
+            daemon_fail(rsp, "window with id '%d' is already minimized.\n", acting_window->id);
+        } else if (result == WINDOW_OP_ERROR_MINIMIZE_FAILED) {
+            daemon_fail(rsp, "could not minimize window with id '%d'.\n", acting_window->id);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_DEMIN)) {
+        enum window_op_error result = window_manager_deminimize_window(acting_window);
+        if (result == WINDOW_OP_ERROR_NOT_MINIMIZED) {
+            daemon_fail(rsp, "window with id '%d' is not minimized.\n", acting_window->id);
+        } else if (result == WINDOW_OP_ERROR_DEMINIMIZE_FAILED) {
+            daemon_fail(rsp, "could not deminimize window with id '%d'.\n", acting_window->id);
+        }
     } else if (token_equals(command, COMMAND_WINDOW_CLOSE)) {
         if (!window_manager_close_window(acting_window)) {
-            daemon_fail(rsp, "could not close window with id '%d'\n", acting_window->id);
+            daemon_fail(rsp, "could not close window with id '%d'.\n", acting_window->id);
         }
     } else if (token_equals(command, COMMAND_WINDOW_LAYER)) {
         struct token value = get_token(&message);
@@ -1733,7 +1751,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                     display_serialize(rsp, window_display_id(acting_window));
                     fprintf(rsp, "\n");
                 } else {
-                    daemon_fail(rsp, "could not find window to retrieve display details\n");
+                    daemon_fail(rsp, "could not find window to retrieve display details.\n");
                 }
             }
         } else if (token_is_valid(option)) {
@@ -1749,14 +1767,14 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
             if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.did) {
                     if (!space_manager_query_spaces_for_display(rsp, selector.did)) {
-                        daemon_fail(rsp, "could not retrieve spaces for display\n");
+                        daemon_fail(rsp, "could not retrieve spaces for display.\n");
                     }
                 } else {
                     daemon_fail(rsp, "could not locate the selected display.\n");
                 }
             } else {
                 if (!space_manager_query_spaces_for_display(rsp, acting_did)) {
-                    daemon_fail(rsp, "could not retrieve spaces for display\n");
+                    daemon_fail(rsp, "could not retrieve spaces for display.\n");
                 }
             }
         } else if (token_equals(option, ARGUMENT_QUERY_SPACE)) {
@@ -1776,7 +1794,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                 }
             } else {
                 if (!space_manager_query_active_space(rsp)) {
-                    daemon_fail(rsp, "could not retrieve active space\n");
+                    daemon_fail(rsp, "could not retrieve active space.\n");
                 }
             }
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
@@ -1792,14 +1810,14 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                 if (acting_window) {
                     space_manager_query_spaces_for_window(rsp, acting_window);
                 } else {
-                    daemon_fail(rsp, "could not find window to retrieve space details\n");
+                    daemon_fail(rsp, "could not find window to retrieve space details.\n");
                 }
             }
         } else if (token_is_valid(option)) {
             daemon_fail(rsp, "unknown option '%.*s' given to command '%.*s' for domain '%.*s'\n", option.length, option.text, command.length, command.text, domain.length, domain.text);
         } else {
             if (!space_manager_query_spaces_for_displays(rsp)) {
-                daemon_fail(rsp, "could not retrieve spaces for displays\n");
+                daemon_fail(rsp, "could not retrieve spaces for displays.\n");
             }
         }
     } else if (token_equals(command, COMMAND_QUERY_WINDOWS)) {
@@ -1843,7 +1861,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
                     window_serialize(rsp, acting_window);
                     fprintf(rsp, "\n");
                 } else {
-                    daemon_fail(rsp, "could not retrieve window details\n");
+                    daemon_fail(rsp, "could not retrieve window details.\n");
                 }
             }
         } else if (token_is_valid(option)) {

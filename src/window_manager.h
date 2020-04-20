@@ -26,7 +26,12 @@ enum window_op_error
     WINDOW_OP_ERROR_INVALID_SRC_NODE,
     WINDOW_OP_ERROR_INVALID_DST_VIEW,
     WINDOW_OP_ERROR_INVALID_DST_NODE,
-    WINDOW_OP_ERROR_SAME_WINDOW
+    WINDOW_OP_ERROR_SAME_WINDOW,
+    WINDOW_OP_ERROR_CANT_MINIMIZE,
+    WINDOW_OP_ERROR_ALREADY_MINIMIZED,
+    WINDOW_OP_ERROR_MINIMIZE_FAILED,
+    WINDOW_OP_ERROR_NOT_MINIMIZED,
+    WINDOW_OP_ERROR_DEMINIMIZE_FAILED,
 };
 
 enum purify_mode
@@ -146,6 +151,8 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct window 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
+enum window_op_error window_manager_minimize_window(struct window *window);
+enum window_op_error window_manager_deminimize_window(struct window *window);
 bool window_manager_close_window(struct window *window);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t sid, bool moved_by_rule);
 void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application);

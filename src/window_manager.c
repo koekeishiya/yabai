@@ -17,7 +17,7 @@ static TABLE_COMPARE_FUNC(compare_wm)
 void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid)
 {
     int window_count;
-    uint32_t *window_list = space_window_list(sid, &window_count);
+    uint32_t *window_list = space_window_list(sid, &window_count, true);
     if (!window_list) return;
 
     struct window **window_aggregate_list = NULL;
@@ -47,7 +47,7 @@ void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
     struct window **window_aggregate_list = NULL;
     for (int i = 0; i < space_count; ++i) {
         int window_count;
-        uint32_t *window_list = space_window_list(space_list[i], &window_count);
+        uint32_t *window_list = space_window_list(space_list[i], &window_count, true);
         if (!window_list) continue;
 
         for (int j = 0; j < window_count; ++j) {
@@ -84,7 +84,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
 
         for (int j = 0; j < space_count; ++j) {
             int window_count;
-            uint32_t *window_list = space_window_list(space_list[j], &window_count);
+            uint32_t *window_list = space_window_list(space_list[j], &window_count, true);
             if (!window_list) continue;
 
             for (int k = 0; k < window_count; ++k) {
@@ -550,7 +550,7 @@ void window_manager_set_layer(uint32_t wid, int layer)
 static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_t sid, int layer)
 {
     int count;
-    uint32_t *window_list = space_window_list_for_connection(sid, cid, &count);
+    uint32_t *window_list = space_window_list_for_connection(sid, cid, &count, false);
     if (!window_list) return;
 
     CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), count, kCFNumberSInt32Type);
@@ -631,7 +631,7 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
 static struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
 {
     int count;
-    uint32_t *window_list = space_window_list(sid, &count);
+    uint32_t *window_list = space_window_list(sid, &count, false);
     if (!window_list) return NULL;
 
     struct window *result = NULL;
@@ -716,7 +716,7 @@ struct window *window_manager_find_closest_managed_window_in_direction(struct wi
 struct window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct window *window, int direction)
 {
     int window_count;
-    uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count);
+    uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count, false);
     if (!window_list) return NULL;
 
     struct window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, window_list, window_count);
@@ -1257,6 +1257,23 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
+enum window_op_error window_manager_minimize_window(struct window *window)
+{
+    if (!window_can_minimize(window)) return WINDOW_OP_ERROR_CANT_MINIMIZE;
+    if (window->is_minimized)         return WINDOW_OP_ERROR_ALREADY_MINIMIZED;
+
+    AXError result = AXUIElementSetAttributeValue(window->ref, kAXMinimizedAttribute, kCFBooleanTrue);
+    return result == kAXErrorSuccess ? WINDOW_OP_ERROR_SUCCESS : WINDOW_OP_ERROR_MINIMIZE_FAILED;
+}
+
+enum window_op_error window_manager_deminimize_window(struct window *window)
+{
+    if (!window->is_minimized) return WINDOW_OP_ERROR_NOT_MINIMIZED;
+
+    AXError result = AXUIElementSetAttributeValue(window->ref, kAXMinimizedAttribute, kCFBooleanFalse);
+    return result == kAXErrorSuccess ? WINDOW_OP_ERROR_SUCCESS : WINDOW_OP_ERROR_DEMINIMIZE_FAILED;
+}
+
 bool window_manager_close_window(struct window *window)
 {
     CFTypeRef button = NULL;
@@ -1514,7 +1531,7 @@ void window_manager_toggle_window_pip(struct space_manager *sm, struct window_ma
 void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
     int window_count;
-    uint32_t *window_list = space_window_list(sid, &window_count);
+    uint32_t *window_list = space_window_list(sid, &window_count, false);
     if (!window_list) return;
 
     struct view *view = space_manager_find_view(sm, sid);
@@ -1547,7 +1564,7 @@ void window_manager_validate_windows_on_space(struct space_manager *sm, struct w
 void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
     int window_count;
-    uint32_t *window_list = space_window_list(sid, &window_count);
+    uint32_t *window_list = space_window_list(sid, &window_count, false);
     if (!window_list) return;
 
     for (int i = 0; i < window_count; ++i) {

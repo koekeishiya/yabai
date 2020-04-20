@@ -116,6 +116,7 @@ void window_serialize(FILE *rsp, struct window *window)
     int display = display_arrangement(space_display_id(sid));
     bool visible = sticky || space_is_visible(sid);
     bool is_topmost = window_is_topmost(window);
+    bool is_minimized = window_is_minimized(window);
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -156,6 +157,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"split\":\"%s\",\n"
             "\t\"floating\":%d,\n"
             "\t\"sticky\":%d,\n"
+            "\t\"minimized\":%d,\n"
             "\t\"topmost\":%d,\n"
             "\t\"border\":%d,\n"
             "\t\"shadow\":%d,\n"
@@ -181,6 +183,7 @@ void window_serialize(FILE *rsp, struct window *window)
             split,
             window->is_floating,
             sticky,
+            is_minimized,
             is_topmost,
             window->border.enabled,
             window->has_shadow,
@@ -255,6 +258,15 @@ bool window_can_resize(struct window *window)
 {
     Boolean result;
     if (AXUIElementIsAttributeSettable(window->ref, kAXSizeAttribute, &result) != kAXErrorSuccess) {
+        result = 0;
+    }
+    return result;
+}
+
+bool window_can_minimize(struct window *window)
+{
+    Boolean result;
+    if (AXUIElementIsAttributeSettable(window->ref, kAXMinimizedAttribute, &result) != kAXErrorSuccess) {
         result = 0;
     }
     return result;

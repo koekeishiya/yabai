@@ -246,7 +246,7 @@ void display_manager_focus_display(uint32_t did)
     CGPoint point;
     AXUIElementRef element_ref;
 
-    window_list = space_window_list(display_space_id(did), &window_count);
+    window_list = space_window_list(display_space_id(did), &window_count, false);
     if (!window_list) goto fallback;
 
     for (int i = 0; i < window_count; ++i) {

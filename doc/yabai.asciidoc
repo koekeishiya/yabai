@@ -340,6 +340,13 @@ COMMAND
 *--space* '<SPACE_SEL>'::
     Send the selected window to the given space.
 
+*--minimize*::
+    Minimizes the selected window. Only works on windows that provide a minimize button in its titlebar.
+
+*--deminimize*::
+    Restores the selected window, if it is minimized. +
+    Note that you can also '--focus' a minimized window to restore it.
+
 *--close*::
     Closes the selected window. Only works on windows that provide a close button in its titlebar.
 

@@ -468,7 +468,7 @@ void view_serialize(FILE *rsp, struct view *view)
     uint32_t windows[MAXLEN] = {};
 
     int window_count = 0;
-    uint32_t *window_list = space_window_list(view->sid, &window_count);
+    uint32_t *window_list = space_window_list(view->sid, &window_count, true);
     if (window_list) {
         for (int i = 0; i < window_count; ++i) {
             if (window_manager_find_window(&g_window_manager, window_list[i])) {

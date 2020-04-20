@@ -60,6 +60,7 @@ CFStringRef window_role(struct window *window);
 CFStringRef window_subrole(struct window *window);
 bool window_can_move(struct window *window);
 bool window_can_resize(struct window *window);
+bool window_can_minimize(struct window *window);
 bool window_level_is_standard(struct window *window);
 bool window_is_undersized(struct window *window);
 bool window_is_minimized(struct window *window);
