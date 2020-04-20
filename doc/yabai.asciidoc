@@ -344,8 +344,8 @@ COMMAND
     Minimizes the selected window. Only works on windows that provide a minimize button in its titlebar.
 
 *--deminimize*::
-    Restores the selected window, if it is minimized. +
-    Note that you can also '--focus' a minimized window to restore it.
+    Restores the selected window, if it is minimized. The window will only get focus if the owning application has focus. +
+    Note that you can also '--focus' a minimized window to restore it as the focused window.
 
 *--close*::
     Closes the selected window. Only works on windows that provide a close button in its titlebar.
