@@ -192,47 +192,11 @@ static inline bool psn_equals(ProcessSerialNumber *a, ProcessSerialNumber *b)
 }
 #pragma clang diagnostic pop
 
-static bool rect_is_in_direction(CGRect r1, CGRect r2, int direction)
+static inline int euclidean_distance(CGPoint p1, CGPoint p2)
 {
-    CGPoint r1_max = { CGRectGetMaxX(r1), CGRectGetMaxY(r1) };
-    CGPoint r2_max = { CGRectGetMaxX(r2), CGRectGetMaxY(r2) };
-
-    switch (direction) {
-    case DIR_NORTH: if (r2.origin.y > r1_max.y) return false; break;
-    case DIR_WEST:  if (r2.origin.x > r1_max.x) return false; break;
-    case DIR_SOUTH: if (r2_max.y < r1.origin.y) return false; break;
-    case DIR_EAST:  if (r2_max.x < r1.origin.x) return false; break;
-    }
-
-    switch (direction) {
-    case DIR_NORTH:
-    case DIR_SOUTH:
-        return (r2.origin.x >= r1.origin.x && r2.origin.x <= r1_max.x) ||
-               (r2_max.x >= r1.origin.x && r2_max.x <= r1_max.x) ||
-               (r1.origin.x > r2.origin.x && r1.origin.x < r2_max.x);
-    case DIR_WEST:
-    case DIR_EAST:
-        return (r2.origin.y >= r1.origin.y && r2.origin.y <= r1_max.y) ||
-               (r2_max.y >= r1.origin.y && r2_max.y <= r1_max.y) ||
-               (r1.origin.y > r2.origin.y && r1_max.y < r2_max.y);
-    }
-
-    return false;
-}
-
-static uint32_t rect_distance(CGRect r1, CGRect r2, int direction)
-{
-    CGPoint r1_max = { CGRectGetMaxX(r1), CGRectGetMaxY(r1) };
-    CGPoint r2_max = { CGRectGetMaxX(r2), CGRectGetMaxY(r2) };
-
-    switch (direction) {
-    case DIR_NORTH: return r2_max.y > r1.origin.y ? r2_max.y - r1.origin.y : r1.origin.y - r2_max.y;
-    case DIR_WEST:  return r2_max.x > r1.origin.x ? r2_max.x - r1.origin.x : r1.origin.x - r2_max.x;
-    case DIR_SOUTH: return r2.origin.y < r1_max.y ? r1_max.y - r2.origin.y : r2.origin.y - r1_max.y;
-    case DIR_EAST:  return r2.origin.x < r1_max.x ? r1_max.x - r2.origin.x : r2.origin.x - r1_max.x;
-    }
-
-    return UINT32_MAX;
+    int dx = p1.x - p2.x;
+    int dy = p1.y - p2.y;
+    return dx*dx + dy*dy;
 }
 
 static bool triangle_contains_point(CGPoint t[3], CGPoint p)

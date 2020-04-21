@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - New window commands `--minimize` and `--deminimize`. Minimized windows are now reported through window queries and there is a new attribute `minimized` to identify the current state [#379](https://github.com/koekeishiya/yabai/issues/379)
 
+### Changed
+- Window commands using cardinal directions use euclidean distance (frame center) to identify best target window [#301](https://github.com/koekeishiya/yabai/issues/301)
+
 ## [2.4.3] - 2020-04-14
 ### Changed
 - Changed how *mouse down* events are handled to reduce cycles spent in macOS event tap callback [#376](https://github.com/koekeishiya/yabai/issues/376)
