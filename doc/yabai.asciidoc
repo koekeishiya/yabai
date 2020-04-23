@@ -408,10 +408,6 @@ ARGUMENT
 *layer='<LAYER>'*::
     Window is ordered within the given stacking layer.
 
-*topmost='<BOOL_SEL>'*::
-    Window appears above other windows. +
-    *DEPRECATED:* This option will be removed in a future version. Use *layer=above* instead!
-
 *border='<BOOL_SEL>'*::
     Window should draw border.
 

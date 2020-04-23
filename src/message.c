@@ -1930,30 +1930,6 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_ON_TOP)) {
-
-                //
-                // @deprecated
-                //
-                // Kept for backwards compatibility for now, but will be removed in the future.
-                // The actual implementation of this option uses the new layer system internally.
-                //
-
-                daemon_deprecated(rsp, "key '%s=%s' has been replaced by '%s=%s' and will be removed in the future\n",
-                                  ARGUMENT_RULE_KEY_ON_TOP, ARGUMENT_COMMON_VAL_ON,
-                                  ARGUMENT_RULE_KEY_LAYER, ARGUMENT_WINDOW_LAYER_ABOVE);
-
-                if (exclusion) unsupported_exclusion = key;
-
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.layer = LAYER_ABOVE;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.layer = LAYER_NORMAL;
-                } else {
-                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
-                    did_parse = false;
-                }
-
             } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
                 if (exclusion) unsupported_exclusion = key;
 

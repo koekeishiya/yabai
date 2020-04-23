@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Removed
+- The deprecated rule option *topmost='<BOOL_SEL>'* has been removed.
 - The built-in status bar has been removed. [#486](https://github.com/koekeishiya/yabai/issues/486)
 
 ### Added
