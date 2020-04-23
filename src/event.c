@@ -7,7 +7,6 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
-extern struct bar g_bar;
 extern bool g_mission_control_active;
 extern int g_connection;
 
@@ -390,7 +389,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
     debug("%s: %s\n", __FUNCTION__, process->name);
     g_process_manager.last_front_pid = g_process_manager.front_pid;
     g_process_manager.front_pid = process->pid;
-    bar_refresh(&g_bar);
 
     return EVENT_SUCCESS;
 }
@@ -644,7 +642,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     border_window_activate(window);
     window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.active_window_opacity);
-    bar_refresh(&g_bar);
 
     if (window_level_is_standard(window) && window_is_standard(window)) {
         if (g_window_manager.focused_window_id != window->id) {
@@ -824,7 +821,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_TITLE_CHANGED)
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    if (window->id == g_window_manager.focused_window_id) bar_refresh(&g_bar);
 
     return EVENT_SUCCESS;
 }
@@ -846,8 +842,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
             window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
         }
     }
-
-    bar_refresh(&g_bar);
 
     if (space_is_user(g_space_manager.current_space_id)) {
         if (view_is_invalid(view)) view_update(view);
@@ -892,8 +886,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
         }
     }
 
-    bar_refresh(&g_bar);
-
     if (space_is_user(g_space_manager.current_space_id)) {
         if (view_is_invalid(view)) view_update(view);
         if (view_is_dirty(view))   view_flush(view);
@@ -911,7 +903,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_ADDED)
     debug("%s: %d\n", __FUNCTION__, did);
     space_manager_handle_display_add(&g_space_manager, did);
     window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
-    bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 
@@ -920,7 +911,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_REMOVED)
     uint32_t did = display_manager_main_display_id();
     debug("%s: %d\n", __FUNCTION__, did);
     window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
-    bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 
@@ -929,7 +919,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_MOVED)
     uint32_t did = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, did);
     space_manager_mark_spaces_invalid(&g_space_manager);
-    bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 
@@ -938,7 +927,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_RESIZED)
     uint32_t did = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, did);
     space_manager_mark_spaces_invalid_for_display(&g_space_manager, did);
-    bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 
@@ -1388,7 +1376,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED)
 {
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
-    bar_resize(&g_bar);
     return EVENT_SUCCESS;
 }
 
@@ -1409,12 +1396,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
         window_manager_center_mouse(&g_window_manager, focused_window);
     }
 
-    return EVENT_SUCCESS;
-}
-
-static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH)
-{
-    bar_refresh(&g_bar);
     return EVENT_SUCCESS;
 }
 

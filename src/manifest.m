@@ -55,7 +55,6 @@
 #include "display_manager.h"
 #include "space_manager.h"
 #include "window_manager.h"
-#include "bar.h"
 
 #include "event_loop.c"
 #include "event.c"
@@ -73,6 +72,5 @@
 #include "display_manager.c"
 #include "space_manager.c"
 #include "window_manager.c"
-#include "bar.c"
 
 #include "yabai.c"

@@ -5,8 +5,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Removed
+- The built-in status bar has been removed. [#486](https://github.com/koekeishiya/yabai/issues/486)
+
 ### Added
 - New window commands `--minimize` and `--deminimize`. Minimized windows are now reported through window queries and there is a new attribute `minimized` to identify the current state [#379](https://github.com/koekeishiya/yabai/issues/379)
+- New config option `external_bar` to specify special padding compatible with the `space --toggle padding` option [#454](https://github.com/koekeishiya/yabai/issues/454)
 
 ### Changed
 - New self-signed certificate used to sign the released binaries because the previous one expired at april 21th, 2020. You will have to re-enable accessibility permissions after this install. Sorry about that.

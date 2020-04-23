@@ -1,7 +1,6 @@
 #include "display.h"
 
 extern struct event_loop g_event_loop;
-extern struct bar g_bar;
 extern int g_connection;
 
 static DISPLAY_EVENT_HANDLER(display_handler)
@@ -93,9 +92,12 @@ CGRect display_bounds_constrained(uint32_t did)
     CGRect menu   = display_manager_menu_bar_rect(did);
     CGRect dock   = display_manager_dock_rect();
 
-    if (g_bar.enabled && g_bar.did == did) {
-        frame.origin.y    += g_bar.frame.size.height;
-        frame.size.height -= g_bar.frame.size.height;
+    if ((g_display_manager.mode == EXTERNAL_BAR_MAIN &&
+         did == display_manager_main_display_id()) ||
+        (g_display_manager.mode == EXTERNAL_BAR_ALL)) {
+        frame.origin.y    += g_display_manager.top_padding;
+        frame.size.height -= g_display_manager.top_padding;
+        frame.size.height -= g_display_manager.bottom_padding;
     }
 
     if (!display_manager_menu_bar_hidden()) {

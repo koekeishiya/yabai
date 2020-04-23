@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-04-20
+.\"      Date: 2020-04-23
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-04-20" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-04-23" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -127,55 +127,15 @@ Get or set the value of <space setting>.
 Enable output of debug information to stdout.
 .RE
 .sp
-\fBstatus_bar\fP [\fI<BOOL_SEL>\fP]
+\fBexternal_bar\fP [\fI<main|all|off>:<top_padding>:<bottom_padding>\fP]
 .RS 4
-Enable custom status bar.
-.RE
-.sp
-\fBstatus_bar_text_font\fP [\fI<font_family>:<font_style>:<font_size>\fP]
-.RS 4
-Specify name, style and size of font to use for drawing text.
+Specify top and bottom padding for a potential custom bar that you may be running.
 .br
-Use \fIFont Book.app\fP to identify the correct name.
-.RE
-.sp
-\fBstatus_bar_icon_font\fP [\fI<font_family>:<font_style>:<font_size>\fP]
-.RS 4
-Specify name, style and size of font to use for drawing icon symbols.
+\fImain\fP: Apply the given padding only to spaces located on the main display.
 .br
-Use \fIFont Book.app\fP to identify the correct name.
-.RE
-.sp
-\fBstatus_bar_background_color\fP [\fI<COLOR>\fP]
-.RS 4
-Color to use for drawing status bar background.
-.RE
-.sp
-\fBstatus_bar_foreground_color\fP [\fI<COLOR>\fP]
-.RS 4
-Color to use for drawing status bar elements.
-.RE
-.sp
-\fBstatus_bar_space_icon_strip\fP [\fI<sym_1> <sym_2> <sym_n>\fP]
-.RS 4
-Specify symbols separated by whitespace to be used for visualizing spaces.
-.RE
-.sp
-\fBstatus_bar_power_icon_strip\fP [\fI<sym_battery> <sym_ac>\fP]
-.RS 4
-Specify two symbols separated by whitespace.
+\fIall\fP:  Apply the given padding to all spaces regardless of their display.
 .br
-The first symbol represents battery power and the second symbol indicates AC.
-.RE
-.sp
-\fBstatus_bar_space_icon\fP [\fI<sym>\fP]
-.RS 4
-Specify a general symbol to use for any given space that does not have a match in \fIstatus_bar_space_icon_strip\fP.
-.RE
-.sp
-\fBstatus_bar_clock_icon\fP [\fI<sym>\fP]
-.RS 4
-Specify a symbol to represent the current time.
+\fIoff\fP:  Do not apply any special padding.
 .RE
 .sp
 \fBmouse_follows_focus\fP [\fI<BOOL_SEL>\fP]

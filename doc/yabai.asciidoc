@@ -106,35 +106,11 @@ Global Settings
 *debug_output* ['<BOOL_SEL>']::
     Enable output of debug information to stdout.
 
-*status_bar* ['<BOOL_SEL>']::
-    Enable custom status bar.
-
-*status_bar_text_font* ['<font_family>:<font_style>:<font_size>']::
-    Specify name, style and size of font to use for drawing text. +
-    Use 'Font Book.app' to identify the correct name.
-
-*status_bar_icon_font* ['<font_family>:<font_style>:<font_size>']::
-    Specify name, style and size of font to use for drawing icon symbols. +
-    Use 'Font Book.app' to identify the correct name.
-
-*status_bar_background_color* ['<COLOR>']::
-    Color to use for drawing status bar background.
-
-*status_bar_foreground_color* ['<COLOR>']::
-    Color to use for drawing status bar elements.
-
-*status_bar_space_icon_strip* ['<sym_1> <sym_2> <sym_n>']::
-    Specify symbols separated by whitespace to be used for visualizing spaces.
-
-*status_bar_power_icon_strip* ['<sym_battery> <sym_ac>']::
-    Specify two symbols separated by whitespace. +
-    The first symbol represents battery power and the second symbol indicates AC.
-
-*status_bar_space_icon* ['<sym>']::
-    Specify a general symbol to use for any given space that does not have a match in 'status_bar_space_icon_strip'.
-
-*status_bar_clock_icon* ['<sym>']::
-    Specify a symbol to represent the current time.
+*external_bar* ['<main|all|off>:<top_padding>:<bottom_padding>']::
+    Specify top and bottom padding for a potential custom bar that you may be running. +
+    'main': Apply the given padding only to spaces located on the main display. +
+    'all':  Apply the given padding to all spaces regardless of their display. +
+    'off':  Do not apply any special padding.
 
 *mouse_follows_focus* ['<BOOL_SEL>']::
     When focusing a window, put the mouse at its center.

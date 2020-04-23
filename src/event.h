@@ -37,7 +37,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MENU_OPENED);
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED);
 static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_CHANGE_PREF);
 static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE);
-static EVENT_CALLBACK(EVENT_HANDLER_BAR_REFRESH);
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE);
 
 #define EVENT_QUEUED    0x0
@@ -86,7 +85,6 @@ enum event_type
     MENU_BAR_HIDDEN_CHANGED,
     DOCK_DID_CHANGE_PREF,
     SYSTEM_WOKE,
-    BAR_REFRESH,
     DAEMON_MESSAGE,
 
     EVENT_TYPE_COUNT
@@ -129,7 +127,6 @@ static const char *event_type_str[] =
     [MENU_BAR_HIDDEN_CHANGED]        = "menu_bar_hidden_changed",
     [DOCK_DID_CHANGE_PREF]           = "dock_did_change_pref",
     [SYSTEM_WOKE]                    = "system_woke",
-    [BAR_REFRESH]                    = "bar_refresh",
     [DAEMON_MESSAGE]                 = "daemon_message",
 
     [EVENT_TYPE_COUNT]               = "event_type_count"
@@ -170,7 +167,6 @@ static event_callback *event_handler[] =
     [MENU_BAR_HIDDEN_CHANGED]        = EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED,
     [DOCK_DID_CHANGE_PREF]           = EVENT_HANDLER_DOCK_DID_CHANGE_PREF,
     [SYSTEM_WOKE]                    = EVENT_HANDLER_SYSTEM_WOKE,
-    [BAR_REFRESH]                    = EVENT_HANDLER_BAR_REFRESH,
     [DAEMON_MESSAGE]                 = EVENT_HANDLER_DAEMON_MESSAGE,
 };
 

@@ -14,10 +14,28 @@ extern void CoreDockGetOrientationAndPinning(int *orientation, int *pinning);
 #define DOCK_ORIENTATION_LEFT   3
 #define DOCK_ORIENTATION_RIGHT  4
 
+enum external_bar_mode
+{
+    EXTERNAL_BAR_OFF,
+    EXTERNAL_BAR_MAIN,
+    EXTERNAL_BAR_ALL
+};
+
+static const char *external_bar_mode_str[] =
+{
+    "off",
+    "main",
+    "all"
+};
+
 struct display_manager
 {
     uint32_t current_display_id;
     uint32_t last_display_id;
+
+    int top_padding;
+    int bottom_padding;
+    enum external_bar_mode mode;
 };
 
 bool display_manager_query_displays(FILE *rsp);

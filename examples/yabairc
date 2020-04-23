@@ -1,16 +1,5 @@
 #!/usr/bin/env sh
 
-# bar settings
-yabai -m config status_bar                   off
-yabai -m config status_bar_text_font         "Helvetica Neue:Bold:12.0"
-yabai -m config status_bar_icon_font         "FontAwesome:Regular:12.0"
-yabai -m config status_bar_background_color  0xff202020
-yabai -m config status_bar_foreground_color  0xffa8a8a8
-yabai -m config status_bar_space_icon_strip  I II III IV V VI VII VIII IX X
-yabai -m config status_bar_power_icon_strip   
-yabai -m config status_bar_space_icon        
-yabai -m config status_bar_clock_icon        
-
 # global settings
 yabai -m config mouse_follows_focus          off
 yabai -m config focus_follows_mouse          off
@@ -37,10 +26,10 @@ yabai -m config mouse_action2                resize
 
 # general space settings
 yabai -m config layout                       bsp
-yabai -m config top_padding                  20
-yabai -m config bottom_padding               20
-yabai -m config left_padding                 20
-yabai -m config right_padding                20
-yabai -m config window_gap                   10
+yabai -m config top_padding                  12
+yabai -m config bottom_padding               12
+yabai -m config left_padding                 12
+yabai -m config right_padding                12
+yabai -m config window_gap                   06
 
 echo "yabai configuration loaded.."

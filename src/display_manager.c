@@ -1,5 +1,6 @@
 #include "display_manager.h"
 
+extern struct display_manager g_display_manager;
 extern struct window_manager g_window_manager;
 extern int g_connection;
 
@@ -292,6 +293,9 @@ bool display_manager_begin(struct display_manager *dm)
 {
     dm->current_display_id = display_manager_active_display_id();
     dm->last_display_id = dm->current_display_id;
+    dm->mode = EXTERNAL_BAR_OFF;
+    dm->top_padding = 0;
+    dm->bottom_padding = 0;
     return CGDisplayRegisterReconfigurationCallback(display_handler, NULL) == kCGErrorSuccess;
 }
 
