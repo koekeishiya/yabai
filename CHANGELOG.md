@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - New self-signed certificate used to sign the released binaries because the previous one expired at april 21th, 2020. You will have to re-enable accessibility permissions after this install. Sorry about that.
 - Window commands using cardinal directions use euclidean distance to identify best target window [#301](https://github.com/koekeishiya/yabai/issues/301)
 - Config option `insert_window_border_color` changed to `insert_feedback_color` [#487](https://github.com/koekeishiya/yabai/issues/487)
+- Fixed an issue that would invalidate a manual insertion point, if a mouse action triggered [#492](https://github.com/koekeishiya/yabai/issues/492)
 
 ## [2.4.3] - 2020-04-14
 ### Changed

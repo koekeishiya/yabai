@@ -1027,26 +1027,21 @@ enum window_op_error window_manager_set_window_insertion(struct space_manager *s
     if (direction == DIR_NORTH) {
         node->split = SPLIT_X;
         node->child = CHILD_FIRST;
-        node->insert_dir = direction;
-        view->insertion_point = node->window_id;
     } else if (direction == DIR_EAST) {
         node->split = SPLIT_Y;
         node->child = CHILD_SECOND;
-        node->insert_dir = direction;
-        view->insertion_point = node->window_id;
     } else if (direction == DIR_SOUTH) {
         node->split = SPLIT_X;
         node->child = CHILD_SECOND;
-        node->insert_dir = direction;
-        view->insertion_point = node->window_id;
     } else if (direction == DIR_WEST) {
         node->split = SPLIT_Y;
         node->child = CHILD_FIRST;
-        node->insert_dir = direction;
-        view->insertion_point = node->window_id;
     }
 
+    node->insert_dir = direction;
+    view->insertion_point = node->window_id;
     insert_feedback_show(node);
+
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
