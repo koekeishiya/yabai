@@ -449,28 +449,31 @@ void view_remove_window_node(struct view *view, struct window *window)
                                ? parent->left
                                : parent->right;
 
+
     parent->window_id = child->window_id;
+    parent->split     = child->split;
+    parent->child     = child->child;
     parent->left      = NULL;
     parent->right     = NULL;
     parent->zoom      = NULL;
+
+    parent->insert_dir      = child->insert_dir;
+    parent->feedback_window = child->feedback_window;
+    if (parent->insert_dir) insert_feedback_show(parent);
 
     if (window_node_is_intermediate(child) && !window_node_is_leaf(child)) {
         parent->left = child->left;
         parent->left->parent = parent;
         parent->left->zoom = NULL;
-        insert_feedback_destroy(parent->left);
 
         parent->right = child->right;
         parent->right->parent = parent;
         parent->right->zoom = NULL;
-        insert_feedback_destroy(parent->right);
 
         window_node_clear_zoom(parent);
-        insert_feedback_destroy(parent);
         window_node_update(view, parent);
     }
 
-    insert_feedback_destroy(child);
     insert_feedback_destroy(node);
 
     free(child);
