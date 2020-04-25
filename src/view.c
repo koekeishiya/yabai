@@ -1,8 +1,88 @@
 #include "view.h"
 
+extern int g_connection;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
+
+void insert_feedback_show(struct window_node *node)
+{
+    CFTypeRef frame_region;
+    CGRect frame = {{(int)node->area.x, (int)node->area.y},{(int)(node->area.w+0.5f), (int)(node->area.h+0.5f)}};
+    CGSNewRegionWithRect(&frame, &frame_region);
+
+    if (!node->feedback_window.id) {
+        uint32_t tags[2] = { kCGSIgnoreForExposeTagBit | kCGSIgnoreForEventsTagBit, 0 };
+        SLSNewWindow(g_connection, 2, 0, 0, frame_region, &node->feedback_window.id);
+        SLSSetWindowTags(g_connection, node->feedback_window.id, tags, 64);
+        SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
+        SLSSetWindowLevel(g_connection, node->feedback_window.id, 5);
+        node->feedback_window.context = SLWindowContextCreate(g_connection, node->feedback_window.id, 0);
+        CGContextSetLineWidth(node->feedback_window.context, 8);
+        CGContextSetRGBStrokeColor(node->feedback_window.context,
+                                   g_window_manager.insert_feedback_color.r,
+                                   g_window_manager.insert_feedback_color.g,
+                                   g_window_manager.insert_feedback_color.b,
+                                   g_window_manager.insert_feedback_color.a);
+    }
+
+    frame.origin.x = 0; frame.origin.y = 0;
+    CGMutablePathRef insert = CGPathCreateMutable();
+    CGFloat minx = CGRectGetMinX(frame), midx = CGRectGetMidX(frame), maxx = CGRectGetMaxX(frame);
+    CGFloat miny = CGRectGetMinY(frame), midy = CGRectGetMidY(frame), maxy = CGRectGetMaxY(frame);
+
+    switch (node->insert_dir) {
+    case DIR_NORTH: {
+        CGPathMoveToPoint(insert, NULL, maxx, midy);
+        CGPathAddLineToPoint(insert, NULL, maxx, maxy);
+        CGPathAddLineToPoint(insert, NULL, minx, maxy);
+        CGPathAddLineToPoint(insert, NULL, minx, midy);
+    } break;
+    case DIR_EAST: {
+        CGPathMoveToPoint(insert, NULL, midx, miny);
+        CGPathAddLineToPoint(insert, NULL, maxx, miny);
+        CGPathAddLineToPoint(insert, NULL, maxx, maxy);
+        CGPathAddLineToPoint(insert, NULL, midx, maxy);
+    } break;
+    case DIR_SOUTH: {
+        CGPathMoveToPoint(insert, NULL, minx, midy);
+        CGPathAddLineToPoint(insert, NULL, minx, miny);
+        CGPathAddLineToPoint(insert, NULL, maxx, miny);
+        CGPathAddLineToPoint(insert, NULL, maxx, midy);
+    } break;
+    case DIR_WEST: {
+        CGPathMoveToPoint(insert, NULL, midx, miny);
+        CGPathAddLineToPoint(insert, NULL, minx, miny);
+        CGPathAddLineToPoint(insert, NULL, minx, maxy);
+        CGPathAddLineToPoint(insert, NULL, midx, maxy);
+    } break;
+    }
+
+    SLSDisableUpdate(g_connection);
+    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_id);
+
+    SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
+
+    CGContextClearRect(node->feedback_window.context, frame);
+    CGContextAddPath(node->feedback_window.context, insert);
+    CGContextStrokePath(node->feedback_window.context);
+
+    CGContextFlush(node->feedback_window.context);
+
+    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_id);
+    SLSReenableUpdate(g_connection);
+    CGPathRelease(insert);
+    CFRelease(frame_region);
+}
+
+void insert_feedback_destroy(struct window_node *node)
+{
+    if (node->feedback_window.id) {
+        CGContextRelease(node->feedback_window.context);
+        SLSReleaseWindow(g_connection, node->feedback_window.id);
+        memset(&node->feedback_window, 0, sizeof(struct feedback_window));
+    }
+}
 
 static struct area area_from_cgrect(CGRect rect)
 {
@@ -190,25 +270,15 @@ static void window_node_clear_zoom(struct window_node *node)
     }
 }
 
-float window_node_border_window_offset(struct window *window)
-{
-    if (!window->border.enabled) return 0.0f;
-    if (g_window_manager.window_border_placement == BORDER_PLACEMENT_EXTERIOR) return window->border.width;
-    if (g_window_manager.window_border_placement == BORDER_PLACEMENT_INTERIOR) return 0.0f;
-    if (g_window_manager.window_border_placement == BORDER_PLACEMENT_INSET)    return window->border.width*0.5f;
-    return 0.0f; // shutup compiler
-}
-
 void window_node_flush(struct window_node *node)
 {
     if (window_node_is_occupied(node)) {
         struct window *window = window_manager_find_window(&g_window_manager, node->window_id);
         if (window) {
-            float offset = window_node_border_window_offset(window);
             if (node->zoom) {
-                window_manager_set_window_frame(window, node->zoom->area.x + offset, node->zoom->area.y + offset, node->zoom->area.w - 2*offset, node->zoom->area.h - 2*offset);
+                window_manager_set_window_frame(window, node->zoom->area.x, node->zoom->area.y, node->zoom->area.w, node->zoom->area.h);
             } else {
-                window_manager_set_window_frame(window, node->area.x + offset, node->area.y + offset, node->area.w - 2*offset, node->area.h - 2*offset);
+                window_manager_set_window_frame(window, node->area.x, node->area.y, node->area.w, node->area.h);
             }
         }
     }
@@ -360,6 +430,7 @@ void view_remove_window_node(struct view *view, struct window *window)
 
     if (node == view->root) {
         view->root->window_id = 0;
+        insert_feedback_destroy(view->root);
         return;
     }
 
@@ -377,14 +448,20 @@ void view_remove_window_node(struct view *view, struct window *window)
         parent->left = child->left;
         parent->left->parent = parent;
         parent->left->zoom = NULL;
+        insert_feedback_destroy(parent->left);
 
         parent->right = child->right;
         parent->right->parent = parent;
         parent->right->zoom = NULL;
+        insert_feedback_destroy(parent->right);
 
         window_node_clear_zoom(parent);
+        insert_feedback_destroy(parent);
         window_node_update(view, parent);
     }
+
+    insert_feedback_destroy(child);
+    insert_feedback_destroy(node);
 
     free(child);
     free(node);
@@ -406,20 +483,17 @@ void view_add_window_node(struct view *view, struct window *window)
         if (view->insertion_point) {
             leaf = view_find_window_node(view, view->insertion_point);
             view->insertion_point = 0;
+
+            if (leaf) {
+                leaf->insert_dir = 0;
+                insert_feedback_destroy(leaf);
+            }
         }
 
         if (!leaf) leaf = view_find_window_node(view, g_window_manager.focused_window_id);
         if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
 
-        struct window *leaf_window = window_manager_find_window(&g_window_manager, leaf->window_id);
         window_node_split(view, leaf, window);
-
-        if (leaf_window) {
-            if (leaf_window->border.insert_active) {
-                leaf_window->border.insert_active = false;
-                leaf_window->border.insert_dir = 0;
-            }
-        }
 
         if (g_space_manager.auto_balance) {
             window_node_equalize(view->root);

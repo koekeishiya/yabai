@@ -78,8 +78,6 @@ FLOAT_SEL   := 0 < value <= 1.0
 
 BOOL_SEL    := on | off
 
-COLOR       := #AARRGGBB
-
 REGEX       := https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended-regular-expression-syntax.html[POSIX extended regular expression syntax]
 
 LABEL       := arbitrary string/text used as an identifier
@@ -133,28 +131,7 @@ Global Settings
 *window_shadow* ['<BOOL_SEL>|float']::
     Draw shadow for windows.
 
-*window_border* ['<BOOL_SEL>']::
-    Draw border for windows.
-
-*window_border_placement* ['exterior|interior|inset']::
-    Position/draw-mode of window border.
-
-*window_border_width* ['<integer number>']::
-    Width of window borders.
-
-*window_border_radius* ['<floating point number>']::
-    Radius of window border corners.
-
-*active_window_border_topmost* ['<BOOL_SEL>']::
-    Make the active border stay on top of other windows.
-
-*active_window_border_color* ['<COLOR>']::
-    Color of the border of the focused window.
-
-*normal_window_border_color* ['<COLOR>']::
-    Color of the border of an unfocused window.
-
-*insert_window_border_color* ['<COLOR>']::
+*insert_feedback_color* ['0xAARRGGBB']::
     Color of the *window --insert* message selection.
 
 *active_window_opacity* ['<FLOAT_SEL>']::
@@ -304,7 +281,7 @@ COMMAND
 *--ratio* 'rel|abs:<dr>'::
     If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.
 
-*--toggle* 'float|sticky|topmost|pip|shadow|split|border|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
+*--toggle* 'float|sticky|topmost|pip|shadow|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window.
 
 *--layer* '<LAYER>'::
@@ -407,9 +384,6 @@ ARGUMENT
 
 *layer='<LAYER>'*::
     Window is ordered within the given stacking layer.
-
-*border='<BOOL_SEL>'*::
-    Window should draw border.
 
 *native-fullscreen='<BOOL_SEL>'*::
     Window should enter native macOS fullscreen mode.

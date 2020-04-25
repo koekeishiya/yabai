@@ -37,7 +37,6 @@ struct window
     uint32_t id;
     uint32_t **volatile id_ptr;
     uint8_t notification;
-    struct border border;
     bool has_shadow;
     bool is_fullscreen;
     bool is_minimized;

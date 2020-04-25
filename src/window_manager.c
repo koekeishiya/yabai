@@ -164,12 +164,6 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window_manager_set_window_layer(window, rule->layer);
     }
 
-    if (rule->border == RULE_PROP_ON) {
-        border_window_create(window);
-    } else if (rule->border == RULE_PROP_OFF) {
-        border_window_destroy(window);
-    }
-
     if (rule->fullscreen == RULE_PROP_ON) {
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
         window->rule_fullscreen = true;
@@ -376,117 +370,6 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
             if (bucket->value) {
                 struct window *window = bucket->value;
                 window_manager_purify_window(wm, window);
-            }
-
-            bucket = bucket->next;
-        }
-    }
-}
-
-void window_manager_set_border_window_enabled(struct window_manager *wm, bool enabled)
-{
-    wm->enable_window_border = enabled;
-
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if ((window_is_standard(window)) || (window_is_dialog(window))) {
-                    if (enabled && !window->border.id) {
-                        border_window_create(window);
-
-                        if ((!window->application->is_hidden) &&
-                            (!window->is_minimized) &&
-                            (!window->is_fullscreen)) {
-                            border_window_refresh(window);
-                        }
-
-                        if (window->id == wm->focused_window_id) {
-                            border_window_activate(window);
-                        }
-                    } else if (!enabled && window->border.id) {
-                        border_window_destroy(window);
-                    }
-                }
-            }
-
-            bucket = bucket->next;
-        }
-    }
-}
-
-void window_manager_set_border_window_width(struct window_manager *wm, int width)
-{
-    wm->window_border_width = width;
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if (window->border.id) {
-                    window->border.width = width;
-                    CGContextSetLineWidth(window->border.context, width);
-
-                    if ((!window->application->is_hidden) &&
-                        (!window->is_minimized) &&
-                        (!window->is_fullscreen)) {
-                        border_window_refresh(window);
-                    }
-                }
-            }
-
-            bucket = bucket->next;
-        }
-    }
-}
-
-void window_manager_set_border_window_radius(struct window_manager *wm, float radius)
-{
-    wm->window_border_radius = radius;
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if (window->border.id) {
-                    window->border.radius = radius;
-
-                    if ((!window->application->is_hidden) &&
-                        (!window->is_minimized) &&
-                        (!window->is_fullscreen)) {
-                        border_window_refresh(window);
-                    }
-                }
-            }
-
-            bucket = bucket->next;
-        }
-    }
-}
-
-void window_manager_set_active_border_window_color(struct window_manager *wm, uint32_t color)
-{
-    wm->active_window_border_color = color;
-    struct window *window = window_manager_focused_window(wm);
-    if (window) border_window_activate(window);
-}
-
-void window_manager_set_normal_border_window_color(struct window_manager *wm, uint32_t color)
-{
-    wm->normal_window_border_color = color;
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if (window->id != wm->focused_window_id) {
-                    if ((!window->application->is_hidden) &&
-                        (!window->is_minimized) &&
-                        (!window->is_fullscreen)) {
-                        border_window_deactivate(window);
-                    }
-                }
             }
 
             bucket = bucket->next;
@@ -1125,52 +1008,45 @@ enum window_op_error window_manager_set_window_insertion(struct space_manager *s
     if (view->insertion_point && view->insertion_point != window->id) {
         struct window_node *insert_node = view_find_window_node(view, view->insertion_point);
         if (insert_node) {
+            insert_feedback_destroy(insert_node);
             insert_node->split = SPLIT_NONE;
             insert_node->child = CHILD_NONE;
-        }
-
-        struct window *insert_window = window_manager_find_window(wm, view->insertion_point);
-        if (insert_window) {
-            insert_window->border.insert_active = false;
-            insert_window->border.insert_dir = 0;
-            border_window_refresh(insert_window);
+            insert_node->insert_dir = 0;
         }
     }
 
-    if (direction == window->border.insert_dir) {
+    if (direction == node->insert_dir) {
+        insert_feedback_destroy(node);
         node->split = SPLIT_NONE;
         node->child = CHILD_NONE;
-        window->border.insert_active = false;
-        window->border.insert_dir = 0;
+        node->insert_dir = 0;
         view->insertion_point = 0;
-    } else if (direction == DIR_NORTH) {
+        return WINDOW_OP_ERROR_SUCCESS;
+    }
+
+    if (direction == DIR_NORTH) {
         node->split = SPLIT_X;
         node->child = CHILD_FIRST;
-        window->border.insert_active = true;
-        window->border.insert_dir = direction;
+        node->insert_dir = direction;
         view->insertion_point = node->window_id;
     } else if (direction == DIR_EAST) {
         node->split = SPLIT_Y;
         node->child = CHILD_SECOND;
-        window->border.insert_active = true;
-        window->border.insert_dir = direction;
+        node->insert_dir = direction;
         view->insertion_point = node->window_id;
     } else if (direction == DIR_SOUTH) {
         node->split = SPLIT_X;
         node->child = CHILD_SECOND;
-        window->border.insert_active = true;
-        window->border.insert_dir = direction;
+        node->insert_dir = direction;
         view->insertion_point = node->window_id;
     } else if (direction == DIR_WEST) {
         node->split = SPLIT_Y;
         node->child = CHILD_FIRST;
-        window->border.insert_active = true;
-        window->border.insert_dir = direction;
+        node->insert_dir = direction;
         view->insertion_point = node->window_id;
     }
 
-    border_window_refresh(window);
-
+    insert_feedback_show(node);
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
@@ -1371,13 +1247,12 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
         bounds.size.height -= (dview->top_padding + dview->bottom_padding);
     }
 
-    float offset = window_node_border_window_offset(window);
     float cw = bounds.size.width / c;
     float ch = bounds.size.height / r;
-    float fx = bounds.origin.x + bounds.size.width  - cw * (c - x) + offset;
-    float fy = bounds.origin.y + bounds.size.height - ch * (r - y) + offset;
-    float fw = cw * w - 2 * offset;
-    float fh = ch * h - 2 * offset;
+    float fx = bounds.origin.x + bounds.size.width  - cw * (c - x);
+    float fy = bounds.origin.y + bounds.size.height - ch * (r - y);
+    float fw = cw * w;
+    float fh = ch * h;
 
     window_manager_move_window(window, fx, fy);
     window_manager_resize_window(window, fw, fh);
@@ -1474,14 +1349,12 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
 
     struct window_node *node = view_find_window_node(view, window->id);
     if (node->zoom) {
-        float offset = window_node_border_window_offset(window);
-        window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
-        window_manager_resize_window(window, node->area.w - 2*offset, node->area.h - 2*offset);
+        window_manager_move_window(window, node->area.x, node->area.y);
+        window_manager_resize_window(window, node->area.w, node->area.h);
         node->zoom = NULL;
     } else if (node->parent) {
-        float offset = window_node_border_window_offset(window);
-        window_manager_move_window(window, node->parent->area.x + offset, node->parent->area.y + offset);
-        window_manager_resize_window(window, node->parent->area.w - 2*offset, node->parent->area.h - 2*offset);
+        window_manager_move_window(window, node->parent->area.x, node->parent->area.y);
+        window_manager_resize_window(window, node->parent->area.w, node->parent->area.h);
         node->zoom = node->parent;
     }
 }
@@ -1493,32 +1366,14 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
 
     struct window_node *node = view_find_window_node(view, window->id);
     if (node->zoom) {
-        float offset = window_node_border_window_offset(window);
-        window_manager_move_window(window, node->area.x + offset, node->area.y + offset);
-        window_manager_resize_window(window, node->area.w - 2*offset, node->area.h - 2*offset);
+        window_manager_move_window(window, node->area.x, node->area.y);
+        window_manager_resize_window(window, node->area.w, node->area.h);
         node->zoom = NULL;
     } else {
-        float offset = window_node_border_window_offset(window);
-        window_manager_move_window(window, view->root->area.x + offset, view->root->area.y + offset);
-        window_manager_resize_window(window, view->root->area.w - 2*offset, view->root->area.h - 2*offset);
+        window_manager_move_window(window, view->root->area.x, view->root->area.y);
+        window_manager_resize_window(window, view->root->area.w, view->root->area.h);
         node->zoom = view->root;
     }
-}
-
-void window_manager_toggle_window_border(struct window_manager *wm, struct window *window)
-{
-    struct view *view = window_manager_find_managed_window(wm, window);
-    struct window_node *node = view ? view_find_window_node(view, window->id) : NULL;
-
-    if (window->border.enabled) {
-        border_window_hide(window);
-        window->border.enabled = false;
-    } else {
-        window->border.enabled = true;
-        border_window_refresh(window);
-    }
-
-    if (node) window_node_flush(node);
 }
 
 void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window)
@@ -1649,17 +1504,10 @@ void window_manager_init(struct window_manager *wm)
     wm->enable_mff = false;
     wm->enable_window_opacity = false;
     wm->enable_window_topmost = false;
-    wm->enable_window_border = false;
-    wm->window_border_placement = BORDER_PLACEMENT_INSET;
-    wm->window_border_width = 4;
-    wm->window_border_radius = -1;
-    wm->active_window_border_topmost = false;
-    wm->active_window_border_color = 0xff775759;
-    wm->normal_window_border_color = 0xff555555;
-    wm->insert_window_border_color = 0xfff57f7f;
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.2f;
+    wm->insert_feedback_color = rgba_color_from_hex(0xaad75f5f);
 
     table_init(&wm->application, 150, hash_wm, compare_wm);
     table_init(&wm->window, 150, hash_wm, compare_wm);
@@ -1695,7 +1543,6 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         wm->last_window_id = window->id;
         wm->focused_window_id = window->id;
         wm->focused_window_psn = window->application->psn;
-        border_window_activate(window);
         window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
     }
 }

@@ -421,7 +421,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_ACTIVATED)
     g_window_manager.focused_window_id = application_focused_window_id;
     g_window_manager.focused_window_psn = application->psn;
 
-    border_window_activate(window);
     window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.active_window_opacity);
 
     if (g_mouse_state.ffm_window_id != window->id) {
@@ -441,13 +440,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_DEACTIVATED)
     debug("%s: %s\n", __FUNCTION__, application->name);
     struct window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
     if (focused_window) {
-        border_window_deactivate(focused_window);
         window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
 
         if (!window_level_is_standard(focused_window) || !window_is_standard(focused_window)) {
             struct window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
             if (main_window && main_window != focused_window) {
-                border_window_deactivate(main_window);
                 window_manager_set_window_opacity(&g_window_manager, main_window, g_window_manager.normal_window_opacity);
             }
         }
@@ -479,7 +476,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         if (window_manager_should_manage_window(window)) {
             struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
-            border_window_show(window);
             prev_window_id = window->id;
         }
     }
@@ -503,8 +499,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
         if (!window) continue;
-
-        border_window_hide(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -635,12 +629,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
 
     struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
     if (focused_window && focused_window != window) {
-        border_window_deactivate(focused_window);
         window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    border_window_activate(window);
     window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.active_window_opacity);
 
     if (window_level_is_standard(window) && window_is_standard(window)) {
@@ -676,10 +668,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
-    if (!window->is_fullscreen) {
-        border_window_refresh(window);
-    }
-
     return EVENT_SUCCESS;
 }
 
@@ -705,8 +693,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     bool is_fullscreen = window_is_fullscreen(window);
 
     if (!window->is_fullscreen && is_fullscreen) {
-        border_window_hide(window);
-
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
@@ -731,15 +717,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
-
-        border_window_show(window);
     }
 
     window->is_fullscreen = is_fullscreen;
-
-    if (!window->is_fullscreen) {
-        border_window_refresh(window);
-    }
 
     return EVENT_SUCCESS;
 }
@@ -757,7 +737,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     window->is_minimized = true;
-    border_window_hide(window);
 
     if (window->id == g_window_manager.last_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
@@ -786,7 +765,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
     }
 
     window->is_minimized = false;
-    border_window_show(window);
 
     if (space_manager_is_window_on_active_space(window)) {
         debug("%s: window %s %d is deminimized on active space\n", __FUNCTION__, window->application->name, window->id);
@@ -836,7 +814,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
     if (space_manager_refresh_application_windows(&g_space_manager)) {
         struct window *focused_window = window_manager_focused_window(&g_window_manager);
         if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
-            border_window_activate(focused_window);
             window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
             window_manager_center_mouse(&g_window_manager, focused_window);
             window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
@@ -874,7 +851,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
     if (space_manager_refresh_application_windows(&g_space_manager)) {
         struct window *focused_window = window_manager_focused_window(&g_window_manager);
         if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
-            border_window_activate(focused_window);
             window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
 
             if (g_mouse_state.ffm_window_id != focused_window->id) {
@@ -1240,18 +1216,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = true;
 
-    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
-        struct bucket *bucket = g_window_manager.window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                border_window_hide(window);
-            }
-
-            bucket = bucket->next;
-        }
-    }
-
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         struct event *event = event_create(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
         event_loop_post(&g_event_loop, event);
@@ -1310,23 +1274,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = false;
-
-    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
-        struct bucket *bucket = g_window_manager.window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if ((!window->application->is_hidden) &&
-                    (!window->is_fullscreen) &&
-                    (!window->is_minimized) &&
-                    (!window_is_fullscreen(window))) {
-                    border_window_show(window);
-                }
-            }
-
-            bucket = bucket->next;
-        }
-    }
 
     space_manager_mark_spaces_invalid(&g_space_manager);
 
@@ -1391,7 +1338,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
     debug("%s:\n", __FUNCTION__);
     struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
     if (focused_window) {
-        border_window_activate(focused_window);
         window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
         window_manager_center_mouse(&g_window_manager, focused_window);
     }

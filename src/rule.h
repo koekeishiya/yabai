@@ -21,7 +21,6 @@ struct rule
     int manage;
     int sticky;
     int layer;
-    int border;
     int fullscreen;
     unsigned grid[6];
 };

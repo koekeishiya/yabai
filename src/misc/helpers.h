@@ -15,7 +15,6 @@ struct signal_args
 
 struct rgba_color
 {
-    bool is_valid;
     uint32_t p;
     float r;
     float g;
@@ -23,16 +22,14 @@ struct rgba_color
     float a;
 };
 
-static struct rgba_color
-rgba_color_from_hex(uint32_t color)
+struct rgba_color rgba_color_from_hex(uint32_t color)
 {
     struct rgba_color result;
-    result.is_valid = true;
     result.p = color;
-    result.r = ((color >> 16) & 0xff) / 255.0;
-    result.g = ((color >> 8) & 0xff) / 255.0;
-    result.b = ((color >> 0) & 0xff) / 255.0;
-    result.a = ((color >> 24) & 0xff) / 255.0;
+    result.r = ((color >> 0x10) & 0xff) / 255.0f;
+    result.g = ((color >> 0x08) & 0xff) / 255.0f;
+    result.b = ((color >> 0x00) & 0xff) / 255.0f;
+    result.a = ((color >> 0x18) & 0xff) / 255.0f;
     return result;
 }
 

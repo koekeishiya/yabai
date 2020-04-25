@@ -159,7 +159,6 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"sticky\":%d,\n"
             "\t\"minimized\":%d,\n"
             "\t\"topmost\":%d,\n"
-            "\t\"border\":%d,\n"
             "\t\"shadow\":%d,\n"
             "\t\"zoom-parent\":%d,\n"
             "\t\"zoom-fullscreen\":%d,\n"
@@ -185,7 +184,6 @@ void window_serialize(FILE *rsp, struct window *window)
             sticky,
             is_minimized,
             is_topmost,
-            window->border.enabled,
             window->has_shadow,
             zoom_parent,
             zoom_fullscreen,
@@ -430,22 +428,11 @@ struct window *window_create(struct application *application, AXUIElementRef win
     *window->id_ptr = &window->id;
     window->has_shadow = true;
 
-    if ((window_is_standard(window)) || (window_is_dialog(window))) {
-        border_window_create(window);
-
-        if ((!window->application->is_hidden) &&
-            (!window->is_minimized) &&
-            (!window->is_fullscreen)) {
-            border_window_refresh(window);
-        }
-    }
-
     return window;
 }
 
 void window_destroy(struct window *window)
 {
-    border_window_destroy(window);
     CFRelease(window->ref);
     free(window->id_ptr);
     free(window);

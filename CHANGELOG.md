@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Removed
 - The deprecated rule option *topmost='<BOOL_SEL>'* has been removed.
 - The built-in status bar has been removed. [#486](https://github.com/koekeishiya/yabai/issues/486)
+- Window borders have been removed. [#487](https://github.com/koekeishiya/yabai/issues/487)
 
 ### Added
 - New window commands `--minimize` and `--deminimize`. Minimized windows are now reported through window queries and there is a new attribute `minimized` to identify the current state [#379](https://github.com/koekeishiya/yabai/issues/379)
@@ -16,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - New self-signed certificate used to sign the released binaries because the previous one expired at april 21th, 2020. You will have to re-enable accessibility permissions after this install. Sorry about that.
 - Window commands using cardinal directions use euclidean distance to identify best target window [#301](https://github.com/koekeishiya/yabai/issues/301)
+- Config option `insert_window_border_color` changed to `insert_feedback_color` [#487](https://github.com/koekeishiya/yabai/issues/487)
 
 ## [2.4.3] - 2020-04-14
 ### Changed
