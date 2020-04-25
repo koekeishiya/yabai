@@ -312,7 +312,7 @@ static void daemon_fail(FILE *rsp, char *fmt, ...)
     va_end(ap);
 }
 
-static void daemon_deprecated(FILE *rsp, char *fmt, ...)
+__unused static void daemon_deprecated(FILE *rsp, char *fmt, ...)
 {
     if (!rsp) return;
 
