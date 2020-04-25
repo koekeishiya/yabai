@@ -1036,6 +1036,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
 
                 if (CGRectContainsPoint(window_center, point_in_window)) {
 do_swap:
+                    if (src_view->insertion_point == a_node->window_id) {
+                        src_view->insertion_point = window->id;
+                    } else if (dst_view->insertion_point == b_node->window_id) {
+                        dst_view->insertion_point = g_mouse_state.window->id;
+                    }
+
                     a_node->window_id = window->id;
                     a_node->zoom = NULL;
                     b_node->window_id = g_mouse_state.window->id;

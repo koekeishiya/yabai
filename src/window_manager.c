@@ -1072,9 +1072,12 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
             window_manager_add_managed_window(wm, a, b_view);
             space_manager_tile_window_on_space_with_insertion_point(sm, a, b_view->sid, b->id);
         } else {
+            if (a_view->insertion_point == a_node->window_id) {
+                a_view->insertion_point = b->id;
+            }
+
             a_node->window_id = b->id;
             a_node->zoom = NULL;
-
             b_node->window_id = a->id;
             b_node->zoom = NULL;
 
@@ -1127,9 +1130,14 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
     struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
+    if (a_view->insertion_point == a_node->window_id) {
+        a_view->insertion_point = b->id;
+    } else if (b_view->insertion_point == b_node->window_id) {
+        b_view->insertion_point = a->id;
+    }
+
     a_node->window_id = b->id;
     a_node->zoom = NULL;
-
     b_node->window_id = a->id;
     b_node->zoom = NULL;
 
