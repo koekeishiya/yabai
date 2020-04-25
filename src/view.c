@@ -4,7 +4,6 @@ extern int g_connection;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
-extern uint32_t *g_insert_feedback_windows;
 
 void insert_feedback_show(struct window_node *node)
 {
@@ -25,7 +24,7 @@ void insert_feedback_show(struct window_node *node)
                                    g_window_manager.insert_feedback_color.g,
                                    g_window_manager.insert_feedback_color.b,
                                    g_window_manager.insert_feedback_color.a);
-        buf_push(g_insert_feedback_windows, node->feedback_window.id);
+        buf_push(g_window_manager.insert_feedback_windows, node->feedback_window.id);
     }
 
     frame.origin.x = 0; frame.origin.y = 0;
@@ -80,9 +79,9 @@ void insert_feedback_show(struct window_node *node)
 void insert_feedback_destroy(struct window_node *node)
 {
     if (node->feedback_window.id) {
-        for (int i = 0; i < buf_len(g_insert_feedback_windows); ++i) {
-            if (g_insert_feedback_windows[i] == node->feedback_window.id) {
-                buf_del(g_insert_feedback_windows, i);
+        for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
+            if (g_window_manager.insert_feedback_windows[i] == node->feedback_window.id) {
+                buf_del(g_window_manager.insert_feedback_windows, i);
                 break;
             }
         }

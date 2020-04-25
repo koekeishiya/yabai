@@ -82,6 +82,7 @@ struct window_manager
     float active_window_opacity;
     float normal_window_opacity;
     float window_opacity_duration;
+    uint32_t *insert_feedback_windows;
     struct rgba_color insert_feedback_color;
 };
 

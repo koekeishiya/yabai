@@ -8,7 +8,6 @@ extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
 extern bool g_mission_control_active;
-extern uint32_t *g_insert_feedback_windows;
 extern int g_connection;
 
 static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
@@ -1217,8 +1216,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = true;
 
-    for (int i = 0; i < buf_len(g_insert_feedback_windows); ++i) {
-        uint32_t feedback_wid = g_insert_feedback_windows[i];
+    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
+        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
     }
 
@@ -1281,8 +1280,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = false;
 
-    for (int i = 0; i < buf_len(g_insert_feedback_windows); ++i) {
-        uint32_t feedback_wid = g_insert_feedback_windows[i];
+    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
+        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 1, 0);
     }
 

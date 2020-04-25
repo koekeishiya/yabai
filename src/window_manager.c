@@ -1502,6 +1502,7 @@ void window_manager_init(struct window_manager *wm)
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.2f;
+    wm->insert_feedback_windows = NULL;
     wm->insert_feedback_color = rgba_color_from_hex(0xaad75f5f);
 
     table_init(&wm->application, 150, hash_wm, compare_wm);

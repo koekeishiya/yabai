@@ -35,7 +35,6 @@ struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
-uint32_t *g_insert_feedback_windows;
 int g_connection;
 
 struct signal *g_signal_event[EVENT_TYPE_COUNT];
