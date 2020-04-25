@@ -245,7 +245,9 @@ void window_node_update(struct view *view, struct window_node *node)
         area_make_pair(view, node->parent);
     }
 
-    if (!window_node_is_leaf(node)) {
+    if (window_node_is_leaf(node)) {
+        if (node->insert_dir) insert_feedback_show(node);
+    } else {
         window_node_update(view, node->left);
         window_node_update(view, node->right);
     }
