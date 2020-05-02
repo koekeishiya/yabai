@@ -839,10 +839,10 @@ static void do_handshake(int sockfd)
 
     if (dock_spaces != nil)                attrib |= OSAX_ATTRIB_DOCK_SPACES;
     if (dp_desktop_picture_manager != nil) attrib |= OSAX_ATTRIB_DPPM;
-    if (can_create_space())                attrib |= OSAX_ATTRIB_ADD_SPACE;
-    if (can_destroy_space())               attrib |= OSAX_ATTRIB_REM_SPACE;
-    if (can_move_space())                  attrib |= OSAX_ATTRIB_MOV_SPACE;
-    if (can_focus_window())                attrib |= OSAX_ATTRIB_SET_WINDOW;
+    if (add_space_fp)                      attrib |= OSAX_ATTRIB_ADD_SPACE;
+    if (remove_space_fp)                   attrib |= OSAX_ATTRIB_REM_SPACE;
+    if (move_space_fp)                     attrib |= OSAX_ATTRIB_MOV_SPACE;
+    if (set_front_window_fp)               attrib |= OSAX_ATTRIB_SET_WINDOW;
 
     char bytes[BUFSIZ] = {};
     int version_length = strlen(OSAX_VERSION);
