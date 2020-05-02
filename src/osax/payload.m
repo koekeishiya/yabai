@@ -265,7 +265,6 @@ const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_dppm_pattern(NSOperatingSystemVersion os_version)
 {
-
     if (os_version.minorVersion == 15) {
         return "?? ?? ?? 00 48 89 C6 E8 ?? ?? ?? 00 4D 85 F6 0F 84 67 06 00 00 48 8B 3D ?? ?? ?? 00 48 8B 35 ?? ?? ?? 00 FF 15 ?? ?? ?? 00 48 89 C7 E8 ?? ?? ?? 00 48 89 85 08 FF FF FF C7 85 1C FF FF FF 00 00 00 00 E8 ?? ?? ?? 00 48 8D 75 B0 89 C7 E8 ?? ?? ?? 00";
     } else if (os_version.minorVersion == 14) {
