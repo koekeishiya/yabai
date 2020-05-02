@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Update scripting addition for macOS 10.15.5 Beta (19F72f) [#501](https://github.com/koekeishiya/yabai/issues/501)
 
 ## [3.0.0] - 2020-05-01
 ### Removed
