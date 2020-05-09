@@ -36,6 +36,7 @@ extern CGError CGSSetWindowAlpha(int cid, uint32_t wid, float alpha);
 extern CGError CGSSetWindowListAlpha(int cid, const uint32_t *window_list, int window_count, float alpha, float duration);
 extern CGError CGSSetWindowLevel(int cid, uint32_t wid, int level);
 extern OSStatus CGSMoveWindow(const int cid, const uint32_t wid, CGPoint *point);
+extern CGError CGSReassociateWindowsSpacesByGeometry(int cid, CFArrayRef window_list);
 extern CGError CGSGetWindowOwner(int cid, uint32_t wid, int *window_cid);
 extern CGError CGSInvalidateWindowShadow(int cid, CGWindowID wid);
 extern CGError CGSSetWindowTags(int cid, uint32_t wid, const int tags[2], size_t maxTagSize);
@@ -723,6 +724,10 @@ static void do_window_move(const char *message)
     int y = token_to_int(y_token);
     CGPoint point = CGPointMake(x, y);
     CGSMoveWindow(_connection, wid, &point);
+
+    NSArray *window_list = @[ @(wid) ];
+    CGSReassociateWindowsSpacesByGeometry(_connection, (__bridge CFArrayRef) window_list);
+    [window_list release];
 }
 
 static void do_window_alpha(const char *message)
