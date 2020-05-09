@@ -430,6 +430,16 @@ void window_manager_set_layer(uint32_t wid, int layer)
     socket_close(sockfd);
 }
 
+static void window_manager_set_layer_for_window_relation_with_parent(uint32_t *parents, uint32_t *children, int count, uint32_t wid, int layer)
+{
+    for (int i = 0; i < count; ++i) {
+        if (parents[i] == wid) {
+            window_manager_set_layer(children[i], layer);
+            window_manager_set_layer_for_window_relation_with_parent(parents, children, count, children[i], layer);
+        }
+    }
+}
+
 static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_t sid, int layer)
 {
     int count;
@@ -440,17 +450,18 @@ static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_
     CFTypeRef query = SLSWindowQueryWindows(g_connection, window_list_ref, count);
     CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
 
+    int relation_count = 0;
+    uint32_t parents[count];
+    uint32_t children[count];
+
     while (SLSWindowIteratorAdvance(iterator)) {
-        uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
-        uint32_t child_wid = SLSWindowIteratorGetWindowID(iterator);
-
-        if (parent_wid == wid) {
-            window_manager_set_layer(child_wid, layer);
-
-            // @speed: doing this recursively is more inefficient than it has to be..
-            window_manager_set_layer_for_children(cid, child_wid, sid, layer);
-        }
+        parents[relation_count]  = SLSWindowIteratorGetParentID(iterator);
+        children[relation_count] = SLSWindowIteratorGetWindowID(iterator);
+        ++relation_count;
     }
+
+    assert(relation_count == count);
+    window_manager_set_layer_for_window_relation_with_parent(parents, children, relation_count, wid, layer);
 
     CFRelease(query);
     CFRelease(iterator);
