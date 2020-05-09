@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.0.1] - 2020-05-09
 ### Changed
 - Update scripting addition for macOS 10.15.5 Beta (19F72f) [#501](https://github.com/koekeishiya/yabai/issues/501)
 - Allow calling `space --label` without an argument to intentionally remove a previously assigned label [#514](https://github.com/koekeishiya/yabai/issues/514)
@@ -232,7 +234,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.0.1...HEAD
+[3.0.1]: https://github.com/koekeishiya/yabai/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/koekeishiya/yabai/compare/v2.4.3...v3.0.0
 [2.4.3]: https://github.com/koekeishiya/yabai/compare/v2.4.2...v2.4.3
 [2.4.2]: https://github.com/koekeishiya/yabai/compare/v2.4.1...v2.4.2
