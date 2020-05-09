@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Update scripting addition for macOS 10.15.5 Beta (19F72f) [#501](https://github.com/koekeishiya/yabai/issues/501)
 - Allow calling `space --label` without an argument to intentionally remove a previously assigned label [#514](https://github.com/koekeishiya/yabai/issues/514)
 - Fixed an issue where a window moved across displays using *mouse action move* would be invisible [#506](https://github.com/koekeishiya/yabai/issues/506)
+- Fixed an issue where the last window on a display would not properly update the focused window of the original display upon move, causing selectors to not work as expected [#505](https://github.com/koekeishiya/yabai/issues/505)
 
 ## [3.0.0] - 2020-05-01
 ### Removed

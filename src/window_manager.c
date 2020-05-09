@@ -1101,10 +1101,9 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
         if (a_view->sid != b_view->sid) {
             window_manager_remove_managed_window(wm, a->id);
             window_manager_add_managed_window(wm, a, b_view);
-            space_manager_move_window_to_space(b_view->sid, a);
 
             if (wm->focused_window_id == a->id) {
-                struct window *next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 1);
+                struct window *next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 2);
                 if (next) {
                     window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
                 } else {
@@ -1115,6 +1114,8 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
                     _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
                 }
             }
+
+            space_manager_move_window_to_space(b_view->sid, a);
         }
 
         space_manager_tile_window_on_space_with_insertion_point(sm, a, b_view->sid, b->id);
@@ -1214,15 +1215,8 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
         window_manager_purify_window(wm, window);
     }
 
-    space_manager_move_window_to_space(dst_sid, window);
-
-    if (window_manager_should_manage_window(window) && !window->is_minimized) {
-        struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
-        window_manager_add_managed_window(wm, window, view);
-    }
-
     if ((space_is_visible(src_sid) && (moved_by_rule || wm->focused_window_id == window->id))) {
-        struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 1);
+        struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 2);
         if (next) {
             window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
         } else {
@@ -1232,6 +1226,13 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
             g_window_manager.focused_window_psn = g_process_manager.finder_psn;
             _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
         }
+    }
+
+    space_manager_move_window_to_space(dst_sid, window);
+
+    if (window_manager_should_manage_window(window) && !window->is_minimized) {
+        struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
+        window_manager_add_managed_window(wm, window, view);
     }
 }
 
