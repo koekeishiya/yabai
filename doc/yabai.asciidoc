@@ -242,8 +242,9 @@ COMMAND
 *--layout* 'bsp|float'::
     Set the layout of the selected space.
 
-*--label* '<LABEL>'::
-    Label the selected space, allowing that label to be used as an alias in commands that take a `SPACE_SEL` parameter.
+*--label* ['<LABEL>']::
+    Label the selected space, allowing that label to be used as an alias in commands that take a `SPACE_SEL` parameter. +
+    If the command is called without an argument it will try to remove a previously assigned label.
 
 Window
 ~~~~~~

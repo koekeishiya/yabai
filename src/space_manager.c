@@ -176,16 +176,23 @@ struct space_label *space_manager_get_space_for_label(struct space_manager *sm, 
     return NULL;
 }
 
-void space_manager_set_label_for_space(struct space_manager *sm, uint64_t sid, char *label)
+bool space_manager_remove_label_for_space(struct space_manager *sm, uint64_t sid)
 {
     for (int i = 0; i < buf_len(sm->labels); ++i) {
         struct space_label *space_label = &sm->labels[i];
         if (space_label->sid == sid) {
             free(space_label->label);
             buf_del(sm->labels, i);
-            break;
+            return true;
         }
     }
+
+    return false;
+}
+
+void space_manager_set_label_for_space(struct space_manager *sm, uint64_t sid, char *label)
+{
+    space_manager_remove_label_for_space(sm, sid);
 
     for (int i = 0; i < buf_len(sm->labels); ++i) {
         struct space_label *space_label = &sm->labels[i];

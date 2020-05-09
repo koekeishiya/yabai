@@ -70,6 +70,7 @@ uint64_t space_manager_last_space(void);
 uint64_t space_manager_active_space(void);
 struct space_label *space_manager_get_label_for_space(struct space_manager *sm, uint64_t sid);
 struct space_label *space_manager_get_space_for_label(struct space_manager *sm, struct token label);
+bool space_manager_remove_label_for_space(struct space_manager *sm, uint64_t sid);
 void space_manager_set_label_for_space(struct space_manager *sm, uint64_t sid, char *label);
 void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, enum view_type type);
 bool space_manager_set_gap_for_space(struct space_manager *sm, uint64_t sid, int type, int gap);

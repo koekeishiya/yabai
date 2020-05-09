@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-04-25
+.\"      Date: 2020-05-09
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-04-25" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-05-09" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -326,9 +326,11 @@ Toggle space setting on or off for the selected space.
 Set the layout of the selected space.
 .RE
 .sp
-\fB\-\-label\fP \fI<LABEL>\fP
+\fB\-\-label\fP [\fI<LABEL>\fP]
 .RS 4
 Label the selected space, allowing that label to be used as an alias in commands that take a \f(CRSPACE_SEL\fP parameter.
+.br
+If the command is called without an argument it will try to remove a previously assigned label.
 .RE
 .SS "Window"
 .SS "General Syntax"

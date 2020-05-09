@@ -746,29 +746,34 @@ static char *reserved_space_identifiers[] =
     ARGUMENT_COMMON_SEL_RECENT
 };
 
-static char *parse_label(FILE *rsp, char **message, enum label_type type)
+static bool parse_label(FILE *rsp, char **message, enum label_type type, char **label)
 {
     struct token value = get_token(message);
 
-    if ((!token_is_valid(value)) || (value.text[0] >= '0' && value.text[0] <= '9')) {
+    if (!token_is_valid(value)) {
+        *label = NULL;
+        return true;
+    }
+
+    if ((value.text[0] >= '0' && value.text[0] <= '9')) {
         daemon_fail(rsp, "'%.*s' is not a valid label.\n", value.length, value.text);
-        return NULL;
+        return false;
     }
 
     switch (type) {
     default: break;
-
     case LABEL_SPACE: {
         for (int i = 0; i < array_count(reserved_space_identifiers); ++i) {
             if (token_equals(value, reserved_space_identifiers[i])) {
                 daemon_fail(rsp, "'%.*s' is a reserved keyword and cannot be used as a label.\n", value.length, value.text);
-                return NULL;
+                return false;
             }
         }
     } break;
     }
 
-    return token_to_string(value);
+    *label = token_to_string(value);
+    return true;
 }
 
 static uint8_t parse_value_type(char *type)
@@ -1335,9 +1340,15 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
     } else if (token_equals(command, COMMAND_SPACE_LABEL)) {
-        char *label = parse_label(rsp, &message, LABEL_SPACE);
-        if (label) {
-            space_manager_set_label_for_space(&g_space_manager, acting_sid, label);
+        char *label;
+        if (parse_label(rsp, &message, LABEL_SPACE, &label)) {
+            if (label) {
+                space_manager_set_label_for_space(&g_space_manager, acting_sid, label);
+            } else {
+                if (!space_manager_remove_label_for_space(&g_space_manager, acting_sid)) {
+                    daemon_fail(rsp, "the selected space was not associated with a label!\n");
+                }
+            }
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
