@@ -115,6 +115,7 @@ void window_serialize(FILE *rsp, struct window *window)
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
     bool visible = sticky || space_is_visible(sid);
+    bool hidden = application_is_hidden(window->application);
     bool is_topmost = window_is_topmost(window);
     bool is_minimized = window_is_minimized(window);
 
@@ -153,6 +154,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"display\":%d,\n"
             "\t\"space\":%d,\n"
             "\t\"visible\":%d,\n"
+            "\t\"hidden\":%d,\n"
             "\t\"focused\":%d,\n"
             "\t\"split\":\"%s\",\n"
             "\t\"floating\":%d,\n"
@@ -178,6 +180,7 @@ void window_serialize(FILE *rsp, struct window *window)
             display,
             space,
             visible,
+            hidden,
             window->id == g_window_manager.focused_window_id,
             split,
             window->is_floating,
