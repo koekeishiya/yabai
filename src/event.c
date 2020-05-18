@@ -287,11 +287,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         return EVENT_FAILURE;
     }
 
-    if (!workspace_application_is_observable(process)) {
-        debug("%s: %s is not observable\n", __FUNCTION__, process->name);
-        return EVENT_FAILURE;
-    }
-
     struct application *application = application_create(process);
     if (!application_observe(application)) {
         application_unobserve(application);
