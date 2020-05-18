@@ -275,19 +275,19 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         return EVENT_FAILURE;
     }
 
-    if (!workspace_application_is_observable(process->pid)) {
+    if (!workspace_application_is_observable(process)) {
         debug("%s: %s is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name);
         workspace_application_observe_activation_policy(g_workspace_context, process);
         return EVENT_FAILURE;
     }
 
-    if (!workspace_application_is_finished_launching(process->pid)) {
+    if (!workspace_application_is_finished_launching(process)) {
         debug("%s: %s is not finished launching, subscribing to finishedLaunching changes\n", __FUNCTION__, process->name);
         workspace_application_observe_finished_launching(g_workspace_context, process);
         return EVENT_FAILURE;
     }
 
-    if (!workspace_application_is_observable(process->pid)) {
+    if (!workspace_application_is_observable(process)) {
         debug("%s: %s is not observable\n", __FUNCTION__, process->name);
         return EVENT_FAILURE;
     }

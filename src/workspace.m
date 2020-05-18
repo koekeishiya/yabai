@@ -20,44 +20,52 @@ void workspace_event_handler_end(void *context)
     [ws_context dealloc];
 }
 
-void workspace_application_observe_finished_launching(void *context, void *process)
+void workspace_application_observe_finished_launching(void *context, struct process *process)
 {
-    workspace_context *ws_context = (workspace_context *) context;
-
     NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:((struct process *)process)->pid];
-
-    [application addObserver:ws_context
-                forKeyPath:@"finishedLaunching"
-                options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew
-                context:process];
+    if (application) {
+        [application addObserver:context forKeyPath:@"finishedLaunching" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:process];
+    } else {
+        debug("%s: could not subscribe to activation policy changes for %s\n", __FUNCTION__, process->name);
+    }
 }
 
-void workspace_application_observe_activation_policy(void *context, void *process)
+void workspace_application_observe_activation_policy(void *context, struct process *process)
 {
-    workspace_context *ws_context = (workspace_context *) context;
-
-    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:((struct process *)process)->pid];
-
-    [application addObserver:ws_context
-                forKeyPath:@"activationPolicy"
-                options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew
-                context:process];
+    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:process->pid];
+    if (application) {
+        [application addObserver:context forKeyPath:@"activationPolicy" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:process];
+    } else {
+        debug("%s: could not subscribe to finished launching changes for %s\n", __FUNCTION__, process->name);
+    }
 }
 
-bool workspace_application_is_observable(pid_t pid)
+bool workspace_application_is_observable(struct process *process)
 {
-    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
-    bool result = [application activationPolicy] != NSApplicationActivationPolicyProhibited;
-    [application release];
-    return result;
+    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:process->pid];
+
+    if (application) {
+        bool result = [application activationPolicy] != NSApplicationActivationPolicyProhibited;
+        [application release];
+        return result;
+    }
+
+    debug("%s: could not determine observability status for %s\n", __FUNCTION__, process->name);
+    return false;
 }
 
-bool workspace_application_is_finished_launching(pid_t pid)
+bool workspace_application_is_finished_launching(struct process *process)
 {
-    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
-    bool result = [application isFinishedLaunching] == YES;
-    [application release];
-    return result;
+    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:process->pid];
+
+    if (application) {
+        bool result = [application isFinishedLaunching] == YES;
+        [application release];
+        return result;
+    }
+
+    debug("%s: could not determine launch status for %s\n", __FUNCTION__, process->name);
+    return false;
 }
 
 @implementation workspace_context
