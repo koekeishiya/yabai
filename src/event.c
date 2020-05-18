@@ -815,7 +815,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
         struct window *focused_window = window_manager_focused_window(&g_window_manager);
         if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
             window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
-            window_manager_center_mouse(&g_window_manager, focused_window);
+
+            if (g_mouse_state.ffm_window_id != focused_window->id) {
+                window_manager_center_mouse(&g_window_manager, focused_window);
+            }
+
+            g_mouse_state.ffm_window_id = 0;
             window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
         }
     }
