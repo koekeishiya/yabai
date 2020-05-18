@@ -27,19 +27,15 @@ struct process *process_create(ProcessSerialNumber psn)
         process->name = string_copy("<unknown>");
     }
 
-    ProcessInfoRec process_info = {};
-    process_info.processInfoLength = sizeof(ProcessInfoRec);
+    ProcessInfoRec process_info = { .processInfoLength = sizeof(ProcessInfoRec) };
     GetProcessInformation(&psn, &process_info);
 
     process->psn = psn;
-    GetProcessPID(&process->psn, &process->pid);
-    process->background = (process_info.processMode & modeOnlyBackground) != 0;
     process->xpc = process_info.processType == 'XPC!';
+    GetProcessPID(&process->psn, &process->pid);
 
     CFDictionaryRef process_dict = ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
     if (process_dict) {
-        CFBooleanRef process_lsuielement = CFDictionaryGetValue(process_dict, CFSTR("LSUIElement"));
-        if (process_lsuielement) process->lsuielement = CFBooleanGetValue(process_lsuielement);
         CFBooleanRef process_lsbackground = CFDictionaryGetValue(process_dict, CFSTR("LSBackgroundOnly"));
         if (process_lsbackground) process->lsbackground = CFBooleanGetValue(process_lsbackground);
         CFRelease(process_dict);
@@ -58,16 +54,6 @@ static bool process_is_observable(struct process *process)
 {
     if (process->lsbackground) {
         debug("%s: %s was marked as background only! ignoring..\n", __FUNCTION__, process->name);
-        return false;
-    }
-
-    if (process->lsuielement) {
-        debug("%s: %s was marked as agent! ignoring..\n", __FUNCTION__, process->name);
-        return false;
-    }
-
-    if (process->background) {
-        debug("%s: %s was marked as daemon! ignoring..\n", __FUNCTION__, process->name);
         return false;
     }
 

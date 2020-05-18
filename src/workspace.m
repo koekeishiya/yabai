@@ -20,6 +20,22 @@ void workspace_event_handler_end(void *context)
     [ws_context dealloc];
 }
 
+bool workspace_application_is_observable(pid_t pid)
+{
+    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
+    bool result = [application activationPolicy] != NSApplicationActivationPolicyProhibited;
+    [application release];
+    return result;
+}
+
+bool workspace_application_is_finished_launching(pid_t pid)
+{
+    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
+    bool result = [application isFinishedLaunching] == YES;
+    [application release];
+    return result;
+}
+
 @implementation workspace_context
 - (id)init
 {
@@ -115,7 +131,6 @@ void workspace_event_handler_end(void *context)
 - (void)didHideApplication:(NSNotification *)notification
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-
     struct event *event = event_create(&g_event_loop, APPLICATION_HIDDEN, (void *)(intptr_t) pid);
     event_loop_post(&g_event_loop, event);
 }
@@ -123,7 +138,6 @@ void workspace_event_handler_end(void *context)
 - (void)didUnhideApplication:(NSNotification *)notification
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-
     struct event *event = event_create(&g_event_loop, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
     event_loop_post(&g_event_loop, event);
 }

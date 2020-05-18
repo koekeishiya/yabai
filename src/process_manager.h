@@ -15,10 +15,8 @@ struct process
     ProcessSerialNumber psn;
     pid_t pid;
     char *name;
-    bool background;
-    bool lsuielement;
-    bool lsbackground;
     bool xpc;
+    bool lsbackground;
     bool volatile terminated;
 };
 

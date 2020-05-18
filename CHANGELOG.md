@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 - Properly clear focus-follows-mouse cache upon space change [#528](https://github.com/koekeishiya/yabai/issues/528)
+- Revised process type restrictions and observation requirements to correctly track some applications that don't identify correctly [#529](https://github.com/koekeishiya/yabai/issues/529)
 
 ## [3.0.1] - 2020-05-09
 ### Changed
