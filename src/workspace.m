@@ -28,7 +28,7 @@ void workspace_application_observe_finished_launching(void *context, void *proce
 
     [application addObserver:ws_context
                 forKeyPath:@"finishedLaunching"
-                options:NSKeyValueObservingOptionNew
+                options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew
                 context:process];
 }
 
@@ -40,7 +40,7 @@ void workspace_application_observe_activation_policy(void *context, void *proces
 
     [application addObserver:ws_context
                 forKeyPath:@"activationPolicy"
-                options:NSKeyValueObservingOptionNew
+                options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew
                 context:process];
 }
 
@@ -119,8 +119,8 @@ bool workspace_application_is_finished_launching(pid_t pid)
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath isEqualToString:@"activationPolicy"]) {
-        int policy = (int) [change objectForKey:NSKeyValueChangeNewKey];
-        if (policy != NSApplicationActivationPolicyProhibited) {
+        id result = [change objectForKey:NSKeyValueChangeNewKey];
+        if ([result intValue] != NSApplicationActivationPolicyProhibited) {
             struct process *process = context;
 
             debug("%s: activation policy changed for %s\n", __FUNCTION__, process->name);
@@ -133,8 +133,8 @@ bool workspace_application_is_finished_launching(pid_t pid)
     }
 
     if ([keyPath isEqualToString:@"finishedLaunching"]) {
-        bool result = [change objectForKey:NSKeyValueChangeNewKey];
-        if (result) {
+        id result = [change objectForKey:NSKeyValueChangeNewKey];
+        if ([result intValue] == 1) {
             struct process *process = context;
 
             debug("%s: %s finished launching\n", __FUNCTION__, process->name);
