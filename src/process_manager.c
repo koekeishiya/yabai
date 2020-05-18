@@ -34,13 +34,6 @@ struct process *process_create(ProcessSerialNumber psn)
     process->xpc = process_info.processType == 'XPC!';
     GetProcessPID(&process->psn, &process->pid);
 
-    CFDictionaryRef process_dict = ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
-    if (process_dict) {
-        CFBooleanRef process_lsbackground = CFDictionaryGetValue(process_dict, CFSTR("LSBackgroundOnly"));
-        if (process_lsbackground) process->lsbackground = CFBooleanGetValue(process_lsbackground);
-        CFRelease(process_dict);
-    }
-
     return process;
 }
 
@@ -52,11 +45,6 @@ void process_destroy(struct process *process)
 
 static bool process_is_observable(struct process *process)
 {
-    if (process->lsbackground) {
-        debug("%s: %s was marked as background only! ignoring..\n", __FUNCTION__, process->name);
-        return false;
-    }
-
     if (process->xpc) {
         debug("%s: %s was marked as xpc service! ignoring..\n", __FUNCTION__, process->name);
         return false;

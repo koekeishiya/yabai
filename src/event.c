@@ -9,6 +9,7 @@ extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
 extern bool g_mission_control_active;
 extern int g_connection;
+extern void *g_workspace_context;
 
 static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
 {
@@ -274,14 +275,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         return EVENT_FAILURE;
     }
 
+    if (!workspace_application_is_observable(process->pid)) {
+        debug("%s: %s is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name);
+        workspace_application_observe_activation_policy(g_workspace_context, process);
+        return EVENT_FAILURE;
+    }
+
     if (!workspace_application_is_finished_launching(process->pid)) {
-        debug("%s: %s is not yet finished launching\n", __FUNCTION__, process->name);
-
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
-            event_loop_post(&g_event_loop, event);
-        });
-
+        debug("%s: %s is not finished launching, subscribing to finishedLaunching changes\n", __FUNCTION__, process->name);
+        workspace_application_observe_finished_launching(g_workspace_context, process);
         return EVENT_FAILURE;
     }
 
@@ -294,7 +296,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
     if (!application_observe(application)) {
         application_unobserve(application);
         application_destroy(application);
-        debug("%s: could not observe %s (%d)\n", __FUNCTION__, process->name);
+        debug("%s: could not observe notifications for %s\n", __FUNCTION__, process->name);
         return EVENT_FAILURE;
     }
 

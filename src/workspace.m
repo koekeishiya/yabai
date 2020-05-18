@@ -20,6 +20,30 @@ void workspace_event_handler_end(void *context)
     [ws_context dealloc];
 }
 
+void workspace_application_observe_finished_launching(void *context, void *process)
+{
+    workspace_context *ws_context = (workspace_context *) context;
+
+    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:((struct process *)process)->pid];
+
+    [application addObserver:ws_context
+                forKeyPath:@"finishedLaunching"
+                options:NSKeyValueObservingOptionNew
+                context:process];
+}
+
+void workspace_application_observe_activation_policy(void *context, void *process)
+{
+    workspace_context *ws_context = (workspace_context *) context;
+
+    NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:((struct process *)process)->pid];
+
+    [application addObserver:ws_context
+                forKeyPath:@"activationPolicy"
+                options:NSKeyValueObservingOptionNew
+                context:process];
+}
+
 bool workspace_application_is_observable(pid_t pid)
 {
     NSRunningApplication *application = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
@@ -90,6 +114,37 @@ bool workspace_application_is_finished_launching(pid_t pid)
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if ([keyPath isEqualToString:@"activationPolicy"]) {
+        int policy = (int) [change objectForKey:NSKeyValueChangeNewKey];
+        if (policy != NSApplicationActivationPolicyProhibited) {
+            struct process *process = context;
+
+            debug("%s: activation policy changed for %s\n", __FUNCTION__, process->name);
+            struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
+            event_loop_post(&g_event_loop, event);
+
+            [object removeObserver:self forKeyPath:@"activationPolicy"];
+            [object release];
+        }
+    }
+
+    if ([keyPath isEqualToString:@"finishedLaunching"]) {
+        bool result = [change objectForKey:NSKeyValueChangeNewKey];
+        if (result) {
+            struct process *process = context;
+
+            debug("%s: %s finished launching\n", __FUNCTION__, process->name);
+            struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
+            event_loop_post(&g_event_loop, event);
+
+            [object removeObserver:self forKeyPath:@"finishedLaunching"];
+            [object release];
+        }
+    }
 }
 
 - (void)didWake:(NSNotification *)notification

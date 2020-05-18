@@ -16,7 +16,6 @@ struct process
     pid_t pid;
     char *name;
     bool xpc;
-    bool lsbackground;
     bool volatile terminated;
 };
 
