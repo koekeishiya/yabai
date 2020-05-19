@@ -22,7 +22,35 @@ typedef OBSERVER_CALLBACK(observer_callback);
                                              AX_APPLICATION_WINDOW_RESIZED |\
                                              AX_APPLICATION_WINDOW_TITLE_CHANGED)
 
-static const CFStringRef kAXFocusedTabChangedNotification = CFSTR("AXFocusedTabChanged");
+static const char *ax_error_str[] =
+{
+    [-kAXErrorSuccess]                           = "kAXErrorSuccess",
+    [-kAXErrorFailure]                           = "kAXErrorFailure",
+    [-kAXErrorIllegalArgument]                   = "kAXErrorIllegalArgument",
+    [-kAXErrorInvalidUIElement]                  = "kAXErrorInvalidUIElement",
+    [-kAXErrorInvalidUIElementObserver]          = "kAXErrorInvalidUIElementObserver",
+    [-kAXErrorCannotComplete]                    = "kAXErrorCannotComplete",
+    [-kAXErrorAttributeUnsupported]              = "kAXErrorAttributeUnsupported",
+    [-kAXErrorActionUnsupported]                 = "kAXErrorActionUnsupported",
+    [-kAXErrorNotificationUnsupported]           = "kAXErrorNotificationUnsupported",
+    [-kAXErrorNotImplemented]                    = "kAXErrorNotImplemented",
+    [-kAXErrorNotificationAlreadyRegistered]     = "kAXErrorNotificationAlreadyRegistered",
+    [-kAXErrorNotificationNotRegistered]         = "kAXErrorNotificationNotRegistered",
+    [-kAXErrorAPIDisabled]                       = "kAXErrorAPIDisabled",
+    [-kAXErrorNoValue]                           = "kAXErrorNoValue",
+    [-kAXErrorParameterizedAttributeUnsupported] = "kAXErrorParameterizedAttributeUnsupported",
+    [-kAXErrorNotEnoughPrecision]                = "kAXErrorNotEnoughPrecision"
+};
+
+static const char *ax_application_notification_str[] =
+{
+    [AX_APPLICATION_WINDOW_CREATED_INDEX]       = "kAXCreatedNotification",
+    [AX_APPLICATION_WINDOW_FOCUSED_INDEX]       = "kAXFocusedWindowChangedNotification",
+    [AX_APPLICATION_WINDOW_MOVED_INDEX]         = "kAXWindowMovedNotification",
+    [AX_APPLICATION_WINDOW_RESIZED_INDEX]       = "kAXWindowResizedNotification",
+    [AX_APPLICATION_WINDOW_TITLE_CHANGED_INDEX] = "kAXTitleChangedNotification",
+    [AX_APPLICATION_WINDOW_MENU_OPENED_INDEX]   = "kAXMenuOpenedNotification"
+};
 
 static CFStringRef ax_application_notification[] =
 {
@@ -44,6 +72,7 @@ struct application
     uint8_t notification;
     bool is_observing;
     bool is_hidden;
+    bool ax_retry;
 };
 
 bool application_is_frontmost(struct application *application);

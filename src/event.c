@@ -289,9 +289,18 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 
     struct application *application = application_create(process);
     if (!application_observe(application)) {
+        bool ax_retry = application->ax_retry;
         application_unobserve(application);
         application_destroy(application);
-        debug("%s: could not observe notifications for %s\n", __FUNCTION__, process->name);
+        debug("%s: could not observe notifications for %s (%d)\n", __FUNCTION__, process->name, ax_retry);
+
+        if (ax_retry) {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
+                event_loop_post(&g_event_loop, event);
+            });
+        }
+
         return EVENT_FAILURE;
     }
 

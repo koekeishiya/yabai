@@ -63,6 +63,9 @@ application_observe_notification(struct application *application, int notificati
     AXError result = AXObserverAddNotification(application->observer_ref, application->ref, ax_application_notification[notification], application);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         application->notification |= 1 << notification;
+    } else {
+        if (result == kAXErrorCannotComplete) application->ax_retry = true;
+        debug("%s: %s failed with error %s\n", __FUNCTION__, ax_application_notification_str[notification], ax_error_str[-result]);
     }
 }
 
