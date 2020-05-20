@@ -17,7 +17,6 @@ static TABLE_COMPARE_FUNC(compare_psn)
 struct process *process_create(ProcessSerialNumber psn)
 {
     struct process *process = malloc(sizeof(struct process));
-    memset(process, 0, sizeof(struct process));
 
     CFStringRef process_name_ref;
     if (CopyProcessName(&psn, &process_name_ref) == noErr) {
@@ -31,6 +30,7 @@ struct process *process_create(ProcessSerialNumber psn)
     GetProcessInformation(&psn, &process_info);
 
     process->psn = psn;
+    process->terminated = false;
     process->xpc = process_info.processType == 'XPC!';
     GetProcessPID(&process->psn, &process->pid);
 
@@ -68,9 +68,9 @@ static PROCESS_EVENT_HANDLER(process_handler)
         if (!process) return noErr;
 
         if (process_is_observable(process)) {
+            process_manager_add_process(pm, process);
             struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
             event_loop_post(&g_event_loop, event);
-            process_manager_add_process(pm, process);
         } else {
             process_destroy(process);
         }
