@@ -11,6 +11,41 @@ extern bool g_mission_control_active;
 extern int g_connection;
 extern void *g_workspace_context;
 
+static struct process *process_retry_list[256];
+static int process_retry_list_count = 0;
+
+static inline void process_retry_add(struct process *process)
+{
+    process_retry_list[process_retry_list_count++] = process;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
+        event_loop_post(&g_event_loop, event);
+    });
+}
+
+static inline bool process_retry_find(struct process *process)
+{
+    for (int i = 0; i < process_retry_list_count; ++i) {
+        if (process_retry_list[i] == process) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static inline bool process_retry_remove(struct process *process)
+{
+    for (int i = 0; i < process_retry_list_count; ++i) {
+        if (process_retry_list[i] == process) {
+            process_retry_list[i] = process_retry_list[--process_retry_list_count];
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
 {
     switch (type) {
@@ -250,7 +285,11 @@ void event_destroy(struct event_loop *event_loop, struct event *event)
     default: break;
 
     case APPLICATION_TERMINATED: {
-        process_destroy(event->context);
+        struct process *process = event->context;
+        if (process_retry_find(process)) break;
+
+        debug("%s: destroying process %s (%d)\n", __FUNCTION__, process->name, process->pid);
+        process_destroy(process);
     } break;
     case WINDOW_CREATED: {
         CFRelease(event->context);
@@ -267,22 +306,23 @@ void event_destroy(struct event_loop *event_loop, struct event *event)
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
     struct process *process = context;
-    debug("%s: %s\n", __FUNCTION__, process->name);
+    bool is_retry = process_retry_remove(process);
 
-    if ((process->terminated) || (kill(process->pid, 0) == -1)) {
-        debug("%s: %s terminated during launch\n", __FUNCTION__, process->name);
+    if (process->terminated) {
+        debug("%s: %s (%d) terminated during launch (is_retry = %d)\n", __FUNCTION__, process->name, process->pid, is_retry);
         window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
+        if (is_retry) process_destroy(process);
         return EVENT_FAILURE;
     }
 
     if (!workspace_application_is_observable(process)) {
-        debug("%s: %s is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name);
+        debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
         workspace_application_observe_activation_policy(g_workspace_context, process);
         return EVENT_FAILURE;
     }
 
     if (!workspace_application_is_finished_launching(process)) {
-        debug("%s: %s is not finished launching, subscribing to finishedLaunching changes\n", __FUNCTION__, process->name);
+        debug("%s: %s (%d) is not finished launching, subscribing to finishedLaunching changes\n", __FUNCTION__, process->name, process->pid);
         workspace_application_observe_finished_launching(g_workspace_context, process);
         return EVENT_FAILURE;
     }
@@ -292,18 +332,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         bool ax_retry = application->ax_retry;
         application_unobserve(application);
         application_destroy(application);
-        debug("%s: could not observe notifications for %s (%d)\n", __FUNCTION__, process->name, ax_retry);
-
-        if (ax_retry) {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
-                event_loop_post(&g_event_loop, event);
-            });
-        }
-
+        debug("%s: could not observe notifications for %s (%d) (ax_retry = %d)\n", __FUNCTION__, process->name, process->pid, ax_retry);
+        if (ax_retry) process_retry_add(process);
         return EVENT_FAILURE;
     }
 
+    debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     window_manager_add_application(&g_window_manager, application);
     window_manager_add_application_windows(&g_space_manager, &g_window_manager, application);
 
@@ -344,11 +378,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
     struct application *application = window_manager_find_application(&g_window_manager, process->pid);
 
     if (!application) {
-        debug("%s: %s (not observed)\n", __FUNCTION__, process->name);
+        debug("%s: %s (%d) (not observed)\n", __FUNCTION__, process->name, process->pid);
         return EVENT_FAILURE;
     }
 
-    debug("%s: %s\n", __FUNCTION__, process->name);
+    debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     window_manager_remove_application(&g_window_manager, application->pid);
 
     int window_count = 0;
@@ -399,7 +433,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
     struct event *re_event = event_create(&g_event_loop, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid);
     event_loop_post(&g_event_loop, re_event);
 
-    debug("%s: %s\n", __FUNCTION__, process->name);
+    debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     g_process_manager.last_front_pid = g_process_manager.front_pid;
     g_process_manager.front_pid = process->pid;
 
