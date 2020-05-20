@@ -1418,15 +1418,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
     FILE *rsp = fdopen(param1, "w");
     if (!rsp) goto out;
 
-    if (g_verbose) {
-        fprintf(stdout, "%s:", __FUNCTION__);
-        for (char *message = context; *message;) {
-            message += fprintf(stdout, " %s", message);
-        }
-        putc('\n', stdout);
-        fflush(stdout);
-    }
-
+    debug_message(__FUNCTION__, context);
     handle_message(rsp, context);
     fflush(rsp);
     fclose(rsp);
