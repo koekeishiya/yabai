@@ -71,7 +71,6 @@ static PROCESS_EVENT_HANDLER(process_handler)
             // It is by definition NOT possible for two processes to exist at the same time with the same PID and PSN.
             // If we detect such a scenario we simply discard the dupe notification..
             //
-            //
 
             return noErr;
         }
