@@ -136,8 +136,17 @@ bool workspace_application_is_finished_launching(struct process *process)
             struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
             event_loop_post(&g_event_loop, event);
 
-            [object removeObserver:self forKeyPath:@"activationPolicy"];
-            [object release];
+            //
+            // NOTE(koekeishiya): For some stupid reason it is possible to get notified by the system
+            // about a change, and NOT being able to remove ourselves from observation because
+            // it claims that we are not observing the key-path, but we clearly are, as we would
+            // otherwise not be here in the first place..
+            //
+
+            @try {
+                [object removeObserver:self forKeyPath:@"activationPolicy"];
+                [object release];
+            } @catch (NSException * __unused exception) {}
         }
     }
 
@@ -151,8 +160,17 @@ bool workspace_application_is_finished_launching(struct process *process)
             struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
             event_loop_post(&g_event_loop, event);
 
-            [object removeObserver:self forKeyPath:@"finishedLaunching"];
-            [object release];
+            //
+            // NOTE(koekeishiya): For some stupid reason it is possible to get notified by the system
+            // about a change, and NOT being able to remove ourselves from observation because
+            // it claims that we are not observing the key-path, but we clearly are, as we would
+            // otherwise not be here in the first place..
+            //
+
+            @try {
+                [object removeObserver:self forKeyPath:@"finishedLaunching"];
+                [object release];
+            } @catch (NSException * __unused exception) {}
         }
     }
 }
