@@ -130,6 +130,7 @@ bool workspace_application_is_finished_launching(struct process *process)
         id result = [change objectForKey:NSKeyValueChangeNewKey];
         if ([result intValue] != NSApplicationActivationPolicyProhibited) {
             struct process *process = context;
+            assert(!process->terminated);
 
             debug("%s: activation policy changed for %s\n", __FUNCTION__, process->name);
             struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
@@ -144,6 +145,7 @@ bool workspace_application_is_finished_launching(struct process *process)
         id result = [change objectForKey:NSKeyValueChangeNewKey];
         if ([result intValue] == 1) {
             struct process *process = context;
+            assert(!process->terminated);
 
             debug("%s: %s finished launching\n", __FUNCTION__, process->name);
             struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
