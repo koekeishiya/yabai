@@ -145,8 +145,9 @@ bool workspace_application_is_finished_launching(struct process *process)
 
             @try {
                 [object removeObserver:self forKeyPath:@"activationPolicy"];
-                [object release];
             } @catch (NSException * __unused exception) {}
+
+            [object release];
         }
     }
 
@@ -169,8 +170,9 @@ bool workspace_application_is_finished_launching(struct process *process)
 
             @try {
                 [object removeObserver:self forKeyPath:@"finishedLaunching"];
-                [object release];
             } @catch (NSException * __unused exception) {}
+
+            [object release];
         }
     }
 }
