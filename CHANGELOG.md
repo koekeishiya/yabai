@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.0.2] - 2020-05-22
 - Properly clear focus-follows-mouse cache upon space change [#528](https://github.com/koekeishiya/yabai/issues/528)
 - Revised process type restrictions and observation requirements to correctly track some applications that don't identify correctly [#529](https://github.com/koekeishiya/yabai/issues/529)
 - Translate newline (0x0a) and carriage return (0x0d) when outputting window titles through the query system [#533](https://github.com/koekeishiya/yabai/issues/533)
@@ -237,7 +239,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.0.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.0.2...HEAD
+[3.0.2]: https://github.com/koekeishiya/yabai/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/koekeishiya/yabai/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/koekeishiya/yabai/compare/v2.4.3...v3.0.0
 [2.4.3]: https://github.com/koekeishiya/yabai/compare/v2.4.2...v2.4.3
