@@ -46,7 +46,7 @@ void process_destroy(struct process *process)
 static bool process_is_observable(struct process *process)
 {
     if (process->xpc) {
-        debug("%s: %s was marked as xpc service! ignoring..\n", __FUNCTION__, process->name);
+        debug("%s: %s (%d) was marked as xpc service! ignoring..\n", __FUNCTION__, process->name, process->pid);
         return false;
     }
 
@@ -118,7 +118,7 @@ process_manager_add_running_processes(struct process_manager *pm)
 
         if (process_is_observable(process)) {
             if (string_equals(process->name, "Finder")) {
-                debug("%s: %s was found! caching psn..\n", __FUNCTION__, process->name);
+                debug("%s: %s (%d) was found! caching psn..\n", __FUNCTION__, process->name, process->pid);
                 pm->finder_psn = psn;
             }
 

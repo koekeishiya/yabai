@@ -26,7 +26,7 @@ void workspace_application_observe_finished_launching(void *context, struct proc
     if (application) {
         [application addObserver:context forKeyPath:@"finishedLaunching" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:process];
     } else {
-        debug("%s: could not subscribe to activation policy changes for %s\n", __FUNCTION__, process->name);
+        debug("%s: could not subscribe to activation policy changes for %s (%d)\n", __FUNCTION__, process->name, process->pid);
     }
 }
 
@@ -36,7 +36,7 @@ void workspace_application_observe_activation_policy(void *context, struct proce
     if (application) {
         [application addObserver:context forKeyPath:@"activationPolicy" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:process];
     } else {
-        debug("%s: could not subscribe to finished launching changes for %s\n", __FUNCTION__, process->name);
+        debug("%s: could not subscribe to finished launching changes for %s (%d)\n", __FUNCTION__, process->name, process->pid);
     }
 }
 
@@ -50,7 +50,7 @@ bool workspace_application_is_observable(struct process *process)
         return result;
     }
 
-    debug("%s: could not determine observability status for %s\n", __FUNCTION__, process->name);
+    debug("%s: could not determine observability status for %s (%d)\n", __FUNCTION__, process->name, process->pid);
     return false;
 }
 
@@ -64,7 +64,7 @@ bool workspace_application_is_finished_launching(struct process *process)
         return result;
     }
 
-    debug("%s: could not determine launch status for %s\n", __FUNCTION__, process->name);
+    debug("%s: could not determine launch status for %s (%d)\n", __FUNCTION__, process->name, process->pid);
     return false;
 }
 
@@ -132,7 +132,7 @@ bool workspace_application_is_finished_launching(struct process *process)
             struct process *process = context;
             assert(!process->terminated);
 
-            debug("%s: activation policy changed for %s\n", __FUNCTION__, process->name);
+            debug("%s: activation policy changed for %s (%d)\n", __FUNCTION__, process->name, process->pid);
             struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
             event_loop_post(&g_event_loop, event);
 
@@ -157,7 +157,7 @@ bool workspace_application_is_finished_launching(struct process *process)
             struct process *process = context;
             assert(!process->terminated);
 
-            debug("%s: %s finished launching\n", __FUNCTION__, process->name);
+            debug("%s: %s (%d) finished launching\n", __FUNCTION__, process->name, process->pid);
             struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
             event_loop_post(&g_event_loop, event);
 
