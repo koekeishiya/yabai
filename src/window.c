@@ -106,7 +106,7 @@ err:
 void window_serialize(FILE *rsp, struct window *window)
 {
     char *title = window_title(window);
-    char *escaped_title = string_escape_quote(title);
+    char *escaped_title = string_escape(title);
     CGRect frame = window_frame(window);
     char *role = NULL;
     char *subrole = NULL;

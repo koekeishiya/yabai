@@ -43,27 +43,42 @@ static inline bool string_equals(const char *a, const char *b)
     return a && b && strcmp(a, b) == 0;
 }
 
-static inline char *string_escape_quote(char *s)
+static inline char *string_escape(char *s)
 {
     if (!s) return NULL;
 
     char *cursor = s;
-    int num_quotes = 0;
+    int num_replacements = 0;
 
     while (*cursor) {
-        if (*cursor == '"') ++num_quotes;
+        if ((*cursor == '"') ||
+            (*cursor == '\n') ||
+            (*cursor == '\r')) {
+            ++num_replacements;
+        }
+
         ++cursor;
     }
 
-    if (!num_quotes) return NULL;
+    if (!num_replacements) return NULL;
 
-    int size_in_bytes = (int)(cursor - s) + num_quotes;
+    int size_in_bytes = (int)(cursor - s) + num_replacements;
     char *result = malloc(sizeof(char) * (size_in_bytes+1));
     result[size_in_bytes] = '\0';
 
     for (char *dst = result, *cursor = s; *cursor; ++cursor) {
-        if (*cursor == '"') *dst++ = '\\';
-        *dst++ = *cursor;
+        if (*cursor == '"') {
+            *dst++ = '\\';
+            *dst++ = *cursor;
+        } else if (*cursor == '\n') {
+            *dst++ = '\\';
+            *dst++ = 'n';
+        } else if (*cursor == '\r') {
+            *dst++ = '\\';
+            *dst++ = 'r';
+        } else {
+            *dst++ = *cursor;
+        }
     }
 
     return result;
