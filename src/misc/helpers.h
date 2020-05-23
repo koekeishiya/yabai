@@ -60,8 +60,12 @@ static inline char *string_escape(char *s)
 
     while (*cursor) {
         if ((*cursor == '"') ||
+            (*cursor == '\\') ||
+            (*cursor == '\b') ||
+            (*cursor == '\f') ||
             (*cursor == '\n') ||
-            (*cursor == '\r')) {
+            (*cursor == '\r') ||
+            (*cursor == '\t')) {
             ++num_replacements;
         }
 
@@ -78,12 +82,24 @@ static inline char *string_escape(char *s)
         if (*cursor == '"') {
             *dst++ = '\\';
             *dst++ = *cursor;
+        } else if (*cursor == '\\') {
+            *dst++ = '\\';
+            *dst++ = '\\';
+        } else if (*cursor == '\b') {
+            *dst++ = '\\';
+            *dst++ = 'b';
+        } else if (*cursor == '\f') {
+            *dst++ = '\\';
+            *dst++ = 'f';
         } else if (*cursor == '\n') {
             *dst++ = '\\';
             *dst++ = 'n';
         } else if (*cursor == '\r') {
             *dst++ = '\\';
             *dst++ = 'r';
+        } else if (*cursor == '\t') {
+            *dst++ = '\\';
+            *dst++ = 't';
         } else {
             *dst++ = *cursor;
         }

@@ -40,6 +40,7 @@
 
 #include "event_loop.h"
 #include "event.h"
+#include "event_signal.h"
 #include "event_tap.h"
 #include "workspace.h"
 #include "mouse.h"
@@ -57,6 +58,7 @@
 
 #include "event_loop.c"
 #include "event.c"
+#include "event_signal.c"
 #include "event_tap.c"
 #include "workspace.m"
 #include "rule.c"

@@ -175,6 +175,7 @@ extern bool g_verbose;
 /* --------------------------------DOMAIN SIGNAL-------------------------------- */
 #define COMMAND_SIGNAL_ADD "--add"
 #define COMMAND_SIGNAL_REM "--remove"
+#define COMMAND_SIGNAL_LS  "--list"
 
 #define ARGUMENT_SIGNAL_KEY_APP      "app"
 #define ARGUMENT_SIGNAL_KEY_TITLE    "title"
@@ -1933,6 +1934,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
                 signal.label = string_copy(value);
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_APP)) {
+                signal.app = string_copy(value);
                 signal.app_regex_exclude = exclusion;
                 signal.app_regex_valid = regcomp(&signal.app_regex, value, REG_EXTENDED) == 0;
                 if (!signal.app_regex_valid) {
@@ -1940,6 +1942,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                     did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_TITLE)) {
+                signal.title = string_copy(value);
                 signal.title_regex_exclude = exclusion;
                 signal.title_regex_valid = regcomp(&signal.title_regex, value, REG_EXTENDED) == 0;
                 if (!signal.title_regex_valid) {
@@ -1955,7 +1958,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 has_signal_type = true;
-                signal_type = event_type_from_string(value);
+                signal_type = event_signal_type_from_string(value);
                 if (signal_type == EVENT_TYPE_UNKNOWN) {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
@@ -1992,13 +1995,21 @@ snext:
     } else if (token_equals(command, COMMAND_SIGNAL_REM)) {
         struct token token = get_token(&message);
         if (token_is_valid(token)) {
-            char *label = token_to_string(token);
-            bool did_remove_signal = event_signal_remove(label);
-            if (!did_remove_signal) daemon_fail(rsp, "signal with label '%s' not found.\n", label);
-            free(label);
+            int index = -1;
+            if (token_to_int(token, &index) && index != -1) {
+                bool did_remove_signal = event_signal_remove_by_index(index);
+                if (!did_remove_signal) daemon_fail(rsp, "signal with index '%d' not found.\n", index);
+            } else {
+                char *label = token_to_string(token);
+                bool did_remove_signal = event_signal_remove(label);
+                if (!did_remove_signal) daemon_fail(rsp, "signal with label '%s' not found.\n", label);
+                free(label);
+            }
         } else {
-            daemon_fail(rsp, "invalid label specified.\n");
+            daemon_fail(rsp, "value '%.*s' is not a valid option for SIGNAL_SEL\n", token.length, token.text);
         }
+    } else if (token_equals(command, COMMAND_SIGNAL_LS)) {
+        event_signal_list(rsp);
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
     }

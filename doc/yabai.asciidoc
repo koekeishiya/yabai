@@ -76,6 +76,8 @@ FLOAT_SEL   := 0 < <value> <= 1.0
 
 RULE_SEL    := <index> | LABEL
 
+SIGNAL_SEL  := <index> | LABEL
+
 DIR_SEL     := north | east | south | west
 
 WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | <window id>
@@ -357,7 +359,7 @@ COMMAND
     Add a new rule.
 
 *--remove '<RULE_SEL>'*::
-    Remove an existing rule with the given label.
+    Remove an existing rule with the given index or label.
 
 *--list*::
     Output list of registered rules.
@@ -416,8 +418,11 @@ COMMAND
     Add an optionally labelled signal to execute an action after processing an event of the given type. +
     Some signals can be specified to trigger based on the application name and/or window title.
 
-*--remove '<LABEL>'*::
-    Remove an existing signal with the given label.
+*--remove '<SIGNAL_SEL>'*::
+    Remove an existing signal with the given index or label.
+
+*--list*::
+    Output list of registered signals.
 
 EVENT
 ^^^^^

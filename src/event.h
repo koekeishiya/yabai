@@ -178,26 +178,8 @@ struct event
     int param1;
 };
 
-struct signal
-{
-    bool app_regex_valid;
-    bool title_regex_valid;
-    bool app_regex_exclude;
-    bool title_regex_exclude;
-    regex_t app_regex;
-    regex_t title_regex;
-    char *command;
-    char *label;
-};
-
 struct event *event_create(struct event_loop *event_loop, enum event_type type, void *context);
 struct event *event_create_p1(struct event_loop *event_loop, enum event_type type, void *context, int param1);
 void event_destroy(struct event_loop *event_loop, struct event *event);
-enum event_type event_type_from_string(const char *str);
-
-void event_signal_transmit(void *context, enum event_type type);
-void event_signal_add(enum event_type type, struct signal *signal);
-void event_signal_destroy(struct signal *signal);
-bool event_signal_remove(char *label);
 
 #endif
