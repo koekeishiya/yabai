@@ -91,6 +91,6 @@ void rule_destroy(struct rule *rule)
     if (rule->app_regex_valid)   regfree(&rule->app_regex);
     if (rule->title_regex_valid) regfree(&rule->title_regex);
     if (rule->label) free(rule->label);
-    if (rule->app) free(rule->app);
+    if (rule->app)   free(rule->app);
     if (rule->title) free(rule->title);
 }

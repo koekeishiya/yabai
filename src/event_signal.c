@@ -225,7 +225,7 @@ void event_signal_destroy(struct signal *signal)
     if (signal->title_regex_valid) regfree(&signal->title_regex);
     if (signal->command) free(signal->command);
     if (signal->label)   free(signal->label);
-    if (signal->app)   free(signal->app);
+    if (signal->app)     free(signal->app);
     if (signal->title)   free(signal->title);
 }
 
