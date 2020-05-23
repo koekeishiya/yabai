@@ -153,6 +153,7 @@ extern bool g_verbose;
 /* --------------------------------DOMAIN RULE---------------------------------- */
 #define COMMAND_RULE_ADD "--add"
 #define COMMAND_RULE_REM "--remove"
+#define COMMAND_RULE_LS  "--list"
 
 #define ARGUMENT_RULE_KEY_APP     "app"
 #define ARGUMENT_RULE_KEY_TITLE   "title"
@@ -1750,6 +1751,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 rule.label = string_copy(value);
             } else if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
                 has_filter = true;
+                rule.app = string_copy(value);
                 rule.app_regex_exclude = exclusion;
                 rule.app_regex_valid = regcomp(&rule.app_regex, value, REG_EXTENDED) == 0;
                 if (!rule.app_regex_valid) {
@@ -1758,6 +1760,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_TITLE)) {
                 has_filter = true;
+                rule.title = string_copy(value);
                 rule.title_regex_exclude = exclusion;
                 rule.title_regex_valid = regcomp(&rule.title_regex, value, REG_EXTENDED) == 0;
                 if (!rule.title_regex_valid) {
@@ -1882,13 +1885,21 @@ rnext:
     } else if (token_equals(command, COMMAND_RULE_REM)) {
         struct token token = get_token(&message);
         if (token_is_valid(token)) {
-            char *label = token_to_string(token);
-            bool did_remove_rule = rule_remove(label);
-            if (!did_remove_rule) daemon_fail(rsp, "rule with label '%s' not found.\n", label);
-            free(label);
+            int index = -1;
+            if (token_to_int(token, &index) && index != -1) {
+                bool did_remove_rule = rule_remove_by_index(index);
+                if (!did_remove_rule) daemon_fail(rsp, "rule with index '%d' not found.\n", index);
+            } else {
+                char *label = token_to_string(token);
+                bool did_remove_rule = rule_remove(label);
+                if (!did_remove_rule) daemon_fail(rsp, "rule with label '%s' not found.\n", label);
+                free(label);
+            }
         } else {
-            daemon_fail(rsp, "invalid label specified.\n");
+            daemon_fail(rsp, "value '%.*s' is not a valid option for RULE_SEL\n", token.length, token.text);
         }
+    } else if (token_equals(command, COMMAND_RULE_LS)) {
+        window_manager_query_window_rules(rsp);
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
     }

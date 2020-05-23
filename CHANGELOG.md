@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- New command to output list of registered rules [#511](https://github.com/koekeishiya/yabai/issues/511)
 
 ## [3.0.2] - 2020-05-22
 ### Changed

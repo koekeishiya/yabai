@@ -5,6 +5,14 @@ extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 
 static const char *bool_str[] = { "off", "on" };
 
+static const char *layer_str[] =
+{
+    [0] = "",
+    [LAYER_BELOW] = "below",
+    [LAYER_NORMAL] = "normal",
+    [LAYER_ABOVE] = "above"
+};
+
 struct signal_args
 {
     char name[2][255];

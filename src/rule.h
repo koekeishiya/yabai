@@ -5,9 +5,18 @@
 #define RULE_PROP_ON  1
 #define RULE_PROP_OFF 2
 
+static int rule_prop[] =
+{
+    [RULE_PROP_UD]  = -1,
+    [RULE_PROP_OFF] =  0,
+    [RULE_PROP_ON]  =  1,
+};
+
 struct rule
 {
     char *label;
+    char *app;
+    char *title;
     regex_t app_regex;
     regex_t title_regex;
     bool app_regex_valid;
@@ -25,6 +34,8 @@ struct rule
     unsigned grid[6];
 };
 
+void rule_serialize(FILE *rsp, struct rule *rule, int index);
+bool rule_remove_by_index(int index);
 bool rule_remove(char *label);
 void rule_add(struct rule *rule);
 void rule_destroy(struct rule *rule);

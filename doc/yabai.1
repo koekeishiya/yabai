@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-05-09
+.\"      Date: 2020-05-23
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-05-09" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-05-23" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -85,24 +85,26 @@ Loads the scripting\-addition into Dock.app.
 .sp
 .if n .RS 4
 .nf
-DIR_SEL     := north | east | south | west
-
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | window id
-
-DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1\-based)
-
-SPACE_SEL   := prev | next | first | last | recent | mission\-control index (1\-based) | LABEL
-
-LAYER       := below | normal | above
-
-FLOAT_SEL   := 0 < value <= 1.0
-
-BOOL_SEL    := on | off
-
 REGEX       := \c
 .URL "https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended\-regular\-expression\-syntax.html" "POSIX extended regular expression syntax" ""
 
 LABEL       := arbitrary string/text used as an identifier
+
+LAYER       := below | normal | above
+
+BOOL_SEL    := on | off
+
+FLOAT_SEL   := 0 < <value> <= 1.0
+
+RULE_SEL    := <index> | LABEL
+
+DIR_SEL     := north | east | south | west
+
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | <window id>
+
+DISPLAY_SEL := prev | next | first | last | recent | <arrangement index (1\-based)>
+
+SPACE_SEL   := prev | next | first | last | recent | <mission\-control index (1\-based)> | LABEL
 .fi
 .if n .RE
 .SH "DOMAINS"
@@ -467,9 +469,14 @@ yabai \-m rule \fI<COMMAND>\fP
 Add a new rule.
 .RE
 .sp
-\fB\-\-remove \fI<LABEL>\fP\fP
+\fB\-\-remove \fI<RULE_SEL>\fP\fP
 .RS 4
 Remove an existing rule with the given label.
+.RE
+.sp
+\fB\-\-list\fP
+.RS 4
+Output list of registered rules.
 .RE
 .SS "ARGUMENT"
 .sp

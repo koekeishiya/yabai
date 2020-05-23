@@ -86,6 +86,7 @@ struct window_manager
     struct rgba_color insert_feedback_color;
 };
 
+void window_manager_query_window_rules(FILE *rsp);
 void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid);
 void window_manager_query_windows_for_display(FILE *rsp, uint32_t did);
 void window_manager_query_windows_for_displays(FILE *rsp);

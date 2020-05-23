@@ -14,6 +14,17 @@ static TABLE_COMPARE_FUNC(compare_wm)
     return *(uint32_t *) key_a == *(uint32_t *) key_b;
 }
 
+void window_manager_query_window_rules(FILE *rsp)
+{
+    fprintf(rsp, "[");
+    for (int i = 0; i < buf_len(g_window_manager.rules); ++i) {
+        struct rule *rule = &g_window_manager.rules[i];
+        rule_serialize(rsp, rule, i);
+        if (i < buf_len(g_window_manager.rules) - 1) fprintf(rsp, ",");
+    }
+    fprintf(rsp, "]\n");
+}
+
 void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid)
 {
     int window_count;

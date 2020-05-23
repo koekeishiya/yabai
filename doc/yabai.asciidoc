@@ -64,23 +64,26 @@ Definitions
 
 [subs=+macros]
 ----
-DIR_SEL     := north | east | south | west
-
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | window id
-
-DISPLAY_SEL := prev | next | first | last | recent | arrangement index (1-based)
-
-SPACE_SEL   := prev | next | first | last | recent | mission-control index (1-based) | LABEL
-
-LAYER       := below | normal | above
-
-FLOAT_SEL   := 0 < value <= 1.0
-
-BOOL_SEL    := on | off
-
 REGEX       := https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended-regular-expression-syntax.html[POSIX extended regular expression syntax]
 
 LABEL       := arbitrary string/text used as an identifier
+
+LAYER       := below | normal | above
+
+BOOL_SEL    := on | off
+
+FLOAT_SEL   := 0 < <value> <= 1.0
+
+RULE_SEL    := <index> | LABEL
+
+DIR_SEL     := north | east | south | west
+
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | <window id>
+
+DISPLAY_SEL := prev | next | first | last | recent | <arrangement index (1-based)>
+
+SPACE_SEL   := prev | next | first | last | recent | <mission-control index (1-based)> | LABEL
+
 ----
 
 Domains
@@ -353,8 +356,11 @@ COMMAND
 *--add ['<ARGUMENT>']*::
     Add a new rule.
 
-*--remove '<LABEL>'*::
+*--remove '<RULE_SEL>'*::
     Remove an existing rule with the given label.
+
+*--list*::
+    Output list of registered rules.
 
 ARGUMENT
 ^^^^^^^^
