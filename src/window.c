@@ -10,7 +10,11 @@ static void
 window_observe_notification(struct window *window, int notification)
 {
     AXError result = AXObserverAddNotification(window->application->observer_ref, window->ref, ax_window_notification[notification], window->id_ptr);
-    if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) window->notification |= 1 << notification;
+    if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
+        window->notification |= 1 << notification;
+    } else {
+        debug("%s: %s failed with error %s\n", __FUNCTION__, ax_window_notification_str[notification], ax_error_str[-result]);
+    }
 }
 
 static void

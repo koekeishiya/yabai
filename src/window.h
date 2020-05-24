@@ -22,6 +22,13 @@ const CFStringRef kAXFullscreenAttribute = CFSTR("AXFullScreen");
                                   AX_WINDOW_MINIMIZED |\
                                   AX_WINDOW_DEMINIMIZED)
 
+static const char *ax_window_notification_str[] =
+{
+    [AX_WINDOW_DESTROYED_INDEX]      = "kAXUIElementDestroyedNotification",
+    [AX_WINDOW_MINIMIZED_INDEX]      = "kAXWindowMiniaturizedNotification",
+    [AX_WINDOW_DEMINIMIZED_INDEX]    = "kAXWindowDeminiaturizedNotification"
+};
+
 static CFStringRef ax_window_notification[] =
 {
     [AX_WINDOW_DESTROYED_INDEX]      = kAXUIElementDestroyedNotification,

@@ -992,12 +992,14 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         window_manager_purify_window(wm, window);
 
         if (!window_observe(window)) {
+            debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
             window_manager_make_floating(wm, window, true);
             window_unobserve(window);
             window_destroy(window);
             continue;
         }
 
+        debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_add_window(wm, window);
         window_manager_apply_rules_to_window(sm, wm, window);
 
