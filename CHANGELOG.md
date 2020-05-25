@@ -9,6 +9,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - New command to output list of registered rules and remove by index [#511](https://github.com/koekeishiya/yabai/issues/511)
 - New command to output list of registered signals and remove by index [#458](https://github.com/koekeishiya/yabai/issues/458)
 
+### Chaned
+- Blacklist loginwindow and ScreenSaverEngine processes [#537](https://github.com/koekeishiya/yabai/issues/537)
+
 ## [3.0.2] - 2020-05-22
 ### Changed
 - Properly clear focus-follows-mouse cache upon space change [#528](https://github.com/koekeishiya/yabai/issues/528)
