@@ -25,18 +25,37 @@ void *workspace_application_create_running_ns_application(struct process *proces
     return [NSRunningApplication runningApplicationWithProcessIdentifier:process->pid];
 }
 
-void workspace_application_destroy_running_ns_application(void *context, struct process *process)
+void workspace_application_destroy_running_ns_application(void *ws_context, struct process *process)
 {
     NSRunningApplication *application = process->ns_application;
 
     if (application) {
-        @try {
-            [application removeObserver:context forKeyPath:@"activationPolicy"];
-        } @catch (NSException * __unused exception) {}
+        if ([application observationInfo]) {
 
-        @try {
-            [application removeObserver:context forKeyPath:@"finishedLaunching"];
-        } @catch (NSException * __unused exception) {}
+            //
+            // :WorstApiEverMade
+            //
+            // NOTE(koekeishiya): Because the developers of this API did such an amazing job
+            // there is no way for us to actually just friggin loop through the currently
+            // registered observations and then call removeObservation on them..
+            //
+            // Instead we just try to force remove the observations that **could** be present
+            // at this point in time, because it will complain if we try to actually release
+            // the object when it has observers present.
+            //
+            // We can't actually correctly track whether it did actually get unobserved previously,
+            // becase even when our notification callback is triggered it will claim that we try
+            // to remove a non-existing observation when it just called us back.
+            //
+
+            @try {
+                [application removeObserver:ws_context forKeyPath:@"activationPolicy" context:process];
+            } @catch (NSException * __unused exception) {}
+
+            @try {
+                [application removeObserver:ws_context forKeyPath:@"finishedLaunching" context:process];
+            } @catch (NSException * __unused exception) {}
+        }
 
         [application release];
     }
@@ -151,6 +170,8 @@ bool workspace_application_is_finished_launching(struct process *process)
             event_loop_post(&g_event_loop, event);
 
             //
+            // :WorstApiEverMade
+            //
             // NOTE(koekeishiya): For some stupid reason it is possible to get notified by the system
             // about a change, and NOT being able to remove ourselves from observation because
             // it claims that we are not observing the key-path, but we clearly are, as we would
@@ -158,7 +179,7 @@ bool workspace_application_is_finished_launching(struct process *process)
             //
 
             @try {
-                [object removeObserver:self forKeyPath:@"activationPolicy"];
+                [object removeObserver:self forKeyPath:@"activationPolicy" context:process];
             } @catch (NSException * __unused exception) {}
         }
     }
@@ -174,6 +195,8 @@ bool workspace_application_is_finished_launching(struct process *process)
             event_loop_post(&g_event_loop, event);
 
             //
+            // :WorstApiEverMade
+            //
             // NOTE(koekeishiya): For some stupid reason it is possible to get notified by the system
             // about a change, and NOT being able to remove ourselves from observation because
             // it claims that we are not observing the key-path, but we clearly are, as we would
@@ -181,7 +204,7 @@ bool workspace_application_is_finished_launching(struct process *process)
             //
 
             @try {
-                [object removeObserver:self forKeyPath:@"finishedLaunching"];
+                [object removeObserver:self forKeyPath:@"finishedLaunching" context:process];
             } @catch (NSException * __unused exception) {}
         }
     }
