@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 - Blacklist loginwindow and ScreenSaverEngine processes [#537](https://github.com/koekeishiya/yabai/issues/537)
+- Resolve some issues with the lifetime of NSRunningApplication [#543](https://github.com/koekeishiya/yabai/issues/543)
 
 ## [3.0.2] - 2020-05-22
 ### Changed

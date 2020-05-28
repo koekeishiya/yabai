@@ -17,6 +17,7 @@ struct process
     char *name;
     bool xpc;
     bool volatile terminated;
+    void *ns_application;
 };
 
 struct process_manager

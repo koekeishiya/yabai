@@ -33,12 +33,14 @@ struct process *process_create(ProcessSerialNumber psn)
     process->terminated = false;
     process->xpc = process_info.processType == 'XPC!';
     GetProcessPID(&process->psn, &process->pid);
+    process->ns_application = workspace_application_create_running_ns_application(process);
 
     return process;
 }
 
 void process_destroy(struct process *process)
 {
+    workspace_application_destroy_running_ns_application(process);
     free(process->name);
     free(process);
 }
