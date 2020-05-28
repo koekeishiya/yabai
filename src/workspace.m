@@ -25,10 +25,21 @@ void *workspace_application_create_running_ns_application(struct process *proces
     return [NSRunningApplication runningApplicationWithProcessIdentifier:process->pid];
 }
 
-void workspace_application_destroy_running_ns_application(struct process *process)
+void workspace_application_destroy_running_ns_application(void *context, struct process *process)
 {
     NSRunningApplication *application = process->ns_application;
-    if (application) [application release];
+
+    if (application) {
+        @try {
+            [application removeObserver:context forKeyPath:@"activationPolicy"];
+        } @catch (NSException * __unused exception) {}
+
+        @try {
+            [application removeObserver:context forKeyPath:@"finishedLaunching"];
+        } @catch (NSException * __unused exception) {}
+
+        [application release];
+    }
 }
 
 void workspace_application_observe_finished_launching(void *context, struct process *process)

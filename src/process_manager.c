@@ -1,6 +1,7 @@
 #include "process_manager.h"
 
 extern struct event_loop g_event_loop;
+extern void *g_workspace_context;
 
 static TABLE_HASH_FUNC(hash_psn)
 {
@@ -40,7 +41,7 @@ struct process *process_create(ProcessSerialNumber psn)
 
 void process_destroy(struct process *process)
 {
-    workspace_application_destroy_running_ns_application(process);
+    workspace_application_destroy_running_ns_application(g_workspace_context, process);
     free(process->name);
     free(process);
 }
