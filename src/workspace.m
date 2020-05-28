@@ -44,7 +44,7 @@ void workspace_application_destroy_running_ns_application(void *ws_context, stru
             // the object when it has observers present.
             //
             // We can't actually correctly track whether it did actually get unobserved previously,
-            // becase even when our notification callback is triggered it will claim that we try
+            // because even when our notification callback is triggered it will claim that we try
             // to remove a non-existing observation when it just called us back.
             //
 
