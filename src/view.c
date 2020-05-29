@@ -439,8 +439,12 @@ void view_remove_window_node(struct view *view, struct window *window)
     if (!node) return;
 
     if (node == view->root) {
-        view->root->window_id = 0;
-        insert_feedback_destroy(view->root);
+        node->window_id = 0;
+        insert_feedback_destroy(node);
+        node->split = SPLIT_NONE;
+        node->child = CHILD_NONE;
+        node->insert_dir = 0;
+        view->insertion_point = 0;
         return;
     }
 
