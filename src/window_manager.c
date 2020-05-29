@@ -708,13 +708,13 @@ struct window *window_manager_find_last_managed_window(struct space_manager *sm,
 
 struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm)
 {
-    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    struct window *window = window_manager_find_window(wm, wm->last_window_id);
+    if (!window) return NULL;
+
+    struct view *view = window_manager_find_managed_window(wm, window);
     if (!view) return NULL;
 
-    struct window_node *node = view_find_window_node(view, wm->last_window_id);
-    if (!node) return NULL;
-
-    return window_manager_find_window(wm, node->window_id);
+    return window;
 }
 
 struct window *window_manager_find_largest_managed_window(struct space_manager *sm, struct window_manager *wm)
