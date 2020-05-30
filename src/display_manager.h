@@ -48,6 +48,7 @@ uint32_t display_manager_dock_display_id(void);
 CFStringRef display_manager_cursor_display_uuid(void);
 uint32_t display_manager_cursor_display_id(void);
 CFStringRef display_manager_arrangement_display_uuid(int arrangement);
+uint32_t display_manager_coordinate_display_id(char axis, int index);
 uint32_t display_manager_arrangement_display_id(int arrangement);
 uint32_t display_manager_prev_display_id(uint32_t did);
 uint32_t display_manager_next_display_id(uint32_t did);

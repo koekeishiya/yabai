@@ -230,15 +230,28 @@ static uint32_t token_to_uint32t(struct token token)
     return result;
 }
 
-static bool token_to_int(struct token token, int *value)
+static bool token_to_int_offset(struct token token, unsigned int offset, int *value)
 {
+    // if it's bigger, it would overflow. if it's the same,
+    // there's no text left, so we already know it's invalid
+    if (offset >= token.length) return false;
+
+    // guaranteed >= 1 by the above
+    unsigned int length = token.length - offset;
+    char *start = token.text + offset;
+
     int result = 0;
-    char buffer[token.length + 1];
-    memcpy(buffer, token.text, token.length);
+    char buffer[length + 1];
+    memcpy(buffer, start, length);
     buffer[token.length] = '\0';
     bool success = sscanf(buffer, "%d", &result) == 1;
     *value = result;
     return success;
+}
+
+static bool token_to_int(struct token token, int *value)
+{
+    return token_to_int_offset(token, 0, value);
 }
 
 static float token_to_float(struct token token)
@@ -871,6 +884,21 @@ static struct selector parse_display_selector(FILE *rsp, char **message, uint32_
                 }
             } else {
                 daemon_fail(rsp, "invalid arrangement-index specified '%d'.\n", arrangement_index);
+            }
+        } else if (result.token.length >= 2 && result.token.text[1] == ':') {
+            int coordinate_index = 0;
+            char axis = result.token.text[0];
+            bool valid_axis = (axis == 'y' || axis == 'x');
+
+            if (valid_axis && token_to_int_offset(result.token, 2, &coordinate_index) && coordinate_index) {
+                uint32_t did = display_manager_coordinate_display_id(axis, coordinate_index);
+                if (did) {
+                    result.did = did;
+                } else {
+                    daemon_fail(rsp, "could not locate display with %c coordinate index %d.\n", axis, coordinate_index);
+                }
+            } else {
+                daemon_fail(rsp, "invalid coordinate-index specified: '%.*s'", result.token.length, result.token.text);
             }
         } else {
             result.did_parse = false;
