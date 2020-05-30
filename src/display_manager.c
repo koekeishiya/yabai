@@ -128,7 +128,7 @@ static inline int display_frame_center(CFStringRef uuid_str, char axis) {
     if (axis == 'y') return frame.origin.y + (frame.size.height) / 2;
 
     // axis should only have these two values
-    assert(false);
+    return 0;
 }
 
 static enum CFComparisonResult coordinate_comparator(const void *a_p, const void *b_p, void *context_p) {
