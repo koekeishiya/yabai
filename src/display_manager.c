@@ -80,6 +80,55 @@ uint32_t display_manager_point_display_id(CGPoint point)
     return result;
 }
 
+static inline enum display_sort_order rotate_axis(enum display_sort_order axis) {
+    switch(axis) {
+        case DISPLAY_SORT_NONE: return DISPLAY_SORT_NONE;
+        case DISPLAY_SORT_VERT: return DISPLAY_SORT_HORIZ;
+        case DISPLAY_SORT_HORIZ: return DISPLAY_SORT_VERT;
+    }
+}
+
+static inline float display_sort_lookup(CGPoint point, enum display_sort_order axis) {
+    switch(axis) {
+        case DISPLAY_SORT_NONE: return 0.0;
+        case DISPLAY_SORT_VERT: return point.y;
+        case DISPLAY_SORT_HORIZ: return point.x;
+    }
+}
+
+static enum CFComparisonResult coordinate_comparator(const void *a_p, const void *b_p, void *context_p) {
+    CFStringRef a = (CFStringRef) a_p;
+    CFStringRef b = (CFStringRef) b_p;
+    enum display_sort_order axis = *((enum display_sort_order *) context_p);
+
+    CFUUIDRef uuid_a = CFUUIDCreateFromString(NULL, a);
+    CFUUIDRef uuid_b = CFUUIDCreateFromString(NULL, b);
+
+    uint32_t did_a = CGDisplayGetDisplayIDFromUUID(uuid_a);
+    uint32_t did_b = CGDisplayGetDisplayIDFromUUID(uuid_b);
+
+    CGPoint center_a = display_center(did_a);
+    CGPoint center_b = display_center(did_b);
+
+    float coord_a, coord_b;
+
+    coord_a = display_sort_lookup(center_a, axis);
+    coord_b = display_sort_lookup(center_b, axis);
+    if (coord_a < coord_b) return kCFCompareLessThan;
+    if (coord_a > coord_b) return kCFCompareGreaterThan;
+
+    // if equal, fall back to the other axis
+    axis = rotate_axis(axis);
+
+    coord_a = display_sort_lookup(center_a, axis);
+    coord_b = display_sort_lookup(center_b, axis);
+    if (coord_a < coord_b) return kCFCompareLessThan;
+    if (coord_a > coord_b) return kCFCompareGreaterThan;
+
+    // the screens share a center point, so don't re-order them at all
+    return kCFCompareEqualTo;
+}
+
 CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 {
     CFStringRef result = NULL;
@@ -87,9 +136,17 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 
     int count = CFArrayGetCount(displays);
     int index = arrangement - 1;
-
     if (in_range_ie(index, 0, count)) {
-        result = CFRetain(CFArrayGetValueAtIndex(displays, index));
+        if (g_display_manager.sort_order == DISPLAY_SORT_NONE) {
+            result = CFRetain(CFArrayGetValueAtIndex(displays, index));
+        } else {
+            // copy the array to a mutable one, then sort it in place
+            CFRange all = CFRangeMake((long) 0, (long) count);
+            CFMutableArrayRef mut_displays = CFArrayCreateMutableCopy(NULL, count, displays);
+            CFArraySortValues(mut_displays, all, &coordinate_comparator, NULL);
+            result = CFRetain(CFArrayGetValueAtIndex(mut_displays, index));
+            CFRelease(mut_displays);
+        }
     }
 
     CFRelease(displays);
@@ -99,16 +156,15 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 uint32_t display_manager_arrangement_display_id(int arrangement)
 {
     uint32_t result = 0;
-    CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
+    CFStringRef uuid = display_manager_arrangement_display_uuid(arrangement);
+    if (!uuid) return result;
+    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid);
+    CFRelease(uuid);
+    if (!uuid_ref) return result;
 
-    int count = CFArrayGetCount(displays);
-    int index = arrangement - 1;
+    result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
+    CFRelease(uuid_ref);
 
-    if (in_range_ie(index, 0, count)) {
-        result = display_id(CFArrayGetValueAtIndex(displays, index));
-    }
-
-    CFRelease(displays);
     return result;
 }
 
@@ -333,6 +389,7 @@ bool display_manager_begin(struct display_manager *dm)
     dm->current_display_id = display_manager_active_display_id();
     dm->last_display_id = dm->current_display_id;
     dm->mode = EXTERNAL_BAR_OFF;
+    dm->sort_order = DISPLAY_SORT_NONE;
     dm->top_padding = 0;
     dm->bottom_padding = 0;
     return CGDisplayRegisterReconfigurationCallback(display_handler, NULL) == kCGErrorSuccess;

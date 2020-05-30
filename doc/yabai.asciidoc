@@ -122,6 +122,12 @@ Global Settings
 *focus_follows_mouse* ['autofocus|autoraise|off']::
     Automatically focus the window under the mouse.
 
+*display_sort_order* ['horizontal|vertical|none']::
+    Specify how displays are ordered. +
+    'horizontal'|'vertical': order by the display's relative position. +
+    'none': (default) use the native ordering. +
+    The position of a display is determined by its center point.
+
 *window_placement* ['first_child|second_child']::
     Specify whether managed windows should become the first or second leaf-node.
 

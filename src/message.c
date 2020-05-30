@@ -21,6 +21,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
 #define COMMAND_CONFIG_FFM                   "focus_follows_mouse"
 #define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
+#define COMMAND_CONFIG_DISPLAY_SORT          "display_sort_order"
 #define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
@@ -50,6 +51,9 @@ extern bool g_verbose;
 
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
+#define ARGUMENT_CONFIG_DISPLAY_SORT_NONE    "none"
+#define ARGUMENT_CONFIG_DISPLAY_SORT_HORIZ   "horizontal"
+#define ARGUMENT_CONFIG_DISPLAY_SORT_VERT    "vertical"
 #define ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST "first_child"
 #define ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND "second_child"
 #define ARGUMENT_CONFIG_SHADOW_FLT           "float"
