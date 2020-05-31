@@ -120,15 +120,14 @@ uint32_t display_manager_arrangement_display_id(int arrangement)
     return result;
 }
 
-static inline int display_frame_center(CFStringRef uuid_str, char axis) {
+static inline float display_frame_center(CFStringRef uuid_str, char axis) {
     CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid_str);
     uint32_t did = CGDisplayGetDisplayIDFromUUID(uuid_ref);
     CGRect frame = CGDisplayBounds(did);
     if (axis == 'x') return frame.origin.x + (frame.size.width) / 2;
     if (axis == 'y') return frame.origin.y + (frame.size.height) / 2;
 
-    // axis should only have these two values
-    return 0;
+    return 0.0;
 }
 
 static enum CFComparisonResult coordinate_comparator(const void *a_p, const void *b_p, void *context_p) {
@@ -136,8 +135,8 @@ static enum CFComparisonResult coordinate_comparator(const void *a_p, const void
     CFStringRef b = (CFStringRef) b_p;
     char axis = *((char *) context_p);
 
-    int center_a = display_frame_center(a, axis);
-    int center_b = display_frame_center(b, axis);
+    float center_a = display_frame_center(a, axis);
+    float center_b = display_frame_center(b, axis);
 
     if (center_a < center_b) return kCFCompareLessThan;
     if (center_a > center_b) return kCFCompareGreaterThan;
@@ -154,13 +153,18 @@ uint32_t display_manager_coordinate_display_id(char axis, int index) {
 
     if (index >= 0 && index < displays_count) {
         // copy the array to a mutable one, then sort it in place
-        CFRange all = CFRangeMake((long) 0, (long) displays_count - 1);
+        CFRange all = CFRangeMake((long) 0, (long) displays_count);
         CFMutableArrayRef mut_displays = CFArrayCreateMutableCopy(NULL, displays_count, displays);
         CFArraySortValues(mut_displays, all, &coordinate_comparator, &axis);
 
         CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, CFArrayGetValueAtIndex(mut_displays, index));
         result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
+
+        CFRelease(uuid_ref);
+        CFRelease(mut_displays);
     }
+
+    CFRelease(displays);
 
     return result;
 }
