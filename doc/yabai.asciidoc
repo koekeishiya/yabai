@@ -564,9 +564,6 @@ EVENT
 *system_woke*::
     Triggered when macOS wakes from sleep.
 
-*bar_refresh*::
-    Triggered when the yabai status_bar is told to update.
-
 *daemon_message*::
     Triggered when yabai receives a message on its socket.
 
