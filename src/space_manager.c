@@ -642,6 +642,37 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
     return SPACE_OP_ERROR_SUCCESS;
 }
 
+enum space_op_error space_manager_switch_to_space(uint64_t sid)
+{
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
+    uint64_t cur_sid = space_manager_active_space();
+    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
+
+    uint32_t cur_did = space_display_id(cur_sid);
+    uint32_t new_did = space_display_id(sid);
+
+    bool is_animating = display_manager_display_is_animating(new_did);
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    bool swap_space = display_space_id(new_did) == sid;
+    bool move_space = cur_did != new_did;
+
+    if (swap_space) {
+        // TODO this will not work if both are the last on the display
+        space_manager_move_space_to_display(&g_space_manager, cur_sid, new_did);
+        space_manager_move_space_to_display(&g_space_manager, sid, cur_did);
+    }
+    else if (move_space) {
+        space_manager_move_space_to_display(&g_space_manager, sid, cur_did);
+    }
+
+    space_manager_focus_space(sid);
+
+    return SPACE_OP_ERROR_SUCCESS;
+}
+
 static inline bool space_manager_is_space_last_user_space(uint64_t sid)
 {
     bool result = true;

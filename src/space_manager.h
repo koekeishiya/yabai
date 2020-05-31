@@ -84,6 +84,7 @@ bool space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degr
 bool space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis);
 void space_manager_move_window_to_space(uint64_t sid, struct window *window);
 enum space_op_error space_manager_focus_space(uint64_t sid);
+enum space_op_error space_manager_switch_to_space(uint64_t sid);
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid);
 enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint64_t selector_sid);
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did);

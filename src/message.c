@@ -76,6 +76,7 @@ extern bool g_verbose;
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
 #define COMMAND_SPACE_FOCUS   "--focus"
+#define COMMAND_SPACE_SWITCH  "--switch"
 #define COMMAND_SPACE_CREATE  "--create"
 #define COMMAND_SPACE_DESTROY "--destroy"
 #define COMMAND_SPACE_MOVE    "--move"
@@ -1432,6 +1433,18 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "cannot focus space because mission-control is active.\n");
             } else if (result == SPACE_OP_ERROR_SCRIPTING_ADDITION) {
                 daemon_fail(rsp, "cannot focus space due to an error with the scripting-addition.\n");
+            }
+        }
+    } else if (token_equals(command, COMMAND_SPACE_SWITCH)) {
+        struct selector selector = parse_space_selector(rsp, &message, acting_sid);
+        if (selector.did_parse && selector.sid) {
+            enum space_op_error result = space_manager_switch_to_space(selector.sid);
+            if (result == SPACE_OP_ERROR_SAME_SPACE) {
+                daemon_fail(rsp, "cannot focus an already focused space.\n");
+            } else if (result == SPACE_OP_ERROR_DISPLAY_IS_ANIMATING) {
+                daemon_fail(rsp, "cannot focus space because the display is in the middle of an animation.\n");
+            } else if (result == SPACE_OP_ERROR_IN_MISSION_CONTROL) {
+                daemon_fail(rsp, "cannot focus space because mission-control is active.\n");
             }
         }
     } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
