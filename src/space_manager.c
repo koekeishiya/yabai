@@ -14,6 +14,28 @@ static TABLE_COMPARE_FUNC(compare_view)
     return *(uint64_t *) key_a == *(uint64_t *) key_b;
 }
 
+static inline bool space_manager_is_space_last_user_space(uint64_t sid)
+{
+    bool result = true;
+
+    int count;
+    uint64_t *space_list = display_space_list(space_display_id(sid), &count);
+    if (!space_list) return true;
+
+    for (int i = 0; i < count; ++i) {
+        uint64_t c_sid = space_list[i];
+        if (sid == c_sid) continue;
+
+        if (space_is_user(c_sid)) {
+            result = false;
+            break;
+        }
+    }
+
+    return result;
+}
+
+
 bool space_manager_has_separate_spaces(void)
 {
     return SLSGetSpaceManagementMode(g_connection) == 1;
@@ -642,6 +664,61 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
     return SPACE_OP_ERROR_SUCCESS;
 }
 
+static bool move_all_windows(uint32_t *window_list, int window_list_count, uint64_t to_sid) {
+    debug("move_all_windows %i to %d\n", window_list_count, to_sid);
+
+    if (!window_list) {
+      debug("no window list!\n");
+      return false;
+    }
+    struct window *window;
+
+    for (int i = 0; i < window_list_count; i++) {
+        window = window_manager_find_window(&g_window_manager, window_list[i]);
+        if (!window) {
+          debug("find_window came up blank for %d\n", window_list[i]);
+          continue;
+        }
+        debug("move_all_windows: #%d:%s -> %d\n", window_list[i], window->application->name, to_sid);
+        space_manager_move_window_to_space(to_sid, window);
+    }
+
+    return true;
+}
+
+static void space_manager_swap_spaces(uint64_t a_sid, uint64_t b_sid)
+{
+    int a_window_list_count = 0;
+    uint32_t *a_window_list = space_window_list(a_sid, &a_window_list_count, true);
+
+    int b_window_list_count = 0;
+    uint32_t *b_window_list = space_window_list(b_sid, &b_window_list_count, true);
+
+    // swap all windows
+    move_all_windows(a_window_list, a_window_list_count, b_sid);
+    move_all_windows(b_window_list, b_window_list_count, a_sid);
+    free(a_window_list);
+    free(b_window_list);
+
+    // swap the view table
+    struct view *a_view = table_find(&g_space_manager.view, &a_sid);
+    struct view *b_view = table_find(&g_space_manager.view, &b_sid);
+
+    table_add(&g_space_manager.view, &a_sid, b_view);
+    table_add(&g_space_manager.view, &b_sid, a_view);
+
+    // swap the labels
+    int labels_size = buf_len(g_space_manager.labels);
+    for (int i = 0; i < labels_size; ++i) {
+        struct space_label *label = &g_space_manager.labels[i];
+        if      (label->sid == a_sid) label->sid = b_sid;
+        else if (label->sid == b_sid) label->sid = a_sid;
+    }
+
+    space_manager_refresh_view(&g_space_manager, a_sid);
+    space_manager_refresh_view(&g_space_manager, b_sid);
+}
+
 enum space_op_error space_manager_switch_to_space(uint64_t sid)
 {
     bool is_in_mc = g_mission_control_active;
@@ -660,7 +737,13 @@ enum space_op_error space_manager_switch_to_space(uint64_t sid)
     bool move_space = cur_did != new_did;
 
     if (swap_space) {
-        // TODO this will not work if both are the last on the display
+        // if the current is last on its display, we'll run into trouble when
+        // trying to move it. so instead we swap all windows and all material
+        // state about the two spaces.
+        if (space_manager_is_space_last_user_space(cur_sid)) {
+            space_manager_swap_spaces(cur_sid, sid);
+        }
+
         space_manager_move_space_to_display(&g_space_manager, cur_sid, new_did);
         space_manager_move_space_to_display(&g_space_manager, sid, cur_did);
     }
@@ -671,27 +754,6 @@ enum space_op_error space_manager_switch_to_space(uint64_t sid)
     space_manager_focus_space(sid);
 
     return SPACE_OP_ERROR_SUCCESS;
-}
-
-static inline bool space_manager_is_space_last_user_space(uint64_t sid)
-{
-    bool result = true;
-
-    int count;
-    uint64_t *space_list = display_space_list(space_display_id(sid), &count);
-    if (!space_list) return true;
-
-    for (int i = 0; i < count; ++i) {
-        uint64_t c_sid = space_list[i];
-        if (sid == c_sid) continue;
-
-        if (space_is_user(c_sid)) {
-            result = false;
-            break;
-        }
-    }
-
-    return result;
 }
 
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid)
