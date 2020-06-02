@@ -10,41 +10,6 @@ extern bool g_mission_control_active;
 extern int g_connection;
 extern void *g_workspace_context;
 
-static struct process *process_retry_list[256];
-static int process_retry_list_count = 0;
-
-static inline void process_retry_add(struct process *process)
-{
-    process_retry_list[process_retry_list_count++] = process;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
-        event_loop_post(&g_event_loop, event);
-    });
-}
-
-static inline bool process_retry_find(struct process *process)
-{
-    for (int i = 0; i < process_retry_list_count; ++i) {
-        if (process_retry_list[i] == process) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-static inline bool process_retry_remove(struct process *process)
-{
-    for (int i = 0; i < process_retry_list_count; ++i) {
-        if (process_retry_list[i] == process) {
-            process_retry_list[i] = process_retry_list[--process_retry_list_count];
-            return true;
-        }
-    }
-
-    return false;
-}
-
 struct event *event_create(struct event_loop *event_loop, enum event_type type, void *context)
 {
     struct event *event = memory_pool_push(&event_loop->pool, struct event);
@@ -71,11 +36,7 @@ void event_destroy(struct event_loop *event_loop, struct event *event)
     default: break;
 
     case APPLICATION_TERMINATED: {
-        struct process *process = event->context;
-        if (process_retry_find(process)) break;
-
-        debug("%s: destroying process %s (%d)\n", __FUNCTION__, process->name, process->pid);
-        process_destroy(process);
+        process_destroy(event->context);
     } break;
     case WINDOW_CREATED: {
         CFRelease(event->context);
@@ -92,12 +53,10 @@ void event_destroy(struct event_loop *event_loop, struct event *event)
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
     struct process *process = context;
-    bool is_retry = process_retry_remove(process);
 
     if (process->terminated) {
-        debug("%s: %s (%d) terminated during launch (is_retry = %d)\n", __FUNCTION__, process->name, process->pid, is_retry);
+        debug("%s: %s (%d) terminated during launch\n", __FUNCTION__, process->name, process->pid);
         window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
-        if (is_retry) process_destroy(process);
         return EVENT_FAILURE;
     }
 
@@ -118,8 +77,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         bool ax_retry = application->ax_retry;
         application_unobserve(application);
         application_destroy(application);
+
         debug("%s: could not observe notifications for %s (%d) (ax_retry = %d)\n", __FUNCTION__, process->name, process->pid, ax_retry);
-        if (ax_retry) process_retry_add(process);
+
+        if (ax_retry) {
+            __block ProcessSerialNumber psn = process->psn;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                struct process *_process = process_manager_find_process(&g_process_manager, &psn);
+                if (!_process) return;
+
+                struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, _process);
+                event_loop_post(&g_event_loop, event);
+            });
+        }
+
         return EVENT_FAILURE;
     }
 

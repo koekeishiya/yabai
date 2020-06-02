@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Blacklist loginwindow and ScreenSaverEngine processes [#537](https://github.com/koekeishiya/yabai/issues/537)
 - Resolve some issues with the lifetime of NSRunningApplication [#543](https://github.com/koekeishiya/yabai/issues/543)
+- Resolve some obscure issue that would in some cases lead to a double-free upon process termination [#543](https://github.com/koekeishiya/yabai/issues/543)
 - Properly clear insert feedback settings if active on the root node when it is closed [#546](https://github.com/koekeishiya/yabai/issues/546)
 - Window selector **recent** should properly work across spaces [#544](https://github.com/koekeishiya/yabai/issues/544)
 
