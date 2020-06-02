@@ -371,10 +371,10 @@ ARGUMENT
     Label used to identify the rule with a unique name
 
 *app[!]='<REGEX>'*::
-    Name of application.
+    Name of application. If '!' is present, invert the match.
 
 *title[!]='<REGEX>'*::
-    Title of window.
+    Title of window. If '!' is present, invert the match.
 
 *display='[^]<DISPLAY_SEL>'*::
     Send window to display. If '^' is present, follow focus.
