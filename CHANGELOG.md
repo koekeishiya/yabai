@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.1.0] - 2020-06-05
 ### Added
 - New command to output list of registered rules and remove by index [#511](https://github.com/koekeishiya/yabai/issues/511)
 - New command to output list of registered signals and remove by index [#458](https://github.com/koekeishiya/yabai/issues/458)
@@ -250,7 +252,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.0.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/koekeishiya/yabai/compare/v3.0.2...v3.1.0
 [3.0.2]: https://github.com/koekeishiya/yabai/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/koekeishiya/yabai/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/koekeishiya/yabai/compare/v2.4.3...v3.0.0
