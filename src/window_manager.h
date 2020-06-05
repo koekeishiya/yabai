@@ -100,6 +100,7 @@ void window_manager_move_window_cgs(struct window *window, float x, float y);
 void window_manager_resize_window(struct window *window, float width, float height);
 enum window_op_error window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int action, float ratio);
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height);
+struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank);
 struct window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid);
 struct window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point);
 struct window *window_manager_find_window_below_cursor(struct window_manager *wm);

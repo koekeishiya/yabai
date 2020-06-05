@@ -39,12 +39,12 @@ CFStringRef display_manager_active_display_uuid(void)
 
 uint32_t display_manager_active_display_id(void)
 {
-    uint32_t result = 0;
     CFStringRef uuid = display_manager_active_display_uuid();
-    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid);
-    result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
-    CFRelease(uuid_ref);
+    assert(uuid);
+
+    uint32_t result = display_id(uuid);
     CFRelease(uuid);
+
     return result;
 }
 
@@ -59,29 +59,25 @@ uint32_t display_manager_dock_display_id(void)
     CFStringRef uuid = display_manager_dock_display_uuid();
     if (!uuid) return 0;
 
-    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid);
-    uint32_t result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
-    CFRelease(uuid_ref);
+    uint32_t result = display_id(uuid);
     CFRelease(uuid);
+
     return result;
 }
 
-CFStringRef display_manager_cursor_display_uuid(void)
+CFStringRef display_manager_point_display_uuid(CGPoint point)
 {
-    CGPoint cursor;
-    SLSGetCurrentCursorLocation(g_connection, &cursor);
-    return SLSCopyBestManagedDisplayForPoint(g_connection, cursor);
+    return SLSCopyBestManagedDisplayForPoint(g_connection, point);
 }
 
-uint32_t display_manager_cursor_display_id(void)
+uint32_t display_manager_point_display_id(CGPoint point)
 {
-    CFStringRef uuid = display_manager_cursor_display_uuid();
+    CFStringRef uuid = display_manager_point_display_uuid(point);
     if (!uuid) return 0;
 
-    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid);
-    uint32_t result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
-    CFRelease(uuid_ref);
+    uint32_t result = display_id(uuid);
     CFRelease(uuid);
+
     return result;
 }
 
@@ -110,9 +106,7 @@ uint32_t display_manager_arrangement_display_id(int arrangement)
     int index = arrangement - 1;
 
     if (in_range_ie(index, 0, count)) {
-        CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, CFArrayGetValueAtIndex(displays, index));
-        result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
-        CFRelease(uuid_ref);
+        result = display_id(CFArrayGetValueAtIndex(displays, index));
     }
 
     CFRelease(displays);
@@ -184,8 +178,11 @@ CGRect display_manager_dock_rect(void)
 bool display_manager_active_display_is_animating(void)
 {
     CFStringRef uuid = display_manager_active_display_uuid();
+    assert(uuid);
+
     bool result = SLSManagedDisplayIsAnimating(g_connection, uuid);
     CFRelease(uuid);
+
     return result;
 }
 
@@ -196,6 +193,7 @@ bool display_manager_display_is_animating(uint32_t did)
 
     bool result = SLSManagedDisplayIsAnimating(g_connection, uuid);
     CFRelease(uuid);
+
     return result;
 }
 
@@ -237,57 +235,41 @@ static AXUIElementRef display_manager_find_element_at_point(CGPoint point)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-void display_manager_focus_display(uint32_t did)
+void display_manager_focus_display_with_point(uint32_t did, CGPoint point)
 {
-    int window_count;
-    uint32_t *window_list;
-    struct window *window;
+    int element_connection;
+    ProcessSerialNumber element_psn;
 
-    CGRect bounds;
-    CGPoint point;
-    AXUIElementRef element_ref;
+    AXUIElementRef element_ref = display_manager_find_element_at_point(point);
+    if (!element_ref) goto click;
 
-    window_list = space_window_list(display_space_id(did), &window_count, false);
-    if (!window_list) goto fallback;
+    uint32_t element_id = ax_window_id(element_ref);
+    if (!element_id) goto err_ref;
 
-    for (int i = 0; i < window_count; ++i) {
-        window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (!window || !window_is_standard(window)) continue;
+    SLSGetWindowOwner(g_connection, element_id, &element_connection);
+    SLSGetConnectionPSN(element_connection, &element_psn);
+    window_manager_focus_window_with_raise(&element_psn, element_id, element_ref);
+    CFRelease(element_ref);
+    goto out;
 
-        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
-        free(window_list);
-        goto out;
-    }
-
-    free(window_list);
-
-fallback:
-    bounds = display_bounds(did);
-    point = (CGPoint) { bounds.origin.x + bounds.size.width / 2, bounds.origin.y + bounds.size.height / 2 };
-    element_ref = display_manager_find_element_at_point(point);
-
-    if (element_ref) {
-        uint32_t element_id = ax_window_id(element_ref);
-
-        if (element_id) {
-            int element_connection;
-            ProcessSerialNumber element_psn;
-            SLSGetWindowOwner(g_connection, element_id, &element_connection);
-            SLSGetConnectionPSN(element_connection, &element_psn);
-            window_manager_focus_window_with_raise(&element_psn, element_id, element_ref);
-        } else {
-            CGPostMouseEvent(point, true, 1, true);
-            CGPostMouseEvent(point, true, 1, false);
-        }
-
-        CFRelease(element_ref);
-    } else {
-        CGPostMouseEvent(point, true, 1, true);
-        CGPostMouseEvent(point, true, 1, false);
-    }
+err_ref:
+    CFRelease(element_ref);
+click:
+    CGPostMouseEvent(point, true, 1, true);
+    CGPostMouseEvent(point, true, 1, false);
 out:;
 }
 #pragma clang diagnostic pop
+
+void display_manager_focus_display(uint32_t did)
+{
+    struct window *window = window_manager_find_window_on_space_by_rank(&g_window_manager, display_space_id(did), 1);
+    if (window) {
+        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+    } else {
+        display_manager_focus_display_with_point(did, display_center(did));
+    }
+}
 
 bool display_manager_begin(struct display_manager *dm)
 {

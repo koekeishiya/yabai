@@ -81,6 +81,17 @@ CFStringRef display_uuid(uint32_t did)
     return uuid_str;
 }
 
+uint32_t display_id(CFStringRef uuid)
+{
+    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid);
+    if (!uuid_ref) return 0;
+
+    uint32_t did = CGDisplayGetDisplayIDFromUUID(uuid_ref);
+    CFRelease(uuid_ref);
+
+    return did;
+}
+
 CGRect display_bounds(uint32_t did)
 {
     return CGDisplayBounds(did);
@@ -123,6 +134,12 @@ CGRect display_bounds_constrained(uint32_t did)
     }
 
     return frame;
+}
+
+CGPoint display_center(uint32_t did)
+{
+    CGRect bounds = display_bounds(did);
+    return (CGPoint) { bounds.origin.x + bounds.size.width/2, bounds.origin.y + bounds.size.height/2 };
 }
 
 uint64_t display_space_id(uint32_t did)

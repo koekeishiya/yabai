@@ -533,7 +533,7 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
     socket_close(sockfd);
 }
 
-static struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
+struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
 {
     int count;
     uint32_t *window_list = space_window_list(sid, &count, false);
