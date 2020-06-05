@@ -53,6 +53,7 @@ uint32_t display_manager_prev_display_id(uint32_t did);
 uint32_t display_manager_next_display_id(uint32_t did);
 uint32_t display_manager_first_display_id(void);
 uint32_t display_manager_last_display_id(void);
+uint32_t display_manager_find_closest_display_in_direction(uint32_t acting_did, int direction);
 bool display_manager_menu_bar_hidden(void);
 CGRect display_manager_menu_bar_rect(uint32_t did);
 bool display_manager_dock_hidden(void);

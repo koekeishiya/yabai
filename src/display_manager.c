@@ -140,6 +140,58 @@ uint32_t display_manager_last_display_id(void)
     return display_manager_arrangement_display_id(arrangement);
 }
 
+uint32_t display_manager_find_closest_display_in_direction(uint32_t source_did, int direction)
+{
+    uint32_t display_count;
+    uint32_t *display_list = display_manager_active_display_list(&display_count);
+    if (!display_list) return 0;
+
+    uint32_t best_did = 0;
+    int best_distance = INT_MAX;
+    CGRect source_bounds = display_bounds(source_did);
+    CGPoint source_point = (CGPoint) { source_bounds.origin.x + source_bounds.size.width/2, source_bounds.origin.y + source_bounds.size.height/2 };
+
+    for (int i = 0; i < display_count; ++i) {
+        uint32_t did = display_list[i];
+        if (did == source_did) continue;
+
+        CGRect bounds = display_bounds(did);
+        CGPoint point = (CGPoint) { bounds.origin.x + bounds.size.width/2, bounds.origin.y + bounds.size.height/2 };
+        int distance = euclidean_distance(source_point, point);
+        if (distance >= best_distance) continue;
+
+        switch (direction) {
+        case DIR_EAST: {
+            if (bounds.origin.x >= source_bounds.origin.x + source_bounds.size.width) {
+                best_did = did;
+                best_distance = distance;
+            }
+        } break;
+        case DIR_SOUTH: {
+            if (bounds.origin.y >= source_bounds.origin.y + source_bounds.size.height) {
+                best_did = did;
+                best_distance = distance;
+            }
+        } break;
+        case DIR_WEST: {
+            if (bounds.origin.x + bounds.size.width <= source_bounds.origin.x) {
+                best_did = did;
+                best_distance = distance;
+            }
+        } break;
+        case DIR_NORTH: {
+            if (bounds.origin.y + bounds.size.height <= source_bounds.origin.y) {
+                best_did = did;
+                best_distance = distance;
+            }
+        } break;
+        }
+    }
+
+    free(display_list);
+    return best_did;
+}
+
 bool display_manager_menu_bar_hidden(void)
 {
     int status = 0;
