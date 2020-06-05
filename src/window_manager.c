@@ -139,7 +139,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         }
     }
 
-    if (rule->alpha > 0.0f && rule->alpha <= 1.0f) {
+    if (in_range_ei(rule->alpha, 0.0f, 1.0f)) {
         window_manager_set_window_opacity(wm, window, rule->alpha);
         window->rule_alpha = rule->alpha;
     }

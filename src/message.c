@@ -449,7 +449,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             fprintf(rsp, "%.4f\n", g_window_manager.active_window_opacity);
         } else {
             float opacity = token_to_float(value);
-            if (opacity > 0.0f && opacity <= 1.0f) {
+            if (in_range_ei(opacity, 0.0f, 1.0f)) {
                 window_manager_set_active_window_opacity(&g_window_manager, opacity);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -461,7 +461,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             fprintf(rsp, "%.4f\n", g_window_manager.normal_window_opacity);
         } else {
             float opacity = token_to_float(value);
-            if (opacity > 0.0f && opacity <= 1.0f) {
+            if (in_range_ei(opacity, 0.0f, 1.0f)) {
                 window_manager_set_normal_window_opacity(&g_window_manager, opacity);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);

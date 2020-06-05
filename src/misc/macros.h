@@ -5,6 +5,10 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define add_and_clamp_to_zero(a, b) (((a) + (b) <= 0) ? 0 : (a) + (b))
+#define in_range_ii(a, b, c) (((a) >= (b)) && ((a) <= (c)))
+#define in_range_ie(a, b, c) (((a) >= (b)) && ((a) <  (c)))
+#define in_range_ei(a, b, c) (((a) >  (b)) && ((a) <= (c)))
+#define in_range_ee(a, b, c) (((a) >  (b)) && ((a) <  (c)))
 
 #define MAXLEN 512
 

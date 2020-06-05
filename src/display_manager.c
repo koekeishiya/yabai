@@ -90,11 +90,11 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement)
     CFStringRef result = NULL;
     CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
 
-    int displays_count = CFArrayGetCount(displays);
-    for (int i = 0; i < displays_count; ++i) {
-        if ((i+1) != arrangement) continue;
-        result = CFRetain(CFArrayGetValueAtIndex(displays, i));
-        break;
+    int count = CFArrayGetCount(displays);
+    int index = arrangement - 1;
+
+    if (in_range_ie(index, 0, count)) {
+        result = CFRetain(CFArrayGetValueAtIndex(displays, index));
     }
 
     CFRelease(displays);
@@ -106,13 +106,13 @@ uint32_t display_manager_arrangement_display_id(int arrangement)
     uint32_t result = 0;
     CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
 
-    int displays_count = CFArrayGetCount(displays);
-    for (int i = 0; i < displays_count; ++i) {
-        if ((i+1) != arrangement) continue;
-        CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, CFArrayGetValueAtIndex(displays, i));
+    int count = CFArrayGetCount(displays);
+    int index = arrangement - 1;
+
+    if (in_range_ie(index, 0, count)) {
+        CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, CFArrayGetValueAtIndex(displays, index));
         result = CGDisplayGetDisplayIDFromUUID(uuid_ref);
         CFRelease(uuid_ref);
-        break;
     }
 
     CFRelease(displays);

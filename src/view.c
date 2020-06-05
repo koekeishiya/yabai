@@ -117,7 +117,7 @@ static enum window_node_split window_node_get_split(struct window_node *node)
 
 static float window_node_get_ratio(struct window_node *node)
 {
-    if (node->ratio >= 0.1f && node->ratio <= 0.9f) return node->ratio;
+    if (in_range_ii(node->ratio, 0.1f, 0.9f)) return node->ratio;
     return g_space_manager.split_ratio;
 }
 
