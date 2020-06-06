@@ -51,8 +51,6 @@ struct window
     float rule_alpha;
     bool rule_manage;
     bool rule_fullscreen;
-    int internal_move;
-    int internal_resize;
 };
 
 CFStringRef window_display_uuid(struct window *window);
