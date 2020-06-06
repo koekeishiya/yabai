@@ -339,6 +339,7 @@ void window_manager_move_window_cgs(struct window *window, float x, float y)
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_move %d %d %d", window->id, (int)x, (int)y);
+        ++window->internal_move;
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }
@@ -351,7 +352,9 @@ void window_manager_move_window(struct window *window, float x, float y)
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
     if (!position_ref) return;
 
-    AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref);
+    AXError result = AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref);
+    if (result == kAXErrorSuccess) ++window->internal_move;
+
     CFRelease(position_ref);
 }
 
@@ -361,7 +364,9 @@ void window_manager_resize_window(struct window *window, float width, float heig
     CFTypeRef size_ref = AXValueCreate(kAXValueTypeCGSize, (void *) &size);
     if (!size_ref) return;
 
-    AXUIElementSetAttributeValue(window->ref, kAXSizeAttribute, size_ref);
+    AXError result = AXUIElementSetAttributeValue(window->ref, kAXSizeAttribute, size_ref);
+    if (result == kAXErrorSuccess) ++window->internal_resize;
+
     CFRelease(size_ref);
 }
 

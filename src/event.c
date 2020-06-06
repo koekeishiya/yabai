@@ -472,13 +472,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
-    if (g_mouse_state.window != window) {
+    if (!window->internal_move && g_mouse_state.window != window) {
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view && view->layout == VIEW_BSP) {
             struct window_node *node = view_find_window_node(view, window->id);
             if (node) window_node_flush(node);
         }
     }
+
+    if (window->internal_move) --window->internal_move;
 
     return EVENT_SUCCESS;
 }
@@ -529,13 +531,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
         }
 
-        if (g_mouse_state.window != window) {
+        if (!window->internal_resize && g_mouse_state.window != window) {
             struct view *view = window_manager_find_managed_window(&g_window_manager, window);
             if (view && view->layout == VIEW_BSP) {
                 struct window_node *node = view_find_window_node(view, window->id);
                 if (node) window_node_flush(node);
             }
         }
+
+        if (window->internal_resize) --window->internal_resize;
     }
 
     window->is_fullscreen = is_fullscreen;
