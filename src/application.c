@@ -60,7 +60,7 @@ static OBSERVER_CALLBACK(application_notification_handler)
 static void
 application_observe_notification(struct application *application, int notification)
 {
-    AXError result = AXObserverAddNotificationAsync(application->observer_ref, application->ref, ax_application_notification[notification], application);
+    AXError result = _AXObserverAddNotification(application->observer_ref, application->ref, ax_application_notification[notification], application);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         application->notification |= 1 << notification;
     } else {
@@ -72,7 +72,7 @@ application_observe_notification(struct application *application, int notificati
 static void
 application_unobserve_notification(struct application *application, int notification)
 {
-    AXObserverRemoveNotificationAsync(application->observer_ref, application->ref, ax_application_notification[notification]);
+    _AXObserverRemoveNotification(application->observer_ref, application->ref, ax_application_notification[notification]);
     application->notification &= ~(1 << notification);
 }
 

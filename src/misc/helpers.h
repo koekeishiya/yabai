@@ -2,8 +2,14 @@
 #define HELPERS_H
 
 extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
-extern AXError AXObserverAddNotificationAsync(AXObserverRef observer, AXUIElementRef application, CFStringRef notification, void *context);
-extern AXError AXObserverRemoveNotificationAsync(AXObserverRef observer, AXUIElementRef application, CFStringRef notification);
+
+#define AXOBSERVER_ADD_NOTIFICATION(name) AXError name(AXObserverRef observer, AXUIElementRef application, CFStringRef notification, void *context)
+typedef AXOBSERVER_ADD_NOTIFICATION(axobserver_add_notification);
+axobserver_add_notification *_AXObserverAddNotification;
+
+#define AXOBSERVER_REMOVE_NOTIFICATION(name) AXError name(AXObserverRef observer, AXUIElementRef application, CFStringRef notification)
+typedef AXOBSERVER_REMOVE_NOTIFICATION(axobserver_remove_notification);
+axobserver_remove_notification *_AXObserverRemoveNotification;
 
 static const char *bool_str[] = { "off", "on" };
 

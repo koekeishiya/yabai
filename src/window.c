@@ -9,7 +9,7 @@ int g_floating_window_level;
 static void
 window_observe_notification(struct window *window, int notification)
 {
-    AXError result = AXObserverAddNotificationAsync(window->application->observer_ref, window->ref, ax_window_notification[notification], window->id_ptr);
+    AXError result = _AXObserverAddNotification(window->application->observer_ref, window->ref, ax_window_notification[notification], window->id_ptr);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         window->notification |= 1 << notification;
     } else {
@@ -20,7 +20,7 @@ window_observe_notification(struct window *window, int notification)
 static void
 window_unobserve_notification(struct window *window, int notification)
 {
-    AXObserverRemoveNotificationAsync(window->application->observer_ref, window->ref, ax_window_notification[notification]);
+    _AXObserverRemoveNotification(window->application->observer_ref, window->ref, ax_window_notification[notification]);
     window->notification &= ~(1 << notification);
 }
 
