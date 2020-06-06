@@ -111,7 +111,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         if (view) continue;
 
         if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
+            struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, g_space_manager.current_space_id, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
             prev_window_id = window->id;
         }
@@ -369,7 +369,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     }
 
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
-        struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
+        struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, g_space_manager.current_space_id);
         window_manager_add_managed_window(&g_window_manager, window, view);
     }
 
