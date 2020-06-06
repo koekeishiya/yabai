@@ -472,6 +472,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
+    if (g_mouse_state.window != window) {
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        if (view && view->layout == VIEW_BSP) {
+            struct window_node *node = view_find_window_node(view, window->id);
+            if (node) window_node_flush(node);
+        }
+    }
+
     return EVENT_SUCCESS;
 }
 
@@ -489,11 +497,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     if (window->application->is_hidden) return EVENT_SUCCESS;
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-    if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
-        g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
-    }
-
     bool is_fullscreen = window_is_fullscreen(window);
 
     if (!window->is_fullscreen && is_fullscreen) {
@@ -521,10 +524,21 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
+    } else if (window->is_fullscreen == is_fullscreen) {
+        if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
+            g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
+        }
+
+        if (g_mouse_state.window != window) {
+            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+            if (view && view->layout == VIEW_BSP) {
+                struct window_node *node = view_find_window_node(view, window->id);
+                if (node) window_node_flush(node);
+            }
+        }
     }
 
     window->is_fullscreen = is_fullscreen;
-
     return EVENT_SUCCESS;
 }
 
@@ -916,18 +930,29 @@ end:;
                 }
             }
         } else {
+            bool success = true;
+
             if (did_change_p) {
                 uint8_t direction = 0;
                 if (dx != 0.0f) direction |= HANDLE_LEFT;
                 if (dy != 0.0f) direction |= HANDLE_TOP;
-                window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy);
+                if (window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+                    success = false;
+                }
             }
 
             if (did_change_s) {
                 uint8_t direction = 0;
                 if (did_change_w && !did_change_x) direction |= HANDLE_RIGHT;
                 if (did_change_h && !did_change_y) direction |= HANDLE_BOTTOM;
-                window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dw, dh);
+                if (window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dw, dh) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+                    success = false;
+                }
+            }
+
+            if (!success) {
+                struct window_node *node = view_find_window_node(src_view, g_mouse_state.window->id);
+                if (node) window_node_flush(node);
             }
         }
     }
