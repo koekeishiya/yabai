@@ -1052,12 +1052,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
         }
     } else {
         uint32_t cursor_did = display_manager_point_display_id(point);
-        if (g_display_manager.current_display_id != cursor_did) {
-            CGRect menu = display_manager_menu_bar_rect(cursor_did);
-            if (cgrect_contains_point(menu, point)) return EVENT_SUCCESS;
+        if (g_display_manager.current_display_id == cursor_did) return EVENT_SUCCESS;
 
-            display_manager_focus_display_with_point(cursor_did, point, false);
-        }
+        CGRect menu = display_manager_menu_bar_rect(cursor_did);
+        if (cgrect_contains_point(menu, point)) return EVENT_SUCCESS;
+
+        display_manager_focus_display_with_point(cursor_did, point, false);
     }
 
     return EVENT_SUCCESS;
