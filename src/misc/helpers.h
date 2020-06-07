@@ -243,6 +243,12 @@ static inline int euclidean_distance(CGPoint p1, CGPoint p2)
     return dx*dx + dy*dy;
 }
 
+static bool cgrect_contains_point(CGRect r, CGPoint p)
+{
+    return p.x >= r.origin.x && p.x <= r.origin.x + r.size.width &&
+           p.y >= r.origin.y && p.y <= r.origin.y + r.size.height;
+}
+
 static bool triangle_contains_point(CGPoint t[3], CGPoint p)
 {
     float l1 = (p.x - t[0].x) * (t[2].y - t[0].y) - (t[2].x - t[0].x) * (p.y - t[0].y);
