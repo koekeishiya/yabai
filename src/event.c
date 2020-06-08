@@ -468,17 +468,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
         return EVENT_FAILURE;
     }
 
-    if (window->application->is_hidden) return EVENT_SUCCESS;
+    if (window->application->is_hidden) {
+        debug("%s: %d was moved while the application is hidden, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_FAILURE;
+    }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-    if (g_mouse_state.window != window) {
-        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-        if (view && view->layout == VIEW_BSP) {
-            struct window_node *node = view_find_window_node(view, window->id);
-            if (node) window_node_flush(node);
-        }
-    }
 
     return EVENT_SUCCESS;
 }
@@ -494,19 +489,25 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         return EVENT_FAILURE;
     }
 
-    if (window->application->is_hidden) return EVENT_SUCCESS;
+    if (window->application->is_hidden) {
+        debug("%s: %d was resized while the application is hidden, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_FAILURE;
+    }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    bool is_fullscreen = window_is_fullscreen(window);
 
-    if (!window->is_fullscreen && is_fullscreen) {
+    bool was_fullscreen = window->is_fullscreen;
+    bool is_fullscreen = window_is_fullscreen(window);
+    window->is_fullscreen = is_fullscreen;
+
+    if (!was_fullscreen && is_fullscreen) {
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
             window_manager_purify_window(&g_window_manager, window);
         }
-    } else if (window->is_fullscreen && !is_fullscreen) {
+    } else if (was_fullscreen && !is_fullscreen) {
         uint32_t did = window_display_id(window);
 
         while (display_manager_display_is_animating(did)) {
@@ -524,21 +525,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
-    } else if (window->is_fullscreen == is_fullscreen) {
+    } else if (was_fullscreen == is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
         }
-
-        if (g_mouse_state.window != window) {
-            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-            if (view && view->layout == VIEW_BSP) {
-                struct window_node *node = view_find_window_node(view, window->id);
-                if (node) window_node_flush(node);
-            }
-        }
     }
 
-    window->is_fullscreen = is_fullscreen;
     return EVENT_SUCCESS;
 }
 
@@ -762,9 +754,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     if (g_mission_control_active) return EVENT_SUCCESS;
     if (!g_mouse_state.window)    return EVENT_SUCCESS;
 
-    CGPoint point = CGEventGetLocation(context);
-    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
-
     if (!__sync_bool_compare_and_swap(g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         goto out;
@@ -774,6 +763,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
         debug("%s: %d is transitioning into native-fullscreen mode, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         goto out;
     }
+
+    CGPoint point = CGEventGetLocation(context);
+    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
     struct view *src_view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
     if (src_view && src_view->layout == VIEW_BSP) {
