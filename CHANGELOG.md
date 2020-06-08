@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.1.1] - 2020-06-08
 ### Changed
 - If *focus follows mouse* is enabled, moving the cursor to a different display will now focus that display even if it is empty [#459](https://github.com/koekeishiya/yabai/issues/459)
 - Extend definition of *DISPLAY_SEL* to include *DIR_SEL* so that displays can be targetted using cardinal directions [#225](https://github.com/koekeishiya/yabai/issues/225)
@@ -258,7 +260,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.1.1...HEAD
+[3.1.1]: https://github.com/koekeishiya/yabai/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/koekeishiya/yabai/compare/v3.0.2...v3.1.0
 [3.0.2]: https://github.com/koekeishiya/yabai/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/koekeishiya/yabai/compare/v3.0.0...v3.0.1
