@@ -915,7 +915,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         struct window *window = window_list[window_index];
         if (!window) continue;
 
-        if (!window->id || window_manager_find_window(wm, window->id)) {
+        if (window_manager_find_window(wm, window->id)) {
             window_destroy(window);
             continue;
         }
