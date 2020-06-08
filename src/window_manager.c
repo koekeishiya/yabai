@@ -581,79 +581,18 @@ struct window *window_manager_find_window_below_cursor(struct window_manager *wm
     return window_manager_find_window_at_point(wm, cursor);
 }
 
-static struct window *window_manager_find_closest_window_for_direction_in_window_list(struct window_manager *wm, struct window *source, int direction, uint32_t *window_list, int window_count)
-{
-    struct window *best_window = NULL;
-    int best_distance = INT_MAX;
-
-    CGRect source_frame = window_frame(source);
-    CGPoint source_point = { source_frame.origin.x, source_frame.origin.y };
-
-    for (int i = 0; i < window_count; ++i) {
-        struct window *window = window_manager_find_window(wm, window_list[i]);
-        if (!window || !window_is_standard(window) || window == source) continue;
-
-        CGRect frame = window_frame(window);
-        CGPoint point = { frame.origin.x, frame.origin.y };
-
-        int distance = euclidean_distance(source_point, point);
-        if (distance >= best_distance) continue;
-
-        switch (direction) {
-        case DIR_EAST: {
-            if (point.x > source_point.x) {
-                best_window = window;
-                best_distance = distance;
-            }
-        } break;
-        case DIR_SOUTH: {
-            if (point.y > source_point.y) {
-                best_window = window;
-                best_distance = distance;
-            }
-        } break;
-        case DIR_WEST: {
-            if (point.x < source_point.x) {
-                best_window = window;
-                best_distance = distance;
-            }
-        } break;
-        case DIR_NORTH: {
-            if (point.y < source_point.y) {
-                best_window = window;
-                best_distance = distance;
-            }
-        } break;
-        }
-    }
-
-    return best_window;
-}
-
 struct window *window_manager_find_closest_managed_window_in_direction(struct window_manager *wm, struct window *window, int direction)
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view) return NULL;
 
-    uint32_t *view_window_list = view_find_window_list(view);
-    if (!view_window_list) return NULL;
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node) return NULL;
 
-    struct window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, view_window_list, buf_len(view_window_list));
-    buf_free(view_window_list);
+    struct window_node *closest = view_find_window_node_in_direction(view, node, direction);
+    if (!closest) return NULL;
 
-    return result;
-}
-
-struct window *window_manager_find_closest_window_in_direction(struct window_manager *wm, struct window *window, int direction)
-{
-    int window_count;
-    uint32_t *window_list = space_window_list(display_space_id(window_display_id(window)), &window_count, false);
-    if (!window_list) return NULL;
-
-    struct window *result = window_manager_find_closest_window_for_direction_in_window_list(wm, window, direction, window_list, window_count);
-    free(window_list);
-
-    return result;
+    return window_manager_find_window(wm, closest->window_id);
 }
 
 struct window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)

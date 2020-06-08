@@ -92,36 +92,35 @@ void insert_feedback_destroy(struct window_node *node)
     }
 }
 
-static struct area area_from_cgrect(CGRect rect)
+static inline CGPoint area_center(struct area a)
 {
-    struct area area = {
-        rect.origin.x,
-        rect.origin.y,
-        rect.size.width,
-        rect.size.height
-    };
-    return  area;
+    return (CGPoint) { a.x + a.w*0.5f, a.y + a.h*0.5f };
 }
 
-static enum window_node_child window_node_get_child(struct window_node *node)
+static inline struct area area_from_cgrect(CGRect rect)
+{
+    return (struct area) { rect.origin.x, rect.origin.y, rect.size.width, rect.size.height };
+}
+
+static inline enum window_node_child window_node_get_child(struct window_node *node)
 {
     if (node->child != CHILD_NONE) return node->child;
     return g_space_manager.window_placement;
 }
 
-static enum window_node_split window_node_get_split(struct window_node *node)
+static inline enum window_node_split window_node_get_split(struct window_node *node)
 {
     if (node->split != SPLIT_NONE) return node->split;
     return node->area.w / node->area.h >= 1.1618f ? SPLIT_Y : SPLIT_X;
 }
 
-static float window_node_get_ratio(struct window_node *node)
+static inline float window_node_get_ratio(struct window_node *node)
 {
     if (in_range_ii(node->ratio, 0.1f, 0.9f)) return node->ratio;
     return g_space_manager.split_ratio;
 }
 
-static float window_node_get_gap(struct view *view)
+static inline float window_node_get_gap(struct view *view)
 {
     return view->enable_gap ? view->window_gap*0.5f : 0.0f;
 }
@@ -158,27 +157,27 @@ static void area_make_pair(struct view *view, struct window_node *node)
     node->ratio = ratio;
 }
 
-static bool window_node_is_occupied(struct window_node *node)
+static inline bool window_node_is_occupied(struct window_node *node)
 {
     return node->window_id != 0;
 }
 
-static bool window_node_is_intermediate(struct window_node *node)
+static inline bool window_node_is_intermediate(struct window_node *node)
 {
     return node->parent != NULL;
 }
 
-static bool window_node_is_leaf(struct window_node *node)
+static inline bool window_node_is_leaf(struct window_node *node)
 {
     return node->left == NULL && node->right == NULL;
 }
 
-static bool window_node_is_left_child(struct window_node *node)
+static inline bool window_node_is_left_child(struct window_node *node)
 {
     return node->parent && node->parent->left == node;
 }
 
-static bool window_node_is_right_child(struct window_node *node)
+static inline bool window_node_is_right_child(struct window_node *node)
 {
     return node->parent && node->parent->right == node;
 }
@@ -420,6 +419,52 @@ struct window_node *view_find_min_depth_leaf_node(struct window_node *node)
     }
 
     return NULL;
+}
+
+struct window_node *view_find_window_node_in_direction(struct view *view, struct window_node *source, int direction)
+{
+    int best_distance = INT_MAX;
+    struct window_node *best_node = NULL;
+    CGPoint source_point = area_center(source->area);
+
+    struct window_node *target = window_node_find_first_leaf(view->root);
+    while (target) {
+        CGPoint target_point = area_center(target->area);
+        int distance = euclidean_distance(source_point, target_point);
+        if (distance >= best_distance) goto next;
+
+        switch (direction) {
+        case DIR_EAST: {
+            if (target->area.x >= source->area.x + source->area.w) {
+                best_node = target;
+                best_distance = distance;
+            }
+        } break;
+        case DIR_SOUTH: {
+            if (target->area.y >= source->area.y + source->area.h) {
+                best_node = target;
+                best_distance = distance;
+            }
+        } break;
+        case DIR_WEST: {
+            if (target->area.x + target->area.w <= source->area.x) {
+                best_node = target;
+                best_distance = distance;
+            }
+        } break;
+        case DIR_NORTH: {
+            if (target->area.y + target->area.h <= source->area.y) {
+                best_node = target;
+                best_distance = distance;
+            }
+        } break;
+        }
+
+next:
+        target = window_node_find_next_leaf(target);
+    }
+
+    return best_node;
 }
 
 struct window_node *view_find_window_node(struct view *view, uint32_t window_id)

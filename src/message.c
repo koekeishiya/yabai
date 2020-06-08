@@ -1013,7 +1013,7 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
 
     if (token_equals(result.token, ARGUMENT_COMMON_SEL_NORTH)) {
         if (acting_window) {
-            struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, acting_window, DIR_NORTH);
+            struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, acting_window, DIR_NORTH);
             if (closest_window) {
                 result.window = closest_window;
             } else {
@@ -1024,7 +1024,7 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
         }
     } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_EAST)) {
         if (acting_window) {
-            struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, acting_window, DIR_EAST);
+            struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, acting_window, DIR_EAST);
             if (closest_window) {
                 result.window = closest_window;
             } else {
@@ -1035,7 +1035,7 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
         }
     } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_SOUTH)) {
         if (acting_window) {
-            struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, acting_window, DIR_SOUTH);
+            struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, acting_window, DIR_SOUTH);
             if (closest_window) {
                 result.window = closest_window;
             } else {
@@ -1046,7 +1046,7 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
         }
     } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_WEST)) {
         if (acting_window) {
-            struct window *closest_window = window_manager_find_closest_window_in_direction(&g_window_manager, acting_window, DIR_WEST);
+            struct window *closest_window = window_manager_find_closest_managed_window_in_direction(&g_window_manager, acting_window, DIR_WEST);
             if (closest_window) {
                 result.window = closest_window;
             } else {

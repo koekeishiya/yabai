@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Extend definition of *DISPLAY_SEL* to include *DIR_SEL* so that displays can be targetted using cardinal directions [#225](https://github.com/koekeishiya/yabai/issues/225)
 - When an application is launched or a window is created; tile the window on the space that has focus, rather than the display it spawned at [#467](https://github.com/koekeishiya/yabai/issues/467)
 - Properly re-adjust window frame of managed windows if they break the assigned region in response to an event not invoked directly by the user [#16](https://github.com/koekeishiya/yabai/issues/16)
+- Cardinal directions for *WINDOW_SEL* will only consider managed windows due to various issues with detecting the correct window [#562](https://github.com/koekeishiya/yabai/issues/562)
 
 ## [3.1.0] - 2020-06-05
 ### Added
