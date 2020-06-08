@@ -688,11 +688,15 @@ static bool move_all_windows(uint32_t *window_list, int window_list_count, uint6
 
 static void space_manager_swap_spaces(uint64_t a_sid, uint64_t b_sid)
 {
+    // collect all data before mutating any state
     int a_window_list_count = 0;
     uint32_t *a_window_list = space_window_list(a_sid, &a_window_list_count, true);
 
     int b_window_list_count = 0;
     uint32_t *b_window_list = space_window_list(b_sid, &b_window_list_count, true);
+
+    struct view *a_view = table_find(&g_space_manager.view, &a_sid);
+    struct view *b_view = table_find(&g_space_manager.view, &b_sid);
 
     // swap all windows
     move_all_windows(a_window_list, a_window_list_count, b_sid);
@@ -701,8 +705,6 @@ static void space_manager_swap_spaces(uint64_t a_sid, uint64_t b_sid)
     free(b_window_list);
 
     // swap the view table
-    struct view *a_view = table_find(&g_space_manager.view, &a_sid);
-    struct view *b_view = table_find(&g_space_manager.view, &b_sid);
 
     table_add(&g_space_manager.view, &a_sid, b_view);
     table_add(&g_space_manager.view, &b_sid, a_view);
