@@ -513,6 +513,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             window_manager_remove_managed_window(&g_window_manager, window->id);
             window_manager_purify_window(&g_window_manager, window);
         }
+        window_manager_make_floating(&g_window_manager, window, false);
     } else if (was_fullscreen && !is_fullscreen) {
         uint32_t did = window_display_id(window);
 
@@ -531,6 +532,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
+        window_manager_make_floating(&g_window_manager, window, window->is_floating);
     } else if (was_fullscreen == is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
