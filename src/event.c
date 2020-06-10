@@ -500,6 +500,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+    border_resize(window);
 
     bool was_fullscreen = window->is_fullscreen;
     bool is_fullscreen = window_is_fullscreen(window);
@@ -536,7 +537,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         }
     }
 
-    border_resize(window);
     return EVENT_SUCCESS;
 }
 
