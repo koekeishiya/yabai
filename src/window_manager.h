@@ -1,6 +1,7 @@
 #ifndef WINDOW_MANAGER_H
 #define WINDOW_MANAGER_H
 
+extern CGError SLSMoveWindow(int cid, uint32_t wid, CGPoint *point);
 extern CFTypeRef SLSWindowQueryWindows(int cid, CFArrayRef windows, int count);
 extern CFTypeRef SLSWindowQueryResultCopyWindows(CFTypeRef window_query);
 extern CGError SLSWindowIteratorAdvance(CFTypeRef iterator);
@@ -77,13 +78,17 @@ struct window_manager
     bool enable_mff;
     enum ffm_mode ffm_mode;
     enum purify_mode purify_mode;
+    bool enable_window_border;
     bool enable_window_opacity;
     bool enable_window_topmost;
     float active_window_opacity;
     float normal_window_opacity;
     float window_opacity_duration;
     uint32_t *insert_feedback_windows;
+    int border_width;
     struct rgba_color insert_feedback_color;
+    struct rgba_color active_border_color;
+    struct rgba_color normal_border_color;
 };
 
 void window_manager_query_window_rules(FILE *rsp);
@@ -138,6 +143,10 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
+void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled);
+void window_manager_set_window_border_width(struct window_manager *wm, int width);
+void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);
+void window_manager_set_normal_window_border_color(struct window_manager *wm, uint32_t color);
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
@@ -166,5 +175,6 @@ void window_manager_check_for_windows_on_space(struct space_manager *sm, struct 
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did);
 void window_manager_begin(struct space_manager *sm, struct window_manager *window_manager);
 void window_manager_init(struct window_manager *window_manager);
+void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid);
 
 #endif

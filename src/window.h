@@ -4,6 +4,7 @@
 extern int SLSMainConnectionID(void);
 extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
+extern CGError SLSSetWindowResolution(int cid, uint32_t wid, float resolution);
 extern CGError SLSCopyWindowProperty(int cid, uint32_t wid, CFStringRef property, CFTypeRef *value);
 extern CFStringRef SLSCopyManagedDisplayForWindow(int cid, uint32_t wid);
 extern CFStringRef SLSCopyBestManagedDisplayForRect(int cid, CGRect rect);
@@ -51,6 +52,7 @@ struct window
     float rule_alpha;
     bool rule_manage;
     bool rule_fullscreen;
+    struct border border;
 };
 
 CFStringRef window_display_uuid(struct window *window);

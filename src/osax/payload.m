@@ -31,11 +31,10 @@
 
 extern int CGSMainConnectionID(void);
 extern CGError CGSGetConnectionPSN(int cid, ProcessSerialNumber *psn);
-
 extern CGError CGSSetWindowAlpha(int cid, uint32_t wid, float alpha);
 extern CGError CGSSetWindowListAlpha(int cid, const uint32_t *window_list, int window_count, float alpha, float duration);
 extern CGError CGSSetWindowLevel(int cid, uint32_t wid, int level);
-extern OSStatus CGSMoveWindow(const int cid, const uint32_t wid, CGPoint *point);
+extern OSStatus CGSMoveWindowWithGroup(const int cid, const uint32_t wid, CGPoint *point);
 extern CGError CGSReassociateWindowsSpacesByGeometry(int cid, CFArrayRef window_list);
 extern CGError CGSGetWindowOwner(int cid, uint32_t wid, int *window_cid);
 extern CGError CGSInvalidateWindowShadow(int cid, CGWindowID wid);
@@ -44,7 +43,8 @@ extern CGError CGSClearWindowTags(int cid, uint32_t wid, const int tags[2], size
 extern CGError CGSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError CGSGetWindowTransform(int cid, uint32_t wid, CGAffineTransform *t);
 extern CGError CGSSetWindowTransform(int cid, uint32_t wid, CGAffineTransform t);
-
+extern CGError CGSAddWindowToWindowMovementGroup(int cid, uint32_t parent_wid, uint32_t child_wid);
+extern CGError CGSAddWindowToWindowOrderingGroup(int cid, uint32_t parent_wid, uint32_t child_wid, int order);
 extern void CGSManagedDisplaySetCurrentSpace(int cid, CFStringRef display_ref, uint64_t spid);
 extern uint64_t CGSManagedDisplayGetCurrentSpace(int cid, CFStringRef display_ref);
 extern CFArrayRef CGSCopyManagedDisplaySpaces(const int cid);
@@ -720,10 +720,12 @@ static void do_window_move(const char *message)
 
     Token x_token = get_token(&message);
     int x = token_to_int(x_token);
+
     Token y_token = get_token(&message);
     int y = token_to_int(y_token);
+
     CGPoint point = CGPointMake(x, y);
-    CGSMoveWindow(_connection, wid, &point);
+    CGSMoveWindowWithGroup(_connection, wid, &point);
 
     NSArray *window_list = @[ @(wid) ];
     CGSReassociateWindowsSpacesByGeometry(_connection, (__bridge CFArrayRef) window_list);
@@ -811,6 +813,20 @@ static void do_window_shadow(const char *message)
         CGSSetWindowTags(_connection, wid, tags, 32);
     }
     CGSInvalidateWindowShadow(_connection, wid);
+}
+
+static void do_window_group_add(const char *message)
+{
+    Token parent_token = get_token(&message);
+    uint32_t parent = token_to_uint32t(parent_token);
+    if (!parent) return;
+
+    Token child_token = get_token(&message);
+    uint32_t child = token_to_uint32t(child_token);
+    if (!child) return;
+
+    CGSAddWindowToWindowMovementGroup(_connection, parent, child);
+    CGSAddWindowToWindowOrderingGroup(_connection, parent, child, 1);
 }
 
 static inline bool can_focus_space()
@@ -902,6 +918,8 @@ static void handle_message(int sockfd, const char *message)
         do_window_focus(message);
     } else if (token_equals(token, "window_shadow")) {
         do_window_shadow(message);
+    } else if (token_equals(token, "window_group_add")) {
+        do_window_group_add(message);
     }
 }
 

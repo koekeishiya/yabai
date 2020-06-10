@@ -432,11 +432,23 @@ struct window *window_create(struct application *application, AXUIElementRef win
     *window->id_ptr = &window->id;
     window->has_shadow = true;
 
+    if ((window_is_standard(window)) || (window_is_dialog(window))) {
+        border_create(window);
+        border_resize(window);
+
+        if ((!window->application->is_hidden) &&
+            (!window->is_minimized) &&
+            (!window->is_fullscreen)) {
+            border_show(window);
+        }
+    }
+
     return window;
 }
 
 void window_destroy(struct window *window)
 {
+    border_destroy(window);
     CFRelease(window->ref);
     free(window->id_ptr);
     free(window);

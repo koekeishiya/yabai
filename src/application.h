@@ -79,7 +79,7 @@ bool application_is_frontmost(struct application *application);
 bool application_is_hidden(struct application *application);
 uint32_t application_main_window(struct application *application);
 uint32_t application_focused_window(struct application *application);
-struct window **application_window_list(struct application *application, int *window_count);
+CFArrayRef application_window_list(struct application *application);
 bool application_observe(struct application *application);
 void application_unobserve(struct application *application);
 struct application *application_create(struct process *process);

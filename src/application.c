@@ -143,23 +143,11 @@ bool application_is_hidden(struct application *application)
 }
 #pragma clang diagnostic pop
 
-struct window **application_window_list(struct application *application, int *window_count)
+CFArrayRef application_window_list(struct application *application)
 {
     CFTypeRef window_list_ref = NULL;
     AXUIElementCopyAttributeValue(application->ref, kAXWindowsAttribute, &window_list_ref);
-    if (!window_list_ref) return NULL;
-
-    *window_count = CFArrayGetCount(window_list_ref);
-    struct window **window_list = malloc((*window_count) * sizeof(struct window *));
-
-    for (int i = 0; i < *window_count; ++i) {
-        AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list_ref, i);
-        uint32_t window_id = ax_window_id(window_ref);
-        window_list[i] = window_id ? window_create(application, CFRetain(window_ref), window_id) : NULL;
-    }
-
-    CFRelease(window_list_ref);
-    return window_list;
+    return window_list_ref;
 }
 
 struct application *application_create(struct process *process)

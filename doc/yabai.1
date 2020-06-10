@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-06-06
+.\"      Date: 2020-06-10
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-06-06" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-06-10" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -160,6 +160,11 @@ Specify whether managed windows should become the first or second leaf\-node.
 Make floating windows stay on top.
 .RE
 .sp
+\fBwindow_shadow\fP [\fI<BOOL_SEL>|float\fP]
+.RS 4
+Draw shadow for windows.
+.RE
+.sp
 \fBwindow_opacity\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Enable opacity for windows.
@@ -170,16 +175,6 @@ Enable opacity for windows.
 Duration of transition between active / normal opacity.
 .RE
 .sp
-\fBwindow_shadow\fP [\fI<BOOL_SEL>|float\fP]
-.RS 4
-Draw shadow for windows.
-.RE
-.sp
-\fBinsert_feedback_color\fP [\fI0xAARRGGBB\fP]
-.RS 4
-Color of the \fBwindow \-\-insert\fP message selection.
-.RE
-.sp
 \fBactive_window_opacity\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Opacity of the focused window.
@@ -188,6 +183,31 @@ Opacity of the focused window.
 \fBnormal_window_opacity\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Opacity of an unfocused window.
+.RE
+.sp
+\fBwindow_border\fP [\fI<BOOL_SEL>\fP]
+.RS 4
+Draw border for windows.
+.RE
+.sp
+\fBwindow_border_width\fP [\fI<even integer number>\fP]
+.RS 4
+Width of window borders. If the given width is an odd number, it will be incremented by 1.
+.RE
+.sp
+\fBactive_window_border_color\fP [\fI0xAARRGGBB\fP]
+.RS 4
+Color of the border of the focused window.
+.RE
+.sp
+\fBnormal_window_border_color\fP [\fI0xAARRGGBB\fP]
+.RS 4
+Color of the border of an unfocused window.
+.RE
+.sp
+\fBinsert_feedback_color\fP [\fI0xAARRGGBB\fP]
+.RS 4
+Color of the \fBwindow \-\-insert\fP message selection.
 .RE
 .sp
 \fBsplit_ratio\fP [\fI<FLOAT_SEL>\fP]

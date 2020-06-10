@@ -127,23 +127,35 @@ Global Settings
 *window_topmost* ['<BOOL_SEL>']::
     Make floating windows stay on top.
 
+*window_shadow* ['<BOOL_SEL>|float']::
+    Draw shadow for windows.
+
 *window_opacity* ['<BOOL_SEL>']::
     Enable opacity for windows.
 
 *window_opacity_duration* ['<floating point number>']::
     Duration of transition between active / normal opacity.
 
-*window_shadow* ['<BOOL_SEL>|float']::
-    Draw shadow for windows.
-
-*insert_feedback_color* ['0xAARRGGBB']::
-    Color of the *window --insert* message selection.
-
 *active_window_opacity* ['<FLOAT_SEL>']::
     Opacity of the focused window.
 
 *normal_window_opacity* ['<FLOAT_SEL>']::
     Opacity of an unfocused window.
+
+*window_border* ['<BOOL_SEL>']::
+    Draw border for windows.
+
+*window_border_width* ['<even integer number>']::
+    Width of window borders. If the given width is an odd number, it will be incremented by 1.
+
+*active_window_border_color* ['0xAARRGGBB']::
+    Color of the border of the focused window.
+
+*normal_window_border_color* ['0xAARRGGBB']::
+    Color of the border of an unfocused window.
+
+*insert_feedback_color* ['0xAARRGGBB']::
+    Color of the *window --insert* message selection.
 
 *split_ratio* ['<FLOAT_SEL>']::
     Default split ratio.

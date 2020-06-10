@@ -192,6 +192,84 @@ void window_manager_apply_rules_to_window(struct space_manager *sm, struct windo
     }
 }
 
+void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled)
+{
+    wm->enable_window_border = enabled;
+
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if ((window_is_standard(window)) || (window_is_dialog(window))) {
+                    if (enabled && !window->border.id) {
+                        border_create(window);
+                        border_resize(window);
+
+                        if ((!window->application->is_hidden) &&
+                            (!window->is_minimized) &&
+                            (!window->is_fullscreen)) {
+                            border_show(window);
+                        }
+
+                        if (window->id == wm->focused_window_id) {
+                            border_activate(window);
+                        }
+                    } else if (!enabled) {
+                        border_destroy(window);
+                    }
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+void window_manager_set_window_border_width(struct window_manager *wm, int width)
+{
+    wm->border_width = width;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id) {
+                    CGContextSetLineWidth(window->border.context, width);
+                    border_redraw(window);
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color)
+{
+    wm->active_border_color = rgba_color_from_hex(color);
+    struct window *window = window_manager_focused_window(wm);
+    if (window) border_activate(window);
+}
+
+void window_manager_set_normal_window_border_color(struct window_manager *wm, uint32_t color)
+{
+    wm->normal_border_color = rgba_color_from_hex(color);
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->id != wm->focused_window_id) {
+                    border_deactivate(window);
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
 void window_manager_center_mouse(struct window_manager *wm, struct window *window)
 {
     if (!wm->enable_mff) return;
@@ -332,6 +410,19 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
+void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid)
+{
+    int sockfd;
+    char message[MAXLEN];
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "window_group_add %d %d", parent_wid, child_wid);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
+}
+
 void window_manager_move_window_cgs(struct window *window, float x, float y)
 {
     int sockfd;
@@ -351,7 +442,10 @@ void window_manager_move_window(struct window *window, float x, float y)
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
     if (!position_ref) return;
 
-    AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref);
+    if (AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref) == kAXErrorSuccess) {
+        if (window->border.id) SLSMoveWindow(g_connection, window->border.id, &position);
+    }
+
     CFRelease(position_ref);
 }
 
@@ -454,7 +548,7 @@ static void window_manager_set_layer_for_window_relation_with_parent(uint32_t *p
 static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_t sid, int layer)
 {
     int count;
-    uint32_t *window_list = space_window_list_for_connection(sid, cid, &count, false);
+    uint32_t *window_list = space_window_list(sid, &count, false);
     if (!window_list) return;
 
     CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), count, kCFNumberSInt32Type);
@@ -907,19 +1001,16 @@ struct window **window_manager_find_application_windows(struct window_manager *w
 
 void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application)
 {
-    int window_count;
-    struct window **window_list = application_window_list(application, &window_count);
-    if (!window_list) return;
+    CFArrayRef window_list_ref = application_window_list(application);
+    if (!window_list_ref) return;
 
-    for (int window_index = 0; window_index < window_count; ++window_index) {
-        struct window *window = window_list[window_index];
-        if (!window) continue;
+    int window_count = CFArrayGetCount(window_list_ref);
+    for (int i = 0; i < window_count; ++i) {
+        AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list_ref, i);
+        uint32_t window_id = ax_window_id(window_ref);
+        if (!window_id || window_manager_find_window(wm, window_id)) continue;
 
-        if (window_manager_find_window(wm, window->id)) {
-            window_destroy(window);
-            continue;
-        }
-
+        struct window *window = window_create(application, CFRetain(window_ref), window_id);
         if (window_is_popover(window) || window_is_unknown(window)) {
             debug("%s: ignoring window %s %d\n", __FUNCTION__, window->application->name, window->id);
             window_manager_make_floating(wm, window, true);
@@ -956,7 +1047,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         }
     }
 
-    free(window_list);
+    CFRelease(window_list_ref);
 }
 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
@@ -1469,13 +1560,17 @@ void window_manager_init(struct window_manager *wm)
     wm->ffm_mode = FFM_DISABLED;
     wm->purify_mode = PURIFY_DISABLED;
     wm->enable_mff = false;
+    wm->enable_window_border = false;
     wm->enable_window_opacity = false;
     wm->enable_window_topmost = false;
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.2f;
     wm->insert_feedback_windows = NULL;
-    wm->insert_feedback_color = rgba_color_from_hex(0xaad75f5f);
+    wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
+    wm->active_border_color = rgba_color_from_hex(0xff775759);
+    wm->normal_border_color = rgba_color_from_hex(0xff555555);
+    wm->border_width = 6;
 
     table_init(&wm->application, 150, hash_wm, compare_wm);
     table_init(&wm->window, 150, hash_wm, compare_wm);
@@ -1512,5 +1607,6 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         wm->focused_window_id = window->id;
         wm->focused_window_psn = window->application->psn;
         window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
+        border_activate(window);
     }
 }
