@@ -94,6 +94,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         return EVENT_FAILURE;
     }
 
+    if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
+        struct event *event = event_create(&g_event_loop, APPLICATION_FRONT_SWITCHED, process);
+        event_loop_post(&g_event_loop, event);
+        window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
+    }
+
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     window_manager_add_application(&g_window_manager, application);
     window_manager_add_application_windows(&g_space_manager, &g_window_manager, application);
@@ -120,12 +126,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
     free(window_list);
 
 end:
-    if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
-        struct event *event = event_create(&g_event_loop, APPLICATION_FRONT_SWITCHED, process);
-        event_loop_post(&g_event_loop, event);
-        window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
-    }
-
     return EVENT_SUCCESS;
 }
 
@@ -351,6 +351,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
         return EVENT_FAILURE;
     }
 
+    if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
+        struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
+        event_loop_post(&g_event_loop, event);
+        window_manager_remove_lost_focused_event(&g_window_manager, window->id);
+    }
+
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     window_manager_add_window(&g_window_manager, window);
     window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
@@ -371,12 +377,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
         struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, g_space_manager.current_space_id);
         window_manager_add_managed_window(&g_window_manager, window, view);
-    }
-
-    if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
-        struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
-        event_loop_post(&g_event_loop, event);
-        window_manager_remove_lost_focused_event(&g_window_manager, window->id);
     }
 
     return EVENT_SUCCESS;
