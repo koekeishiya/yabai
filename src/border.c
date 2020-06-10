@@ -57,7 +57,7 @@ void border_create(struct window *window)
     window->border.frame.origin.x = 0;
     window->border.frame.origin.y = 0;
 
-    uint64_t tags[2] = { (1ULL << 31) | kCGSIgnoreForExposeTagBit | kCGSIgnoreForEventsTagBit, 0 };
+    uint64_t tags[2] = { kCGSIgnoreForEventsTagBit, 0 };
     SLSNewWindow(g_connection, 2, 0, 0, window->border.region, &window->border.id);
     SLSSetWindowTags(g_connection, window->border.id, tags, 64);
     SLSSetWindowResolution(g_connection, window->border.id, 1.0f);
