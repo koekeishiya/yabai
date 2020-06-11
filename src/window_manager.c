@@ -1,5 +1,6 @@
 #include "window_manager.h"
 
+extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;
 extern char g_sa_socket_file[MAXLEN];
@@ -1002,6 +1003,62 @@ struct window **window_manager_find_application_windows(struct window_manager *w
     return result;
 }
 
+struct window *window_manager_create_and_add_window(struct space_manager *sm, struct window_manager *wm, struct application *application, AXUIElementRef window_ref, uint32_t window_id)
+{
+    struct window *window = window_create(application, window_ref, window_id);
+
+    if (window_is_unknown(window)) {
+        debug("%s: ignoring AXUnknown window %s %d\n", __FUNCTION__, window->application->name, window->id);
+        window_manager_remove_lost_focused_event(wm, window->id);
+        window_destroy(window);
+        return NULL;
+    }
+
+    if (window_is_popover(window)) {
+        debug("%s: ignoring AXPopover window %s %d\n", __FUNCTION__, window->application->name, window->id);
+        window_manager_remove_lost_focused_event(wm, window->id);
+        window_destroy(window);
+        return NULL;
+    }
+
+    window_manager_purify_window(wm, window);
+    window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+
+    if (!window_observe(window)) {
+        debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
+        window_manager_make_floating(wm, window, true);
+        window_manager_remove_lost_focused_event(wm, window->id);
+        window_unobserve(window);
+        window_destroy(window);
+        return NULL;
+    }
+
+    if (window_manager_find_lost_focused_event(wm, window->id)) {
+        struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
+        event_loop_post(&g_event_loop, event);
+        window_manager_remove_lost_focused_event(wm, window->id);
+    }
+
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+    window_manager_add_window(wm, window);
+    window_manager_apply_rules_to_window(sm, wm, window);
+
+    if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
+        if (window->rule_fullscreen) {
+            window->rule_fullscreen = false;
+        } else if ((!window_level_is_standard(window)) ||
+                   (!window_is_standard(window)) ||
+                   (!window_can_move(window)) ||
+                   (window_is_sticky(window)) ||
+                   (!window_can_resize(window) && window_is_undersized(window))) {
+            window_manager_make_floating(wm, window, true);
+            window->is_floating = true;
+        }
+    }
+
+    return window;
+}
+
 void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application)
 {
     CFArrayRef window_list_ref = application_window_list(application);
@@ -1012,42 +1069,7 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list_ref, i);
         uint32_t window_id = ax_window_id(window_ref);
         if (!window_id || window_manager_find_window(wm, window_id)) continue;
-
-        struct window *window = window_create(application, CFRetain(window_ref), window_id);
-        if (window_is_popover(window) || window_is_unknown(window)) {
-            debug("%s: ignoring window %s %d\n", __FUNCTION__, window->application->name, window->id);
-            window_manager_make_floating(wm, window, true);
-            window_destroy(window);
-            continue;
-        }
-
-        window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
-        window_manager_purify_window(wm, window);
-
-        if (!window_observe(window)) {
-            debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
-            window_manager_make_floating(wm, window, true);
-            window_unobserve(window);
-            window_destroy(window);
-            continue;
-        }
-
-        debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_add_window(wm, window);
-        window_manager_apply_rules_to_window(sm, wm, window);
-
-        if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
-            if (window->rule_fullscreen) {
-                window->rule_fullscreen = false;
-            } else if ((!window_level_is_standard(window)) ||
-                       (!window_is_standard(window)) ||
-                       (!window_can_move(window)) ||
-                       (window_is_sticky(window)) ||
-                       (!window_can_resize(window) && window_is_undersized(window))) {
-                window_manager_make_floating(wm, window, true);
-                window->is_floating = true;
-            }
-        }
+        window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
     }
 
     CFRelease(window_list_ref);

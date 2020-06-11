@@ -333,49 +333,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     struct application *application = window_manager_find_application(&g_window_manager, window_pid);
     if (!application) return EVENT_FAILURE;
 
-    struct window *window = window_create(application, CFRetain(context), window_id);
-    if (window_is_popover(window) || window_is_unknown(window)) {
-        debug("%s: ignoring window %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_make_floating(&g_window_manager, window, true);
-        window_manager_remove_lost_focused_event(&g_window_manager, window->id);
-        window_destroy(window);
-        return EVENT_FAILURE;
-    }
-
-    window_manager_set_window_opacity(&g_window_manager, window, g_window_manager.normal_window_opacity);
-    window_manager_purify_window(&g_window_manager, window);
-
-    if (!window_observe(window)) {
-        debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_make_floating(&g_window_manager, window, true);
-        window_manager_remove_lost_focused_event(&g_window_manager, window->id);
-        window_unobserve(window);
-        window_destroy(window);
-        return EVENT_FAILURE;
-    }
-
-    if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
-        struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
-        event_loop_post(&g_event_loop, event);
-        window_manager_remove_lost_focused_event(&g_window_manager, window->id);
-    }
-
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    window_manager_add_window(&g_window_manager, window);
-    window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
-
-    if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
-        if (window->rule_fullscreen) {
-            window->rule_fullscreen = false;
-        } else if ((!window_level_is_standard(window)) ||
-                   (!window_is_standard(window)) ||
-                   (!window_can_move(window)) ||
-                   (window_is_sticky(window)) ||
-                   (!window_can_resize(window) && window_is_undersized(window))) {
-            window_manager_make_floating(&g_window_manager, window, true);
-            window->is_floating = true;
-        }
-    }
+    struct window *window = window_manager_create_and_add_window(&g_space_manager, &g_window_manager, application, CFRetain(context), window_id);
+    if (!window) return EVENT_FAILURE;
 
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
         struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, g_space_manager.current_space_id);
