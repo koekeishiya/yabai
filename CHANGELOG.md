@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Re-construct application switched and window created events in the correct order when the window is moved through a rule upon creation [#564](https://github.com/koekeishiya/yabai/issues/564)
 - Improve interaction between *window_topmost* and windows that enter native-fullscreen mode [#566](https://github.com/koekeishiya/yabai/issues/566)
 - Properly set focused window id cache upon window detection at first space activation [#567](https://github.com/koekeishiya/yabai/issues/567)
+- Blacklist Übersicht process from being monitored and managed [#535](https://github.com/koekeishiya/yabai/issues/535)
 
 ## [3.1.2] - 2020-06-09
 ### Changed
