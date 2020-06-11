@@ -1,6 +1,17 @@
 #include "border.h"
 
+extern int g_connection;
 extern struct window_manager g_window_manager;
+
+static void border_order_in(struct window *window)
+{
+    SLSOrderWindow(g_connection, window->border.id, 1, window->id);
+}
+
+static void border_order_out(struct window *window)
+{
+    SLSOrderWindow(g_connection, window->border.id, 0, window->id);
+}
 
 void border_redraw(struct window *window)
 {
@@ -36,14 +47,20 @@ void border_deactivate(struct window *window)
     border_redraw(window);
 }
 
-void border_show(struct window *window)
+void border_enter_fullscreen(struct window *window)
 {
-    if (window->border.id) SLSOrderWindow(g_connection, window->border.id, 1, window->id);
+    if (!window->border.id) return;
+
+    window_manager_remove_from_window_group(window->border.id, window->id);
+    border_order_out(window);
 }
 
-void border_hide(struct window *window)
+void border_exit_fullscreen(struct window *window)
 {
-    if (window->border.id) SLSOrderWindow(g_connection, window->border.id, 0, window->id);
+    if (!window->border.id) return;
+
+    border_order_in(window);
+    window_manager_add_to_window_group(window->border.id, window->id);
 }
 
 void border_create(struct window *window)
@@ -51,8 +68,9 @@ void border_create(struct window *window)
     if (!g_window_manager.enable_window_border) return;
     if (window->border.id) return;
 
+    if ((!window_is_standard(window)) && (!window_is_dialog(window))) return;
+
     CGRect frame = window_ax_frame(window);
-    if (window->border.region) CFRelease(window->border.region);
     CGSNewRegionWithRect(&frame, &window->border.region);
     window->border.frame.size = frame.size;
 
@@ -75,6 +93,12 @@ void border_create(struct window *window)
     window_manager_add_to_window_group(window->border.id, window->id);
 
     border_redraw(window);
+
+    if ((!window->application->is_hidden) &&
+        (!window->is_minimized) &&
+        (!window->is_fullscreen)) {
+        border_order_in(window);
+    }
 }
 
 void border_resize(struct window *window)

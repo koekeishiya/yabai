@@ -201,28 +201,19 @@ void window_manager_set_window_border_enabled(struct window_manager *wm, bool en
         while (bucket) {
             if (bucket->value) {
                 struct window *window = bucket->value;
-                if ((window_is_standard(window)) || (window_is_dialog(window))) {
-                    if (enabled && !window->border.id) {
-                        border_create(window);
-
-                        if ((!window->application->is_hidden) &&
-                            (!window->is_minimized) &&
-                            (!window->is_fullscreen)) {
-                            border_show(window);
-                        }
-
-                        if (window->id == wm->focused_window_id) {
-                            border_activate(window);
-                        }
-                    } else if (!enabled) {
-                        border_destroy(window);
-                    }
+                if (enabled) {
+                    border_create(window);
+                } else {
+                    border_destroy(window);
                 }
             }
 
             bucket = bucket->next;
         }
     }
+
+    struct window *window = window_manager_focused_window(wm);
+    if (window) border_activate(window);
 }
 
 void window_manager_set_window_border_width(struct window_manager *wm, int width)

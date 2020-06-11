@@ -431,16 +431,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;
     window->has_shadow = true;
-
-    if ((window_is_standard(window)) || (window_is_dialog(window))) {
-        border_create(window);
-
-        if ((!window->application->is_hidden) &&
-            (!window->is_minimized) &&
-            (!window->is_fullscreen)) {
-            border_show(window);
-        }
-    }
+    border_create(window);
 
     return window;
 }
