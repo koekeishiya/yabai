@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Improve interaction between *window_topmost* and windows that enter native-fullscreen mode [#566](https://github.com/koekeishiya/yabai/issues/566)
 - Properly set focused window id cache upon window detection at first space activation [#567](https://github.com/koekeishiya/yabai/issues/567)
 - Don't modify the properties of AXUnknown and AXPopover windows [#535](https://github.com/koekeishiya/yabai/issues/535)
+- The window attribute *visible* should be 0 for minimized windows [#569](https://github.com/koekeishiya/yabai/issues/569)
 
 ## [3.1.2] - 2020-06-09
 ### Changed

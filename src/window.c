@@ -118,9 +118,9 @@ void window_serialize(FILE *rsp, struct window *window)
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
-    bool visible = sticky || space_is_visible(sid);
     bool is_topmost = window_is_topmost(window);
     bool is_minimized = window_is_minimized(window);
+    bool visible = !is_minimized && (sticky || space_is_visible(sid));
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
