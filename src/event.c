@@ -505,6 +505,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     window->is_fullscreen = is_fullscreen;
 
     if (!was_fullscreen && is_fullscreen) {
+        window_manager_make_floating(&g_window_manager, window, false);
         border_enter_fullscreen(window);
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -512,7 +513,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             window_manager_remove_managed_window(&g_window_manager, window->id);
             window_manager_purify_window(&g_window_manager, window);
         }
-        window_manager_make_floating(&g_window_manager, window, false);
     } else if (was_fullscreen && !is_fullscreen) {
         uint32_t did = window_display_id(window);
 
@@ -531,8 +531,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
-        window_manager_make_floating(&g_window_manager, window, window->is_floating);
         border_exit_fullscreen(window);
+        window_manager_make_floating(&g_window_manager, window, window->is_floating);
     } else if (was_fullscreen == is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
@@ -637,9 +637,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
             window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
             border_activate(focused_window);
 
-            if (g_mouse_state.ffm_window_id != focused_window->id) {
-                window_manager_center_mouse(&g_window_manager, focused_window);
+            if (g_window_manager.focused_window_id != focused_window->id) {
+                if (g_mouse_state.ffm_window_id != focused_window->id) {
+                    window_manager_center_mouse(&g_window_manager, focused_window);
+                }
+
+                g_window_manager.last_window_id = g_window_manager.focused_window_id;
             }
+
+            g_window_manager.focused_window_id = focused_window->id;
+            g_window_manager.focused_window_psn = focused_window->application->psn;
 
             g_mouse_state.ffm_window_id = 0;
             window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
@@ -679,9 +686,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
             window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
             border_activate(focused_window);
 
-            if (g_mouse_state.ffm_window_id != focused_window->id) {
-                window_manager_center_mouse(&g_window_manager, focused_window);
+            if (g_window_manager.focused_window_id != focused_window->id) {
+                if (g_mouse_state.ffm_window_id != focused_window->id) {
+                    window_manager_center_mouse(&g_window_manager, focused_window);
+                }
+
+                g_window_manager.last_window_id = g_window_manager.focused_window_id;
             }
+
+            g_window_manager.focused_window_id = focused_window->id;
+            g_window_manager.focused_window_psn = focused_window->application->psn;
 
             g_mouse_state.ffm_window_id = 0;
             window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
