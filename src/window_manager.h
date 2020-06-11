@@ -147,6 +147,8 @@ void window_manager_set_window_border_enabled(struct window_manager *wm, bool en
 void window_manager_set_window_border_width(struct window_manager *wm, int width);
 void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_normal_window_border_color(struct window_manager *wm, uint32_t color);
+void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid);
+void window_manager_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid);
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
@@ -170,12 +172,9 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window);
 void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window);
 void window_manager_toggle_window_pip(struct space_manager *sm, struct window_manager *wm, struct window *window);
-void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
-void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
+void window_manager_validate_and_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did);
 void window_manager_begin(struct space_manager *sm, struct window_manager *window_manager);
 void window_manager_init(struct window_manager *window_manager);
-void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid);
-void window_manager_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid);
 
 #endif

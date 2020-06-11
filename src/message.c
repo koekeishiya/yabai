@@ -656,7 +656,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                     if (space_is_user(sel_sid)) {
                         view->layout = VIEW_BSP;
                         view->custom_layout = true;
-                        window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
+                        window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
                     } else {
                         daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
                     }

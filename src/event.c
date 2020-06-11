@@ -650,8 +650,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_SPACE_CHANGED)
         if (view_is_invalid(view)) view_update(view);
         if (view_is_dirty(view))   view_flush(view);
 
-        window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
-        window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+        window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     }
 
     return EVENT_SUCCESS;
@@ -693,8 +692,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_CHANGED)
         if (view_is_invalid(view)) view_update(view);
         if (view_is_dirty(view))   view_flush(view);
 
-        window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
-        window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+        window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     }
 
     return EVENT_SUCCESS;
@@ -1144,8 +1142,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
     space_manager_mark_spaces_invalid(&g_space_manager);
 
     if (space_is_user(g_space_manager.current_space_id)) {
-        window_manager_validate_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
-        window_manager_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
+        window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
     }
 
     return EVENT_SUCCESS;

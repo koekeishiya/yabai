@@ -215,7 +215,7 @@ void space_manager_set_layout_for_space(struct space_manager *sm, uint64_t sid, 
     view->layout = layout;
 
     if (view->layout == VIEW_BSP) {
-        window_manager_check_for_windows_on_space(sm, &g_window_manager, sid);
+        window_manager_validate_and_check_for_windows_on_space(sm, &g_window_manager, sid);
     } else if (view->layout == VIEW_FLOAT) {
         view_clear(view);
     }
@@ -274,7 +274,7 @@ void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view
                     if (space_is_user(view->sid)) {
                         view->layout = layout;
                         if (view->layout == VIEW_BSP) {
-                            window_manager_check_for_windows_on_space(sm, &g_window_manager, view->sid);
+                            window_manager_validate_and_check_for_windows_on_space(sm, &g_window_manager, view->sid);
                         } else if (view->layout == VIEW_FLOAT) {
                             view_clear(view);
                         }
