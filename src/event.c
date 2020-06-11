@@ -507,6 +507,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     if (!was_fullscreen && is_fullscreen) {
         window_manager_make_floating(&g_window_manager, window, false);
         border_enter_fullscreen(window);
+
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
@@ -516,7 +517,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     } else if (was_fullscreen && !is_fullscreen) {
         uint32_t did = window_display_id(window);
 
-        while (display_manager_display_is_animating(did)) {
+        do {
 
             //
             // NOTE(koekeishiya): Window has exited native-fullscreen mode.
@@ -525,15 +526,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             //
 
             usleep(100000);
-        }
+        } while (display_manager_display_is_animating(did));
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
+
         border_exit_fullscreen(window);
         window_manager_make_floating(&g_window_manager, window, window->is_floating);
-    } else if (was_fullscreen == is_fullscreen) {
+    } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
         }
