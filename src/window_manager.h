@@ -176,5 +176,6 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
 void window_manager_begin(struct space_manager *sm, struct window_manager *window_manager);
 void window_manager_init(struct window_manager *window_manager);
 void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid);
+void window_manager_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid);
 
 #endif

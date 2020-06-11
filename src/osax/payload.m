@@ -44,7 +44,9 @@ extern CGError CGSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError CGSGetWindowTransform(int cid, uint32_t wid, CGAffineTransform *t);
 extern CGError CGSSetWindowTransform(int cid, uint32_t wid, CGAffineTransform t);
 extern CGError CGSAddWindowToWindowMovementGroup(int cid, uint32_t parent_wid, uint32_t child_wid);
+extern CGError CGSRemoveWindowFromWindowMovementGroup(int cid, uint32_t parent_wid, uint32_t child_wid);
 extern CGError CGSAddWindowToWindowOrderingGroup(int cid, uint32_t parent_wid, uint32_t child_wid, int order);
+extern CGError CGSRemoveFromOrderingGroup(int cid, uint32_t wid);
 extern void CGSManagedDisplaySetCurrentSpace(int cid, CFStringRef display_ref, uint64_t spid);
 extern uint64_t CGSManagedDisplayGetCurrentSpace(int cid, CFStringRef display_ref);
 extern CFArrayRef CGSCopyManagedDisplaySpaces(const int cid);
@@ -829,6 +831,20 @@ static void do_window_group_add(const char *message)
     CGSAddWindowToWindowOrderingGroup(_connection, parent, child, 1);
 }
 
+static void do_window_group_remove(const char *message)
+{
+    Token parent_token = get_token(&message);
+    uint32_t parent = token_to_uint32t(parent_token);
+    if (!parent) return;
+
+    Token child_token = get_token(&message);
+    uint32_t child = token_to_uint32t(child_token);
+    if (!child) return;
+
+    CGSRemoveWindowFromWindowMovementGroup(_connection, parent, child);
+    CGSRemoveFromOrderingGroup(_connection, child);
+}
+
 static inline bool can_focus_space()
 {
     return dock_spaces != nil;
@@ -920,6 +936,8 @@ static void handle_message(int sockfd, const char *message)
         do_window_shadow(message);
     } else if (token_equals(token, "window_group_add")) {
         do_window_group_add(message);
+    } else if (token_equals(token, "window_group_remove")) {
+        do_window_group_remove(message);
     }
 }
 

@@ -500,13 +500,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    border_resize(window);
-
     bool was_fullscreen = window->is_fullscreen;
     bool is_fullscreen = window_is_fullscreen(window);
     window->is_fullscreen = is_fullscreen;
 
     if (!was_fullscreen && is_fullscreen) {
+        if (window->border.id) {
+            window_manager_remove_from_window_group(window->border.id, window->id);
+            border_hide(window);
+        }
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
@@ -533,10 +535,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
         window_manager_make_floating(&g_window_manager, window, window->is_floating);
+        if (window->border.id) {
+            border_show(window);
+            window_manager_add_to_window_group(window->border.id, window->id);
+        }
     } else if (was_fullscreen == is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
         }
+
+        border_resize(window);
     }
 
     return EVENT_SUCCESS;

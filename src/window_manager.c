@@ -204,7 +204,6 @@ void window_manager_set_window_border_enabled(struct window_manager *wm, bool en
                 if ((window_is_standard(window)) || (window_is_dialog(window))) {
                     if (enabled && !window->border.id) {
                         border_create(window);
-                        border_resize(window);
 
                         if ((!window->application->is_hidden) &&
                             (!window->is_minimized) &&
@@ -417,6 +416,19 @@ void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid)
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_group_add %d %d", parent_wid, child_wid);
+        socket_write(sockfd, message);
+        socket_wait(sockfd);
+    }
+    socket_close(sockfd);
+}
+
+void window_manager_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid)
+{
+    int sockfd;
+    char message[MAXLEN];
+
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        snprintf(message, sizeof(message), "window_group_remove %d %d", parent_wid, child_wid);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }

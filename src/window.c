@@ -434,7 +434,6 @@ struct window *window_create(struct application *application, AXUIElementRef win
 
     if ((window_is_standard(window)) || (window_is_dialog(window))) {
         border_create(window);
-        border_resize(window);
 
         if ((!window->application->is_hidden) &&
             (!window->is_minimized) &&

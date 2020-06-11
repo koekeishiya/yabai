@@ -54,8 +54,10 @@ void border_create(struct window *window)
     window->border.frame = window_ax_frame(window);
     if (window->border.region) CFRelease(window->border.region);
     CGSNewRegionWithRect(&window->border.frame, &window->border.region);
-    window->border.frame.origin.x = 0;
-    window->border.frame.origin.y = 0;
+    window->border.frame.origin = (CGPoint) { 0, 0 };
+
+    window->border.path = CGPathCreateMutable();
+    CGPathAddRoundedRect(window->border.path, NULL, window->border.frame, 0, 0);
 
     uint64_t tags[2] = { kCGSIgnoreForEventsTagBit, 0 };
     SLSNewWindow(g_connection, 2, 0, 0, window->border.region, &window->border.id);
@@ -71,17 +73,22 @@ void border_create(struct window *window)
                                g_window_manager.normal_border_color.b,
                                g_window_manager.normal_border_color.a);
     window_manager_add_to_window_group(window->border.id, window->id);
+
+    border_redraw(window);
 }
 
 void border_resize(struct window *window)
 {
     if (!window->border.id) return;
 
-    window->border.frame = window_ax_frame(window);
+    CGRect frame = window_ax_frame(window);
+    if ((frame.size.width  == window->border.frame.size.width) &&
+        (frame.size.height == window->border.frame.size.height)) return;
+
+    window->border.frame = frame;
     if (window->border.region) CFRelease(window->border.region);
     CGSNewRegionWithRect(&window->border.frame, &window->border.region);
-    window->border.frame.origin.x = 0;
-    window->border.frame.origin.y = 0;
+    window->border.frame.origin = (CGPoint) { 0, 0 };
 
     if (window->border.path) CGPathRelease(window->border.path);
     window->border.path = CGPathCreateMutable();
