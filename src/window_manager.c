@@ -427,13 +427,22 @@ void window_manager_remove_from_window_group(uint32_t child_wid, uint32_t parent
     socket_close(sockfd);
 }
 
-void window_manager_move_window_cgs(struct window *window, float x, float y)
+void window_manager_move_window_cgs(struct window *window, float x, float y, float dx, float dy)
 {
     int sockfd;
     char message[MAXLEN];
 
+    float fx = x + dx;
+    float fy = y + dy;
+
+    uint32_t did = display_manager_point_display_id((CGPoint) { fx, fy });
+    if (!did) return;
+
+    CGRect bounds = display_bounds(did);
+    if (fy < bounds.origin.y) fy = bounds.origin.y;
+
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_move %d %d %d", window->id, (int)x, (int)y);
+        snprintf(message, sizeof(message), "window_move %d %d %d", window->id, (int)fx, (int)fy);
         socket_write(sockfd, message);
         socket_wait(sockfd);
     }

@@ -101,7 +101,7 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
 bool window_manager_should_manage_window(struct window *window);
 void window_manager_tile_window(struct window_manager *wm, struct window *window);
 void window_manager_move_window(struct window *window, float x, float y);
-void window_manager_move_window_cgs(struct window *window, float x, float y);
+void window_manager_move_window_cgs(struct window *window, float x, float y, float dx, float dy);
 void window_manager_resize_window(struct window *window, float width, float height);
 enum window_op_error window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int action, float ratio);
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height);
