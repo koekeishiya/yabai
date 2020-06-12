@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Properly set focused window id cache upon window detection at first space activation [#567](https://github.com/koekeishiya/yabai/issues/567)
 - Don't modify the properties of AXUnknown and AXPopover windows [#535](https://github.com/koekeishiya/yabai/issues/535)
 - The window attribute *visible* should be 0 for minimized windows [#569](https://github.com/koekeishiya/yabai/issues/569)
-- Prevent *mouse_action mouse* from placing the y-coordinate of a window outside valid display boundaries [#570](https://github.com/koekeishiya/yabai/issues/570)
+- Prevent *mouse_action move* from placing the y-coordinate of a window outside valid display boundaries [#570](https://github.com/koekeishiya/yabai/issues/570)
 
 ## [3.1.2] - 2020-06-09
 ### Changed
