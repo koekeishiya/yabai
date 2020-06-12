@@ -176,6 +176,12 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window_manager_set_window_layer(window, rule->layer);
     }
 
+    if (rule->border == RULE_PROP_ON) {
+        border_create(window);
+    } else if (rule->border == RULE_PROP_OFF) {
+        border_destroy(window);
+    }
+
     if (rule->fullscreen == RULE_PROP_ON) {
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
         window->rule_fullscreen = true;
@@ -1499,6 +1505,16 @@ void window_manager_toggle_window_pip(struct space_manager *sm, struct window_ma
         socket_wait(sockfd);
     }
     socket_close(sockfd);
+}
+
+void window_manager_toggle_window_border(struct window_manager *wm, struct window *window)
+{
+    if (window->border.id) {
+        border_destroy(window);
+    } else {
+        border_create(window);
+        if (window->id == wm->focused_window_id) border_activate(window);
+    }
 }
 
 static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid, uint32_t *window_list, int window_count)

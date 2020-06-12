@@ -299,7 +299,7 @@ COMMAND
 *--ratio* 'rel|abs:<dr>'::
     If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.
 
-*--toggle* 'float|sticky|topmost|pip|shadow|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
+*--toggle* 'float|sticky|topmost|pip|shadow|border|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window.
 
 *--layer* '<LAYER>'::
@@ -405,6 +405,9 @@ ARGUMENT
 
 *layer='<LAYER>'*::
     Window is ordered within the given stacking layer.
+
+*border=<BOOL_SEL>'*::
+    Window should draw border when 'config window_border on' is specified.
 
 *native-fullscreen='<BOOL_SEL>'*::
     Window should enter native macOS fullscreen mode.

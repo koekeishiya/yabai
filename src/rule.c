@@ -18,6 +18,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"manage\":%d,\n"
             "\t\"sticky\":%d,\n"
             "\t\"layer\":\"%s\",\n"
+            "\t\"border\":%d,\n"
             "\t\"native-fullscreen\":%d,\n"
             "\t\"grid\":\"%d:%d:%d:%d:%d:%d\"\n"
             "}",
@@ -32,6 +33,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule_prop[rule->manage],
             rule_prop[rule->sticky],
             layer_str[rule->layer],
+            rule_prop[rule->border],
             rule_prop[rule->fullscreen],
             rule->grid[0], rule->grid[1],
             rule->grid[2], rule->grid[3],

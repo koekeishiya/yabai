@@ -121,6 +121,7 @@ void window_serialize(FILE *rsp, struct window *window)
     bool is_topmost = window_is_topmost(window);
     bool is_minimized = window_is_minimized(window);
     bool visible = !is_minimized && (sticky || space_is_visible(sid));
+    bool border = window->border.id ? 1 : 0;
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -164,6 +165,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"minimized\":%d,\n"
             "\t\"topmost\":%d,\n"
             "\t\"shadow\":%d,\n"
+            "\t\"border\":%d,\n"
             "\t\"zoom-parent\":%d,\n"
             "\t\"zoom-fullscreen\":%d,\n"
             "\t\"native-fullscreen\":%d\n"
@@ -189,6 +191,7 @@ void window_serialize(FILE *rsp, struct window *window)
             is_minimized,
             is_topmost,
             window->has_shadow,
+            border,
             zoom_parent,
             zoom_fullscreen,
             window_is_fullscreen(window));
