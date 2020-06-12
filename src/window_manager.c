@@ -149,8 +149,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window->rule_manage = true;
         window->is_floating = false;
         window_manager_make_floating(wm, window, false);
-        if ((window_manager_should_manage_window(window)) &&
-            (!window_manager_find_managed_window(wm, window))) {
+        if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
             window_manager_add_managed_window(wm, window, view);
         }
@@ -293,13 +292,13 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
 
 bool window_manager_should_manage_window(struct window *window)
 {
-    if (window->rule_manage) return true;
+    if (window->is_floating)      return false;
+    if (window_is_sticky(window)) return false;
+    if (window->rule_manage)      return true;
 
     return ((window_level_is_standard(window)) &&
             (window_is_standard(window)) &&
-            (window_can_move(window)) &&
-            (!window_is_sticky(window)) &&
-            (!window->is_floating));
+            (window_can_move(window)));
 }
 
 struct view *window_manager_find_managed_window(struct window_manager *wm, struct window *window)
