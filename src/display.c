@@ -208,7 +208,6 @@ uint64_t *display_space_list(uint32_t did, int *count)
 
     CFRelease(display_spaces_ref);
     CFRelease(uuid);
-
     return space_list;
 }
 

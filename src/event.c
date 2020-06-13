@@ -174,7 +174,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
         }
 
         if (g_mouse_state.window == window) g_mouse_state.window = NULL;
-
         window_manager_remove_window(&g_window_manager, window->id);
         window_destroy(window);
     }
@@ -184,7 +183,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
 end:
     application_unobserve(application);
     application_destroy(application);
-
     return EVENT_SUCCESS;
 }
 
@@ -367,6 +365,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
     if (g_mouse_state.window == window) g_mouse_state.window = NULL;
     window_manager_remove_window(&g_window_manager, window->id);
     window_destroy(window);
+
     return EVENT_SUCCESS;
 }
 
