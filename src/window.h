@@ -50,6 +50,7 @@ struct window
     bool is_fullscreen;
     bool is_minimized;
     bool is_floating;
+    bool is_sticky;
     float opacity;
     bool rule_manage;
     bool rule_fullscreen;

@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Prevent *mouse_action move* from placing the y-coordinate of a window outside valid display boundaries [#570](https://github.com/koekeishiya/yabai/issues/570)
 - Properly allow the user to float windows that are forced to tile using window rules (manage=on) [#571](https://github.com/koekeishiya/yabai/issues/571)
 - Improve visual feedback effect of the *window --insert* message selection [#572](https://github.com/koekeishiya/yabai/issues/572)
+- Fix inconsistencies when mixing floating and sticky properties on a window [#574](https://github.com/koekeishiya/yabai/issues/574)
 
 ## [3.1.2] - 2020-06-09
 ### Changed

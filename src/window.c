@@ -108,18 +108,17 @@ err:
 
 void window_serialize(FILE *rsp, struct window *window)
 {
+    char *role = NULL;
+    char *subrole = NULL;
     char *title = window_title(window);
     char *escaped_title = string_escape(title);
     CGRect frame = window_frame(window);
-    char *role = NULL;
-    char *subrole = NULL;
-    bool sticky = window_is_sticky(window);
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
     bool is_topmost = window_is_topmost(window);
     bool is_minimized = window_is_minimized(window);
-    bool visible = !is_minimized && (sticky || space_is_visible(sid));
+    bool visible = !is_minimized && (window->is_sticky || space_is_visible(sid));
     bool border = window->border.id ? 1 : 0;
     float opacity = window_opacity(window);
 
@@ -188,7 +187,7 @@ void window_serialize(FILE *rsp, struct window *window)
             window->id == g_window_manager.focused_window_id,
             split,
             window->is_floating,
-            sticky,
+            window->is_sticky,
             is_minimized,
             is_topmost,
             opacity,
@@ -437,6 +436,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     SLSGetWindowOwner(g_connection, window->id, &window->connection);
     window->is_minimized = window_is_minimized(window);
     window->is_fullscreen = window_is_fullscreen(window) || space_is_fullscreen(window_space(window));
+    window->is_sticky = window_is_sticky(window);
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;
     window->has_shadow = true;

@@ -147,28 +147,16 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
 
     if (rule->manage == RULE_PROP_ON) {
         window->rule_manage = true;
-        window->is_floating = false;
-        window_manager_make_floating(wm, window, false);
-        if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
-            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
-            window_manager_add_managed_window(wm, window, view);
-        }
+        window_manager_make_window_floating(sm, wm, window, false);
     } else if (rule->manage == RULE_PROP_OFF) {
         window->rule_manage = false;
-        struct view *view = window_manager_find_managed_window(wm, window);
-        if (view) {
-            space_manager_untile_window(sm, view, window);
-            window_manager_remove_managed_window(wm, window->id);
-            window_manager_purify_window(wm, window);
-        }
-        window_manager_make_floating(wm, window, true);
-        window->is_floating = true;
+        window_manager_make_window_floating(sm, wm, window, true);
     }
 
     if (rule->sticky == RULE_PROP_ON) {
-        window_manager_make_sticky(window->id, true);
+        window_manager_make_window_sticky(sm, wm, window, true);
     } else if (rule->sticky == RULE_PROP_OFF) {
-        window_manager_make_sticky(window->id, false);
+        window_manager_make_window_sticky(sm, wm, window, false);
     }
 
     if (rule->layer) {
@@ -616,15 +604,15 @@ void window_manager_set_window_layer(struct window *window, int layer)
     window_manager_set_layer_for_children(window->connection, window->id, sid, layer);
 }
 
-void window_manager_make_floating(struct window_manager *wm, struct window *window, bool floating)
+void window_manager_make_window_topmost(struct window_manager *wm, struct window *window, bool topmost)
 {
     if (!wm->enable_window_topmost) return;
 
-    int layer = floating ? LAYER_ABOVE : LAYER_NORMAL;
+    int layer = topmost ? LAYER_ABOVE : LAYER_NORMAL;
     window_manager_set_window_layer(window, layer);
 }
 
-void window_manager_make_sticky(uint32_t wid, bool sticky)
+void window_manager_set_sticky(uint32_t wid, bool sticky)
 {
     int sockfd;
     char message[MAXLEN];
@@ -1047,7 +1035,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
     if (!window_observe(window)) {
         debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_make_floating(wm, window, true);
+        window_manager_make_window_topmost(wm, window, true);
         window_manager_remove_lost_focused_event(wm, window->id);
         window_unobserve(window);
         window_destroy(window);
@@ -1072,7 +1060,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
                    (!window_can_move(window)) ||
                    (window_is_sticky(window)) ||
                    (!window_can_resize(window) && window_is_undersized(window))) {
-            window_manager_make_floating(wm, window, true);
+            window_manager_make_window_topmost(wm, window, true);
             window->is_floating = true;
         }
     }
@@ -1362,43 +1350,38 @@ void window_manager_toggle_window_topmost(struct window *window)
     window_manager_set_window_layer(window, is_topmost ? LAYER_NORMAL : LAYER_ABOVE);
 }
 
-void window_manager_toggle_window_float(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float)
 {
-    if (window->is_floating) {
-        window->is_floating = false;
-        window_manager_make_floating(wm, window, false);
-        if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
-            window_manager_add_managed_window(wm, window, view);
-        }
-    } else {
+    if (should_float) {
         struct view *view = window_manager_find_managed_window(wm, window);
         if (view) {
             space_manager_untile_window(sm, view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
-        window_manager_make_floating(wm, window, true);
+        window_manager_make_window_topmost(wm, window, true);
         window->is_floating = true;
+    } else {
+        window->is_sticky = false;
+        window->is_floating = false;
+        window_manager_set_sticky(window->id, false);
+        window_manager_make_window_topmost(wm, window, false);
+        if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
+            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
+            window_manager_add_managed_window(wm, window, view);
+        }
     }
 }
 
-void window_manager_toggle_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky)
 {
-    if (window_is_sticky(window)) {
-        window_manager_make_sticky(window->id, false);
-        if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
-            window_manager_add_managed_window(wm, window, view);
-        }
+    if (should_sticky) {
+        window_manager_make_window_floating(sm, wm, window, true);
+        window_manager_set_sticky(window->id, true);
+        window->is_sticky = true;
     } else {
-        struct view *view = window_manager_find_managed_window(wm, window);
-        if (view) {
-            space_manager_untile_window(sm, view, window);
-            window_manager_remove_managed_window(wm, window->id);
-            window_manager_purify_window(wm, window);
-        }
-        window_manager_make_sticky(window->id, true);
+        window_manager_set_sticky(window->id, false);
+        window->is_sticky = false;
     }
 }
 

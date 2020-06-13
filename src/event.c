@@ -446,7 +446,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     window->is_fullscreen = is_fullscreen;
 
     if (!was_fullscreen && is_fullscreen) {
-        window_manager_make_floating(&g_window_manager, window, false);
+        window_manager_make_window_topmost(&g_window_manager, window, false);
         border_enter_fullscreen(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
@@ -475,7 +475,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         }
 
         border_exit_fullscreen(window);
-        window_manager_make_floating(&g_window_manager, window, window->is_floating);
+        window_manager_make_window_topmost(&g_window_manager, window, window->is_floating);
     } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
