@@ -146,7 +146,7 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement)
             // copy the array to a mutable one, then sort it in place
             CFRange all = CFRangeMake((long) 0, (long) count);
             CFMutableArrayRef mut_displays = CFArrayCreateMutableCopy(NULL, count, displays);
-            CFArraySortValues(mut_displays, all, &coordinate_comparator, NULL);
+            CFArraySortValues(mut_displays, all, &coordinate_comparator, &g_display_manager.sort_order);
             result = CFRetain(CFArrayGetValueAtIndex(mut_displays, index));
             CFRelease(mut_displays);
         }
