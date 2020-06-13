@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.2.0] - 2020-06-14
 ### Added
 - Re-introduce a more efficient window border system [#565](https://github.com/koekeishiya/yabai/issues/565)
 - New command *window --opacity* to explicitly set the opacity of a window [#503](https://github.com/koekeishiya/yabai/issues/503)
@@ -278,7 +280,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.1.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/koekeishiya/yabai/compare/v3.1.2...v3.2.0
 [3.1.2]: https://github.com/koekeishiya/yabai/compare/v3.1.1...v3.1.2
 [3.1.1]: https://github.com/koekeishiya/yabai/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/koekeishiya/yabai/compare/v3.0.2...v3.1.0
