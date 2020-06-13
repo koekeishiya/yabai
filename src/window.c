@@ -1,10 +1,9 @@
 #include "window.h"
 
-extern int g_connection;
 extern struct window_manager g_window_manager;
-
-int g_normal_window_level;
-int g_floating_window_level;
+extern int g_normal_window_level;
+extern int g_floating_window_level;
+extern int g_connection;
 
 static void
 window_observe_notification(struct window *window, int notification)
@@ -353,9 +352,6 @@ CFStringRef window_subrole(struct window *window)
 
 bool window_level_is_standard(struct window *window)
 {
-    if (!g_normal_window_level)   g_normal_window_level   = CGWindowLevelForKey(4);
-    if (!g_floating_window_level) g_floating_window_level = CGWindowLevelForKey(5);
-
     int level = window_level(window);
     return level == g_normal_window_level || level == g_floating_window_level;
 }

@@ -35,7 +35,10 @@ struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
 struct daemon g_daemon;
+int g_normal_window_level;
+int g_floating_window_level;
 int g_connection;
+
 
 struct signal *g_signal_event[EVENT_TYPE_COUNT];
 bool g_mission_control_active;
@@ -218,6 +221,8 @@ static inline void init_misc_settings(void)
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
     g_connection = SLSMainConnectionID();
+    g_normal_window_level   = CGWindowLevelForKey(LAYER_NORMAL);
+    g_floating_window_level = CGWindowLevelForKey(LAYER_ABOVE);
 }
 #pragma clang diagnostic pop
 
