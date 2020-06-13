@@ -410,7 +410,7 @@ ARGUMENT
 *opacity='<FLOAT_SEL>'*::
     Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
 
-*border=<BOOL_SEL>'*::
+*border='<BOOL_SEL>'*::
     Window should draw border.
 
 *native-fullscreen='<BOOL_SEL>'*::
