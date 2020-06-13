@@ -20,7 +20,8 @@ void insert_feedback_show(struct window_node *node)
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
         SLSSetWindowLevel(g_connection, node->feedback_window.id, g_floating_window_level);
         node->feedback_window.context = SLWindowContextCreate(g_connection, node->feedback_window.id, 0);
-        CGContextSetLineWidth(node->feedback_window.context, 8);
+        int width = g_window_manager.enable_window_border ? g_window_manager.border_width : 2;
+        CGContextSetLineWidth(node->feedback_window.context, width);
         CGContextSetRGBFillColor(node->feedback_window.context,
                                    g_window_manager.insert_feedback_color.r,
                                    g_window_manager.insert_feedback_color.g,
