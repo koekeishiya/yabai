@@ -1362,10 +1362,9 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
         window_manager_make_window_topmost(wm, window, true);
         window->is_floating = true;
     } else {
-        window->is_sticky = false;
         window->is_floating = false;
-        window_manager_set_sticky(window->id, false);
         window_manager_make_window_topmost(wm, window, false);
+        if (window->is_sticky) window_manager_make_window_sticky(sm, wm, window, false);
         if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
             struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
             window_manager_add_managed_window(wm, window, view);
@@ -1376,7 +1375,7 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
 void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky)
 {
     if (should_sticky) {
-        window_manager_make_window_floating(sm, wm, window, true);
+        if (!window->is_floating) window_manager_make_window_floating(sm, wm, window, true);
         window_manager_set_sticky(window->id, true);
         window->is_sticky = true;
     } else {
