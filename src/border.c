@@ -65,7 +65,6 @@ void border_exit_fullscreen(struct window *window)
 
 void border_create(struct window *window)
 {
-    if (!g_window_manager.enable_window_border) return;
     if (window->border.id) return;
 
     if ((!window_is_standard(window)) && (!window_is_dialog(window))) return;

@@ -440,7 +440,8 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->id_ptr = malloc(sizeof(uint32_t *));
     *window->id_ptr = &window->id;
     window->has_shadow = true;
-    border_create(window);
+
+    if (g_window_manager.enable_window_border) border_create(window);
 
     return window;
 }
