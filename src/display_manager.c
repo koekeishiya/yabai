@@ -107,8 +107,8 @@ static enum CFComparisonResult coordinate_comparator(const void *a_p, const void
     uint32_t did_a = CGDisplayGetDisplayIDFromUUID(uuid_a);
     uint32_t did_b = CGDisplayGetDisplayIDFromUUID(uuid_b);
 
-    CFRelease(uuid_a);
-    CFRelease(uuid_b);
+    // if (uuid_a) CFRelease(uuid_a);
+    // if (uuid_b) CFRelease(uuid_b);
 
     CGPoint center_a = display_center(did_a);
     CGPoint center_b = display_center(did_b);
