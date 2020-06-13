@@ -104,14 +104,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
     window_manager_add_application(&g_window_manager, application);
     window_manager_add_application_windows(&g_space_manager, &g_window_manager, application);
 
-    int window_count = 0;
+    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application);
+    if (!window_list) return EVENT_SUCCESS;
+
+    int window_count = buf_len(window_list);
     uint32_t prev_window_id = g_window_manager.focused_window_id;
-    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
-    if (!window_list) goto end;
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (!window || window->is_minimized) continue;
+        if (window->is_minimized) continue;
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) continue;
@@ -123,9 +124,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         }
     }
 
-    free(window_list);
-
-end:
+    buf_free(window_list);
     return EVENT_SUCCESS;
 }
 
@@ -142,13 +141,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     window_manager_remove_application(&g_window_manager, application->pid);
 
-    int window_count = 0;
-    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
+    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application);
     if (!window_list) goto end;
+
+    int window_count = buf_len(window_list);
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (!window) continue;
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -163,7 +162,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
         window_destroy(window);
     }
 
-    free(window_list);
+    buf_free(window_list);
 
 end:
     application_unobserve(application);
@@ -268,14 +267,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = false;
 
-    int window_count = 0;
-    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
+    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application);
     if (!window_list) return EVENT_SUCCESS;
 
+    int window_count = buf_len(window_list);
     uint32_t prev_window_id = g_window_manager.last_window_id;
+
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (!window || window->is_minimized) continue;
+        if (window->is_minimized) continue;
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) continue;
@@ -287,7 +287,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         }
     }
 
-    free(window_list);
+    buf_free(window_list);
     return EVENT_SUCCESS;
 }
 
@@ -299,9 +299,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = true;
 
-    int window_count = 0;
-    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
+    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application);
     if (!window_list) return EVENT_SUCCESS;
+
+    int window_count = buf_len(window_list);
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
@@ -315,7 +316,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
         }
     }
 
-    free(window_list);
+    buf_free(window_list);
     return EVENT_SUCCESS;
 }
 

@@ -988,10 +988,9 @@ void window_manager_add_application(struct window_manager *wm, struct applicatio
     table_add(&wm->application, &application->pid, application);
 }
 
-struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application, int *count)
+struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application)
 {
-    int window_count = 0;
-    uint32_t window_list[MAXLEN];
+    struct window **window_list = NULL;
 
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
         struct bucket *bucket = wm->window.buckets[window_index];
@@ -999,7 +998,7 @@ struct window **window_manager_find_application_windows(struct window_manager *w
             if (bucket->value) {
                 struct window *window = bucket->value;
                 if (window->application == application) {
-                    window_list[window_count++] = window->id;
+                    buf_push(window_list, window);
                 }
             }
 
@@ -1007,16 +1006,7 @@ struct window **window_manager_find_application_windows(struct window_manager *w
         }
     }
 
-    if (!window_count) return NULL;
-
-    struct window **result = malloc(sizeof(struct window *) * window_count);
-    *count = window_count;
-
-    for (int i = 0; i < window_count; ++i) {
-        result[i] = window_manager_find_window(wm, window_list[i]);
-    }
-
-    return result;
+    return window_list;
 }
 
 struct window *window_manager_create_and_add_window(struct space_manager *sm, struct window_manager *wm, struct application *application, AXUIElementRef window_ref, uint32_t window_id)
