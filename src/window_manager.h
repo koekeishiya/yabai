@@ -142,6 +142,7 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode);
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);
+void window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled);
 void window_manager_set_window_border_width(struct window_manager *wm, int width);

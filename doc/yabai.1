@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-06-12
+.\"      Date: 2020-06-13
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-06-12" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-06-13" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -414,6 +414,13 @@ Toggle the given property of the selected window.
 Set the stacking layer of the selected window.
 .RE
 .sp
+\fB\-\-opacity\fP \fI<floating point number>\fP
+.RS 4
+Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change.
+.br
+Specify the value \fI0.0\fP to reset back to full opacity OR have it be automatically managed through focus changes.
+.RE
+.sp
 \fB\-\-display\fP \fI<DISPLAY_SEL>\fP
 .RS 4
 Send the selected window to the given display.
@@ -527,11 +534,6 @@ Send window to display. If \fI^\fP is present, follow focus.
 Send window to space. If \fI^\fP is present, follow focus.
 .RE
 .sp
-\fBopacity=\fI<FLOAT_SEL>\fP\fP
-.RS 4
-Set window opacity.
-.RE
-.sp
 \fBmanage=\fI<BOOL_SEL>\fP\fP
 .RS 4
 Window should be managed (tile vs float).
@@ -545,6 +547,11 @@ Window appears on all spaces.
 \fBlayer=\fI<LAYER>\fP\fP
 .RS 4
 Window is ordered within the given stacking layer.
+.RE
+.sp
+\fBopacity=\fI<FLOAT_SEL>\fP\fP
+.RS 4
+Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
 .RE
 .sp
 \fBborder=<BOOL_SEL>\(aq\fP

@@ -141,8 +141,8 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (in_range_ei(rule->alpha, 0.0f, 1.0f)) {
-        window_manager_set_window_opacity(wm, window, rule->alpha);
-        window->rule_alpha = rule->alpha;
+        window->opacity = rule->alpha;
+        window_manager_set_opacity(wm, window, rule->alpha);
     }
 
     if (rule->manage == RULE_PROP_ON) {
@@ -500,14 +500,18 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
     }
 }
 
-void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
+void window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity)
 {
-    if (!wm->enable_window_opacity) return;
-    if (window->rule_alpha != 0.0f) return;
-    if ((!window_is_standard(window)) && (!window_is_dialog(window))) return;
-
     int sockfd;
     char message[MAXLEN];
+
+    if (opacity == 0.0f) {
+        if (wm->enable_window_opacity) {
+            opacity = window->id == wm->focused_window_id ? wm->active_window_opacity : wm->normal_window_opacity;
+        } else {
+            opacity = 1.0f;
+        }
+    }
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
         snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", window->id, opacity, wm->window_opacity_duration);
@@ -515,6 +519,15 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct window 
         socket_wait(sockfd);
     }
     socket_close(sockfd);
+}
+
+void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
+{
+    if (!wm->enable_window_opacity) return;
+    if (window->opacity != 0.0f)    return;
+    if ((!window_is_standard(window)) && (!window_is_dialog(window))) return;
+
+    window_manager_set_opacity(wm, window, opacity);
 }
 
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity)
@@ -532,9 +545,11 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
         while (bucket) {
             if (bucket->value) {
                 struct window *window = bucket->value;
-                if (window->id != wm->focused_window_id) window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+                if (window->id == wm->focused_window_id) goto next;
+                window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
             }
 
+next:
             bucket = bucket->next;
         }
     }

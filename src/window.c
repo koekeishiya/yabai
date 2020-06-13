@@ -121,6 +121,7 @@ void window_serialize(FILE *rsp, struct window *window)
     bool is_minimized = window_is_minimized(window);
     bool visible = !is_minimized && (sticky || space_is_visible(sid));
     bool border = window->border.id ? 1 : 0;
+    float opacity = window_opacity(window);
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -163,6 +164,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"sticky\":%d,\n"
             "\t\"minimized\":%d,\n"
             "\t\"topmost\":%d,\n"
+            "\t\"opacity\":%.4f,\n"
             "\t\"shadow\":%d,\n"
             "\t\"border\":%d,\n"
             "\t\"zoom-parent\":%d,\n"
@@ -189,6 +191,7 @@ void window_serialize(FILE *rsp, struct window *window)
             sticky,
             is_minimized,
             is_topmost,
+            opacity,
             window->has_shadow,
             border,
             zoom_parent,
@@ -327,6 +330,13 @@ bool window_is_topmost(struct window *window)
 {
     bool is_topmost = window_level(window) == CGWindowLevelForKey(LAYER_ABOVE);
     return is_topmost;
+}
+
+float window_opacity(struct window *window)
+{
+    float alpha = 0.0f;
+    SLSGetWindowAlpha(g_connection, window->id, &alpha);
+    return alpha;
 }
 
 int window_level(struct window *window)

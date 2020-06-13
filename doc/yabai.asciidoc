@@ -305,6 +305,10 @@ COMMAND
 *--layer* '<LAYER>'::
     Set the stacking layer of the selected window.
 
+*--opacity* '<floating point number>'::
+    Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change. +
+    Specify the value '0.0' to reset back to full opacity OR have it be automatically managed through focus changes.
+
 *--display* '<DISPLAY_SEL>'::
     Send the selected window to the given display.
 
@@ -394,9 +398,6 @@ ARGUMENT
 *space='[^]<SPACE_SEL>'*::
     Send window to space. If '^' is present, follow focus.
 
-*opacity='<FLOAT_SEL>'*::
-    Set window opacity.
-
 *manage='<BOOL_SEL>'*::
     Window should be managed (tile vs float).
 
@@ -405,6 +406,9 @@ ARGUMENT
 
 *layer='<LAYER>'*::
     Window is ordered within the given stacking layer.
+
+*opacity='<FLOAT_SEL>'*::
+    Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
 
 *border=<BOOL_SEL>'*::
     Window should draw border when 'config window_border on' is specified.

@@ -114,6 +114,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_DEMIN   "--deminimize"
 #define COMMAND_WINDOW_CLOSE   "--close"
 #define COMMAND_WINDOW_LAYER   "--layer"
+#define COMMAND_WINDOW_OPACITY "--opacity"
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
 #define COMMAND_WINDOW_DISPLAY "--display"
 #define COMMAND_WINDOW_SPACE   "--space"
@@ -1601,6 +1602,15 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_WINDOW_OPACITY)) {
+        float opacity;
+        struct token value = get_token(&message);
+        if ((sscanf(value.text, "%f", &opacity) == 1) && in_range_ii(opacity, 0.0f, 1.0f)) {
+            acting_window->opacity = opacity;
+            window_manager_set_opacity(&g_window_manager, acting_window, opacity);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
@@ -1907,7 +1917,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             } else if (string_equals(key, ARGUMENT_RULE_KEY_ALPHA)) {
                 if (exclusion) unsupported_exclusion = key;
 
-                if (sscanf(value, "%f", &rule.alpha) != 1) {
+                if ((sscanf(value, "%f", &rule.alpha) != 1) || (!in_range_ei(rule.alpha, 0.0f, 1.0f))) {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }

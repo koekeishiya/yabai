@@ -4,6 +4,7 @@
 extern int SLSMainConnectionID(void);
 extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
+extern CGError SLSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
 extern CGError SLSSetWindowResolution(int cid, uint32_t wid, float resolution);
 extern CGError SLSCopyWindowProperty(int cid, uint32_t wid, CFStringRef property, CFTypeRef *value);
 extern CFStringRef SLSCopyManagedDisplayForWindow(int cid, uint32_t wid);
@@ -49,7 +50,7 @@ struct window
     bool is_fullscreen;
     bool is_minimized;
     bool is_floating;
-    float rule_alpha;
+    float opacity;
     bool rule_manage;
     bool rule_fullscreen;
     struct border border;
@@ -63,6 +64,7 @@ void window_serialize(FILE *rsp, struct window *window);
 char *window_title(struct window *window);
 CGRect window_ax_frame(struct window *window);
 CGRect window_frame(struct window *window);
+float window_opacity(struct window *window);
 int window_level(struct window *window);
 CFStringRef window_role(struct window *window);
 CFStringRef window_subrole(struct window *window);

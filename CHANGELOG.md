@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Added
 - Re-introduce a more efficient window border system [#565](https://github.com/koekeishiya/yabai/issues/565)
+- New command *window --opacity* to explicitly set the opacity of a window [#503](https://github.com/koekeishiya/yabai/issues/503)
 
 ### Changed
 - Re-construct application switched and window created events in the correct order when the window is moved through a rule upon creation [#564](https://github.com/koekeishiya/yabai/issues/564)
