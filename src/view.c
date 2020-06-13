@@ -1,6 +1,7 @@
 #include "view.h"
 
 extern int g_connection;
+extern int g_floating_window_level;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
@@ -15,10 +16,16 @@ void insert_feedback_show(struct window_node *node)
         uint64_t tags[2] = { kCGSIgnoreForExposeTagBit | kCGSIgnoreForEventsTagBit, 0 };
         SLSNewWindow(g_connection, 2, 0, 0, frame_region, &node->feedback_window.id);
         SLSSetWindowTags(g_connection, node->feedback_window.id, tags, 64);
+        SLSSetWindowResolution(g_connection, node->feedback_window.id, 1.0f);
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
-        SLSSetWindowLevel(g_connection, node->feedback_window.id, 5);
+        SLSSetWindowLevel(g_connection, node->feedback_window.id, g_floating_window_level);
         node->feedback_window.context = SLWindowContextCreate(g_connection, node->feedback_window.id, 0);
         CGContextSetLineWidth(node->feedback_window.context, 8);
+        CGContextSetRGBFillColor(node->feedback_window.context,
+                                   g_window_manager.insert_feedback_color.r,
+                                   g_window_manager.insert_feedback_color.g,
+                                   g_window_manager.insert_feedback_color.b,
+                                   g_window_manager.insert_feedback_color.a*0.25f);
         CGContextSetRGBStrokeColor(node->feedback_window.context,
                                    g_window_manager.insert_feedback_color.r,
                                    g_window_manager.insert_feedback_color.g,
@@ -28,51 +35,55 @@ void insert_feedback_show(struct window_node *node)
     }
 
     frame.origin.x = 0; frame.origin.y = 0;
-    CGMutablePathRef insert = CGPathCreateMutable();
+    CGFloat x1, y1, x2, y2, x3, y3, x4, y4;
     CGFloat minx = CGRectGetMinX(frame), midx = CGRectGetMidX(frame), maxx = CGRectGetMaxX(frame);
     CGFloat miny = CGRectGetMinY(frame), midy = CGRectGetMidY(frame), maxy = CGRectGetMaxY(frame);
 
     switch (node->insert_dir) {
     case DIR_NORTH: {
-        CGPathMoveToPoint(insert, NULL, maxx, midy);
-        CGPathAddLineToPoint(insert, NULL, maxx, maxy);
-        CGPathAddLineToPoint(insert, NULL, minx, maxy);
-        CGPathAddLineToPoint(insert, NULL, minx, midy);
+        x1 = minx; y1 = midy;
+        x2 = minx; y2 = maxy;
+        x3 = maxx; y3 = maxy;
+        x4 = maxx; y4 = midy;
     } break;
     case DIR_EAST: {
-        CGPathMoveToPoint(insert, NULL, midx, miny);
-        CGPathAddLineToPoint(insert, NULL, maxx, miny);
-        CGPathAddLineToPoint(insert, NULL, maxx, maxy);
-        CGPathAddLineToPoint(insert, NULL, midx, maxy);
+        x1 = midx; y1 = miny;
+        x2 = maxx; y2 = miny;
+        x3 = maxx; y3 = maxy;
+        x4 = midx; y4 = maxy;
     } break;
     case DIR_SOUTH: {
-        CGPathMoveToPoint(insert, NULL, minx, midy);
-        CGPathAddLineToPoint(insert, NULL, minx, miny);
-        CGPathAddLineToPoint(insert, NULL, maxx, miny);
-        CGPathAddLineToPoint(insert, NULL, maxx, midy);
+        x1 = minx; y1 = midy;
+        x2 = minx; y2 = miny;
+        x3 = maxx; y3 = miny;
+        x4 = maxx; y4 = midy;
     } break;
     case DIR_WEST: {
-        CGPathMoveToPoint(insert, NULL, midx, miny);
-        CGPathAddLineToPoint(insert, NULL, minx, miny);
-        CGPathAddLineToPoint(insert, NULL, minx, maxy);
-        CGPathAddLineToPoint(insert, NULL, midx, maxy);
+        x1 = midx; y1 = miny;
+        x2 = minx; y2 = miny;
+        x3 = minx; y3 = maxy;
+        x4 = midx; y4 = maxy;
     } break;
     }
 
+    CGRect fill = { {x1, y1}, { x3 - x1, y3 - y1 } };
+    CGMutablePathRef outline = CGPathCreateMutable();
+    CGPathMoveToPoint(outline, NULL, x1, y1);
+    CGPathAddLineToPoint(outline, NULL, x2, y2);
+    CGPathAddLineToPoint(outline, NULL, x3, y3);
+    CGPathAddLineToPoint(outline, NULL, x4, y4);
+
     SLSDisableUpdate(g_connection);
     SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_id);
-
     SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
-
     CGContextClearRect(node->feedback_window.context, frame);
-    CGContextAddPath(node->feedback_window.context, insert);
+    CGContextFillRect(node->feedback_window.context, fill);
+    CGContextAddPath(node->feedback_window.context, outline);
     CGContextStrokePath(node->feedback_window.context);
-
     CGContextFlush(node->feedback_window.context);
-
     SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_id);
     SLSReenableUpdate(g_connection);
-    CGPathRelease(insert);
+    CGPathRelease(outline);
     CFRelease(frame_region);
 }
 

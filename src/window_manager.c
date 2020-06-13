@@ -668,21 +668,23 @@ struct window *window_manager_find_window_on_space_by_rank(struct window_manager
 
 struct window *window_manager_find_window_at_point_filtering_window(struct window_manager *wm, CGPoint point, uint32_t filter_wid)
 {
-    uint32_t window_id = 0;
     CGPoint window_point;
+    uint32_t window_id;
     int window_cid;
 
-    SLSFindWindowByGeometry(g_connection, filter_wid, 0xffffffff, 0, &point, &window_point, &window_id, &window_cid);
+    SLSFindWindowByGeometry(g_connection, filter_wid, -1, 0, &point, &window_point, &window_id, &window_cid);
     return window_manager_find_window(wm, window_id);
 }
 
 struct window *window_manager_find_window_at_point(struct window_manager *wm, CGPoint point)
 {
-    uint32_t window_id = 0;
     CGPoint window_point;
+    uint32_t window_id;
     int window_cid;
 
     SLSFindWindowByGeometry(g_connection, 0, 1, 0, &point, &window_point, &window_id, &window_cid);
+    if (g_connection == window_cid) SLSFindWindowByGeometry(g_connection, window_id, -1, 0, &point, &window_point, &window_id, &window_cid);
+
     return window_manager_find_window(wm, window_id);
 }
 
