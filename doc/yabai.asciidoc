@@ -411,7 +411,7 @@ ARGUMENT
     Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
 
 *border=<BOOL_SEL>'*::
-    Window should draw border when 'config window_border on' is specified.
+    Window should draw border.
 
 *native-fullscreen='<BOOL_SEL>'*::
     Window should enter native macOS fullscreen mode.
