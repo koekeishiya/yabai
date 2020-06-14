@@ -1021,7 +1021,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MENU_OPENED)
     uint32_t window_id = (uint32_t)(intptr_t) context;
 
     if (g_window_manager.enable_window_topmost) {
-        window_manager_set_layer(window_id, LAYER_ABOVE);
+        scripting_addition_set_layer(window_id, LAYER_ABOVE);
     }
 
     return EVENT_SUCCESS;

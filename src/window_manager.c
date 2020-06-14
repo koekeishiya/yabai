@@ -3,7 +3,6 @@
 extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;
-extern char g_sa_socket_file[MAXLEN];
 
 static TABLE_HASH_FUNC(hash_wm)
 {
@@ -394,37 +393,8 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid)
-{
-    int sockfd;
-    char message[MAXLEN];
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_group_add %d %d", parent_wid, child_wid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-}
-
-void window_manager_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid)
-{
-    int sockfd;
-    char message[MAXLEN];
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_group_remove %d %d", parent_wid, child_wid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-}
-
 void window_manager_move_window_cgs(struct window *window, float x, float y, float dx, float dy)
 {
-    int sockfd;
-    char message[MAXLEN];
-
     float fx = x + dx;
     float fy = y + dy;
 
@@ -434,12 +404,7 @@ void window_manager_move_window_cgs(struct window *window, float x, float y, flo
     CGRect bounds = display_bounds(did);
     if (fy < bounds.origin.y) fy = bounds.origin.y;
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_move %d %d %d", window->id, (int)fx, (int)fy);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
+    scripting_addition_move_window(window->id, (int)fx, (int)fy);
 }
 
 void window_manager_move_window(struct window *window, float x, float y)
@@ -490,9 +455,6 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
 
 void window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity)
 {
-    int sockfd;
-    char message[MAXLEN];
-
     if (opacity == 0.0f) {
         if (wm->enable_window_opacity) {
             opacity = window->id == wm->focused_window_id ? wm->active_window_opacity : wm->normal_window_opacity;
@@ -501,12 +463,7 @@ void window_manager_set_opacity(struct window_manager *wm, struct window *window
         }
     }
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", window->id, opacity, wm->window_opacity_duration);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
+    scripting_addition_set_opacity(window->id, opacity, wm->window_opacity_duration);
 }
 
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
@@ -543,24 +500,11 @@ next:
     }
 }
 
-void window_manager_set_layer(uint32_t wid, int layer)
-{
-    int sockfd;
-    char message[MAXLEN];
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_level %d %d", wid, layer);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-}
-
 static void window_manager_set_layer_for_window_relation_with_parent(uint32_t *parents, uint32_t *children, int count, uint32_t wid, int layer)
 {
     for (int i = 0; i < count; ++i) {
         if (parents[i] == wid) {
-            window_manager_set_layer(children[i], layer);
+            scripting_addition_set_layer(children[i], layer);
             window_manager_set_layer_for_window_relation_with_parent(parents, children, count, children[i], layer);
         }
     }
@@ -600,7 +544,7 @@ void window_manager_set_window_layer(struct window *window, int layer)
     uint64_t sid = window_space(window);
     if (!sid) sid = space_manager_active_space();
 
-    window_manager_set_layer(window->id, layer);
+    scripting_addition_set_layer(window->id, layer);
     window_manager_set_layer_for_children(window->connection, window->id, sid, layer);
 }
 
@@ -612,40 +556,21 @@ void window_manager_make_window_topmost(struct window_manager *wm, struct window
     window_manager_set_window_layer(window, layer);
 }
 
-void window_manager_set_sticky(uint32_t wid, bool sticky)
-{
-    int sockfd;
-    char message[MAXLEN];
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_sticky %d %d", wid, sticky);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-}
-
 void window_manager_purify_window(struct window_manager *wm, struct window *window)
 {
     int value;
-    int sockfd;
-    char message[MAXLEN];
 
     if (wm->purify_mode == PURIFY_DISABLED) {
         value = 1;
     } else if (wm->purify_mode == PURIFY_MANAGED) {
         value = window_manager_find_managed_window(wm, window) ? 0 : 1;
-    } else if (wm->purify_mode == PURIFY_ALWAYS) {
+    } else /*if (wm->purify_mode == PURIFY_ALWAYS) */ {
         value = 0;
     }
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_shadow %d %d", window->id, value);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
+    if (scripting_addition_set_shadow(window->id, value)) {
         window->has_shadow = value;
     }
-    socket_close(sockfd);
 }
 
 struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
@@ -896,15 +821,7 @@ void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uin
     window_manager_make_key_window(window_psn, window_id);
     AXUIElementPerformAction(window_ref, kAXRaiseAction);
 #else
-    int sockfd;
-    char message[MAXLEN];
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_focus %d", window_id);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
+    scripting_addition_focus_window("window_focus %d", window_id);
 #endif
 }
 
@@ -1375,27 +1292,20 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
 {
     if (should_sticky) {
         if (!window->is_floating) window_manager_make_window_floating(sm, wm, window, true);
-        window_manager_set_sticky(window->id, true);
+        scripting_addition_set_sticky(window->id, true);
         window->is_sticky = true;
     } else {
-        window_manager_set_sticky(window->id, false);
+        scripting_addition_set_sticky(window->id, false);
         window->is_sticky = false;
     }
 }
 
 void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
-    int sockfd;
-    char message[MAXLEN];
     bool shadow = !window->has_shadow;
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_shadow %d %d", window->id, shadow);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
+    if (scripting_addition_set_shadow(window->id, shadow)) {
         window->has_shadow = shadow;
     }
-    socket_close(sockfd);
 }
 
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -1475,15 +1385,7 @@ void window_manager_toggle_window_pip(struct space_manager *sm, struct window_ma
         bounds.size.height -= (dview->top_padding + dview->bottom_padding);
     }
 
-    int sockfd;
-    char message[MAXLEN];
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "window_scale %d %f %f %f %f", window->id, bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
+    scripting_addition_scale_window(window->id, bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
 }
 
 void window_manager_toggle_window_border(struct window_manager *wm, struct window *window)

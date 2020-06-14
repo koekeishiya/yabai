@@ -1,7 +1,6 @@
 #include "space_manager.h"
 
 extern struct window_manager g_window_manager;
-extern char g_sa_socket_file[MAXLEN];
 extern bool g_mission_control_active;
 extern int g_connection;
 
@@ -620,9 +619,6 @@ void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 
 enum space_op_error space_manager_focus_space(uint64_t sid)
 {
-    int sockfd;
-    char message[MAXLEN];
-
     bool is_in_mc = g_mission_control_active;
     if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
 
@@ -636,14 +632,9 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
     bool is_animating = display_manager_display_is_animating(new_did);
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space %lld", sid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-
+    if (scripting_addition_focus_space(sid)) {
         if (focus_display) display_manager_focus_display(new_did);
     }
-    socket_close(sockfd);
 
     return SPACE_OP_ERROR_SUCCESS;
 }
@@ -672,18 +663,8 @@ static inline bool space_manager_is_space_last_user_space(uint64_t sid)
 
 static void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
 {
-    int sockfd;
-    char message[MAXLEN];
-
-    if (!src_sid) return;
-    if (!dst_sid) return;
-
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space_move %lld %lld %d", src_sid, dst_sid, focus);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
+    if (!src_sid || !dst_sid) return;
+    scripting_addition_move_space_after_space(src_sid, dst_sid, focus);
 }
 
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid)
@@ -776,9 +757,6 @@ enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint6
 
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did)
 {
-    int sockfd;
-    char message[MAXLEN];
-
     bool is_in_mc = g_mission_control_active;
     if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
     if (!sid)     return SPACE_OP_ERROR_MISSING_SRC;
@@ -798,13 +776,7 @@ enum space_op_error space_manager_move_space_to_display(struct space_manager *sm
     uint64_t d_sid = display_space_id(did);
     if (!d_sid) return SPACE_OP_ERROR_MISSING_DST;
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space_move %lld %lld 1", sid, d_sid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-
+    scripting_addition_move_space_after_space(sid, d_sid, 1);
     space_manager_mark_view_invalid(sm, sid);
     space_manager_focus_space(sid);
 
@@ -813,9 +785,6 @@ enum space_op_error space_manager_move_space_to_display(struct space_manager *sm
 
 enum space_op_error space_manager_destroy_space(uint64_t sid)
 {
-    int sockfd;
-    char message[MAXLEN];
-
     bool is_in_mc = g_mission_control_active;
     if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
 
@@ -826,21 +795,12 @@ enum space_op_error space_manager_destroy_space(uint64_t sid)
     bool is_animating = display_manager_display_is_animating(space_display_id(sid));
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space_destroy %lld", sid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-
+    scripting_addition_destroy_space(sid);
     return SPACE_OP_ERROR_SUCCESS;
 }
 
 enum space_op_error space_manager_add_space(uint64_t sid)
 {
-    int sockfd;
-    char message[MAXLEN];
-
     bool is_in_mc = g_mission_control_active;
     if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
     if (!sid)     return SPACE_OP_ERROR_MISSING_SRC;
@@ -848,13 +808,7 @@ enum space_op_error space_manager_add_space(uint64_t sid)
     bool is_animating = display_manager_display_is_animating(space_display_id(sid));
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "space_create %lld", sid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-    socket_close(sockfd);
-
+    scripting_addition_create_space(sid);
     return SPACE_OP_ERROR_SUCCESS;
 }
 

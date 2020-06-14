@@ -51,7 +51,7 @@ void border_enter_fullscreen(struct window *window)
 {
     if (!window->border.id) return;
 
-    window_manager_remove_from_window_group(window->border.id, window->id);
+    scripting_addition_remove_from_window_group(window->border.id, window->id);
     border_order_out(window);
 }
 
@@ -60,7 +60,7 @@ void border_exit_fullscreen(struct window *window)
     if (!window->border.id) return;
 
     border_order_in(window);
-    window_manager_add_to_window_group(window->border.id, window->id);
+    scripting_addition_add_to_window_group(window->border.id, window->id);
 }
 
 void border_create(struct window *window)
@@ -89,7 +89,7 @@ void border_create(struct window *window)
                                g_window_manager.normal_border_color.g,
                                g_window_manager.normal_border_color.b,
                                g_window_manager.normal_border_color.a);
-    window_manager_add_to_window_group(window->border.id, window->id);
+    scripting_addition_add_to_window_group(window->border.id, window->id);
 
     border_redraw(window);
 

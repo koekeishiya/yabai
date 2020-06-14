@@ -148,8 +148,6 @@ void window_manager_set_window_border_enabled(struct window_manager *wm, bool en
 void window_manager_set_window_border_width(struct window_manager *wm, int width);
 void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_normal_window_border_color(struct window_manager *wm, uint32_t color);
-void window_manager_add_to_window_group(uint32_t child_wid, uint32_t parent_wid);
-void window_manager_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid);
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
@@ -164,8 +162,6 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
 void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float);
 void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky);
 void window_manager_make_window_topmost(struct window_manager *wm, struct window *window, bool topmost);
-void window_manager_set_sticky(uint32_t wid, bool sticky);
-void window_manager_set_layer(uint32_t wid, int layer);
 void window_manager_set_window_layer(struct window *window, int layer);
 void window_manager_toggle_window_topmost(struct window *window);
 void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window);
