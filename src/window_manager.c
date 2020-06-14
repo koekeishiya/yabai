@@ -568,9 +568,7 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
         value = 0;
     }
 
-    if (scripting_addition_set_shadow(window->id, value)) {
-        window->has_shadow = value;
-    }
+    if (scripting_addition_set_shadow(window->id, value)) window->has_shadow = value;
 }
 
 struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
@@ -821,7 +819,7 @@ void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uin
     window_manager_make_key_window(window_psn, window_id);
     AXUIElementPerformAction(window_ref, kAXRaiseAction);
 #else
-    scripting_addition_focus_window("window_focus %d", window_id);
+    scripting_addition_focus_window(window_id);
 #endif
 }
 
@@ -1292,20 +1290,16 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
 {
     if (should_sticky) {
         if (!window->is_floating) window_manager_make_window_floating(sm, wm, window, true);
-        scripting_addition_set_sticky(window->id, true);
-        window->is_sticky = true;
+        if (scripting_addition_set_sticky(window->id, true)) window->is_sticky = true;
     } else {
-        scripting_addition_set_sticky(window->id, false);
-        window->is_sticky = false;
+        if (scripting_addition_set_sticky(window->id, false)) window->is_sticky = false;
     }
 }
 
 void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     bool shadow = !window->has_shadow;
-    if (scripting_addition_set_shadow(window->id, shadow)) {
-        window->has_shadow = shadow;
-    }
+    if (scripting_addition_set_shadow(window->id, shadow)) window->has_shadow = shadow;
 }
 
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
