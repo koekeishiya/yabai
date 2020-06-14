@@ -39,8 +39,8 @@
 #include "osax/sa_payload.c"
 #include "osax/sa.m"
 
-#include "event_loop.h"
 #include "event.h"
+#include "event_loop.h"
 #include "event_signal.h"
 #include "event_tap.h"
 #include "workspace.h"

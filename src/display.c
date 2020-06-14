@@ -6,17 +6,13 @@ extern int g_connection;
 static DISPLAY_EVENT_HANDLER(display_handler)
 {
     if (flags & kCGDisplayAddFlag) {
-        struct event *event = event_create(&g_event_loop, DISPLAY_ADDED, (void *)(intptr_t) did);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, DISPLAY_ADDED, (void *)(intptr_t) did, 0, NULL);
     } else if (flags & kCGDisplayRemoveFlag) {
-        struct event *event = event_create(&g_event_loop, DISPLAY_REMOVED, (void *)(intptr_t) did);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, DISPLAY_REMOVED, (void *)(intptr_t) did, 0, NULL);
     } else if (flags & kCGDisplayMovedFlag) {
-        struct event *event = event_create(&g_event_loop, DISPLAY_MOVED, (void *)(intptr_t) did);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, DISPLAY_MOVED, (void *)(intptr_t) did, 0, NULL);
     } else if (flags & kCGDisplayDesktopShapeChangedFlag) {
-        struct event *event = event_create(&g_event_loop, DISPLAY_RESIZED, (void *)(intptr_t) did);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, DISPLAY_RESIZED, (void *)(intptr_t) did, 0, NULL);
     }
 }
 

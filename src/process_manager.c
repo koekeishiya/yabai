@@ -98,8 +98,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
 
         if (process_is_observable(process)) {
             process_manager_add_process(pm, process);
-            struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
-            event_loop_post(&g_event_loop, event);
+            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
         } else {
             process_destroy(process);
         }
@@ -111,15 +110,13 @@ static PROCESS_EVENT_HANDLER(process_handler)
         process->terminated = true;
         process_manager_remove_process(pm, &psn);
 
-        struct event *event = event_create(&g_event_loop, APPLICATION_TERMINATED, process);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, APPLICATION_TERMINATED, process, 0, NULL);
     } break;
     case kEventAppFrontSwitched: {
         struct process *process = process_manager_find_process(pm, &psn);
         if (!process) return noErr;
 
-        struct event *event = event_create(&g_event_loop, APPLICATION_FRONT_SWITCHED, process);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, APPLICATION_FRONT_SWITCHED, process, 0, NULL);
     } break;
     }
 

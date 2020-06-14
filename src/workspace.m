@@ -166,8 +166,7 @@ bool workspace_application_is_finished_launching(struct process *process)
             assert(!process->terminated);
 
             debug("%s: activation policy changed for %s (%d)\n", __FUNCTION__, process->name, process->pid);
-            struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
-            event_loop_post(&g_event_loop, event);
+            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
 
             //
             // :WorstApiEverMade
@@ -191,8 +190,7 @@ bool workspace_application_is_finished_launching(struct process *process)
             assert(!process->terminated);
 
             debug("%s: %s (%d) finished launching\n", __FUNCTION__, process->name, process->pid);
-            struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, process);
-            event_loop_post(&g_event_loop, event);
+            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
 
             //
             // :WorstApiEverMade
@@ -212,52 +210,44 @@ bool workspace_application_is_finished_launching(struct process *process)
 
 - (void)didWake:(NSNotification *)notification
 {
-    struct event *event = event_create(&g_event_loop, SYSTEM_WOKE, NULL);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, SYSTEM_WOKE, NULL, 0, NULL);
 }
 
 - (void)didRestartDock:(NSNotification *)notification
 {
-    struct event *event = event_create(&g_event_loop, DOCK_DID_RESTART, NULL);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, DOCK_DID_RESTART, NULL, 0, NULL);
 }
 
 - (void)didChangeMenuBarHiding:(NSNotification *)notification
 {
-    struct event *event = event_create(&g_event_loop, MENU_BAR_HIDDEN_CHANGED, NULL);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, MENU_BAR_HIDDEN_CHANGED, NULL, 0, NULL);
 }
 
 - (void)didChangeDockPref:(NSNotification *)notification
 {
-    struct event *event = event_create(&g_event_loop, DOCK_DID_CHANGE_PREF, NULL);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, DOCK_DID_CHANGE_PREF, NULL, 0, NULL);
 }
 
 - (void)activeDisplayDidChange:(NSNotification *)notification
 {
-    struct event *event = event_create(&g_event_loop, DISPLAY_CHANGED, NULL);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, DISPLAY_CHANGED, NULL, 0, NULL);
 }
 
 - (void)activeSpaceDidChange:(NSNotification *)notification
 {
-    struct event *event = event_create(&g_event_loop, SPACE_CHANGED, NULL);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, SPACE_CHANGED, NULL, 0, NULL);
 }
 
 - (void)didHideApplication:(NSNotification *)notification
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-    struct event *event = event_create(&g_event_loop, APPLICATION_HIDDEN, (void *)(intptr_t) pid);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, APPLICATION_HIDDEN, (void *)(intptr_t) pid, 0, NULL);
 }
 
 - (void)didUnhideApplication:(NSNotification *)notification
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-    struct event *event = event_create(&g_event_loop, APPLICATION_VISIBLE, (void *)(intptr_t) pid);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, APPLICATION_VISIBLE, (void *)(intptr_t) pid, 0, NULL);
 }
 
 @end

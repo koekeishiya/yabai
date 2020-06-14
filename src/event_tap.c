@@ -18,26 +18,20 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     case kCGEventRightMouseDown: {
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
         consume_mouse_click = mod == g_mouse_state.modifier;
-
-        struct event *event = event_create_p1(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod);
-        event_loop_post(&g_event_loop, event);
-
+        event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod, NULL);
         if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseUp:
     case kCGEventRightMouseUp: {
-        struct event *event = event_create(&g_event_loop, MOUSE_UP, (void *) CFRetain(cgevent));
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(cgevent), 0, NULL);
         if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseDragged:
     case kCGEventRightMouseDragged: {
-        struct event *event = event_create(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(cgevent));
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(cgevent), 0, NULL);
     } break;
     case kCGEventMouseMoved: {
-        struct event *event = event_create(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(cgevent));
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(cgevent), 0, NULL);
     } break;
     }
 

@@ -2158,6 +2158,5 @@ void handle_message(FILE *rsp, char *message)
 
 static SOCKET_DAEMON_HANDLER(message_handler)
 {
-    struct event *event = event_create_p1(&g_event_loop, DAEMON_MESSAGE, message, sockfd);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, DAEMON_MESSAGE, message, sockfd, NULL);
 }

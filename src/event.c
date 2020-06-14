@@ -10,46 +10,6 @@ extern bool g_mission_control_active;
 extern int g_connection;
 extern void *g_workspace_context;
 
-struct event *event_create(struct event_loop *event_loop, enum event_type type, void *context)
-{
-    struct event *event = memory_pool_push(&event_loop->pool, struct event);
-    event->type = type;
-    event->context = context;
-    event->param1 = 0;
-    event->info = 0;
-    return event;
-}
-
-struct event *event_create_p1(struct event_loop *event_loop, enum event_type type, void *context, int param1)
-{
-    struct event *event = memory_pool_push(&event_loop->pool, struct event);
-    event->type = type;
-    event->context = context;
-    event->param1 = param1;
-    event->info = 0;
-    return event;
-}
-
-void event_destroy(struct event_loop *event_loop, struct event *event)
-{
-    switch (event->type) {
-    default: break;
-
-    case APPLICATION_TERMINATED: {
-        process_destroy(event->context);
-    } break;
-    case WINDOW_CREATED: {
-        CFRelease(event->context);
-    } break;
-    case MOUSE_DOWN:
-    case MOUSE_UP:
-    case MOUSE_DRAGGED:
-    case MOUSE_MOVED: {
-        CFRelease(event->context);
-    } break;
-    }
-}
-
 static void window_did_receive_focus(struct window_manager *wm, struct mouse_state *ms, struct window *window)
 {
     window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
@@ -102,10 +62,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
             __block ProcessSerialNumber psn = process->psn;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 struct process *_process = process_manager_find_process(&g_process_manager, &psn);
-                if (!_process) return;
-
-                struct event *event = event_create(&g_event_loop, APPLICATION_LAUNCHED, _process);
-                event_loop_post(&g_event_loop, event);
+                if (_process) event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, _process, 0, NULL);
             });
         }
 
@@ -113,8 +70,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
     }
 
     if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
-        struct event *event = event_create(&g_event_loop, APPLICATION_FRONT_SWITCHED, process);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, APPLICATION_FRONT_SWITCHED, process, 0, NULL);
         window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
     }
 
@@ -198,11 +154,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_FRONT_SWITCHED)
         return EVENT_FAILURE;
     }
 
-    struct event *de_event = event_create(&g_event_loop, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid);
-    event_loop_post(&g_event_loop, de_event);
-
-    struct event *re_event = event_create(&g_event_loop, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid);
-    event_loop_post(&g_event_loop, re_event);
+    event_loop_post(&g_event_loop, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid, 0, NULL);
+    event_loop_post(&g_event_loop, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid, 0, NULL);
 
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     g_process_manager.last_front_pid = g_process_manager.front_pid;
@@ -542,8 +495,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
     }
 
     if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
-        struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id, 0, NULL);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
     }
 
@@ -972,8 +924,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
     }
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        struct event *event = event_create(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0, NULL);
     });
 
     return EVENT_SUCCESS;
@@ -1011,13 +962,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
 
     if (found) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            struct event *event = event_create(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL);
-            event_loop_post(&g_event_loop, event);
+            event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0, NULL);
         });
     } else {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.0f), dispatch_get_main_queue(), ^{
-            struct event *event = event_create(&g_event_loop, MISSION_CONTROL_EXIT, NULL);
-            event_loop_post(&g_event_loop, event);
+            event_loop_post(&g_event_loop, MISSION_CONTROL_EXIT, NULL, 0, NULL);
         });
     }
 

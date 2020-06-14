@@ -1,6 +1,6 @@
 #include "event_loop.h"
 
-static bool queue_init(struct queue *queue)
+static inline bool queue_init(struct queue *queue)
 {
     if (!memory_pool_init(&queue->pool, QUEUE_POOL_SIZE)) return false;
     queue->head = memory_pool_push(&queue->pool, struct queue_item);
@@ -10,7 +10,7 @@ static bool queue_init(struct queue *queue)
     return true;
 }
 
-static void queue_push(struct queue *queue, struct event *event)
+static inline void queue_push(struct queue *queue, struct event *event)
 {
     bool success;
     struct queue_item *tail, *new_tail;
@@ -28,7 +28,7 @@ static void queue_push(struct queue *queue, struct event *event)
     __sync_bool_compare_and_swap(&queue->tail, tail, new_tail);
 }
 
-static struct event *queue_pop(struct queue *queue)
+static inline struct event *queue_pop(struct queue *queue)
 {
     struct queue_item *head;
 
@@ -38,6 +38,36 @@ static struct event *queue_pop(struct queue *queue)
     } while (!__sync_bool_compare_and_swap(&queue->head, head, head->next));
 
     return head->next->data;
+}
+
+static inline struct event *event_loop_create_event(struct event_loop *event_loop, enum event_type type, void *context, int param1, volatile uint32_t *info)
+{
+    struct event *event = memory_pool_push(&event_loop->pool, struct event);
+    event->type = type;
+    event->context = context;
+    event->param1 = param1;
+    event->info = info;
+    return event;
+}
+
+static inline void event_loop_destroy_event(struct event *event)
+{
+    switch (event->type) {
+    default: break;
+
+    case APPLICATION_TERMINATED: {
+        process_destroy(event->context);
+    } break;
+    case WINDOW_CREATED: {
+        CFRelease(event->context);
+    } break;
+    case MOUSE_DOWN:
+    case MOUSE_UP:
+    case MOUSE_DRAGGED:
+    case MOUSE_MOVED: {
+        CFRelease(event->context);
+    } break;
+    }
 }
 
 static void *event_loop_run(void *context)
@@ -54,7 +84,7 @@ static void *event_loop_run(void *context)
 
             if (event->info) *event->info = (result << 0x1) | EVENT_PROCESSED;
 
-            event_destroy(event_loop, event);
+            event_loop_destroy_event(event);
         } else {
             sem_wait(event_loop->semaphore);
         }
@@ -63,10 +93,10 @@ static void *event_loop_run(void *context)
     return NULL;
 }
 
-void event_loop_post(struct event_loop *event_loop, struct event *event)
+void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1, volatile uint32_t *info)
 {
     assert(event_loop->is_running);
-    queue_push(&event_loop->queue, event);
+    queue_push(&event_loop->queue, event_loop_create_event(event_loop, type, context, param1, info));
     sem_post(event_loop->semaphore);
 }
 

@@ -178,8 +178,4 @@ struct event
     int param1;
 };
 
-struct event *event_create(struct event_loop *event_loop, enum event_type type, void *context);
-struct event *event_create_p1(struct event_loop *event_loop, enum event_type type, void *context, int param1);
-void event_destroy(struct event_loop *event_loop, struct event *event);
-
 #endif

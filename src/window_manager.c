@@ -1043,8 +1043,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     }
 
     if (window_manager_find_lost_focused_event(wm, window->id)) {
-        struct event *event = event_create(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id);
-        event_loop_post(&g_event_loop, event);
+        event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id, 0, NULL);
         window_manager_remove_lost_focused_event(wm, window->id);
     }
 

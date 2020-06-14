@@ -228,8 +228,7 @@ static inline void init_misc_settings(void)
 
 static CONNECTION_CALLBACK(connection_handler)
 {
-    struct event *event = event_create(&g_event_loop, MISSION_CONTROL_ENTER, NULL);
-    event_loop_post(&g_event_loop, event);
+    event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
 }
 
 static void parse_arguments(int argc, char **argv)
