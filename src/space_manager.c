@@ -661,12 +661,6 @@ static inline bool space_manager_is_space_last_user_space(uint64_t sid)
     return result;
 }
 
-static void space_manager_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
-{
-    if (!src_sid || !dst_sid) return;
-    scripting_addition_move_space_after_space(src_sid, dst_sid, focus);
-}
-
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid)
 {
     bool is_in_mc = g_mission_control_active;
@@ -694,22 +688,22 @@ enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uin
     int selector_mci = space_manager_mission_control_index(selector_sid);
 
     if (acting_sid_is_first && !selector_sid_is_first && selector_mci - acting_mci == 1) {
-        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
     } else if (!acting_sid_is_first && selector_sid_is_first && acting_mci - selector_mci == 1) {
-        space_manager_move_space_after_space(selector_sid, acting_sid, selector_sid == space_manager_active_space());
+        scripting_addition_move_space_after_space(selector_sid, acting_sid, selector_sid == space_manager_active_space());
     } else if (acting_sid_is_first && !selector_sid_is_first) {
-        space_manager_move_space_after_space(selector_sid, acting_sid, false);
-        space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+        scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
+        scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
     } else if (!acting_sid_is_first && selector_sid_is_first) {
-        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
-        space_manager_move_space_after_space(selector_sid, acting_prev_sid, false);
+        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        scripting_addition_move_space_after_space(selector_sid, acting_prev_sid, false);
     } else if (!acting_sid_is_first && !selector_sid_is_first) {
         if (acting_mci > selector_mci) {
-            space_manager_move_space_after_space(selector_sid, acting_sid, false);
-            space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+            scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
+            scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
         } else {
-            space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
-            space_manager_move_space_after_space(selector_sid, acting_prev_sid, false);
+            scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+            scripting_addition_move_space_after_space(selector_sid, acting_prev_sid, false);
         }
     }
 
@@ -740,15 +734,15 @@ enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint6
     bool selector_sid_is_first = !selector_prev_sid || selector_prev_did != selector_did;
 
     if (acting_sid_is_first && !selector_sid_is_first) {
-        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
     } else if (!acting_sid_is_first && selector_sid_is_first) {
-        space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
-        space_manager_move_space_after_space(selector_sid, acting_sid, false);
+        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
     } else if (!acting_sid_is_first && !selector_sid_is_first) {
         if (space_manager_mission_control_index(acting_sid) > space_manager_mission_control_index(selector_sid)) {
-            space_manager_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+            scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
         } else {
-            space_manager_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+            scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
         }
     }
 
