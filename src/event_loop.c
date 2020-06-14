@@ -23,7 +23,6 @@ static inline void queue_push(struct queue *queue, struct event *event)
     do {
         tail = queue->tail;
         success = __sync_bool_compare_and_swap(&tail->next, NULL, new_tail);
-        if (!success) __sync_bool_compare_and_swap(&queue->tail, tail, tail->next);
     } while (!success);
     __sync_bool_compare_and_swap(&queue->tail, tail, new_tail);
 }
