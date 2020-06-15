@@ -345,6 +345,23 @@ int window_level(struct window *window)
     return level;
 }
 
+uint64_t window_tags(struct window *window)
+{
+    uint64_t tags = 0;
+    CFArrayRef window_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);
+    CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
+
+    if (SLSWindowIteratorAdvance(iterator)) {
+        tags = SLSWindowIteratorGetTags(iterator);
+    }
+
+    CFRelease(query);
+    CFRelease(iterator);
+    CFRelease(window_ref);
+    return tags;
+}
+
 CFStringRef window_role(struct window *window)
 {
     const void *role = NULL;
