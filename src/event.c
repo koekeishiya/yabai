@@ -259,7 +259,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
     int window_count = buf_len(window_list);
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (!window) continue;
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
