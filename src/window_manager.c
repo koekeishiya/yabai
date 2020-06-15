@@ -749,21 +749,28 @@ static void window_manager_defer_window_raise(ProcessSerialNumber *window_psn, u
 static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     uint8_t bytes1[0xf8] = {
-        [0x04] = 0xF8,
+        [0x04] = 0xf8,
         [0x08] = 0x01,
-        [0x3a] = 0x10
+        [0x3a] = 0x10,
+        [0x26] = 0xf0,
+        [0x27] = 0xbf,
+        [0x2e] = 0xf0,
+        [0x2f] = 0xbf
     };
 
     uint8_t bytes2[0xf8] = {
-        [0x04] = 0xF8,
+        [0x04] = 0xf8,
         [0x08] = 0x02,
-        [0x3a] = 0x10
+        [0x3a] = 0x10,
+        [0x26] = 0xf0,
+        [0x27] = 0xbf,
+        [0x2e] = 0xf0,
+        [0x2f] = 0xbf
     };
 
     memcpy(bytes1 + 0x3c, &window_id, sizeof(uint32_t));
-    memset(bytes1 + 0x20, 0xFF, 0x10);
     memcpy(bytes2 + 0x3c, &window_id, sizeof(uint32_t));
-    memset(bytes2 + 0x20, 0xFF, 0x10);
+
     SLPSPostEventRecordTo(window_psn, bytes1);
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
