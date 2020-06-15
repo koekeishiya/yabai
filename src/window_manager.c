@@ -734,24 +734,11 @@ struct window *window_manager_find_smallest_managed_window(struct space_manager 
     return best_id ? window_manager_find_window(wm, best_id) : NULL;
 }
 
-static void window_manager_defer_window_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
-{
-    uint8_t bytes[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x0d,
-        [0x8a] = 0x09
-    };
-
-    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    SLPSPostEventRecordTo(window_psn, bytes);
-}
-
 static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     uint8_t bytes1[0xf8] = {
         [0x04] = 0xf8,
         [0x08] = 0x01,
-        [0x3a] = 0x10,
         [0x26] = 0xf0,
         [0x27] = 0xbf,
         [0x2e] = 0xf0,
@@ -761,7 +748,6 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     uint8_t bytes2[0xf8] = {
         [0x04] = 0xf8,
         [0x08] = 0x02,
-        [0x3a] = 0x10,
         [0x26] = 0xf0,
         [0x27] = 0xbf,
         [0x2e] = 0xf0,
@@ -801,8 +787,6 @@ static void window_manager_activate_window(ProcessSerialNumber *window_psn, uint
 
 void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
-    window_manager_defer_window_raise(window_psn, window_id);
-
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
         window_manager_deactivate_window(&g_window_manager.focused_window_psn, g_window_manager.focused_window_id);
 
