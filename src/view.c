@@ -13,9 +13,9 @@ void insert_feedback_show(struct window_node *node)
     CGSNewRegionWithRect(&frame, &frame_region);
 
     if (!node->feedback_window.id) {
-        uint64_t tags[2] = { kCGSIgnoreForExposeTagBit | kCGSIgnoreForEventsTagBit, 0 };
+        uint64_t tags = { kCGSIgnoreForExposeTagBit | kCGSIgnoreForEventsTagBit };
         SLSNewWindow(g_connection, 2, 0, 0, frame_region, &node->feedback_window.id);
-        SLSSetWindowTags(g_connection, node->feedback_window.id, tags, 64);
+        SLSSetWindowTags(g_connection, node->feedback_window.id, &tags, 64);
         SLSSetWindowResolution(g_connection, node->feedback_window.id, 1.0f);
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
         SLSSetWindowLevel(g_connection, node->feedback_window.id, g_floating_window_level);

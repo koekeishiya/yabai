@@ -888,16 +888,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
     if (window) {
         if (window->id == g_window_manager.focused_window_id) return EVENT_SUCCESS;
-
-        if (!window_level_is_standard(window)) return EVENT_SUCCESS;
-        if (!window_is_standard(window))       return EVENT_SUCCESS;
-
-        g_mouse_state.ffm_window_id = window->id;
+        if (!window_level_is_standard(window))                return EVENT_SUCCESS;
+        if (!window_is_standard(window))                      return EVENT_SUCCESS;
 
         if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
             window_manager_focus_window_without_raise(&window->application->psn, window->id);
+            g_mouse_state.ffm_window_id = window->id;
         } else {
             window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+            g_mouse_state.ffm_window_id = window->id;
         }
     } else {
         uint32_t cursor_did = display_manager_point_display_id(point);

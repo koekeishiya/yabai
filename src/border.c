@@ -76,9 +76,9 @@ void border_create(struct window *window)
     window->border.path = CGPathCreateMutable();
     CGPathAddRoundedRect(window->border.path, NULL, window->border.frame, 0, 0);
 
-    uint64_t tags[2] = { kCGSIgnoreForEventsTagBit, 0 };
+    uint64_t tags = { kCGSIgnoreForEventsTagBit };
     SLSNewWindow(g_connection, 2, 0, 0, window->border.region, &window->border.id);
-    SLSSetWindowTags(g_connection, window->border.id, tags, 64);
+    SLSSetWindowTags(g_connection, window->border.id, &tags, 64);
     SLSSetWindowResolution(g_connection, window->border.id, 1.0f);
     SLSSetWindowOpacity(g_connection, window->border.id, 0);
     SLSSetWindowLevel(g_connection, window->border.id, window_level(window));
