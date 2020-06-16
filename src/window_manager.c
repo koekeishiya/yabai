@@ -500,52 +500,42 @@ next:
     }
 }
 
-static void window_manager_set_layer_for_window_relation_with_parent(uint32_t *parents, uint32_t *children, int count, uint32_t wid, int layer)
+void window_manager_set_window_layer(struct window *window, int layer)
 {
-    for (int i = 0; i < count; ++i) {
-        if (parents[i] == wid) {
-            scripting_addition_set_layer(children[i], layer);
-            window_manager_set_layer_for_window_relation_with_parent(parents, children, count, children[i], layer);
-        }
-    }
-}
+    scripting_addition_set_layer(window->id, layer);
 
-static void window_manager_set_layer_for_children(int cid, uint32_t wid, uint64_t sid, int layer)
-{
-    int count;
-    uint32_t *window_list = space_window_list(sid, &count, false);
+    CFArrayRef window_list = SLSCopyAssociatedWindows(g_connection, window->id);
     if (!window_list) return;
 
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), count, kCFNumberSInt32Type);
-    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_list_ref, count);
+    int window_count = CFArrayGetCount(window_list);
+    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_list, window_count);
     CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
 
     int relation_count = 0;
-    uint32_t parents[count];
-    uint32_t children[count];
+    uint32_t parent_list[window_count];
+    uint32_t child_list[window_count];
 
     while (SLSWindowIteratorAdvance(iterator)) {
-        parents[relation_count]  = SLSWindowIteratorGetParentID(iterator);
-        children[relation_count] = SLSWindowIteratorGetWindowID(iterator);
+        parent_list[relation_count] = SLSWindowIteratorGetParentID(iterator);
+        child_list[relation_count] = SLSWindowIteratorGetWindowID(iterator);
         ++relation_count;
     }
 
-    assert(relation_count == count);
-    window_manager_set_layer_for_window_relation_with_parent(parents, children, relation_count, wid, layer);
+    int check_count = 1;
+    uint32_t check_wid[window_count];
+    check_wid[0] = window->id;
+
+    for (int i = 0; i < check_count; ++i) {
+        for (int j = 0; j < window_count; ++j) {
+            if (parent_list[j] != check_wid[i]) continue;
+            scripting_addition_set_layer(child_list[j], layer);
+            check_wid[check_count++] = child_list[j];
+        }
+    }
 
     CFRelease(query);
     CFRelease(iterator);
-    CFRelease(window_list_ref);
-    free(window_list);
-}
-
-void window_manager_set_window_layer(struct window *window, int layer)
-{
-    uint64_t sid = window_space(window);
-    if (!sid) sid = space_manager_active_space();
-
-    scripting_addition_set_layer(window->id, layer);
-    window_manager_set_layer_for_children(window->connection, window->id, sid, layer);
+    CFRelease(window_list);
 }
 
 void window_manager_make_window_topmost(struct window_manager *wm, struct window *window, bool topmost)

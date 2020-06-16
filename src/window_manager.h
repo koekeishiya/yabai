@@ -2,6 +2,7 @@
 #define WINDOW_MANAGER_H
 
 extern CGError SLSMoveWindow(int cid, uint32_t wid, CGPoint *point);
+extern CFArrayRef SLSCopyAssociatedWindows(int cid, uint32_t wid);
 extern CFTypeRef SLSWindowQueryWindows(int cid, CFArrayRef windows, int count);
 extern CFTypeRef SLSWindowQueryResultCopyWindows(CFTypeRef window_query);
 extern CGError SLSWindowIteratorAdvance(CFTypeRef iterator);
