@@ -522,14 +522,14 @@ void window_manager_set_window_layer(struct window *window, int layer)
     }
 
     int check_count = 1;
-    uint32_t check_wid[window_count];
-    check_wid[0] = window->id;
+    uint32_t check_list[window_count];
+    check_list[0] = window->id;
 
     for (int i = 0; i < check_count; ++i) {
         for (int j = 0; j < window_count; ++j) {
-            if (parent_list[j] != check_wid[i]) continue;
+            if (parent_list[j] != check_list[i]) continue;
             scripting_addition_set_layer(child_list[j], layer);
-            check_wid[check_count++] = child_list[j];
+            check_list[check_count++] = child_list[j];
         }
     }
 
