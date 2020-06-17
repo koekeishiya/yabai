@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Fixed a race condition upon receiving window destroy notifications from macOS because their API is garbage and reports duplicate notifications for the same window [#580](https://github.com/koekeishiya/yabai/issues/580)
+- focus-follows-mouse *autofocus* needs to perform some validation in order to see if the window is focusable [#578](https://github.com/koekeishiya/yabai/issues/578)
 
 ## [3.2.0] - 2020-06-14
 ### Added

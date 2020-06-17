@@ -892,6 +892,35 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
         if (!window_is_standard(window))                      return EVENT_SUCCESS;
 
         if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
+
+            //
+            // NOTE(koekeishiya): Look for a window with role AXSheet or AXDrawer
+            // and forward focus to it because we are not allowed to focus the main
+            // window in these cases.
+            //
+
+            CFArrayRef window_list = SLSCopyAssociatedWindows(g_connection, window->id);
+            int window_count = CFArrayGetCount(window_list);
+
+            uint32_t child_wid;
+            for (int i = 0; i < window_count; ++i) {
+                CFNumberGetValue(CFArrayGetValueAtIndex(window_list, i), kCFNumberSInt64Type, &child_wid);
+                struct window *child = window_manager_find_window(&g_window_manager, child_wid);
+                if (!child) continue;
+
+                CFTypeRef role = window_role(child);
+                if (!role) continue;
+
+                bool valid = CFEqual(role, kAXSheetRole) || CFEqual(role, kAXDrawerRole);
+                CFRelease(role);
+
+                if (valid) {
+                    window = child;
+                    break;
+                }
+            }
+
+            CFRelease(window_list);
             window_manager_focus_window_without_raise(&window->application->psn, window->id);
             g_mouse_state.ffm_window_id = window->id;
         } else {
