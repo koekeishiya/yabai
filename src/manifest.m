@@ -35,8 +35,6 @@
 #include "misc/socket.c"
 
 #include "osax/sa.h"
-#include "osax/sa_loader.c"
-#include "osax/sa_payload.c"
 #include "osax/sa.m"
 
 #include "event.h"

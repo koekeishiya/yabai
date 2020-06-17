@@ -7,18 +7,19 @@ SCRIPT_PATH    = ./scripts
 ASSET_PATH     = ./assets
 SMP_PATH       = ./examples
 ARCH_PATH      = ./archive
-YABAI_SRC      = ./src/manifest.m
+OSAX_SRC       = ./src/osax/sa_loader.c ./src/osax/sa_payload.c
+YABAI_SRC      = ./src/manifest.m $(OSAX_SRC)
 OSAX_PATH      = ./src/osax
 BINS           = $(BUILD_PATH)/yabai
 
-.PHONY: all clean install sign archive man sa
+.PHONY: all clean install sign archive man
 
-all: clean $(BINS)
+all: clean-build $(BINS)
 
 install: BUILD_FLAGS=-std=c99 -Wall -DNDEBUG -O2 -fvisibility=hidden -mmacosx-version-min=10.13
-install: clean $(BINS)
+install: clean-build $(BINS)
 
-sa:
+$(OSAX_SRC): $(OSAX_PATH)/loader.m $(OSAX_PATH)/payload.m
 	clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/loader -framework Cocoa
 	clang $(OSAX_PATH)/payload.m -DOBJC_OLD_DISPATCH_PROTOTYPES=1 -shared -fPIC -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/payload -framework Cocoa -framework Carbon
 	xxd -i -a $(OSAX_PATH)/loader $(OSAX_PATH)/sa_loader.c
@@ -32,7 +33,7 @@ man:
 icon:
 	python $(SCRIPT_PATH)/seticon.py $(ASSET_PATH)/icon/2x/icon-512px@2x.png $(BUILD_PATH)/yabai
 
-archive: man sa install sign icon
+archive: man install sign icon
 	rm -rf $(ARCH_PATH)
 	mkdir -p $(ARCH_PATH)
 	cp -r $(BUILD_PATH) $(ARCH_PATH)/
@@ -44,8 +45,11 @@ archive: man sa install sign icon
 sign:
 	codesign -fs "yabai-cert" $(BUILD_PATH)/yabai
 
-clean:
+clean-build:
 	rm -rf $(BUILD_PATH)
+
+clean: clean-build
+	rm -f $(OSAX_SRC)
 
 $(BUILD_PATH)/yabai: $(YABAI_SRC)
 	mkdir -p $(BUILD_PATH)
