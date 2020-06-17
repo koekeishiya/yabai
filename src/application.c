@@ -10,10 +10,9 @@ static OBSERVER_CALLBACK(application_notification_handler)
         uint32_t *window_id_ptr = *(uint32_t **) context;
         if (!window_id_ptr) return;
 
-        uint32_t window_id = *window_id_ptr;
-        while (!__sync_bool_compare_and_swap((uint32_t **) context, window_id_ptr, NULL));
+        if (!__sync_bool_compare_and_swap((uint32_t **) context, window_id_ptr, NULL)) return;
 
-        event_loop_post(&g_event_loop, WINDOW_DESTROYED, (void *)(uintptr_t) window_id, 0, NULL);
+        event_loop_post(&g_event_loop, WINDOW_DESTROYED, (void *)(uintptr_t) *window_id_ptr, 0, NULL);
     } else if (CFEqual(notification, kAXFocusedWindowChangedNotification)) {
         uint32_t window_id = ax_window_id(element);
         if (window_id) event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window_id, 0, NULL);
@@ -41,7 +40,7 @@ static OBSERVER_CALLBACK(application_notification_handler)
 static void
 application_observe_notification(struct application *application, int notification)
 {
-    AXError result = _AXObserverAddNotification(application->observer_ref, application->ref, ax_application_notification[notification], application);
+    AXError result = AXObserverAddNotification(application->observer_ref, application->ref, ax_application_notification[notification], application);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         application->notification |= 1 << notification;
     } else {
@@ -53,7 +52,7 @@ application_observe_notification(struct application *application, int notificati
 static void
 application_unobserve_notification(struct application *application, int notification)
 {
-    _AXObserverRemoveNotification(application->observer_ref, application->ref, ax_application_notification[notification]);
+    AXObserverRemoveNotification(application->observer_ref, application->ref, ax_application_notification[notification]);
     application->notification &= ~(1 << notification);
 }
 

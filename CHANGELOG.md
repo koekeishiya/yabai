@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Fixed a race condition upon receiving window destroy notifications from macOS because their API is garbage and reports duplicate notifications for the same window [#580](https://github.com/koekeishiya/yabai/issues/580)
 
 ## [3.2.0] - 2020-06-14
 ### Added

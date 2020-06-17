@@ -8,7 +8,7 @@ extern int g_connection;
 static void
 window_observe_notification(struct window *window, int notification)
 {
-    AXError result = _AXObserverAddNotification(window->application->observer_ref, window->ref, ax_window_notification[notification], window->id_ptr);
+    AXError result = AXObserverAddNotification(window->application->observer_ref, window->ref, ax_window_notification[notification], window->id_ptr);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         window->notification |= 1 << notification;
     } else {
@@ -19,7 +19,7 @@ window_observe_notification(struct window *window, int notification)
 static void
 window_unobserve_notification(struct window *window, int notification)
 {
-    _AXObserverRemoveNotification(window->application->observer_ref, window->ref, ax_window_notification[notification]);
+    AXObserverRemoveNotification(window->application->observer_ref, window->ref, ax_window_notification[notification]);
     window->notification &= ~(1 << notification);
 }
 

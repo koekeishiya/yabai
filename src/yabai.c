@@ -182,26 +182,6 @@ static void exec_config_file(void)
     }
 }
 
-static inline void load_axobserver_async(void)
-{
-    void *handle = dlopen("/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework/Versions/Current/HIServices", RTLD_LAZY);
-    if (handle) {
-        _AXObserverAddNotification = dlsym(handle, "AXObserverAddNotificationAsync");
-        _AXObserverRemoveNotification = dlsym(handle, "AXObserverRemoveNotificationAsync");
-
-        if (_AXObserverAddNotification && _AXObserverRemoveNotification) {
-            debug("%s: loaded AXObserverAddNotificationAsync and AXObserverRemoveNotificationAsync\n", __FUNCTION__);
-            return;
-        }
-
-        dlclose(handle);
-    }
-
-    _AXObserverAddNotification = &AXObserverAddNotification;
-    _AXObserverRemoveNotification = &AXObserverRemoveNotification;
-    debug("%s: falling back to AXObserverAddNotification and AXObserverRemoveNotification\n", __FUNCTION__);
-}
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static inline void init_misc_settings(void)
@@ -291,7 +271,6 @@ int main(int argc, char **argv)
         error("yabai: could not access accessibility features! abort..\n");
     }
 
-    load_axobserver_async();
     init_misc_settings();
     acquire_lockfile();
 

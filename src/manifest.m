@@ -12,7 +12,6 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <fcntl.h>
-#include <dlfcn.h>
 #include <regex.h>
 #include <execinfo.h>
 #include <signal.h>
