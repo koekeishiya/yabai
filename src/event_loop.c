@@ -72,10 +72,8 @@ static inline void event_loop_destroy_event(struct event *event)
 static void *event_loop_run(void *context)
 {
     struct event_loop *event_loop = (struct event_loop *) context;
-    struct queue *queue = (struct queue *) &event_loop->queue;
-
     while (event_loop->is_running) {
-        struct event *event = queue_pop(queue);
+        struct event *event = queue_pop(&event_loop->queue);
         if (event) {
             uint32_t result = event_handler[event->type](event->context, event->param1);
 
