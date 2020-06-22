@@ -253,6 +253,22 @@ void window_manager_set_normal_window_border_color(struct window_manager *wm, ui
     }
 }
 
+void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool enabled)
+{
+    wm->enable_window_opacity = enabled;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                window_manager_set_opacity(wm, window, enabled ? window->opacity : 1.0f);
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
 void window_manager_center_mouse(struct window_manager *wm, struct window *window)
 {
     if (!wm->enable_mff) return;

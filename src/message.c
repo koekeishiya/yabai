@@ -423,9 +423,9 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         if (!token_is_valid(value)) {
             fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_opacity]);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-            g_window_manager.enable_window_opacity = false;
+            window_manager_set_window_opacity_enabled(&g_window_manager, false);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-            g_window_manager.enable_window_opacity = true;
+            window_manager_set_window_opacity_enabled(&g_window_manager, true);
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
