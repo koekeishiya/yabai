@@ -722,6 +722,7 @@ void view_clear(struct view *view)
     if (view->root) {
         if (view->root->left)  window_node_destroy(view->root->left);
         if (view->root->right) window_node_destroy(view->root->right);
+        if (view->root->window_id) window_manager_remove_managed_window(&g_window_manager, view->root->window_id);
         insert_feedback_destroy(view->root);
         memset(view->root, 0, sizeof(struct window_node));
         view_update(view);
