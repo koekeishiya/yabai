@@ -377,8 +377,8 @@ static void init_instances()
 {
     // TODO(koekeishiya): Do proper version checks with minor and patch version..
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if (os_version.minorVersion != 13 && os_version.minorVersion != 14 && os_version.minorVersion != 15) {
-        NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra, Mojave and Catalina!");
+    if (os_version.minorVersion != 13 && os_version.minorVersion != 14 && os_version.minorVersion != 15 && os_version.minorVersion != 16) {
+        NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra, Mojave, Catalina and Big Sur!");
         return;
     }
 
