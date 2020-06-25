@@ -904,7 +904,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
 
             uint32_t child_wid;
             for (int i = 0; i < window_count; ++i) {
-                CFNumberGetValue(CFArrayGetValueAtIndex(window_list, i), kCFNumberSInt64Type, &child_wid);
+                CFNumberGetValue(CFArrayGetValueAtIndex(window_list, i), kCFNumberSInt32Type, &child_wid);
                 struct window *child = window_manager_find_window(&g_window_manager, child_wid);
                 if (!child) continue;
 
