@@ -202,7 +202,9 @@ uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
 }
 
 uint64_t get_add_space_offset(NSOperatingSystemVersion os_version) {
-    if (os_version.minorVersion == 15) {
+    if (os_version.minorVersion == 16) {
+        return 0x230000;
+    } else if (os_version.minorVersion == 15) {
         return 0x230000;
     } else if (os_version.minorVersion == 14) {
         return 0x27e500;
