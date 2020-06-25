@@ -217,7 +217,9 @@ static int scripting_addition_perform_validation(bool loaded)
         return PAYLOAD_STATUS_CON_ERROR;
     }
 
-    debug("yabai: osax version = %s, osax attrib = 0x%X\n", version, attrib);
+    NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    debug("yabai: osax version = %s, osax attrib = 0x%X, macOS version = %zd.%zd.%zd\n", version, attrib,
+                os_version.majorVersion, os_version.minorVersion, os_version.patchVersion);
     bool is_latest_version_installed = scripting_addition_check() == 0;
 
     if (!string_equals(version, OSAX_VERSION)) {
