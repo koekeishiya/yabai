@@ -832,6 +832,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
         window_manager_move_window_cgs(g_mouse_state.window, g_mouse_state.window_frame.origin.x, g_mouse_state.window_frame.origin.y, dx, dy);
+    } else if (g_mouse_state.current_action == MOUSE_MODE_MOVE_LEGACY) {
+        CGPoint point = CGEventGetLocation(context);
+        int dx = point.x - g_mouse_state.down_location.x;
+        int dy = point.y - g_mouse_state.down_location.y;
+        float fx = g_mouse_state.window_frame.origin.x + dx;
+        float fy = g_mouse_state.window_frame.origin.y + dy;
+        window_manager_move_window(g_mouse_state.window, fx, fy);
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         uint64_t event_time = CGEventGetTimestamp(context);
         float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);

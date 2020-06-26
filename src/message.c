@@ -47,23 +47,24 @@ extern bool g_verbose;
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
-#define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
-#define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
-#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST "first_child"
-#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND "second_child"
-#define ARGUMENT_CONFIG_SHADOW_FLT           "float"
-#define ARGUMENT_CONFIG_LAYOUT_BSP           "bsp"
-#define ARGUMENT_CONFIG_LAYOUT_FLOAT         "float"
-#define ARGUMENT_CONFIG_MOUSE_MOD_ALT        "alt"
-#define ARGUMENT_CONFIG_MOUSE_MOD_SHIFT      "shift"
-#define ARGUMENT_CONFIG_MOUSE_MOD_CMD        "cmd"
-#define ARGUMENT_CONFIG_MOUSE_MOD_CTRL       "ctrl"
-#define ARGUMENT_CONFIG_MOUSE_MOD_FN         "fn"
-#define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE    "move"
-#define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE  "resize"
-#define ARGUMENT_CONFIG_EXTERNAL_BAR_MAIN    "main"
-#define ARGUMENT_CONFIG_EXTERNAL_BAR_ALL     "all"
-#define ARGUMENT_CONFIG_EXTERNAL_BAR         "%5[^:]:%d:%d"
+#define ARGUMENT_CONFIG_FFM_AUTOFOCUS            "autofocus"
+#define ARGUMENT_CONFIG_FFM_AUTORAISE            "autoraise"
+#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST     "first_child"
+#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND     "second_child"
+#define ARGUMENT_CONFIG_SHADOW_FLT               "float"
+#define ARGUMENT_CONFIG_LAYOUT_BSP               "bsp"
+#define ARGUMENT_CONFIG_LAYOUT_FLOAT             "float"
+#define ARGUMENT_CONFIG_MOUSE_MOD_ALT            "alt"
+#define ARGUMENT_CONFIG_MOUSE_MOD_SHIFT          "shift"
+#define ARGUMENT_CONFIG_MOUSE_MOD_CMD            "cmd"
+#define ARGUMENT_CONFIG_MOUSE_MOD_CTRL           "ctrl"
+#define ARGUMENT_CONFIG_MOUSE_MOD_FN             "fn"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE        "move"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE_LEGACY "move2"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE      "resize"
+#define ARGUMENT_CONFIG_EXTERNAL_BAR_MAIN        "main"
+#define ARGUMENT_CONFIG_EXTERNAL_BAR_ALL         "all"
+#define ARGUMENT_CONFIG_EXTERNAL_BAR             "%5[^:]:%d:%d"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
@@ -728,6 +729,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.action1]);
         } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE)) {
             g_mouse_state.action1 = MOUSE_MODE_MOVE;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE_LEGACY)) {
+            g_mouse_state.action1 = MOUSE_MODE_MOVE_LEGACY;
         } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
             g_mouse_state.action1 = MOUSE_MODE_RESIZE;
         } else {
@@ -739,6 +742,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.action2]);
         } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE)) {
             g_mouse_state.action2 = MOUSE_MODE_MOVE;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE_LEGACY)) {
+            g_mouse_state.action2 = MOUSE_MODE_MOVE_LEGACY;
         } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
             g_mouse_state.action2 = MOUSE_MODE_RESIZE;
         } else {

@@ -166,11 +166,13 @@ Global Settings
 *mouse_modifier* ['cmd|alt|shift|ctrl|fn']::
     Keyboard modifier used for moving and resizing windows.
 
-*mouse_action1* ['move|resize']::
-    Action performed when pressing 'mouse_modifier' + 'button1'.
+*mouse_action1* ['move|move2|resize']::
+    Action performed when pressing 'mouse_modifier' + 'button1'. +
+    If the scripting-addition is not installed, move will not work. In this case, move2 may be used although it is less performant.
 
-*mouse_action2* ['move|resize']::
-    Action performed when pressing 'mouse_modifier' + 'button2'.
+*mouse_action2* ['move|move2|resize']::
+    Action performed when pressing 'mouse_modifier' + 'button2'. +
+    If the scripting-addition is not installed, move will not work. In this case, move2 may be used although it is less performant.
 
 Space Settings
 ^^^^^^^^^^^^^^

@@ -15,6 +15,7 @@ enum mouse_mode
 {
     MOUSE_MODE_NONE,
     MOUSE_MODE_MOVE,
+    MOUSE_MODE_MOVE_LEGACY,
     MOUSE_MODE_RESIZE,
 };
 
@@ -43,9 +44,10 @@ static char *mouse_mod_str[] =
 
 static char *mouse_mode_str[] =
 {
-    [MOUSE_MODE_NONE]   = "none",
-    [MOUSE_MODE_MOVE]   = "move",
-    [MOUSE_MODE_RESIZE] = "resize"
+    [MOUSE_MODE_NONE]        = "none",
+    [MOUSE_MODE_MOVE]        = "move",
+    [MOUSE_MODE_MOVE_LEGACY] = "move2",
+    [MOUSE_MODE_RESIZE]      = "resize"
 };
 
 static uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
