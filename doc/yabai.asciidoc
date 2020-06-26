@@ -163,8 +163,9 @@ Global Settings
 *auto_balance* ['<BOOL_SEL>']::
     Balance the window tree upon change, so that all windows occupy the same area.
 
-*mouse_modifier* ['cmd|alt|shift|ctrl|fn']::
-    Keyboard modifier used for moving and resizing windows.
+*mouse_modifier* ['cmd|alt|shift|ctrl|fn|super']::
+    Keyboard modifier used for moving and resizing windows. +
+    Additional modifiers can be specified by separating them with '+', for example 'cmd+alt+fn'. A shorthand for 'cmd+alt+shift+ctrl' is provided via 'super'.
 
 *mouse_action1* ['move|move2|resize']::
     Action performed when pressing 'mouse_modifier' + 'button1'. +
