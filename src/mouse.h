@@ -1,6 +1,9 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
+#define MOUSE_MOD_FLAG_MIN 0x02
+#define MOUSE_MOD_FLAG_MAX 0x20
+
 enum mouse_mod
 {
     MOUSE_MOD_NONE  = 0x01,

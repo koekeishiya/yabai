@@ -60,6 +60,7 @@ extern bool g_verbose;
 #define ARGUMENT_CONFIG_MOUSE_MOD_CTRL           "ctrl"
 #define ARGUMENT_CONFIG_MOUSE_MOD_FN             "fn"
 #define ARGUMENT_CONFIG_MOUSE_MOD_SUPER          "super"
+#define ARGUMENT_CONFIG_MOUSE_MOD_SEPARATOR      '+'
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE        "move"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE_LEGACY "move2"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE      "resize"
@@ -710,21 +711,55 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_CONFIG_MOUSE_MOD)) {
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
-            fprintf(rsp, "%s\n", mouse_mod_str[g_mouse_state.modifier]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_ALT)) {
-            g_mouse_state.modifier = MOUSE_MOD_ALT;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_SHIFT)) {
-            g_mouse_state.modifier = MOUSE_MOD_SHIFT;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CMD)) {
-            g_mouse_state.modifier = MOUSE_MOD_CMD;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CTRL)) {
-            g_mouse_state.modifier = MOUSE_MOD_CTRL;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_FN)) {
-            g_mouse_state.modifier = MOUSE_MOD_FN;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_SUPER)) {
-            g_mouse_state.modifier = MOUSE_MOD_SUPER;
+            uint8_t modifier = g_mouse_state.modifier;
+            bool first = true;
+            for (uint8_t flag = MOUSE_MOD_FLAG_MIN; flag <= MOUSE_MOD_FLAG_MAX; flag <<= 1) {
+                if (modifier & flag) {
+                    if (!first) {
+                        fprintf(rsp, "%c", ARGUMENT_CONFIG_MOUSE_MOD_SEPARATOR);
+                    }
+                    fprintf(rsp, "%s", mouse_mod_str[flag]);
+                    first = false;
+                }
+            }
+            fprintf(rsp, "\n");
         } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            uint8_t modifier = 0;
+            char *arg_start = value.text;
+            char *arg_end = value.text + value.length;
+            bool failed = false;
+
+            while (arg_start < arg_end) {
+                char *arg = arg_start;
+                struct token subvalue;
+                while (arg < arg_end && *arg != ARGUMENT_CONFIG_MOUSE_MOD_SEPARATOR)
+                    arg++;
+                subvalue.text = arg_start;
+                subvalue.length = arg - arg_start;
+                arg_start = ++arg;
+
+                if (token_equals(subvalue, ARGUMENT_CONFIG_MOUSE_MOD_ALT)) {
+                    modifier |= MOUSE_MOD_ALT;
+                } else if (token_equals(subvalue, ARGUMENT_CONFIG_MOUSE_MOD_SHIFT)) {
+                    modifier |= MOUSE_MOD_SHIFT;
+                } else if (token_equals(subvalue, ARGUMENT_CONFIG_MOUSE_MOD_CMD)) {
+                    modifier |= MOUSE_MOD_CMD;
+                } else if (token_equals(subvalue, ARGUMENT_CONFIG_MOUSE_MOD_CTRL)) {
+                    modifier |= MOUSE_MOD_CTRL;
+                } else if (token_equals(subvalue, ARGUMENT_CONFIG_MOUSE_MOD_FN)) {
+                    modifier |= MOUSE_MOD_FN;
+                } else if (token_equals(subvalue, ARGUMENT_CONFIG_MOUSE_MOD_SUPER)) {
+                    modifier |= MOUSE_MOD_SUPER;
+                } else {
+                    failed = true;
+                    daemon_fail(rsp, "unknown value '%.*s' (part of '%.*s') given to command '%.*s' for domain '%.*s'\n", subvalue.length, subvalue.text, value.length, value.text, command.length, command.text, domain.length, domain.text);
+                    break;
+                }
+            }
+
+            if (modifier == 0)
+                modifier = MOUSE_MOD_NONE;
+            g_mouse_state.modifier = modifier;
         }
     } else if (token_equals(command, COMMAND_CONFIG_MOUSE_ACTION1)) {
         struct token value = get_token(&message);
