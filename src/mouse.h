@@ -8,7 +8,8 @@ enum mouse_mod
     MOUSE_MOD_SHIFT = 0x04,
     MOUSE_MOD_CMD   = 0x08,
     MOUSE_MOD_CTRL  = 0x10,
-    MOUSE_MOD_FN    = 0x20
+    MOUSE_MOD_FN    = 0x20,
+    MOUSE_MOD_SUPER = MOUSE_MOD_ALT | MOUSE_MOD_SHIFT | MOUSE_MOD_CMD | MOUSE_MOD_CTRL,
 };
 
 enum mouse_mode
@@ -40,6 +41,7 @@ static char *mouse_mod_str[] =
     [MOUSE_MOD_CMD]   = "cmd",
     [MOUSE_MOD_CTRL]  = "ctrl",
     [MOUSE_MOD_FN]    = "fn",
+    [MOUSE_MOD_SUPER] = "super",
 };
 
 static char *mouse_mode_str[] =

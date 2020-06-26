@@ -59,6 +59,7 @@ extern bool g_verbose;
 #define ARGUMENT_CONFIG_MOUSE_MOD_CMD            "cmd"
 #define ARGUMENT_CONFIG_MOUSE_MOD_CTRL           "ctrl"
 #define ARGUMENT_CONFIG_MOUSE_MOD_FN             "fn"
+#define ARGUMENT_CONFIG_MOUSE_MOD_SUPER          "super"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE        "move"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE_LEGACY "move2"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE      "resize"
@@ -720,6 +721,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_mouse_state.modifier = MOUSE_MOD_CTRL;
         } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_FN)) {
             g_mouse_state.modifier = MOUSE_MOD_FN;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_SUPER)) {
+            g_mouse_state.modifier = MOUSE_MOD_SUPER;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
