@@ -708,24 +708,39 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
                 enum window_node_split new_split;
                 enum window_node_child new_child;
 
-                if (CGRectContainsPoint(window_center, point_in_window)) {
+                if (CGRectContainsPoint(window_center, point_in_window) && a_node->window_count == 1) {
 do_swap:
-                    if (src_view->insertion_point == a_node->window_id) {
+                    if (window_node_contains_window(a_node, src_view->insertion_point)) {
                         src_view->insertion_point = window->id;
-                    } else if (dst_view->insertion_point == b_node->window_id) {
+                    } else if (window_node_contains_window(b_node, dst_view->insertion_point)) {
                         dst_view->insertion_point = g_mouse_state.window->id;
                     }
 
-                    a_node->window_id = window->id;
+                    uint32_t tmp_window_id[64];
+                    uint32_t tmp_window_count;
+
+                    memcpy(tmp_window_id, a_node->window_id, sizeof(uint32_t) * a_node->window_count);
+                    tmp_window_count = a_node->window_count;
+
+                    memcpy(a_node->window_id, b_node->window_id, sizeof(uint32_t) * b_node->window_count);
+                    a_node->window_count = b_node->window_count;
+
+                    memcpy(b_node->window_id, tmp_window_id, sizeof(uint32_t) * tmp_window_count);
+                    b_node->window_count = tmp_window_count;
+
                     a_node->zoom = NULL;
-                    b_node->window_id = g_mouse_state.window->id;
                     b_node->zoom = NULL;
 
                     if (src_view->sid != dst_view->sid) {
-                        window_manager_remove_managed_window(&g_window_manager, a_node->window_id);
-                        window_manager_remove_managed_window(&g_window_manager, b_node->window_id);
-                        window_manager_add_managed_window(&g_window_manager, window, src_view);
-                        window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, dst_view);
+                        for (int i = 0; i < a_node->window_count; ++i) {
+                            window_manager_remove_managed_window(&g_window_manager, a_node->window_id[i]);
+                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, a_node->window_id[i]), src_view);
+                        }
+
+                        for (int i = 0; i < b_node->window_count; ++i) {
+                            window_manager_remove_managed_window(&g_window_manager, b_node->window_id[i]);
+                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, b_node->window_id[i]), dst_view);
+                        }
                     }
 
                     window_node_flush(a_node);
@@ -748,7 +763,8 @@ do_swap:
                 }
 
                 if ((a_node->parent && b_node->parent) &&
-                    (a_node->parent == b_node->parent)) {
+                    (a_node->parent == b_node->parent) &&
+                    (a_node->window_count == 1)) {
                     if (b_node->parent->split == new_split) {
                         goto do_swap;
                     } else {

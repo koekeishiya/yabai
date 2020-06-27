@@ -152,6 +152,7 @@ void window_manager_set_window_border_width(struct window_manager *wm, int width
 void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);
 void window_manager_set_normal_window_border_color(struct window_manager *wm, uint32_t color);
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
+enum window_op_error window_manager_stack_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_minimize_window(struct window *window);

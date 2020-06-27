@@ -638,7 +638,7 @@ struct window *window_manager_find_closest_managed_window_in_direction(struct wi
     struct window_node *closest = view_find_window_node_in_direction(view, node, direction);
     if (!closest) return NULL;
 
-    return window_manager_find_window(wm, closest->window_id);
+    return window_manager_find_window(wm, closest->window_id[0]);
 }
 
 struct window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -652,7 +652,7 @@ struct window *window_manager_find_prev_managed_window(struct space_manager *sm,
     struct window_node *prev = window_node_find_prev_leaf(node);
     if (!prev) return NULL;
 
-    return window_manager_find_window(wm, prev->window_id);
+    return window_manager_find_window(wm, prev->window_id[0]);
 }
 
 struct window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -666,7 +666,7 @@ struct window *window_manager_find_next_managed_window(struct space_manager *sm,
     struct window_node *next = window_node_find_next_leaf(node);
     if (!next) return NULL;
 
-    return window_manager_find_window(wm, next->window_id);
+    return window_manager_find_window(wm, next->window_id[0]);
 }
 
 struct window *window_manager_find_first_managed_window(struct space_manager *sm, struct window_manager *wm)
@@ -677,7 +677,7 @@ struct window *window_manager_find_first_managed_window(struct space_manager *sm
     struct window_node *first = window_node_find_first_leaf(view->root);
     if (!first) return NULL;
 
-    return window_manager_find_window(wm, first->window_id);
+    return window_manager_find_window(wm, first->window_id[0]);
 }
 
 struct window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm)
@@ -688,7 +688,7 @@ struct window *window_manager_find_last_managed_window(struct space_manager *sm,
     struct window_node *last = window_node_find_last_leaf(view->root);
     if (!last) return NULL;
 
-    return window_manager_find_window(wm, last->window_id);
+    return window_manager_find_window(wm, last->window_id[0]);
 }
 
 struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm)
@@ -713,7 +713,7 @@ struct window *window_manager_find_largest_managed_window(struct space_manager *
     for (struct window_node *node = window_node_find_first_leaf(view->root); node != NULL; node = window_node_find_next_leaf(node)) {
         uint32_t area = node->area.w * node->area.h;
         if (area > best_area) {
-            best_id   = node->window_id;
+            best_id   = node->window_id[0];
             best_area = area;
         }
     }
@@ -732,7 +732,7 @@ struct window *window_manager_find_smallest_managed_window(struct space_manager 
     for (struct window_node *node = window_node_find_first_leaf(view->root); node != NULL; node = window_node_find_next_leaf(node)) {
         uint32_t area = node->area.w * node->area.h;
         if (area <= best_area) {
-            best_id   = node->window_id;
+            best_id   = node->window_id[0];
             best_area = area;
         }
     }
@@ -1038,8 +1038,32 @@ enum window_op_error window_manager_set_window_insertion(struct space_manager *s
     }
 
     node->insert_dir = direction;
-    view->insertion_point = node->window_id;
+    view->insertion_point = node->window_id[0];
     insert_feedback_show(node);
+
+    return WINDOW_OP_ERROR_SUCCESS;
+}
+
+enum window_op_error window_manager_stack_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
+{
+    if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
+
+    struct view *a_view = window_manager_find_managed_window(wm, a);
+    if (!a_view) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
+
+    struct view *b_view = window_manager_find_managed_window(wm, b);
+    if (b_view) {
+        space_manager_untile_window(sm, b_view, b);
+        window_manager_remove_managed_window(wm, b->id);
+        window_manager_purify_window(wm, b);
+    } else if (b->is_floating) {
+        b->is_floating = false;
+        window_manager_make_window_topmost(wm, b, false);
+        if (b->is_sticky) window_manager_make_window_sticky(sm, wm, b, false);
+    }
+
+    view_stack_window_node(a_view, a, b);
+    window_manager_add_managed_window(wm, b, a_view);
 
     return WINDOW_OP_ERROR_SUCCESS;
 }
@@ -1062,8 +1086,8 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
     struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
-    if (a_node->parent == b_node->parent) {
-        if (b_view->insertion_point == b_node->window_id) {
+    if (a_node->parent == b_node->parent && a_node->window_count == 1) {
+        if (window_node_contains_window(b_node, b_view->insertion_point)) {
             b_node->parent->split = b_node->split;
             b_node->parent->child = b_node->child;
             space_manager_untile_window(sm, a_view, a);
@@ -1071,13 +1095,23 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
             window_manager_add_managed_window(wm, a, b_view);
             space_manager_tile_window_on_space_with_insertion_point(sm, a, b_view->sid, b->id);
         } else {
-            if (a_view->insertion_point == a_node->window_id) {
+            if (window_node_contains_window(a_node, a_view->insertion_point)) {
                 a_view->insertion_point = b->id;
             }
 
-            a_node->window_id = b->id;
+            uint32_t tmp_window_id[64];
+            uint32_t tmp_window_count;
+
+            memcpy(tmp_window_id, a_node->window_id, sizeof(uint32_t) * a_node->window_count);
+            tmp_window_count = a_node->window_count;
+
+            memcpy(a_node->window_id, b_node->window_id, sizeof(uint32_t) * b_node->window_count);
+            a_node->window_count = b_node->window_count;
+
+            memcpy(b_node->window_id, tmp_window_id, sizeof(uint32_t) * tmp_window_count);
+            b_node->window_count = tmp_window_count;;
+
             a_node->zoom = NULL;
-            b_node->window_id = a->id;
             b_node->zoom = NULL;
 
             window_node_flush(a_node);
@@ -1126,28 +1160,45 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
     struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
-    if (a_view->insertion_point == a_node->window_id) {
+    if (window_node_contains_window(a_node, a_view->insertion_point)) {
         a_view->insertion_point = b->id;
-    } else if (b_view->insertion_point == b_node->window_id) {
+    } else if (window_node_contains_window(b_node, b_view->insertion_point)) {
         b_view->insertion_point = a->id;
     }
 
-    a_node->window_id = b->id;
+    uint32_t tmp_window_id[64];
+    uint32_t tmp_window_count;
+
+    memcpy(tmp_window_id, a_node->window_id, sizeof(uint32_t) * a_node->window_count);
+    tmp_window_count = a_node->window_count;
+
+    memcpy(a_node->window_id, b_node->window_id, sizeof(uint32_t) * b_node->window_count);
+    a_node->window_count = b_node->window_count;
+
+    memcpy(b_node->window_id, tmp_window_id, sizeof(uint32_t) * tmp_window_count);
+    b_node->window_count = tmp_window_count;
+
     a_node->zoom = NULL;
-    b_node->window_id = a->id;
     b_node->zoom = NULL;
 
     if (a_view->sid != b_view->sid) {
-        window_manager_remove_managed_window(wm, a->id);
-        window_manager_add_managed_window(wm, a, b_view);
-        window_manager_remove_managed_window(wm, b->id);
-        window_manager_add_managed_window(wm, b, a_view);
-        space_manager_move_window_to_space(b_view->sid, a);
-        space_manager_move_window_to_space(a_view->sid, b);
+        for (int i = 0; i < a_node->window_count; ++i) {
+            struct window *window = window_manager_find_window(wm, a_node->window_id[i]);
+            window_manager_remove_managed_window(wm, a_node->window_id[i]);
+            window_manager_add_managed_window(wm, window, a_view);
+            space_manager_move_window_to_space(a_view->sid, window);
+        }
 
-        if (wm->focused_window_id == a->id) {
+        for (int i = 0; i < b_node->window_count; ++i) {
+            struct window *window = window_manager_find_window(wm, b_node->window_id[i]);
+            window_manager_remove_managed_window(wm, b_node->window_id[i]);
+            window_manager_add_managed_window(wm, window, b_view);
+            space_manager_move_window_to_space(b_view->sid, window);
+        }
+
+        if (window_node_contains_window(a_node, wm->focused_window_id)) {
             window_manager_focus_window_with_raise(&b->application->psn, b->id, b->ref);
-        } else if (wm->focused_window_id == b->id) {
+        } else if (window_node_contains_window(b_node, wm->focused_window_id)) {
             window_manager_focus_window_with_raise(&a->application->psn, a->id, a->ref);
         }
     }
@@ -1326,15 +1377,15 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
     if (!view || view->layout != VIEW_BSP) return;
 
     struct window_node *node = view_find_window_node(view, window->id);
+    assert(node);
+
     if (node->zoom) {
-        window_manager_move_window(window, node->area.x, node->area.y);
-        window_manager_resize_window(window, node->area.w, node->area.h);
         node->zoom = NULL;
     } else if (node->parent) {
-        window_manager_move_window(window, node->parent->area.x, node->parent->area.y);
-        window_manager_resize_window(window, node->parent->area.w, node->parent->area.h);
         node->zoom = node->parent;
     }
+
+    window_node_flush(node);
 }
 
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -1343,15 +1394,15 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     if (!view || view->layout != VIEW_BSP) return;
 
     struct window_node *node = view_find_window_node(view, window->id);
+    assert(node);
+
     if (node->zoom) {
-        window_manager_move_window(window, node->area.x, node->area.y);
-        window_manager_resize_window(window, node->area.w, node->area.h);
         node->zoom = NULL;
     } else {
-        window_manager_move_window(window, view->root->area.x, view->root->area.y);
-        window_manager_resize_window(window, view->root->area.w, view->root->area.h);
         node->zoom = view->root;
     }
+
+    window_node_flush(node);
 }
 
 void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window)

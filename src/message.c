@@ -105,6 +105,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_FOCUS   "--focus"
 #define COMMAND_WINDOW_SWAP    "--swap"
 #define COMMAND_WINDOW_WARP    "--warp"
+#define COMMAND_WINDOW_STACK   "--stack"
 #define COMMAND_WINDOW_INSERT  "--insert"
 #define COMMAND_WINDOW_GRID    "--grid"
 #define COMMAND_WINDOW_MOVE    "--move"
@@ -1508,6 +1509,16 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "the selected window is not managed.\n");
             } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
                 daemon_fail(rsp, "cannot warp a window onto itself.\n");
+            }
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_STACK)) {
+        struct selector selector = parse_window_selector(rsp, &message, acting_window);
+        if (selector.did_parse && selector.window) {
+            enum window_op_error result = window_manager_stack_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                daemon_fail(rsp, "the acting window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
+                daemon_fail(rsp, "cannot stack a window onto itself.\n");
             }
         }
     } else if (token_equals(command, COMMAND_WINDOW_INSERT)) {
