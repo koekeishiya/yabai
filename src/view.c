@@ -242,11 +242,13 @@ static void window_node_split(struct view *view, struct window_node *node, struc
     if (window_node_get_child(node) == CHILD_SECOND) {
         memcpy(left->window_id, node->window_id, sizeof(uint32_t) * node->window_count);
         left->window_count = node->window_count;
+        left->window_index = node->window_index;
         right->window_id[0] = window->id;
         right->window_count = 1;
     } else {
         memcpy(right->window_id, node->window_id, sizeof(uint32_t) * node->window_count);
         right->window_count = node->window_count;
+        right->window_index = node->window_index;
         left->window_id[0] = window->id;
         left->window_count = 1;
     }
@@ -255,6 +257,7 @@ static void window_node_split(struct view *view, struct window_node *node, struc
     right->parent = node;
 
     node->window_count = 0;
+    node->window_index = 0;
     node->left  = left;
     node->right = right;
     node->zoom  = NULL;
@@ -518,6 +521,7 @@ void view_remove_window_node(struct view *view, struct window *window)
         for (int i = 0; i < node->window_count; ++i) {
             if (node->window_id[i] == window->id) {
                 node->window_id[i] = node->window_id[--node->window_count];
+                if (node->window_index == node->window_count) node->window_index = i;
                 break;
             }
         }
@@ -526,6 +530,7 @@ void view_remove_window_node(struct view *view, struct window *window)
 
     if (node == view->root) {
         node->window_count = 0;
+        node->window_index = 0;
         insert_feedback_destroy(node);
         node->split = SPLIT_NONE;
         node->child = CHILD_NONE;
@@ -542,6 +547,8 @@ void view_remove_window_node(struct view *view, struct window *window)
 
     memcpy(parent->window_id, child->window_id, sizeof(uint32_t) * child->window_count);
     parent->window_count = child->window_count;
+    parent->window_index = child->window_index;
+
     parent->left      = NULL;
     parent->right     = NULL;
     parent->zoom      = NULL;
@@ -714,8 +721,8 @@ void view_serialize(FILE *rsp, struct view *view)
             space_is_visible(view->sid),
             view->sid == g_space_manager.current_space_id,
             space_is_fullscreen(view->sid),
-            first_leaf ? first_leaf->window_id[0] : 0,
-            last_leaf ? last_leaf->window_id[0] : 0);
+            first_leaf ? first_leaf->window_id[first_leaf->window_index] : 0,
+            last_leaf ? last_leaf->window_id[last_leaf->window_index] : 0);
 }
 
 void view_update(struct view *view)

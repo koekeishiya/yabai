@@ -60,6 +60,7 @@ struct window_node
     struct window_node *zoom;
     uint32_t window_id[64];
     uint32_t window_count;
+    int window_index;
     float ratio;
     enum window_node_split split;
     enum window_node_child child;

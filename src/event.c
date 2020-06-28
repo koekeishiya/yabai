@@ -26,6 +26,19 @@ static void window_did_receive_focus(struct window_manager *wm, struct mouse_sta
     wm->focused_window_id = window->id;
     wm->focused_window_psn = window->application->psn;
     ms->ffm_window_id = 0;
+
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    if (!view) return;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (node->window_count <= 1) return;
+
+    for (int i = 0; i < node->window_count; ++i) {
+        if (node->window_id[i] == window->id) {
+            node->window_index = i;
+            break;
+        }
+    }
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
@@ -718,15 +731,19 @@ do_swap:
 
                     uint32_t tmp_window_id[64];
                     uint32_t tmp_window_count;
+                    int tmp_window_index;
 
                     memcpy(tmp_window_id, a_node->window_id, sizeof(uint32_t) * a_node->window_count);
                     tmp_window_count = a_node->window_count;
+                    tmp_window_index = a_node->window_index;
 
                     memcpy(a_node->window_id, b_node->window_id, sizeof(uint32_t) * b_node->window_count);
                     a_node->window_count = b_node->window_count;
+                    a_node->window_index = b_node->window_index;
 
                     memcpy(b_node->window_id, tmp_window_id, sizeof(uint32_t) * tmp_window_count);
                     b_node->window_count = tmp_window_count;
+                    b_node->window_index = tmp_window_index;
 
                     a_node->zoom = NULL;
                     b_node->zoom = NULL;
