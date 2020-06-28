@@ -1,3 +1,7 @@
+_This is a fork of koekeishiya's yabai tiling window manager; its main differences are allowing moving windows without scripting addition (use the mouse action `move2`), and using multiple modifier keys for mouse actions (use `+` as a delimiter, e.g. `cmd+ctrl`, or `super` as a shortcut for `cmd+ctrl+shift+alt`)._
+
+_This package is head-only; to install, do `brew install sourtin/formulae/yabai-sourtin` and then `brew services start yabai-sourtin`._
+
 <!-- Please be careful editing the below HTML, as GitHub is quite finicky with anything that looks like an HTML tag in GitHub Flavored Markdown. -->
 <p align="center">
   <img width="75%" src="assets/banner/banner.svg" alt="Banner">
