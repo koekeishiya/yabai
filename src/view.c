@@ -81,14 +81,14 @@ void insert_feedback_show(struct window_node *node)
     CGPathAddLineToPoint(outline, NULL, x4, y4);
 
     SLSDisableUpdate(g_connection);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_id[node->window_index]);
+    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_id[0]);
     SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
     CGContextClearRect(node->feedback_window.context, frame);
     CGContextFillRect(node->feedback_window.context, fill);
     CGContextAddPath(node->feedback_window.context, outline);
     CGContextStrokePath(node->feedback_window.context);
     CGContextFlush(node->feedback_window.context);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_id[node->window_index]);
+    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_id[0]);
     SLSReenableUpdate(g_connection);
     CGPathRelease(outline);
     CFRelease(frame_region);
@@ -248,13 +248,11 @@ static void window_node_split(struct view *view, struct window_node *node, struc
     if (window_node_get_child(node) == CHILD_SECOND) {
         memcpy(left->window_id, node->window_id, sizeof(uint32_t) * node->window_count);
         left->window_count = node->window_count;
-        left->window_index = node->window_index;
         right->window_id[0] = window->id;
         right->window_count = 1;
     } else {
         memcpy(right->window_id, node->window_id, sizeof(uint32_t) * node->window_count);
         right->window_count = node->window_count;
-        right->window_index = node->window_index;
         left->window_id[0] = window->id;
         left->window_count = 1;
     }
@@ -263,7 +261,6 @@ static void window_node_split(struct view *view, struct window_node *node, struc
     right->parent = node;
 
     node->window_count = 0;
-    node->window_index = 0;
     node->left  = left;
     node->right = right;
     node->zoom  = NULL;
@@ -525,14 +522,12 @@ void view_remove_window_node(struct view *view, struct window *window)
 
     if (node->window_count > 1) {
         for (int i = 0; i < node->window_count; ++i) {
-            if (node->window_id[i] == window->id) {
-                if (i == node->window_count-1) {
-                    node->window_index = node->window_count-2;
-                }
+            if (node->window_id[i] != window->id) continue;
 
-                node->window_id[i] = node->window_id[--node->window_count];
-                break;
-            }
+            memmove(node->window_id + i, node->window_id + i + 1, sizeof(uint32_t) * (node->window_count - i - 1));
+            --node->window_count;
+
+            break;
         }
 
         return;
@@ -540,7 +535,6 @@ void view_remove_window_node(struct view *view, struct window *window)
 
     if (node == view->root) {
         node->window_count = 0;
-        node->window_index = 0;
         insert_feedback_destroy(node);
         node->split = SPLIT_NONE;
         node->child = CHILD_NONE;
@@ -557,7 +551,6 @@ void view_remove_window_node(struct view *view, struct window *window)
 
     memcpy(parent->window_id, child->window_id, sizeof(uint32_t) * child->window_count);
     parent->window_count = child->window_count;
-    parent->window_index = child->window_index;
 
     parent->left      = NULL;
     parent->right     = NULL;
@@ -735,8 +728,8 @@ void view_serialize(FILE *rsp, struct view *view)
             space_is_visible(view->sid),
             view->sid == g_space_manager.current_space_id,
             space_is_fullscreen(view->sid),
-            first_leaf ? first_leaf->window_id[first_leaf->window_index] : 0,
-            last_leaf ? last_leaf->window_id[last_leaf->window_index] : 0);
+            first_leaf ? first_leaf->window_id[0] : 0,
+            last_leaf ? last_leaf->window_id[0] : 0);
 }
 
 void view_update(struct view *view)
