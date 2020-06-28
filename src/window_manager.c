@@ -1062,7 +1062,10 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
         if (b->is_sticky) window_manager_make_window_sticky(sm, wm, b, false);
     }
 
-    view_stack_window_node(a_view, a, b);
+    struct window_node *a_node = view_find_window_node(a_view, a->id);
+    assert(a_node);
+
+    view_stack_window_node(a_view, a_node, b);
     window_manager_add_managed_window(wm, b, a_view);
 
     return WINDOW_OP_ERROR_SUCCESS;

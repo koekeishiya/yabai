@@ -65,6 +65,12 @@ void insert_feedback_show(struct window_node *node)
         x3 = minx; y3 = maxy;
         x4 = midx; y4 = maxy;
     } break;
+    case STACK: {
+        x1 = minx; y1 = miny;
+        x2 = minx; y2 = maxy;
+        x3 = maxx; y3 = maxy;
+        x4 = maxx; y4 = miny;
+    } break;
     }
 
     CGRect fill = { {x1, y1}, { x3 - x1, y3 - y1 } };
@@ -585,18 +591,15 @@ void view_remove_window_node(struct view *view, struct window *window)
     }
 }
 
-void view_stack_window_node(struct view *view, struct window *a, struct window *b)
+void view_stack_window_node(struct view *view, struct window_node *node, struct window *window)
 {
-    struct window_node *a_node = view_find_window_node(view, a->id);
-    assert(a_node);
-
-    if (a_node->zoom) {
-        window_manager_set_window_frame(b, a_node->zoom->area.x, a_node->zoom->area.y, a_node->zoom->area.w, a_node->zoom->area.h);
+    if (node->zoom) {
+        window_manager_set_window_frame(window, node->zoom->area.x, node->zoom->area.y, node->zoom->area.w, node->zoom->area.h);
     } else {
-        window_manager_set_window_frame(b, a_node->area.x, a_node->area.y, a_node->area.w, a_node->area.h);
+        window_manager_set_window_frame(window, node->area.x, node->area.y, node->area.w, node->area.h);
     }
 
-    a_node->window_id[a_node->window_count++] = b->id;
+    node->window_id[node->window_count++] = window->id;
 }
 
 void view_add_window_node(struct view *view, struct window *window)
@@ -613,8 +616,15 @@ void view_add_window_node(struct view *view, struct window *window)
             view->insertion_point = 0;
 
             if (leaf) {
+                bool do_stack = leaf->insert_dir == STACK;
+
                 leaf->insert_dir = 0;
                 insert_feedback_destroy(leaf);
+
+                if (do_stack) {
+                    view_stack_window_node(view, leaf, window);
+                    return;
+                }
             }
         }
 
