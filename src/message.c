@@ -108,6 +108,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_FOCUS   "--focus"
 #define COMMAND_WINDOW_SWAP    "--swap"
 #define COMMAND_WINDOW_WARP    "--warp"
+#define COMMAND_WINDOW_STACK   "--stack"
 #define COMMAND_WINDOW_INSERT  "--insert"
 #define COMMAND_WINDOW_GRID    "--grid"
 #define COMMAND_WINDOW_MOVE    "--move"
@@ -201,6 +202,7 @@ extern bool g_verbose;
 #define ARGUMENT_COMMON_SEL_EAST   "east"
 #define ARGUMENT_COMMON_SEL_SOUTH  "south"
 #define ARGUMENT_COMMON_SEL_WEST   "west"
+#define ARGUMENT_COMMON_SEL_STACK  "stack"
 /* ----------------------------------------------------------------------------- */
 
 static bool token_equals(struct token token, char *match)
@@ -1240,7 +1242,7 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
     return result;
 }
 
-static struct selector parse_dir_selector(FILE *rsp, char **message)
+static struct selector parse_insert_selector(FILE *rsp, char **message)
 {
     struct selector result = {
         .token = get_token(message),
@@ -1255,6 +1257,8 @@ static struct selector parse_dir_selector(FILE *rsp, char **message)
         result.dir = DIR_SOUTH;
     } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_WEST)) {
         result.dir = DIR_WEST;
+    } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK)) {
+        result.dir = STACK;
     } else {
         result.did_parse = false;
         daemon_fail(rsp, "value '%.*s' is not a valid option for DIR_SEL\n", result.token.length, result.token.text);
@@ -1553,8 +1557,18 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "cannot warp a window onto itself.\n");
             }
         }
+    } else if (token_equals(command, COMMAND_WINDOW_STACK)) {
+        struct selector selector = parse_window_selector(rsp, &message, acting_window);
+        if (selector.did_parse && selector.window) {
+            enum window_op_error result = window_manager_stack_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
+            if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                daemon_fail(rsp, "the acting window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
+                daemon_fail(rsp, "cannot stack a window onto itself.\n");
+            }
+        }
     } else if (token_equals(command, COMMAND_WINDOW_INSERT)) {
-        struct selector selector = parse_dir_selector(rsp, &message);
+        struct selector selector = parse_insert_selector(rsp, &message);
         if (selector.did_parse && selector.dir) {
             enum window_op_error result = window_manager_set_window_insertion(&g_space_manager, &g_window_manager, acting_window, selector.dir);
             if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
