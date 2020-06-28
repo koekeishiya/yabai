@@ -34,10 +34,10 @@ static void window_did_receive_focus(struct window_manager *wm, struct mouse_sta
     if (node->window_count <= 1) return;
 
     for (int i = 0; i < node->window_count; ++i) {
-        if (node->window_id[i] != window->id) continue;
+        if (node->window_list[i] != window->id) continue;
 
-        memmove(node->window_id + 1, node->window_id, sizeof(uint32_t) * i);
-        node->window_id[0] = window->id;
+        memmove(node->window_list + 1, node->window_list, sizeof(uint32_t) * i);
+        node->window_list[0] = window->id;
 
         break;
     }
@@ -731,16 +731,16 @@ do_swap:
                         dst_view->insertion_point = g_mouse_state.window->id;
                     }
 
-                    uint32_t tmp_window_id[64];
+                    uint32_t tmp_window_list[64];
                     uint32_t tmp_window_count;
 
-                    memcpy(tmp_window_id, a_node->window_id, sizeof(uint32_t) * a_node->window_count);
+                    memcpy(tmp_window_list, a_node->window_list, sizeof(uint32_t) * a_node->window_count);
                     tmp_window_count = a_node->window_count;
 
-                    memcpy(a_node->window_id, b_node->window_id, sizeof(uint32_t) * b_node->window_count);
+                    memcpy(a_node->window_list, b_node->window_list, sizeof(uint32_t) * b_node->window_count);
                     a_node->window_count = b_node->window_count;
 
-                    memcpy(b_node->window_id, tmp_window_id, sizeof(uint32_t) * tmp_window_count);
+                    memcpy(b_node->window_list, tmp_window_list, sizeof(uint32_t) * tmp_window_count);
                     b_node->window_count = tmp_window_count;
 
                     a_node->zoom = NULL;
@@ -748,13 +748,13 @@ do_swap:
 
                     if (src_view->sid != dst_view->sid) {
                         for (int i = 0; i < a_node->window_count; ++i) {
-                            window_manager_remove_managed_window(&g_window_manager, a_node->window_id[i]);
-                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, a_node->window_id[i]), src_view);
+                            window_manager_remove_managed_window(&g_window_manager, a_node->window_list[i]);
+                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, a_node->window_list[i]), src_view);
                         }
 
                         for (int i = 0; i < b_node->window_count; ++i) {
-                            window_manager_remove_managed_window(&g_window_manager, b_node->window_id[i]);
-                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, b_node->window_id[i]), dst_view);
+                            window_manager_remove_managed_window(&g_window_manager, b_node->window_list[i]);
+                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, b_node->window_list[i]), dst_view);
                         }
                     }
 

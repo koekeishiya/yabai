@@ -638,7 +638,7 @@ struct window *window_manager_find_closest_managed_window_in_direction(struct wi
     struct window_node *closest = view_find_window_node_in_direction(view, node, direction);
     if (!closest) return NULL;
 
-    return window_manager_find_window(wm, closest->window_id[0]);
+    return window_manager_find_window(wm, closest->window_list[0]);
 }
 
 struct window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -652,7 +652,7 @@ struct window *window_manager_find_prev_managed_window(struct space_manager *sm,
     struct window_node *prev = window_node_find_prev_leaf(node);
     if (!prev) return NULL;
 
-    return window_manager_find_window(wm, prev->window_id[0]);
+    return window_manager_find_window(wm, prev->window_list[0]);
 }
 
 struct window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -666,7 +666,7 @@ struct window *window_manager_find_next_managed_window(struct space_manager *sm,
     struct window_node *next = window_node_find_next_leaf(node);
     if (!next) return NULL;
 
-    return window_manager_find_window(wm, next->window_id[0]);
+    return window_manager_find_window(wm, next->window_list[0]);
 }
 
 struct window *window_manager_find_first_managed_window(struct space_manager *sm, struct window_manager *wm)
@@ -677,7 +677,7 @@ struct window *window_manager_find_first_managed_window(struct space_manager *sm
     struct window_node *first = window_node_find_first_leaf(view->root);
     if (!first) return NULL;
 
-    return window_manager_find_window(wm, first->window_id[0]);
+    return window_manager_find_window(wm, first->window_list[0]);
 }
 
 struct window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm)
@@ -688,7 +688,7 @@ struct window *window_manager_find_last_managed_window(struct space_manager *sm,
     struct window_node *last = window_node_find_last_leaf(view->root);
     if (!last) return NULL;
 
-    return window_manager_find_window(wm, last->window_id[0]);
+    return window_manager_find_window(wm, last->window_list[0]);
 }
 
 struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm)
@@ -713,7 +713,7 @@ struct window *window_manager_find_largest_managed_window(struct space_manager *
     for (struct window_node *node = window_node_find_first_leaf(view->root); node != NULL; node = window_node_find_next_leaf(node)) {
         uint32_t area = node->area.w * node->area.h;
         if (area > best_area) {
-            best_id   = node->window_id[0];
+            best_id   = node->window_list[0];
             best_area = area;
         }
     }
@@ -732,7 +732,7 @@ struct window *window_manager_find_smallest_managed_window(struct space_manager 
     for (struct window_node *node = window_node_find_first_leaf(view->root); node != NULL; node = window_node_find_next_leaf(node)) {
         uint32_t area = node->area.w * node->area.h;
         if (area <= best_area) {
-            best_id   = node->window_id[0];
+            best_id   = node->window_list[0];
             best_area = area;
         }
     }
@@ -1038,7 +1038,7 @@ enum window_op_error window_manager_set_window_insertion(struct space_manager *s
     }
 
     node->insert_dir = direction;
-    view->insertion_point = node->window_id[0];
+    view->insertion_point = node->window_list[0];
     insert_feedback_show(node);
 
     return WINDOW_OP_ERROR_SUCCESS;
@@ -1102,16 +1102,16 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
                 a_view->insertion_point = b->id;
             }
 
-            uint32_t tmp_window_id[64];
+            uint32_t tmp_window_list[64];
             uint32_t tmp_window_count;
 
-            memcpy(tmp_window_id, a_node->window_id, sizeof(uint32_t) * a_node->window_count);
+            memcpy(tmp_window_list, a_node->window_list, sizeof(uint32_t) * a_node->window_count);
             tmp_window_count = a_node->window_count;
 
-            memcpy(a_node->window_id, b_node->window_id, sizeof(uint32_t) * b_node->window_count);
+            memcpy(a_node->window_list, b_node->window_list, sizeof(uint32_t) * b_node->window_count);
             a_node->window_count = b_node->window_count;
 
-            memcpy(b_node->window_id, tmp_window_id, sizeof(uint32_t) * tmp_window_count);
+            memcpy(b_node->window_list, tmp_window_list, sizeof(uint32_t) * tmp_window_count);
             b_node->window_count = tmp_window_count;
 
             a_node->zoom = NULL;
@@ -1169,16 +1169,16 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
         b_view->insertion_point = a->id;
     }
 
-    uint32_t tmp_window_id[64];
+    uint32_t tmp_window_list[64];
     uint32_t tmp_window_count;
 
-    memcpy(tmp_window_id, a_node->window_id, sizeof(uint32_t) * a_node->window_count);
+    memcpy(tmp_window_list, a_node->window_list, sizeof(uint32_t) * a_node->window_count);
     tmp_window_count = a_node->window_count;
 
-    memcpy(a_node->window_id, b_node->window_id, sizeof(uint32_t) * b_node->window_count);
+    memcpy(a_node->window_list, b_node->window_list, sizeof(uint32_t) * b_node->window_count);
     a_node->window_count = b_node->window_count;
 
-    memcpy(b_node->window_id, tmp_window_id, sizeof(uint32_t) * tmp_window_count);
+    memcpy(b_node->window_list, tmp_window_list, sizeof(uint32_t) * tmp_window_count);
     b_node->window_count = tmp_window_count;
 
     a_node->zoom = NULL;
@@ -1186,15 +1186,15 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
 
     if (a_view->sid != b_view->sid) {
         for (int i = 0; i < a_node->window_count; ++i) {
-            struct window *window = window_manager_find_window(wm, a_node->window_id[i]);
-            window_manager_remove_managed_window(wm, a_node->window_id[i]);
+            struct window *window = window_manager_find_window(wm, a_node->window_list[i]);
+            window_manager_remove_managed_window(wm, a_node->window_list[i]);
             window_manager_add_managed_window(wm, window, a_view);
             space_manager_move_window_to_space(a_view->sid, window);
         }
 
         for (int i = 0; i < b_node->window_count; ++i) {
-            struct window *window = window_manager_find_window(wm, b_node->window_id[i]);
-            window_manager_remove_managed_window(wm, b_node->window_id[i]);
+            struct window *window = window_manager_find_window(wm, b_node->window_list[i]);
+            window_manager_remove_managed_window(wm, b_node->window_list[i]);
             window_manager_add_managed_window(wm, window, b_view);
             space_manager_move_window_to_space(b_view->sid, window);
         }

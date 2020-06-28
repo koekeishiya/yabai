@@ -58,7 +58,7 @@ struct window_node
     struct window_node *left;
     struct window_node *right;
     struct window_node *zoom;
-    uint32_t window_id[64];
+    uint32_t window_list[64];
     uint32_t window_count;
     float ratio;
     enum window_node_split split;
