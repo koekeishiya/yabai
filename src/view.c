@@ -526,11 +526,15 @@ void view_remove_window_node(struct view *view, struct window *window)
     if (node->window_count > 1) {
         for (int i = 0; i < node->window_count; ++i) {
             if (node->window_id[i] == window->id) {
+                if (i == node->window_count-1) {
+                    node->window_index = node->window_count-2;
+                }
+
                 node->window_id[i] = node->window_id[--node->window_count];
-                if (node->window_index == node->window_count) node->window_index = i;
                 break;
             }
         }
+
         return;
     }
 
