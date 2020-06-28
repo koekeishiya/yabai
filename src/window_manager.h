@@ -121,6 +121,9 @@ struct window *window_manager_find_last_managed_window(struct space_manager *sm,
 struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm);
 struct window *window_manager_find_prev_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_next_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
+struct window *window_manager_find_first_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
+struct window *window_manager_find_last_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
+struct window *window_manager_find_recent_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_largest_managed_window(struct space_manager *sm, struct window_manager *wm);
 struct window *window_manager_find_smallest_managed_window(struct space_manager *sm, struct window_manager *wm);
 void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id);
