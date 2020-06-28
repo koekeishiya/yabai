@@ -1123,6 +1123,8 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
     struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
+    if (a_node == b_node) return WINDOW_OP_ERROR_SAME_STACK;
+
     if (a_node->parent == b_node->parent && a_node->window_count == 1) {
         if (window_node_contains_window(b_node, b_view->insertion_point)) {
             b_node->parent->split = b_node->split;
@@ -1183,6 +1185,8 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
 
     struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
+
+    if (a_node == b_node) return WINDOW_OP_ERROR_SAME_STACK;
 
     if (window_node_contains_window(a_node, a_view->insertion_point)) {
         a_view->insertion_point = b->id;
