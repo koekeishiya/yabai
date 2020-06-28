@@ -75,14 +75,14 @@ void insert_feedback_show(struct window_node *node)
     CGPathAddLineToPoint(outline, NULL, x4, y4);
 
     SLSDisableUpdate(g_connection);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_id[0]);
+    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_id[node->window_index]);
     SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
     CGContextClearRect(node->feedback_window.context, frame);
     CGContextFillRect(node->feedback_window.context, fill);
     CGContextAddPath(node->feedback_window.context, outline);
     CGContextStrokePath(node->feedback_window.context);
     CGContextFlush(node->feedback_window.context);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_id[0]);
+    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_id[node->window_index]);
     SLSReenableUpdate(g_connection);
     CGPathRelease(outline);
     CFRelease(frame_region);
