@@ -339,6 +339,15 @@ bool window_node_contains_window(struct window_node *node, uint32_t window_id)
     return false;
 }
 
+int window_node_index_of_window(struct window_node *node, uint32_t window_id)
+{
+    for (int i = 0; i < node->window_count; ++i) {
+        if (node->window_list[i] == window_id) return i;
+    }
+
+    return 0;
+}
+
 void window_node_swap_window_list(struct window_node *a_node, struct window_node *b_node)
 {
     uint32_t tmp_window_list[NODE_MAX_WINDOW_COUNT];
