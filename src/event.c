@@ -724,29 +724,40 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
                 enum window_node_child new_child;
 
                 if (CGRectContainsPoint(window_center, point_in_window) && a_node->window_count == 1) {
+                    if (g_mouse_state.drop_action == MOUSE_MODE_STACK) {
+                        space_manager_untile_window(&g_space_manager, src_view, g_mouse_state.window);
+                        window_manager_remove_managed_window(&g_window_manager, g_mouse_state.window->id);
+
+                        b_node = view_find_window_node(dst_view, window->id);
+                        if (b_node->window_count+1 < NODE_MAX_WINDOW_COUNT) {
+                            view_stack_window_node(dst_view, b_node, g_mouse_state.window);
+                            window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, dst_view);
+                        }
+                    } else if (g_mouse_state.drop_action == MOUSE_MODE_SWAP) {
 do_swap:
-                    if (window_node_contains_window(a_node, src_view->insertion_point)) {
-                        src_view->insertion_point = window->id;
-                    } else if (window_node_contains_window(b_node, dst_view->insertion_point)) {
-                        dst_view->insertion_point = g_mouse_state.window->id;
-                    }
-
-                    window_node_swap_window_list(a_node, b_node);
-
-                    if (src_view->sid != dst_view->sid) {
-                        for (int i = 0; i < a_node->window_count; ++i) {
-                            window_manager_remove_managed_window(&g_window_manager, a_node->window_list[i]);
-                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, a_node->window_list[i]), src_view);
+                        if (window_node_contains_window(a_node, src_view->insertion_point)) {
+                            src_view->insertion_point = window->id;
+                        } else if (window_node_contains_window(b_node, dst_view->insertion_point)) {
+                            dst_view->insertion_point = g_mouse_state.window->id;
                         }
 
-                        for (int i = 0; i < b_node->window_count; ++i) {
-                            window_manager_remove_managed_window(&g_window_manager, b_node->window_list[i]);
-                            window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, b_node->window_list[i]), dst_view);
-                        }
-                    }
+                        window_node_swap_window_list(a_node, b_node);
 
-                    window_node_flush(a_node);
-                    window_node_flush(b_node);
+                        if (src_view->sid != dst_view->sid) {
+                            for (int i = 0; i < a_node->window_count; ++i) {
+                                window_manager_remove_managed_window(&g_window_manager, a_node->window_list[i]);
+                                window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, a_node->window_list[i]), src_view);
+                            }
+
+                            for (int i = 0; i < b_node->window_count; ++i) {
+                                window_manager_remove_managed_window(&g_window_manager, b_node->window_list[i]);
+                                window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, b_node->window_list[i]), dst_view);
+                            }
+                        }
+
+                        window_node_flush(a_node);
+                        window_node_flush(b_node);
+                    }
                     goto end;
                 } else if (triangle_contains_point(top_triangle, point_in_window)) {
                     new_split = SPLIT_X;
