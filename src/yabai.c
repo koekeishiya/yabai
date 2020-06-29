@@ -39,7 +39,6 @@ int g_normal_window_level;
 int g_floating_window_level;
 int g_connection;
 
-
 struct signal *g_signal_event[EVENT_TYPE_COUNT];
 bool g_mission_control_active;
 char g_sa_socket_file[MAXLEN];
