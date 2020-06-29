@@ -81,14 +81,14 @@ void insert_feedback_show(struct window_node *node)
     CGPathAddLineToPoint(outline, NULL, x4, y4);
 
     SLSDisableUpdate(g_connection);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_list[0]);
+    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_order[0]);
     SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
     CGContextClearRect(node->feedback_window.context, frame);
     CGContextFillRect(node->feedback_window.context, fill);
     CGContextAddPath(node->feedback_window.context, outline);
     CGContextStrokePath(node->feedback_window.context);
     CGContextFlush(node->feedback_window.context);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_list[0]);
+    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
     SLSReenableUpdate(g_connection);
     CGPathRelease(outline);
     CFRelease(frame_region);
@@ -247,13 +247,17 @@ static void window_node_split(struct view *view, struct window_node *node, struc
 
     if (window_node_get_child(node) == CHILD_SECOND) {
         memcpy(left->window_list, node->window_list, sizeof(uint32_t) * node->window_count);
+        memcpy(left->window_order, node->window_order, sizeof(uint32_t) * node->window_count);
         left->window_count = node->window_count;
         right->window_list[0] = window->id;
+        right->window_order[0] = window->id;
         right->window_count = 1;
     } else {
         memcpy(right->window_list, node->window_list, sizeof(uint32_t) * node->window_count);
+        memcpy(right->window_order, node->window_order, sizeof(uint32_t) * node->window_count);
         right->window_count = node->window_count;
         left->window_list[0] = window->id;
+        left->window_order[0] = window->id;
         left->window_count = 1;
     }
 
@@ -333,6 +337,28 @@ bool window_node_contains_window(struct window_node *node, uint32_t window_id)
     }
 
     return false;
+}
+
+void window_node_swap_window_list(struct window_node *a_node, struct window_node *b_node)
+{
+    uint32_t tmp_window_list[NODE_MAX_WINDOW_COUNT];
+    uint32_t tmp_window_order[NODE_MAX_WINDOW_COUNT];
+    uint32_t tmp_window_count;
+
+    memcpy(tmp_window_list, a_node->window_list, sizeof(uint32_t) * a_node->window_count);
+    memcpy(tmp_window_order, a_node->window_order, sizeof(uint32_t) * a_node->window_count);
+    tmp_window_count = a_node->window_count;
+
+    memcpy(a_node->window_list, b_node->window_list, sizeof(uint32_t) * b_node->window_count);
+    memcpy(a_node->window_order, b_node->window_order, sizeof(uint32_t) * b_node->window_count);
+    a_node->window_count = b_node->window_count;
+
+    memcpy(b_node->window_list, tmp_window_list, sizeof(uint32_t) * tmp_window_count);
+    memcpy(b_node->window_order, tmp_window_order, sizeof(uint32_t) * tmp_window_count);
+    b_node->window_count = tmp_window_count;
+
+    a_node->zoom = NULL;
+    b_node->zoom = NULL;
 }
 
 struct window_node *window_node_find_first_leaf(struct window_node *root)
@@ -521,14 +547,24 @@ void view_remove_window_node(struct view *view, struct window *window)
     if (!node) return;
 
     if (node->window_count > 1) {
+        bool removed_entry = false;
+        bool removed_order = false;
+
         for (int i = 0; i < node->window_count; ++i) {
-            if (node->window_list[i] != window->id) continue;
+            if (!removed_entry && node->window_list[i] == window->id) {
+                memmove(node->window_list + i, node->window_list + i + 1, sizeof(uint32_t) * (node->window_count - i - 1));
+                removed_entry = true;
+            }
 
-            memmove(node->window_list + i, node->window_list + i + 1, sizeof(uint32_t) * (node->window_count - i - 1));
-            --node->window_count;
-
-            break;
+            if (!removed_order && node->window_order[i] == window->id) {
+                memmove(node->window_order + i, node->window_order + i + 1, sizeof(uint32_t) * (node->window_count - i - 1));
+                removed_order = true;
+            }
         }
+
+        assert(removed_entry);
+        assert(removed_order);
+        --node->window_count;
 
         return;
     }
@@ -550,6 +586,7 @@ void view_remove_window_node(struct view *view, struct window *window)
 
 
     memcpy(parent->window_list, child->window_list, sizeof(uint32_t) * child->window_count);
+    memcpy(parent->window_order, child->window_order, sizeof(uint32_t) * child->window_count);
     parent->window_count = child->window_count;
 
     parent->left      = NULL;
@@ -596,7 +633,9 @@ void view_stack_window_node(struct view *view, struct window_node *node, struct 
         window_manager_set_window_frame(window, node->area.x, node->area.y, node->area.w, node->area.h);
     }
 
-    node->window_list[node->window_count++] = window->id;
+    node->window_list[node->window_count] = window->id;
+    node->window_order[node->window_count] = window->id;
+    ++node->window_count;
 }
 
 void view_add_window_node(struct view *view, struct window *window)
@@ -604,6 +643,7 @@ void view_add_window_node(struct view *view, struct window *window)
     if (!window_node_is_occupied(view->root) &&
         window_node_is_leaf(view->root)) {
         view->root->window_list[0] = window->id;
+        view->root->window_order[0] = window->id;
         view->root->window_count = 1;
     } else {
         struct window_node *leaf = NULL;
@@ -728,8 +768,8 @@ void view_serialize(FILE *rsp, struct view *view)
             space_is_visible(view->sid),
             view->sid == g_space_manager.current_space_id,
             space_is_fullscreen(view->sid),
-            first_leaf ? first_leaf->window_list[0] : 0,
-            last_leaf ? last_leaf->window_list[0] : 0);
+            first_leaf ? first_leaf->window_order[0] : 0,
+            last_leaf ? last_leaf->window_order[0] : 0);
 }
 
 void view_update(struct view *view)

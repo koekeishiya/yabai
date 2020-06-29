@@ -191,18 +191,23 @@ extern bool g_verbose;
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------COMMON ARGUMENTS----------------------------- */
-#define ARGUMENT_COMMON_VAL_ON     "on"
-#define ARGUMENT_COMMON_VAL_OFF    "off"
-#define ARGUMENT_COMMON_SEL_PREV   "prev"
-#define ARGUMENT_COMMON_SEL_NEXT   "next"
-#define ARGUMENT_COMMON_SEL_FIRST  "first"
-#define ARGUMENT_COMMON_SEL_LAST   "last"
-#define ARGUMENT_COMMON_SEL_RECENT "recent"
-#define ARGUMENT_COMMON_SEL_NORTH  "north"
-#define ARGUMENT_COMMON_SEL_EAST   "east"
-#define ARGUMENT_COMMON_SEL_SOUTH  "south"
-#define ARGUMENT_COMMON_SEL_WEST   "west"
-#define ARGUMENT_COMMON_SEL_STACK  "stack"
+#define ARGUMENT_COMMON_VAL_ON           "on"
+#define ARGUMENT_COMMON_VAL_OFF          "off"
+#define ARGUMENT_COMMON_SEL_PREV         "prev"
+#define ARGUMENT_COMMON_SEL_NEXT         "next"
+#define ARGUMENT_COMMON_SEL_FIRST        "first"
+#define ARGUMENT_COMMON_SEL_LAST         "last"
+#define ARGUMENT_COMMON_SEL_RECENT       "recent"
+#define ARGUMENT_COMMON_SEL_NORTH        "north"
+#define ARGUMENT_COMMON_SEL_EAST         "east"
+#define ARGUMENT_COMMON_SEL_SOUTH        "south"
+#define ARGUMENT_COMMON_SEL_WEST         "west"
+#define ARGUMENT_COMMON_SEL_STACK        "stack"
+#define ARGUMENT_COMMON_SEL_STACK_PREV   "stack.prev"
+#define ARGUMENT_COMMON_SEL_STACK_NEXT   "stack.next"
+#define ARGUMENT_COMMON_SEL_STACK_FIRST  "stack.first"
+#define ARGUMENT_COMMON_SEL_STACK_LAST   "stack.last"
+#define ARGUMENT_COMMON_SEL_STACK_RECENT "stack.recent"
 /* ----------------------------------------------------------------------------- */
 
 static bool token_equals(struct token token, char *match)
@@ -1217,6 +1222,61 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
         } else {
             daemon_fail(rsp, "could not locate the most recently focused window.\n");
         }
+    } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_PREV)) {
+        if (acting_window) {
+            struct window *prev_window = window_manager_find_prev_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+            if (prev_window) {
+                result.window = prev_window;
+            } else {
+                daemon_fail(rsp, "could not locate the prev stacked window.\n");
+            }
+        } else {
+            daemon_fail(rsp, "could not locate the selected window.\n");
+        }
+    } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_NEXT)) {
+        if (acting_window) {
+            struct window *next_window = window_manager_find_next_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+            if (next_window) {
+                result.window = next_window;
+            } else {
+                daemon_fail(rsp, "could not locate the next stacked window.\n");
+            }
+        } else {
+            daemon_fail(rsp, "could not locate the selected window.\n");
+        }
+    } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_FIRST)) {
+        if (acting_window) {
+            struct window *first_window = window_manager_find_first_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+            if (first_window) {
+                result.window = first_window;
+            } else {
+                daemon_fail(rsp, "could not locate the first stacked window.\n");
+            }
+        } else {
+            daemon_fail(rsp, "could not locate the selected window.\n");
+        }
+    } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_LAST)) {
+        if (acting_window) {
+            struct window *last_window = window_manager_find_last_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+            if (last_window) {
+                result.window = last_window;
+            } else {
+                daemon_fail(rsp, "could not locate the last stacked window.\n");
+            }
+        } else {
+            daemon_fail(rsp, "could not locate the selected window.\n");
+        }
+    } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_RECENT)) {
+        if (acting_window) {
+            struct window *recent_window = window_manager_find_recent_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+            if (recent_window) {
+                result.window = recent_window;
+            } else {
+                daemon_fail(rsp, "could not locate the recent stacked window.\n");
+            }
+        } else {
+            daemon_fail(rsp, "could not locate the selected window.\n");
+        }
     } else if (token_is_valid(result.token)) {
         int wid = 0;
         if (token_to_int(result.token, &wid)) {
@@ -1537,6 +1597,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "the acting window is not managed.\n");
             } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
                 daemon_fail(rsp, "the selected window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_SAME_STACK) {
+                daemon_fail(rsp, "cannot swap a window with a window in the same stack.\n");
             } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
                 daemon_fail(rsp, "cannot swap a window with itself.\n");
             }
@@ -1553,6 +1615,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "the acting window is not managed.\n");
             } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
                 daemon_fail(rsp, "the selected window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_SAME_STACK) {
+                daemon_fail(rsp, "cannot warp a window with a window in the same stack.\n");
             } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
                 daemon_fail(rsp, "cannot warp a window onto itself.\n");
             }
@@ -1563,6 +1627,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             enum window_op_error result = window_manager_stack_window(&g_space_manager, &g_window_manager, acting_window, selector.window);
             if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
                 daemon_fail(rsp, "the acting window is not managed.\n");
+            } else if (result == WINDOW_OP_ERROR_MAX_STACK) {
+                daemon_fail(rsp, "cannot stack window, max capacity of %d reached.\n", NODE_MAX_WINDOW_COUNT);
             } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
                 daemon_fail(rsp, "cannot stack a window onto itself.\n");
             }
