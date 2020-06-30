@@ -22,9 +22,15 @@
 #define MINOR 2
 #define PATCH 1
 
+extern CGError SLSEventSetAppIsUnresponsiveNotificationTimeout(int cid, float timeout);
+
 #define CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context, int cid)
 typedef CONNECTION_CALLBACK(connection_callback);
 extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);
+
+#define GLOBAL_CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context)
+typedef GLOBAL_CONNECTION_CALLBACK(global_connection_callback);
+extern CGError SLSRegisterNotifyProc(global_connection_callback *handler, uint32_t event, void *context);
 
 struct event_loop g_event_loop;
 void *g_workspace_context;
@@ -205,6 +211,15 @@ static inline void init_misc_settings(void)
 }
 #pragma clang diagnostic pop
 
+static GLOBAL_CONNECTION_CALLBACK(global_connection_handler)
+{
+    struct process *process = process_manager_find_process(&g_process_manager, data+0x10);
+    if (process) {
+        enum event_type event = type == 750 ? APPLICATION_IS_UNRESPONSIVE : APPLICATION_IS_RESPONSIVE;
+        event_loop_post(&g_event_loop, event, process, 0, NULL);
+    }
+}
+
 static CONNECTION_CALLBACK(connection_handler)
 {
     event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
@@ -294,7 +309,10 @@ int main(int argc, char **argv)
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+    SLSEventSetAppIsUnresponsiveNotificationTimeout(g_connection, 1.0);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
+    SLSRegisterNotifyProc(global_connection_handler, 750, NULL);
+    SLSRegisterNotifyProc(global_connection_handler, 751, NULL);
 
     if (!socket_daemon_begin_un(&g_daemon, g_socket_file, message_handler)) {
         error("yabai: could not initialize daemon! abort..\n");

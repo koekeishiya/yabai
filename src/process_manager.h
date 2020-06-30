@@ -34,6 +34,7 @@ struct process_manager
 
 void process_destroy(struct process *process);
 struct process *process_create(ProcessSerialNumber psn);
+bool process_is_suspended(pid_t pid);
 struct process *process_manager_find_process(struct process_manager *pm, ProcessSerialNumber *psn);
 void process_manager_remove_process(struct process_manager *pm, ProcessSerialNumber *psn);
 void process_manager_add_process(struct process_manager *pm, struct process *process);

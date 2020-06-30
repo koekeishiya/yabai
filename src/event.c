@@ -53,6 +53,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         return EVENT_FAILURE;
     }
 
+    if (process_is_suspended(process->pid)) {
+        debug("%s: %s (%d) is not responsive, deferring initialization..\n", __FUNCTION__, process->name, process->pid);
+        return EVENT_FAILURE;
+    }
+
     if (!workspace_application_is_observable(process)) {
         debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
         workspace_application_observe_activation_policy(g_workspace_context, process);
@@ -284,6 +289,30 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
     }
 
     buf_free(window_list);
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_IS_UNRESPONSIVE)
+{
+    struct process *process = context;
+
+    struct application *application = window_manager_find_application(&g_window_manager, process->pid);
+    if (!application) return EVENT_SUCCESS;
+
+    debug("%s: %s (%d) is not responsive..\n", __FUNCTION__, application->name, application->pid);
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_IS_RESPONSIVE)
+{
+    struct process *process = context;
+
+    struct application *application = window_manager_find_application(&g_window_manager, process->pid);
+    if (!application) event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
+
+    debug("%s: %s (%d) is now responsive..\n", __FUNCTION__, process->name, process->pid);
+
     return EVENT_SUCCESS;
 }
 

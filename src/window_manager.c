@@ -1616,8 +1616,12 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         while (bucket) {
             if (bucket->value) {
                 struct process *process = bucket->value;
-                struct application *application = application_create(process);
+                if (process_is_suspended(process->pid)) {
+                    debug("%s: %s (%d) is not responsive, deferring initialization..\n", __FUNCTION__, process->name, process->pid);
+                    goto next;
+                }
 
+                struct application *application = application_create(process);
                 if (application_observe(application)) {
                     window_manager_add_application(wm, application);
                     window_manager_add_application_windows(sm, wm, application);
@@ -1627,6 +1631,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
                 }
             }
 
+next:
             bucket = bucket->next;
         }
     }

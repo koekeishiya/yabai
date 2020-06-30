@@ -45,7 +45,7 @@ application_observe_notification(struct application *application, int notificati
         application->notification |= 1 << notification;
     } else {
         if (result == kAXErrorCannotComplete) application->ax_retry = true;
-        debug("%s: %s failed with error %s\n", __FUNCTION__, ax_application_notification_str[notification], ax_error_str[-result]);
+        debug("%s: %s (%d) could not subscribe to notification %s, failed with error %s\n", __FUNCTION__, application->name, application->pid, ax_application_notification_str[notification], ax_error_str[-result]);
     }
 }
 

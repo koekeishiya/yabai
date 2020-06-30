@@ -58,13 +58,13 @@ static bool process_is_traced(pid_t pid)
     return ((info.kp_proc.p_flag & P_TRACED) != 0);
 }
 
-static bool process_is_suspended(pid_t pid)
+bool process_is_suspended(pid_t pid)
 {
     struct kinfo_proc info;
     size_t size = sizeof(info);
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid };
 
-    info.kp_proc.p_flag = 0;
+    info.kp_proc.p_stat = 0;
     sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
 
     return ((info.kp_proc.p_stat & SRUN) == 0);
