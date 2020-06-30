@@ -18,7 +18,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include <sys/sysctl.h>
 #include <semaphore.h>
 #include <pthread.h>
 
