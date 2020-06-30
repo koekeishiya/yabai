@@ -46,6 +46,30 @@ void process_destroy(struct process *process)
     free(process);
 }
 
+static bool process_is_traced(pid_t pid)
+{
+    struct kinfo_proc info;
+    size_t size = sizeof(info);
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid };
+
+    info.kp_proc.p_flag = 0;
+    sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+
+    return ((info.kp_proc.p_flag & P_TRACED) != 0);
+}
+
+static bool process_is_suspended(pid_t pid)
+{
+    struct kinfo_proc info;
+    size_t size = sizeof(info);
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid };
+
+    info.kp_proc.p_flag = 0;
+    sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+
+    return ((info.kp_proc.p_stat & SRUN) == 0);
+}
+
 static bool process_is_observable(struct process *process)
 {
     if (process->xpc) {
@@ -65,6 +89,11 @@ static bool process_is_observable(struct process *process)
 
     if (string_equals(process->name, "Dock")) {
         debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
+        return false;
+    }
+
+    if (process_is_traced(process->pid)) {
+        warn("%s: %s (%d) is running under a debugger! ignoring..\n", __FUNCTION__, process->name, process->pid);
         return false;
     }
 

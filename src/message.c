@@ -43,6 +43,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_MOUSE_MOD             "mouse_modifier"
 #define COMMAND_CONFIG_MOUSE_ACTION1         "mouse_action1"
 #define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
+#define COMMAND_CONFIG_MOUSE_DROP_ACTION     "mouse_drop_action"
 #define COMMAND_CONFIG_EXTERNAL_BAR          "external_bar"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
@@ -64,6 +65,8 @@ extern bool g_verbose;
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE        "move"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE_LEGACY "move2"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE      "resize"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_SWAP        "swap"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_STACK       "stack"
 #define ARGUMENT_CONFIG_EXTERNAL_BAR_MAIN        "main"
 #define ARGUMENT_CONFIG_EXTERNAL_BAR_ALL         "all"
 #define ARGUMENT_CONFIG_EXTERNAL_BAR             "%5[^:]:%d:%d"
@@ -791,6 +794,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_mouse_state.action2 = MOUSE_MODE_MOVE_LEGACY;
         } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
             g_mouse_state.action2 = MOUSE_MODE_RESIZE;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_DROP_ACTION)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.drop_action]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_SWAP)) {
+            g_mouse_state.drop_action = MOUSE_MODE_SWAP;
+        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_STACK)) {
+            g_mouse_state.drop_action = MOUSE_MODE_STACK;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

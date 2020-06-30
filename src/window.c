@@ -141,6 +141,7 @@ void window_serialize(FILE *rsp, struct window *window)
     snprintf(split, sizeof(split), "%s", window_node_split_str[node && node->parent ? node->parent->split : 0]);
     bool zoom_parent = node && node->zoom && node->zoom == node->parent;
     bool zoom_fullscreen = node && node->zoom && node->zoom == view->root;
+    bool stack_index = node && node->window_count > 1 ? window_node_index_of_window(node, window->id)+1 : 0;
 
     fprintf(rsp,
             "{\n"
@@ -166,6 +167,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"opacity\":%.4f,\n"
             "\t\"shadow\":%d,\n"
             "\t\"border\":%d,\n"
+            "\t\"stack-index\":%d,\n"
             "\t\"zoom-parent\":%d,\n"
             "\t\"zoom-fullscreen\":%d,\n"
             "\t\"native-fullscreen\":%d\n"
@@ -193,6 +195,7 @@ void window_serialize(FILE *rsp, struct window *window)
             opacity,
             window->has_shadow,
             border,
+            stack_index,
             zoom_parent,
             zoom_fullscreen,
             window_is_fullscreen(window));

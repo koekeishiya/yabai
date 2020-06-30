@@ -113,6 +113,7 @@ void insert_feedback_destroy(struct window_node *node);
 void window_node_flush(struct window_node *node);
 void window_node_update(struct view *view, struct window_node *node);
 bool window_node_contains_window(struct window_node *node, uint32_t window_id);
+int window_node_index_of_window(struct window_node *node, uint32_t window_id);
 void window_node_swap_window_list(struct window_node *a_node, struct window_node *b_node);
 struct window_node *window_node_find_first_leaf(struct window_node *root);
 struct window_node *window_node_find_last_leaf(struct window_node *root);
