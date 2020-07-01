@@ -15,19 +15,27 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         CGEventTapEnable(event_tap->handle, 1);
     } break;
     case kCGEventLeftMouseDown:
-    case kCGEventRightMouseDown: {
+    case kCGEventRightMouseDown:
+    case kCGEventOtherMouseDown: {
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
-        consume_mouse_click = mod == g_mouse_state.modifier;
+        enum mouse_button button =
+              type == kCGEventLeftMouseDown ? MOUSE_BUTTON_LEFT
+            : type == kCGEventRightMouseDown ? MOUSE_BUTTON_RIGHT
+            : type == kCGEventOtherMouseDown ? MOUSE_BUTTON_MIDDLE
+            : MOUSE_BUTTON_NONE;
+        consume_mouse_click = mouse_action_get(&g_mouse_state, mod, button) != MOUSE_ACTION_NONE;
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod, NULL);
         if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseUp:
-    case kCGEventRightMouseUp: {
+    case kCGEventRightMouseUp:
+    case kCGEventOtherMouseUp: {
         event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(cgevent), 0, NULL);
         if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseDragged:
-    case kCGEventRightMouseDragged: {
+    case kCGEventRightMouseDragged:
+    case kCGEventOtherMouseDragged: {
         event_loop_post(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(cgevent), 0, NULL);
     } break;
     case kCGEventMouseMoved: {
