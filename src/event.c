@@ -644,13 +644,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
     uint8_t mod = (uint8_t) param1;
 
-    for (int i = 0; i < MAX_MOUSE_ACTIONS; i++) {
-        if (button == g_mouse_state.actions[i].button &&
-               mod == g_mouse_state.actions[i].modifier) {
-            g_mouse_state.current_action = g_mouse_state.actions[i].drag_action;
-            g_mouse_state.drop_action    = g_mouse_state.actions[i].drop_action;
-            break;
-        }
+    int action = mouse_action_get(&g_mouse_state, mod, button);
+    if (action != MOUSE_ACTION_NONE) {
+        g_mouse_state.current_action = g_mouse_state.actions[action].drag_action;
+        g_mouse_state.drop_action    = g_mouse_state.actions[action].drop_action;
+        g_mouse_state.modifier       = g_mouse_state.actions[action].modifier;
     }
 
     return EVENT_SUCCESS;

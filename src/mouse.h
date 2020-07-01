@@ -41,6 +41,7 @@ struct mouse_action
     volatile enum mouse_mode drop_action;
 };
 
+#define MOUSE_ACTION_NONE (-1)
 #define MAX_MOUSE_ACTIONS 16
 
 struct mouse_state
@@ -130,6 +131,15 @@ static inline void mouse_state_init(struct mouse_state *state)
     state->current_action = MOUSE_MODE_NONE;
     state->drop_action    = MOUSE_MODE_NONE;
     state->modifier       = MOUSE_MOD_INVALID;
+}
+
+static inline int mouse_action_get(struct mouse_state *state, enum mouse_mod mod, enum mouse_button button) {
+    for (int i = 0; i < MAX_MOUSE_ACTIONS; i++) {
+        if (button == state->actions[i].button &&
+               mod == state->actions[i].modifier) 
+            return i;
+    }
+    return MOUSE_ACTION_NONE;
 }
 
 #endif
