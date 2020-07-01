@@ -220,19 +220,19 @@ Default split ratio.
 Balance the window tree upon change, so that all windows occupy the same area.
 .RE
 .sp
-\fBmouse_modifier\fP [\fIcmd|alt|shift|ctrl|fn\fP]
+\fBmouse_action\fP [\fI<integer number>\fP]
 .RS 4
-Keyboard modifier used for moving and resizing windows.
+List all registered mouse actions, or report the specified mouse action. Up to 16 mouse actions may be specified, using indices 0-15 inclusive.
 .RE
 .sp
-\fBmouse_action1\fP [\fImove|resize\fP]
+\fBmouse_action\fP [\fI<integer number>\fP] \fIclear\fP
 .RS 4
-Action performed when pressing \fImouse_modifier\fP + \fIbutton1\fP.
+Clear all registered mouse actions, or the specified mouse action.
 .RE
 .sp
-\fBmouse_action2\fP [\fImove|resize\fP]
+\fBmouse_action\fP \fI<integer number>\fP [\fIalt|shift|ctrl|cmd|fn|super\fP]+ [\fIleft|right|middle\fP] [\fImove|resize\fP] [\fIswap|stack\fP]::
 .RS 4
-Action performed when pressing \fImouse_modifier\fP + \fIbutton2\fP.
+Set the specified mouse action. Any combination of modifiers may be specified, delimited by spaces. \fIsuper\fP is a shortcut for \fIalt shift ctrl cmd\fP. A mouse button and drag action (move or resize) should also be specified, and a drop action (swap or stack) may optionally be specified. For example, \fBmouse_action 3 alt ctrl right resize\fP.
 .RE
 .SS "Space Settings"
 .sp

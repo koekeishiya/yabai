@@ -163,14 +163,14 @@ Global Settings
 *auto_balance* ['<BOOL_SEL>']::
     Balance the window tree upon change, so that all windows occupy the same area.
 
-*mouse_modifier* ['cmd|alt|shift|ctrl|fn']::
-    Keyboard modifier used for moving and resizing windows.
+*mouse_action* ['<integer number>']::
+    List all registered mouse actions, or report the specified mouse action. Up to 16 mouse actions may be specified, using indices 0-15 inclusive.
 
-*mouse_action1* ['move|resize']::
-    Action performed when pressing 'mouse_modifier' + 'button1'.
+*mouse_action* ['<integer number>'] 'clear'::
+    Clear all registered mouse actions, or the specified mouse action.
 
-*mouse_action2* ['move|resize']::
-    Action performed when pressing 'mouse_modifier' + 'button2'.
+*mouse_action* '<integer number>' ['alt|shift|ctrl|cmd|fn|super']+ ['left|right|middle'] ['move|resize'] ['swap|stack']::
+    Set the specified mouse action. Any combination of modifiers may be specified, delimited by spaces. 'super' is a shortcut for 'alt shift ctrl cmd'. A mouse button and drag action (move or resize) should also be specified, and a drop action (swap or stack) may optionally be specified. For example, *mouse_action 3 alt ctrl right resize*.
 
 Space Settings
 ^^^^^^^^^^^^^^

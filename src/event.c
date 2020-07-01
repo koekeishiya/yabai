@@ -644,10 +644,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
     uint8_t mod = (uint8_t) param1;
 
-    if (button == kCGMouseButtonLeft && g_mouse_state.modifier == mod) {
-        g_mouse_state.current_action = g_mouse_state.action1;
-    } else if (button == kCGMouseButtonRight && g_mouse_state.modifier == mod) {
-        g_mouse_state.current_action = g_mouse_state.action2;
+    for (int i = 0; i < MAX_MOUSE_ACTIONS; i++) {
+        if (button == g_mouse_state.actions[i].button &&
+               mod == g_mouse_state.actions[i].modifier) {
+            g_mouse_state.current_action = g_mouse_state.actions[i].drag_action;
+            g_mouse_state.drop_action    = g_mouse_state.actions[i].drop_action;
+            break;
+        }
     }
 
     return EVENT_SUCCESS;
@@ -838,8 +841,10 @@ end:;
     }
 
 out:
-    g_mouse_state.window = NULL;
+    g_mouse_state.window         = NULL;
     g_mouse_state.current_action = MOUSE_MODE_NONE;
+    g_mouse_state.drop_action    = MOUSE_MODE_NONE;
+    g_mouse_state.modifier       = MOUSE_MOD_INVALID;
 
     return EVENT_SUCCESS;
 }
@@ -853,6 +858,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         g_mouse_state.window = NULL;
         g_mouse_state.current_action = MOUSE_MODE_NONE;
+        g_mouse_state.drop_action    = MOUSE_MODE_NONE;
         return EVENT_SUCCESS;
     }
 

@@ -40,10 +40,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_WINDOW_GAP            "window_gap"
 #define COMMAND_CONFIG_SPLIT_RATIO           "split_ratio"
 #define COMMAND_CONFIG_AUTO_BALANCE          "auto_balance"
-#define COMMAND_CONFIG_MOUSE_MOD             "mouse_modifier"
-#define COMMAND_CONFIG_MOUSE_ACTION1         "mouse_action1"
-#define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
-#define COMMAND_CONFIG_MOUSE_DROP_ACTION     "mouse_drop_action"
+#define COMMAND_CONFIG_MOUSE_ACTION          "mouse_action"
 #define COMMAND_CONFIG_EXTERNAL_BAR          "external_bar"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
@@ -55,11 +52,16 @@ extern bool g_verbose;
 #define ARGUMENT_CONFIG_SHADOW_FLT           "float"
 #define ARGUMENT_CONFIG_LAYOUT_BSP           "bsp"
 #define ARGUMENT_CONFIG_LAYOUT_FLOAT         "float"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_RESET   "clear"
 #define ARGUMENT_CONFIG_MOUSE_MOD_ALT        "alt"
 #define ARGUMENT_CONFIG_MOUSE_MOD_SHIFT      "shift"
 #define ARGUMENT_CONFIG_MOUSE_MOD_CMD        "cmd"
 #define ARGUMENT_CONFIG_MOUSE_MOD_CTRL       "ctrl"
 #define ARGUMENT_CONFIG_MOUSE_MOD_FN         "fn"
+#define ARGUMENT_CONFIG_MOUSE_MOD_SUPER      "super"
+#define ARGUMENT_CONFIG_MOUSE_BUTTON_LEFT    "left"
+#define ARGUMENT_CONFIG_MOUSE_BUTTON_RIGHT   "right"
+#define ARGUMENT_CONFIG_MOUSE_BUTTON_MIDDLE  "middle"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE    "move"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE  "resize"
 #define ARGUMENT_CONFIG_MOUSE_ACTION_SWAP    "swap"
@@ -265,6 +267,31 @@ static float token_to_float(struct token token)
     buffer[token.length] = '\0';
     sscanf(buffer, "%f", &result);
     return result;
+}
+
+bool mouse_action_empty(int i) {
+    if (0 <= i && i < MAX_MOUSE_ACTIONS) {
+        return (g_mouse_state.actions[i].modifier    == MOUSE_MOD_NONE ||
+                g_mouse_state.actions[i].button      == MOUSE_BUTTON_NONE ||
+                g_mouse_state.actions[i].drag_action == MOUSE_MODE_NONE);
+    } else {
+        return true;
+    }
+}
+
+void fprint_mouse_action(FILE *rsp, int i) {
+    fprintf(rsp, "%d", i);
+    if (mouse_action_empty(i)) {
+        fprintf(rsp, " %s\n", ARGUMENT_CONFIG_MOUSE_ACTION_RESET);
+    } else {
+        for (int m = MOUSE_MOD_NONE << 1; m < MOUSE_MOD_END; m <<= 1) {
+            if (m & g_mouse_state.actions[i].modifier)
+                fprintf(rsp, " %s", mouse_mod_str[m]);
+        }
+        fprintf(rsp, " %s", mouse_button_str[g_mouse_state.actions[i].button]);
+        fprintf(rsp, " %s", mouse_mode_str[g_mouse_state.actions[i].drag_action]);
+        fprintf(rsp, " %s\n", mouse_mode_str[g_mouse_state.actions[i].drop_action]);
+    }
 }
 
 static struct token get_token(char **message)
@@ -715,55 +742,69 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
-    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_MOD)) {
-        struct token value = get_token(&message);
-        if (!token_is_valid(value)) {
-            fprintf(rsp, "%s\n", mouse_mod_str[g_mouse_state.modifier]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_ALT)) {
-            g_mouse_state.modifier = MOUSE_MOD_ALT;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_SHIFT)) {
-            g_mouse_state.modifier = MOUSE_MOD_SHIFT;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CMD)) {
-            g_mouse_state.modifier = MOUSE_MOD_CMD;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CTRL)) {
-            g_mouse_state.modifier = MOUSE_MOD_CTRL;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_FN)) {
-            g_mouse_state.modifier = MOUSE_MOD_FN;
+    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_ACTION)) {
+        struct token selector = get_token(&message);
+        if (!token_is_valid(selector)) {
+            for (int i = 0; i < MAX_MOUSE_ACTIONS; i++) {
+                if (!mouse_action_empty(i))
+                    fprint_mouse_action(rsp, i);
+            }
+        } else if (token_equals(selector, ARGUMENT_CONFIG_MOUSE_ACTION_RESET)) {
+            mouse_action_clear_all(&g_mouse_state);
         } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-        }
-    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_ACTION1)) {
-        struct token value = get_token(&message);
-        if (!token_is_valid(value)) {
-            fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.action1]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE)) {
-            g_mouse_state.action1 = MOUSE_MODE_MOVE;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
-            g_mouse_state.action1 = MOUSE_MODE_RESIZE;
-        } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-        }
-    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_ACTION2)) {
-        struct token value = get_token(&message);
-        if (!token_is_valid(value)) {
-            fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.action2]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE)) {
-            g_mouse_state.action2 = MOUSE_MODE_MOVE;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
-            g_mouse_state.action2 = MOUSE_MODE_RESIZE;
-        } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-        }
-    } else if (token_equals(command, COMMAND_CONFIG_MOUSE_DROP_ACTION)) {
-        struct token value = get_token(&message);
-        if (!token_is_valid(value)) {
-            fprintf(rsp, "%s\n", mouse_mode_str[g_mouse_state.drop_action]);
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_SWAP)) {
-            g_mouse_state.drop_action = MOUSE_MODE_SWAP;
-        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_STACK)) {
-            g_mouse_state.drop_action = MOUSE_MODE_STACK;
-        } else {
-            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            int i;
+            token_to_int(selector, &i);
+            struct token value = get_token(&message);
+            if (0 <= i && i < MAX_MOUSE_ACTIONS) {
+                if (!token_is_valid(value)) {
+                    fprint_mouse_action(rsp, i);
+                } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESET)) {
+                    mouse_action_clear(&g_mouse_state, i);
+                } else {
+                    enum mouse_mod modifier     = 0;
+                    enum mouse_button button    = MOUSE_BUTTON_NONE;
+                    enum mouse_mode drag_action = MOUSE_MODE_NONE;
+                    enum mouse_mode drop_action = MOUSE_MODE_NONE;
+                    for (; token_is_valid(value); value = get_token(&message)) {
+                        if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_ALT)) {
+                            modifier |= MOUSE_MOD_ALT;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_SHIFT)) {
+                            modifier |= MOUSE_MOD_SHIFT;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CMD)) {
+                            modifier |= MOUSE_MOD_CMD;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_CTRL)) {
+                            modifier |= MOUSE_MOD_CTRL;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_FN)) {
+                            modifier |= MOUSE_MOD_FN;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_MOD_SUPER)) {
+                            modifier |= MOUSE_MOD_SUPER;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_BUTTON_LEFT)) {
+                            button = MOUSE_BUTTON_LEFT;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_BUTTON_RIGHT)) {
+                            button = MOUSE_BUTTON_RIGHT;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_BUTTON_MIDDLE)) {
+                            button = MOUSE_BUTTON_MIDDLE;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_MOVE)) {
+                            drag_action = MOUSE_MODE_MOVE;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE)) {
+                            drag_action = MOUSE_MODE_RESIZE;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_SWAP)) {
+                            drop_action = MOUSE_MODE_SWAP;
+                        } else if (token_equals(value, ARGUMENT_CONFIG_MOUSE_ACTION_STACK)) {
+                            drop_action = MOUSE_MODE_STACK;
+                        } else {
+                            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                            return;
+                        }
+                    }
+                    if (modifier == 0) {
+                        modifier = MOUSE_MOD_NONE;
+                    }
+                    mouse_action_set(&g_mouse_state, i, modifier, button, drag_action, drop_action);
+                }
+            } else {
+                daemon_fail(rsp, "mouse action index %d is out of range (0-%d inclusive)\n", i, MAX_MOUSE_ACTIONS-1);
+            }
         }
     } else if (token_equals(command, COMMAND_CONFIG_EXTERNAL_BAR)) {
         int t, b;
