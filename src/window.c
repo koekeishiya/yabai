@@ -141,7 +141,7 @@ void window_serialize(FILE *rsp, struct window *window)
     snprintf(split, sizeof(split), "%s", window_node_split_str[node && node->parent ? node->parent->split : 0]);
     bool zoom_parent = node && node->zoom && node->zoom == node->parent;
     bool zoom_fullscreen = node && node->zoom && node->zoom == view->root;
-    bool stack_index = node && node->window_count > 1 ? window_node_index_of_window(node, window->id)+1 : 0;
+    int stack_index = node && node->window_count > 1 ? window_node_index_of_window(node, window->id)+1 : 0;
 
     fprintf(rsp,
             "{\n"
