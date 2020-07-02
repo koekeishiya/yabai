@@ -654,7 +654,7 @@ void view_add_window_node(struct view *view, struct window *window)
         view->root->window_list[0] = window->id;
         view->root->window_order[0] = window->id;
         view->root->window_count = 1;
-    } else {
+    } else if (view->layout == VIEW_BSP) {
         struct window_node *leaf = NULL;
 
         if (view->insertion_point) {
@@ -683,6 +683,8 @@ void view_add_window_node(struct view *view, struct window *window)
             window_node_equalize(view->root);
             view_update(view);
         }
+    } else if (view->layout == VIEW_STACK) {
+        view_stack_window_node(view, view->root, window);
     }
 }
 
