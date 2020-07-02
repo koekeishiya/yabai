@@ -316,7 +316,7 @@ void window_manager_remove_managed_window(struct window_manager *wm, uint32_t wi
 
 void window_manager_add_managed_window(struct window_manager *wm, struct window *window, struct view *view)
 {
-    if (view->layout != VIEW_BSP) return;
+    if (view->layout == VIEW_FLOAT) return;
     table_add(&wm->managed_window, &window->id, view);
     window_manager_purify_window(wm, window);
 }
@@ -1528,13 +1528,13 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
         if (window->is_minimized || window->application->is_hidden)  continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
-        if (existing_view && existing_view->layout == VIEW_BSP && existing_view->sid != sid) {
+        if (existing_view && existing_view->layout != VIEW_FLOAT && existing_view->sid != sid) {
             space_manager_untile_window(sm, existing_view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
 
-        if (!existing_view || (existing_view->layout == VIEW_BSP && existing_view->sid != sid)) {
+        if (!existing_view || (existing_view->layout != VIEW_FLOAT && existing_view->sid != sid)) {
             struct view *view = space_manager_tile_window_on_space(sm, window, sid);
             window_manager_add_managed_window(wm, window, view);
         }

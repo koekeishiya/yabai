@@ -73,6 +73,7 @@ enum view_type
 {
     VIEW_DEFAULT,
     VIEW_BSP,
+    VIEW_STACK,
     VIEW_FLOAT
 };
 
@@ -80,6 +81,7 @@ static const char *view_type_str[] =
 {
     "default",
     "bsp",
+    "stack",
     "float"
 };
 
