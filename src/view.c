@@ -122,20 +122,17 @@ static inline struct area area_from_cgrect(CGRect rect)
 
 static inline enum window_node_child window_node_get_child(struct window_node *node)
 {
-    if (node->child != CHILD_NONE) return node->child;
-    return g_space_manager.window_placement;
+    return node->child != CHILD_NONE ? node->child : g_space_manager.window_placement;
 }
 
 static inline enum window_node_split window_node_get_split(struct window_node *node)
 {
-    if (node->split != SPLIT_NONE) return node->split;
-    return node->area.w / node->area.h >= 1.1618f ? SPLIT_Y : SPLIT_X;
+    return node->split != SPLIT_NONE ? node->split : node->area.w / node->area.h >= 1.1618f ? SPLIT_Y : SPLIT_X;
 }
 
 static inline float window_node_get_ratio(struct window_node *node)
 {
-    if (in_range_ii(node->ratio, 0.1f, 0.9f)) return node->ratio;
-    return g_space_manager.split_ratio;
+    return in_range_ii(node->ratio, 0.1f, 0.9f) ? node->ratio : g_space_manager.split_ratio;
 }
 
 static inline float window_node_get_gap(struct view *view)
@@ -200,12 +197,9 @@ static inline bool window_node_is_right_child(struct window_node *node)
     return node->parent && node->parent->right == node;
 }
 
-static struct equalize_node equalize_node_add(struct equalize_node a, struct equalize_node b)
+static inline struct equalize_node equalize_node_add(struct equalize_node a, struct equalize_node b)
 {
-    return (struct equalize_node) {
-        a.y_count + b.y_count,
-        a.x_count + b.x_count,
-    };
+    return (struct equalize_node) { a.y_count + b.y_count, a.x_count + b.x_count, };
 }
 
 static struct equalize_node window_node_equalize(struct window_node *node)
