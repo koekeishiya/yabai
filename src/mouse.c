@@ -20,42 +20,23 @@ void mouse_window_info_populate(struct mouse_state *ms, struct mouse_window_info
 
 enum mouse_drop_action mouse_determine_drop_action(struct mouse_state *ms, struct window_node *src_node, struct window *dst_window, CGPoint point)
 {
-    CGRect f = window_ax_frame(dst_window);
-    CGPoint wp = { point.x - f.origin.x, point.y - f.origin.y };
+    CGRect  f    = window_ax_frame(dst_window);
+    CGPoint wp   = { point.x - f.origin.x, point.y - f.origin.y };
+    CGRect  c    = {{ 0.25f * f.size.width, 0.25f * f.size.height }, { 0.50f * f.size.width, 0.50f * f.size.height }};
+    CGPoint t[3] = {{ 0.0f, 0.0f}, { 0.5f * f.size.width, 0.5f * f.size.height }, { f.size.width, 0.0f }};
+    CGPoint r[3] = {{ f.size.width, 0.0f }, { 0.5f * f.size.width, 0.5f * f.size.height }, { f.size.width, f.size.height }};
+    CGPoint b[3] = {{ f.size.width, f.size.height }, { 0.5f * f.size.width, 0.5f * f.size.height }, { 0.0f, f.size.height }};
+    CGPoint l[3] = {{ 0.0f, f.size.height }, { 0.5f * f.size.width, 0.5f * f.size.height }, { 0.0f, 0.0f }};
 
-    CGRect center     = {{ 0.25f * f.size.width, 0.25f * f.size.height },
-                         { 0.50f * f.size.width, 0.50f * f.size.height }};
-
-    CGPoint top[3]    = {{ 0.0f, 0.0f},
-                         { 0.5f * f.size.width, 0.5f * f.size.height },
-                         { f.size.width, 0.0f }};
-
-    CGPoint right[3]  = {{ f.size.width, 0.0f },
-                         { 0.5f * f.size.width, 0.5f * f.size.height },
-                         { f.size.width, f.size.height }};
-
-    CGPoint bottom[3] = {{ f.size.width, f.size.height },
-                         { 0.5f * f.size.width, 0.5f * f.size.height },
-                         { 0.0f, f.size.height }};
-
-    CGPoint left[3]   = {{ 0.0f, f.size.height },
-                         { 0.5f * f.size.width, 0.5f * f.size.height },
-                         { 0.0f, 0.0f }};
-
-    if ((CGRectContainsPoint(center, wp)) &&
-        (src_node->window_count == 1)) {
-        if (ms->drop_action == MOUSE_MODE_STACK) {
-            return MOUSE_DROP_ACTION_STACK;
-        } else if (ms->drop_action == MOUSE_MODE_SWAP) {
-            return MOUSE_DROP_ACTION_SWAP;
-        }
-    } else if (triangle_contains_point(top, wp)) {
+    if ((CGRectContainsPoint(c, wp)) && (src_node->window_count == 1)) {
+        return ms->drop_action == MOUSE_MODE_STACK ? MOUSE_DROP_ACTION_STACK : MOUSE_DROP_ACTION_SWAP;
+    } else if (triangle_contains_point(t, wp)) {
         return MOUSE_DROP_ACTION_WARP_TOP;
-    } else if (triangle_contains_point(right, wp)) {
+    } else if (triangle_contains_point(r, wp)) {
         return MOUSE_DROP_ACTION_WARP_RIGHT;
-    } else if (triangle_contains_point(bottom, wp)) {
+    } else if (triangle_contains_point(b, wp)) {
         return MOUSE_DROP_ACTION_WARP_BOTTOM;
-    } else if (triangle_contains_point(left, wp)) {
+    } else if (triangle_contains_point(l, wp)) {
         return MOUSE_DROP_ACTION_WARP_LEFT;
     }
 
