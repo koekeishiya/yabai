@@ -672,169 +672,52 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
     struct view *src_view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
-    if (src_view && src_view->layout == VIEW_BSP) {
-        CGRect frame = window_ax_frame(g_mouse_state.window);
-        float dx = frame.origin.x - g_mouse_state.window_frame.origin.x;
-        float dy = frame.origin.y - g_mouse_state.window_frame.origin.y;
-        float dw = frame.size.width - g_mouse_state.window_frame.size.width;
-        float dh = frame.size.height - g_mouse_state.window_frame.size.height;
+    if (!src_view) goto out;
 
-        bool did_change_x = dx != 0.0f;
-        bool did_change_y = dy != 0.0f;
-        bool did_change_w = dw != 0.0f;
-        bool did_change_h = dh != 0.0f;
-        bool did_change_p = did_change_x || did_change_y;
-        bool did_change_s = did_change_w || did_change_h;
+    struct mouse_window_info info;
+    mouse_window_info_populate(&g_mouse_state, &info);
 
-        if (did_change_p && !did_change_s) {
-            uint64_t cursor_sid = display_space_id(display_manager_point_display_id(point));
-            struct view *dst_view = space_manager_find_view(&g_space_manager, cursor_sid);
+    if (info.changed_position && !info.changed_size) {
+        uint64_t cursor_sid = display_space_id(display_manager_point_display_id(point));
+        struct view *dst_view = space_manager_find_view(&g_space_manager, cursor_sid);
 
-            struct window *window = window_manager_find_window_at_point_filtering_window(&g_window_manager, point, g_mouse_state.window->id);
-            if (!window) window = window_manager_find_window_at_point(&g_window_manager, point);
-            if (window == g_mouse_state.window) window = NULL;
+        struct window *window = window_manager_find_window_at_point_filtering_window(&g_window_manager, point, g_mouse_state.window->id);
+        if (!window) window = window_manager_find_window_at_point(&g_window_manager, point);
+        if (window == g_mouse_state.window) window = NULL;
 
-            struct window_node *a_node = view_find_window_node(src_view, g_mouse_state.window->id);
-            struct window_node *b_node = window ? view_find_window_node(dst_view, window->id) : NULL;
+        struct window_node *a_node = view_find_window_node(src_view, g_mouse_state.window->id);
+        struct window_node *b_node = window ? view_find_window_node(dst_view, window->id) : NULL;
 
-            if (a_node && b_node) {
-                CGRect frame = window_ax_frame(window);
-                CGPoint point_in_window    = { point.x - frame.origin.x, point.y - frame.origin.y };
-
-                CGRect window_center       = {{ 0.25f * frame.size.width, 0.25f * frame.size.height },
-                                              { 0.50f * frame.size.width, 0.50f * frame.size.height }};
-
-                CGPoint top_triangle[3]    = {{ 0.0f, 0.0f},
-                                              { 0.5f * frame.size.width, 0.5f * frame.size.height },
-                                              { frame.size.width, 0.0f }};
-
-                CGPoint right_triangle[3]  = {{ frame.size.width, 0.0f },
-                                              { 0.5f * frame.size.width, 0.5f * frame.size.height },
-                                              { frame.size.width, frame.size.height }};
-
-                CGPoint bottom_triangle[3] = {{ frame.size.width, frame.size.height },
-                                              { 0.5f * frame.size.width, 0.5f * frame.size.height },
-                                              { 0.0f, frame.size.height }};
-
-                CGPoint left_triangle[3]   = {{ 0.0f, frame.size.height },
-                                              { 0.5f * frame.size.width, 0.5f * frame.size.height },
-                                              { 0.0f, 0.0f }};
-
-                enum window_node_split new_split;
-                enum window_node_child new_child;
-
-                if (CGRectContainsPoint(window_center, point_in_window) && a_node->window_count == 1) {
-                    if (g_mouse_state.drop_action == MOUSE_MODE_STACK) {
-                        space_manager_untile_window(&g_space_manager, src_view, g_mouse_state.window);
-                        window_manager_remove_managed_window(&g_window_manager, g_mouse_state.window->id);
-
-                        b_node = view_find_window_node(dst_view, window->id);
-                        if (b_node->window_count+1 < NODE_MAX_WINDOW_COUNT) {
-                            view_stack_window_node(dst_view, b_node, g_mouse_state.window);
-                            window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, dst_view);
-                        }
-                    } else if (g_mouse_state.drop_action == MOUSE_MODE_SWAP) {
-do_swap:
-                        if (window_node_contains_window(a_node, src_view->insertion_point)) {
-                            src_view->insertion_point = window->id;
-                        } else if (window_node_contains_window(b_node, dst_view->insertion_point)) {
-                            dst_view->insertion_point = g_mouse_state.window->id;
-                        }
-
-                        window_node_swap_window_list(a_node, b_node);
-
-                        if (src_view->sid != dst_view->sid) {
-                            for (int i = 0; i < a_node->window_count; ++i) {
-                                window_manager_remove_managed_window(&g_window_manager, a_node->window_list[i]);
-                                window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, a_node->window_list[i]), src_view);
-                            }
-
-                            for (int i = 0; i < b_node->window_count; ++i) {
-                                window_manager_remove_managed_window(&g_window_manager, b_node->window_list[i]);
-                                window_manager_add_managed_window(&g_window_manager, window_manager_find_window(&g_window_manager, b_node->window_list[i]), dst_view);
-                            }
-                        }
-
-                        window_node_flush(a_node);
-                        window_node_flush(b_node);
-                    }
-                    goto end;
-                } else if (triangle_contains_point(top_triangle, point_in_window)) {
-                    new_split = SPLIT_X;
-                    new_child = CHILD_FIRST;
-                } else if (triangle_contains_point(right_triangle, point_in_window)) {
-                    new_split = SPLIT_Y;
-                    new_child = CHILD_SECOND;
-                } else if (triangle_contains_point(bottom_triangle, point_in_window)) {
-                    new_split = SPLIT_X;
-                    new_child = CHILD_SECOND;
-                } else if (triangle_contains_point(left_triangle, point_in_window)) {
-                    new_split = SPLIT_Y;
-                    new_child = CHILD_FIRST;
-                } else {
-                    goto end;
-                }
-
-                if ((a_node->parent && b_node->parent) &&
-                    (a_node->parent == b_node->parent) &&
-                    (a_node->window_count == 1)) {
-                    if (b_node->parent->split == new_split) {
-                        goto do_swap;
-                    } else {
-                        b_node->parent->split = new_split;
-                        b_node->parent->child = new_child;
-                    }
-                } else {
-                    b_node->split = new_split;
-                    b_node->child = new_child;
-                }
-
-                space_manager_untile_window(&g_space_manager, src_view, g_mouse_state.window);
-                window_manager_remove_managed_window(&g_window_manager, g_mouse_state.window->id);
-                window_manager_purify_window(&g_window_manager, g_mouse_state.window);
-
-                struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, g_mouse_state.window, dst_view->sid, window->id);
-                window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, view);
-end:;
-            } else if (a_node) {
-                if (src_view->sid == dst_view->sid) {
-                    a_node->zoom = NULL;
-                    window_node_flush(a_node);
-                } else {
-                    space_manager_untile_window(&g_space_manager, src_view, g_mouse_state.window);
-                    window_manager_remove_managed_window(&g_window_manager, g_mouse_state.window->id);
-                    window_manager_purify_window(&g_window_manager, g_mouse_state.window);
-
-                    struct view *view = space_manager_tile_window_on_space(&g_space_manager, g_mouse_state.window, dst_view->sid);
-                    window_manager_add_managed_window(&g_window_manager, g_mouse_state.window, view);
-                }
+        if (a_node && b_node && a_node != b_node) {
+            enum mouse_drop_action drop_action = mouse_determine_drop_action(&g_mouse_state, a_node, window, point);
+            switch (drop_action) {
+            case MOUSE_DROP_ACTION_STACK: {
+                mouse_drop_action_stack(&g_space_manager, &g_window_manager, src_view, g_mouse_state.window, dst_view, window);
+            } break;
+            case MOUSE_DROP_ACTION_SWAP: {
+                mouse_drop_action_swap(&g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window);
+            } break;
+            case MOUSE_DROP_ACTION_WARP_TOP: {
+                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_X, CHILD_FIRST);
+            } break;
+            case MOUSE_DROP_ACTION_WARP_RIGHT: {
+                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_Y, CHILD_SECOND);
+            } break;
+            case MOUSE_DROP_ACTION_WARP_BOTTOM: {
+                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_X, CHILD_SECOND);
+            } break;
+            case MOUSE_DROP_ACTION_WARP_LEFT: {
+                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_Y, CHILD_FIRST);
+            } break;
+            case MOUSE_DROP_ACTION_NONE: {
+                /* silence compiler warning.. */
+            } break;
             }
-        } else {
-            bool success = true;
-
-            if (did_change_p) {
-                uint8_t direction = 0;
-                if (dx != 0.0f) direction |= HANDLE_LEFT;
-                if (dy != 0.0f) direction |= HANDLE_TOP;
-                if (window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dx, dy) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
-                    success = false;
-                }
-            }
-
-            if (did_change_s) {
-                uint8_t direction = 0;
-                if (did_change_w && !did_change_x) direction |= HANDLE_RIGHT;
-                if (did_change_h && !did_change_y) direction |= HANDLE_BOTTOM;
-                if (window_manager_resize_window_relative(&g_window_manager, g_mouse_state.window, direction, dw, dh) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
-                    success = false;
-                }
-            }
-
-            if (!success) {
-                struct window_node *node = view_find_window_node(src_view, g_mouse_state.window->id);
-                if (node) window_node_flush(node);
-            }
+        } else if (a_node) {
+            mouse_drop_no_target(&g_space_manager, &g_window_manager, src_view, dst_view, g_mouse_state.window, a_node);
         }
+    } else {
+        mouse_drop_try_adjust_bsp_grid(&g_window_manager, src_view, g_mouse_state.window, &info);
     }
 
 out:
@@ -858,9 +741,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 
     if (g_mouse_state.current_action == MOUSE_MODE_MOVE) {
         CGPoint point = CGEventGetLocation(context);
-        int dx = point.x - g_mouse_state.down_location.x;
-        int dy = point.y - g_mouse_state.down_location.y;
-        window_manager_move_window_cgs(g_mouse_state.window, g_mouse_state.window_frame.origin.x, g_mouse_state.window_frame.origin.y, dx, dy);
+
+        CGPoint new_point = { g_mouse_state.window_frame.origin.x + (point.x - g_mouse_state.down_location.x),
+                              g_mouse_state.window_frame.origin.y + (point.y - g_mouse_state.down_location.y) };
+
+        uint32_t did = display_manager_point_display_id(new_point);
+        if (did) {
+            CGRect bounds = display_bounds(did);
+            if (new_point.y < bounds.origin.y) new_point.y = bounds.origin.y;
+        }
+
+        scripting_addition_move_window(g_mouse_state.window->id, new_point.x, new_point.y);
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         uint64_t event_time = CGEventGetTimestamp(context);
         float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
