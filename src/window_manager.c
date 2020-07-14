@@ -409,20 +409,6 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_move_window_cgs(struct window *window, float x, float y, float dx, float dy)
-{
-    float fx = x + dx;
-    float fy = y + dy;
-
-    uint32_t did = display_manager_point_display_id((CGPoint) { fx, fy });
-    if (!did) return;
-
-    CGRect bounds = display_bounds(did);
-    if (fy < bounds.origin.y) fy = bounds.origin.y;
-
-    scripting_addition_move_window(window->id, (int)fx, (int)fy);
-}
-
 void window_manager_move_window(struct window *window, float x, float y)
 {
     CGPoint position = CGPointMake(x, y);

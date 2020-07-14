@@ -41,7 +41,6 @@
 #include "event_signal.h"
 #include "event_tap.h"
 #include "workspace.h"
-#include "mouse.h"
 #include "rule.h"
 #include "message.h"
 #include "display.h"
@@ -54,6 +53,7 @@
 #include "display_manager.h"
 #include "space_manager.h"
 #include "window_manager.h"
+#include "mouse.h"
 
 #include "event_loop.c"
 #include "event.c"
@@ -72,5 +72,6 @@
 #include "display_manager.c"
 #include "space_manager.c"
 #include "window_manager.c"
+#include "mouse.c"
 
 #include "yabai.c"
