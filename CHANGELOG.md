@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fixed an issue that caused a window to not become unmanaged when a space with a single window changed to float [#586](https://github.com/koekeishiya/yabai/issues/586)
 - Restore opacity back to full if *window_opacity* is disabled [#585](https://github.com/koekeishiya/yabai/issues/585)
 - Update scripting-addition to support macOS Big Sur 10.16 Build 20A4299v [#589](https://github.com/koekeishiya/yabai/issues/589)
+- Border windows should not have shadows [#617](https://github.com/koekeishiya/yabai/issues/617)
 
 ## [3.2.1] - 2020-06-17
 ### Changed

@@ -15,6 +15,7 @@ extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *outRegion);
 
 #define kCGSIgnoreForExposeTagBit (1 << 7)
 #define kCGSIgnoreForEventsTagBit (1 << 9)
+#define kCGSDisableShadowTagBit   (1 << 3)
 
 struct border
 {
