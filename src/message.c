@@ -788,14 +788,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 g_display_manager.mode = EXTERNAL_BAR_MAIN;
                 g_display_manager.top_padding = t;
                 g_display_manager.bottom_padding = b;
+                space_manager_mark_spaces_invalid(&g_space_manager);
             } else if (string_equals(mode, ARGUMENT_CONFIG_EXTERNAL_BAR_ALL)) {
                 g_display_manager.mode = EXTERNAL_BAR_ALL;
                 g_display_manager.top_padding = t;
                 g_display_manager.bottom_padding = b;
+                space_manager_mark_spaces_invalid(&g_space_manager);
             } else if (string_equals(mode, ARGUMENT_COMMON_VAL_OFF)) {
                 g_display_manager.mode = EXTERNAL_BAR_OFF;
                 g_display_manager.top_padding = t;
                 g_display_manager.bottom_padding = b;
+                space_manager_mark_spaces_invalid(&g_space_manager);
             } else {
                 daemon_fail(rsp, "unknown mode '%s' specified in value '%.*s' given to command '%.*s' for domain '%.*s'\n", mode, value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

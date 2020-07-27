@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Restore opacity back to full if *window_opacity* is disabled [#585](https://github.com/koekeishiya/yabai/issues/585)
 - Update scripting-addition to support macOS Big Sur 10.16 Build 20A4299v [#589](https://github.com/koekeishiya/yabai/issues/589)
 - Border windows should not have shadows [#617](https://github.com/koekeishiya/yabai/issues/617)
+- *external_bar* should not have to be set before regular padding [#615](https://github.com/koekeishiya/yabai/issues/615)
 
 ## [3.2.1] - 2020-06-17
 ### Changed
