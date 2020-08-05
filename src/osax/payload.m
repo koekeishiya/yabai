@@ -265,7 +265,7 @@ uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
 
 const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return "?? ?? ?? 00 49 8B 7D 00 48 8B 35 E4 7B 41 00 44 89 BD 38 FE FF FF 44 89 FA 41 FF D4 48 89 C7 E8 1D 8B 32 00 48 89 85 E8 FD FF FF 48 8B 3D 09 CB 41 00 E8 5C 8A 32 00 48 8B 35 45 7C 41 00 48 89 C7 31 D2 41 FF D4 48 89 85 28 FE FF FF 49 8B 7D 00 48";
+        return "?? ?? ?? 00 49 8B 7D 00 48 8B 35 ?? ?? 41 00 44 89 BD 38 FE FF FF 44 89 FA 41 FF D4 48 89 C7 E8 ?? ?? 32 00 48 89 85 E8 FD FF FF 48 8B 3D ?? ?? 41 00 E8 ?? ?? 32 00 48 8B 35 ?? ?? 41 00 48 89 C7 31 D2 41 FF D4 48 89 85 28 FE FF FF 49 8B 7D 00 48";
     } else if (os_version.minorVersion == 15) {
         if (os_version.patchVersion >= 4) {
             return "?? ?? ?? 00 49 8B 3F 48 8B 35 ?? 3D 44 00 44 89 B5 40 FE FF FF 44 89 F2 41 FF D4 48 89 C7 E8 ?? 70 35 00 48 89 85 E8 FD FF FF 48 8B 3D ?? 8D 44 00 E8 ?? 6F 35 00 4C 8B 35 ?? 3E 44 00 48 89 C7 4C 89 F6 31 D2 41 FF D4 48 89 85 28 FE FF FF 49 8B 3F 48 8B 35 ?? 82 44 00 48 89 DA 41 FF";
@@ -282,7 +282,7 @@ const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return "?? ?? ?? 00 48 89 C6 E8 ?? ?? ?? 00 4D 85 F6 0F 84 ?? 06 00 00 48 8B 3D ?? ?? ?? 00 48 8B 35 ?? ?? ?? 00 FF 15 ?? ?? ?? 00 48 89 C7 E8 ?? ?? ?? 00 48 89 85 08 FF FF FF C7 85 1C FF FF FF 00 00 00 00 E8 ?? ?? ?? 00 48 8D 75 B0 89 C7 E8 ?? ?? ?? 00";
+        return "?? ?? ?? 00 48 89 C6 E8 ?? ?? ?? 00 4D 85 F6 0F 84 ?? 06 00 00 48 8B 3D ?? ?? ?? 00 48 8B 35 ?? ?? ?? 00 FF 15 ?? ?? ?? 00 48 89 C7 E8 ?? ?? ?? 00 48 89 85 08 FF FF FF C7 85 1C FF FF FF 00 00 00 00 E8 ?? ?? ?? 00 48 8D 75 B0 89 C7 E8 ?? ?? ?? ??";
     } else if (os_version.minorVersion == 15) {
         return "?? ?? ?? 00 48 89 C6 E8 ?? ?? ?? 00 4D 85 F6 0F 84 ?? 06 00 00 48 8B 3D ?? ?? ?? 00 48 8B 35 ?? ?? ?? 00 FF 15 ?? ?? ?? 00 48 89 C7 E8 ?? ?? ?? 00 48 89 85 08 FF FF FF C7 85 1C FF FF FF 00 00 00 00 E8 ?? ?? ?? 00 48 8D 75 B0 89 C7 E8 ?? ?? ?? 00";
     } else if (os_version.minorVersion == 14) {
@@ -295,7 +295,7 @@ const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_add_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 18 4C 89 6D C0 48 BA 01 00 00 00 00 00 00 40 48 B9 F8 FF FF FF FF FF FF 00 49 8D 45 28 48 89 45 D0 4D 8B 7D 28 41 80 7D 38 01 48 89 7D C8 75 2E 49 89 FC 49 85 D7 74 59 4C 89 FB 48 21 CB 41 F6 C7 01 49 0F 45 DF 4C 89 FF E8 18 FC 0F 00 48 89 DF E8 62";
+        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 18 4C 89 6D C0 48 BA 01 00 00 00 00 00 00 40 48 B9 F8 FF FF FF FF FF FF 00 49 8D 45 28 48 89 45 D0 4D 8B 7D 28 41 80 7D 38 01 48 89 7D C8 75 2E 49 89 FC 49 85 D7 74 59 4C 89 FB 48 21 CB 41 F6 C7 01 49 0F 45 DF 4C 89 FF E8 ?? ?? 0F 00 48 89 DF E8 ??";
     } else if (os_version.minorVersion == 15) {
         if (os_version.patchVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 28 4C 89 6D C0 48 89 7D C8 48 B9 01 00 00 00 00 00 00 40 49 BE F8 FF FF FF FF FF FF 00 49 8D 45 28 48 89 45 D0 4D 8B 7D 28 41 80 7D 38 01 75 2B 49 85 CF 74 59 4C 89 FB 4C 21 F3 41 F6 C7 01 49 0F 45 DF 4C 89 FF E8 ?? 26 12 00 48 89 DF E8 9B";
@@ -316,7 +316,7 @@ const char *get_add_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_remove_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 68 48 89 4D 98 49 89 D4 49 89 F6 49 89 FF 49 89 F5 E8 9A 93 F3 FF 49 89 C5 48 B8 01 00 00 00 00 00 00 40 49 85 C5 0F 85 DE 03 00 00 48 B8 F8 FF FF FF FF FF FF 00 4C 21 E8 48 8B 58 10 48 83 FB 02 0F 8C CD 01 00 00 4C 89 75 A0 48 8D 05 C6 F6 13 00 48 8B 00 4D 8B 34 07 4C 89 E3 4D 8B 64 07";
+            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 68 48 89 4D 98 49 89 D4 49 89 F6 49 89 FF 49 89 F5 E8 ?? ?? F3 FF 49 89 C5 48 B8 01 00 00 00 00 00 00 40 49 85 C5 0F 85 DE 03 00 00 48 B8 F8 FF FF FF FF FF FF 00 4C 21 E8 48 8B 58 10 48 83 FB 02 0F 8C CD 01 00 00 4C 89 75 A0 48 8D 05 ?? ?? 13 00 48 8B 00 4D 8B 34 07 4C 89 E3 4D 8B 64 07";
     } else if (os_version.minorVersion == 15) {
         if (os_version.patchVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 48 89 4D A0 49 89 D4 49 89 F5 49 89 FE E8 FD 7B F1 FF 48 89 C3 48 B8 01 00 00 00 00 00 00 40 48 85 C3 0F 85 23 03 00 00 48 B8 F8 FF FF FF FF FF FF 00 48 21 D8 4C 8B 78 10 49 83 FF 02 0F 8C 3F 01 00 00 4C 89 6D A8 48 89 5D B8 48 8D 05 ??";
@@ -337,7 +337,7 @@ const char *get_remove_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_move_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 F6 49 89 FF 48 8D 1D 0C EA 14 00 48 8B 03 4C 8B 24 07 4C 89 E7 48 89 4D A0 48 89 CE E8 D6 C0 00 00 48 85 C0 74 27 48 8D 0D 0E DD 15 00 80 39 01 48 89 55 C8 48 89 45 A8 75 1A 48 89 C7 4C 89 F6 49 89 D5 E8 6F D8 F4";
+        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 F6 49 89 FF 48 8D 1D ?? ?? 14 00 48 8B 03 4C 8B 24 07 4C 89 E7 48 89 4D A0 48 89 CE E8 ?? C0 00 00 48 85 C0 74 27 48 8D 0D ?? ?? 15 00 80 39 01 48 89 55 C8 48 89 45 A8 75 1A 48 89 C7 4C 89 F6 49 89 D5 E8 ?? ?? F4";
     } else if (os_version.minorVersion == 15) {
         if (os_version.patchVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 F6 49 89 FF 48 8D 1D ?? ?? 14 00 48 8B 03 4C 8B 24 07 4C 89 E7 48 89 4D A0 48 89 CE E8 E6 BE 00 00 48 85 C0 74 27 48 8D 0D ?? D8 15 00 80 39 01 48 89 55 C8 48 89 45 A8 75 1A 48 89 C7 4C 89 F6 49 89 D5 E8 3F D8 F2";
@@ -375,25 +375,42 @@ const char *get_set_front_window_pattern(NSOperatingSystemVersion os_version) {
     return NULL;
 }
 
+static bool verify_os_version(NSOperatingSystemVersion os_version)
+{
+    NSLog(@"[yabai-sa] checking for macOS %ld.%ld.%ld compatibility!", os_version.majorVersion, os_version.minorVersion, os_version.patchVersion);
+
+    if (os_version.majorVersion == 10) {
+        if (os_version.minorVersion == 13 && os_version.patchVersion == 6) {
+            return true; // High Sierra 10.13.6
+        } else if (os_version.minorVersion == 14 && os_version.patchVersion >= 4) {
+            return true; // Mojave 10.14.4-6
+        } else if (os_version.minorVersion == 15 && os_version.patchVersion >= 0) {
+            return true; // Catalina 10.15.0-6
+        }
+    } else if (os_version.majorVersion == 11) {
+        return true; // Big Sur 11.0
+    }
+
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra 10.13.6, Mojave 10.14.4-6, Catalina 10.15.0-6 and Big Sur 11.0");
+    return false;
+}
+
 static void init_instances()
 {
-    // TODO(koekeishiya): Do proper version checks with minor and patch version..
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if (os_version.minorVersion != 13 && os_version.minorVersion != 14 && os_version.minorVersion != 15 && os_version.minorVersion != 16) {
-        NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra, Mojave, Catalina and Big Sur!");
-        return;
-    }
+    if (!verify_os_version(os_version)) return;
 
     uint64_t baseaddr = static_base_address() + image_slide();
+
     uint64_t dock_spaces_addr = hex_find_seq(baseaddr + get_dock_spaces_offset(os_version), get_dock_spaces_pattern(os_version));
     if (dock_spaces_addr == 0) {
+        dock_spaces = nil;
         NSLog(@"[yabai-sa] could not locate pointer to dock.spaces! spaces functionality will not work!");
-        return;
+    } else {
+        uint32_t dock_spaces_offset = *(int32_t *)dock_spaces_addr;
+        NSLog(@"[yabai-sa] (0x%llx) dock.spaces found at address 0x%llX (0x%llx)", baseaddr, dock_spaces_addr, dock_spaces_addr - baseaddr);
+        dock_spaces = [(*(id *)(dock_spaces_addr + dock_spaces_offset + 0x4)) retain];
     }
-
-    uint32_t dock_spaces_offset = *(int32_t *)dock_spaces_addr;
-    NSLog(@"[yabai-sa] (0x%llx) dock.spaces found at address 0x%llX (0x%llx)", baseaddr, dock_spaces_addr, dock_spaces_addr - baseaddr);
-    dock_spaces = [(*(id *)(dock_spaces_addr + dock_spaces_offset + 0x4)) retain];
 
     uint64_t dppm_addr = hex_find_seq(baseaddr + get_dppm_offset(os_version), get_dppm_pattern(os_version));
     if (dppm_addr == 0) {
