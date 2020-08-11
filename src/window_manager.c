@@ -799,23 +799,8 @@ struct window *window_manager_find_smallest_managed_window(struct space_manager 
 
 static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
-    uint8_t bytes1[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x01,
-        [0x26] = 0xf0,
-        [0x27] = 0xbf,
-        [0x2e] = 0xf0,
-        [0x2f] = 0xbf
-    };
-
-    uint8_t bytes2[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x02,
-        [0x26] = 0xf0,
-        [0x27] = 0xbf,
-        [0x2e] = 0xf0,
-        [0x2f] = 0xbf
-    };
+    uint8_t bytes1[0xf8] = { [0x04] = 0xf8, [0x08] = 0x01, [0x26] = 0xef, [0x27] = 0x7f, [0x2e] = 0xef, [0x2f] = 0x7f };
+    uint8_t bytes2[0xf8] = { [0x04] = 0xf8, [0x08] = 0x02, [0x26] = 0xef, [0x27] = 0x7f, [0x2e] = 0xef, [0x2f] = 0x7f };
 
     memcpy(bytes1 + 0x3c, &window_id, sizeof(uint32_t));
     memcpy(bytes2 + 0x3c, &window_id, sizeof(uint32_t));
@@ -824,34 +809,12 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
 
-static void window_manager_deactivate_window(ProcessSerialNumber *window_psn, uint32_t window_id)
-{
-    uint8_t bytes[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x0d,
-        [0x8a] = 0x02
-    };
-
-    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    SLPSPostEventRecordTo(window_psn, bytes);
-}
-
-static void window_manager_activate_window(ProcessSerialNumber *window_psn, uint32_t window_id)
-{
-    uint8_t bytes[0xf8] = {
-        [0x04] = 0xf8,
-        [0x08] = 0x0d,
-        [0x8a] = 0x01
-    };
-
-    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    SLPSPostEventRecordTo(window_psn, bytes);
-}
-
 void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
-        window_manager_deactivate_window(&g_window_manager.focused_window_psn, g_window_manager.focused_window_id);
+        uint8_t bytes1[0xf8] = { [0x04] = 0xf8, [0x08] = 0x0d, [0x8a] = 0x02 };
+        memcpy(bytes1 + 0x3c, &g_window_manager.focused_window_id, sizeof(uint32_t));
+        SLPSPostEventRecordTo(&g_window_manager.focused_window_psn, bytes1);
 
         // @hack
         // Artificially delay the activation by 1ms. This is necessary
@@ -859,7 +822,9 @@ void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, 
         // the events appear instantaneously.
         usleep(10000);
 
-        window_manager_activate_window(window_psn, window_id);
+        uint8_t bytes2[0xf8] = { [0x04] = 0xf8, [0x08] = 0x0d, [0x8a] = 0x01 };
+        memcpy(bytes2 + 0x3c, &window_id, sizeof(uint32_t));
+        SLPSPostEventRecordTo(window_psn, bytes2);
     }
 
     _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
