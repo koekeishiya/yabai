@@ -11,11 +11,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Update scripting-addition to support macOS Big Sur 10.16 Build 20A5343i [#589](https://github.com/koekeishiya/yabai/issues/589)
 - Border windows should not have shadows [#617](https://github.com/koekeishiya/yabai/issues/617)
 - *external_bar* should not have to be set before regular padding [#615](https://github.com/koekeishiya/yabai/issues/615)
+- Adjust reported mouse location to use when synthesizing events for ffm autofocus [#637](https://github.com/koekeishiya/yabai/issues/637)
 
 ## [3.2.1] - 2020-06-17
 ### Changed
 - Fixed a race condition upon receiving window destroy notifications from macOS because their API is garbage and reports duplicate notifications for the same window [#580](https://github.com/koekeishiya/yabai/issues/580)
 - focus-follows-mouse *autofocus* needs to perform some validation in order to see if the window is focusable [#578](https://github.com/koekeishiya/yabai/issues/578)
+- Properly set mouse location for synthesized events used by ffm autofocus [#545](https://github.com/koekeishiya/yabai/issues/545)
 
 ## [3.2.0] - 2020-06-14
 ### Added
