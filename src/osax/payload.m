@@ -190,7 +190,7 @@ uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return 0x8000;
+        return 0x7000;
     } else if (os_version.minorVersion == 15) {
         return 0x6000;
     } else if (os_version.minorVersion == 14) {
@@ -216,7 +216,7 @@ uint64_t get_add_space_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_remove_space_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return 0x2F9000;
+        return 0x2F0000;
     } else if (os_version.minorVersion == 15) {
         return 0x320000;
     } else if (os_version.minorVersion == 14) {
@@ -229,7 +229,7 @@ uint64_t get_remove_space_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_move_space_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return 0x2E9000;
+        return 0x2E0000;
     } else if (os_version.minorVersion == 15) {
         return 0x310000;
     } else if (os_version.minorVersion == 14) {
@@ -248,7 +248,7 @@ uint64_t get_move_space_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return 0x53000;
+        return 0x52000;
     } else if (os_version.minorVersion == 15) {
         return 0x53000;
     } else if (os_version.minorVersion == 14) {
