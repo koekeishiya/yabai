@@ -101,6 +101,12 @@ bool workspace_application_is_finished_launching(struct process *process)
     }
 }
 
+bool workspace_is_macos_catalina(void)
+{
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return version.majorVersion == 10 && version.minorVersion == 15;
+}
+
 @implementation workspace_context
 - (id)init
 {
