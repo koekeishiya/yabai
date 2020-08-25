@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Implemented support for stacking multiple windows in the same region (bsp node) [#203](https://github.com/koekeishiya/yabai/issues/203)
+- Implemented a fullscreen layout, using stacking as its backing mechanism [#337](https://github.com/koekeishiya/yabai/issues/337)
+
 ### Changed
 - Fixed an issue that caused a window to not become unmanaged when a space with a single window changed to float [#586](https://github.com/koekeishiya/yabai/issues/586)
 - Restore opacity back to full if *window_opacity* is disabled [#585](https://github.com/koekeishiya/yabai/issues/585)

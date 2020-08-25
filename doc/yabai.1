@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-06-14
+.\"      Date: 2020-08-25
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-06-14" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-08-25" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -102,7 +102,9 @@ SIGNAL_SEL  := <index> | LABEL
 
 DIR_SEL     := north | east | south | west
 
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | <window id>
+STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent
+
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | STACK_SEL | DIR_SEL | <window id>
 
 DISPLAY_SEL := prev | next | first | last | recent | DIR_SEL | <arrangement index (1\-based)>
 
@@ -234,9 +236,14 @@ Action performed when pressing \fImouse_modifier\fP + \fIbutton1\fP.
 .RS 4
 Action performed when pressing \fImouse_modifier\fP + \fIbutton2\fP.
 .RE
+.sp
+\fBmouse_drop_action\fP [\fIswap|stack\fP]
+.RS 4
+Action performed when a bsp\-managed window is dropped in the center of some other bsp\-managed window.
+.RE
 .SS "Space Settings"
 .sp
-\fBlayout\fP [\fIbsp|float\fP]
+\fBlayout\fP [\fIbsp|stack|float\fP]
 .RS 4
 Set the layout of the selected space.
 .RE
@@ -345,7 +352,7 @@ Size of the gap that separates windows on the selected space.
 Toggle space setting on or off for the selected space.
 .RE
 .sp
-\fB\-\-layout\fP \fIbsp|float\fP
+\fB\-\-layout\fP \fIbsp|stack|float\fP
 .RS 4
 Set the layout of the selected space.
 .RE
@@ -377,11 +384,18 @@ Swap position of the selected window and the given window.
 Re\-insert the selected window, splitting the given window.
 .RE
 .sp
-\fB\-\-insert\fP \fI<DIR_SEL>\fP
+\fB\-\-stack\fP \fI<WINDOW_SEL>\fP
 .RS 4
-Set the splitting area of the selected window.
+Stack the given window on top of the selected window.
 .br
-If the current splitting area matches \fIDIR_SEL\fP, the action will be undone.
+Any kind of warp operation performed on a stacked window will unstack it.
+.RE
+.sp
+\fB\-\-insert\fP \fI<DIR_SEL>|stack\fP
+.RS 4
+Set the splitting mode of the selected window.
+.br
+If the current splitting mode matches the selected mode, the action will be undone.
 .RE
 .sp
 \fB\-\-grid\fP \fI<rows>:<cols>:<start\-x>:<start\-y>:<width>:<height>\fP

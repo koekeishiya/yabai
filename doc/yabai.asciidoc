@@ -80,12 +80,13 @@ SIGNAL_SEL  := <index> | LABEL
 
 DIR_SEL     := north | east | south | west
 
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | DIR_SEL | <window id>
+STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent
+
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | STACK_SEL | DIR_SEL | <window id>
 
 DISPLAY_SEL := prev | next | first | last | recent | DIR_SEL | <arrangement index (1-based)>
 
 SPACE_SEL   := prev | next | first | last | recent | <mission-control index (1-based)> | LABEL
-
 ----
 
 Domains
@@ -172,10 +173,13 @@ Global Settings
 *mouse_action2* ['move|resize']::
     Action performed when pressing 'mouse_modifier' + 'button2'.
 
+*mouse_drop_action* ['swap|stack']::
+    Action performed when a bsp-managed window is dropped in the center of some other bsp-managed window.
+
 Space Settings
 ^^^^^^^^^^^^^^
 
-*layout* ['bsp|float']::
+*layout* ['bsp|stack|float']::
     Set the layout of the selected space.
 
 *top_padding* ['<integer number>']::
@@ -256,7 +260,7 @@ COMMAND
 *--toggle* 'padding|gap|mission-control|show-desktop'::
     Toggle space setting on or off for the selected space.
 
-*--layout* 'bsp|float'::
+*--layout* 'bsp|stack|float'::
     Set the layout of the selected space.
 
 *--label* ['<LABEL>']::
@@ -283,9 +287,13 @@ COMMAND
 *--warp* '<WINDOW_SEL>'::
     Re-insert the selected window, splitting the given window.
 
-*--insert* '<DIR_SEL>'::
-    Set the splitting area of the selected window. +
-    If the current splitting area matches 'DIR_SEL', the action will be undone.
+*--stack* '<WINDOW_SEL>'::
+    Stack the given window on top of the selected window. +
+    Any kind of warp operation performed on a stacked window will unstack it.
+
+*--insert* '<DIR_SEL>|stack'::
+    Set the splitting mode of the selected window. +
+    If the current splitting mode matches the selected mode, the action will be undone.
 
 *--grid* '<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'::
     Set the frame of the selected window based on a self-defined grid.
