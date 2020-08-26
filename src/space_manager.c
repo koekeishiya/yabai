@@ -506,6 +506,12 @@ out:
     return result;
 }
 
+uint64_t space_manager_cursor_space(void)
+{
+    uint32_t did = display_manager_cursor_display_id();
+    return display_space_id(did);
+}
+
 uint64_t space_manager_prev_space(uint64_t sid)
 {
     uint64_t p_sid = 0;

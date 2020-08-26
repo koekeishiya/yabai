@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-08-25
+.\"      Date: 2020-08-26
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-08-25" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-08-26" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -106,9 +106,9 @@ STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent
 
 WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | STACK_SEL | DIR_SEL | <window id>
 
-DISPLAY_SEL := prev | next | first | last | recent | DIR_SEL | <arrangement index (1\-based)>
+DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1\-based)>
 
-SPACE_SEL   := prev | next | first | last | recent | <mission\-control index (1\-based)> | LABEL
+SPACE_SEL   := prev | next | first | last | recent | mouse | <mission\-control index (1\-based)> | LABEL
 .fi
 .if n .RE
 .SH "DOMAINS"

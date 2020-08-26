@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Border windows should not have shadows [#617](https://github.com/koekeishiya/yabai/issues/617)
 - *external_bar* should not have to be set before regular padding [#615](https://github.com/koekeishiya/yabai/issues/615)
 - Adjust reported mouse location to use when synthesizing events for ffm autofocus [#637](https://github.com/koekeishiya/yabai/issues/637)
+- Extend *SPACE_SEL* and *DISPLAY_SEL* to include the option *mouse* [#644](https://github.com/koekeishiya/yabai/issues/644)
 
 ## [3.2.1] - 2020-06-17
 ### Changed

@@ -113,6 +113,13 @@ uint32_t display_manager_arrangement_display_id(int arrangement)
     return result;
 }
 
+uint32_t display_manager_cursor_display_id(void)
+{
+    CGPoint cursor;
+    SLSGetCurrentCursorLocation(g_connection, &cursor);
+    return display_manager_point_display_id(cursor);
+}
+
 uint32_t display_manager_prev_display_id(uint32_t did)
 {
     int arrangement = display_arrangement(did);
