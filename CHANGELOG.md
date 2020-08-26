@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Implemented support for stacking multiple windows in the same region (bsp node) [#203](https://github.com/koekeishiya/yabai/issues/203)
+- Implemented a fullscreen layout, using stacking as its backing mechanism [#337](https://github.com/koekeishiya/yabai/issues/337)
+
 ### Changed
 - Fixed an issue that caused a window to not become unmanaged when a space with a single window changed to float [#586](https://github.com/koekeishiya/yabai/issues/586)
 - Restore opacity back to full if *window_opacity* is disabled [#585](https://github.com/koekeishiya/yabai/issues/585)
@@ -13,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Border windows should not have shadows [#617](https://github.com/koekeishiya/yabai/issues/617)
 - *external_bar* should not have to be set before regular padding [#615](https://github.com/koekeishiya/yabai/issues/615)
 - Adjust reported mouse location to use when synthesizing events for ffm autofocus [#637](https://github.com/koekeishiya/yabai/issues/637)
+- Extend *SPACE_SEL* and *DISPLAY_SEL* to include the option *mouse* [#644](https://github.com/koekeishiya/yabai/issues/644)
 
 ## [3.2.1] - 2020-06-17
 ### Changed
