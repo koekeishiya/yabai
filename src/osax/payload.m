@@ -265,7 +265,7 @@ uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
 
 const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 11) {
-        return "?? ?? ?? 00 49 8B 7D 00 48 8B 35 ?? ?? 41 00 44 89 BD 38 FE FF FF 44 89 FA 41 FF D4 48 89 C7 E8 ?? ?? 32 00 48 89 85 E8 FD FF FF 48 8B 3D ?? ?? 41 00 E8 ?? ?? 32 00 48 8B 35 ?? ?? 41 00 48 89 C7 31 D2 41 FF D4 48 89 85 28 FE FF FF 49 8B 7D 00 48";
+        return "?? ?? ?? 00 49 8B 7D 00 48 8B 35 ?? ?? ?? 00 44 89 BD 38 FE FF FF 44 89 FA 41 FF D4 48 89 C7 E8 ?? ?? 32 00 48 89 85 E8 FD FF FF 48 8B 3D ?? ?? 41 00 E8 ?? ?? 32 00 48 8B 35 ?? ?? ?? 00 48 89 C7 31 D2 41 FF D4 48 89 85 28 FE FF FF 49 8B 7D 00 48";
     } else if (os_version.minorVersion == 15) {
         if (os_version.patchVersion >= 4) {
             return "?? ?? ?? 00 49 8B 3F 48 8B 35 ?? 3D 44 00 44 89 B5 40 FE FF FF 44 89 F2 41 FF D4 48 89 C7 E8 ?? 70 35 00 48 89 85 E8 FD FF FF 48 8B 3D ?? 8D 44 00 E8 ?? 6F 35 00 4C 8B 35 ?? 3E 44 00 48 89 C7 4C 89 F6 31 D2 41 FF D4 48 89 85 28 FE FF FF 49 8B 3F 48 8B 35 ?? 82 44 00 48 89 DA 41 FF";
