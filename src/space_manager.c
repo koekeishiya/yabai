@@ -671,17 +671,10 @@ static bool move_all_windows(uint32_t *window_list, int window_list_count, uint6
       debug("no window list!\n");
       return false;
     }
-    struct window *window;
 
-    for (int i = 0; i < window_list_count; i++) {
-        window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (!window) {
-          debug("find_window came up blank for %d\n", window_list[i]);
-          continue;
-        }
-        debug("move_all_windows: #%d:%s -> %d\n", window_list[i], window->application->name, to_sid);
-        space_manager_move_window_to_space(to_sid, window);
-    }
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), window_list_count, kCFNumberSInt32Type);
+    SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, to_sid);
+    CFRelease(window_list_ref);
 
     return true;
 }
@@ -698,16 +691,26 @@ static void space_manager_swap_spaces(uint64_t a_sid, uint64_t b_sid)
     struct view *a_view = table_find(&g_space_manager.view, &a_sid);
     struct view *b_view = table_find(&g_space_manager.view, &b_sid);
 
+    // swap the view table
+    table_remove(&g_space_manager.view, &a_sid);
+    table_remove(&g_space_manager.view, &b_sid);
+
+    table_add(&g_space_manager.view, &a_sid, b_view);
+    table_add(&g_space_manager.view, &b_sid, a_view);
+    a_view->sid = b_sid;
+    b_view->sid = a_sid;
+
+    // swap suuid
+    CFStringRef tmp;
+    tmp = a_view->suuid;
+    a_view->suuid = b_view->suuid;
+    b_view->suuid = tmp;
+
     // swap all windows
     move_all_windows(a_window_list, a_window_list_count, b_sid);
     move_all_windows(b_window_list, b_window_list_count, a_sid);
     free(a_window_list);
     free(b_window_list);
-
-    // swap the view table
-
-    table_add(&g_space_manager.view, &a_sid, b_view);
-    table_add(&g_space_manager.view, &b_sid, a_view);
 
     // swap the labels
     int labels_size = buf_len(g_space_manager.labels);
@@ -721,13 +724,12 @@ static void space_manager_swap_spaces(uint64_t a_sid, uint64_t b_sid)
     space_manager_refresh_view(&g_space_manager, b_sid);
 }
 
-enum space_op_error space_manager_switch_to_space(uint64_t sid)
+enum space_op_error space_manager_switch_to_space(uint64_t sid, uint64_t cur_sid)
 {
+    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
+
     bool is_in_mc = g_mission_control_active;
     if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
-
-    uint64_t cur_sid = space_manager_active_space();
-    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
 
     uint32_t cur_did = space_display_id(cur_sid);
     uint32_t new_did = space_display_id(sid);
@@ -738,22 +740,29 @@ enum space_op_error space_manager_switch_to_space(uint64_t sid)
     bool swap_space = display_space_id(new_did) == sid;
     bool move_space = cur_did != new_did;
 
-    if (swap_space) {
-        // if the current is last on its display, we'll run into trouble when
-        // trying to move it. so instead we swap all windows and all material
-        // state about the two spaces.
-        if (space_manager_is_space_last_user_space(cur_sid)) {
-            space_manager_swap_spaces(cur_sid, sid);
-        }
+    debug("switch space %d[%d] -> %d[%d]\n", cur_sid, cur_did, sid, new_did);
 
-        space_manager_move_space_to_display(&g_space_manager, cur_sid, new_did);
-        space_manager_move_space_to_display(&g_space_manager, sid, cur_did);
+    if (swap_space) {
+        // debug("target space visible on other display: SWAP");
+        space_manager_swap_spaces(cur_sid, sid);
+        display_manager_focus_display(cur_did);
     }
     else if (move_space) {
+        // debug("on other display: MOVE\n");
         space_manager_move_space_to_display(&g_space_manager, sid, cur_did);
+        space_manager_focus_space(sid);
+    }
+    else {
+        // debug("on same display: FOCUS\n");
+        space_manager_focus_space(sid);
     }
 
-    space_manager_focus_space(sid);
+    // debug("labels after:\n");
+    // int labels_size = buf_len(g_space_manager.labels);
+    // for (int i = 0; i < labels_size; ++i) {
+    //     struct space_label *label = &g_space_manager.labels[i];
+    //     debug("%s(%d) on display %d\n", label->label, label->sid, display_arrangement(space_display_id(label->sid)));
+    // }
 
     return SPACE_OP_ERROR_SUCCESS;
 }

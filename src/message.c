@@ -125,6 +125,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_TOGGLE  "--toggle"
 #define COMMAND_WINDOW_DISPLAY "--display"
 #define COMMAND_WINDOW_SPACE   "--space"
+#define COMMAND_WINDOW_SWITCH  "--switch"
 
 #define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
 #define ARGUMENT_WINDOW_SEL_SMALLEST  "smallest"
@@ -1438,7 +1439,7 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_SPACE_SWITCH)) {
         struct selector selector = parse_space_selector(rsp, &message, acting_sid);
         if (selector.did_parse && selector.sid) {
-            enum space_op_error result = space_manager_switch_to_space(selector.sid);
+            enum space_op_error result = space_manager_switch_to_space(selector.sid, space_manager_active_space());
             if (result == SPACE_OP_ERROR_SAME_SPACE) {
                 daemon_fail(rsp, "cannot focus an already focused space.\n");
             } else if (result == SPACE_OP_ERROR_DISPLAY_IS_ANIMATING) {
@@ -1864,6 +1865,18 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
             } else {
                 window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid, false);
+            }
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_SWITCH)) {
+        uint64_t cur_sid = space_manager_active_space();
+
+        struct selector selector = parse_space_selector(rsp, &message, cur_sid);
+        if (selector.did_parse && selector.sid) {
+            if (space_is_fullscreen(selector.sid)) {
+                daemon_fail(rsp, "can not switch window to a macOS fullscreen space!\n");
+            } else {
+                window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid, false);
+                space_manager_switch_to_space(selector.sid, cur_sid);
             }
         }
     } else {
