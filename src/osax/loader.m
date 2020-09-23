@@ -1,27 +1,23 @@
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import "common.h"
-#include <dlfcn.h>
 
-static bool _loaded;
+@interface Loader : NSObject
+@end
+
+@implementation Loader
+@end
+
+static Class _instance;
+
 OSErr yabai_osax_load(const AppleEvent *event, AppleEvent *reply, long context)
 {
     NSLog(@"[yabai] attempting to load scripting addition..");
 
     OSErr result = OSAX_PAYLOAD_SUCCESS;
-    NSBundle *loader_bundle = [NSBundle bundleWithIdentifier:@"com.koekeishiya.yabai-osax"];
+    NSBundle* loader_bundle = [NSBundle bundleForClass:[Loader class]];
     NSString *payload_path = [loader_bundle pathForResource:@"payload" ofType:@"bundle"];
     NSBundle *payload_bundle = [NSBundle bundleWithPath:payload_path];
-
-    NSLog(@"[yabai] loader_bundle: %@", loader_bundle);
-    NSLog(@"[yabai] payload_path: %@", payload_path);
-    NSLog(@"[yabai] payload_bundle: %@", payload_bundle);
-
-    if (_loaded) {
-        NSLog(@"[yabai] payload has already been loaded!");
-        result = OSAX_PAYLOAD_ALREADY_LOADED;
-        goto end;
-    }
 
     if (!payload_bundle) {
         NSLog(@"[yabai] could not locate payload!");
@@ -29,23 +25,19 @@ OSErr yabai_osax_load(const AppleEvent *event, AppleEvent *reply, long context)
         goto end;
     }
 
-    void *payload_handle = dlopen([[payload_bundle executablePath] UTF8String], RTLD_NOW);
-    if (!payload_handle) {
-        NSLog(@"[yabai] could not locate payload!");
-        result = OSAX_PAYLOAD_NOT_FOUND;
+    if ([payload_bundle isLoaded]) {
+        NSLog(@"[yabai] payload has already been loaded!");
+        result = OSAX_PAYLOAD_ALREADY_LOADED;
         goto end;
     }
 
-    void *payload_load = dlsym(payload_handle, "load_payload");
-    if (!payload_load) {
+    if (![payload_bundle load]) {
         NSLog(@"[yabai] could not load payload!");
         result = OSAX_PAYLOAD_NOT_LOADED;
         goto end;
     }
 
-    _loaded = true;
-    ((void(*)())payload_load)();
-    dlclose(payload_handle);
+    _instance = [payload_bundle principalClass];
 
 end:
     if (result == OSAX_PAYLOAD_SUCCESS) {

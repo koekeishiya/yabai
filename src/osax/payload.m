@@ -1036,7 +1036,12 @@ static bool start_daemon(char *socket_path)
     return true;
 }
 
-void load_payload(void)
+@interface Payload : NSObject
++ (void) load;
+@end
+
+@implementation Payload
++ (void) load
 {
     NSLog(@"[yabai-sa] loaded payload");
     init_instances();
@@ -1061,3 +1066,4 @@ void load_payload(void)
         NSLog(@"[yabai-sa] failed to spawn thread..");
     }
 }
+@end
