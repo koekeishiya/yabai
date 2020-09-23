@@ -9,8 +9,13 @@ OSErr yabai_osax_load(const AppleEvent *event, AppleEvent *reply, long context)
 
     OSErr result = OSAX_PAYLOAD_SUCCESS;
     NSBundle *loader_bundle = [NSBundle bundleWithIdentifier:@"com.koekeishiya.yabai-osax"];
+    NSLog(@"[yabai] loader_bundle: %@", loader_bundle);
+
     NSString *payload_path = [loader_bundle pathForResource:@"payload" ofType:@"bundle"];
+    NSLog(@"[yabai] payload_path: %@", payload_path);
+
     NSBundle *payload_bundle = [NSBundle bundleWithPath:payload_path];
+    NSLog(@"[yabai] payload_bundle: %@", payload_bundle);
 
     if (!payload_bundle) {
         NSLog(@"[yabai] could not locate payload!");
@@ -31,6 +36,7 @@ OSErr yabai_osax_load(const AppleEvent *event, AppleEvent *reply, long context)
     }
 
     _instance = [payload_bundle principalClass];
+    NSLog(@"[yabai] set class instance: %@", _instance);
 
 end:
     if (result == OSAX_PAYLOAD_SUCCESS) {
