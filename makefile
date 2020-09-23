@@ -19,9 +19,10 @@ all: clean-build $(BINS)
 install: BUILD_FLAGS=-std=c99 -Wall -DNDEBUG -O2 -fvisibility=hidden -mmacosx-version-min=10.13
 install: clean-build $(BINS)
 
-$(OSAX_SRC): $(OSAX_PATH)/loader.m $(OSAX_PATH)/payload.m
+$(OSAX_SRC): $(OSAX_PATH)/loader.m $(OSAX_PATH)/payload.c
 	clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/loader -framework Cocoa
-	clang $(OSAX_PATH)/payload.m -DOBJC_OLD_DISPATCH_PROTOTYPES=1 -shared -fPIC -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/payload -framework Carbon
+	#clang $(OSAX_PATH)/payload.m -DOBJC_OLD_DISPATCH_PROTOTYPES=1 -shared -fPIC -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/payload -framework Carbon
+	clang $(OSAX_PATH)/payload.c -shared -fPIC -O0 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/payload
 	xxd -i -a $(OSAX_PATH)/loader $(OSAX_PATH)/sa_loader.c
 	xxd -i -a $(OSAX_PATH)/payload $(OSAX_PATH)/sa_payload.c
 	rm -f $(OSAX_PATH)/loader
