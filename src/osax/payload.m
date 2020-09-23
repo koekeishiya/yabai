@@ -1,6 +1,7 @@
-#include <Foundation/Foundation.h>
-#include <Cocoa/Cocoa.h>
+//#include <Foundation/Foundation.h>
+//#include <Cocoa/Cocoa.h>
 
+#include <Carbon/Carbon.h>
 #include <mach-o/getsect.h>
 #include <mach-o/dyld.h>
 
@@ -103,6 +104,23 @@ static Class dump_class_info_by_name(const char *name)
         dump_class_info(c);
     }
     return c;
+}
+
+static CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
+{
+    CFNumberRef temp[count];
+
+    for (int i = 0; i < count; ++i) {
+        temp[i] = CFNumberCreate(NULL, type, ((char *)values) + (size * i));
+    }
+
+    CFArrayRef result = CFArrayCreate(NULL, (const void **)temp, count, &kCFTypeArrayCallBacks);
+
+    for (int i = 0; i < count; ++i) {
+        CFRelease(temp[i]);
+    }
+
+    return result;
 }
 
 static uint64_t static_base_address(void)
@@ -377,7 +395,7 @@ const char *get_set_front_window_pattern(NSOperatingSystemVersion os_version) {
 
 static bool verify_os_version(NSOperatingSystemVersion os_version)
 {
-    NSLog(@"[yabai-sa] checking for macOS %ld.%ld.%ld compatibility!", os_version.majorVersion, os_version.minorVersion, os_version.patchVersion);
+    // NSLog(@"[yabai-sa] checking for macOS %ld.%ld.%ld compatibility!", os_version.majorVersion, os_version.minorVersion, os_version.patchVersion);
 
     if (os_version.majorVersion == 10) {
         if (os_version.minorVersion == 13 && os_version.patchVersion == 6) {
@@ -391,13 +409,14 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
         return true; // Big Sur 11.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra 10.13.6, Mojave 10.14.4-6, Catalina 10.15.0-6 and Big Sur 11.0");
+    // NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra 10.13.6, Mojave 10.14.4-6, Catalina 10.15.0-6 and Big Sur 11.0");
     return false;
 }
 
 static void init_instances()
 {
-    NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    // NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    NSOperatingSystemVersion os_version = { 11, 0, 0 };
     if (!verify_os_version(os_version)) return;
 
     uint64_t baseaddr = static_base_address() + image_slide();
@@ -405,56 +424,56 @@ static void init_instances()
     uint64_t dock_spaces_addr = hex_find_seq(baseaddr + get_dock_spaces_offset(os_version), get_dock_spaces_pattern(os_version));
     if (dock_spaces_addr == 0) {
         dock_spaces = nil;
-        NSLog(@"[yabai-sa] could not locate pointer to dock.spaces! spaces functionality will not work!");
+        // NSLog(@"[yabai-sa] could not locate pointer to dock.spaces! spaces functionality will not work!");
     } else {
         uint32_t dock_spaces_offset = *(int32_t *)dock_spaces_addr;
-        NSLog(@"[yabai-sa] (0x%llx) dock.spaces found at address 0x%llX (0x%llx)", baseaddr, dock_spaces_addr, dock_spaces_addr - baseaddr);
+        // NSLog(@"[yabai-sa] (0x%llx) dock.spaces found at address 0x%llX (0x%llx)", baseaddr, dock_spaces_addr, dock_spaces_addr - baseaddr);
         dock_spaces = [(*(id *)(dock_spaces_addr + dock_spaces_offset + 0x4)) retain];
     }
 
     uint64_t dppm_addr = hex_find_seq(baseaddr + get_dppm_offset(os_version), get_dppm_pattern(os_version));
     if (dppm_addr == 0) {
         dp_desktop_picture_manager = nil;
-        NSLog(@"[yabai-sa] could not locate pointer to dppm! moving spaces will not work!");
+        // NSLog(@"[yabai-sa] could not locate pointer to dppm! moving spaces will not work!");
     } else {
         uint32_t dppm_offset = *(int32_t *)dppm_addr;
-        NSLog(@"[yabai-sa] (0x%llx) dppm found at address 0x%llX (0x%llx)", baseaddr, dppm_addr, dppm_addr - baseaddr);
+        // NSLog(@"[yabai-sa] (0x%llx) dppm found at address 0x%llX (0x%llx)", baseaddr, dppm_addr, dppm_addr - baseaddr);
         dp_desktop_picture_manager = [(*(id *)(dppm_addr + dppm_offset + 0x4)) retain];
     }
 
     uint64_t add_space_addr = hex_find_seq(baseaddr + get_add_space_offset(os_version), get_add_space_pattern(os_version));
     if (add_space_addr == 0x0) {
-        NSLog(@"[yabai-sa] failed to get pointer to addSpace function..");
+        // NSLog(@"[yabai-sa] failed to get pointer to addSpace function..");
         add_space_fp = 0;
     } else {
-        NSLog(@"[yabai-sa] (0x%llx) addSpace found at address 0x%llX (0x%llx)", baseaddr, add_space_addr, add_space_addr - baseaddr);
+        // NSLog(@"[yabai-sa] (0x%llx) addSpace found at address 0x%llX (0x%llx)", baseaddr, add_space_addr, add_space_addr - baseaddr);
         add_space_fp = add_space_addr;
     }
 
     uint64_t remove_space_addr = hex_find_seq(baseaddr + get_remove_space_offset(os_version), get_remove_space_pattern(os_version));
     if (remove_space_addr == 0x0) {
-        NSLog(@"[yabai-sa] failed to get pointer to removeSpace function..");
+        // NSLog(@"[yabai-sa] failed to get pointer to removeSpace function..");
         remove_space_fp = 0;
     } else {
-        NSLog(@"[yabai-sa] (0x%llx) removeSpace found at address 0x%llX (0x%llx)", baseaddr, remove_space_addr, remove_space_addr - baseaddr);
+        // NSLog(@"[yabai-sa] (0x%llx) removeSpace found at address 0x%llX (0x%llx)", baseaddr, remove_space_addr, remove_space_addr - baseaddr);
         remove_space_fp = remove_space_addr;
     }
 
     uint64_t move_space_addr = hex_find_seq(baseaddr + get_move_space_offset(os_version), get_move_space_pattern(os_version));
     if (move_space_addr == 0x0) {
-        NSLog(@"[yabai-sa] failed to get pointer to moveSpace function..");
+        // NSLog(@"[yabai-sa] failed to get pointer to moveSpace function..");
         move_space_fp = 0;
     } else {
-        NSLog(@"[yabai-sa] (0x%llx) moveSpace found at address 0x%llX (0x%llx)", baseaddr, move_space_addr, move_space_addr - baseaddr);
+        // NSLog(@"[yabai-sa] (0x%llx) moveSpace found at address 0x%llX (0x%llx)", baseaddr, move_space_addr, move_space_addr - baseaddr);
         move_space_fp = move_space_addr;
     }
 
     uint64_t set_front_window_addr = hex_find_seq(baseaddr + get_set_front_window_offset(os_version), get_set_front_window_pattern(os_version));
     if (set_front_window_addr == 0x0) {
-        NSLog(@"[yabai-sa] failed to get pointer to setFrontWindow function..");
+        // NSLog(@"[yabai-sa] failed to get pointer to setFrontWindow function..");
         set_front_window_fp = 0;
     } else {
-        NSLog(@"[yabai-sa] (0x%llx) setFrontWindow found at address 0x%llX (0x%llx)", baseaddr, set_front_window_addr, set_front_window_addr - baseaddr);
+        // NSLog(@"[yabai-sa] (0x%llx) setFrontWindow found at address 0x%llX (0x%llx)", baseaddr, set_front_window_addr, set_front_window_addr - baseaddr);
         set_front_window_fp = set_front_window_addr;
     }
 
@@ -635,11 +654,13 @@ static void do_space_move(const char *message)
         id new_source_space = space_for_display_with_id(source_display_uuid, new_source_space_id);
         set_ivar_value(source_display_space, "_currentSpace", [new_source_space retain]);
 
-        NSArray *ns_dest_monitor_space = @[ @(dest_space_id) ];
+        // NSArray *ns_dest_monitor_space = @[ @(dest_space_id) ];
+        CFArrayRef ns_dest_monitor_space = cfarray_of_cfnumbers(&dest_space_id, sizeof(uint64_t), 1, kCFNumberSInt64Type);
+
         CGSHideSpaces(_connection, (__bridge CFArrayRef) ns_dest_monitor_space);
         CGSManagedDisplaySetCurrentSpace(_connection, dest_display_uuid, source_space_id);
         set_ivar_value(dest_display_space, "_currentSpace", [source_space retain]);
-        [ns_dest_monitor_space release];
+        // [ns_dest_monitor_space release];
     }
 
     CFRelease(source_display_uuid);
@@ -699,14 +720,17 @@ static void do_space_change(const char *message)
             if (dest_space != nil) {
                 id display_space = display_space_for_space_with_id(source_space_id);
                 if (display_space != nil) {
-                    NSArray *ns_source_space = @[ @(source_space_id) ];
-                    NSArray *ns_dest_space = @[ @(dest_space_id) ];
+                    // NSArray *ns_source_space = @[ @(source_space_id) ];
+                    // NSArray *ns_dest_space = @[ @(dest_space_id) ];
+                    CFArrayRef ns_source_space = cfarray_of_cfnumbers(&source_space_id, sizeof(uint64_t), 1, kCFNumberSInt64Type);
+                    CFArrayRef ns_dest_space = cfarray_of_cfnumbers(&dest_space_id, sizeof(uint64_t), 1, kCFNumberSInt64Type);
+
                     CGSShowSpaces(_connection, (__bridge CFArrayRef) ns_dest_space);
                     CGSHideSpaces(_connection, (__bridge CFArrayRef) ns_source_space);
                     CGSManagedDisplaySetCurrentSpace(_connection, dest_display, dest_space_id);
                     set_ivar_value(display_space, "_currentSpace", [dest_space retain]);
-                    [ns_dest_space release];
-                    [ns_source_space release];
+                    // [ns_dest_space release];
+                    // [ns_source_space release];
                 }
             }
         }
@@ -769,9 +793,10 @@ static void do_window_move(const char *message)
     CGPoint point = CGPointMake(x, y);
     CGSMoveWindowWithGroup(_connection, wid, &point);
 
-    NSArray *window_list = @[ @(wid) ];
+    // NSArray *window_list = @[ @(wid) ];
+    CFArrayRef window_list = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CGSReassociateWindowsSpacesByGeometry(_connection, (__bridge CFArrayRef) window_list);
-    [window_list release];
+    // [window_list release];
 }
 
 static void do_window_alpha(const char *message)
@@ -1038,17 +1063,19 @@ static bool start_daemon(char *socket_path)
 
 void load_payload(void)
 {
-    NSLog(@"[yabai-sa] loaded payload");
+    // NSLog(@"[yabai-sa] loaded payload");
     init_instances();
 
     const char *user = getenv("USER");
+    /*
     if (!user) {
         NSString *ns_user = NSUserName();
         if (ns_user) user = [ns_user UTF8String];
     }
+    */
 
     if (!user) {
-        NSLog(@"[yabai-sa] could not get 'env USER'! abort..");
+        // NSLog(@"[yabai-sa] could not get 'env USER'! abort..");
         return;
     }
 
@@ -1056,8 +1083,8 @@ void load_payload(void)
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
 
     if (start_daemon(socket_file)) {
-        NSLog(@"[yabai-sa] now listening..");
+        // NSLog(@"[yabai-sa] now listening..");
     } else {
-        NSLog(@"[yabai-sa] failed to spawn thread..");
+        // NSLog(@"[yabai-sa] failed to spawn thread..");
     }
 }
