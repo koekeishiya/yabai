@@ -300,10 +300,12 @@ int main(int argc, char **argv)
         error("yabai: could not initialize daemon! abort..\n");
     }
 
-    if (scripting_addition_is_installed()) {
-        scripting_addition_load();
-    } else {
-        notify("scripting-addition", "payload is not installed, some features will not work!");
+    if (!workspace_is_macos_bigsur()) {
+        if (scripting_addition_is_installed()) {
+            scripting_addition_load();
+        } else {
+            notify("scripting-addition", "payload is not installed, some features will not work!");
+        }
     }
 
     exec_config_file();

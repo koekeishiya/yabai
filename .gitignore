@@ -1,4 +1,5 @@
 /bin
 /archive
+/src/osax/sa_mach_bootstrap.c
 /src/osax/sa_loader.c
 /src/osax/sa_payload.c
