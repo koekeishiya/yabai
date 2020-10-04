@@ -944,7 +944,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
 {
     debug("%s:\n", __FUNCTION__);
 
-    if (scripting_addition_is_installed()) {
+    if (!workspace_is_macos_bigsur() && scripting_addition_is_installed()) {
         scripting_addition_load();
 
         for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
