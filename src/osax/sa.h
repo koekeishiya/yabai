@@ -1,6 +1,7 @@
 #ifndef SA_H
 #define SA_H
 
+#include <pwd.h>
 #include "common.h"
 
 #define PAYLOAD_STATUS_SUCCESS   0

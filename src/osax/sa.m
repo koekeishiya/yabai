@@ -1,5 +1,6 @@
 #include "sa.h"
 
+#define SA_SOCKET_PATH_FMT      "/tmp/yabai-sa_%s.socket"
 extern char g_sa_socket_file[MAXLEN];
 
 @interface SALoader : NSObject<SBApplicationDelegate> {}
@@ -281,6 +282,13 @@ static bool scripting_addition_remove(void)
 
 int scripting_addition_install(void)
 {
+    if (!is_root()) {
+        warn("yabai: scripting-addition must be installed as root!\n");
+        notify("scripting-addition", "must be installed as root!");
+        sleep(1);
+        return 1;
+    }
+
     umask(S_IWGRP | S_IWOTH);
 
     if ((scripting_addition_is_installed()) &&
@@ -327,6 +335,13 @@ cleanup:
 
 int scripting_addition_uninstall(void)
 {
+    if (!is_root()) {
+        warn("yabai: scripting-addition must be uninstalled as root!\n");
+        notify("scripting-addition", "must be uninstalled as root!");
+        sleep(1);
+        return 1;
+    }
+
     if (!scripting_addition_is_installed()) return  0;
     if (!scripting_addition_remove())       return -1;
     return 0;
@@ -348,30 +363,66 @@ int scripting_addition_check(void)
     }
 }
 
+static bool drop_sudo_privileges_and_set_sa_socket_path(void)
+{
+    uid_t uid = getuid();
+    assert(uid == 0);
+
+    const char *sudo_uid = getenv("SUDO_UID");
+    if (sudo_uid == NULL) return false;
+
+    if (sscanf(sudo_uid, "%u", &uid) != 1) return false;
+    if (setuid(uid) != 0) return false;
+
+    struct passwd *pw = getpwuid(uid);
+    if (!pw) return false;
+
+    snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, pw->pw_name);
+    return true;
+}
+
 int scripting_addition_load(void)
 {
     @autoreleasepool {
+    if (!scripting_addition_is_installed()) return 1;
+
     if (workspace_is_macos_bigsur()) {
-        if (!scripting_addition_is_installed()) return 1;
+        if (!is_root()) {
+            warn("yabai: scripting-addition must be loaded as root!\n");
+            notify("scripting-addition", "must be loaded as root!");
+            sleep(1);
+            return 1;
+        }
 
         pid_t pid = scripting_addition_get_dock_pid();
         if (!pid) {
             notify("scripting-addition", "could not locate pid of Dock.app!");
             warn("yabai: scripting-addition could not locate pid of Dock.app!\n");
+            sleep(1);
             return 1;
         }
 
         if (mach_loader_inject_payload(pid)) {
             debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
-            scripting_addition_perform_validation(false);
+            if (drop_sudo_privileges_and_set_sa_socket_path()) {
+                sleep(1);
+                scripting_addition_perform_validation(false);
+                sleep(1);
+            }
             return 0;
         } else {
-            notify("scripting-addition", "failed to inject payload into Dock.app!");
             warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
+            notify("scripting-addition", "failed to inject payload into Dock.app!");
+            sleep(1);
             return 1;
         }
     } else {
-        if (!scripting_addition_is_installed()) return 1;
+        if (is_root()) {
+            warn("yabai: scripting-addition should not be loaded as root!\n");
+            notify("scripting-addition", "should not be loaded as root!");
+            sleep(1);
+            return 1;
+        }
 
         SALoader *loader = [[SALoader alloc] init];
         loader->result = OSAX_PAYLOAD_SUCCESS;
