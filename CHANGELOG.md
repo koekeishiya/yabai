@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
-- Update scripting-addition to support macOS Big Sur 11.0 Build 20A5364e [#589](https://github.com/koekeishiya/yabai/issues/589)
+- Update scripting-addition to support macOS Big Sur 11.0 Build 20A5384c [#589](https://github.com/koekeishiya/yabai/issues/589)
 
 ## [3.3.0] - 2020-09-03
 ### Added

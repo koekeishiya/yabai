@@ -1,5 +1,6 @@
 #include "sa.h"
 
+#define SA_SOCKET_PATH_FMT      "/tmp/yabai-sa_%s.socket"
 extern char g_sa_socket_file[MAXLEN];
 
 @interface SALoader : NSObject<SBApplicationDelegate> {}
@@ -24,6 +25,7 @@ static char osax_payload_contents_macos_dir[MAXLEN];
 static char osax_info_plist[MAXLEN];
 static char osax_sdefn_file[MAXLEN];
 static char osax_payload_plist[MAXLEN];
+static char osax_bin_mach_bootstrap[MAXLEN];
 static char osax_bin_loader[MAXLEN];
 static char osax_bin_payload[MAXLEN];
 
@@ -128,6 +130,7 @@ static void scripting_addition_set_path(void)
     snprintf(osax_sdefn_file, sizeof(osax_sdefn_file), "%s/%s", osax_contents_res_dir, "yabai.sdef");
 
     snprintf(osax_payload_plist, sizeof(osax_payload_plist), "%s/%s", osax_payload_contents_dir, "Info.plist");
+    snprintf(osax_bin_mach_bootstrap, sizeof(osax_bin_mach_bootstrap), "%s/%s", osax_contents_macos_dir, "mach_bootstrap");
     snprintf(osax_bin_loader, sizeof(osax_bin_loader), "%s/%s", osax_contents_macos_dir, "loader");
     snprintf(osax_bin_payload, sizeof(osax_bin_payload), "%s/%s", osax_payload_contents_macos_dir, "payload");
 }
@@ -237,10 +240,22 @@ static int scripting_addition_perform_validation(bool loaded)
     }
 }
 
-static void scripting_addition_restart_dock()
+static void scripting_addition_restart_dock(void)
 {
     NSArray *dock = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.dock"];
     [dock makeObjectsPerformSelector:@selector(terminate)];
+}
+
+static pid_t scripting_addition_get_dock_pid(void)
+{
+    NSArray *list = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.dock"];
+
+    if (list.count == 1) {
+        NSRunningApplication *dock = list[0];
+        return [dock processIdentifier];
+    }
+
+    return 0;
 }
 
 bool scripting_addition_is_installed(void)
@@ -267,6 +282,13 @@ static bool scripting_addition_remove(void)
 
 int scripting_addition_install(void)
 {
+    if (!is_root()) {
+        warn("yabai: scripting-addition must be installed as root!\n");
+        notify("scripting-addition", "must be installed as root!");
+        sleep(1);
+        return 1;
+    }
+
     umask(S_IWGRP | S_IWOTH);
 
     if ((scripting_addition_is_installed()) &&
@@ -290,6 +312,10 @@ int scripting_addition_install(void)
         goto cleanup;
     }
 
+    if (!scripting_addition_write_file((char *) __src_osax_mach_bootstrap, __src_osax_mach_bootstrap_len, osax_bin_mach_bootstrap, "wb")) {
+        goto cleanup;
+    }
+
     if (!scripting_addition_write_file((char *) __src_osax_loader, __src_osax_loader_len, osax_bin_loader, "wb")) {
         goto cleanup;
     }
@@ -309,6 +335,13 @@ cleanup:
 
 int scripting_addition_uninstall(void)
 {
+    if (!is_root()) {
+        warn("yabai: scripting-addition must be uninstalled as root!\n");
+        notify("scripting-addition", "must be uninstalled as root!");
+        sleep(1);
+        return 1;
+    }
+
     if (!scripting_addition_is_installed()) return  0;
     if (!scripting_addition_remove())       return -1;
     return 0;
@@ -330,73 +363,130 @@ int scripting_addition_check(void)
     }
 }
 
+static bool drop_sudo_privileges_and_set_sa_socket_path(void)
+{
+    uid_t uid = getuid();
+    assert(uid == 0);
+
+    const char *sudo_uid = getenv("SUDO_UID");
+    if (sudo_uid == NULL) return false;
+
+    if (sscanf(sudo_uid, "%u", &uid) != 1) return false;
+    if (setuid(uid) != 0) return false;
+
+    struct passwd *pw = getpwuid(uid);
+    if (!pw) return false;
+
+    snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, pw->pw_name);
+    return true;
+}
+
 int scripting_addition_load(void)
 {
     @autoreleasepool {
-
     if (!scripting_addition_is_installed()) return 1;
 
-    SALoader *loader = [[SALoader alloc] init];
-    loader->result = OSAX_PAYLOAD_SUCCESS;
+    if (workspace_is_macos_bigsur()) {
+        if (!is_root()) {
+            warn("yabai: scripting-addition must be loaded as root!\n");
+            notify("scripting-addition", "must be loaded as root!");
+            sleep(1);
+            return 1;
+        }
 
-    // temporarily redirect stderr to /dev/null to silence
-    // meaningless warning reported by the scripting-bridge
-    // framework, because Dock.app does not provide a .sdef
+        pid_t pid = scripting_addition_get_dock_pid();
+        if (!pid) {
+            notify("scripting-addition", "could not locate pid of Dock.app!");
+            warn("yabai: scripting-addition could not locate pid of Dock.app!\n");
+            sleep(1);
+            return 1;
+        }
 
-    int stderr_fd = dup(2);
-    int null_fd = open("/dev/null", O_WRONLY);
-    fflush(stderr);
-    dup2(null_fd, 2);
-    close(null_fd);
-
-    // @memory_leak
-    // [SBApplication applicationWithBundleIdentifier] leaks memory and there is nothing we
-    // can do about it.. So much for all the automatic memory management techniques in objc
-
-    SBApplication *dock = [SBApplication applicationWithBundleIdentifier:@"com.apple.Dock"];
-    [dock setTimeout:10*60];
-    [dock setSendMode:kAEWaitReply];
-    [dock sendEvent:'ascr' id:'gdut' parameters:0];
-    [dock setDelegate:loader];
-    [dock sendEvent:'YBSA' id:'load' parameters:0];
-
-    //
-    // restore stderr back to normal
-    //
-
-    fflush(stderr);
-    dup2(stderr_fd, 2);
-    close(stderr_fd);
-
-    int result = loader->result;
-    [loader release];
-
-    if (result == OSAX_PAYLOAD_SUCCESS) {
-        debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
-        scripting_addition_perform_validation(false);
-        return 0;
-    } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
-        debug("yabai: scripting-addition payload was already injected into Dock.app!\n");
-        scripting_addition_perform_validation(true);
-        return 0;
-    } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
-        notify("scripting-addition", "failed to inject payload into Dock.app!");
-        warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
-        return 1;
-    } else if (result == OSAX_PAYLOAD_NOT_FOUND) {
-        notify("scripting-addition", "payload could not be found!");
-        warn("yabai: scripting-addition payload could not be found!\n");
-        return 1;
-    } else if (result == OSAX_PAYLOAD_UNAUTHORIZED) {
-        notify("scripting-addition", "could not load, make sure SIP is disabled!");
-        warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
-        return 1;
+        if (mach_loader_inject_payload(pid)) {
+            debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
+            if (drop_sudo_privileges_and_set_sa_socket_path()) {
+                sleep(1);
+                scripting_addition_perform_validation(false);
+                sleep(1);
+            }
+            return 0;
+        } else {
+            warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
+            notify("scripting-addition", "failed to inject payload into Dock.app!");
+            sleep(1);
+            return 1;
+        }
     } else {
-        notify("scripting-addition", "failed to load or inject payload into Dock.app!");
-        warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app! Error: %d\n", result);
-        return 1;
-    }
+        if (is_root()) {
+            warn("yabai: scripting-addition should not be loaded as root!\n");
+            notify("scripting-addition", "should not be loaded as root!");
+            sleep(1);
+            return 1;
+        }
 
+        SALoader *loader = [[SALoader alloc] init];
+        loader->result = OSAX_PAYLOAD_SUCCESS;
+
+        // temporarily redirect stderr to /dev/null to silence
+        // meaningless warning reported by the scripting-bridge
+        // framework, because Dock.app does not provide a .sdef
+
+        int stderr_fd = dup(2);
+        int null_fd = open("/dev/null", O_WRONLY);
+        fflush(stderr);
+        dup2(null_fd, 2);
+        close(null_fd);
+
+        // @memory_leak
+        // [SBApplication applicationWithBundleIdentifier] leaks memory and there is nothing we
+        // can do about it.. So much for all the automatic memory management techniques in objc
+
+        SBApplication *dock = [SBApplication applicationWithBundleIdentifier:@"com.apple.Dock"];
+        [dock setTimeout:10*60];
+        [dock setSendMode:kAEWaitReply];
+        [dock sendEvent:'ascr' id:'gdut' parameters:0];
+        [dock setDelegate:loader];
+        [dock sendEvent:'YBSA' id:'load' parameters:0];
+
+        //
+        // restore stderr back to normal
+        //
+
+        fflush(stderr);
+        dup2(stderr_fd, 2);
+        close(stderr_fd);
+
+        int result = loader->result;
+        [loader release];
+
+        if (result == OSAX_PAYLOAD_SUCCESS) {
+            debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
+            scripting_addition_perform_validation(false);
+            return 0;
+        } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
+            debug("yabai: scripting-addition payload was already injected into Dock.app!\n");
+            scripting_addition_perform_validation(true);
+            return 0;
+        } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
+            notify("scripting-addition", "failed to inject payload into Dock.app!");
+            warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
+            return 1;
+        } else if (result == OSAX_PAYLOAD_NOT_FOUND) {
+            notify("scripting-addition", "payload could not be found!");
+            warn("yabai: scripting-addition payload could not be found!\n");
+            return 1;
+        } else if (result == OSAX_PAYLOAD_UNAUTHORIZED) {
+            notify("scripting-addition", "could not load, make sure SIP is disabled!");
+            warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
+            return 1;
+        } else {
+            notify("scripting-addition", "failed to load or inject payload into Dock.app!");
+            warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app! Error: %d\n", result);
+            return 1;
+        }
+
+        return 0;
+    }
     }
 }
 
