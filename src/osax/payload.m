@@ -1,6 +1,4 @@
 #include <Foundation/Foundation.h>
-#include <Cocoa/Cocoa.h>
-
 #include <mach-o/getsect.h>
 #include <mach-o/dyld.h>
 
