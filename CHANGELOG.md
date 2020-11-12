@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [3.3.2] - 2020-11-13
+### Changed
+- Focusing a space incorrectly returned a non-zero exit code even when the operation succeeded [#181](https://github.com/koekeishiya/yabai/issues/181)
+
 ## [3.3.1] - 2020-11-13
 ### Changed
 - New self-signed certificate used to sign the released binaries. You will have to re-enable accessibility permissions after this install.
@@ -307,7 +311,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.2...HEAD
+[3.3.2]: https://github.com/koekeishiya/yabai/compare/v3.3.1...v3.3.2
 [3.3.1]: https://github.com/koekeishiya/yabai/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/koekeishiya/yabai/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/koekeishiya/yabai/compare/v3.2.0...v3.2.1
