@@ -639,6 +639,8 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
 
     if (scripting_addition_focus_space(sid)) {
         if (focus_display) display_manager_focus_display(new_did);
+    } else {
+        return SPACE_OP_ERROR_SCRIPTING_ADDITION;
     }
 
     return SPACE_OP_ERROR_SUCCESS;

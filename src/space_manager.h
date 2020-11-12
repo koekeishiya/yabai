@@ -44,6 +44,7 @@ enum space_op_error
     SPACE_OP_ERROR_SAME_DISPLAY         = 7,
     SPACE_OP_ERROR_DISPLAY_IS_ANIMATING = 8,
     SPACE_OP_ERROR_IN_MISSION_CONTROL   = 9,
+    SPACE_OP_ERROR_SCRIPTING_ADDITION   = 10,
 };
 
 bool space_manager_has_separate_spaces(void);
