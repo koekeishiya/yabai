@@ -1546,7 +1546,7 @@ void window_manager_init(struct window_manager *wm)
     wm->enable_window_topmost = false;
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
-    wm->window_opacity_duration = workspace_is_macos_catalina() ? 0.0f : 0.2f;
+    wm->window_opacity_duration = 0.0f;
     wm->insert_feedback_windows = NULL;
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
     wm->active_border_color = rgba_color_from_hex(0xff775759);

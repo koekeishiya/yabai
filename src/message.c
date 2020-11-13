@@ -445,10 +445,10 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
             fprintf(rsp, "%f\n", g_window_manager.window_opacity_duration);
-        } else if (!workspace_is_macos_catalina()) {
+        } else if (!workspace_is_macos_catalina() && !workspace_is_macos_bigsur()) {
             g_window_manager.window_opacity_duration = token_to_float(value);
         } else {
-            daemon_fail(rsp, "'%s' cannot be changed on macOS Catalina because of an Apple bug in the WindowServer\n", COMMAND_CONFIG_OPACITY_DURATION);
+            daemon_fail(rsp, "'%s' cannot be changed on macOS Catalina/Big Sur because of an Apple bug in the WindowServer\n", COMMAND_CONFIG_OPACITY_DURATION);
         }
     } else if (token_equals(command, COMMAND_CONFIG_BORDER)) {
         struct token value = get_token(&message);
