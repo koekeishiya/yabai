@@ -1176,7 +1176,6 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_STACK)) {
                 if (space_is_user(sel_sid)) {
-                    printf("setting stack layout for space with id: %lld", sel_sid);
                     view->layout = VIEW_STACK;
                     view->custom_layout = true;
                     view_clear(view);
