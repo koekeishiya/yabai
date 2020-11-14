@@ -1017,7 +1017,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
     fclose(rsp);
 
 err:
-    free(context);
+    free(message);
 
 out:
     socket_close(param1);
