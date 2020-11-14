@@ -872,7 +872,6 @@ static struct selector parse_insert_selector(FILE *rsp, char **message)
 
 static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 {
-    int sel_mci = 0;
     uint64_t sel_sid = 0;
     bool found_selector = true;
 
@@ -880,9 +879,11 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
     struct token command  = selector;
 
     if (token_equals(selector, SELECTOR_CONFIG_SPACE)) {
-        struct selector space_selector = parse_space_selector(rsp, &message, space_manager_active_space());
+        struct selector space_selector = parse_space_selector(rsp, &message, 0);
         if (space_selector.did_parse && space_selector.sid) {
             sel_sid = space_selector.sid;
+        } else {
+            return;
         }
     } else {
         found_selector = false;
@@ -1065,16 +1066,12 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_TOP_PADDING)) {
         struct token value = get_token(&message);
-        if (sel_mci) {
-            if (sel_sid) {
-                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
-                if (!token_is_valid(value)) {
-                    fprintf(rsp, "%d\n", view->top_padding);
-                } else {
-                    VIEW_SET_PROPERTY(top_padding);
-                }
+        if (sel_sid) {
+            struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%d\n", view->top_padding);
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", sel_mci);
+                VIEW_SET_PROPERTY(top_padding);
             }
         } else {
             if (!token_is_valid(value)) {
@@ -1088,16 +1085,12 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_BOTTOM_PADDING)) {
         struct token value = get_token(&message);
-        if (sel_mci) {
-            if (sel_sid) {
-                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
-                if (!token_is_valid(value)) {
-                    fprintf(rsp, "%d\n", view->bottom_padding);
-                } else {
-                    VIEW_SET_PROPERTY(bottom_padding);
-                }
+        if (sel_sid) {
+            struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%d\n", view->bottom_padding);
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", sel_mci);
+                VIEW_SET_PROPERTY(bottom_padding);
             }
         } else {
             if (!token_is_valid(value)) {
@@ -1111,16 +1104,12 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_LEFT_PADDING)) {
         struct token value = get_token(&message);
-        if (sel_mci) {
-            if (sel_sid) {
-                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
-                if (!token_is_valid(value)) {
-                    fprintf(rsp, "%d\n", view->left_padding);
-                } else {
-                    VIEW_SET_PROPERTY(left_padding);
-                }
+        if (sel_sid) {
+            struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%d\n", view->left_padding);
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", sel_mci);
+                VIEW_SET_PROPERTY(left_padding);
             }
         } else {
             if (!token_is_valid(value)) {
@@ -1134,16 +1123,12 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_RIGHT_PADDING)) {
         struct token value = get_token(&message);
-        if (sel_mci) {
-            if (sel_sid) {
-                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
-                if (!token_is_valid(value)) {
-                    fprintf(rsp, "%d\n", view->right_padding);
-                } else {
-                    VIEW_SET_PROPERTY(right_padding);
-                }
+        if (sel_sid) {
+            struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%d\n", view->right_padding);
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", sel_mci);
+                VIEW_SET_PROPERTY(right_padding);
             }
         } else {
             if (!token_is_valid(value)) {
@@ -1157,16 +1142,12 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_WINDOW_GAP)) {
         struct token value = get_token(&message);
-        if (sel_mci) {
-            if (sel_sid) {
-                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
-                if (!token_is_valid(value)) {
-                    fprintf(rsp, "%d\n", view->window_gap);
-                } else {
-                    VIEW_SET_PROPERTY(window_gap);
-                }
+        if (sel_sid) {
+            struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%d\n", view->window_gap);
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", sel_mci);
+                VIEW_SET_PROPERTY(window_gap);
             }
         } else {
             if (!token_is_valid(value)) {
@@ -1180,42 +1161,39 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_CONFIG_LAYOUT)) {
         struct token value = get_token(&message);
-        if (sel_mci) {
-            if (sel_sid) {
-                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
-                if (!token_is_valid(value)) {
-                    fprintf(rsp, "%s\n", view_type_str[view->layout]);
-                } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
-                    if (space_is_user(sel_sid)) {
-                        view->layout = VIEW_BSP;
-                        view->custom_layout = true;
-                        view_clear(view);
-                        window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
-                    } else {
-                        daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
-                    }
-                } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_STACK)) {
-                    if (space_is_user(sel_sid)) {
-                        view->layout = VIEW_STACK;
-                        view->custom_layout = true;
-                        view_clear(view);
-                        window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
-                    } else {
-                        daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
-                    }
-                } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_FLOAT)) {
-                    if (space_is_user(sel_sid)) {
-                        view->layout = VIEW_FLOAT;
-                        view->custom_layout = true;
-                        view_clear(view);
-                    } else {
-                        daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
-                    }
+        if (sel_sid) {
+            struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%s\n", view_type_str[view->layout]);
+            } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
+                if (space_is_user(sel_sid)) {
+                    view->layout = VIEW_BSP;
+                    view->custom_layout = true;
+                    view_clear(view);
+                    window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
                 } else {
-                    daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                    daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
+                }
+            } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_STACK)) {
+                if (space_is_user(sel_sid)) {
+                    printf("setting stack layout for space with id: %lld", sel_sid);
+                    view->layout = VIEW_STACK;
+                    view->custom_layout = true;
+                    view_clear(view);
+                    window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
+                } else {
+                    daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
+                }
+            } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_FLOAT)) {
+                if (space_is_user(sel_sid)) {
+                    view->layout = VIEW_FLOAT;
+                    view->custom_layout = true;
+                    view_clear(view);
+                } else {
+                    daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
                 }
             } else {
-                daemon_fail(rsp, "could not locate space with mission-control index '%d'.\n", sel_mci);
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else {
             if (!token_is_valid(value)) {
