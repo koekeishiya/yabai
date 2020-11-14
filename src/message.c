@@ -1665,6 +1665,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "cannot locate bsp node for the managed window.\n");
             } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
                 daemon_fail(rsp, "cannot locate a bsp node fence.\n");
+            } else if (result == WINDOW_OP_ERROR_INVALID_OPERATION) {
+                daemon_fail(rsp, "cannot use absolute resizing on a managed window.\n");
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);

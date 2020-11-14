@@ -368,11 +368,13 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
 {
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
-        struct window_node *x_fence = NULL;
-        struct window_node *y_fence = NULL;
+        if (direction == HANDLE_ABS) return WINDOW_OP_ERROR_INVALID_OPERATION;
 
         struct window_node *node = view_find_window_node(view, window->id);
         if (!node) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
+
+        struct window_node *x_fence = NULL;
+        struct window_node *y_fence = NULL;
 
         if (direction & HANDLE_TOP)    x_fence = window_node_fence(node, DIR_NORTH);
         if (direction & HANDLE_BOTTOM) x_fence = window_node_fence(node, DIR_SOUTH);
