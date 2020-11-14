@@ -2293,5 +2293,5 @@ void handle_message(FILE *rsp, char *message)
 
 static SOCKET_DAEMON_HANDLER(message_handler)
 {
-    event_loop_post(&g_event_loop, DAEMON_MESSAGE, message, sockfd, NULL);
+    event_loop_post(&g_event_loop, DAEMON_MESSAGE, NULL, sockfd, NULL);
 }

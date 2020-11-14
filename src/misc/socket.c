@@ -96,15 +96,7 @@ static void *socket_connection_handler(void *context)
 
     while (daemon->is_running) {
         int sockfd = accept(daemon->sockfd, NULL, 0);
-        if (sockfd == -1) continue;
-
-        int length;
-        char *message = socket_read(sockfd, &length);
-        if (message) {
-            daemon->handler(message, length, sockfd);
-        } else {
-            socket_close(sockfd);
-        }
+        if (sockfd != -1) daemon->handler(sockfd);
     }
 
     return NULL;

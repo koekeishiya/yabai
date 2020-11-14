@@ -1003,17 +1003,23 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
-    FILE *rsp = fdopen(param1, "w");
-    if (!rsp) goto out;
+    int length;
+    char *message = socket_read(param1, &length);
+    if (!message) goto out;
 
-    debug_message(__FUNCTION__, context);
-    handle_message(rsp, context);
+    FILE *rsp = fdopen(param1, "w");
+    if (!rsp) goto err;
+
+    debug_message(__FUNCTION__, message);
+    handle_message(rsp, message);
+
     fflush(rsp);
     fclose(rsp);
 
-out:
-    socket_close(param1);
+err:
     free(context);
 
+out:
+    socket_close(param1);
     return EVENT_SUCCESS;
 }

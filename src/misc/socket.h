@@ -1,7 +1,7 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#define SOCKET_DAEMON_HANDLER(name) void name(char *message, int length, int sockfd)
+#define SOCKET_DAEMON_HANDLER(name) void name(int sockfd)
 typedef SOCKET_DAEMON_HANDLER(socket_daemon_handler);
 
 #define FAILURE_MESSAGE "\x07"

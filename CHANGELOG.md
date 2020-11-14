@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Fixed an issue (exposed on Big Sur, maybe didn't exist on prior macOS versions ??) that caused yabai' message receiver to block in *recv* [#714](https://github.com/koekeishiya/yabai/issues/714)
 
 ## [3.3.3] - 2020-11-13
 ### Changed
