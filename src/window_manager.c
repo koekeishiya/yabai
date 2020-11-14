@@ -126,8 +126,12 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     int regex_match_app = rule->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
     if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == regex_match_app)   return;
 
+    char *title = window_title(window);
+    int regex_title_result = regex_match(rule->title_regex_valid, &rule->title_regex, title);
+    free(title);
+
     int regex_match_title = rule->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window))      == regex_match_title) return;
+    if (regex_title_result == regex_match_title) return;
 
     if (rule->sid || rule->did) {
         if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {

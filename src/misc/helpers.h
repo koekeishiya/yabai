@@ -252,7 +252,8 @@ static bool triangle_contains_point(CGPoint t[3], CGPoint p)
 
 static int regex_match(bool valid, regex_t *regex, const char *match)
 {
-    if (!valid || !match) return REGEX_MATCH_UD;
+    if (!valid) return REGEX_MATCH_UD;
+
     int result = regexec(regex, match, 0, NULL, 0);
     return result == 0 ? REGEX_MATCH_YES : REGEX_MATCH_NO;
 }

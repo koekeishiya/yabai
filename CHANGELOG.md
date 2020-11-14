@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Improved SIP detection logic [#716](https://github.com/koekeishiya/yabai/issues/716)
+- Windows that do not report a title at all should be treated as having the empty string as its title [#707](https://github.com/koekeishiya/yabai/issues/707)
 
 ## [3.3.4] - 2020-11-14
 ### Changed
