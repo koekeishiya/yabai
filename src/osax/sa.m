@@ -419,7 +419,11 @@ int scripting_addition_load(void)
 {
     @autoreleasepool {
     if (!scripting_addition_is_installed())    return 1;
-    if (!scripting_addition_is_sip_friendly()) return 1;
+
+    if (!workspace_is_macos_highsierra() &&
+        !scripting_addition_is_sip_friendly()) {
+        return 1;
+    }
 
     if (workspace_is_macos_bigsur()) {
         if (!is_root()) {

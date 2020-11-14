@@ -19,5 +19,6 @@ void workspace_application_observe_finished_launching(void *context, struct proc
 void workspace_application_observe_activation_policy(void *context, struct process *process);
 bool workspace_is_macos_bigsur(void);
 bool workspace_is_macos_catalina(void);
+bool workspace_is_macos_highsierra(void);
 
 #endif

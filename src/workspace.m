@@ -113,6 +113,12 @@ bool workspace_is_macos_catalina(void)
     return version.majorVersion == 10 && version.minorVersion == 15;
 }
 
+bool workspace_is_macos_highsierra(void)
+{
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return version.majorVersion == 10 && version.minorVersion == 13;
+}
+
 @implementation workspace_context
 - (id)init
 {
