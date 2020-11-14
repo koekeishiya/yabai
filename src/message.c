@@ -880,7 +880,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
     struct token command  = selector;
 
     if (token_equals(selector, SELECTOR_CONFIG_SPACE)) {
-        struct selector space_selector = parse_space_selector(rsp, &value, space_manager_active_space());
+        struct selector space_selector = parse_space_selector(rsp, &message, space_manager_active_space());
         if (space_selector.did_parse && space_selector.sid) {
             sel_sid = space_selector.sid;
         }
