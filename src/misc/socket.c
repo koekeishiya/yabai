@@ -14,6 +14,19 @@ char *socket_read(int sockfd, int *len)
         result = temp;
         memcpy(result+cursor, buffer, bytes_read);
         cursor += bytes_read;
+
+        if (((result+cursor)[-1] == '\0') &&
+            ((result+cursor)[-2] == '\0')) {
+
+            // NOTE(koekeishiya): if our message ends with double null-terminator we
+            // have successfully received the entire message. this was added because
+            // on macOS Big Sur we would in a few rare cases read the message AND YET
+            // still enter another call to *read* above that would block, because the
+            // client was finished sending its message and is blocking in a poll loop
+            // waiting for a response.
+
+            break;
+        }
     }
 
     if (result && bytes_read != -1) {
