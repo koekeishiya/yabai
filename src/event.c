@@ -423,18 +423,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             window_manager_purify_window(&g_window_manager, window);
         }
     } else if (was_fullscreen && !is_fullscreen) {
-        uint32_t did = window_display_id(window);
-
-        do {
-
-            //
-            // NOTE(koekeishiya): Window has exited native-fullscreen mode.
-            // We need to spin lock until the display is finished animating
-            // because we are not actually able to interact with the window.
-            //
-
-            usleep(100000);
-        } while (display_manager_display_is_animating(did));
+        window_manager_wait_for_native_fullscreen_transition(window);
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));

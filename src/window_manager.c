@@ -1357,6 +1357,40 @@ void window_manager_toggle_window_shadow(struct space_manager *sm, struct window
     if (scripting_addition_set_shadow(window->id, shadow)) window->has_shadow = shadow;
 }
 
+void window_manager_wait_for_native_fullscreen_transition(struct window *window)
+{
+    if (workspace_is_macos_mojave()) {
+        while (!space_is_user(space_manager_active_space())) {
+
+            //
+            // NOTE(koekeishiya): Window has exited native-fullscreen mode.
+            // We need to spin lock until the display is finished animating
+            // because we are not actually able to interact with the window.
+            //
+            // macOS Mojave freezes fullscreen applications when using the
+            // display_manager API to check for animation status:
+            //
+            //  - https://github.com/koekeishiya/yabai/issues/690
+            //
+
+            usleep(100000);
+        }
+    } else {
+        uint32_t did = window_display_id(window);
+
+        do {
+
+            //
+            // NOTE(koekeishiya): Window has exited native-fullscreen mode.
+            // We need to spin lock until the display is finished animating
+            // because we are not actually able to interact with the window.
+            //
+
+            usleep(100000);
+        } while (display_manager_display_is_animating(did));
+    }
+}
+
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     uint32_t sid = window_space(window);
