@@ -644,10 +644,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
     uint8_t mod = (uint8_t) param1;
 
-    if (button == kCGMouseButtonLeft && g_mouse_state.modifier == mod) {
-        g_mouse_state.current_action = g_mouse_state.action1;
-    } else if (button == kCGMouseButtonRight && g_mouse_state.modifier == mod) {
-        g_mouse_state.current_action = g_mouse_state.action2;
+    int action = mouse_action_get(&g_mouse_state, mod, button);
+    if (action != MOUSE_ACTION_NONE) {
+        g_mouse_state.current_action = g_mouse_state.actions[action].drag_action;
+        g_mouse_state.drop_action    = g_mouse_state.actions[action].drop_action;
+        g_mouse_state.modifier       = g_mouse_state.actions[action].modifier;
     }
 
     return EVENT_SUCCESS;
@@ -721,10 +722,33 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     }
 
 out:
-    g_mouse_state.window = NULL;
+    g_mouse_state.window         = NULL;
     g_mouse_state.current_action = MOUSE_MODE_NONE;
+    g_mouse_state.drop_action    = MOUSE_MODE_NONE;
+    g_mouse_state.modifier       = MOUSE_MOD_INVALID;
 
     return EVENT_SUCCESS;
+}
+
+static inline CGPoint mouse_move_destination(void* context, bool legacy) {
+    CGPoint point = CGEventGetLocation(context);
+
+    CGPoint new_point = { g_mouse_state.window_frame.origin.x + (point.x - g_mouse_state.down_location.x),
+                          g_mouse_state.window_frame.origin.y + (point.y - g_mouse_state.down_location.y) };
+
+    if (legacy) {
+        // possible improve experience?
+        g_mouse_state.window_frame.origin = new_point;
+        g_mouse_state.down_location = point;
+    }
+
+    uint32_t did = display_manager_point_display_id(new_point);
+    if (did) {
+        CGRect bounds = display_bounds(did);
+        if (new_point.y < bounds.origin.y) new_point.y = bounds.origin.y;
+    }
+
+    return new_point;
 }
 
 static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
@@ -736,22 +760,16 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         g_mouse_state.window = NULL;
         g_mouse_state.current_action = MOUSE_MODE_NONE;
+        g_mouse_state.drop_action    = MOUSE_MODE_NONE;
         return EVENT_SUCCESS;
     }
 
     if (g_mouse_state.current_action == MOUSE_MODE_MOVE) {
-        CGPoint point = CGEventGetLocation(context);
-
-        CGPoint new_point = { g_mouse_state.window_frame.origin.x + (point.x - g_mouse_state.down_location.x),
-                              g_mouse_state.window_frame.origin.y + (point.y - g_mouse_state.down_location.y) };
-
-        uint32_t did = display_manager_point_display_id(new_point);
-        if (did) {
-            CGRect bounds = display_bounds(did);
-            if (new_point.y < bounds.origin.y) new_point.y = bounds.origin.y;
-        }
-
+        CGPoint new_point = mouse_move_destination(context, false);
         scripting_addition_move_window(g_mouse_state.window->id, new_point.x, new_point.y);
+    } else if (g_mouse_state.current_action == MOUSE_MODE_MOVE_LEGACY) {
+        CGPoint new_point = mouse_move_destination(context, true);
+        window_manager_move_window(g_mouse_state.window, new_point.x, new_point.y);
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         uint64_t event_time = CGEventGetTimestamp(context);
         float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
