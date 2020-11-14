@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Improved SIP detection logic [#716](https://github.com/koekeishiya/yabai/issues/716)
 
 ## [3.3.4] - 2020-11-14
 ### Changed

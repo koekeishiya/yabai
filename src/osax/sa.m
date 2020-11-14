@@ -1,5 +1,9 @@
 #include "sa.h"
 
+extern int csr_get_active_config(uint32_t *config);
+#define CSR_ALLOW_UNRESTRICTED_FS 0x02
+#define CSR_ALLOW_TASK_FOR_PID    0x04
+
 #define SA_SOCKET_PATH_FMT      "/tmp/yabai-sa_%s.socket"
 extern char g_sa_socket_file[MAXLEN];
 
@@ -258,6 +262,28 @@ static pid_t scripting_addition_get_dock_pid(void)
     return 0;
 }
 
+static bool scripting_addition_is_sip_friendly(void)
+{
+    uint32_t config = 0;
+    csr_get_active_config(&config);
+
+    if (!(config & CSR_ALLOW_UNRESTRICTED_FS)) {
+        warn("yabai: System Integrity Protection: Filesystem Protections must be disabled!\n");
+        notify("scripting-addition", "System Integrity Protection: Filesystem Protections must be disabled!");
+        sleep(1);
+        return false;
+    }
+
+    if (!(config & CSR_ALLOW_TASK_FOR_PID)) {
+        warn("yabai: System Integrity Protection: Debugging Restrictions must be disabled!\n");
+        notify("scripting-addition", "System Integrity Protection: Debugging Restrictions must be disabled!");
+        sleep(1);
+        return false;
+    }
+
+    return true;
+}
+
 bool scripting_addition_is_installed(void)
 {
     if (osax_base_dir[0] == 0) scripting_addition_set_path();
@@ -282,6 +308,10 @@ static bool scripting_addition_remove(void)
 
 int scripting_addition_install(void)
 {
+    if (!scripting_addition_is_sip_friendly()) {
+        return 1;
+    }
+
     if (!is_root()) {
         warn("yabai: scripting-addition must be installed as root!\n");
         notify("scripting-addition", "must be installed as root!");
@@ -335,6 +365,10 @@ cleanup:
 
 int scripting_addition_uninstall(void)
 {
+    if (!scripting_addition_is_sip_friendly()) {
+        return 1;
+    }
+
     if (!is_root()) {
         warn("yabai: scripting-addition must be uninstalled as root!\n");
         notify("scripting-addition", "must be uninstalled as root!");
@@ -384,7 +418,8 @@ static bool drop_sudo_privileges_and_set_sa_socket_path(void)
 int scripting_addition_load(void)
 {
     @autoreleasepool {
-    if (!scripting_addition_is_installed()) return 1;
+    if (!scripting_addition_is_installed())    return 1;
+    if (!scripting_addition_is_sip_friendly()) return 1;
 
     if (workspace_is_macos_bigsur()) {
         if (!is_root()) {
@@ -474,10 +509,6 @@ int scripting_addition_load(void)
         } else if (result == OSAX_PAYLOAD_NOT_FOUND) {
             notify("scripting-addition", "payload could not be found!");
             warn("yabai: scripting-addition payload could not be found!\n");
-            return 1;
-        } else if (result == OSAX_PAYLOAD_UNAUTHORIZED) {
-            notify("scripting-addition", "could not load, make sure SIP is disabled!");
-            warn("yabai: scripting-addition could not load, make sure SIP is disabled!\n");
             return 1;
         } else {
             notify("scripting-addition", "failed to load or inject payload into Dock.app!");
