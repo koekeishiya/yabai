@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.3.4] - 2020-11-14
 ### Changed
-- Fixed an issue (exposed on Big Sur, maybe didn't exist on prior macOS versions ??) that caused yabai' message receiver to block in *recv* [#714](https://github.com/koekeishiya/yabai/issues/714)
+- Fixed an issue (exposed on Big Sur, maybe didn't exist on prior macOS versions ??) that caused yabai' message receiver to block in *read* [#714](https://github.com/koekeishiya/yabai/issues/714)
 
 ## [3.3.3] - 2020-11-13
 ### Changed
@@ -317,7 +319,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.3...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.4...HEAD
+[3.3.4]: https://github.com/koekeishiya/yabai/compare/v3.3.3...v3.3.4
 [3.3.3]: https://github.com/koekeishiya/yabai/compare/v3.3.2...v3.3.3
 [3.3.2]: https://github.com/koekeishiya/yabai/compare/v3.3.1...v3.3.2
 [3.3.1]: https://github.com/koekeishiya/yabai/compare/v3.3.0...v3.3.1
