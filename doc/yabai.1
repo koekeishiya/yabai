@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.10
-.\"      Date: 2020-08-26
+.\" Generator: Asciidoctor 2.0.12
+.\"      Date: 2020-11-14
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-08-26" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-11-14" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -85,6 +85,7 @@ Loads the scripting\-addition into Dock.app.
 .sp
 .if n .RS 4
 .nf
+.fam C
 REGEX       := \c
 .URL "https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended\-regular\-expression\-syntax.html" "POSIX extended regular expression syntax" ""
 
@@ -109,6 +110,7 @@ WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest 
 DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1\-based)>
 
 SPACE_SEL   := prev | next | first | last | recent | mouse | <mission\-control index (1\-based)> | LABEL
+.fam
 .fi
 .if n .RE
 .SH "DOMAINS"
@@ -120,7 +122,7 @@ yabai \-m config <global setting>
 Get or set the value of <global setting>.
 .RE
 .sp
-yabai \-m config [\-\-space \fI<mission\-control index>\fP] <space setting>
+yabai \-m config [\-\-space \fI<SPACE_SEL>\fP] <space setting>
 .RS 4
 Get or set the value of <space setting>.
 .RE
