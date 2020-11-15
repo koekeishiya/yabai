@@ -1712,11 +1712,17 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
     } else if (token_equals(command, COMMAND_WINDOW_LAYER)) {
         struct token value = get_token(&message);
         if (token_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
-            window_manager_set_window_layer(acting_window, LAYER_BELOW);
+            if (!window_manager_set_window_layer(acting_window, LAYER_BELOW)) {
+                daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+            }
         } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_NORMAL)) {
-            window_manager_set_window_layer(acting_window, LAYER_NORMAL);
+            if (!window_manager_set_window_layer(acting_window, LAYER_NORMAL)) {
+                daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+            }
         } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
-            window_manager_set_window_layer(acting_window, LAYER_ABOVE);
+            if (!window_manager_set_window_layer(acting_window, LAYER_ABOVE)) {
+                daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
@@ -1725,7 +1731,9 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         struct token value = get_token(&message);
         if ((sscanf(value.text, "%f", &opacity) == 1) && in_range_ii(opacity, 0.0f, 1.0f)) {
             acting_window->opacity = opacity;
-            window_manager_set_opacity(&g_window_manager, acting_window, opacity);
+            if (!window_manager_set_opacity(&g_window_manager, acting_window, opacity)) {
+                daemon_fail(rsp, "could not change opacity of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+            }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

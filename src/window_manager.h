@@ -152,7 +152,7 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool enabled);
-void window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity);
+bool window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled);
 void window_manager_set_window_border_width(struct window_manager *wm, int width);
@@ -173,7 +173,7 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
 void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float);
 void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky);
 void window_manager_make_window_topmost(struct window_manager *wm, struct window *window, bool topmost);
-void window_manager_set_window_layer(struct window *window, int layer);
+bool window_manager_set_window_layer(struct window *window, int layer);
 void window_manager_toggle_window_topmost(struct window *window);
 void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window);
 void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window);
