@@ -873,23 +873,17 @@ static struct selector parse_insert_selector(FILE *rsp, char **message)
 static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 {
     uint64_t sel_sid = 0;
-    bool found_selector = true;
-
     struct token selector = get_token(&message);
     struct token command  = selector;
 
-    if (token_equals(selector, SELECTOR_CONFIG_SPACE)) {
+    bool found_selector = token_equals(selector, SELECTOR_CONFIG_SPACE);
+    if (found_selector) {
         struct selector space_selector = parse_space_selector(rsp, &message, 0);
-        if (space_selector.did_parse && space_selector.sid) {
-            sel_sid = space_selector.sid;
-        } else {
-            return;
-        }
-    } else {
-        found_selector = false;
-    }
+        if (!space_selector.did_parse || !space_selector.sid) return;
 
-    if (found_selector) command = get_token(&message);
+        sel_sid = space_selector.sid;
+        command = get_token(&message);
+    }
 
     if (token_equals(command, COMMAND_CONFIG_DEBUG_OUTPUT)) {
         struct token value = get_token(&message);
