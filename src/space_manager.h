@@ -8,6 +8,7 @@ extern CGError SLSProcessAssignToAllSpaces(int cid, pid_t pid);
 extern void SLSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
 extern CGError CoreDockSendNotification(CFStringRef notification, int unknown);
 
+struct token;
 struct space_label
 {
     uint64_t sid;
