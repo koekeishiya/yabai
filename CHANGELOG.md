@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Allow *SPACE_SEL* to be used instead of *mission-control index* when specifying config options for a specific space [#705](https://github.com/koekeishiya/yabai/issues/705)
 - Native fullscreen transitions would freeze on macOS Mojave due to internal API differences between macOS version [#690](https://github.com/koekeishiya/yabai/issues/690)
 - Report proper error message when trying to use absolute resizing on a managed window [#661](https://github.com/koekeishiya/yabai/issues/661)
+- Space commands that utilize the scripting addition should correctly return a non-zero exit code upon failure [#181](https://github.com/koekeishiya/yabai/issues/181)
 
 ## [3.3.4] - 2020-11-14
 ### Changed

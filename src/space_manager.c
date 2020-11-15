@@ -693,28 +693,29 @@ enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uin
 
     int acting_mci = space_manager_mission_control_index(acting_sid);
     int selector_mci = space_manager_mission_control_index(selector_sid);
+    bool success = true;
 
     if (acting_sid_is_first && !selector_sid_is_first && selector_mci - acting_mci == 1) {
-        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        success = scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
     } else if (!acting_sid_is_first && selector_sid_is_first && acting_mci - selector_mci == 1) {
-        scripting_addition_move_space_after_space(selector_sid, acting_sid, selector_sid == space_manager_active_space());
+        success = scripting_addition_move_space_after_space(selector_sid, acting_sid, selector_sid == space_manager_active_space());
     } else if (acting_sid_is_first && !selector_sid_is_first) {
-        scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
-        scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+        success  = scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
+        success &= scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
     } else if (!acting_sid_is_first && selector_sid_is_first) {
-        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
-        scripting_addition_move_space_after_space(selector_sid, acting_prev_sid, false);
+        success  = scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        success &= scripting_addition_move_space_after_space(selector_sid, acting_prev_sid, false);
     } else if (!acting_sid_is_first && !selector_sid_is_first) {
         if (acting_mci > selector_mci) {
-            scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
-            scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+            success  = scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
+            success &= scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
         } else {
-            scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
-            scripting_addition_move_space_after_space(selector_sid, acting_prev_sid, false);
+            success  = scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+            success &= scripting_addition_move_space_after_space(selector_sid, acting_prev_sid, false);
         }
     }
 
-    return SPACE_OP_ERROR_SUCCESS;
+    return success ? SPACE_OP_ERROR_SUCCESS : SPACE_OP_ERROR_SCRIPTING_ADDITION;
 }
 
 enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint64_t selector_sid)
@@ -739,21 +740,22 @@ enum space_op_error space_manager_move_space_to_space(uint64_t acting_sid, uint6
 
     bool acting_sid_is_first = !acting_prev_sid || acting_prev_did != acting_did;
     bool selector_sid_is_first = !selector_prev_sid || selector_prev_did != selector_did;
+    bool success = true;
 
     if (acting_sid_is_first && !selector_sid_is_first) {
-        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        success = scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
     } else if (!acting_sid_is_first && selector_sid_is_first) {
-        scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
-        scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
+        success  = scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+        success &= scripting_addition_move_space_after_space(selector_sid, acting_sid, false);
     } else if (!acting_sid_is_first && !selector_sid_is_first) {
         if (space_manager_mission_control_index(acting_sid) > space_manager_mission_control_index(selector_sid)) {
-            scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
+            success = scripting_addition_move_space_after_space(acting_sid, selector_prev_sid, acting_sid == space_manager_active_space());
         } else {
-            scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
+            success = scripting_addition_move_space_after_space(acting_sid, selector_sid, acting_sid == space_manager_active_space());
         }
     }
 
-    return SPACE_OP_ERROR_SUCCESS;
+    return success ? SPACE_OP_ERROR_SUCCESS : SPACE_OP_ERROR_SCRIPTING_ADDITION;
 }
 
 enum space_op_error space_manager_move_space_to_display(struct space_manager *sm, uint64_t sid, uint32_t did)
@@ -777,11 +779,13 @@ enum space_op_error space_manager_move_space_to_display(struct space_manager *sm
     uint64_t d_sid = display_space_id(did);
     if (!d_sid) return SPACE_OP_ERROR_MISSING_DST;
 
-    scripting_addition_move_space_after_space(sid, d_sid, 1);
-    space_manager_mark_view_invalid(sm, sid);
-    space_manager_focus_space(sid);
+    if (scripting_addition_move_space_after_space(sid, d_sid, 1)) {
+        space_manager_mark_view_invalid(sm, sid);
+        space_manager_focus_space(sid);
+        return SPACE_OP_ERROR_SUCCESS;
+    }
 
-    return SPACE_OP_ERROR_SUCCESS;
+    return SPACE_OP_ERROR_SCRIPTING_ADDITION;
 }
 
 enum space_op_error space_manager_destroy_space(uint64_t sid)
@@ -796,8 +800,7 @@ enum space_op_error space_manager_destroy_space(uint64_t sid)
     bool is_animating = display_manager_display_is_animating(space_display_id(sid));
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
-    scripting_addition_destroy_space(sid);
-    return SPACE_OP_ERROR_SUCCESS;
+    return scripting_addition_destroy_space(sid) ? SPACE_OP_ERROR_SUCCESS : SPACE_OP_ERROR_SCRIPTING_ADDITION;
 }
 
 enum space_op_error space_manager_add_space(uint64_t sid)
@@ -809,8 +812,7 @@ enum space_op_error space_manager_add_space(uint64_t sid)
     bool is_animating = display_manager_display_is_animating(space_display_id(sid));
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
-    scripting_addition_create_space(sid);
-    return SPACE_OP_ERROR_SUCCESS;
+    return scripting_addition_create_space(sid) ? SPACE_OP_ERROR_SUCCESS : SPACE_OP_ERROR_SCRIPTING_ADDITION;
 }
 
 void space_manager_assign_process_to_space(pid_t pid, uint64_t sid)
