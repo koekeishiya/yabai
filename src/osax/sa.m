@@ -184,19 +184,15 @@ static void scripting_addition_prepare_binaries(void)
 
 static bool scripting_addition_request_handshake(char *version, uint32_t *attrib)
 {
-    bool result = false;
-
     int sockfd;
-    char message[MAXLEN];
+    bool result = false;
+    char rsp[BUFSIZ] = {};
+    char message[] = "handshake";
 
     if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        snprintf(message, sizeof(message), "handshake");
         if (socket_write(sockfd, message)) {
-            result = true;
-
-            int length;
-            char *rsp = socket_read(sockfd, &length);
-            if (!rsp) goto out;
+            int length = recv(sockfd, rsp, sizeof(rsp)-1, 0);
+            if (length <= 0) goto out;
 
             char *zero = rsp;
             while (*zero != '\0') ++zero;
@@ -204,6 +200,8 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
             assert(*zero == '\0');
             memcpy(version, rsp, zero - rsp + 1);
             memcpy(attrib, zero+1, sizeof(uint32_t));
+
+            result = true;
         }
     }
 

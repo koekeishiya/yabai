@@ -259,10 +259,6 @@ static void parse_arguments(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    if (!ts_init(KILOBYTES(64))) {
-        error("yabai: could not allocate temporary storage! abort..\n");
-    }
-
     if (argc > 1) {
         parse_arguments(argc, argv);
     }
@@ -284,6 +280,10 @@ int main(int argc, char **argv)
 
     if (!event_loop_init(&g_event_loop)) {
         error("yabai: could not initialize event_loop! abort..\n");
+    }
+
+    if (!ts_init(KILOBYTES(64))) {
+        error("yabai: could not allocate temporary storage! abort..\n");
     }
 
     process_manager_init(&g_process_manager);
