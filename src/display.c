@@ -23,7 +23,7 @@ void display_serialize(FILE *rsp, uint32_t did)
     char *uuid = NULL;
     CFStringRef uuid_ref = display_uuid(did);
     if (uuid_ref) {
-        uuid = cfstring_copy(uuid_ref);
+        uuid = ts_cfstring_copy(uuid_ref);
         CFRelease(uuid_ref);
     }
 
@@ -46,7 +46,6 @@ void display_serialize(FILE *rsp, uint32_t did)
             buffer_size -= bytes_written;
             if (buffer_size <= 0) break;
         }
-        free(space_list);
     }
 
     fprintf(rsp,
@@ -60,10 +59,6 @@ void display_serialize(FILE *rsp, uint32_t did)
             did, uuid ? uuid : "<unknown>", display_arrangement(did), buffer,
             frame.origin.x, frame.origin.y,
             frame.size.width, frame.size.height);
-
-    if (uuid) {
-        free(uuid);
-    }
 }
 
 CFStringRef display_uuid(uint32_t did)
@@ -192,7 +187,7 @@ uint64_t *display_space_list(uint32_t did, int *count)
         CFArrayRef spaces_ref = CFDictionaryGetValue(display_ref, CFSTR("Spaces"));
         int spaces_count = CFArrayGetCount(spaces_ref);
 
-        space_list = malloc(sizeof(uint64_t) * spaces_count);
+        space_list = ts_alloc(sizeof(uint64_t) * spaces_count);
         *count = spaces_count;
 
         for (int j = 0; j < spaces_count; ++j) {

@@ -93,7 +93,7 @@ uint64_t *window_space_list(struct window *window, int *count)
     *count = CFArrayGetCount(space_list_ref);
     if (!*count) goto out;
 
-    space_list = malloc(*count * sizeof(uint64_t));
+    space_list = ts_alloc(*count * sizeof(uint64_t));
     for (int i = 0; i < *count; ++i) {
         CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, i);
         CFNumberGetValue(id_ref, CFNumberGetType(id_ref), space_list + i);
@@ -111,7 +111,7 @@ void window_serialize(FILE *rsp, struct window *window)
     char *role = NULL;
     char *subrole = NULL;
     char *title = window_title(window);
-    char *escaped_title = string_escape(title);
+    char *escaped_title = ts_string_escape(title);
     CGRect frame = window_frame(window);
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
@@ -124,13 +124,13 @@ void window_serialize(FILE *rsp, struct window *window)
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
-        role = cfstring_copy(cfrole);
+        role = ts_cfstring_copy(cfrole);
         CFRelease(cfrole);
     }
 
     CFStringRef cfsubrole = window_subrole(window);
     if (cfsubrole) {
-        subrole = cfstring_copy(cfsubrole);
+        subrole = ts_cfstring_copy(cfsubrole);
         CFRelease(cfsubrole);
     }
 
@@ -199,11 +199,6 @@ void window_serialize(FILE *rsp, struct window *window)
             zoom_parent,
             zoom_fullscreen,
             window_is_fullscreen(window));
-
-    if (subrole) free(subrole);
-    if (role) free(role);
-    if (title) free(title);
-    if (escaped_title) free(escaped_title);
 }
 
 char *window_title(struct window *window)
@@ -218,10 +213,10 @@ char *window_title(struct window *window)
 #endif
 
     if (value) {
-        title = cfstring_copy(value);
+        title = ts_cfstring_copy(value);
         CFRelease(value);
     } else {
-        title = string_copy("");
+        title = ts_string_copy("");
     }
 
     return title;

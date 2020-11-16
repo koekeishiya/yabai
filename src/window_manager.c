@@ -46,7 +46,6 @@ void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid)
     fprintf(rsp, "]\n");
 
     buf_free(window_aggregate_list);
-    free(window_list);
 }
 
 void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
@@ -65,8 +64,6 @@ void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
             struct window *window = window_manager_find_window(&g_window_manager, window_list[j]);
             if (window) buf_push(window_aggregate_list, window);
         }
-
-        free(window_list);
     }
 
     fprintf(rsp, "[");
@@ -78,7 +75,6 @@ void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
     fprintf(rsp, "]\n");
 
     buf_free(window_aggregate_list);
-    free(space_list);
 }
 
 void window_manager_query_windows_for_displays(FILE *rsp)
@@ -102,11 +98,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
                 struct window *window = window_manager_find_window(&g_window_manager, window_list[k]);
                 if (window) buf_push(window_aggregate_list, window);
             }
-
-            free(window_list);
         }
-
-        free(space_list);
     }
 
     fprintf(rsp, "[");
@@ -118,7 +110,6 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     fprintf(rsp, "]\n");
 
     buf_free(window_aggregate_list);
-    free(display_list);
 }
 
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
@@ -128,7 +119,6 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
 
     char *title = window_title(window);
     int regex_title_result = regex_match(rule->title_regex_valid, &rule->title_regex, title);
-    free(title);
 
     int regex_match_title = rule->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
     if (regex_title_result == regex_match_title) return;
@@ -588,7 +578,6 @@ struct window *window_manager_find_window_on_space_by_rank(struct window_manager
         }
     }
 
-    free(window_list);
     return result;
 }
 
@@ -1542,7 +1531,6 @@ void window_manager_validate_and_check_for_windows_on_space(struct space_manager
 
     window_manager_validate_windows_on_space(sm, wm, sid, window_list, window_count);
     window_manager_check_for_windows_on_space(sm, wm, sid, window_list, window_count);
-    free(window_list);
 }
 
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did)
@@ -1557,7 +1545,6 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
             uint32_t *window_list = space_window_list(space_list[i], &window_count, false);
             if (window_list) {
                 window_manager_check_for_windows_on_space(sm, wm, space_list[i], window_list, window_count);
-                free(window_list);
             }
             break;
         }
@@ -1571,8 +1558,6 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
             space_manager_mark_view_invalid(sm, space_list[i]);
         }
     }
-
-    free(space_list);
 }
 
 void window_manager_init(struct window_manager *wm)

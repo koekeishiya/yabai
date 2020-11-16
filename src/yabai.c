@@ -259,6 +259,10 @@ static void parse_arguments(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+    if (!ts_init(KILOBYTES(64))) {
+        error("yabai: could not allocate temporary storage! abort..\n");
+    }
+
     if (argc > 1) {
         parse_arguments(argc, argv);
     }

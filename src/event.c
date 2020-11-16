@@ -997,16 +997,13 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
     if (!message) goto out;
 
     FILE *rsp = fdopen(param1, "w");
-    if (!rsp) goto err;
+    if (!rsp) goto out;
 
     debug_message(__FUNCTION__, message);
     handle_message(rsp, message);
 
     fflush(rsp);
     fclose(rsp);
-
-err:
-    free(message);
 
 out:
     socket_close(param1);

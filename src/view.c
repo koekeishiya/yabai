@@ -731,7 +731,6 @@ void view_serialize(FILE *rsp, struct view *view)
                 windows[count++] = window_list[i];
             }
         }
-        free(window_list);
     }
 
     for (int i = 0; i < count; ++i) {

@@ -8,7 +8,7 @@ extern struct window_manager g_window_manager;
 
 static void event_signal_serialize(FILE *rsp, struct signal *signal, enum event_type type, int index)
 {
-    char *escaped_action = string_escape(signal->command);
+    char *escaped_action = ts_string_escape(signal->command);
 
     fprintf(rsp,
             "{\n"
@@ -25,8 +25,6 @@ static void event_signal_serialize(FILE *rsp, struct signal *signal, enum event_
             signal->title ? signal->title : "",
             event_type_str[type],
             escaped_action ? escaped_action : signal->command ? signal->command : "");
-
-    if (escaped_action) free(escaped_action);
 }
 
 static void event_signal_populate_args(void *context, enum event_type type, struct signal_args *args)
@@ -119,23 +117,6 @@ static void event_signal_populate_args(void *context, enum event_type type, stru
     }
 }
 
-static void event_signal_destroy_args(enum event_type type, struct signal_args *args)
-{
-    switch (type) {
-    default: break;
-
-    case WINDOW_CREATED:
-    case WINDOW_FOCUSED:
-    case WINDOW_MOVED:
-    case WINDOW_RESIZED:
-    case WINDOW_MINIMIZED:
-    case WINDOW_DEMINIMIZED:
-    case WINDOW_TITLE_CHANGED: {
-        if (args->param1) free(args->param1);
-    } break;
-    }
-}
-
 static bool event_signal_filter(struct signal *signal, enum event_type type, struct signal_args *args)
 {
     switch (type) {
@@ -189,10 +170,7 @@ void event_signal_transmit(void *context, enum event_type type)
     event_signal_populate_args(context, type, &args);
     debug("%s: transmitting %s to %d subscriber(s)\n", __FUNCTION__, event_type_str[type], signal_count);
 
-    if (fork() != 0) {
-        event_signal_destroy_args(type, &args);
-        return;
-    }
+    if (fork() != 0) return;
 
     for (int i = 0; i < signal_count; ++i) {
         struct signal *signal = &g_signal_event[type][i];

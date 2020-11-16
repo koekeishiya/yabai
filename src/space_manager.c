@@ -45,7 +45,6 @@ bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
     }
     fprintf(rsp, "\n");
 
-    free(space_list);
     return true;
 }
 
@@ -65,7 +64,6 @@ bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
     }
     fprintf(rsp, "\n");
 
-    free(space_list);
     return true;
 }
 
@@ -89,12 +87,10 @@ bool space_manager_query_spaces_for_displays(FILE *rsp)
             if (j < space_count - 1) fprintf(rsp, ",");
         }
 
-        free(space_list);
         fprintf(rsp, "%c", i < display_count - 1 ? ',' : ']');
     }
     fprintf(rsp, "\n");
 
-    free(display_list);
     return true;
 }
 
@@ -163,11 +159,11 @@ struct space_label *space_manager_get_label_for_space(struct space_manager *sm, 
     return NULL;
 }
 
-struct space_label *space_manager_get_space_for_label(struct space_manager *sm, struct token label)
+struct space_label *space_manager_get_space_for_label(struct space_manager *sm, char *label)
 {
     for (int i = 0; i < buf_len(sm->labels); ++i) {
         struct space_label *space_label = &sm->labels[i];
-        if (token_equals(label, space_label->label)) {
+        if (string_equals(label, space_label->label)) {
             return space_label;
         }
     }
@@ -663,7 +659,6 @@ static inline bool space_manager_is_space_last_user_space(uint64_t sid)
             break;
         }
     }
-    free(space_list);
 
     return result;
 }
@@ -834,22 +829,17 @@ bool space_manager_is_window_on_active_space(struct window *window)
 
 bool space_manager_is_window_on_space(uint64_t sid, struct window *window)
 {
-    bool result = false;
-
     int space_count;
     uint64_t *space_list = window_space_list(window, &space_count);
-    if (!space_list) goto out;
+    if (!space_list) return false;
 
     for (int i = 0; i < space_count; ++i) {
         if (sid == space_list[i]) {
-            result = true;
-            break;
+            return true;
         }
     }
 
-    free(space_list);
-out:
-    return result;
+    return false;
 }
 
 void space_manager_mark_spaces_invalid_for_display(struct space_manager *sm, uint32_t did)
@@ -866,8 +856,6 @@ void space_manager_mark_spaces_invalid_for_display(struct space_manager *sm, uin
             space_manager_mark_view_invalid(sm, space_list[i]);
         }
     }
-
-    free(space_list);
 }
 
 void space_manager_mark_spaces_invalid(struct space_manager *sm)
@@ -879,8 +867,6 @@ void space_manager_mark_spaces_invalid(struct space_manager *sm)
     for (int i = 0; i < display_count; ++i) {
         space_manager_mark_spaces_invalid_for_display(sm, display_list[i]);
     }
-
-    free(display_list);
 }
 
 bool space_manager_refresh_application_windows(struct space_manager *sm)
@@ -957,8 +943,6 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
 
     sm->current_space_id = space_manager_active_space();
     sm->last_space_id = sm->current_space_id;
-
-    free(space_list);
 }
 
 void space_manager_init(struct space_manager *sm)
@@ -984,11 +968,7 @@ void space_manager_init(struct space_manager *sm)
             struct view *view = view_create(space_list[j]);
             table_add(&sm->view, &space_list[j], view);
         }
-
-        free(space_list);
     }
-
-    free(display_list);
 }
 
 void space_manager_begin(struct space_manager *sm)

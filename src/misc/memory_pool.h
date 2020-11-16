@@ -1,10 +1,6 @@
 #ifndef MEMORY_POOL_H
 #define MEMORY_POOL_H
 
-#define KILOBYTES(value) ((value) * 1024ULL)
-#define MEGABYTES(value) (KILOBYTES(value) * 1024ULL)
-#define GIGABYTES(value) (MEGABYTES(value) * 1024ULL)
-
 struct memory_pool
 {
     void *memory;

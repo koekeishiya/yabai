@@ -17,7 +17,6 @@ bool display_manager_query_displays(FILE *rsp)
     }
     fprintf(rsp, "\n");
 
-    free(display_list);
     return true;
 }
 
@@ -195,7 +194,6 @@ uint32_t display_manager_find_closest_display_in_direction(uint32_t source_did, 
         }
     }
 
-    free(display_list);
     return best_did;
 }
 
@@ -266,7 +264,7 @@ uint32_t display_manager_active_display_count(void)
 uint32_t *display_manager_active_display_list(uint32_t *count)
 {
     int display_count = display_manager_active_display_count();
-    uint32_t *result = malloc(sizeof(uint32_t) * display_count);
+    uint32_t *result = ts_alloc(sizeof(uint32_t) * display_count);
     CGGetActiveDisplayList(display_count, result, count);
     return result;
 }

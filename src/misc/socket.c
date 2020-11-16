@@ -8,10 +8,7 @@ char *socket_read(int sockfd, int *len)
     char buffer[BUFSIZ];
 
     while ((bytes_read = read(sockfd, buffer, sizeof(buffer)-1)) > 0) {
-        char *temp = realloc(result, cursor+bytes_read+1);
-        if (!temp) goto err;
-
-        result = temp;
+        result = ts_expand(result, cursor, bytes_read);
         memcpy(result+cursor, buffer, bytes_read);
         cursor += bytes_read;
 
@@ -30,13 +27,9 @@ char *socket_read(int sockfd, int *len)
     }
 
     if (result && bytes_read != -1) {
-        result[cursor] = '\0';
         *len = cursor;
     } else {
-err:
-        if (result) free(result);
         result = NULL;
-        *len = 0;
     }
 
     return result;

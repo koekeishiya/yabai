@@ -82,6 +82,8 @@ static void *event_loop_run(void *context)
             if (event->info) *event->info = (result << 0x1) | EVENT_PROCESSED;
 
             event_loop_destroy_event(event);
+
+            ts_reset();
         } else {
             sem_wait(event_loop->semaphore);
         }

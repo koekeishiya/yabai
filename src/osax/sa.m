@@ -204,8 +204,6 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
             assert(*zero == '\0');
             memcpy(version, rsp, zero - rsp + 1);
             memcpy(attrib, zero+1, sizeof(uint32_t));
-
-            free(rsp);
         }
     }
 
