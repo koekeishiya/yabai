@@ -127,7 +127,7 @@ struct window_node *view_find_window_node(struct view *view, uint32_t window_id)
 void view_stack_window_node(struct view *view, struct window_node *node, struct window *window);
 void view_add_window_node(struct view *view, struct window *window);
 void view_remove_window_node(struct view *view, struct window *window);
-uint32_t *view_find_window_list(struct view *view);
+uint32_t *view_find_window_list(struct view *view, int *window_count);
 
 void view_serialize(FILE *rsp, struct view *view);
 bool view_is_invalid(struct view *view);

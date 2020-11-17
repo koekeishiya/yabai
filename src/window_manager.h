@@ -145,7 +145,7 @@ void window_manager_add_window(struct window_manager *wm, struct window *window)
 struct application *window_manager_find_application(struct window_manager *wm, pid_t pid);
 void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct application *application);
-struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application);
+struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application, int *window_count);
 enum window_op_error window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy);
 enum window_op_error window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy);
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode);

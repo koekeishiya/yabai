@@ -922,9 +922,10 @@ void window_manager_add_application(struct window_manager *wm, struct applicatio
     table_add(&wm->application, &application->pid, application);
 }
 
-struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application)
+struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application, int *window_count)
 {
-    struct window **window_list = NULL;
+    *window_count = 0;
+    struct window **window_list = ts_alloc(sizeof(struct window *) * wm->window.count);
 
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
         struct bucket *bucket = wm->window.buckets[window_index];
@@ -932,7 +933,7 @@ struct window **window_manager_find_application_windows(struct window_manager *w
             if (bucket->value) {
                 struct window *window = bucket->value;
                 if (window->application == application) {
-                    buf_push(window_list, window);
+                    window_list[(*window_count)++] = window;
                 }
             }
 
@@ -1476,10 +1477,11 @@ void window_manager_toggle_window_border(struct window_manager *wm, struct windo
 
 static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid, uint32_t *window_list, int window_count)
 {
+    int view_window_count;
     struct view *view = space_manager_find_view(sm, sid);
-    uint32_t *view_window_list = view_find_window_list(view);
+    uint32_t *view_window_list = view_find_window_list(view, &view_window_count);
 
-    for (int i = 0; i < buf_len(view_window_list); ++i) {
+    for (int i = 0; i < view_window_count; ++i) {
         bool found = false;
 
         for (int j = 0; j < window_count; ++j) {
@@ -1498,8 +1500,6 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
             window_manager_purify_window(wm, window);
         }
     }
-
-    buf_free(view_window_list);
 }
 
 static void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid, uint32_t *window_list, int window_count)
