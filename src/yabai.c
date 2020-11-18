@@ -282,7 +282,7 @@ int main(int argc, char **argv)
         error("yabai: could not initialize event_loop! abort..\n");
     }
 
-    if (!ts_init(KILOBYTES(64))) {
+    if (!ts_init(KILOBYTES(128))) {
         error("yabai: could not allocate temporary storage! abort..\n");
     }
 
