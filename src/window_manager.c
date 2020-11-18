@@ -25,91 +25,81 @@ void window_manager_query_window_rules(FILE *rsp)
     fprintf(rsp, "]\n");
 }
 
-void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid)
+static struct window **window_manager_find_windows_for_spaces(uint64_t *space_list, int space_count, int *window_aggregate_count)
 {
-    int window_count;
-    uint32_t *window_list = space_window_list(sid, &window_count, true);
-    if (!window_list) return;
+    int window_count = 0;
+    uint32_t *window_list = NULL;
 
-    struct window **window_aggregate_list = NULL;
+    for (int i = 0; i < space_count; ++i) {
+        int count;
+        uint32_t *list = space_window_list(space_list[i], &count, true);
+        if (!list) continue;
+
+        //
+        // NOTE(koekeishiya): space_window_list(..) uses a linear allocator,
+        // and so we only need to track the beginning of the first list along
+        // with the total number of windows that have been allocated.
+        //
+
+        if (!window_list) window_list = list;
+        window_count += count;
+    }
+
+    *window_aggregate_count = 0;
+    struct window **window_aggregate_list = ts_alloc(sizeof(struct window *) * window_count);
+
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (window) buf_push(window_aggregate_list, window);
+        if (window) window_aggregate_list[(*window_aggregate_count)++] = window;
     }
+
+    return window_aggregate_list;
+}
+
+void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count)
+{
+    int window_count = 0;
+    struct window **window_list = window_manager_find_windows_for_spaces(space_list, space_count, &window_count);
 
     fprintf(rsp, "[");
-    for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
-        struct window *window = window_aggregate_list[i];
-        window_serialize(rsp, window);
-        if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
+    for (int i = 0; i < window_count; ++i) {
+        window_serialize(rsp, window_list[i]);
+        if (i < window_count - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
-
-    buf_free(window_aggregate_list);
 }
 
 void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
 {
-    int space_count;
+    int space_count = 0;
     uint64_t *space_list = display_space_list(did, &space_count);
-    if (!space_list) return;
-
-    struct window **window_aggregate_list = NULL;
-    for (int i = 0; i < space_count; ++i) {
-        int window_count;
-        uint32_t *window_list = space_window_list(space_list[i], &window_count, true);
-        if (!window_list) continue;
-
-        for (int j = 0; j < window_count; ++j) {
-            struct window *window = window_manager_find_window(&g_window_manager, window_list[j]);
-            if (window) buf_push(window_aggregate_list, window);
-        }
-    }
-
-    fprintf(rsp, "[");
-    for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
-        struct window *window = window_aggregate_list[i];
-        window_serialize(rsp, window);
-        if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
-    }
-    fprintf(rsp, "]\n");
-
-    buf_free(window_aggregate_list);
+    window_manager_query_windows_for_spaces(rsp, space_list, space_count);
 }
 
 void window_manager_query_windows_for_displays(FILE *rsp)
 {
-    uint32_t display_count;
+    uint32_t display_count = 0;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
-    if (!display_list) return;
 
-    struct window **window_aggregate_list = NULL;
+    int space_count = 0;
+    uint64_t *space_list = NULL;
+
     for (int i = 0; i < display_count; ++i) {
-        int space_count;
-        uint64_t *space_list = display_space_list(display_list[i], &space_count);
-        if (!space_list) continue;
+        int count;
+        uint64_t *list = display_space_list(display_list[i], &count);
+        if (!list) continue;
 
-        for (int j = 0; j < space_count; ++j) {
-            int window_count;
-            uint32_t *window_list = space_window_list(space_list[j], &window_count, true);
-            if (!window_list) continue;
+        //
+        // NOTE(koekeishiya): display_space_list(..) uses a linear allocator,
+        // and so we only need to track the beginning of the first list along
+        // with the total number of spaces that have been allocated.
+        //
 
-            for (int k = 0; k < window_count; ++k) {
-                struct window *window = window_manager_find_window(&g_window_manager, window_list[k]);
-                if (window) buf_push(window_aggregate_list, window);
-            }
-        }
+        if (!space_list) space_list = list;
+        space_count += count;
     }
 
-    fprintf(rsp, "[");
-    for (int i = 0; i < buf_len(window_aggregate_list); ++i) {
-        struct window *window = window_aggregate_list[i];
-        window_serialize(rsp, window);
-        if (i < buf_len(window_aggregate_list) - 1) fprintf(rsp, ",");
-    }
-    fprintf(rsp, "]\n");
-
-    buf_free(window_aggregate_list);
+    window_manager_query_windows_for_spaces(rsp, space_list, space_count);
 }
 
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)

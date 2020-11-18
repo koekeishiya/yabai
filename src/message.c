@@ -1974,12 +1974,12 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
             struct selector selector = parse_space_selector(NULL, &message, acting_sid);
             if (selector.did_parse || token_is_valid(selector.token)) {
                 if (selector.sid) {
-                    window_manager_query_windows_for_space(rsp, selector.sid);
+                    window_manager_query_windows_for_spaces(rsp, &selector.sid, 1);
                 } else {
                     daemon_fail(rsp, "could not locate the selected space.\n");
                 }
             } else {
-                window_manager_query_windows_for_space(rsp, acting_sid);
+                window_manager_query_windows_for_spaces(rsp, &acting_sid, 1);
             }
         } else if (token_equals(option, ARGUMENT_QUERY_WINDOW)) {
             struct window *acting_window = window_manager_focused_window(&g_window_manager);

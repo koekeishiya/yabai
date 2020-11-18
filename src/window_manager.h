@@ -97,7 +97,7 @@ struct window_manager
 };
 
 void window_manager_query_window_rules(FILE *rsp);
-void window_manager_query_windows_for_space(FILE *rsp, uint64_t sid);
+void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count);
 void window_manager_query_windows_for_display(FILE *rsp, uint32_t did);
 void window_manager_query_windows_for_displays(FILE *rsp);
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule);
