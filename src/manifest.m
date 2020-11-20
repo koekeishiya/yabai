@@ -21,6 +21,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 
+#include "misc/extern.h"
 #include "misc/macros.h"
 #include "misc/memory_pool.h"
 #include "misc/ts.h"

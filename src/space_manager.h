@@ -1,13 +1,6 @@
 #ifndef SPACE_MANAGER
 #define SPACE_MANAGER
 
-extern int SLSGetSpaceManagementMode(int cid);
-extern CFArrayRef SLSCopyManagedDisplaySpaces(int cid);
-extern CGError SLSProcessAssignToSpace(int cid, pid_t pid, uint64_t sid);
-extern CGError SLSProcessAssignToAllSpaces(int cid, pid_t pid);
-extern void SLSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
-extern CGError CoreDockSendNotification(CFStringRef notification, int unknown);
-
 struct space_label
 {
     uint64_t sid;

@@ -1,12 +1,6 @@
 #ifndef PROCESS_MANAGER_H
 #define PROCESS_MANAGER_H
 
-#if 0
-extern CFArrayRef _LSCopyApplicationArrayInFrontToBackOrder(int negative_one, int one);
-extern void _LSASNExtractHighAndLowParts(const void *asn, uint32_t *high, uint32_t *low);
-extern CFTypeID _LSASNGetTypeID(void);
-#endif
-
 #define PROCESS_EVENT_HANDLER(name) OSStatus name(EventHandlerCallRef ref, EventRef event, void *user_data)
 typedef PROCESS_EVENT_HANDLER(process_event_handler);
 

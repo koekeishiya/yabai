@@ -1,15 +1,6 @@
 #ifndef DISPLAY_MANAGER_H
 #define DISPLAY_MANAGER_H
 
-extern CFStringRef SLSCopyActiveMenuBarDisplayIdentifier(int cid);
-extern CFStringRef SLSCopyBestManagedDisplayForPoint(int cid, CGPoint point);
-extern bool SLSManagedDisplayIsAnimating(int cid, CFStringRef uuid);
-extern CGError SLSGetMenuBarAutohideEnabled(int cid, int *enabled);
-extern CGError SLSGetRevealedMenuBarBounds(CGRect *rect, int cid, uint64_t sid);
-extern CGError SLSGetDockRectWithReason(int cid, CGRect *rect, int *reason);
-extern Boolean CoreDockGetAutoHideEnabled(void);
-extern void CoreDockGetOrientationAndPinning(int *orientation, int *pinning);
-
 #define DOCK_ORIENTATION_BOTTOM 2
 #define DOCK_ORIENTATION_LEFT   3
 #define DOCK_ORIENTATION_RIGHT  4

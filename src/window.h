@@ -1,16 +1,6 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-extern int SLSMainConnectionID(void);
-extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
-extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
-extern CGError SLSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
-extern CGError SLSSetWindowResolution(int cid, uint32_t wid, float resolution);
-extern CGError SLSCopyWindowProperty(int cid, uint32_t wid, CFStringRef property, CFTypeRef *value);
-extern CFStringRef SLSCopyManagedDisplayForWindow(int cid, uint32_t wid);
-extern CFStringRef SLSCopyBestManagedDisplayForRect(int cid, CGRect rect);
-extern CFArrayRef SLSCopySpacesForWindows(int cid, int selector, CFArrayRef window_list);
-
 const CFStringRef kAXFullscreenAttribute = CFSTR("AXFullScreen");
 
 #define AX_WINDOW_MINIMIZED_INDEX      0

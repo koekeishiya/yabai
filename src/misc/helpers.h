@@ -1,8 +1,6 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
-
 static const char *bool_str[] = { "off", "on" };
 
 static const char *layer_str[] =
