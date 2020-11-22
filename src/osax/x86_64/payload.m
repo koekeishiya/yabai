@@ -1,3 +1,9 @@
+#define asm__call_add_space(v0,v1,func) \
+        __asm__("movq %0, %%rdi;""movq %1, %%r13;""callq *%2;" : :"r"(v0), "r"(v1), "r"(func) :"%rdi", "%r13");
+
+#define asm__call_move_space(v0,v1,v2,v3,func) \
+        __asm__("movq %0, %%rdi;""movq %1, %%rsi;""movq %2, %%rdx;""movq %3, %%r13;""callq *%4;" : :"r"(v0), "r"(v1), "r"(v2), "r"(v3), "r"(func) :"%rdi", "%rsi", "%rdx", "%r13");
+
 uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
     if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
         return 0x9000;

@@ -354,12 +354,12 @@ static inline void set_ivar_value(id instance, const char *name, id value)
 
 static inline uint64_t get_space_id(id space)
 {
-    return (uint64_t) objc_msgSend(space, @selector(spid));
+    return ((uint64_t (*)(id, SEL)) objc_msgSend)(space, @selector(spid));
 }
 
 static inline id space_for_display_with_id(CFStringRef display_uuid, uint64_t space_id)
 {
-    NSArray *spaces_for_display = (NSArray *) objc_msgSend(dock_spaces, @selector(spacesForDisplay:), display_uuid);
+    NSArray *spaces_for_display = ((NSArray *(*)(id, SEL, CFStringRef)) objc_msgSend)(dock_spaces, @selector(spacesForDisplay:), display_uuid);
     for (id space in spaces_for_display) {
         if (space_id == get_space_id(space)) {
             return space;
@@ -404,10 +404,9 @@ static inline id display_space_for_space_with_id(uint64_t space_id)
     return nil;
 }
 
-#define asm__call_move_space(v0,v1,v2,v3,func) \
-        __asm__("movq %0, %%rdi;""movq %1, %%rsi;""movq %2, %%rdx;""movq %3, %%r13;""callq *%4;" : :"r"(v0), "r"(v1), "r"(v2), "r"(v3), "r"(func) :"%rdi", "%rsi", "%rdx", "%r13");
 static void do_space_move(const char *message)
 {
+#ifdef __x86_64__
     Token source_token = get_token(&message);
     uint64_t source_space_id = token_to_uint64t(source_token);
 
@@ -429,7 +428,7 @@ static void do_space_move(const char *message)
     asm__call_move_space(source_space, dest_space, dest_display_uuid, dock_spaces, move_space_fp);
 
     dispatch_sync(dispatch_get_main_queue(), ^{
-        objc_msgSend(dp_desktop_picture_manager, @selector(moveSpace:toDisplay:displayUUID:), source_space, dest_display_id, dest_display_uuid);
+        ((void (*)(id, SEL, id, unsigned, CFStringRef)) objc_msgSend)(dp_desktop_picture_manager, @selector(moveSpace:toDisplay:displayUUID:), source_space, dest_display_id, dest_display_uuid);
     });
 
     if (focus_dest_space) {
@@ -446,6 +445,7 @@ static void do_space_move(const char *message)
 
     CFRelease(source_display_uuid);
     CFRelease(dest_display_uuid);
+#endif
 }
 
 typedef void (*remove_space_call)(id space, id display_space, id dock_spaces, uint64_t space_id1, uint64_t space_id2);
@@ -472,10 +472,9 @@ static void do_space_destroy(const char *message)
     CFRelease(display_uuid);
 }
 
-#define asm__call_add_space(v0,v1,func) \
-        __asm__("movq %0, %%rdi;""movq %1, %%r13;""callq *%2;" : :"r"(v0), "r"(v1), "r"(func) :"%rdi", "%r13");
 static void do_space_create(const char *message)
 {
+#ifdef __x86_64__
     Token space_id_token = get_token(&message);
     uint64_t space_id = token_to_uint64t(space_id_token);
     CFStringRef __block display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
@@ -485,6 +484,7 @@ static void do_space_create(const char *message)
         asm__call_add_space(new_space, display_space, add_space_fp);
         CFRelease(display_uuid);
     });
+#endif
 }
 
 static void do_space_change(const char *message)
@@ -493,7 +493,7 @@ static void do_space_change(const char *message)
     uint64_t dest_space_id = token_to_uint64t(token);
     if (dest_space_id) {
         CFStringRef dest_display = CGSCopyManagedDisplayForSpace(_connection, dest_space_id);
-        id source_space = objc_msgSend(dock_spaces, @selector(currentSpaceforDisplayUUID:), dest_display);
+        id source_space = ((id (*)(id, SEL, CFStringRef)) objc_msgSend)(dock_spaces, @selector(currentSpaceforDisplayUUID:), dest_display);
         uint64_t source_space_id = get_space_id(source_space);
 
         if (source_space_id != dest_space_id) {
