@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Report proper error message when trying to use absolute resizing on a managed window [#661](https://github.com/koekeishiya/yabai/issues/661)
 - Space/Window commands that utilize the scripting addition should correctly return a non-zero exit code upon failure [#181](https://github.com/koekeishiya/yabai/issues/181)
 - Undo [#545](https://github.com/koekeishiya/yabai/issues/545) because it created weird issues with focus [#660](https://github.com/koekeishiya/yabai/issues/660)
-- Allow disabling *mouse_follows_focus* for specific windows using rules [#675](https://github.com/koekeishiya/yabai/issues/675)
+- Allow enabling/disabling *mouse_follows_focus* for specific windows using rules, overriding the global setting [#675](https://github.com/koekeishiya/yabai/issues/675)
 
 ## [3.3.4] - 2020-11-14
 ### Changed

@@ -44,7 +44,8 @@ struct window
     float opacity;
     bool rule_manage;
     bool rule_fullscreen;
-    bool disable_mff;
+    bool rule_mff;
+    bool enable_mff;
     struct border border;
 };
 
