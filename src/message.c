@@ -169,6 +169,7 @@ extern bool g_verbose;
 #define ARGUMENT_RULE_KEY_ALPHA   "opacity"
 #define ARGUMENT_RULE_KEY_MANAGE  "manage"
 #define ARGUMENT_RULE_KEY_STICKY  "sticky"
+#define ARGUMENT_RULE_KEY_MFF     "mouse_follows_focus"
 #define ARGUMENT_RULE_KEY_LAYER   "layer"
 #define ARGUMENT_RULE_KEY_BORDER  "border"
 #define ARGUMENT_RULE_KEY_FULLSCR "native-fullscreen"
@@ -2113,6 +2114,17 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     rule.sticky = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     rule.sticky = RULE_PROP_OFF;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_MFF)) {
+                if (exclusion) unsupported_exclusion = key;
+
+                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    rule.mff = RULE_PROP_ON;
+                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    rule.mff = RULE_PROP_OFF;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;

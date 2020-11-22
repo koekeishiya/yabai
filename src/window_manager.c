@@ -139,6 +139,12 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window_manager_make_window_sticky(sm, wm, window, false);
     }
 
+    if (rule->mff == RULE_PROP_ON) {
+        window->disable_mff = false;
+    } else if (rule->mff == RULE_PROP_OFF) {
+        window->disable_mff = true;
+    }
+
     if (rule->layer) {
         window_manager_set_window_layer(window, rule->layer);
     }
@@ -252,7 +258,8 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
 
 void window_manager_center_mouse(struct window_manager *wm, struct window *window)
 {
-    if (!wm->enable_mff) return;
+    if (!wm->enable_mff)     return;
+    if (window->disable_mff) return;
 
     CGPoint cursor;
     SLSGetCurrentCursorLocation(g_connection, &cursor);

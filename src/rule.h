@@ -29,6 +29,7 @@ struct rule
     float alpha;
     int manage;
     int sticky;
+    int mff;
     int layer;
     int border;
     int fullscreen;

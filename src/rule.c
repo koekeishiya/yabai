@@ -17,6 +17,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"opacity\":%.4f,\n"
             "\t\"manage\":%d,\n"
             "\t\"sticky\":%d,\n"
+            "\t\"mouse_follows_focus\":%d,\n"
             "\t\"layer\":\"%s\",\n"
             "\t\"border\":%d,\n"
             "\t\"native-fullscreen\":%d,\n"
@@ -32,6 +33,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->alpha,
             rule_prop[rule->manage],
             rule_prop[rule->sticky],
+            rule_prop[rule->mff],
             layer_str[rule->layer],
             rule_prop[rule->border],
             rule_prop[rule->fullscreen],

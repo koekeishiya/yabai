@@ -412,6 +412,9 @@ ARGUMENT
 *sticky='<BOOL_SEL>'*::
     Window appears on all spaces.
 
+*mouse_follows_focus='<BOOL_SEL>'*::
+    Window should respect the value of the global setting *mouse_follows_focus*.
+
 *layer='<LAYER>'*::
     Window is ordered within the given stacking layer.
 
