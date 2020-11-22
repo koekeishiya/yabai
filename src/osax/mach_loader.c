@@ -65,7 +65,7 @@ bool mach_loader_inject_payload(pid_t pid)
         return false;
     }
 
-    if (mach_vm_allocate(task, &stack, stack_size, 1) != KERN_SUCCESS) {
+    if (mach_vm_allocate(task, &stack, stack_size, VM_FLAGS_ANYWHERE) != KERN_SUCCESS) {
         fprintf(stderr, "could not allocate stack segment\n");
         return false;
     }
