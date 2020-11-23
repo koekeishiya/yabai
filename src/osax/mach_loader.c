@@ -96,8 +96,9 @@ bool mach_loader_inject_payload(pid_t pid)
     thread_state.__pc = (uint64_t) code + (uint64_t)(((void *) bootstrap_entry) - image);
     thread_state.__sp = (uint64_t) (stack + (stack_size / 2) - 8);
 
-    if (thread_create_running(task, ARM_THREAD_STATE64, (thread_state_t)&thread_state, ARM_THREAD_STATE64_COUNT, &thread) != KERN_SUCCESS) {
-        fprintf(stderr, "could not spawn remote thread\n");
+    kern_return_t error = thread_create_running(task, ARM_THREAD_STATE64, (thread_state_t)&thread_state, ARM_THREAD_STATE64_COUNT, &thread);
+    if (error != KERN_SUCCESS) {
+        fprintf(stderr, "could not spawn remote thread: %s\n", mach_error_string(error));
         return false;
     }
 #else
@@ -106,8 +107,9 @@ bool mach_loader_inject_payload(pid_t pid)
     thread_state.__rip = (uint64_t) code + (uint64_t)(((void *) bootstrap_entry) - image);
     thread_state.__rsp = (uint64_t) (stack + (stack_size / 2) - 8);
 
-    if (thread_create_running(task, x86_THREAD_STATE64, (thread_state_t)&thread_state, x86_THREAD_STATE64_COUNT, &thread) != KERN_SUCCESS) {
-        fprintf(stderr, "could not spawn remote thread\n");
+    kern_return_t error = thread_create_running(task, x86_THREAD_STATE64, (thread_state_t)&thread_state, x86_THREAD_STATE64_COUNT, &thread);
+    if (error != KERN_SUCCESS) {
+        fprintf(stderr, "could not spawn remote thread: %s\n", mach_error_string(error));
         return false;
     }
 #endif
