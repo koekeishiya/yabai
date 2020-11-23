@@ -1,9 +1,10 @@
 #include <mach/mach.h>
 #include <pthread.h>
+#include <pthread_spis.h>
 #include <unistd.h>
 #include <dlfcn.h>
 
-extern void _pthread_set_self(char *);
+extern void _pthread_set_self(pthread_t *);
 
 static void drop_privileges(void)
 {
@@ -23,22 +24,10 @@ static void *mach_load_payload(void *context)
     return NULL;
 }
 
-void mach_bootstrap_entry_point(char *param)
+void mach_bootstrap_entry_point(void)
 {
-    int policy;
     pthread_t thread;
-    pthread_attr_t attr;
-    struct sched_param sched;
-
-    _pthread_set_self(param);
-    pthread_attr_init(&attr);
-    pthread_attr_getschedpolicy(&attr, &policy);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
-    sched.sched_priority = sched_get_priority_max(policy);
-    pthread_attr_setschedparam(&attr, &sched);
-    pthread_create(&thread, &attr, &mach_load_payload, NULL);
-    pthread_attr_destroy(&attr);
-
+    _pthread_set_self(&thread);
+    pthread_create_from_mach_thread(&thread, NULL, &mach_load_payload, NULL);
     thread_suspend(mach_thread_self());
 }
