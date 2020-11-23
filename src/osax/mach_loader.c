@@ -75,6 +75,11 @@ bool mach_loader_inject_payload(pid_t pid)
         return false;
     }
 
+    if (vm_protect(task, stack, stack_size, 0, VM_PROT_READ | VM_PROT_WRITE) != KERN_SUCCESS) {
+        fprintf(stderr, "could not change protection for stack segment\n");
+        return false;
+    }
+
     if (mach_vm_allocate(task, &code, image_size, VM_FLAGS_ANYWHERE) != KERN_SUCCESS) {
         fprintf(stderr, "could not allocate code segment\n");
         return false;
