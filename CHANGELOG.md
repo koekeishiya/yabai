@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Space/Window commands that utilize the scripting addition should correctly return a non-zero exit code upon failure [#181](https://github.com/koekeishiya/yabai/issues/181)
 - Undo [#545](https://github.com/koekeishiya/yabai/issues/545) because it created weird issues with focus [#660](https://github.com/koekeishiya/yabai/issues/660)
 - Allow enabling/disabling *mouse_follows_focus* for specific windows using rules, overriding the global setting [#675](https://github.com/koekeishiya/yabai/issues/675)
+- Space labels are now allowed to start with a digit, as long as it is followed by at least one or more non-digit character(s) [#739](https://github.com/koekeishiya/yabai/issues/739)
 
 ## [3.3.4] - 2020-11-14
 ### Changed

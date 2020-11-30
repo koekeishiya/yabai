@@ -337,7 +337,17 @@ static bool token_is_float(struct token token, float *value)
     char buffer[token.length + 1];
     memcpy(buffer, token.text, token.length);
     buffer[token.length] = '\0';
-    return sscanf(buffer, "%f", value) == 1;
+
+    char *end = NULL;
+    float v = strtof(buffer, &end);
+
+    if (!end || *end) {
+        *value = 0.0f;
+        return false;
+    } else {
+        *value = v;
+        return true;
+    }
 }
 
 static char *token_to_string(struct token token, bool temp)
@@ -460,14 +470,15 @@ static char *reserved_space_identifiers[] =
 static bool parse_label(FILE *rsp, char **message, enum label_type type, char **label)
 {
     struct token token = get_token(message);
+    struct token_value value = token_to_value(token, false);
 
-    if (!token_is_valid(token)) {
+    if (value.type == TOKEN_TYPE_INVALID) {
         *label = NULL;
         return true;
     }
 
-    if ((token.text[0] >= '0' && token.text[0] <= '9')) {
-        daemon_fail(rsp, "'%.*s' is not a valid label.\n", token.length, token.text);
+    if (value.type != TOKEN_TYPE_STRING) {
+        daemon_fail(rsp, "'%.*s' cannot be used as a label.\n", token.length, token.text);
         return false;
     }
 
