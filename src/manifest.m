@@ -1,8 +1,6 @@
 #include <ScriptingBridge/ScriptingBridge.h>
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
-#include <IOKit/ps/IOPowerSources.h>
-#include <IOKit/ps/IOPSKeys.h>
 
 #include <stdio.h>
 #include <stdlib.h>
