@@ -31,8 +31,8 @@ static void *event_loop_run(void *context)
             if (!head->next) break;
         } while (!__sync_bool_compare_and_swap(&event_loop->head, head, head->next));
 
-        if (head->next && head->next->data) {
-            struct event *event = head->next->data;
+        if (head->next) {
+            struct event *event = (void *)head->next + sizeof(struct queue_item);
 
             uint32_t result = event_handler[event->type](event->context, event->param1);
 
@@ -61,9 +61,8 @@ void event_loop_post(struct event_loop *event_loop, enum event_type type, void *
 
     new_tail = memory_pool_push(&event_loop->pool, sizeof(struct queue_item) + sizeof(struct event));
     new_tail->next = NULL;
-    new_tail->data = (void *)new_tail + sizeof(struct queue_item);
 
-    event = new_tail->data;
+    event = (void *)new_tail + sizeof(struct queue_item);
     event->type = type;
     event->context = context;
     event->param1 = param1;
@@ -85,7 +84,6 @@ bool event_loop_init(struct event_loop *event_loop)
     if (!memory_pool_init(&event_loop->pool, EVENT_POOL_SIZE)) return false;
 
     event_loop->head = memory_pool_push(&event_loop->pool, sizeof(struct queue_item) + sizeof(struct event));
-    event_loop->head->data = NULL;
     event_loop->head->next = NULL;
     event_loop->tail = event_loop->head;
 

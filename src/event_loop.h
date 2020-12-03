@@ -5,7 +5,6 @@
 
 struct queue_item
 {
-    struct event *data;
     struct queue_item *next;
 };
 
