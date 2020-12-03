@@ -16,8 +16,7 @@ bool memory_pool_init(struct memory_pool *pool, uint64_t size)
     return pool->memory != NULL;
 }
 
-#define memory_pool_push(p, t) memory_pool_push_size(p, sizeof(t))
-void *memory_pool_push_size(struct memory_pool *pool, uint64_t size)
+void *memory_pool_push(struct memory_pool *pool, uint64_t size)
 {
     for (;;) {
         uint64_t used = pool->used;
