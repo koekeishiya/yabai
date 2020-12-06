@@ -135,6 +135,8 @@ struct application *application_create(struct process *process)
     struct application *application = malloc(sizeof(struct application));
     memset(application, 0, sizeof(struct application));
     application->ref = AXUIElementCreateApplication(process->pid);
+    AXUIElementSetAttributeValue(application->ref, kAXEnhancedUserInterface, kCFBooleanFalse);
+    AXUIElementSetAttributeValue(application->ref, kAXManualAccessibility, kCFBooleanTrue);
     application->psn = process->psn;
     application->pid = process->pid;
     application->name = process->name;

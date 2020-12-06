@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Try to workaround resizing issues in some applications due to weird undocumented accessibility properties [#109](https://github.com/koekeishiya/yabai/issues/109)
 
 ## [3.3.5] - 2020-12-03
 ### Changed
