@@ -355,7 +355,7 @@ enum window_op_error window_manager_move_window_relative(struct window_manager *
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void _window_manager_resize_window_relative(struct window *window, CGRect frame, int direction, float dx, float dy)
+void window_manager_resize_window_relative_internal(struct window *window, CGRect frame, int direction, float dx, float dy)
 {
     int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
     int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
@@ -407,7 +407,7 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
                 window_manager_resize_window(window, dx, dy);
             });
         } else {
-            _window_manager_resize_window_relative(window, window_frame(window), direction, dx, dy);
+            window_manager_resize_window_relative_internal(window, window_frame(window), direction, dx, dy);
         }
     }
 

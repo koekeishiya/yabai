@@ -747,7 +747,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         if (point.x > frame_mid.x) direction |= HANDLE_RIGHT;
         if (point.y > frame_mid.y) direction |= HANDLE_BOTTOM;
 
-        _window_manager_resize_window_relative(g_mouse_state.window, frame, direction, dx, dy);
+        window_manager_resize_window_relative_internal(g_mouse_state.window, frame, direction, dx, dy);
 
         g_mouse_state.last_moved_time = event_time;
         g_mouse_state.down_location = point;
