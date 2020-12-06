@@ -348,9 +348,27 @@ enum window_op_error window_manager_move_window_relative(struct window_manager *
         dy += frame.origin.y;
     }
 
-    window_manager_move_window(window, dx, dy);
+    AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
+        window_manager_move_window(window, dx, dy);
+    });
 
     return WINDOW_OP_ERROR_SUCCESS;
+}
+
+void _window_manager_resize_window_relative(struct window *window, CGRect frame, int direction, float dx, float dy)
+{
+    int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
+    int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
+
+    float fw = max(1, frame.size.width  + dx * x_mod);
+    float fh = max(1, frame.size.height + dy * y_mod);
+    float fx = (direction & HANDLE_LEFT) ? frame.origin.x + frame.size.width  - fw : frame.origin.x;
+    float fy = (direction & HANDLE_TOP)  ? frame.origin.y + frame.size.height - fh : frame.origin.y;
+
+    AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
+        window_manager_move_window(window, fx, fy);
+        window_manager_resize_window(window, fw, fh);
+    });
 }
 
 enum window_op_error window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy)
@@ -385,19 +403,11 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
         view_flush(view);
     } else {
         if (direction == HANDLE_ABS) {
-            window_manager_resize_window(window, dx, dy);
+            AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
+                window_manager_resize_window(window, dx, dy);
+            });
         } else {
-            int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
-            int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
-
-            CGRect frame = window_frame(window);
-            float fw = max(1, frame.size.width  + dx * x_mod);
-            float fh = max(1, frame.size.height + dy * y_mod);
-            float fx = (direction & HANDLE_LEFT) ? frame.origin.x + frame.size.width  - fw : frame.origin.x;
-            float fy = (direction & HANDLE_TOP)  ? frame.origin.y + frame.size.height - fh : frame.origin.y;
-
-            window_manager_move_window(window, fx, fy);
-            window_manager_resize_window(window, fw, fh);
+            _window_manager_resize_window_relative(window, window_frame(window), direction, dx, dy);
         }
     }
 
@@ -429,9 +439,11 @@ void window_manager_resize_window(struct window *window, float width, float heig
 
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height)
 {
-    window_manager_resize_window(window, width, height);
-    window_manager_move_window(window, x, y);
-    window_manager_resize_window(window, width, height);
+    AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
+        window_manager_resize_window(window, width, height);
+        window_manager_move_window(window, x, y);
+        window_manager_resize_window(window, width, height);
+    });
 }
 
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode)
@@ -1303,8 +1315,10 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     float fw = cw * w;
     float fh = ch * h;
 
-    window_manager_move_window(window, fx, fy);
-    window_manager_resize_window(window, fw, fh);
+    AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
+        window_manager_move_window(window, fx, fy);
+        window_manager_resize_window(window, fw, fh);
+    });
 
     return WINDOW_OP_ERROR_SUCCESS;
 }

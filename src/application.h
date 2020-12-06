@@ -1,9 +1,6 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-const CFStringRef kAXEnhancedUserInterface = CFSTR("AXEnhancedUserInterface");
-const CFStringRef kAXManualAccessibility   = CFSTR("AXManualAccessibility");
-
 #define OBSERVER_CALLBACK(name) void name(AXObserverRef observer, AXUIElementRef element, CFStringRef notification, void *context)
 typedef OBSERVER_CALLBACK(observer_callback);
 

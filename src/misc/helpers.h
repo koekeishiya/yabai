@@ -1,6 +1,8 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+const CFStringRef kAXEnhancedUserInterface = CFSTR("AXEnhancedUserInterface");
+
 static const char *bool_str[] = { "off", "on" };
 
 static const char *layer_str[] =
@@ -262,6 +264,36 @@ static inline uint32_t ax_window_id(AXUIElementRef ref)
 static inline pid_t ax_window_pid(AXUIElementRef ref)
 {
     return *(pid_t *)((void *) ref + 0x10);
+}
+
+static inline bool ax_enhanced_userinterface(AXUIElementRef ref)
+{
+    Boolean result = 0;
+    CFTypeRef value;
+
+    if (AXUIElementCopyAttributeValue(ref, kAXEnhancedUserInterface, &value) == kAXErrorSuccess) {
+        result = CFBooleanGetValue(value);
+        CFRelease(value);
+    }
+
+    return result;
+}
+
+static inline void set_ax_enhanced_userinterface(AXUIElementRef ref, bool value)
+{
+    if (value) {
+        AXUIElementSetAttributeValue(ref, kAXEnhancedUserInterface, kCFBooleanTrue);
+    } else {
+        AXUIElementSetAttributeValue(ref, kAXEnhancedUserInterface, kCFBooleanFalse);
+    }
+}
+
+#define AX_ENHANCED_UI_WORKAROUND(r, c) \
+{\
+    bool eui = ax_enhanced_userinterface(r); \
+    if (eui) set_ax_enhanced_userinterface(r, false); \
+    c \
+    if (eui) set_ax_enhanced_userinterface(r, true); \
 }
 
 #pragma clang diagnostic push

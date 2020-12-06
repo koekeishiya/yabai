@@ -747,16 +747,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         if (point.x > frame_mid.x) direction |= HANDLE_RIGHT;
         if (point.y > frame_mid.y) direction |= HANDLE_BOTTOM;
 
-        int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
-        int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
-
-        float fw = max(1, frame.size.width  + dx * x_mod);
-        float fh = max(1, frame.size.height + dy * y_mod);
-        float fx = (direction & HANDLE_LEFT) ? frame.origin.x + frame.size.width  - fw : frame.origin.x;
-        float fy = (direction & HANDLE_TOP)  ? frame.origin.y + frame.size.height - fh : frame.origin.y;
-
-        if (fx != 0.0f || fy != 0.0f) window_manager_move_window(g_mouse_state.window, fx, fy);
-        if (fw != 0.0f || fh != 0.0f) window_manager_resize_window(g_mouse_state.window, fw, fh);
+        _window_manager_resize_window_relative(g_mouse_state.window, frame, direction, dx, dy);
 
         g_mouse_state.last_moved_time = event_time;
         g_mouse_state.down_location = point;
