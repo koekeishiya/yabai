@@ -279,21 +279,12 @@ static inline bool ax_enhanced_userinterface(AXUIElementRef ref)
     return result;
 }
 
-static inline void set_ax_enhanced_userinterface(AXUIElementRef ref, bool value)
-{
-    if (value) {
-        AXUIElementSetAttributeValue(ref, kAXEnhancedUserInterface, kCFBooleanTrue);
-    } else {
-        AXUIElementSetAttributeValue(ref, kAXEnhancedUserInterface, kCFBooleanFalse);
-    }
-}
-
 #define AX_ENHANCED_UI_WORKAROUND(r, c) \
 {\
     bool eui = ax_enhanced_userinterface(r); \
-    if (eui) set_ax_enhanced_userinterface(r, false); \
+    if (eui) AXUIElementSetAttributeValue(r, kAXEnhancedUserInterface, kCFBooleanFalse); \
     c \
-    if (eui) set_ax_enhanced_userinterface(r, true); \
+    if (eui) AXUIElementSetAttributeValue(r, kAXEnhancedUserInterface, kCFBooleanTrue); \
 }
 
 #pragma clang diagnostic push
