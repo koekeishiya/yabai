@@ -9,14 +9,16 @@ static struct {
 
 bool ts_init(uint64_t size)
 {
-    uint64_t pa_size = size + (size % PAGE_SIZE);
+    uint64_t num_pages = size / PAGE_SIZE;
+    uint64_t remainder = size % PAGE_SIZE;
+    if (remainder) num_pages++;
 
     g_temp_storage.used = 0;
-    g_temp_storage.size = pa_size;
-    g_temp_storage.memory = mmap(0, pa_size + PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    g_temp_storage.size = num_pages * PAGE_SIZE;
+    g_temp_storage.memory = mmap(0, g_temp_storage.size + PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
     bool result = g_temp_storage.memory != MAP_FAILED;
-    if (result) mprotect(g_temp_storage.memory + pa_size, PAGE_SIZE, PROT_NONE);
+    if (result) mprotect(g_temp_storage.memory + g_temp_storage.size, PAGE_SIZE, PROT_NONE);
 
     return result;
 }

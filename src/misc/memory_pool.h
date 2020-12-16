@@ -10,14 +10,16 @@ struct memory_pool
 
 bool memory_pool_init(struct memory_pool *pool, uint64_t size)
 {
-    uint64_t pa_size = size + (size % PAGE_SIZE);
+    uint64_t num_pages = size / PAGE_SIZE;
+    uint64_t remainder = size % PAGE_SIZE;
+    if (remainder) num_pages++;
 
     pool->used = 0;
-    pool->size = pa_size;
-    pool->memory = mmap(0, pa_size + PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    pool->size = num_pages * PAGE_SIZE;
+    pool->memory = mmap(0, pool->size + PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
     bool result = pool->memory != MAP_FAILED;
-    if (result) mprotect(pool->memory + pa_size, PAGE_SIZE, PROT_NONE);
+    if (result) mprotect(pool->memory + pool->size, PAGE_SIZE, PROT_NONE);
 
     return result;
 }
