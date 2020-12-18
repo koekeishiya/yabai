@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.3.6] - 2020-12-18
 ### Changed
 - Update scripting addition to support macOS 11.1 [#762](https://github.com/koekeishiya/yabai/issues/762)
 - Try to workaround resizing issues in some applications due to weird undocumented accessibility properties [#109](https://github.com/koekeishiya/yabai/issues/109)
@@ -335,7 +337,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.5...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.6...HEAD
+[3.3.6]: https://github.com/koekeishiya/yabai/compare/v3.3.5...v3.3.6
 [3.3.5]: https://github.com/koekeishiya/yabai/compare/v3.3.4...v3.3.5
 [3.3.4]: https://github.com/koekeishiya/yabai/compare/v3.3.3...v3.3.4
 [3.3.3]: https://github.com/koekeishiya/yabai/compare/v3.3.2...v3.3.3
