@@ -1342,11 +1342,13 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
         window->is_floating = true;
     } else {
         window->is_floating = false;
-        window_manager_make_window_topmost(wm, window, false);
-        if (window->is_sticky) window_manager_make_window_sticky(sm, wm, window, false);
-        if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
-            struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
-            window_manager_add_managed_window(wm, window, view);
+
+        if (!window->is_sticky) {
+            window_manager_make_window_topmost(wm, window, false);
+            if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
+                struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
+                window_manager_add_managed_window(wm, window, view);
+            }
         }
     }
 }
@@ -1354,10 +1356,29 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
 void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky)
 {
     if (should_sticky) {
-        if (!window->is_floating) window_manager_make_window_floating(sm, wm, window, true);
-        if (scripting_addition_set_sticky(window->id, true)) window->is_sticky = true;
+        if (scripting_addition_set_sticky(window->id, true)) {
+            struct view *view = window_manager_find_managed_window(wm, window);
+            if (view) {
+                space_manager_untile_window(sm, view, window);
+                window_manager_remove_managed_window(wm, window->id);
+                window_manager_purify_window(wm, window);
+            }
+            window_manager_make_window_topmost(wm, window, true);
+            window->is_sticky = true;
+        }
     } else {
-        if (scripting_addition_set_sticky(window->id, false)) window->is_sticky = false;
+        if (scripting_addition_set_sticky(window->id, false)) {
+            window->is_sticky = false;
+
+            if (!window->is_floating) {
+                window_manager_make_window_topmost(wm, window, false);
+
+                if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
+                    struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
+                    window_manager_add_managed_window(wm, window, view);
+                }
+            }
+        }
     }
 }
 
