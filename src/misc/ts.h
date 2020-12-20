@@ -23,14 +23,13 @@ bool ts_init(uint64_t size)
     return result;
 }
 
-void *ts_alloc(uint64_t size)
+static inline void *ts_alloc(uint64_t size)
 {
     uint64_t used = __sync_fetch_and_add(&g_temp_storage.used, size);
-    assert(used + size < g_temp_storage.size);
     return g_temp_storage.memory + used;
 }
 
-void *ts_expand(void *ptr, uint64_t old_size, uint64_t increment)
+static inline void *ts_expand(void *ptr, uint64_t old_size, uint64_t increment)
 {
     if (!ptr) return ts_alloc(increment);
 
@@ -40,9 +39,8 @@ void *ts_expand(void *ptr, uint64_t old_size, uint64_t increment)
     return ptr;
 }
 
-void ts_reset(void)
+static inline void ts_reset(void)
 {
-    // printf("resetting temp storage, used: %f%%.\n", (float)g_temp_storage.used / (float)g_temp_storage.size * 100);
     g_temp_storage.used = 0;
 }
 
