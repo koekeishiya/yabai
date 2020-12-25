@@ -624,7 +624,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DISPLAY_REMOVED)
     uint32_t did = display_manager_main_display_id();
     debug("%s: %d\n", __FUNCTION__, did);
     window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
-    event_signal_push(SIGNAL_DISPLAY_REMOVED, (void *)(intptr_t) did);
+    event_signal_push(SIGNAL_DISPLAY_REMOVED, context);
     return EVENT_SUCCESS;
 }
 
