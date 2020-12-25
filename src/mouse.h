@@ -88,10 +88,10 @@ static inline uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
 
 static inline void mouse_state_init(struct mouse_state *state)
 {
-    state->modifier     = MOUSE_MOD_FN;
-    state->action1      = MOUSE_MODE_MOVE;
-    state->action2      = MOUSE_MODE_RESIZE;
-    state->drop_action  = MOUSE_MODE_SWAP;
+    state->modifier    = MOUSE_MOD_FN;
+    state->action1     = MOUSE_MODE_MOVE;
+    state->action2     = MOUSE_MODE_RESIZE;
+    state->drop_action = MOUSE_MODE_SWAP;
 }
 
 void mouse_window_info_populate(struct mouse_state *ms, struct mouse_window_info *info);

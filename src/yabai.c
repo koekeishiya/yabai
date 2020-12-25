@@ -39,7 +39,8 @@ int g_normal_window_level;
 int g_floating_window_level;
 int g_connection;
 
-struct signal *g_signal_event[EVENT_TYPE_COUNT];
+struct signal *g_signal_event[SIGNAL_TYPE_COUNT];
+struct memory_pool g_signal_storage;
 bool g_mission_control_active;
 char g_sa_socket_file[MAXLEN];
 char g_socket_file[MAXLEN];
@@ -176,9 +177,12 @@ static void exec_config_file(void)
         return;
     }
 
-    if (!fork_exec(g_config_file, NULL)) {
+    int pid = fork();
+    if (pid == 0) {
+        char *exec[] = { "/usr/bin/env", "sh", "-c", g_config_file, NULL};
+        exit(execvp(exec[0], exec));
+    } else if (pid == -1) {
         notify("configuration", "failed to execute file '%s'", g_config_file);
-        return;
     }
 }
 
@@ -280,6 +284,10 @@ int main(int argc, char **argv)
 
     if (!event_loop_init(&g_event_loop)) {
         error("yabai: could not initialize event_loop! abort..\n");
+    }
+
+    if (!memory_pool_init(&g_signal_storage, KILOBYTES(32))) {
+        error("yabai: could not allocate memory for event_signal! abort..\n");
     }
 
     if (!ts_init(KILOBYTES(128))) {

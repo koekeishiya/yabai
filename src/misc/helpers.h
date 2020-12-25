@@ -13,14 +13,6 @@ static const char *layer_str[] =
     [LAYER_ABOVE] = "above"
 };
 
-struct signal_args
-{
-    char name[2][255];
-    char value[2][255];
-    void *entity;
-    void *param1;
-};
-
 struct rgba_color
 {
     uint32_t p;
@@ -227,21 +219,6 @@ static inline bool ensure_executable_permission(char *filename)
     }
 
     return true;
-}
-
-static bool fork_exec(char *command, struct signal_args *args)
-{
-    int pid = fork();
-    if (pid == -1) return false;
-    if (pid !=  0) return true;
-
-    if (args) {
-        if (*args->name[0]) setenv(args->name[0], args->value[0], 1);
-        if (*args->name[1]) setenv(args->name[1], args->value[1], 1);
-    }
-
-    char *exec[] = { "/usr/bin/env", "sh", "-c", command, NULL};
-    exit(execvp(exec[0], exec));
 }
 
 static bool ax_privilege(void)

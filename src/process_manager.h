@@ -23,6 +23,7 @@ struct process_manager
     EventHandlerRef ref;
     pid_t front_pid;
     pid_t last_front_pid;
+    EventTime switch_event_time;
     ProcessSerialNumber finder_psn;
 };
 

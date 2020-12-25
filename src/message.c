@@ -1,6 +1,5 @@
 #include "message.h"
 
-extern struct signal *g_signal_event[EVENT_TYPE_COUNT];
 extern struct event_loop g_event_loop;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
@@ -187,9 +186,13 @@ extern bool g_verbose;
 
 #define ARGUMENT_SIGNAL_KEY_APP      "app"
 #define ARGUMENT_SIGNAL_KEY_TITLE    "title"
+#define ARGUMENT_SIGNAL_KEY_ACTIVE   "active"
 #define ARGUMENT_SIGNAL_KEY_EVENT    "event"
 #define ARGUMENT_SIGNAL_KEY_ACTION   "action"
 #define ARGUMENT_SIGNAL_KEY_LABEL    "label"
+
+#define ARGUMENT_SIGNAL_VALUE_YES    "yes"
+#define ARGUMENT_SIGNAL_VALUE_NO     "no"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------COMMON ARGUMENTS----------------------------- */
@@ -2227,7 +2230,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
         bool did_parse = true;
         bool has_command = false;
         bool has_signal_type = false;
-        enum event_type signal_type = EVENT_TYPE_UNKNOWN;
+        enum signal_type signal_type = SIGNAL_TYPE_UNKNOWN;
         struct signal signal = {};
 
         struct token token = get_token(&message);
@@ -2262,6 +2265,17 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
+            } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_ACTIVE)) {
+                if (exclusion) unsupported_exclusion = key;
+
+                if (string_equals(value, ARGUMENT_SIGNAL_VALUE_YES)) {
+                    signal.active = SIGNAL_PROP_YES;
+                } else if (string_equals(value, ARGUMENT_SIGNAL_VALUE_NO)) {
+                    signal.active = SIGNAL_PROP_NO;
+                } else {
+                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
             } else if (string_equals(key, ARGUMENT_SIGNAL_KEY_ACTION)) {
                 if (exclusion) unsupported_exclusion = key;
 
@@ -2271,8 +2285,8 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 has_signal_type = true;
-                signal_type = event_signal_type_from_string(value);
-                if (signal_type == EVENT_TYPE_UNKNOWN) {
+                signal_type = signal_type_from_string(value);
+                if (signal_type == SIGNAL_TYPE_UNKNOWN) {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }

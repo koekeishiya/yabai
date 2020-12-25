@@ -1,25 +1,5 @@
 #include "event_loop.h"
 
-static inline void event_loop_destroy_event(struct event *event)
-{
-    switch (event->type) {
-    default: break;
-
-    case APPLICATION_TERMINATED: {
-        process_destroy(event->context);
-    } break;
-    case WINDOW_CREATED: {
-        CFRelease(event->context);
-    } break;
-    case MOUSE_DOWN:
-    case MOUSE_UP:
-    case MOUSE_DRAGGED:
-    case MOUSE_MOVED: {
-        CFRelease(event->context);
-    } break;
-    }
-}
-
 static void *event_loop_run(void *context)
 {
     struct queue_item *head;
@@ -35,13 +15,9 @@ static void *event_loop_run(void *context)
             struct event *event = (void *)head->next + sizeof(struct queue_item);
 
             uint32_t result = event_handler[event->type](event->context, event->param1);
-
-            if (result == EVENT_SUCCESS) event_signal_transmit(event->context, event->type);
-
             if (event->info) *event->info = (result << 0x1) | EVENT_PROCESSED;
 
-            event_loop_destroy_event(event);
-
+            event_signal_flush();
             ts_reset();
         } else {
             sem_wait(event_loop->semaphore);
@@ -81,7 +57,7 @@ void event_loop_post(struct event_loop *event_loop, enum event_type type, void *
 
 bool event_loop_init(struct event_loop *event_loop)
 {
-    if (!memory_pool_init(&event_loop->pool, EVENT_POOL_SIZE)) return false;
+    if (!memory_pool_init(&event_loop->pool, KILOBYTES(128))) return false;
 
     event_loop->head = memory_pool_push(&event_loop->pool, sizeof(struct queue_item) + sizeof(struct event));
     event_loop->head->next = NULL;

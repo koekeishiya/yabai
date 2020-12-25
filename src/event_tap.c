@@ -12,12 +12,13 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     case kCGEventTapDisabledByTimeout:
     case kCGEventTapDisabledByUserInput: {
         struct event_tap *event_tap = (struct event_tap *) reference;
-        CGEventTapEnable(event_tap->handle, 1);
+        CGEventTapEnable(event_tap->handle, true);
     } break;
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
         consume_mouse_click = mod == g_mouse_state.modifier;
+
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod, NULL);
         if (consume_mouse_click) return NULL;
     } break;
@@ -31,7 +32,10 @@ static EVENT_TAP_CALLBACK(mouse_handler)
         event_loop_post(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(cgevent), 0, NULL);
     } break;
     case kCGEventMouseMoved: {
-        event_loop_post(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(cgevent), 0, NULL);
+        uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
+        if (mod == g_mouse_state.modifier) return cgevent;
+
+        event_loop_post(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(cgevent), mod, NULL);
     } break;
     }
 

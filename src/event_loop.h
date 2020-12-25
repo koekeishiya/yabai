@@ -1,8 +1,6 @@
 #ifndef EVENT_LOOP_H
 #define EVENT_LOOP_H
 
-#define EVENT_POOL_SIZE KILOBYTES(128)
-
 struct queue_item
 {
     struct queue_item *next;

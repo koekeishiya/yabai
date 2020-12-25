@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.12
-.\"      Date: 2020-12-03
+.\"      Date: 2020-12-25
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2020-12-03" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2020-12-25" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -599,11 +599,11 @@ Arguments are passed through environment variables.
 yabai \-m signal \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
-\fB\-\-add event=\fI<EVENT>\fP action=\fI<ACTION>\fP [label=\fI<LABEL>\fP] [app[!]=\fI<REGEX>\fP] [title[!]=\fI<REGEX>\fP]\fP
+\fB\-\-add event=\fI<EVENT>\fP action=\fI<ACTION>\fP [label=\fI<LABEL>\fP] [app[!]=\fI<REGEX>\fP] [title[!]=\fI<REGEX>\fP] [active=\fIyes|no\fP]\fP
 .RS 4
 Add an optionally labelled signal to execute an action after processing an event of the given type.
 .br
-Some signals can be specified to trigger based on the application name and/or window title.
+Some signals can be specified to trigger based on the application name and/or window title, and its active/focused state.
 .RE
 .sp
 \fB\-\-remove \fI<SIGNAL_SEL>\fP\fP
@@ -630,7 +630,7 @@ Passes one argument: $YABAI_PROCESS_ID
 .RS 4
 Triggered when an application is terminated.
 .br
-Eligible for \fBapp\fP filter.
+Eligible for \fBapp\fP and \fBactive\fP filter.
 .br
 Passes one argument: $YABAI_PROCESS_ID
 .RE
@@ -673,7 +673,7 @@ Passes one argument: $YABAI_PROCESS_ID
 .RS 4
 Triggered when an application is hidden.
 .br
-Eligible for \fBapp\fP filter.
+Eligible for \fBapp\fP and \fBactive\fP filter.
 .br
 Passes one argument: $YABAI_PROCESS_ID
 .RE
@@ -682,7 +682,9 @@ Passes one argument: $YABAI_PROCESS_ID
 .RS 4
 Triggered when a window is created.
 .br
-Eligible for both \fBapp\fP and \fBtitle\fP filter.
+Also applies to windows that are implicitly created at application launch.
+.br
+Eligible for \fBapp\fP and \fBtitle\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
@@ -691,14 +693,18 @@ Passes one argument: $YABAI_WINDOW_ID
 .RS 4
 Triggered when a window is destroyed.
 .br
+Also applies to windows that are implicitly destroyed at application exit.
+.br
+Eligible for \fBapp\fP and \fBactive\fP filter.
+.br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
 .sp
 \fBwindow_focused\fP
 .RS 4
-Triggered when a window becomes the key\-window for its application.
+Triggered when a window becomes the key\-window.
 .br
-Eligible for both \fBapp\fP and \fBtitle\fP filter.
+Eligible for \fBapp\fP and \fBtitle\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
@@ -707,7 +713,7 @@ Passes one argument: $YABAI_WINDOW_ID
 .RS 4
 Triggered when a window changes position.
 .br
-Eligible for both \fBapp\fP and \fBtitle\fP filter.
+Eligible for \fBapp\fP, \fBtitle\fP and \fBactive\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
@@ -716,7 +722,7 @@ Passes one argument: $YABAI_WINDOW_ID
 .RS 4
 Triggered when a window changes dimensions.
 .br
-Eligible for both \fBapp\fP and \fBtitle\fP filter.
+Eligible for \fBapp\fP, \fBtitle\fP and \fBactive\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
@@ -725,7 +731,7 @@ Passes one argument: $YABAI_WINDOW_ID
 .RS 4
 Triggered when a window has been minimized.
 .br
-Eligible for both \fBapp\fP and \fBtitle\fP filter.
+Eligible for \fBapp\fP, \fBtitle\fP and \fBactive\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
@@ -734,7 +740,7 @@ Passes one argument: $YABAI_WINDOW_ID
 .RS 4
 Triggered when a window has been deminimized.
 .br
-Eligible for both \fBapp\fP and \fBtitle\fP filter.
+Eligible for \fBapp\fP and \fBtitle\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
@@ -743,7 +749,7 @@ Passes one argument: $YABAI_WINDOW_ID
 .RS 4
 Triggered when a window changes its title.
 .br
-Eligible for both \fBapp\fP and \fBtitle\fP filter.
+Eligible for \fBapp\fP, \fBtitle\fP and \fBactive\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
 .RE
@@ -790,42 +796,9 @@ Triggered when the active display has changed.
 Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
 .RE
 .sp
-\fBmouse_down\fP
-.RS 4
-Triggered when a mouse button has been pressed.
-.br
-Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-.RE
-.sp
-\fBmouse_up\fP
-.RS 4
-Triggered when a mouse button has been released.
-.br
-Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-.RE
-.sp
-\fBmouse_dragged\fP
-.RS 4
-Triggered when the mouse is moved with one of its buttons pressed.
-.br
-Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-.RE
-.sp
-\fBmouse_moved\fP
-.RS 4
-Triggered when the mouse is moved.
-.br
-Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-.RE
-.sp
 \fBmission_control_enter\fP
 .RS 4
 Triggered when mission\-control activates.
-.RE
-.sp
-\fBmission_control_check_for_exit\fP
-.RS 4
-Triggered periodically while mission\-control is active.
 .RE
 .sp
 \fBmission_control_exit\fP
@@ -838,11 +811,6 @@ Triggered when mission\-control deactivates.
 Triggered when Dock.app restarts.
 .RE
 .sp
-\fBmenu_opened\fP
-.RS 4
-Triggered when a menu is opened.
-.RE
-.sp
 \fBmenu_bar_hidden_changed\fP
 .RS 4
 Triggered when the macOS menubar \fIautohide\fP setting changes.
@@ -851,16 +819,6 @@ Triggered when the macOS menubar \fIautohide\fP setting changes.
 \fBdock_did_change_pref\fP
 .RS 4
 Triggered when the macOS Dock preferences changes.
-.RE
-.sp
-\fBsystem_woke\fP
-.RS 4
-Triggered when macOS wakes from sleep.
-.RE
-.sp
-\fBdaemon_message\fP
-.RS 4
-Triggered when yabai receives a message on its socket.
 .RE
 .SS "ACTION"
 .sp

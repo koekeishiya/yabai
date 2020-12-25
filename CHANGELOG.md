@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Reworked signal system; events are no longer coupled 1-1 with observed system events.
+Some events are now eligible for a new filter, *active*, only triggering for the application/window with key-focus.
+The *window_focused* signal is now triggered when the key-window changes, regardless of whether its application is frontmost or not.
+The *window_created* signal is now triggered for windows that are implicitly created at application launch.
+The *window_destroyed* signal is now triggered for windows that are implicitly destroyed at application exit; it is also eligible for *app* filter [#581](https://github.com/koekeishiya/yabai/issues/581)
+
+### Removed
+- The following signals have been removed: *mouse_up*, *mouse_down*, *mouse_dragged*, *mouse_moved*, *mission_control_check_for_exit*, *menu_opened*, *system_woke*, *daemon_message*
 
 ## [3.3.6] - 2020-12-18
 ### Changed

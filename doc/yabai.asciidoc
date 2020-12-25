@@ -444,9 +444,9 @@ yabai -m signal '<COMMAND>'
 COMMAND
 ^^^^^^^
 
-*--add event='<EVENT>' action='<ACTION>' [label='<LABEL>'] [app[!]='<REGEX>'] [title[!]='<REGEX>']*::
+*--add event='<EVENT>' action='<ACTION>' [label='<LABEL>'] [app[!]='<REGEX>'] [title[!]='<REGEX>'] [active='yes|no']*::
     Add an optionally labelled signal to execute an action after processing an event of the given type. +
-    Some signals can be specified to trigger based on the application name and/or window title.
+    Some signals can be specified to trigger based on the application name and/or window title, and its active/focused state.
 
 *--remove '<SIGNAL_SEL>'*::
     Remove an existing signal with the given index or label.
@@ -464,7 +464,7 @@ EVENT
 
 *application_terminated*::
     Triggered when an application is terminated. +
-    Eligible for *app* filter. +
+    Eligible for *app* and *active* filter. +
     Passes one argument: $YABAI_PROCESS_ID
 
 *application_front_switched*::
@@ -488,46 +488,49 @@ EVENT
 
 *application_hidden*::
     Triggered when an application is hidden. +
-    Eligible for *app* filter. +
+    Eligible for *app* and *active* filter. +
     Passes one argument: $YABAI_PROCESS_ID
 
 *window_created*::
     Triggered when a window is created. +
-    Eligible for both *app* and *title* filter. +
+    Also applies to windows that are implicitly created at application launch. +
+    Eligible for *app* and *title* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *window_destroyed*::
     Triggered when a window is destroyed. +
+    Also applies to windows that are implicitly destroyed at application exit. +
+    Eligible for *app* and *active* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *window_focused*::
-    Triggered when a window becomes the key-window for its application. +
-    Eligible for both *app* and *title* filter. +
+    Triggered when a window becomes the key-window. +
+    Eligible for *app* and *title* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *window_moved*::
     Triggered when a window changes position. +
-    Eligible for both *app* and *title* filter. +
+    Eligible for *app*, *title* and *active* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *window_resized*::
     Triggered when a window changes dimensions. +
-    Eligible for both *app* and *title* filter. +
+    Eligible for *app*, *title* and *active* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *window_minimized*::
     Triggered when a window has been minimized. +
-    Eligible for both *app* and *title* filter. +
+    Eligible for *app*, *title* and *active* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *window_deminimized*::
     Triggered when a window has been deminimized. +
-    Eligible for both *app* and *title* filter. +
+    Eligible for *app* and *title* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *window_title_changed*::
     Triggered when a window changes its title. +
-    Eligible for both *app* and *title* filter. +
+    Eligible for *app*, *title* and *active* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
 *space_changed*::
@@ -554,27 +557,8 @@ EVENT
     Triggered when the active display has changed. +
     Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
 
-*mouse_down*::
-    Triggered when a mouse button has been pressed. +
-    Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-
-*mouse_up*::
-    Triggered when a mouse button has been released. +
-    Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-
-*mouse_dragged*::
-    Triggered when the mouse is moved with one of its buttons pressed. +
-    Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-
-*mouse_moved*::
-    Triggered when the mouse is moved. +
-    Passes two arguments: $YABAI_BUTTON, $YABAI_POINT
-
 *mission_control_enter*::
     Triggered when mission-control activates.
-
-*mission_control_check_for_exit*::
-    Triggered periodically while mission-control is active.
 
 *mission_control_exit*::
     Triggered when mission-control deactivates.
@@ -582,20 +566,11 @@ EVENT
 *dock_did_restart*::
     Triggered when Dock.app restarts.
 
-*menu_opened*::
-    Triggered when a menu is opened.
-
 *menu_bar_hidden_changed*::
     Triggered when the macOS menubar 'autohide' setting changes.
 
 *dock_did_change_pref*::
     Triggered when the macOS Dock preferences changes.
-
-*system_woke*::
-    Triggered when macOS wakes from sleep.
-
-*daemon_message*::
-    Triggered when yabai receives a message on its socket.
 
 ACTION
 ^^^^^^
