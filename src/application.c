@@ -6,34 +6,40 @@ static OBSERVER_CALLBACK(application_notification_handler)
 {
     if (CFEqual(notification, kAXCreatedNotification)) {
         event_loop_post(&g_event_loop, WINDOW_CREATED, (void *) CFRetain(element), 0, NULL);
-    } else if (CFEqual(notification, kAXUIElementDestroyedNotification)) {
-        uint32_t *window_id_ptr = *(uint32_t **) context;
-        if (!window_id_ptr) return;
-
-        if (!__sync_bool_compare_and_swap((uint32_t **) context, window_id_ptr, NULL)) return;
-
-        event_loop_post(&g_event_loop, WINDOW_DESTROYED, (void *)(uintptr_t) *window_id_ptr, 0, NULL);
     } else if (CFEqual(notification, kAXFocusedWindowChangedNotification)) {
-        uint32_t window_id = ax_window_id(element);
-        if (window_id) event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window_id, 0, NULL);
+        event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) ax_window_id(element), 0, NULL);
     } else if (CFEqual(notification, kAXWindowMovedNotification)) {
-        uint32_t window_id = ax_window_id(element);
-        if (window_id) event_loop_post(&g_event_loop, WINDOW_MOVED, (void *)(intptr_t) window_id, 0, NULL);
+        event_loop_post(&g_event_loop, WINDOW_MOVED, (void *)(intptr_t) ax_window_id(element), 0, NULL);
     } else if (CFEqual(notification, kAXWindowResizedNotification)) {
-        uint32_t window_id = ax_window_id(element);
-        if (window_id) event_loop_post(&g_event_loop, WINDOW_RESIZED, (void *)(intptr_t) window_id, 0, NULL);
-    } else if (CFEqual(notification, kAXWindowMiniaturizedNotification)) {
-        uint32_t window_id = **((uint32_t **) context);
-        event_loop_post(&g_event_loop, WINDOW_MINIMIZED, (void *)(intptr_t) window_id, 0, NULL);
-    } else if (CFEqual(notification, kAXWindowDeminiaturizedNotification)) {
-        uint32_t window_id = **((uint32_t **) context);
-        event_loop_post(&g_event_loop, WINDOW_DEMINIMIZED, (void *)(intptr_t) window_id, 0, NULL);
+        event_loop_post(&g_event_loop, WINDOW_RESIZED, (void *)(intptr_t) ax_window_id(element), 0, NULL);
     } else if (CFEqual(notification, kAXTitleChangedNotification)) {
-        uint32_t window_id = ax_window_id(element);
-        if (window_id) event_loop_post(&g_event_loop, WINDOW_TITLE_CHANGED, (void *)(intptr_t) window_id, 0, NULL);
+        event_loop_post(&g_event_loop, WINDOW_TITLE_CHANGED, (void *)(intptr_t) ax_window_id(element), 0, NULL);
     } else if (CFEqual(notification, kAXMenuOpenedNotification)) {
-        uint32_t window_id = ax_window_id(element);
-        if (window_id) event_loop_post(&g_event_loop, MENU_OPENED, (void *)(intptr_t) window_id, 0, NULL);
+        event_loop_post(&g_event_loop, MENU_OPENED, (void *)(intptr_t) ax_window_id(element), 0, NULL);
+    } else if (CFEqual(notification, kAXWindowMiniaturizedNotification)) {
+        event_loop_post(&g_event_loop, WINDOW_MINIMIZED, context, 0, NULL);
+    } else if (CFEqual(notification, kAXWindowDeminiaturizedNotification)) {
+        event_loop_post(&g_event_loop, WINDOW_DEMINIMIZED, context, 0, NULL);
+    } else if (CFEqual(notification, kAXUIElementDestroyedNotification)) {
+        struct window *window = context;
+
+        //
+        // NOTE(koekeishiya): Flag events that are already queued, but not yet processed,
+        // so that they will be ignored; the memory we allocated is still valid and will
+        // be freed when this event is handled.
+        //
+
+        if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, NULL)) return;
+
+        //
+        // NOTE(koekeishiya): Usually we avoid running code off the event-loop thread,
+        // however in this case it is fine, as we are only touching fields that never
+        // change after the window allocation and creation code.
+        //
+
+        window_unobserve(window);
+
+        event_loop_post(&g_event_loop, WINDOW_DESTROYED, window, 0, NULL);
     }
 }
 
@@ -45,7 +51,7 @@ application_observe_notification(struct application *application, int notificati
         application->notification |= 1 << notification;
     } else {
         if (result == kAXErrorCannotComplete) application->ax_retry = true;
-        debug("%s: %s failed with error %s\n", __FUNCTION__, ax_application_notification_str[notification], ax_error_str[-result]);
+        debug("%s: notification %s failed with error %s for %s\n", __FUNCTION__, ax_application_notification_str[notification], ax_error_str[-result], application->name);
     }
 }
 
@@ -86,9 +92,9 @@ void application_unobserve(struct application *application)
 
 uint32_t application_main_window(struct application *application)
 {
-    CFTypeRef window_ref;
-    bool result = AXUIElementCopyAttributeValue(application->ref, kAXMainWindowAttribute, &window_ref) == kAXErrorSuccess;
-    if (!result) return 0;
+    CFTypeRef window_ref = NULL;
+    AXUIElementCopyAttributeValue(application->ref, kAXMainWindowAttribute, &window_ref);
+    if (!window_ref) return 0;
 
     uint32_t window_id = ax_window_id(window_ref);
     CFRelease(window_ref);

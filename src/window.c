@@ -5,10 +5,9 @@ extern int g_normal_window_level;
 extern int g_floating_window_level;
 extern int g_connection;
 
-static void
-window_observe_notification(struct window *window, int notification)
+static void window_observe_notification(struct window *window, int notification)
 {
-    AXError result = AXObserverAddNotification(window->application->observer_ref, window->ref, ax_window_notification[notification], window->id_ptr);
+    AXError result = AXObserverAddNotification(window->application->observer_ref, window->ref, ax_window_notification[notification], window);
     if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
         window->notification |= 1 << notification;
     } else {
@@ -16,8 +15,7 @@ window_observe_notification(struct window *window, int notification)
     }
 }
 
-static void
-window_unobserve_notification(struct window *window, int notification)
+static void window_unobserve_notification(struct window *window, int notification)
 {
     AXObserverRemoveNotification(window->application->observer_ref, window->ref, ax_window_notification[notification]);
     window->notification &= ~(1 << notification);
@@ -94,6 +92,7 @@ uint64_t *window_space_list(struct window *window, int *count)
     if (!*count) goto out;
 
     space_list = ts_alloc(*count * sizeof(uint64_t));
+
     for (int i = 0; i < *count; ++i) {
         CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, i);
         CFNumberGetValue(id_ref, CFNumberGetType(id_ref), space_list + i);
@@ -118,9 +117,10 @@ void window_serialize(FILE *rsp, struct window *window)
     int display = display_arrangement(space_display_id(sid));
     bool is_topmost = window_is_topmost(window);
     bool is_minimized = window_is_minimized(window);
-    bool visible = !is_minimized && (window->is_sticky || space_is_visible(sid));
+    bool visible = !is_minimized && !window->application->is_hidden && (window->is_sticky || space_is_visible(sid));
     bool border = window->border.id ? 1 : 0;
     float opacity = window_opacity(window);
+    bool grabbed = window == g_mouse_state.window;
 
     CFStringRef cfrole = window_role(window);
     if (cfrole) {
@@ -150,55 +150,58 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"app\":\"%s\",\n"
             "\t\"title\":\"%s\",\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
-            "\t\"level\":%d,\n"
             "\t\"role\":\"%s\",\n"
             "\t\"subrole\":\"%s\",\n"
-            "\t\"movable\":%d,\n"
-            "\t\"resizable\":%d,\n"
             "\t\"display\":%d,\n"
             "\t\"space\":%d,\n"
-            "\t\"visible\":%d,\n"
-            "\t\"focused\":%d,\n"
-            "\t\"split\":\"%s\",\n"
-            "\t\"floating\":%d,\n"
-            "\t\"sticky\":%d,\n"
-            "\t\"minimized\":%d,\n"
-            "\t\"topmost\":%d,\n"
+            "\t\"level\":%d,\n"
             "\t\"opacity\":%.4f,\n"
-            "\t\"shadow\":%d,\n"
-            "\t\"border\":%d,\n"
+            "\t\"split-type\":\"%s\",\n"
             "\t\"stack-index\":%d,\n"
-            "\t\"zoom-parent\":%d,\n"
-            "\t\"zoom-fullscreen\":%d,\n"
-            "\t\"native-fullscreen\":%d\n"
+            "\t\"can-move\":%s,\n"
+            "\t\"can-resize\":%s,\n"
+            "\t\"has-focus\":%s,\n"
+            "\t\"has-shadow\":%s,\n"
+            "\t\"has-border\":%s,\n"
+            "\t\"has-parent-zoom\":%s,\n"
+            "\t\"has-fullscreen-zoom\":%s,\n"
+            "\t\"is-native-fullscreen\":%s,\n"
+            "\t\"is-visible\":%s,\n"
+            "\t\"is-minimized\":%s,\n"
+            "\t\"is-hidden\":%s,\n"
+            "\t\"is-floating\":%s,\n"
+            "\t\"is-sticky\":%s,\n"
+            "\t\"is-topmost\":%s,\n"
+            "\t\"is-grabbed\":%s\n"
             "}",
             window->id,
             window->application->pid,
             window->application->name,
             escaped_title ? escaped_title : title,
-            frame.origin.x, frame.origin.y,
-            frame.size.width, frame.size.height,
-            window_level(window),
+            frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
             role ? role : "",
             subrole ? subrole : "",
-            window_can_move(window),
-            window_can_resize(window),
             display,
             space,
-            visible,
-            window->id == g_window_manager.focused_window_id,
-            split,
-            window->is_floating,
-            window->is_sticky,
-            is_minimized,
-            is_topmost,
+            window_level(window),
             opacity,
-            window->has_shadow,
-            border,
+            split,
             stack_index,
-            zoom_parent,
-            zoom_fullscreen,
-            window_is_fullscreen(window));
+            json_bool(window_can_move(window)),
+            json_bool(window_can_resize(window)),
+            json_bool(window->id == g_window_manager.focused_window_id),
+            json_bool(window->has_shadow),
+            json_bool(border),
+            json_bool(zoom_parent),
+            json_bool(zoom_fullscreen),
+            json_bool(window_is_fullscreen(window)),
+            json_bool(visible),
+            json_bool(window->is_floating),
+            json_bool(window->is_sticky),
+            json_bool(is_minimized),
+            json_bool(window->application->is_hidden),
+            json_bool(is_topmost),
+            json_bool(grabbed));
 }
 
 char *window_title(struct window *window)
@@ -231,12 +234,12 @@ CGRect window_ax_frame(struct window *window)
     AXUIElementCopyAttributeValue(window->ref, kAXPositionAttribute, &position_ref);
     AXUIElementCopyAttributeValue(window->ref, kAXSizeAttribute, &size_ref);
 
-    if (position_ref != NULL) {
+    if (position_ref) {
         AXValueGetValue(position_ref, kAXValueTypeCGPoint, &frame.origin);
         CFRelease(position_ref);
     }
 
-    if (size_ref != NULL) {
+    if (size_ref) {
         AXValueGetValue(size_ref, kAXValueTypeCGSize, &frame.size);
         CFRelease(size_ref);
     }
@@ -303,10 +306,12 @@ bool window_is_fullscreen(struct window *window)
 {
     Boolean result = 0;
     CFTypeRef value;
+
     if (AXUIElementCopyAttributeValue(window->ref, kAXFullscreenAttribute, &value) == kAXErrorSuccess) {
         result = CFBooleanGetValue(value);
         CFRelease(value);
     }
+
     return result;
 }
 
@@ -454,8 +459,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->is_minimized = window_is_minimized(window);
     window->is_fullscreen = window_is_fullscreen(window) || space_is_fullscreen(window_space(window));
     window->is_sticky = window_is_sticky(window);
-    window->id_ptr = malloc(sizeof(uint32_t *));
-    *window->id_ptr = &window->id;
+    window->id_ptr = &window->id;
     window->has_shadow = true;
 
     if (g_window_manager.enable_window_border) border_create(window);
@@ -467,6 +471,5 @@ void window_destroy(struct window *window)
 {
     border_destroy(window);
     CFRelease(window->ref);
-    free(window->id_ptr);
     free(window);
 }

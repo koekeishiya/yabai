@@ -149,6 +149,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
 
         event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
         window_manager_remove_window(&g_window_manager, window->id);
+        window_unobserve(window);
         window_destroy(window);
     }
 
@@ -328,13 +329,9 @@ out:
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DESTROYED)
 {
-    uint32_t window_id = (uint32_t)(uintptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
-
-    assert(!*window->id_ptr);
+    struct window *window = context;
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    window_unobserve(window);
+    assert(!window->id_ptr);
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
@@ -362,7 +359,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_FOCUSED)
         return EVENT_FAILURE;
     }
 
-    if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
         return EVENT_FAILURE;
     }
@@ -395,7 +392,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
     if (!window) return EVENT_FAILURE;
 
-    if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
         return EVENT_FAILURE;
     }
@@ -417,7 +414,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
     if (!window) return EVENT_FAILURE;
 
-    if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
         return EVENT_FAILURE;
     }
@@ -467,12 +464,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
 {
-    uint32_t window_id = (uint32_t)(intptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    struct window *window = context;
 
-    if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window->id);
         return EVENT_FAILURE;
     }
 
@@ -496,13 +491,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
 {
-    uint32_t window_id = (uint32_t)(intptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    struct window *window = context;
 
-    if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        window_manager_remove_lost_focused_event(&g_window_manager, window_id);
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window->id);
+        window_manager_remove_lost_focused_event(&g_window_manager, window->id);
         return EVENT_FAILURE;
     }
 
@@ -535,7 +528,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_TITLE_CHANGED)
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
     if (!window) return EVENT_FAILURE;
 
-    if (!__sync_bool_compare_and_swap(window->id_ptr, &window->id, &window->id)) {
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
         return EVENT_FAILURE;
     }
@@ -681,7 +674,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_UP)
     if (g_mission_control_active) goto out;
     if (!g_mouse_state.window)    goto out;
 
-    if (!__sync_bool_compare_and_swap(g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
+    if (!__sync_bool_compare_and_swap(&g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         goto err;
     }
@@ -757,7 +750,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
     if (g_mission_control_active) goto out;
     if (!g_mouse_state.window)    goto out;
 
-    if (!__sync_bool_compare_and_swap(g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
+    if (!__sync_bool_compare_and_swap(&g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         g_mouse_state.window = NULL;
         g_mouse_state.current_action = MOUSE_MODE_NONE;
