@@ -35,11 +35,12 @@ void display_serialize(FILE *rsp, uint32_t did)
     int count;
     uint64_t *space_list = display_space_list(did, &count);
     if (space_list) {
+        int first_mci = space_manager_mission_control_index(space_list[0]);
         for (int i = 0; i < count; ++i) {
             if (i < count - 1) {
-                bytes_written = snprintf(cursor, buffer_size, "%d, ", space_manager_mission_control_index(space_list[i]));
+                bytes_written = snprintf(cursor, buffer_size, "%d, ", first_mci + i);
             } else {
-                bytes_written = snprintf(cursor, buffer_size, "%d", space_manager_mission_control_index(space_list[i]));
+                bytes_written = snprintf(cursor, buffer_size, "%d", first_mci + i);
             }
 
             cursor += bytes_written;
@@ -53,12 +54,14 @@ void display_serialize(FILE *rsp, uint32_t did)
             "\t\"id\":%d,\n"
             "\t\"uuid\":\"%s\",\n"
             "\t\"index\":%d,\n"
-            "\t\"spaces\":[%s],\n"
-            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}\n"
+            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
+            "\t\"spaces\":[%s]\n"
             "}",
-            did, uuid ? uuid : "<unknown>", display_arrangement(did), buffer,
-            frame.origin.x, frame.origin.y,
-            frame.size.width, frame.size.height);
+            did,
+            uuid ? uuid : "<unknown>",
+            display_arrangement(did),
+            frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
+            buffer);
 }
 
 CFStringRef display_uuid(uint32_t did)

@@ -3,6 +3,19 @@
 
 const CFStringRef kAXEnhancedUserInterface = CFSTR("AXEnhancedUserInterface");
 
+static inline char *json_optional_bool(int value)
+{
+    if (value == 0) return "null";
+    if (value == 1) return "true";
+
+    return "false";
+}
+
+static inline char *json_bool(bool value)
+{
+    return value ? "true" : "false";
+}
+
 static const char *bool_str[] = { "off", "on" };
 
 static const char *layer_str[] =
@@ -145,7 +158,6 @@ static inline char *ts_cfstring_copy(CFStringRef string)
 {
     CFIndex num_bytes = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
     char *result = ts_alloc(num_bytes + 1);
-    if (!result) return NULL;
 
     if (!CFStringGetCString(string, result, num_bytes + 1, kCFStringEncodingUTF8)) {
         result = NULL;
@@ -172,7 +184,6 @@ static inline char *ts_string_copy(char *s)
 {
     int length = strlen(s);
     char *result = ts_alloc(length + 1);
-    if (!result) return NULL;
 
     memcpy(result, s, length);
     result[length] = '\0';

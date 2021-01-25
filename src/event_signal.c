@@ -325,7 +325,7 @@ static void event_signal_serialize(FILE *rsp, struct signal *signal, enum signal
             "\t\"label\":\"%s\",\n"
             "\t\"app\":\"%s\",\n"
             "\t\"title\":\"%s\",\n"
-            "\t\"active\":\"%d\",\n"
+            "\t\"active\":%s,\n"
             "\t\"event\":\"%s\",\n"
             "\t\"action\":\"%s\"\n"
             "}",
@@ -333,7 +333,7 @@ static void event_signal_serialize(FILE *rsp, struct signal *signal, enum signal
             signal->label ? signal->label : "",
             signal->app ? signal->app : "",
             signal->title ? signal->title : "",
-            signal_prop[signal->active],
+            json_optional_bool(signal->active),
             signal_type_str[type],
             escaped_action ? escaped_action : signal->command ? signal->command : "");
 }

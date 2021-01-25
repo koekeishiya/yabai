@@ -724,6 +724,7 @@ void view_flush(struct view *view)
 
 void view_serialize(FILE *rsp, struct view *view)
 {
+    char *uuid = ts_cfstring_copy(view->suuid);
     int buffer_size = MAXLEN;
     size_t bytes_written = 0;
     char buffer[MAXLEN] = {};
@@ -761,28 +762,30 @@ void view_serialize(FILE *rsp, struct view *view)
     fprintf(rsp,
             "{\n"
             "\t\"id\":%lld,\n"
-            "\t\"label\":\"%s\",\n"
+            "\t\"uuid\":\"%s\",\n"
             "\t\"index\":%d,\n"
+            "\t\"label\":\"%s\",\n"
+            "\t\"type\":\"%s\",\n"
             "\t\"display\":%d,\n"
             "\t\"windows\":[%s],\n"
-            "\t\"type\":\"%s\",\n"
-            "\t\"visible\":%d,\n"
-            "\t\"focused\":%d,\n"
-            "\t\"native-fullscreen\":%d,\n"
             "\t\"first-window\":%d,\n"
-            "\t\"last-window\":%d\n"
+            "\t\"last-window\":%d,\n"
+            "\t\"has-focus\":%s,\n"
+            "\t\"is-visible\":%s,\n"
+            "\t\"is-native-fullscreen\":%s\n"
             "}",
             view->sid,
-            space_label ? space_label->label : "",
+            uuid ? uuid : "<unknown>",
             space_manager_mission_control_index(view->sid),
+            space_label ? space_label->label : "",
+            view_type_str[view->layout],
             display_arrangement(space_display_id(view->sid)),
             buffer,
-            view_type_str[view->layout],
-            space_is_visible(view->sid),
-            view->sid == g_space_manager.current_space_id,
-            space_is_fullscreen(view->sid),
             first_leaf ? first_leaf->window_order[0] : 0,
-            last_leaf ? last_leaf->window_order[0] : 0);
+            last_leaf ? last_leaf->window_order[0] : 0,
+            json_bool(space_is_visible(view->sid)),
+            json_bool(view->sid == g_space_manager.current_space_id),
+            json_bool(space_is_fullscreen(view->sid)));
 }
 
 void view_update(struct view *view)

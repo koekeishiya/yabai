@@ -5,13 +5,6 @@
 #define RULE_PROP_ON  1
 #define RULE_PROP_OFF 2
 
-static int rule_prop[] =
-{
-    [RULE_PROP_UD]  = -1,
-    [RULE_PROP_OFF] =  0,
-    [RULE_PROP_ON]  =  1,
-};
-
 struct rule
 {
     char *label;

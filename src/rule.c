@@ -11,32 +11,32 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"label\":\"%s\",\n"
             "\t\"app\":\"%s\",\n"
             "\t\"title\":\"%s\",\n"
-            "\t\"display_id\":%d,\n"
-            "\t\"space_id\":%lld,\n"
-            "\t\"follow_space\":%d,\n"
+            "\t\"display\":%d,\n"
+            "\t\"space\":%d,\n"
+            "\t\"follow_space\":%s,\n"
             "\t\"opacity\":%.4f,\n"
-            "\t\"manage\":%d,\n"
-            "\t\"sticky\":%d,\n"
-            "\t\"mouse_follows_focus\":%d,\n"
+            "\t\"manage\":%s,\n"
+            "\t\"sticky\":%s,\n"
+            "\t\"mouse_follows_focus\":%s,\n"
             "\t\"layer\":\"%s\",\n"
-            "\t\"border\":%d,\n"
-            "\t\"native-fullscreen\":%d,\n"
+            "\t\"border\":%s,\n"
+            "\t\"native-fullscreen\":%s,\n"
             "\t\"grid\":\"%d:%d:%d:%d:%d:%d\"\n"
             "}",
             index,
             rule->label ? rule->label : "",
             rule->app ? rule->app : "",
             rule->title ? rule->title : "",
-            rule->did,
-            rule->sid,
-            rule->follow_space,
+            display_arrangement(rule->did),
+            space_manager_mission_control_index(rule->sid),
+            json_bool(rule->follow_space),
             rule->alpha,
-            rule_prop[rule->manage],
-            rule_prop[rule->sticky],
-            rule_prop[rule->mff],
+            json_optional_bool(rule->manage),
+            json_optional_bool(rule->sticky),
+            json_optional_bool(rule->mff),
             layer_str[rule->layer],
-            rule_prop[rule->border],
-            rule_prop[rule->fullscreen],
+            json_optional_bool(rule->border),
+            json_optional_bool(rule->fullscreen),
             rule->grid[0], rule->grid[1],
             rule->grid[2], rule->grid[3],
             rule->grid[4], rule->grid[5]);

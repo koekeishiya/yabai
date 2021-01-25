@@ -83,13 +83,6 @@ static const char *signal_type_str[] =
 #define SIGNAL_PROP_YES 1
 #define SIGNAL_PROP_NO  2
 
-static int signal_prop[] =
-{
-    [SIGNAL_PROP_UD]  = -1,
-    [SIGNAL_PROP_NO]  =  0,
-    [SIGNAL_PROP_YES] =  1,
-};
-
 struct event_signal
 {
     enum signal_type type;
