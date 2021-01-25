@@ -573,12 +573,10 @@ void view_remove_window_node(struct view *view, struct window *window)
     }
 
     if (node == view->root) {
-        node->window_count = 0;
-        insert_feedback_destroy(node);
-        node->split = SPLIT_NONE;
-        node->child = CHILD_NONE;
-        node->insert_dir = 0;
         view->insertion_point = 0;
+        insert_feedback_destroy(node);
+        memset(node, 0, sizeof(struct window_node));
+        view_update(view);
         return;
     }
 

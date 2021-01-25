@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Properly clear space.last-window and space.first-window query attributes when the last window is made floating [#786](https://github.com/koekeishiya/yabai/issues/786)
 - Reworked signal system; events are no longer coupled 1-1 with observed system events.
 Some events are now eligible for a new filter, *active*, only triggering for the application/window with key-focus.
 The *window_focused* signal is now triggered when the key-window changes, regardless of whether its application is frontmost or not.
