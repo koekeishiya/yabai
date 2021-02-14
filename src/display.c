@@ -143,18 +143,20 @@ uint64_t display_space_id(uint32_t did)
 
     uint64_t sid = SLSManagedDisplayGetCurrentSpace(g_connection, uuid);
     CFRelease(uuid);
+
     return sid;
 }
 
 int display_space_count(uint32_t did)
 {
+    int space_count = 0;
+
     CFStringRef uuid = display_uuid(did);
-    if (!uuid) return 0;
+    if (!uuid) goto out;
 
     CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
-    if (!display_spaces_ref) return 0;
+    if (!display_spaces_ref) goto err;
 
-    int space_count = 0;
     int display_spaces_count = CFArrayGetCount(display_spaces_ref);
     for (int i = 0; i < display_spaces_count; ++i) {
         CFDictionaryRef display_ref = CFArrayGetValueAtIndex(display_spaces_ref, i);
@@ -167,21 +169,23 @@ int display_space_count(uint32_t did)
     }
 
     CFRelease(display_spaces_ref);
+err:
     CFRelease(uuid);
+out:
     return space_count;
 }
 
 uint64_t *display_space_list(uint32_t did, int *count)
 {
+    uint64_t *space_list = NULL;
+
     CFStringRef uuid = display_uuid(did);
-    if (!uuid) return NULL;
+    if (!uuid) goto out;
 
     CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
-    if (!display_spaces_ref) return NULL;
+    if (!display_spaces_ref) goto err;
 
-    uint64_t *space_list = NULL;
     int display_spaces_count = CFArrayGetCount(display_spaces_ref);
-
     for (int i = 0; i < display_spaces_count; ++i) {
         CFDictionaryRef display_ref = CFArrayGetValueAtIndex(display_spaces_ref, i);
         CFStringRef identifier = CFDictionaryGetValue(display_ref, CFSTR("Display Identifier"));
@@ -201,21 +205,23 @@ uint64_t *display_space_list(uint32_t did, int *count)
     }
 
     CFRelease(display_spaces_ref);
+err:
     CFRelease(uuid);
+out:
     return space_list;
 }
 
 int display_arrangement(uint32_t did)
 {
+    int result = 0;
+
     CFStringRef uuid = display_uuid(did);
-    if (!uuid) return 0;
+    if (!uuid) goto out;
 
     CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
-    if (!displays) return 0;
+    if (!displays) goto err;
 
-    int result = 0;
     int displays_count = CFArrayGetCount(displays);
-
     for (int i = 0; i < displays_count; ++i) {
         if (CFEqual(CFArrayGetValueAtIndex(displays, i), uuid)) {
             result = i + 1;
@@ -224,6 +230,8 @@ int display_arrangement(uint32_t did)
     }
 
     CFRelease(displays);
+err:
     CFRelease(uuid);
+out:
     return result;
 }
