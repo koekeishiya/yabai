@@ -365,6 +365,85 @@ ARGUMENT
 *--window* ['<WINDOW_SEL>']::
     Constrain matches to the selected window.
 
+DATAFORMAT
+^^^^^^^^^^
+
+DISPLAY
+[subs=+macros]
+----
+{
+    "id": number,
+    "uuid": string,
+    "index": number,
+    "frame": object {
+        "x": number,
+        "y": number,
+        "w": number,
+        "h": number
+    },
+    "spaces": array of number
+}
+----
+
+SPACE
+[subs=+macros]
+----
+{
+    "id": number,
+    "uuid": string,
+    "index": number,
+    "label": string,
+    "type": string,
+    "display": number,
+    "windows": array of number,
+    "first-window": number,
+    "last-window": number,
+    "has-focus": bool,
+    "is-visible": bool,
+    "is-native-fullscreen": bool
+}
+----
+
+WINDOW
+[subs=+macros]
+----
+{
+    "id": number,
+    "pid": number,
+    "app": string,
+    "title": string,
+    "frame": object {
+        "x": number,
+        "y": number,
+        "w": number,
+        "h": number,
+    },
+    "role": string,
+    "subrole": string,
+    "display": number,
+    "space": number,
+    "level": number,
+    "opacity": number,
+    "split-type": string,
+    "stack-index": number,
+    "can-move": bool,
+    "can-resize": bool,
+    "has-focus": bool,
+    "has-shadow": bool,
+    "has-border": bool,
+    "has-parent-zoom": bool,
+    "has-fullscreen-zoom": bool,
+    "is-native-fullscreen": bool,
+    "is-visible": bool,
+    "is-minimized": bool,
+    "is-hidden": bool,
+    "is-floating": bool,
+    "is-sticky": bool,
+    "is-topmost": bool,
+    "is-grabbed": bool
+}
+----
+
 Rule
 ~~~~
 
@@ -429,6 +508,30 @@ ARGUMENT
 
 *grid='<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'*::
     Set window frame based on a self-defined grid.
+
+DATAFORMAT
+^^^^^^^^^^
+
+[subs=+macros]
+----
+{
+    "index": number,
+    "label": string,
+    "app": string,
+    "title": string,
+    "display": number,
+    "space": number,
+    "follow_space": bool,
+    "opacity": number,
+    "manage": bool (optional),
+    "sticky": bool (optional),
+    "mouse_follows_focus": bool (optional),
+    "layer": string,
+    "border": bool (optional),
+    "native-fullscreen": bool (optional),
+    "grid": string
+}
+----
 
 Signal
 ~~~~~~
@@ -576,6 +679,22 @@ ACTION
 ^^^^^^
 
 Arbitrary command executed through */usr/bin/env sh -c*
+
+DATAFORMAT
+^^^^^^^^^^
+
+[subs=+macros]
+----
+{
+    "index": number,
+    "label": string,
+    "app": string,
+    "title": string,
+    "active": bool (optional),
+    "event": string,
+    "action": string
+}
+----
 
 Exit Codes
 ----------

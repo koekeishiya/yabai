@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.12
-.\"      Date: 2021-02-02
+.\"      Date: 2021-02-14
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2021-02-02" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2021-02-14" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -499,6 +499,95 @@ Constrain matches to the selected space.
 .RS 4
 Constrain matches to the selected window.
 .RE
+.SS "DATAFORMAT"
+.sp
+DISPLAY
+.sp
+.if n .RS 4
+.nf
+.fam C
+{
+    "id": number,
+    "uuid": string,
+    "index": number,
+    "frame": object {
+        "x": number,
+        "y": number,
+        "w": number,
+        "h": number
+    },
+    "spaces": array of number
+}
+.fam
+.fi
+.if n .RE
+.sp
+SPACE
+.sp
+.if n .RS 4
+.nf
+.fam C
+{
+    "id": number,
+    "uuid": string,
+    "index": number,
+    "label": string,
+    "type": string,
+    "display": number,
+    "windows": array of number,
+    "first\-window": number,
+    "last\-window": number,
+    "has\-focus": bool,
+    "is\-visible": bool,
+    "is\-native\-fullscreen": bool
+}
+.fam
+.fi
+.if n .RE
+.sp
+WINDOW
+.sp
+.if n .RS 4
+.nf
+.fam C
+{
+    "id": number,
+    "pid": number,
+    "app": string,
+    "title": string,
+    "frame": object {
+        "x": number,
+        "y": number,
+        "w": number,
+        "h": number,
+    },
+    "role": string,
+    "subrole": string,
+    "display": number,
+    "space": number,
+    "level": number,
+    "opacity": number,
+    "split\-type": string,
+    "stack\-index": number,
+    "can\-move": bool,
+    "can\-resize": bool,
+    "has\-focus": bool,
+    "has\-shadow": bool,
+    "has\-border": bool,
+    "has\-parent\-zoom": bool,
+    "has\-fullscreen\-zoom": bool,
+    "is\-native\-fullscreen": bool,
+    "is\-visible": bool,
+    "is\-minimized": bool,
+    "is\-hidden": bool,
+    "is\-floating": bool,
+    "is\-sticky": bool,
+    "is\-topmost": bool,
+    "is\-grabbed": bool
+}
+.fam
+.fi
+.if n .RE
 .SS "Rule"
 .sp
 All registered rules that match the given filter will apply to a window in the order they were added.
@@ -589,6 +678,31 @@ Window should enter native macOS fullscreen mode.
 .RS 4
 Set window frame based on a self\-defined grid.
 .RE
+.SS "DATAFORMAT"
+.sp
+.if n .RS 4
+.nf
+.fam C
+{
+    "index": number,
+    "label": string,
+    "app": string,
+    "title": string,
+    "display": number,
+    "space": number,
+    "follow_space": bool,
+    "opacity": number,
+    "manage": bool (optional),
+    "sticky": bool (optional),
+    "mouse_follows_focus": bool (optional),
+    "layer": string,
+    "border": bool (optional),
+    "native\-fullscreen": bool (optional),
+    "grid": string
+}
+.fam
+.fi
+.if n .RE
 .SS "Signal"
 .sp
 A signal is a simple way for the user to react to some event that has been processed.
@@ -823,6 +937,23 @@ Triggered when the macOS Dock preferences changes.
 .SS "ACTION"
 .sp
 Arbitrary command executed through \fB/usr/bin/env sh \-c\fP
+.SS "DATAFORMAT"
+.sp
+.if n .RS 4
+.nf
+.fam C
+{
+    "index": number,
+    "label": string,
+    "app": string,
+    "title": string,
+    "active": bool (optional),
+    "event": string,
+    "action": string
+}
+.fam
+.fi
+.if n .RE
 .SH "EXIT CODES"
 .sp
 If \fByabai\fP can\(cqt handle a message, it will return a non\-zero exit code.
