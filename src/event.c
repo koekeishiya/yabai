@@ -1030,12 +1030,14 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
         if (((message+cursor)[-1] == '\0') &&
             ((message+cursor)[-2] == '\0')) {
 
+            //
             // NOTE(koekeishiya): if our message ends with double null-terminator we
             // have successfully received the entire message. this was added because
             // on macOS Big Sur we would in a few rare cases read the message AND YET
             // still enter another call to *read* above that would block, because the
             // client was finished sending its message and is blocking in a poll loop
             // waiting for a response.
+            //
 
             break;
         }
