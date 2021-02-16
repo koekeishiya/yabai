@@ -1,5 +1,3 @@
-#include "application.h"
-
 extern struct event_loop g_event_loop;
 
 static OBSERVER_CALLBACK(application_notification_handler)

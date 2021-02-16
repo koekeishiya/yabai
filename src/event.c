@@ -1,5 +1,3 @@
-#include "event.h"
-
 extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct display_manager g_display_manager;

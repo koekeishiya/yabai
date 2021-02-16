@@ -1,5 +1,3 @@
-#include "workspace.h"
-
 extern struct event_loop g_event_loop;
 
 void workspace_event_handler_init(void **context)

@@ -1,5 +1,3 @@
-#include "message.h"
-
 static struct {
     int sockfd;
     bool is_running;

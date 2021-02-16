@@ -1,5 +1,3 @@
-#include "view.h"
-
 extern int g_connection;
 extern int g_floating_window_level;
 extern struct display_manager g_display_manager;

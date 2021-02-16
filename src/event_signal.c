@@ -1,5 +1,3 @@
-#include "event_signal.h"
-
 extern struct signal *g_signal_event[SIGNAL_TYPE_COUNT];
 extern struct memory_pool g_signal_storage;
 extern struct process_manager g_process_manager;

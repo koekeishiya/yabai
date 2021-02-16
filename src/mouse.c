@@ -1,5 +1,3 @@
-#include "mouse.h"
-
 void mouse_window_info_populate(struct mouse_state *ms, struct mouse_window_info *info)
 {
     CGRect frame = window_ax_frame(ms->window);

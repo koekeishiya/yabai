@@ -1,5 +1,3 @@
-#include "window_manager.h"
-
 extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;

@@ -1,5 +1,3 @@
-#include "event_loop.h"
-
 static void *event_loop_run(void *context)
 {
     struct queue_item *head;

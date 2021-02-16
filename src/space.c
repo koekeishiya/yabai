@@ -1,5 +1,3 @@
-#include "space.h"
-
 extern int g_connection;
 
 CFStringRef space_display_uuid(uint64_t sid)

@@ -1,5 +1,3 @@
-#include "border.h"
-
 extern int g_connection;
 extern struct window_manager g_window_manager;
 

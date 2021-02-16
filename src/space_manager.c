@@ -1,5 +1,3 @@
-#include "space_manager.h"
-
 extern struct window_manager g_window_manager;
 extern bool g_mission_control_active;
 extern int g_connection;

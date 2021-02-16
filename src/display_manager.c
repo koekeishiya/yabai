@@ -1,5 +1,3 @@
-#include "display_manager.h"
-
 extern struct display_manager g_display_manager;
 extern struct window_manager g_window_manager;
 extern int g_connection;

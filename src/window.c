@@ -1,5 +1,3 @@
-#include "window.h"
-
 extern struct window_manager g_window_manager;
 extern int g_normal_window_level;
 extern int g_floating_window_level;
