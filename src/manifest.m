@@ -16,6 +16,13 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <poll.h>
 #include <semaphore.h>
 #include <pthread.h>
 
@@ -31,7 +38,6 @@
 #include "misc/hashtable.h"
 #undef HASHTABLE_IMPLEMENTATION
 #include "misc/socket.h"
-#include "misc/socket.c"
 
 #include "osax/sa.h"
 #include "osax/mach_loader.c"

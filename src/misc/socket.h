@@ -1,39 +1,52 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#define SOCKET_DAEMON_HANDLER(name) void name(int sockfd)
-typedef SOCKET_DAEMON_HANDLER(socket_daemon_handler);
-
 #define FAILURE_MESSAGE "\x07"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/un.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <poll.h>
-
-struct daemon
+static inline bool socket_write_bytes(int sockfd, char *message, int len)
 {
-    int sockfd;
-    bool is_running;
-    pthread_t thread;
-    socket_daemon_handler *handler;
-};
+    return send(sockfd, message, len, 0) != -1;
+}
 
-char *socket_read(int sockfd, int *len);
-bool socket_write_bytes(int sockfd, char *message, int len);
-bool socket_write(int sockfd, char *message);
-bool socket_connect_in(int *sockfd, int port);
-bool socket_connect_un(int *sockfd, char *socket_path);
-void socket_wait(int sockfd);
-void socket_close(int sockfd);
-bool socket_daemon_begin_in(struct daemon *daemon, int port, socket_daemon_handler *handler);
-bool socket_daemon_begin_un(struct daemon *daemon, char *socket_path, socket_daemon_handler *handler);
-void socket_daemon_end(struct daemon *daemon);
+static inline bool socket_write(int sockfd, char *message)
+{
+    return send(sockfd, message, strlen(message), 0) != -1;
+}
+
+static inline bool socket_connect_un(int *sockfd, char *socket_path)
+{
+    struct sockaddr_un socket_address;
+    socket_address.sun_family = AF_UNIX;
+
+    *sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (*sockfd == -1) return false;
+
+    snprintf(socket_address.sun_path, sizeof(socket_address.sun_path), "%s", socket_path);
+    return connect(*sockfd, (struct sockaddr *) &socket_address, sizeof(socket_address)) != -1;
+}
+
+static inline void socket_wait(int sockfd)
+{
+    struct pollfd fds[] = {
+        { sockfd, POLLIN, 0 }
+    };
+
+    char dummy[1];
+    int bytes = 0;
+
+    while (poll(fds, 1, -1) > 0) {
+        if (fds[0].revents & POLLIN) {
+            if ((bytes = recv(sockfd, dummy, 0, 0)) <= 0) {
+                break;
+            }
+        }
+    }
+}
+
+static inline void socket_close(int sockfd)
+{
+    shutdown(sockfd, SHUT_RDWR);
+    close(sockfd);
+}
 
 #endif

@@ -1,5 +1,11 @@
 #include "message.h"
 
+static struct {
+    int sockfd;
+    bool is_running;
+    pthread_t thread;
+} g_message_loop;
+
 extern struct event_loop g_event_loop;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
@@ -2361,7 +2367,43 @@ void handle_message(FILE *rsp, char *message)
     }
 }
 
-static SOCKET_DAEMON_HANDLER(message_handler)
+static void *message_loop_run(void *context)
 {
-    event_loop_post(&g_event_loop, DAEMON_MESSAGE, NULL, sockfd, NULL);
+    while (g_message_loop.is_running) {
+        int sockfd = accept(g_message_loop.sockfd, NULL, 0);
+        if (sockfd != -1) {
+            event_loop_post(&g_event_loop, DAEMON_MESSAGE, NULL, sockfd, NULL);
+        }
+    }
+
+    return NULL;
+}
+
+bool message_loop_begin(char *socket_path)
+{
+    struct sockaddr_un socket_address;
+    socket_address.sun_family = AF_UNIX;
+    snprintf(socket_address.sun_path, sizeof(socket_address.sun_path), "%s", socket_path);
+    unlink(socket_path);
+
+    if ((g_message_loop.sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        return false;
+    }
+
+    if (bind(g_message_loop.sockfd, (struct sockaddr *) &socket_address, sizeof(socket_address)) == -1) {
+        return false;
+    }
+
+    if (chmod(socket_path, 0600) != 0) {
+        return false;
+    }
+
+    if (listen(g_message_loop.sockfd, SOMAXCONN) == -1) {
+        return false;
+    }
+
+    g_message_loop.is_running = true;
+    pthread_create(&g_message_loop.thread, NULL, &message_loop_run, NULL);
+
+    return true;
 }

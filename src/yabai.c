@@ -34,7 +34,6 @@ struct space_manager g_space_manager;
 struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
 struct event_tap g_event_tap;
-struct daemon g_daemon;
 int g_normal_window_level;
 int g_floating_window_level;
 int g_connection;
@@ -309,8 +308,8 @@ int main(int argc, char **argv)
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
 
-    if (!socket_daemon_begin_un(&g_daemon, g_socket_file, message_handler)) {
-        error("yabai: could not initialize daemon! abort..\n");
+    if (!message_loop_begin(g_socket_file)) {
+        error("yabai: could not initialize message_loop! abort..\n");
     }
 
     if (!workspace_is_macos_bigsur()) {

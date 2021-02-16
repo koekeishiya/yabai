@@ -1019,20 +1019,41 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
-    int length;
-    char *message = socket_read(param1, &length);
-    if (!message) goto out;
+    int cursor = 0;
+    int bytes_read = 0;
+    char *message = NULL;
+    char buffer[BUFSIZ];
 
-    FILE *rsp = fdopen(param1, "w");
-    if (!rsp) goto out;
+    while ((bytes_read = read(param1, buffer, sizeof(buffer)-1)) > 0) {
+        message = ts_expand(message, cursor, bytes_read);
+        memcpy(message+cursor, buffer, bytes_read);
+        cursor += bytes_read;
 
-    debug_message(__FUNCTION__, message);
-    handle_message(rsp, message);
+        if (((message+cursor)[-1] == '\0') &&
+            ((message+cursor)[-2] == '\0')) {
 
-    fflush(rsp);
-    fclose(rsp);
+            // NOTE(koekeishiya): if our message ends with double null-terminator we
+            // have successfully received the entire message. this was added because
+            // on macOS Big Sur we would in a few rare cases read the message AND YET
+            // still enter another call to *read* above that would block, because the
+            // client was finished sending its message and is blocking in a poll loop
+            // waiting for a response.
 
-out:
+            break;
+        }
+    }
+
+    if (message && bytes_read != -1) {
+        FILE *rsp = fdopen(param1, "w");
+        if (rsp) {
+            debug_message(__FUNCTION__, message);
+            handle_message(rsp, message);
+
+            fflush(rsp);
+            fclose(rsp);
+        }
+    }
+
     socket_close(param1);
     return EVENT_SUCCESS;
 }
