@@ -642,6 +642,7 @@ void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 
 enum space_op_error space_manager_focus_space(uint64_t sid)
 {
+    debug("space_manager_focus_space %d\n", sid);
     bool is_in_mc = g_mission_control_active;
     if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
 
@@ -676,6 +677,7 @@ static bool move_all_windows(uint32_t *window_list, int window_list_count, uint6
     SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, to_sid);
     CFRelease(window_list_ref);
 
+    debug("returning from move_all_windows\n");
     return true;
 }
 
@@ -741,17 +743,17 @@ enum space_op_error space_manager_switch_to_space(uint64_t sid, uint64_t cur_sid
     debug("switch space %d[%d] -> %d[%d]\n", cur_sid, cur_did, sid, new_did);
 
     if (swap_space) {
-        // debug("target space visible on other display: SWAP");
+        debug("target space visible on other display: SWAP");
         space_manager_swap_spaces(cur_sid, sid);
         display_manager_focus_display(cur_did);
     }
     else if (move_space) {
-        // debug("on other display: MOVE\n");
+        debug("on other display: MOVE\n");
         space_manager_move_space_to_display(&g_space_manager, sid, cur_did);
         space_manager_focus_space(sid);
     }
     else {
-        // debug("on same display: FOCUS\n");
+        debug("on same display: FOCUS\n");
         space_manager_focus_space(sid);
     }
 
