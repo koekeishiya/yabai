@@ -709,8 +709,6 @@ static void space_manager_swap_spaces(uint64_t a_sid, uint64_t b_sid)
     // swap all windows
     move_all_windows(a_window_list, a_window_list_count, b_sid);
     move_all_windows(b_window_list, b_window_list_count, a_sid);
-    free(a_window_list);
-    free(b_window_list);
 
     // swap the labels
     int labels_size = buf_len(g_space_manager.labels);
