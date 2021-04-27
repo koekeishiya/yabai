@@ -999,6 +999,19 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_CONFIG_DISPLAY_SORT)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", window_node_child_str[g_space_manager.window_placement]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_DISPLAY_SORT_NONE)) {
+            g_display_manager.sort_order = DISPLAY_SORT_NONE;
+        } else if (token_equals(value, ARGUMENT_CONFIG_DISPLAY_SORT_HORIZ)) {
+            g_display_manager.sort_order = DISPLAY_SORT_HORIZ;
+        } else if (token_equals(value, ARGUMENT_CONFIG_DISPLAY_SORT_VERT)) {
+            g_display_manager.sort_order = DISPLAY_SORT_VERT;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_TOPMOST)) {
         struct token value = get_token(&message);
         if (!token_is_valid(value)) {
