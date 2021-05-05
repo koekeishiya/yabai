@@ -17,9 +17,9 @@ bool space_manager_has_separate_spaces(void)
     return SLSGetSpaceManagementMode(g_connection) == 1;
 }
 
-bool space_manager_query_active_space(FILE *rsp)
+bool space_manager_query_space(FILE *rsp, uint64_t sid)
 {
-    struct view *view = space_manager_query_view(&g_space_manager, space_manager_active_space());
+    struct view *view = space_manager_query_view(&g_space_manager, sid);
     if (!view) return false;
 
     view_serialize(rsp, view);

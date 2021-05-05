@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.12
-.\"      Date: 2021-04-28
+.\"      Date: 2021-05-05
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2021-04-28" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2021-05-05" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -295,14 +295,14 @@ yabai \-m space [\fI<SPACE_SEL>\fP] \fI<COMMAND>\fP
 Focus the given space.
 .RE
 .sp
-\fB\-\-create\fP
+\fB\-\-create\fP  [\fI<SPACE_SEL>\fP]
 .RS 4
-Create a new space on the display of the selected space.
+Create a new space on the display of the given space. If none specified, use the selected space instead.
 .RE
 .sp
-\fB\-\-destroy\fP
+\fB\-\-destroy\fP [\fI<SPACE_SEL>\fP]
 .RS 4
-Remove the selected space.
+Remove the given space. If none specified, use the selected space instead.
 .RE
 .sp
 \fB\-\-move\fP \fI<SPACE_SEL>\fP
@@ -324,9 +324,9 @@ The selected space and given space must both belong to the same display.
 Send the selected space to the given display.
 .RE
 .sp
-\fB\-\-balance\fP
+\fB\-\-balance\fP [\fI<SPACE_SEL>\fP]
 .RS 4
-Adjust the split ratios of the selected space so that all windows occupy the same area.
+Adjust the split ratios of the given space so that all windows occupy the same area. If none specified, use the selected space instead.
 .RE
 .sp
 \fB\-\-mirror\fP \fIx\-axis|y\-axis\fP
@@ -371,9 +371,9 @@ If the command is called without an argument it will try to remove a previously 
 yabai \-m window [\fI<WINDOW_SEL>\fP] \fI<COMMAND>\fP
 .SS "COMMAND"
 .sp
-\fB\-\-focus\fP \fI<WINDOW_SEL>\fP
+\fB\-\-focus\fP [\fI<WINDOW_SEL>\fP]
 .RS 4
-Focus the given window.
+Focus the given window. If none specified, focus the selected window instead.
 .RE
 .sp
 \fB\-\-swap\fP \fI<WINDOW_SEL>\fP
@@ -447,21 +447,21 @@ Send the selected window to the given display.
 Send the selected window to the given space.
 .RE
 .sp
-\fB\-\-minimize\fP
+\fB\-\-minimize\fP [\fI<WINDOW_SEL>\fP]
 .RS 4
-Minimizes the selected window. Only works on windows that provide a minimize button in its titlebar.
+Minimizes the given window. If none specified, minimize the selected window instead. Only works on windows that provide a minimize button in its titlebar.
 .RE
 .sp
-\fB\-\-deminimize\fP
+\fB\-\-deminimize\fP \fI<WINDOW_SEL>\fP
 .RS 4
-Restores the selected window, if it is minimized. The window will only get focus if the owning application has focus.
+Restores the given window, if it is minimized. The window will only get focus if the owning application has focus.
 .br
 Note that you can also \fI\-\-focus\fP a minimized window to restore it as the focused window.
 .RE
 .sp
-\fB\-\-close\fP
+\fB\-\-close\fP [\fI<WINDOW_SEL>\fP]
 .RS 4
-Closes the selected window. Only works on windows that provide a close button in its titlebar.
+Closes the given window. If none specified, close the selected window instead. Only works on windows that provide a close button in its titlebar.
 .RE
 .SS "Query"
 .SS "General Syntax"

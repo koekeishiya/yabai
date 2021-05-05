@@ -225,11 +225,11 @@ COMMAND
 *--focus* '<SPACE_SEL>'::
     Focus the given space.
 
-*--create*::
-    Create a new space on the display of the selected space.
+*--create*  ['<SPACE_SEL>']::
+    Create a new space on the display of the given space. If none specified, use the selected space instead.
 
-*--destroy*::
-    Remove the selected space.
+*--destroy* ['<SPACE_SEL>']::
+    Remove the given space. If none specified, use the selected space instead.
 
 *--move* '<SPACE_SEL>'::
     Move position of the selected space to the position of the given space. +
@@ -242,8 +242,8 @@ COMMAND
 *--display* '<DISPLAY_SEL>'::
     Send the selected space to the given display.
 
-*--balance*::
-    Adjust the split ratios of the selected space so that all windows occupy the same area.
+*--balance* ['<SPACE_SEL>']::
+    Adjust the split ratios of the given space so that all windows occupy the same area. If none specified, use the selected space instead.
 
 *--mirror* 'x-axis|y-axis'::
     Flip the tree of the selected space.
@@ -278,8 +278,8 @@ yabai -m window ['<WINDOW_SEL>'] '<COMMAND>'
 COMMAND
 ^^^^^^^
 
-*--focus* '<WINDOW_SEL>'::
-    Focus the given window.
+*--focus* ['<WINDOW_SEL>']::
+    Focus the given window. If none specified, focus the selected window instead.
 
 *--swap* '<WINDOW_SEL>'::
     Swap position of the selected window and the given window.
@@ -323,15 +323,15 @@ COMMAND
 *--space* '<SPACE_SEL>'::
     Send the selected window to the given space.
 
-*--minimize*::
-    Minimizes the selected window. Only works on windows that provide a minimize button in its titlebar.
+*--minimize* ['<WINDOW_SEL>']::
+    Minimizes the given window. If none specified, minimize the selected window instead. Only works on windows that provide a minimize button in its titlebar.
 
-*--deminimize*::
-    Restores the selected window, if it is minimized. The window will only get focus if the owning application has focus. +
+*--deminimize* '<WINDOW_SEL>'::
+    Restores the given window, if it is minimized. The window will only get focus if the owning application has focus. +
     Note that you can also '--focus' a minimized window to restore it as the focused window.
 
-*--close*::
-    Closes the selected window. Only works on windows that provide a close button in its titlebar.
+*--close* ['<WINDOW_SEL>']::
+    Closes the given window. If none specified, close the selected window instead. Only works on windows that provide a close button in its titlebar.
 
 Query
 ~~~~~~

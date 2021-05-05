@@ -41,7 +41,7 @@ enum space_op_error
 };
 
 bool space_manager_has_separate_spaces(void);
-bool space_manager_query_active_space(FILE *rsp);
+bool space_manager_query_space(FILE *rsp, uint64_t sid);
 bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window);
 bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did);
 bool space_manager_query_spaces_for_displays(FILE *rsp);
