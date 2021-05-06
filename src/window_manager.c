@@ -266,16 +266,14 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
 
     CGPoint cursor;
     SLSGetCurrentCursorLocation(g_connection, &cursor);
-
-    CGRect frame = window_frame(window);
-    if (CGRectContainsPoint(frame, cursor)) return;
+    if (CGRectContainsPoint(window->frame, cursor)) return;
 
     uint32_t did = window_display_id(window);
     if (!did) return;
 
     CGPoint center = {
-        frame.origin.x + frame.size.width / 2,
-        frame.origin.y + frame.size.height / 2
+        window->frame.origin.x + window->frame.size.width / 2,
+        window->frame.origin.y + window->frame.size.height / 2
     };
 
     CGRect bounds = display_bounds(did);
@@ -341,9 +339,8 @@ enum window_op_error window_manager_move_window_relative(struct window_manager *
     if (view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     if (type == TYPE_REL) {
-        CGRect frame = window_frame(window);
-        dx += frame.origin.x;
-        dy += frame.origin.y;
+        dx += window->frame.origin.x;
+        dy += window->frame.origin.y;
     }
 
     AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
@@ -405,7 +402,7 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
                 window_manager_resize_window(window, dx, dy);
             });
         } else {
-            window_manager_resize_window_relative_internal(window, window_frame(window), direction, dx, dy);
+            window_manager_resize_window_relative_internal(window, window->frame, direction, dx, dy);
         }
     }
 

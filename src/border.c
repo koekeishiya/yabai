@@ -67,9 +67,8 @@ void border_create(struct window *window)
 
     if ((!window_is_standard(window)) && (!window_is_dialog(window))) return;
 
-    CGRect frame = window_ax_frame(window);
-    CGSNewRegionWithRect(&frame, &window->border.region);
-    window->border.frame.size = frame.size;
+    CGSNewRegionWithRect(&window->frame, &window->border.region);
+    window->border.frame.size = window->frame.size;
 
     window->border.path = CGPathCreateMutable();
     CGPathAddRoundedRect(window->border.path, NULL, window->border.frame, 0, 0);
@@ -102,13 +101,9 @@ void border_resize(struct window *window)
 {
     if (!window->border.id) return;
 
-    CGRect frame = window_ax_frame(window);
-    if ((frame.size.width  == window->border.frame.size.width) &&
-        (frame.size.height == window->border.frame.size.height)) return;
-
     if (window->border.region) CFRelease(window->border.region);
-    CGSNewRegionWithRect(&frame, &window->border.region);
-    window->border.frame.size = frame.size;
+    CGSNewRegionWithRect(&window->frame, &window->border.region);
+    window->border.frame.size = window->frame.size;
 
     if (window->border.path) CGPathRelease(window->border.path);
     window->border.path = CGPathCreateMutable();

@@ -31,8 +31,7 @@ CFStringRef window_display_uuid(struct window *window)
 {
     CFStringRef uuid = SLSCopyManagedDisplayForWindow(g_connection, window->id);
     if (!uuid) {
-        CGRect frame = window_frame(window);
-        uuid = SLSCopyBestManagedDisplayForRect(g_connection, frame);
+        uuid = SLSCopyBestManagedDisplayForRect(g_connection, window->frame);
     }
     return uuid;
 }
@@ -100,7 +99,6 @@ void window_serialize(FILE *rsp, struct window *window)
     char *subrole = NULL;
     char *title = window_title(window);
     char *escaped_title = ts_string_escape(title);
-    CGRect frame = window_frame(window);
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
@@ -167,7 +165,7 @@ void window_serialize(FILE *rsp, struct window *window)
             window->application->pid,
             window->application->name,
             escaped_title ? escaped_title : title,
-            frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
+            window->frame.origin.x, window->frame.origin.y, window->frame.size.width, window->frame.size.height,
             role ? role : "",
             subrole ? subrole : "",
             display,
@@ -214,6 +212,21 @@ char *window_title(struct window *window)
     return title;
 }
 
+CGPoint window_ax_origin(struct window *window)
+{
+    CGPoint origin = {};
+    CFTypeRef position_ref = NULL;
+
+    AXUIElementCopyAttributeValue(window->ref, kAXPositionAttribute, &position_ref);
+
+    if (position_ref) {
+        AXValueGetValue(position_ref, kAXValueTypeCGPoint, &origin);
+        CFRelease(position_ref);
+    }
+
+    return origin;
+}
+
 CGRect window_ax_frame(struct window *window)
 {
     CGRect frame = {};
@@ -233,13 +246,6 @@ CGRect window_ax_frame(struct window *window)
         CFRelease(size_ref);
     }
 
-    return frame;
-}
-
-CGRect window_frame(struct window *window)
-{
-    CGRect frame = {};
-    SLSGetWindowBounds(g_connection, window->id, &frame);
     return frame;
 }
 
@@ -272,9 +278,8 @@ bool window_can_minimize(struct window *window)
 
 bool window_is_undersized(struct window *window)
 {
-    CGRect frame = window_frame(window);
-    if (frame.size.width  < 200.0f) return true;
-    if (frame.size.height < 200.0f) return true;
+    if (window->frame.size.width  < 200.0f) return true;
+    if (window->frame.size.height < 200.0f) return true;
     return false;
 }
 
@@ -445,6 +450,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->ref = window_ref;
     window->id = window_id;
     SLSGetWindowOwner(g_connection, window->id, &window->connection);
+    window->frame = window_ax_frame(window);
     window->is_minimized = window_is_minimized(window);
     window->is_fullscreen = window_is_fullscreen(window) || space_is_fullscreen(window_space(window));
     window->is_sticky = window_is_sticky(window);

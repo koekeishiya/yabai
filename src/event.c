@@ -389,8 +389,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
         return EVENT_FAILURE;
     }
 
+    CGPoint new_origin = window_ax_origin(window);
+    if (CGPointEqualToPoint(new_origin, window->frame.origin)) {
+        debug("%s:DEBOUNCED %s %d\n", __FUNCTION__, window->application->name, window->id);
+        return EVENT_FAILURE;
+    }
+
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_MOVED, window);
+    window->frame.origin = new_origin;
 
     return EVENT_SUCCESS;
 }
@@ -411,12 +418,19 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         return EVENT_FAILURE;
     }
 
+    CGRect new_frame = window_ax_frame(window);
+    if (CGRectEqualToRect(new_frame, window->frame)) {
+        debug("%s:DEBOUNCED %s %d\n", __FUNCTION__, window->application->name, window->id);
+        return EVENT_FAILURE;
+    }
+
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_RESIZED, window);
 
     bool was_fullscreen = window->is_fullscreen;
     bool is_fullscreen = window_is_fullscreen(window);
     window->is_fullscreen = is_fullscreen;
+    window->frame = window_ax_frame(window);
 
     if (!was_fullscreen && is_fullscreen) {
         window_manager_make_window_topmost(&g_window_manager, window, false);
@@ -440,7 +454,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         window_manager_make_window_topmost(&g_window_manager, window, window->is_floating);
     } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
-            g_mouse_state.window_frame.size = window_ax_frame(g_mouse_state.window).size;
+            g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
         }
 
         border_resize(window);
@@ -640,7 +654,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
 
     g_mouse_state.window = window;
     g_mouse_state.down_location = point;
-    g_mouse_state.window_frame = window_ax_frame(g_mouse_state.window);
+    g_mouse_state.window_frame = g_mouse_state.window->frame;
 
     int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
     uint8_t mod = (uint8_t) param1;
@@ -768,7 +782,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
         int dy = point.y - g_mouse_state.down_location.y;
 
         uint8_t direction = 0;
-        CGRect frame = window_ax_frame(g_mouse_state.window);
+        CGRect frame = g_mouse_state.window->frame;
         CGPoint frame_mid = { CGRectGetMidX(frame), CGRectGetMidY(frame) };
 
         if (point.x < frame_mid.x) direction |= HANDLE_LEFT;
@@ -849,7 +863,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
 
 
             bool occludes_window = false;
-            CGRect frame = window_ax_frame(window);
 
             int window_count;
             uint32_t *window_list = space_window_list(g_space_manager.current_space_id, &window_count, false);
@@ -861,8 +874,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
                 struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
                 if (!sub_window) continue;
 
-                CGRect sub_frame = window_ax_frame(sub_window);
-                if (CGRectContainsRect(frame, sub_frame)) {
+                if (CGRectContainsRect(window->frame, sub_window->frame)) {
                     occludes_window = true;
                     break;
                 }

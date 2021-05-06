@@ -35,6 +35,7 @@ struct window
     int connection;
     uint32_t id;
     uint32_t *volatile id_ptr;
+    CGRect frame;
     uint8_t notification;
     bool has_shadow;
     bool is_fullscreen;
@@ -55,8 +56,8 @@ uint64_t window_space(struct window *window);
 uint64_t *window_space_list(struct window *window, int *count);
 void window_serialize(FILE *rsp, struct window *window);
 char *window_title(struct window *window);
+CGPoint window_ax_origin(struct window *window);
 CGRect window_ax_frame(struct window *window);
-CGRect window_frame(struct window *window);
 float window_opacity(struct window *window);
 int window_level(struct window *window);
 uint64_t window_tags(struct window *window);

@@ -1,6 +1,6 @@
 extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 extern int SLSMainConnectionID(void);
-extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
+// extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
 extern CGError SLSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
 extern CGError SLSSetWindowResolution(int cid, uint32_t wid, double resolution);

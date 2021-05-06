@@ -1,6 +1,6 @@
 void mouse_window_info_populate(struct mouse_state *ms, struct mouse_window_info *info)
 {
-    CGRect frame = window_ax_frame(ms->window);
+    CGRect frame = ms->window->frame;
 
     info->dx = frame.origin.x    - ms->window_frame.origin.x;
     info->dy = frame.origin.y    - ms->window_frame.origin.y;
@@ -18,7 +18,7 @@ void mouse_window_info_populate(struct mouse_state *ms, struct mouse_window_info
 
 enum mouse_drop_action mouse_determine_drop_action(struct mouse_state *ms, struct window_node *src_node, struct window *dst_window, CGPoint point)
 {
-    CGRect  f    = window_ax_frame(dst_window);
+    CGRect  f    = dst_window->frame;
     CGPoint wp   = { point.x - f.origin.x, point.y - f.origin.y };
     CGRect  c    = {{ 0.25f * f.size.width, 0.25f * f.size.height }, { 0.50f * f.size.width, 0.50f * f.size.height }};
     CGPoint t[3] = {{ 0.0f, 0.0f}, { 0.5f * f.size.width, 0.5f * f.size.height }, { f.size.width, 0.0f }};
