@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Improve behaviour of *focus_follows_mouse autoraise*, preventing a window from being raised if it would occlude some other window. autoraise is temporarily disabled while a menu is opened. [#407](https://github.com/koekeishiya/yabai/issues/407)
 - Work around broken Apple code for retrieving menubar dimensions on Apple Silicon M1 [#793](https://github.com/koekeishiya/yabai/issues/793)
 - Rework query attributes and define dataformat as part of the API [#775](https://github.com/koekeishiya/yabai/issues/775)
 - Properly clear space.last-window and space.first-window query attributes when the last window is made floating [#786](https://github.com/koekeishiya/yabai/issues/786)

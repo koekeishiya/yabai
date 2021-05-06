@@ -839,8 +839,39 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
             window_manager_focus_window_without_raise(&window->application->psn, window->id);
             g_mouse_state.ffm_window_id = window->id;
         } else {
-            window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
-            g_mouse_state.ffm_window_id = window->id;
+
+            //
+            // NOTE(koekeishiya): If any window would be fully occluded by autoraising
+            // the window below the cursor we do not actually perform the focus change,
+            // as it is likely that the user is trying to reach for the smaller window
+            // that sits on top of the window we would otherwise raise.
+            //
+
+
+            bool occludes_window = false;
+            CGRect frame = window_ax_frame(window);
+
+            int window_count;
+            uint32_t *window_list = space_window_list(g_space_manager.current_space_id, &window_count, false);
+
+            for (int i = 0; i < window_count; ++i) {
+                uint32_t wid = window_list[i];
+                if (wid == window->id) break;
+
+                struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
+                if (!sub_window) continue;
+
+                CGRect sub_frame = window_ax_frame(sub_window);
+                if (CGRectContainsRect(frame, sub_frame)) {
+                    occludes_window = true;
+                    break;
+                }
+            }
+
+            if (!occludes_window) {
+                window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+                g_mouse_state.ffm_window_id = window->id;
+            }
         }
     } else {
         uint32_t cursor_did = display_manager_point_display_id(point);
@@ -963,12 +994,32 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
     return EVENT_SUCCESS;
 }
 
+static enum ffm_mode ffm_value;
+static int is_menu_open = 0;
+
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_OPENED)
 {
-    uint32_t window_id = (uint32_t)(intptr_t) context;
+    debug("%s\n", __FUNCTION__);
+
+    if (++is_menu_open == 1) {
+        ffm_value = g_window_manager.ffm_mode;
+        g_window_manager.ffm_mode = FFM_DISABLED;
+    }
 
     if (g_window_manager.enable_window_topmost) {
+        uint32_t window_id = (uint32_t)(intptr_t) context;
         scripting_addition_set_layer(window_id, LAYER_ABOVE);
+    }
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MENU_CLOSED)
+{
+    debug("%s\n", __FUNCTION__);
+
+    if (--is_menu_open == 0) {
+        g_window_manager.ffm_mode = ffm_value;
     }
 
     return EVENT_SUCCESS;

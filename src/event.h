@@ -34,6 +34,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT);
 static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT);
 static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART);
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_OPENED);
+static EVENT_CALLBACK(EVENT_HANDLER_MENU_CLOSED);
 static EVENT_CALLBACK(EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED);
 static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_CHANGE_PREF);
 static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE);
@@ -82,6 +83,7 @@ enum event_type
     MISSION_CONTROL_EXIT,
     DOCK_DID_RESTART,
     MENU_OPENED,
+    MENU_CLOSED,
     MENU_BAR_HIDDEN_CHANGED,
     DOCK_DID_CHANGE_PREF,
     SYSTEM_WOKE,
@@ -124,6 +126,7 @@ static const char *event_type_str[] =
     [MISSION_CONTROL_EXIT]           = "mission_control_exit",
     [DOCK_DID_RESTART]               = "dock_did_restart",
     [MENU_OPENED]                    = "menu_opened",
+    [MENU_CLOSED]                    = "menu_closed",
     [MENU_BAR_HIDDEN_CHANGED]        = "menu_bar_hidden_changed",
     [DOCK_DID_CHANGE_PREF]           = "dock_did_change_pref",
     [SYSTEM_WOKE]                    = "system_woke",
@@ -164,6 +167,7 @@ static event_callback *event_handler[] =
     [MISSION_CONTROL_EXIT]           = EVENT_HANDLER_MISSION_CONTROL_EXIT,
     [DOCK_DID_RESTART]               = EVENT_HANDLER_DOCK_DID_RESTART,
     [MENU_OPENED]                    = EVENT_HANDLER_MENU_OPENED,
+    [MENU_CLOSED]                    = EVENT_HANDLER_MENU_CLOSED,
     [MENU_BAR_HIDDEN_CHANGED]        = EVENT_HANDLER_MENU_BAR_HIDDEN_CHANGED,
     [DOCK_DID_CHANGE_PREF]           = EVENT_HANDLER_DOCK_DID_CHANGE_PREF,
     [SYSTEM_WOKE]                    = EVENT_HANDLER_SYSTEM_WOKE,
