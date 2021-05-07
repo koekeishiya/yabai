@@ -430,7 +430,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     bool was_fullscreen = window->is_fullscreen;
     bool is_fullscreen = window_is_fullscreen(window);
     window->is_fullscreen = is_fullscreen;
-    window->frame = window_ax_frame(window);
+    window->frame = new_frame;
 
     if (!was_fullscreen && is_fullscreen) {
         window_manager_make_window_topmost(&g_window_manager, window, false);
