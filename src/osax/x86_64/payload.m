@@ -152,8 +152,8 @@ const char *get_add_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_remove_space_pattern(NSOperatingSystemVersion os_version) {
     if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
-        if (os_version.majorVersion == 11 && os_version.minorVersion == 3) {
-            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC C8 00 00 00 49 89 CC 49 89 D7 49 89 F5 49 89 FE E8 35 67 F4 FF 48 89 C3 48 B8 01 00 00 00 00 00 00 40 48 BF F8 FF FF FF FF FF FF 00 48 21 DF 48 85 C3 0F 85 0C 06 00 00 48 8B 47 10 48 83 F8 02 0F 8C 36 02 00 00 4C 89 65 A8 4C 89 AD 68 FF FF FF 48 89 5D A0 48 8D 05 EF BF 13 00 48 8B 00 4D";
+        if (os_version.majorVersion == 11 && os_version.minorVersion >= 3) {
+            return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC C8 00 00 00 49 89 CC 49 89 D7 49 89 F5 49 89 FE E8 ?? ?? F4 FF 48 89 C3 48 B8 01 00 00 00 00 00 00 40 48 BF F8 FF FF FF FF FF FF 00 48 21 DF 48 85 C3 0F 85 0C 06 00 00 48 8B 47 10 48 83 F8 02 0F 8C 36 02 00 00 4C 89 65 A8 4C 89 AD 68 FF FF FF 48 89 5D A0 48 8D 05 ?? ?? 13 00 48 8B 00 4D";
         }
         return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 68 48 89 4D 98 49 89 D4 49 89 F6 49 89 FF 49 89 F5 E8 ?? ?? F3 FF 49 89 C5 48 B8 01 00 00 00 00 00 00 40 49 85 C5 0F 85 DE 03 00 00 48 B8 F8 FF FF FF FF FF FF 00 4C 21 E8 48 8B 58 10 48 83 FB 02 0F 8C CD 01 00 00 4C 89 75 A0 48 8D 05 ?? ?? ?? 00 48 8B 00 4D 8B 34 07 4C 89 E3 4D 8B 64 07";
     } else if (os_version.minorVersion == 15) {
@@ -176,7 +176,7 @@ const char *get_remove_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_move_space_pattern(NSOperatingSystemVersion os_version) {
     if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
-        if (os_version.majorVersion == 11 && os_version.minorVersion == 3) {
+        if (os_version.majorVersion == 11 && os_version.minorVersion >= 3) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 F6 49 89 FF 48 8D 1D ?? ?? ?? 00 48 8B 03 4C 8B 24 07 4C 89 E7 48 89 4D A0 48 89 CE E8 ?? ?? 00 00 48 85 C0 74 ?? 48 8D 0D ?? ?? ?? 00 80 39 01 48 89 55 C8 48 89 45 A8 75 38 49 89 D5 49 83 C5 28 48 89 C3 48 89 C7";
         }
         return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 F6 49 89 FF 48 8D 1D ?? ?? ?? 00 48 8B 03 4C 8B 24 07 4C 89 E7 48 89 4D A0 48 89 CE E8 ?? ?? 00 00 48 85 C0 74 27 48 8D 0D ?? ?? ?? 00 80 39 01 48 89 55 C8 48 89 45 A8 75 1A 48 89 C7 4C 89 F6 49 89 D5 E8 ?? ?? F4";
