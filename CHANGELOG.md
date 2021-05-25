@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [3.3.9] - 2021-05-25
+### Changed
+- Update scripting addition to support macOS 11.4
+
 ## [3.3.8] - 2021-04-28
 ### Changed
 - Update scripting addition to support macOS 11.3
@@ -345,7 +349,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.8...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.9...HEAD
+[3.3.9]: https://github.com/koekeishiya/yabai/compare/v3.3.8...v3.3.9
 [3.3.8]: https://github.com/koekeishiya/yabai/compare/v3.3.7...v3.3.8
 [3.3.7]: https://github.com/koekeishiya/yabai/compare/v3.3.6...v3.3.7
 [3.3.6]: https://github.com/koekeishiya/yabai/compare/v3.3.5...v3.3.6

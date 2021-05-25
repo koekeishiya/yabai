@@ -231,7 +231,7 @@ static int scripting_addition_perform_validation(bool loaded)
 
         return PAYLOAD_STATUS_OUTDATED;
     } else if ((attrib & OSAX_ATTRIB_ALL) != OSAX_ATTRIB_ALL) {
-        notify("scripting-addition", "payload doesn't support this macOS version!");
+        notify("scripting-addition", "payload (0x%X) doesn't support this macOS version!", attrib);
         return PAYLOAD_STATUS_NO_ATTRIB;
     } else {
         notify("scripting-addition", "payload v%s", version);
