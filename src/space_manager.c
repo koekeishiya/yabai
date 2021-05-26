@@ -14,6 +14,28 @@ static TABLE_COMPARE_FUNC(compare_view)
     return *(uint64_t *) key_a == *(uint64_t *) key_b;
 }
 
+static inline bool space_manager_is_space_last_user_space(uint64_t sid)
+{
+    bool result = true;
+
+    int count;
+    uint64_t *space_list = display_space_list(space_display_id(sid), &count);
+    if (!space_list) return true;
+
+    for (int i = 0; i < count; ++i) {
+        uint64_t c_sid = space_list[i];
+        if (sid == c_sid) continue;
+
+        if (space_is_user(c_sid)) {
+            result = false;
+            break;
+        }
+    }
+
+    return result;
+}
+
+
 bool space_manager_has_separate_spaces(void)
 {
     return SLSGetSpaceManagementMode(g_connection) == 1;
@@ -620,6 +642,7 @@ void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 
 enum space_op_error space_manager_focus_space(uint64_t sid)
 {
+    debug("space_manager_focus_space %d\n", sid);
     bool is_in_mc = g_mission_control_active;
     if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
 
@@ -642,25 +665,106 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
     return SPACE_OP_ERROR_SUCCESS;
 }
 
-static inline bool space_manager_is_space_last_user_space(uint64_t sid)
-{
-    bool result = true;
+static bool move_all_windows(uint32_t *window_list, int window_list_count, uint64_t to_sid) {
+    debug("move_all_windows %i to %d\n", window_list_count, to_sid);
 
-    int count;
-    uint64_t *space_list = display_space_list(space_display_id(sid), &count);
-    if (!space_list) return true;
-
-    for (int i = 0; i < count; ++i) {
-        uint64_t c_sid = space_list[i];
-        if (sid == c_sid) continue;
-
-        if (space_is_user(c_sid)) {
-            result = false;
-            break;
-        }
+    if (!window_list) {
+      debug("no window list!\n");
+      return false;
     }
 
-    return result;
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), window_list_count, kCFNumberSInt32Type);
+    SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, to_sid);
+    CFRelease(window_list_ref);
+
+    debug("returning from move_all_windows\n");
+    return true;
+}
+
+static void space_manager_swap_spaces(uint64_t a_sid, uint64_t b_sid)
+{
+    // collect all data before mutating any state
+    int a_window_list_count = 0;
+    uint32_t *a_window_list = space_window_list(a_sid, &a_window_list_count, true);
+
+    int b_window_list_count = 0;
+    uint32_t *b_window_list = space_window_list(b_sid, &b_window_list_count, true);
+
+    struct view *a_view = table_find(&g_space_manager.view, &a_sid);
+    struct view *b_view = table_find(&g_space_manager.view, &b_sid);
+
+    // swap the view table
+    table_remove(&g_space_manager.view, &a_sid);
+    table_remove(&g_space_manager.view, &b_sid);
+
+    table_add(&g_space_manager.view, &a_sid, b_view);
+    table_add(&g_space_manager.view, &b_sid, a_view);
+    a_view->sid = b_sid;
+    b_view->sid = a_sid;
+
+    // swap suuid
+    CFStringRef tmp;
+    tmp = a_view->suuid;
+    a_view->suuid = b_view->suuid;
+    b_view->suuid = tmp;
+
+    // swap all windows
+    move_all_windows(a_window_list, a_window_list_count, b_sid);
+    move_all_windows(b_window_list, b_window_list_count, a_sid);
+
+    // swap the labels
+    int labels_size = buf_len(g_space_manager.labels);
+    for (int i = 0; i < labels_size; ++i) {
+        struct space_label *label = &g_space_manager.labels[i];
+        if      (label->sid == a_sid) label->sid = b_sid;
+        else if (label->sid == b_sid) label->sid = a_sid;
+    }
+
+    space_manager_refresh_view(&g_space_manager, a_sid);
+    space_manager_refresh_view(&g_space_manager, b_sid);
+}
+
+enum space_op_error space_manager_switch_to_space(uint64_t sid, uint64_t cur_sid)
+{
+    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
+
+    bool is_in_mc = g_mission_control_active;
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
+    uint32_t cur_did = space_display_id(cur_sid);
+    uint32_t new_did = space_display_id(sid);
+
+    bool is_animating = display_manager_display_is_animating(new_did);
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    bool swap_space = display_space_id(new_did) == sid;
+    bool move_space = cur_did != new_did;
+
+    debug("switch space %d[%d] -> %d[%d]\n", cur_sid, cur_did, sid, new_did);
+
+    if (swap_space) {
+        debug("target space visible on other display: SWAP");
+        space_manager_swap_spaces(cur_sid, sid);
+        display_manager_focus_display(cur_did);
+    }
+    else if (move_space) {
+        debug("on other display: MOVE\n");
+        space_manager_move_space_to_display(&g_space_manager, sid, cur_did);
+        space_manager_focus_space(sid);
+    }
+    else {
+        debug("on same display: FOCUS\n");
+        space_manager_focus_space(sid);
+    }
+
+    // debug("labels after:\n");
+    // int labels_size = buf_len(g_space_manager.labels);
+    // for (int i = 0; i < labels_size; ++i) {
+    //     struct space_label *label = &g_space_manager.labels[i];
+    //     debug("%s(%d) on display %d\n", label->label, label->sid, display_arrangement(space_display_id(label->sid)));
+    // }
+
+    return SPACE_OP_ERROR_SUCCESS;
 }
 
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid)
