@@ -127,6 +127,21 @@ CGRect display_bounds_constrained(uint32_t did)
     return frame;
 }
 
+static inline float display_frame_center(enum display_sort_order axis, CFStringRef uuid_str) {
+    CFUUIDRef uuid_ref = CFUUIDCreateFromString(NULL, uuid_str);
+    uint32_t did = CGDisplayGetDisplayIDFromUUID(uuid_ref);
+    CGRect frame = CGDisplayBounds(did);
+
+    switch(axis) {
+      case DISPLAY_SORT_HORIZ: return frame.origin.x + (frame.size.width) / 2;
+      case DISPLAY_SORT_VERT: return frame.origin.y + (frame.size.height) / 2;
+
+      // should not get here, but if we do it'll just result in not sorting
+      // (considering every display to be "equal")
+      default: return 0.0;
+    }
+}
+
 CGPoint display_center(uint32_t did)
 {
     CGRect bounds = display_bounds(did);

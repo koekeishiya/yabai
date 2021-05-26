@@ -5,6 +5,20 @@
 #define DOCK_ORIENTATION_LEFT   3
 #define DOCK_ORIENTATION_RIGHT  4
 
+enum display_sort_order
+{
+  DISPLAY_SORT_NONE,
+  DISPLAY_SORT_HORIZ,
+  DISPLAY_SORT_VERT
+};
+
+static const char *display_sort_order_str[] =
+{
+  "none",
+  "horizontal",
+  "vertical"
+};
+
 enum external_bar_mode
 {
     EXTERNAL_BAR_OFF,
@@ -23,6 +37,8 @@ struct display_manager
 {
     uint32_t current_display_id;
     uint32_t last_display_id;
+
+    enum display_sort_order sort_order;
 
     int top_padding;
     int bottom_padding;
