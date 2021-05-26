@@ -19,6 +19,10 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Removed
 - The following signals have been removed: *mouse_up*, *mouse_down*, *mouse_dragged*, *mouse_moved*, *mission_control_check_for_exit*, *menu_opened*, *system_woke*, *daemon_message*
 
+## [3.3.10] - 2021-05-26
+### Changed
+- Update scripting addition to support macOS 10.15.7 Supplemental Update
+
 ## [3.3.9] - 2021-05-25
 ### Changed
 - Update scripting addition to support macOS 11.4
@@ -362,7 +366,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.9...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.10...HEAD
+[3.3.10]: https://github.com/koekeishiya/yabai/compare/v3.3.9...v3.3.10
 [3.3.9]: https://github.com/koekeishiya/yabai/compare/v3.3.8...v3.3.9
 [3.3.8]: https://github.com/koekeishiya/yabai/compare/v3.3.7...v3.3.8
 [3.3.7]: https://github.com/koekeishiya/yabai/compare/v3.3.6...v3.3.7
