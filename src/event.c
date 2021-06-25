@@ -775,9 +775,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
 
     struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
     if (window) {
-        if (window->id == g_window_manager.focused_window_id) return EVENT_SUCCESS;
-        if (!window_level_is_standard(window))                return EVENT_SUCCESS;
-        if (!window_is_standard(window))                      return EVENT_SUCCESS;
+        if (window->id == g_window_manager.focused_window_id)       return EVENT_SUCCESS;
+        if (!window_level_is_standard(window))                      return EVENT_SUCCESS;
+        if (!window_is_standard(window) && !window->rule_manage)    return EVENT_SUCCESS;
 
         if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
 

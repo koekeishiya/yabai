@@ -67,7 +67,7 @@ void border_create(struct window *window)
 {
     if (window->border.id) return;
 
-    if ((!window_is_standard(window)) && (!window_is_dialog(window))) return;
+    if ((!window_is_standard(window) && !window->rule_manage) && (!window_is_dialog(window))) return;
 
     CGRect frame = window_ax_frame(window);
     CGSNewRegionWithRect(&frame, &window->border.region);
