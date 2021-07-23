@@ -46,6 +46,7 @@ static void window_did_receive_focus(struct window_manager *wm, struct mouse_sta
 static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 {
     struct process *process = context;
+    process->ns_application = workspace_application_create_running_ns_application(process); 
 
     if (process->terminated) {
         debug("%s: %s (%d) terminated during launch\n", __FUNCTION__, process->name, process->pid);
