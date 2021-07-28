@@ -183,10 +183,10 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(zoom_fullscreen),
             json_bool(window_is_fullscreen(window)),
             json_bool(visible),
-            json_bool(window->is_floating),
-            json_bool(window->is_sticky),
             json_bool(is_minimized),
             json_bool(window->application->is_hidden),
+            json_bool(window->is_floating),
+            json_bool(window->is_sticky),
             json_bool(is_topmost),
             json_bool(grabbed));
 }
