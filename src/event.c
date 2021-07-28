@@ -817,8 +817,12 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
     if (window) {
         if (window->id == g_window_manager.focused_window_id) goto out;
-        if (!window_level_is_standard(window))                goto out;
-        if (!window_is_standard(window))                      goto out;
+
+        if (!window->rule_manage) {
+            if (!window_level_is_standard(window))                            goto out;
+            if ((!window_is_standard(window)) && (!window_is_dialog(window))) goto out;
+        }
+
 
         if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
 
