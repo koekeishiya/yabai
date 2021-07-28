@@ -22,7 +22,7 @@ void workspace_event_handler_end(void *context)
 
 void *workspace_application_create_running_ns_application(struct process *process)
 {
-    return [NSRunningApplication runningApplicationWithProcessIdentifier:process->pid];
+    return [[NSRunningApplication runningApplicationWithProcessIdentifier:process->pid] retain];
 }
 
 void workspace_application_destroy_running_ns_application(void *ws_context, struct process *process)
