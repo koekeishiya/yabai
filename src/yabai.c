@@ -289,7 +289,7 @@ int main(int argc, char **argv)
         error("yabai: could not allocate memory for event_signal! abort..\n");
     }
 
-    if (!ts_init(KILOBYTES(128))) {
+    if (!ts_init(MEGABYTES(1))) {
         error("yabai: could not allocate temporary storage! abort..\n");
     }
 
