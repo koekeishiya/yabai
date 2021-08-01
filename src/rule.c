@@ -11,6 +11,8 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"label\":\"%s\",\n"
             "\t\"app\":\"%s\",\n"
             "\t\"title\":\"%s\",\n"
+            "\t\"role\":\"%s\",\n"
+            "\t\"subrole\":\"%s\",\n"
             "\t\"display_id\":%d,\n"
             "\t\"space_id\":%lld,\n"
             "\t\"follow_space\":%d,\n"
@@ -27,6 +29,8 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->label ? rule->label : "",
             rule->app ? rule->app : "",
             rule->title ? rule->title : "",
+            rule->role ? rule->role : "",
+            rule->subrole ? rule->subrole : "",
             rule->did,
             rule->sid,
             rule->follow_space,
@@ -92,9 +96,13 @@ void rule_add(struct rule *rule)
 
 void rule_destroy(struct rule *rule)
 {
-    if (rule->app_regex_valid)   regfree(&rule->app_regex);
-    if (rule->title_regex_valid) regfree(&rule->title_regex);
-    if (rule->label) free(rule->label);
-    if (rule->app)   free(rule->app);
-    if (rule->title) free(rule->title);
+    if (rule->app_regex_valid)     regfree(&rule->app_regex);
+    if (rule->title_regex_valid)   regfree(&rule->title_regex);
+    if (rule->role_regex_valid)    regfree(&rule->role_regex);
+    if (rule->subrole_regex_valid) regfree(&rule->subrole_regex);
+    if (rule->label)   free(rule->label);
+    if (rule->app)     free(rule->app);
+    if (rule->title)   free(rule->title);
+    if (rule->role)    free(rule->role);
+    if (rule->subrole) free(rule->subrole);
 }

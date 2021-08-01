@@ -164,6 +164,8 @@ extern bool g_verbose;
 
 #define ARGUMENT_RULE_KEY_APP     "app"
 #define ARGUMENT_RULE_KEY_TITLE   "title"
+#define ARGUMENT_RULE_KEY_ROLE    "role"
+#define ARGUMENT_RULE_KEY_SUBROLE "subrole"
 #define ARGUMENT_RULE_KEY_DISPLAY "display"
 #define ARGUMENT_RULE_KEY_SPACE   "space"
 #define ARGUMENT_RULE_KEY_ALPHA   "opacity"
@@ -2059,6 +2061,24 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 rule.title_regex_exclude = exclusion;
                 rule.title_regex_valid = regcomp(&rule.title_regex, value, REG_EXTENDED) == 0;
                 if (!rule.title_regex_valid) {
+                    daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_ROLE)) {
+                has_filter = true;
+                rule.role = string_copy(value);
+                rule.role_regex_exclude = exclusion;
+                rule.role_regex_valid = regcomp(&rule.role_regex, value, REG_EXTENDED) == 0;
+                if (!rule.role_regex_valid) {
+                    daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
+                    did_parse = false;
+                }
+            } else if (string_equals(key, ARGUMENT_RULE_KEY_SUBROLE)) {
+                has_filter = true;
+                rule.subrole = string_copy(value);
+                rule.subrole_regex_exclude = exclusion;
+                rule.subrole_regex_valid = regcomp(&rule.subrole_regex, value, REG_EXTENDED) == 0;
+                if (!rule.subrole_regex_valid) {
                     daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }

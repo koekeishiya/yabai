@@ -400,6 +400,12 @@ ARGUMENT
 *title[!]='<REGEX>'*::
     Title of window. If '!' is present, invert the match.
 
+*role[!]='<REGEX>'*::
+    Role of window. If '!' is present, invert the match.
+
+*subrole[!]='<REGEX>'*::
+    Subrole of window. If '!' is present, invert the match.
+
 *display='[^]<DISPLAY_SEL>'*::
     Send window to display. If '^' is present, follow focus.
 

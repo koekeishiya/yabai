@@ -110,6 +110,26 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     int regex_match_title = rule->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
     if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window)) == regex_match_title)      return;
 
+    char *role = NULL;
+    char *subrole = NULL;
+    CFStringRef cfrole = window_role(window);
+    if (cfrole) {
+        role = ts_cfstring_copy(cfrole);
+        CFRelease(cfrole);
+    }
+
+    CFStringRef cfsubrole = window_subrole(window);
+    if (cfsubrole) {
+        subrole = ts_cfstring_copy(cfsubrole);
+        CFRelease(cfsubrole);
+    }
+
+    int regex_match_role = rule->role_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->role_regex_valid, &rule->role_regex, role ? role : "") == regex_match_role)               return;
+
+    int regex_match_subrole = rule->subrole_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, subrole ? subrole : "") == regex_match_subrole) return;
+
     if (rule->sid || rule->did) {
         if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
             uint64_t sid = rule->did ? display_space_id(rule->did) : rule->sid;
