@@ -137,7 +137,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
-            window_manager_purify_window(&g_window_manager, window);
         }
 
         if (g_mouse_state.window == window) g_mouse_state.window = NULL;
