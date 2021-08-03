@@ -311,8 +311,10 @@ void window_node_flush(struct window_node *node)
             if (window) {
                 if (node->zoom) {
                     window_manager_set_window_frame(window, node->zoom->area.x, node->zoom->area.y, node->zoom->area.w, node->zoom->area.h);
+                    border_resize(window);
                 } else {
                     window_manager_set_window_frame(window, node->area.x, node->area.y, node->area.w, node->area.h);
+                    border_resize(window);
                 }
             }
         }

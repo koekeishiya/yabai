@@ -105,7 +105,9 @@ void border_resize(struct window *window)
     if (!window->border.id) return;
 
     CGRect frame = window_ax_frame(window);
-    if ((frame.size.width  == window->border.frame.size.width) &&
+    if ((frame.origin.x  == window->border.frame.origin.x) &&
+        (frame.origin.y == window->border.frame.origin.y) &&
+        (frame.size.width  == window->border.frame.size.width) &&
         (frame.size.height == window->border.frame.size.height)) return;
 
     if (window->border.region) CFRelease(window->border.region);
