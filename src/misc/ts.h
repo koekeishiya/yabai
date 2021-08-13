@@ -41,7 +41,6 @@ static inline void *ts_alloc_aligned(uint64_t elem_size, uint64_t elem_count)
     for (;;) {
         uint64_t used = g_temp_storage.used;
         uint64_t aligned = ts_align(used, elem_size);
-        printf("%s: bumped %lld bytes\n", __FUNCTION__, aligned - used);
         uint64_t new_used = aligned + (elem_size * elem_count);
 
         if (__sync_bool_compare_and_swap(&g_temp_storage.used, used, new_used)) {
