@@ -115,7 +115,7 @@ static inline char *ts_string_escape(char *s)
     char *cursor = _string_escape_pre(s, &size_in_bytes);
     if (!cursor) return NULL;
 
-    char *result = ts_alloc(sizeof(char) * (size_in_bytes+1));
+    char *result = ts_alloc_unaligned(sizeof(char) * (size_in_bytes+1));
     result[size_in_bytes] = '\0';
     _string_escape_post(s, cursor, result);
 
@@ -157,7 +157,7 @@ static CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFN
 static inline char *ts_cfstring_copy(CFStringRef string)
 {
     CFIndex num_bytes = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
-    char *result = ts_alloc(num_bytes + 1);
+    char *result = ts_alloc_unaligned(num_bytes + 1);
 
     if (!CFStringGetCString(string, result, num_bytes + 1, kCFStringEncodingUTF8)) {
         result = NULL;
@@ -183,7 +183,7 @@ static inline char *cfstring_copy(CFStringRef string)
 static inline char *ts_string_copy(char *s)
 {
     int length = strlen(s);
-    char *result = ts_alloc(length + 1);
+    char *result = ts_alloc_unaligned(length + 1);
 
     memcpy(result, s, length);
     result[length] = '\0';

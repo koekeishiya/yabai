@@ -360,7 +360,7 @@ static bool token_is_float(struct token token, float *value)
 static char *token_to_string(struct token token, bool temp)
 {
     unsigned int length = token.length + 1;
-    char *result = temp ? ts_alloc(length) : malloc(length);
+    char *result = temp ? ts_alloc_unaligned(length) : malloc(length);
     if (!result) return NULL;
 
     memcpy(result, token.text, token.length);

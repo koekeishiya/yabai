@@ -33,7 +33,7 @@ uint32_t *space_window_list_for_connection(uint64_t sid, int cid, int *count, bo
     *count = CFArrayGetCount(window_list_ref);
     if (!*count) goto out;
 
-    window_list = ts_alloc(*count * sizeof(uint32_t));
+    window_list = ts_alloc_aligned(sizeof(uint32_t), *count);
 
     for (int i = 0; i < *count; ++i) {
         CFNumberRef id_ref = CFArrayGetValueAtIndex(window_list_ref, i);

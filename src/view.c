@@ -683,7 +683,7 @@ uint32_t *view_find_window_list(struct view *view, int *window_count)
     *window_count = 0;
 
     int capacity = 13;
-    uint32_t *window_list = ts_alloc(sizeof(uint32_t) * capacity);
+    uint32_t *window_list = ts_alloc_aligned(sizeof(uint32_t), capacity);
 
     struct window_node *node = window_node_find_first_leaf(view->root);
     while (node) {

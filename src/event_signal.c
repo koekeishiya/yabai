@@ -120,8 +120,8 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_APPLICATION_VISIBLE: {
         struct application *application = context;
 
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_PROCESS_ID");
         snprintf(es->arg_value[0], arg_size, "%d", application->pid);
@@ -131,8 +131,8 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_APPLICATION_TERMINATED: {
         struct application *application = context;
 
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_PROCESS_ID");
         snprintf(es->arg_value[0], arg_size, "%d", application->pid);
@@ -155,10 +155,10 @@ void event_signal_push(enum signal_type type, void *context)
         }
     } break;
     case SIGNAL_APPLICATION_FRONT_SWITCHED: {
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
-        es->arg_name[1]  = ts_alloc(arg_size);
-        es->arg_value[1] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
+        es->arg_name[1]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[1] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_PROCESS_ID");
         snprintf(es->arg_value[0], arg_size, "%d", g_process_manager.front_pid);
@@ -168,8 +168,8 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_APPLICATION_HIDDEN: {
         struct application *application = context;
 
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_PROCESS_ID");
         snprintf(es->arg_value[0], arg_size, "%d", application->pid);
@@ -182,8 +182,8 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_WINDOW_DEMINIMIZED: {
         struct window *window = context;
 
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_WINDOW_ID");
         snprintf(es->arg_value[0], arg_size, "%d", window->id);
@@ -194,8 +194,8 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_WINDOW_DESTROYED: {
         struct window *window = context;
 
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_WINDOW_ID");
         snprintf(es->arg_value[0], arg_size, "%d", window->id);
@@ -209,8 +209,8 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_WINDOW_TITLE_CHANGED: {
         struct window *window = context;
 
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_WINDOW_ID");
         snprintf(es->arg_value[0], arg_size, "%d", window->id);
@@ -220,10 +220,10 @@ void event_signal_push(enum signal_type type, void *context)
         es->active = g_window_manager.focused_window_id == window->id;
     } break;
     case SIGNAL_SPACE_CHANGED: {
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
-        es->arg_name[1]  = ts_alloc(arg_size);
-        es->arg_value[1] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
+        es->arg_name[1]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[1] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s",   "YABAI_SPACE_ID");
         snprintf(es->arg_value[0], arg_size, "%lld", g_space_manager.current_space_id);
@@ -236,17 +236,17 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_DISPLAY_RESIZED: {
         uint32_t did = (uint32_t)(uintptr_t) context;
 
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_DISPLAY_ID");
         snprintf(es->arg_value[0], arg_size, "%d", did);
     } break;
     case SIGNAL_DISPLAY_CHANGED: {
-        es->arg_name[0]  = ts_alloc(arg_size);
-        es->arg_value[0] = ts_alloc(arg_size);
-        es->arg_name[1]  = ts_alloc(arg_size);
-        es->arg_value[1] = ts_alloc(arg_size);
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
+        es->arg_name[1]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[1] = ts_alloc_unaligned(arg_size);
 
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_DISPLAY_ID");
         snprintf(es->arg_value[0], arg_size, "%d", g_display_manager.current_display_id);
