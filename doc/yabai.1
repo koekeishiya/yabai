@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.12
-.\"      Date: 2021-05-26
+.\"      Date: 2021-08-14
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2021-05-26" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2021-08-14" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -152,6 +152,17 @@ When focusing a window, put the mouse at its center.
 \fBfocus_follows_mouse\fP [\fIautofocus|autoraise|off\fP]
 .RS 4
 Automatically focus the window under the mouse.
+.RE
+.sp
+\fBwindow_origin_display\fP [\fIdefault|focused|cursor\fP]
+.RS 4
+Specify which display a newly created window should be managed in.
+.br
+\fIdefault\fP: The display in which the window is created (standard macOS behaviour).
+.br
+\fIfocused\fP: The display that has focus when the window is created.
+.br
+\fIcursor\fP: The display that currently holds the mouse cursor.
 .RE
 .sp
 \fBwindow_placement\fP [\fIfirst_child|second_child\fP]

@@ -23,6 +23,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_DEBUG_OUTPUT          "debug_output"
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
 #define COMMAND_CONFIG_FFM                   "focus_follows_mouse"
+#define COMMAND_CONFIG_WINDOW_ORIGIN         "window_origin_display"
 #define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
 #define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
@@ -51,26 +52,29 @@ extern bool g_verbose;
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
-#define ARGUMENT_CONFIG_FFM_AUTOFOCUS        "autofocus"
-#define ARGUMENT_CONFIG_FFM_AUTORAISE        "autoraise"
-#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST "first_child"
-#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND "second_child"
-#define ARGUMENT_CONFIG_SHADOW_FLT           "float"
-#define ARGUMENT_CONFIG_LAYOUT_BSP           "bsp"
-#define ARGUMENT_CONFIG_LAYOUT_STACK         "stack"
-#define ARGUMENT_CONFIG_LAYOUT_FLOAT         "float"
-#define ARGUMENT_CONFIG_MOUSE_MOD_ALT        "alt"
-#define ARGUMENT_CONFIG_MOUSE_MOD_SHIFT      "shift"
-#define ARGUMENT_CONFIG_MOUSE_MOD_CMD        "cmd"
-#define ARGUMENT_CONFIG_MOUSE_MOD_CTRL       "ctrl"
-#define ARGUMENT_CONFIG_MOUSE_MOD_FN         "fn"
-#define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE    "move"
-#define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE  "resize"
-#define ARGUMENT_CONFIG_MOUSE_ACTION_SWAP    "swap"
-#define ARGUMENT_CONFIG_MOUSE_ACTION_STACK   "stack"
-#define ARGUMENT_CONFIG_EXTERNAL_BAR_MAIN    "main"
-#define ARGUMENT_CONFIG_EXTERNAL_BAR_ALL     "all"
-#define ARGUMENT_CONFIG_EXTERNAL_BAR         "%5[^:]:%d:%d"
+#define ARGUMENT_CONFIG_FFM_AUTOFOCUS         "autofocus"
+#define ARGUMENT_CONFIG_FFM_AUTORAISE         "autoraise"
+#define ARGUMENT_CONFIG_WINDOW_ORIGIN_DEFAULT "default"
+#define ARGUMENT_CONFIG_WINDOW_ORIGIN_FOCUSED "focused"
+#define ARGUMENT_CONFIG_WINDOW_ORIGIN_CURSOR  "cursor"
+#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_FST  "first_child"
+#define ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND  "second_child"
+#define ARGUMENT_CONFIG_SHADOW_FLT            "float"
+#define ARGUMENT_CONFIG_LAYOUT_BSP            "bsp"
+#define ARGUMENT_CONFIG_LAYOUT_STACK          "stack"
+#define ARGUMENT_CONFIG_LAYOUT_FLOAT          "float"
+#define ARGUMENT_CONFIG_MOUSE_MOD_ALT         "alt"
+#define ARGUMENT_CONFIG_MOUSE_MOD_SHIFT       "shift"
+#define ARGUMENT_CONFIG_MOUSE_MOD_CMD         "cmd"
+#define ARGUMENT_CONFIG_MOUSE_MOD_CTRL        "ctrl"
+#define ARGUMENT_CONFIG_MOUSE_MOD_FN          "fn"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_MOVE     "move"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_RESIZE   "resize"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_SWAP     "swap"
+#define ARGUMENT_CONFIG_MOUSE_ACTION_STACK    "stack"
+#define ARGUMENT_CONFIG_EXTERNAL_BAR_MAIN     "main"
+#define ARGUMENT_CONFIG_EXTERNAL_BAR_ALL      "all"
+#define ARGUMENT_CONFIG_EXTERNAL_BAR          "%5[^:]:%d:%d"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
@@ -997,6 +1001,19 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             g_window_manager.ffm_mode = FFM_AUTOFOCUS;
         } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTORAISE)) {
             g_window_manager.ffm_mode = FFM_AUTORAISE;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_WINDOW_ORIGIN)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", window_origin_mode_str[g_window_manager.window_origin_mode]);
+        } else if (token_equals(value, ARGUMENT_CONFIG_WINDOW_ORIGIN_DEFAULT)) {
+            g_window_manager.window_origin_mode = WINDOW_ORIGIN_DEFAULT;
+        } else if (token_equals(value, ARGUMENT_CONFIG_WINDOW_ORIGIN_FOCUSED)) {
+            g_window_manager.window_origin_mode = WINDOW_ORIGIN_FOCUSED;
+        } else if (token_equals(value, ARGUMENT_CONFIG_WINDOW_ORIGIN_CURSOR)) {
+            g_window_manager.window_origin_mode = WINDOW_ORIGIN_CURSOR;
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }

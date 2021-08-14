@@ -85,6 +85,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
     struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
     uint32_t prev_window_id = g_window_manager.focused_window_id;
 
+    uint64_t sid;
+    bool default_origin = g_window_manager.window_origin_mode == WINDOW_ORIGIN_DEFAULT;
+
+    if (!default_origin) {
+        if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_FOCUSED) {
+            sid = g_space_manager.current_space_id;
+        } else /* if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_CURSOR) */ {
+            sid = display_space_id(display_manager_cursor_display_id());
+        }
+    }
+
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
         if (window->is_minimized) goto next;
@@ -93,8 +104,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         if (view) goto next;
 
         if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, g_space_manager.current_space_id, prev_window_id);
+            if (default_origin) sid = window_space(window);
+
+            struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, sid, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
+
             prev_window_id = window->id;
         }
 
@@ -300,7 +314,17 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     if (!window) goto out;
 
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
-        struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, g_space_manager.current_space_id);
+        uint64_t sid;
+
+        if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_DEFAULT) {
+            sid = window_space(window);
+        } else if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_FOCUSED) {
+            sid = g_space_manager.current_space_id;
+        } else /* if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_CURSOR) */ {
+            sid = display_space_id(display_manager_cursor_display_id());
+        }
+
+        struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, sid);
         window_manager_add_managed_window(&g_window_manager, window, view);
     }
 

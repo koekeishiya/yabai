@@ -122,6 +122,12 @@ Global Settings
 *focus_follows_mouse* ['autofocus|autoraise|off']::
     Automatically focus the window under the mouse.
 
+*window_origin_display* ['default|focused|cursor']::
+    Specify which display a newly created window should be managed in. +
+    'default': The display in which the window is created (standard macOS behaviour). +
+    'focused': The display that has focus when the window is created. +
+    'cursor': The display that currently holds the mouse cursor.
+
 *window_placement* ['first_child|second_child']::
     Specify whether managed windows should become the first or second leaf-node.
 

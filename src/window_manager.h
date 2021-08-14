@@ -51,6 +51,20 @@ static const char *ffm_mode_str[] =
     "autoraise"
 };
 
+enum window_origin_mode
+{
+    WINDOW_ORIGIN_DEFAULT,
+    WINDOW_ORIGIN_FOCUSED,
+    WINDOW_ORIGIN_CURSOR
+};
+
+static const char *window_origin_mode_str[] =
+{
+    "default",
+    "focused",
+    "cursor"
+};
+
 struct window_manager
 {
     AXUIElementRef system_element;
@@ -66,6 +80,7 @@ struct window_manager
     bool enable_mff;
     enum ffm_mode ffm_mode;
     enum purify_mode purify_mode;
+    enum window_origin_mode window_origin_mode;
     bool enable_window_border;
     bool enable_window_opacity;
     bool enable_window_topmost;
