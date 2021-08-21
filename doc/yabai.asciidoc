@@ -248,11 +248,11 @@ COMMAND
 *--display* '<DISPLAY_SEL>'::
     Send the selected space to the given display.
 
-*--balance* ['<SPACE_SEL>']::
-    Adjust the split ratios of the given space so that all windows occupy the same area. If none specified, use the selected space instead.
+*--balance* ['x-axis|y-axis']::
+    Adjust the split ratios on the selected space so that all windows along the given axis occupy the same area. If no axis is specified, use both.
 
 *--mirror* 'x-axis|y-axis'::
-    Flip the tree of the selected space.
+    Flip the tree of the selected space along the given axis.
 
 *--rotate* '90|180|270'::
     Rotate the tree of the selected space.

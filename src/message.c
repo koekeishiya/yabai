@@ -97,8 +97,8 @@ extern bool g_verbose;
 #define COMMAND_SPACE_LAYOUT  "--layout"
 #define COMMAND_SPACE_LABEL   "--label"
 
-#define ARGUMENT_SPACE_MIRROR_X     "x-axis"
-#define ARGUMENT_SPACE_MIRROR_Y     "y-axis"
+#define ARGUMENT_SPACE_AXIS_X       "x-axis"
+#define ARGUMENT_SPACE_AXIS_Y       "y-axis"
 #define ARGUMENT_SPACE_ROTATE_90    "90"
 #define ARGUMENT_SPACE_ROTATE_180   "180"
 #define ARGUMENT_SPACE_ROTATE_270   "270"
@@ -1564,26 +1564,29 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             daemon_fail(rsp, "cannot destroy space due to an error with the scripting-addition.\n");
         }
     } else if (token_equals(command, COMMAND_SPACE_BALANCE)) {
-        struct selector selector = parse_space_selector(rsp, &message, acting_sid, true);
-
-        if (token_is_valid(selector.token)) {
-            if (selector.did_parse && selector.sid) {
-                acting_sid = selector.sid;
-            } else {
-                return;
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            if (!space_manager_balance_space(&g_space_manager, acting_sid, SPLIT_X | SPLIT_Y)) {
+                daemon_fail(rsp, "cannot balance a non-managed space.\n");
             }
-        }
-
-        if (!space_manager_balance_space(&g_space_manager, acting_sid)) {
-            daemon_fail(rsp, "cannot balance a non-managed space.\n");
+        } else if (token_equals(value, ARGUMENT_SPACE_AXIS_X)) {
+            if (!space_manager_balance_space(&g_space_manager, acting_sid, SPLIT_X)) {
+                daemon_fail(rsp, "cannot balance a non-managed space.\n");
+            }
+        } else if (token_equals(value, ARGUMENT_SPACE_AXIS_Y)) {
+            if (!space_manager_balance_space(&g_space_manager, acting_sid, SPLIT_Y)) {
+                daemon_fail(rsp, "cannot balance a non-managed space.\n");
+            }
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
     } else if (token_equals(command, COMMAND_SPACE_MIRROR)) {
         struct token value = get_token(&message);
-        if (token_equals(value, ARGUMENT_SPACE_MIRROR_X)) {
+        if (token_equals(value, ARGUMENT_SPACE_AXIS_X)) {
             if (!space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_X)) {
                 daemon_fail(rsp, "cannot mirror a non-managed space.\n");
             }
-        } else if (token_equals(value, ARGUMENT_SPACE_MIRROR_Y)) {
+        } else if (token_equals(value, ARGUMENT_SPACE_AXIS_Y)) {
             if (!space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_Y)) {
                 daemon_fail(rsp, "cannot mirror a non-managed space.\n");
             }

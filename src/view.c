@@ -200,7 +200,7 @@ static inline struct equalize_node equalize_node_add(struct equalize_node a, str
     return (struct equalize_node) { a.y_count + b.y_count, a.x_count + b.x_count, };
 }
 
-static struct equalize_node window_node_equalize(struct window_node *node)
+static struct equalize_node window_node_equalize(struct window_node *node, uint32_t axis_flag)
 {
     if (window_node_is_leaf(node)) {
         return (struct equalize_node) {
@@ -209,16 +209,22 @@ static struct equalize_node window_node_equalize(struct window_node *node)
         };
     }
 
-    struct equalize_node left_leafs  = window_node_equalize(node->left);
-    struct equalize_node right_leafs = window_node_equalize(node->right);
+    struct equalize_node left_leafs  = window_node_equalize(node->left, axis_flag);
+    struct equalize_node right_leafs = window_node_equalize(node->right, axis_flag);
     struct equalize_node total_leafs = equalize_node_add(left_leafs, right_leafs);
 
-    if (node->split == SPLIT_Y) {
-        node->ratio = (float) left_leafs.y_count / total_leafs.y_count;
-        --total_leafs.y_count;
-    } else if (node->split == SPLIT_X) {
-        node->ratio = (float) left_leafs.x_count / total_leafs.x_count;
-        --total_leafs.x_count;
+    if (axis_flag & SPLIT_Y) {
+        if (node->split == SPLIT_Y) {
+            node->ratio = (float) left_leafs.y_count / total_leafs.y_count;
+            --total_leafs.y_count;
+        }
+    }
+
+    if (axis_flag & SPLIT_X) {
+        if (node->split == SPLIT_X) {
+            node->ratio = (float) left_leafs.x_count / total_leafs.x_count;
+            --total_leafs.x_count;
+        }
     }
 
     if (node->parent) {
@@ -619,7 +625,7 @@ void view_remove_window_node(struct view *view, struct window *window)
     free(node);
 
     if (g_space_manager.auto_balance) {
-        window_node_equalize(view->root);
+        window_node_equalize(view->root, SPLIT_X | SPLIT_Y);
         view_update(view);
     }
 }
@@ -670,7 +676,7 @@ void view_add_window_node(struct view *view, struct window *window)
         window_node_split(view, leaf, window);
 
         if (g_space_manager.auto_balance) {
-            window_node_equalize(view->root);
+            window_node_equalize(view->root, SPLIT_X | SPLIT_Y);
             view_update(view);
         }
     } else if (view->layout == VIEW_STACK) {
