@@ -1,9 +1,10 @@
 #ifndef EVENT_LOOP_H
 #define EVENT_LOOP_H
 
-struct queue_item
+struct event_loop_item
 {
-    struct queue_item *next;
+    struct event_loop_item *next;
+    struct event event;
 };
 
 struct event_loop
@@ -12,8 +13,8 @@ struct event_loop
     pthread_t thread;
     sem_t *semaphore;
     struct memory_pool pool;
-    struct queue_item *head;
-    struct queue_item *tail;
+    struct event_loop_item *head;
+    struct event_loop_item *tail;
 };
 
 bool event_loop_init(struct event_loop *event_loop);
