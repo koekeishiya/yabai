@@ -30,6 +30,7 @@
 #include "misc/macros.h"
 #include "misc/memory_pool.h"
 #include "misc/ts.h"
+#include "misc/autorelease.h"
 #include "misc/notify.h"
 #include "misc/log.h"
 #include "misc/helpers.h"

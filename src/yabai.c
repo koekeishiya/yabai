@@ -203,6 +203,7 @@ static inline void init_misc_settings(void)
     signal(SIGPIPE, SIG_IGN);
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
+    hook_autorelease();
     g_connection = SLSMainConnectionID();
     g_normal_window_level   = CGWindowLevelForKey(LAYER_NORMAL);
     g_floating_window_level = CGWindowLevelForKey(LAYER_ABOVE);
