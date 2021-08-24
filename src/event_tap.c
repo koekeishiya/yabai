@@ -15,9 +15,9 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
-        consume_mouse_click = mod == g_mouse_state.modifier;
-
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod, NULL);
+
+        consume_mouse_click = mod == g_mouse_state.modifier;
         if (consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseUp:
