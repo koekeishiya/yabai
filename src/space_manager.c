@@ -640,7 +640,7 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
     return SPACE_OP_ERROR_SUCCESS;
 }
 
-static inline uint64_t space_manager_find_first_user_space(uint32_t did)
+static inline uint64_t space_manager_find_first_user_space_for_display(uint32_t did)
 {
     int count;
     uint64_t *space_list = display_space_list(did, &count);
@@ -808,7 +808,7 @@ enum space_op_error space_manager_destroy_space(uint64_t sid)
     if (space_manager_is_space_last_user_space(sid)) return SPACE_OP_ERROR_INVALID_SRC;
 
     uint32_t did = space_display_id(sid);
-    uint64_t first_sid = space_manager_find_first_user_space(did);
+    uint64_t first_sid = space_manager_find_first_user_space_for_display(did);
 
     bool is_animating = display_manager_display_is_animating(did);
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
