@@ -640,6 +640,23 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
     return SPACE_OP_ERROR_SUCCESS;
 }
 
+static inline uint64_t space_manager_find_first_user_space(uint32_t did)
+{
+    int count;
+    uint64_t *space_list = display_space_list(did, &count);
+    if (!space_list) return 0;
+
+    for (int i = 0; i < count; ++i) {
+        uint64_t sid = space_list[i];
+
+        if (space_is_user(sid)) {
+            return sid;
+        }
+    }
+
+    return 0;
+}
+
 static inline bool space_manager_is_space_last_user_space(uint64_t sid)
 {
     bool result = true;
@@ -790,10 +807,20 @@ enum space_op_error space_manager_destroy_space(uint64_t sid)
     if (!space_is_user(sid)) return SPACE_OP_ERROR_INVALID_TYPE;
     if (space_manager_is_space_last_user_space(sid)) return SPACE_OP_ERROR_INVALID_SRC;
 
-    bool is_animating = display_manager_display_is_animating(space_display_id(sid));
+    uint32_t did = space_display_id(sid);
+    uint64_t first_sid = space_manager_find_first_user_space(did);
+
+    bool is_animating = display_manager_display_is_animating(did);
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
-    return scripting_addition_destroy_space(sid) ? SPACE_OP_ERROR_SUCCESS : SPACE_OP_ERROR_SCRIPTING_ADDITION;
+    bool success = scripting_addition_destroy_space(sid);
+    if (!success) return SPACE_OP_ERROR_SCRIPTING_ADDITION;
+
+    if (first_sid) {
+        window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, first_sid);
+    }
+
+    return SPACE_OP_ERROR_SUCCESS;
 }
 
 enum space_op_error space_manager_add_space(uint64_t sid)
