@@ -46,6 +46,7 @@ IMP g_nsautoreleasepool_release;
 
     ((void(*)(id))g_nsautoreleasepool_drain)(self);
 }
+
 - (void)fake_release
 {
     void *addr[40];
@@ -65,7 +66,7 @@ IMP g_nsautoreleasepool_release;
 }
 @end
 
-static bool hook_autorelease(void)
+static bool hook_nsobject_autorelease(void)
 {
     Class c = objc_getClass("NSObject");
     if (!c) return false;
@@ -73,14 +74,27 @@ static bool hook_autorelease(void)
     Method m = class_getInstanceMethod(c, @selector(autorelease));
     g_nsobject_autorelease = method_setImplementation(m, (IMP)method_getImplementation(class_getInstanceMethod(c, @selector(fake_autorelease))));
 
-    Class c2 = objc_getClass("NSAutoreleasePool");
-    if (!c2) return false;
+    return true;
+}
 
-    Method m2 = class_getInstanceMethod(c2, @selector(drain));
-    g_nsautoreleasepool_drain = method_setImplementation(m2, (IMP)method_getImplementation(class_getInstanceMethod(c2, @selector(fake_drain))));
+static bool hook_autoreleasepool_drain(void)
+{
+    Class c = objc_getClass("NSAutoreleasePool");
+    if (!c) return false;
 
-    Method m3 = class_getInstanceMethod(c2, @selector(release));
-    g_nsautoreleasepool_release = method_setImplementation(m3, (IMP)method_getImplementation(class_getInstanceMethod(c2, @selector(fake_release))));
+    Method m = class_getInstanceMethod(c, @selector(drain));
+    g_nsautoreleasepool_drain = method_setImplementation(m, (IMP)method_getImplementation(class_getInstanceMethod(c, @selector(fake_drain))));
+
+    return true;
+}
+
+static bool hook_autoreleasepool_release(void)
+{
+    Class c = objc_getClass("NSAutoreleasePool");
+    if (!c) return false;
+
+    Method m = class_getInstanceMethod(c, @selector(release));
+    g_nsautoreleasepool_release = method_setImplementation(m, (IMP)method_getImplementation(class_getInstanceMethod(c, @selector(fake_release))));
 
     return true;
 }
