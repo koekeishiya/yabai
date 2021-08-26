@@ -29,7 +29,8 @@ static bool notify_init(void)
 
 static void notify(const char *subtitle, const char *format, ...)
 {
-    @autoreleasepool {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
     if (!g_notify_init) notify_init();
 
     va_list args;
@@ -43,5 +44,6 @@ static void notify(const char *subtitle, const char *format, ...)
     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
     [notification release];
     va_end(args);
-    }
+
+    [pool drain];
 }
