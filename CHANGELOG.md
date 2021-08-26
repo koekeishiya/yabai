@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - New config *window_origin_display* to specify which display a window should become managed at upon creation [#951](https://github.com/koekeishiya/yabai/issues/951)
 
 ### Changed
+- Properly drain autoreleased objects (from Apple frameworks) [#751](https://github.com/koekeishiya/yabai/issues/751)
 - Detect and manage windows that are moved into the first space of a display when a space with active windows on it is destroyed [#813](https://github.com/koekeishiya/yabai/issues/813)
 - The command *space --balance* now takes an optional axis as its argument [#985](https://github.com/koekeishiya/yabai/issues/985)
 - Malformed windows that are managed through rules should be eligible for window alpha, focus follows mouse, and window borders [#788](https://github.com/koekeishiya/yabai/issues/788)
