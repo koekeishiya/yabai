@@ -12,7 +12,10 @@ static void *event_loop_run(void *context)
         if (head->next) {
             struct event *event = &head->next->event;
 
+            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
             uint32_t result = event_handler[event->type](event->context, event->param1);
+            [pool drain];
+
             if (event->info) *event->info = (result << 0x1) | EVENT_PROCESSED;
 
             event_signal_flush();

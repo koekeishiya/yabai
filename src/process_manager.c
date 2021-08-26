@@ -192,7 +192,10 @@ void process_manager_init(struct process_manager *pm)
     pm->type[2].eventClass = kEventClassApplication;
     pm->type[2].eventKind  = kEventAppFrontSwitched;
     table_init(&pm->process, 125, hash_psn, compare_psn);
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     process_manager_add_running_processes(pm);
+    [pool drain];
 }
 
 #pragma clang diagnostic push

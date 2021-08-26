@@ -1622,6 +1622,7 @@ void window_manager_init(struct window_manager *wm)
 
 void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     for (int process_index = 0; process_index < g_process_manager.process.capacity; ++process_index) {
         struct bucket *bucket = g_process_manager.process.buckets[process_index];
         while (bucket) {
@@ -1641,6 +1642,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
             bucket = bucket->next;
         }
     }
+    [pool drain];
 
     struct window *window = window_manager_focused_window(wm);
     if (window) {

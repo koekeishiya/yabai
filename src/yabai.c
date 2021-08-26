@@ -203,10 +203,15 @@ static inline void init_misc_settings(void)
     signal(SIGPIPE, SIG_IGN);
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
-    hook_autorelease();
     g_connection = SLSMainConnectionID();
     g_normal_window_level   = CGWindowLevelForKey(LAYER_NORMAL);
     g_floating_window_level = CGWindowLevelForKey(LAYER_ABOVE);
+
+#if 0
+    hook_nsobject_autorelease();
+    hook_autoreleasepool_drain();
+    hook_autoreleasepool_release();
+#endif
 }
 #pragma clang diagnostic pop
 
@@ -322,6 +327,14 @@ int main(int argc, char **argv)
     }
 
     exec_config_file();
-    CFRunLoopRun();
+
+    for (;;) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        CFRunLoopRunResult result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 60, true);
+        [pool drain];
+
+        if (result == kCFRunLoopRunFinished || result == kCFRunLoopRunStopped) break;
+    }
+
     return 0;
 }
