@@ -378,18 +378,22 @@ int scripting_addition_uninstall(void)
 
 int scripting_addition_check(void)
 {
-    @autoreleasepool {
+    bool result = 0;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    if (!scripting_addition_is_installed()) return 1;
+    if (scripting_addition_is_installed()) {
+        NSString *payload_path = [NSString stringWithUTF8String:osax_payload_dir];
+        NSBundle *payload_bundle = [NSBundle bundleWithPath:payload_path];
+        NSString *ns_version = [payload_bundle objectForInfoDictionaryKey:@"CFBundleVersion"];
 
-    NSString *payload_path = [NSString stringWithUTF8String:osax_payload_dir];
-    NSBundle *payload_bundle = [NSBundle bundleWithPath:payload_path];
-    NSString *ns_version = [payload_bundle objectForInfoDictionaryKey:@"CFBundleVersion"];
-
-    bool status = string_equals([ns_version UTF8String], OSAX_VERSION);
-    return status ? 0 : 1;
-
+        bool status = string_equals([ns_version UTF8String], OSAX_VERSION);
+        result = status ? 0 : 1;
+    } else {
+        result = 1;
     }
+
+    [pool drain];
+    return result;
 }
 
 static bool drop_sudo_privileges_and_set_sa_socket_path(void)
@@ -412,12 +416,18 @@ static bool drop_sudo_privileges_and_set_sa_socket_path(void)
 
 int scripting_addition_load(void)
 {
-    @autoreleasepool {
-    if (!scripting_addition_is_installed())    return 1;
+    int result = 0;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    if (!scripting_addition_is_installed()) {
+        result = 1;
+        goto out;
+    }
 
     if (!workspace_is_macos_highsierra() &&
         !scripting_addition_is_sip_friendly()) {
-        return 1;
+        result = 1;
+        goto out;
     }
 
     if (workspace_is_macos_bigsur()) {
@@ -425,7 +435,8 @@ int scripting_addition_load(void)
             warn("yabai: scripting-addition must be loaded as root!\n");
             notify("scripting-addition", "must be loaded as root!");
             sleep(1);
-            return 1;
+            result = 1;
+            goto out;
         }
 
         pid_t pid = scripting_addition_get_dock_pid();
@@ -433,7 +444,8 @@ int scripting_addition_load(void)
             notify("scripting-addition", "could not locate pid of Dock.app!");
             warn("yabai: scripting-addition could not locate pid of Dock.app!\n");
             sleep(1);
-            return 1;
+            result = 1;
+            goto out;
         }
 
         if (mach_loader_inject_payload(pid)) {
@@ -443,19 +455,22 @@ int scripting_addition_load(void)
                 scripting_addition_perform_validation(false);
                 sleep(1);
             }
-            return 0;
+            result = 0;
+            goto out;
         } else {
             warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
             notify("scripting-addition", "failed to inject payload into Dock.app!");
             sleep(1);
-            return 1;
+            result = 1;
+            goto out;
         }
     } else {
         if (is_root()) {
             warn("yabai: scripting-addition should not be loaded as root!\n");
             notify("scripting-addition", "should not be loaded as root!");
             sleep(1);
-            return 1;
+            result = 1;
+            goto out;
         }
 
         SALoader *loader = [[SALoader alloc] init];
@@ -496,28 +511,37 @@ int scripting_addition_load(void)
         if (result == OSAX_PAYLOAD_SUCCESS) {
             debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
             scripting_addition_perform_validation(false);
-            return 0;
+            result = 0;
+            goto out;
         } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
             debug("yabai: scripting-addition payload was already injected into Dock.app!\n");
             scripting_addition_perform_validation(true);
-            return 0;
+            result = 0;
+            goto out;
         } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
             notify("scripting-addition", "failed to inject payload into Dock.app!");
             warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
-            return 1;
+            result = 1;
+            goto out;
         } else if (result == OSAX_PAYLOAD_NOT_FOUND) {
             notify("scripting-addition", "payload could not be found!");
             warn("yabai: scripting-addition payload could not be found!\n");
-            return 1;
+            result = 1;
+            goto out;
         } else {
             notify("scripting-addition", "failed to load or inject payload into Dock.app!");
             warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app! Error: %d\n", result);
-            return 1;
+            result = 1;
+            goto out;
         }
 
-        return 0;
+        result = 0;
+        goto out;
     }
-    }
+
+out:
+    [pool drain];
+    return result;
 }
 
 bool scripting_addition_create_space(uint64_t sid)
