@@ -265,14 +265,12 @@ static bool scripting_addition_is_sip_friendly(void)
     if (!(config & CSR_ALLOW_UNRESTRICTED_FS)) {
         warn("yabai: System Integrity Protection: Filesystem Protections must be disabled!\n");
         notify("scripting-addition", "System Integrity Protection: Filesystem Protections must be disabled!");
-        sleep(1);
         return false;
     }
 
     if (!(config & CSR_ALLOW_TASK_FOR_PID)) {
         warn("yabai: System Integrity Protection: Debugging Restrictions must be disabled!\n");
         notify("scripting-addition", "System Integrity Protection: Debugging Restrictions must be disabled!");
-        sleep(1);
         return false;
     }
 
@@ -310,7 +308,6 @@ int scripting_addition_install(void)
     if (!is_root()) {
         warn("yabai: scripting-addition must be installed as root!\n");
         notify("scripting-addition", "must be installed as root!");
-        sleep(1);
         return 1;
     }
 
@@ -367,7 +364,6 @@ int scripting_addition_uninstall(void)
     if (!is_root()) {
         warn("yabai: scripting-addition must be uninstalled as root!\n");
         notify("scripting-addition", "must be uninstalled as root!");
-        sleep(1);
         return 1;
     }
 
@@ -434,7 +430,6 @@ int scripting_addition_load(void)
         if (!is_root()) {
             warn("yabai: scripting-addition must be loaded as root!\n");
             notify("scripting-addition", "must be loaded as root!");
-            sleep(1);
             result = 1;
             goto out;
         }
@@ -443,7 +438,6 @@ int scripting_addition_load(void)
         if (!pid) {
             notify("scripting-addition", "could not locate pid of Dock.app!");
             warn("yabai: scripting-addition could not locate pid of Dock.app!\n");
-            sleep(1);
             result = 1;
             goto out;
         }
@@ -451,16 +445,13 @@ int scripting_addition_load(void)
         if (mach_loader_inject_payload(pid)) {
             debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
             if (drop_sudo_privileges_and_set_sa_socket_path()) {
-                sleep(1);
                 scripting_addition_perform_validation(false);
-                sleep(1);
             }
             result = 0;
             goto out;
         } else {
             warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
             notify("scripting-addition", "failed to inject payload into Dock.app!");
-            sleep(1);
             result = 1;
             goto out;
         }
@@ -468,7 +459,6 @@ int scripting_addition_load(void)
         if (is_root()) {
             warn("yabai: scripting-addition should not be loaded as root!\n");
             notify("scripting-addition", "should not be loaded as root!");
-            sleep(1);
             result = 1;
             goto out;
         }

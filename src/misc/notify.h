@@ -15,12 +15,23 @@ static NSImage *g_notify_img;
 }
 @end
 
+@interface NotifyDelegate : NSObject <NSUserNotificationCenterDelegate>
+@end
+
+@implementation NotifyDelegate
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification
+{
+  return YES;
+}
+@end
+
 static bool notify_init(void)
 {
     Class c = objc_getClass("NSBundle");
     if (!c) return false;
 
     method_exchangeImplementations(class_getInstanceMethod(c, @selector(bundleIdentifier)), class_getInstanceMethod(c, @selector(fake_bundleIdentifier)));
+    [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:[NotifyDelegate alloc]];
     g_notify_img = [[[NSWorkspace sharedWorkspace] iconForFile:[[[NSBundle mainBundle] executablePath] stringByResolvingSymlinksInPath]] retain];
     g_notify_init = true;
 
