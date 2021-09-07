@@ -34,6 +34,7 @@ static bool mach_loader_lookup_image(void *ptr, void **image, uint64_t *image_si
 
 bool mach_loader_inject_payload(pid_t pid)
 {
+    bool result = false;
     mach_port_t task = 0;
     thread_act_t thread = 0;
     void *image = 0;
@@ -105,17 +106,46 @@ bool mach_loader_inject_payload(pid_t pid)
         fprintf(stderr, "could not spawn remote thread: %s\n", mach_error_string(error));
         return false;
     }
+
+    return true;
 #else
     x86_thread_state64_t thread_state = {};
+    thread_state_flavor_t thread_flavor = x86_THREAD_STATE64;
+    mach_msg_type_number_t thread_flavor_count = x86_THREAD_STATE64_COUNT;
+
     thread_state.__rip = (uint64_t) code + (uint64_t)(((void *) bootstrap_entry) - image);
     thread_state.__rsp = (uint64_t) (stack + (stack_size / 2) - 8);
 
-    kern_return_t error = thread_create_running(task, x86_THREAD_STATE64, (thread_state_t)&thread_state, x86_THREAD_STATE64_COUNT, &thread);
+    kern_return_t error = thread_create_running(task, thread_flavor, (thread_state_t)&thread_state, thread_flavor_count, &thread);
     if (error != KERN_SUCCESS) {
         fprintf(stderr, "could not spawn remote thread: %s\n", mach_error_string(error));
         return false;
     }
-#endif
 
-    return true;
+    usleep(10000);
+
+    for (int i = 0; i < 10; ++i) {
+        kern_return_t error = thread_get_state(thread, thread_flavor, (thread_state_t)&thread_state, &thread_flavor_count);
+
+        if (error != KERN_SUCCESS) {
+            result = false;
+            goto terminate;
+        }
+
+        if (thread_state.__rax == 0x7961626169) {
+            result = true;
+            goto terminate;
+        }
+
+        usleep(20000);
+    }
+
+terminate:
+    error = thread_terminate(thread);
+    if (error != KERN_SUCCESS) {
+        fprintf(stderr, "failed to terminate remote thread: %s\n", mach_error_string(error));
+    }
+
+    return result;
+#endif
 }

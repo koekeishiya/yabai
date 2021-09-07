@@ -29,5 +29,5 @@ void mach_bootstrap_entry_point(void)
     pthread_t thread;
     _pthread_set_self(&thread);
     pthread_create_from_mach_thread(&thread, NULL, &mach_load_payload, NULL);
-    thread_suspend(mach_thread_self());
+    for (;;) __asm__ __volatile__ ("movq %0, %%rax;" ::"r"(0x7961626169) : "%rax");
 }
