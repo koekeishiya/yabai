@@ -1565,6 +1565,31 @@ void window_manager_validate_and_check_for_windows_on_space(struct space_manager
     window_manager_check_for_windows_on_space(sm, wm, sid, window_list, window_count);
 }
 
+void window_manager_correct_for_mission_control_changes(struct space_manager *sm, struct window_manager *wm)
+{
+    uint32_t display_count = 0;
+    uint32_t *display_list = display_manager_active_display_list(&display_count);
+    if (!display_list) return;
+
+    for (int i = 0; i < display_count; ++i) {
+        uint32_t did = display_list[i];
+
+        int space_count;
+        uint64_t *space_list = display_space_list(did, &space_count);
+        if (!space_list) continue;
+
+        uint64_t sid = display_space_id(did);
+        for (int i = 0; i < space_count; ++i) {
+            if (space_list[i] == sid) {
+                window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sid);
+                space_manager_refresh_view(sm, sid);
+            } else {
+                space_manager_mark_view_invalid(sm, space_list[i]);
+            }
+        }
+    }
+}
+
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did)
 {
     int space_count;

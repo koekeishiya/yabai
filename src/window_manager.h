@@ -183,6 +183,7 @@ void window_manager_toggle_window_pip(struct space_manager *sm, struct window_ma
 void window_manager_toggle_window_border(struct window_manager *wm, struct window *window);
 void window_manager_wait_for_native_fullscreen_transition(struct window *window);
 void window_manager_validate_and_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
+void window_manager_correct_for_mission_control_changes(struct space_manager *sm, struct window_manager *wm);
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did);
 void window_manager_begin(struct space_manager *sm, struct window_manager *window_manager);
 void window_manager_init(struct window_manager *window_manager);
