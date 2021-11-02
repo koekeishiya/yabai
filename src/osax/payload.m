@@ -5,6 +5,7 @@
 #include <objc/message.h>
 #include <objc/runtime.h>
 
+#include <CoreGraphics/CoreGraphics.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
