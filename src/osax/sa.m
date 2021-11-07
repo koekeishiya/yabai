@@ -29,7 +29,6 @@ static char osax_payload_contents_macos_dir[MAXLEN];
 static char osax_info_plist[MAXLEN];
 static char osax_sdefn_file[MAXLEN];
 static char osax_payload_plist[MAXLEN];
-static char osax_bin_mach_bootstrap[MAXLEN];
 static char osax_bin_loader[MAXLEN];
 static char osax_bin_payload[MAXLEN];
 
@@ -134,7 +133,6 @@ static void scripting_addition_set_path(void)
     snprintf(osax_sdefn_file, sizeof(osax_sdefn_file), "%s/%s", osax_contents_res_dir, "yabai.sdef");
 
     snprintf(osax_payload_plist, sizeof(osax_payload_plist), "%s/%s", osax_payload_contents_dir, "Info.plist");
-    snprintf(osax_bin_mach_bootstrap, sizeof(osax_bin_mach_bootstrap), "%s/%s", osax_contents_macos_dir, "mach_bootstrap");
     snprintf(osax_bin_loader, sizeof(osax_bin_loader), "%s/%s", osax_contents_macos_dir, "loader");
     snprintf(osax_bin_payload, sizeof(osax_bin_payload), "%s/%s", osax_payload_contents_macos_dir, "payload");
 }
@@ -331,10 +329,6 @@ int scripting_addition_install(void)
     }
 
     if (!scripting_addition_write_file(sa_bundle_plist, strlen(sa_bundle_plist), osax_payload_plist, "w")) {
-        goto cleanup;
-    }
-
-    if (!scripting_addition_write_file((char *) __src_osax_mach_bootstrap, __src_osax_mach_bootstrap_len, osax_bin_mach_bootstrap, "wb")) {
         goto cleanup;
     }
 
