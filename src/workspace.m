@@ -99,6 +99,12 @@ bool workspace_application_is_finished_launching(struct process *process)
     }
 }
 
+bool workspace_is_macos_monterey(void)
+{
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return version.majorVersion == 12;
+}
+
 bool workspace_is_macos_bigsur(void)
 {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];

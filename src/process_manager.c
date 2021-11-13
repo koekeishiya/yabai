@@ -108,6 +108,8 @@ static PROCESS_EVENT_HANDLER(process_handler)
         process->terminated = true;
         process_manager_remove_process(pm, &psn);
 
+        __asm__ __volatile__ ("" ::: "memory");
+
         event_loop_post(&g_event_loop, APPLICATION_TERMINATED, process, 0, NULL);
     } break;
     case kEventAppFrontSwitched: {

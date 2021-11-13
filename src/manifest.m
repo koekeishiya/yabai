@@ -25,6 +25,7 @@
 #include <poll.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <pwd.h>
 
 #include "misc/extern.h"
 #include "misc/macros.h"
@@ -40,10 +41,9 @@
 #undef HASHTABLE_IMPLEMENTATION
 #include "misc/socket.h"
 
-#include "osax/sa.h"
-#include "osax/mach_loader.c"
-#include "osax/sa.m"
+#include "osax/common.h"
 
+#include "sa.h"
 #include "event.h"
 #include "event_loop.h"
 #include "event_signal.h"
@@ -63,6 +63,8 @@
 #include "window_manager.h"
 #include "mouse.h"
 
+#include "mach_loader.c"
+#include "sa.m"
 #include "event_loop.c"
 #include "event.c"
 #include "event_signal.c"

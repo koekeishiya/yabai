@@ -1,9 +1,6 @@
 #ifndef SA_H
 #define SA_H
 
-#include <pwd.h>
-#include "common.h"
-
 #define PAYLOAD_STATUS_SUCCESS   0
 #define PAYLOAD_STATUS_OUTDATED  1
 #define PAYLOAD_STATUS_NO_ATTRIB 2
@@ -29,6 +26,7 @@ bool scripting_addition_set_shadow(uint32_t wid, bool shadow);
 bool scripting_addition_focus_window(uint32_t wid);
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h);
 
+extern bool workspace_is_macos_monterey(void);
 extern bool workspace_is_macos_bigsur(void);
 extern bool workspace_is_macos_highsierra(void);
 

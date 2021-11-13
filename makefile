@@ -1,13 +1,13 @@
 FRAMEWORK_PATH = -F/System/Library/PrivateFrameworks
 FRAMEWORK      = -framework Carbon -framework Cocoa -framework CoreServices -framework SkyLight -framework ScriptingBridge
-BUILD_FLAGS    = -std=c99 -Wall -g -O0 -fvisibility=hidden -mmacosx-version-min=10.13 -fno-objc-arc
+BUILD_FLAGS    = -std=c99 -Wall -g -O0 -fvisibility=hidden -mmacosx-version-min=10.13 -fno-objc-arc -arch x86_64 -arch arm64e
 BUILD_PATH     = ./bin
 DOC_PATH       = ./doc
 SCRIPT_PATH    = ./scripts
 ASSET_PATH     = ./assets
 SMP_PATH       = ./examples
 ARCH_PATH      = ./archive
-OSAX_SRC       = ./src/osax/sa_loader.c ./src/osax/sa_payload.c
+OSAX_SRC       = ./src/osax/loader_bin.c ./src/osax/payload_bin.c
 YABAI_SRC      = ./src/manifest.m $(OSAX_SRC)
 OSAX_PATH      = ./src/osax
 BINS           = $(BUILD_PATH)/yabai
@@ -16,14 +16,14 @@ BINS           = $(BUILD_PATH)/yabai
 
 all: clean-build $(BINS)
 
-install: BUILD_FLAGS=-std=c99 -Wall -DNDEBUG -O2 -fvisibility=hidden -mmacosx-version-min=10.13 -fno-objc-arc
+install: BUILD_FLAGS=-std=c99 -Wall -DNDEBUG -O2 -fvisibility=hidden -mmacosx-version-min=10.13 -fno-objc-arc -arch x86_64 -arch arm64e
 install: clean-build $(BINS)
 
 $(OSAX_SRC): $(OSAX_PATH)/loader.m $(OSAX_PATH)/payload.m
-	clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/loader -framework Foundation
-	clang $(OSAX_PATH)/payload.m -shared -fPIC -O2 -mmacosx-version-min=10.13 -o $(OSAX_PATH)/payload -framework Foundation -framework Carbon
-	xxd -i -a $(OSAX_PATH)/loader $(OSAX_PATH)/sa_loader.c
-	xxd -i -a $(OSAX_PATH)/payload $(OSAX_PATH)/sa_payload.c
+	clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -arch x86_64 -o $(OSAX_PATH)/loader -framework Foundation
+	clang $(OSAX_PATH)/payload.m -shared -fPIC -O2 -mmacosx-version-min=10.13 -arch x86_64 -arch arm64e -o $(OSAX_PATH)/payload -framework Foundation -framework Carbon
+	xxd -i -a $(OSAX_PATH)/loader $(OSAX_PATH)/loader_bin.c
+	xxd -i -a $(OSAX_PATH)/payload $(OSAX_PATH)/payload_bin.c
 	rm -f $(OSAX_PATH)/loader
 	rm -f $(OSAX_PATH)/payload
 

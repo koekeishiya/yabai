@@ -318,7 +318,7 @@ int main(int argc, char **argv)
         error("yabai: could not initialize message_loop! abort..\n");
     }
 
-    if (!workspace_is_macos_bigsur()) {
+    if (!workspace_is_macos_monterey() && !workspace_is_macos_bigsur()) {
         if (scripting_addition_is_installed()) {
             scripting_addition_load();
         } else {

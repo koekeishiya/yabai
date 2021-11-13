@@ -26,6 +26,7 @@
 #include "x86_64/payload.m"
 #elif __arm64__
 #include "arm64/payload.m"
+#include <ptrauth.h>
 #endif
 
 #define SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
@@ -176,10 +177,33 @@ loop:
     return addr;
 }
 
+#if __arm64__
+uint64_t decode_adrp_add(uint64_t addr, uint64_t offset)
+{
+    uint32_t adrp_instr = *(uint32_t *) addr;
+
+    uint32_t immlo = (0x60000000 & adrp_instr) >> 29;
+    uint32_t immhi = (0xffffe0 & adrp_instr) >> 3;
+
+    int32_t value = (immhi | immlo) << 12;
+    int64_t value_64 = value;
+
+    uint32_t add_instr = *(uint32_t *) (addr + 4);
+    uint64_t imm12 = (add_instr & 0x3ffc00) >> 10;
+
+    if (add_instr & 0xc00000) {
+        imm12 <<= 12;
+    }
+
+    return (offset & 0xf000) + value_64 + imm12;
+}
+#endif
+
 static bool verify_os_version(NSOperatingSystemVersion os_version)
 {
     NSLog(@"[yabai-sa] checking for macOS %ld.%ld.%ld compatibility!", os_version.majorVersion, os_version.minorVersion, os_version.patchVersion);
 
+#ifdef __x86_64__
     if (os_version.majorVersion == 10) {
         if (os_version.minorVersion == 13 && os_version.patchVersion == 6) {
             return true; // High Sierra 10.13.6
@@ -192,10 +216,20 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
         }
     } else if (os_version.majorVersion == 11) {
         return true; // Big Sur 11.0
+    } else if (os_version.majorVersion == 12) {
+        return true; // Monterey 12.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra 10.13.6, Mojave 10.14.4-6, Catalina 10.15.0-6 and Big Sur 11.0");
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra 10.13.6, Mojave 10.14.4-6, Catalina 10.15.0-6, Big Sur 11.0-6, and Monterey 12.0");
     return false;
+#elif __arm64__
+    if (os_version.majorVersion == 12) {
+        return true; // Monterey 12.0
+    }
+
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0");
+    return false;
+#endif
 }
 
 static void init_instances()
@@ -210,9 +244,15 @@ static void init_instances()
         dock_spaces = nil;
         NSLog(@"[yabai-sa] could not locate pointer to dock.spaces! spaces functionality will not work!");
     } else {
+#ifdef __x86_64__
         uint32_t dock_spaces_offset = *(int32_t *)dock_spaces_addr;
         NSLog(@"[yabai-sa] (0x%llx) dock.spaces found at address 0x%llX (0x%llx)", baseaddr, dock_spaces_addr, dock_spaces_addr - baseaddr);
         dock_spaces = [(*(id *)(dock_spaces_addr + dock_spaces_offset + 0x4)) retain];
+#elif __arm64__
+        uint64_t dock_spaces_offset = decode_adrp_add(dock_spaces_addr, dock_spaces_addr - baseaddr);
+        NSLog(@"[yabai-sa] (0x%llx) dock.spaces found at address 0x%llX (0x%llx)", baseaddr, dock_spaces_offset, dock_spaces_offset - baseaddr);
+        dock_spaces = [(*(id *)(baseaddr + dock_spaces_offset)) retain];
+#endif
     }
 
     uint64_t dppm_addr = hex_find_seq(baseaddr + get_dppm_offset(os_version), get_dppm_pattern(os_version));
@@ -220,9 +260,15 @@ static void init_instances()
         dp_desktop_picture_manager = nil;
         NSLog(@"[yabai-sa] could not locate pointer to dppm! moving spaces will not work!");
     } else {
+#ifdef __x86_64__
         uint32_t dppm_offset = *(int32_t *)dppm_addr;
         NSLog(@"[yabai-sa] (0x%llx) dppm found at address 0x%llX (0x%llx)", baseaddr, dppm_addr, dppm_addr - baseaddr);
         dp_desktop_picture_manager = [(*(id *)(dppm_addr + dppm_offset + 0x4)) retain];
+#elif __arm64__
+        uint64_t dppm_offset = decode_adrp_add(dppm_addr, dppm_addr - baseaddr);
+        NSLog(@"[yabai-sa] (0x%llx) dppm found at address 0x%llX (0x%llx)", baseaddr, dppm_offset, dppm_offset - baseaddr);
+        dp_desktop_picture_manager = [(*(id *)(baseaddr + dppm_offset)) retain];
+#endif
     }
 
     uint64_t add_space_addr = hex_find_seq(baseaddr + get_add_space_offset(os_version), get_add_space_pattern(os_version));
@@ -231,7 +277,11 @@ static void init_instances()
         add_space_fp = 0;
     } else {
         NSLog(@"[yabai-sa] (0x%llx) addSpace found at address 0x%llX (0x%llx)", baseaddr, add_space_addr, add_space_addr - baseaddr);
+#ifdef __x86_64__
         add_space_fp = add_space_addr;
+#elif __arm64__
+        add_space_fp = (uint64_t) ptrauth_sign_unauthenticated((void *) add_space_addr, ptrauth_key_asia, 0);
+#endif
     }
 
     uint64_t remove_space_addr = hex_find_seq(baseaddr + get_remove_space_offset(os_version), get_remove_space_pattern(os_version));
@@ -240,7 +290,11 @@ static void init_instances()
         remove_space_fp = 0;
     } else {
         NSLog(@"[yabai-sa] (0x%llx) removeSpace found at address 0x%llX (0x%llx)", baseaddr, remove_space_addr, remove_space_addr - baseaddr);
+#ifdef __x86_64__
         remove_space_fp = remove_space_addr;
+#elif __arm64__
+        remove_space_fp = (uint64_t) ptrauth_sign_unauthenticated((void *) remove_space_addr, ptrauth_key_asia, 0);
+#endif
     }
 
     uint64_t move_space_addr = hex_find_seq(baseaddr + get_move_space_offset(os_version), get_move_space_pattern(os_version));
@@ -249,7 +303,11 @@ static void init_instances()
         move_space_fp = 0;
     } else {
         NSLog(@"[yabai-sa] (0x%llx) moveSpace found at address 0x%llX (0x%llx)", baseaddr, move_space_addr, move_space_addr - baseaddr);
+#ifdef __x86_64__
         move_space_fp = move_space_addr;
+#elif __arm64__
+        move_space_fp = (uint64_t) ptrauth_sign_unauthenticated((void *) move_space_addr, ptrauth_key_asia, 0);
+#endif
     }
 
     uint64_t set_front_window_addr = hex_find_seq(baseaddr + get_set_front_window_offset(os_version), get_set_front_window_pattern(os_version));
@@ -258,7 +316,11 @@ static void init_instances()
         set_front_window_fp = 0;
     } else {
         NSLog(@"[yabai-sa] (0x%llx) setFrontWindow found at address 0x%llX (0x%llx)", baseaddr, set_front_window_addr, set_front_window_addr - baseaddr);
+#ifdef __x86_64__
         set_front_window_fp = set_front_window_addr;
+#elif __arm64__
+        set_front_window_fp = (uint64_t) ptrauth_sign_unauthenticated((void *) set_front_window_addr, ptrauth_key_asia, 0);
+#endif
     }
 
     managed_space = objc_getClass("Dock.ManagedSpace");
@@ -407,7 +469,6 @@ static inline id display_space_for_space_with_id(uint64_t space_id)
 
 static void do_space_move(const char *message)
 {
-#ifdef __x86_64__
     Token source_token = get_token(&message);
     uint64_t source_space_id = token_to_uint64t(source_token);
 
@@ -446,7 +507,6 @@ static void do_space_move(const char *message)
 
     CFRelease(source_display_uuid);
     CFRelease(dest_display_uuid);
-#endif
 }
 
 typedef void (*remove_space_call)(id space, id display_space, id dock_spaces, uint64_t space_id1, uint64_t space_id2);
@@ -475,7 +535,6 @@ static void do_space_destroy(const char *message)
 
 static void do_space_create(const char *message)
 {
-#ifdef __x86_64__
     Token space_id_token = get_token(&message);
     uint64_t space_id = token_to_uint64t(space_id_token);
     CFStringRef __block display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
@@ -485,7 +544,6 @@ static void do_space_create(const char *message)
         asm__call_add_space(new_space, display_space, add_space_fp);
         CFRelease(display_uuid);
     });
-#endif
 }
 
 static void do_space_change(const char *message)

@@ -115,7 +115,7 @@ static char sa_bundle_plist[] =
 static void scripting_addition_set_path(void)
 {
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if (os_version.majorVersion == 11 || os_version.minorVersion >= 14) {
+    if (os_version.majorVersion >= 11 || os_version.minorVersion >= 14) {
         snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/Library/ScriptingAdditions/yabai.osax");
     } else {
         snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/System/Library/ScriptingAdditions/yabai.osax");
@@ -420,7 +420,7 @@ int scripting_addition_load(void)
         goto out;
     }
 
-    if (workspace_is_macos_bigsur()) {
+    if (workspace_is_macos_monterey() || workspace_is_macos_bigsur()) {
         if (!is_root()) {
             warn("yabai: scripting-addition must be loaded as root!\n");
             notify("scripting-addition", "must be loaded as root!");
