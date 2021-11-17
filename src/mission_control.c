@@ -31,7 +31,6 @@ void mission_control_observe(void)
         g_mission_control_observer.ref = AXUIElementCreateApplication(pid);
 
         if (pid && g_mission_control_observer.ref) {
-
             if (AXObserverCreate(pid, mission_control_notification_handler, &g_mission_control_observer.observer_ref) == kAXErrorSuccess) {
                 AXObserverAddNotification(g_mission_control_observer.observer_ref, g_mission_control_observer.ref, kAXExposeShowAllWindows, NULL);
                 AXObserverAddNotification(g_mission_control_observer.observer_ref, g_mission_control_observer.ref, kAXExposeShowFrontWindows, NULL);
