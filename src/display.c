@@ -92,8 +92,6 @@ CGRect display_bounds(uint32_t did)
 CGRect display_bounds_constrained(uint32_t did)
 {
     CGRect frame  = display_bounds(did);
-    CGRect menu   = display_manager_menu_bar_rect(did);
-    CGRect dock   = display_manager_dock_rect();
 
     if ((g_display_manager.mode == EXTERNAL_BAR_MAIN &&
          did == display_manager_main_display_id()) ||
@@ -103,13 +101,20 @@ CGRect display_bounds_constrained(uint32_t did)
         frame.size.height -= g_display_manager.bottom_padding;
     }
 
-    if (!display_manager_menu_bar_hidden()) {
+    if (display_manager_menu_bar_hidden()) {
+        if (workspace_display_has_notch(did)) {
+            frame.origin.y    += 38;
+            frame.size.height -= 38;
+        }
+    } else {
+        CGRect menu = display_manager_menu_bar_rect(did);
         frame.origin.y    += menu.size.height;
         frame.size.height -= menu.size.height;
     }
 
     if (!display_manager_dock_hidden()) {
         if (did == display_manager_dock_display_id()) {
+            CGRect dock = display_manager_dock_rect();
             switch (display_manager_dock_orientation()) {
             case DOCK_ORIENTATION_LEFT: {
                 frame.origin.x   += dock.size.width;

@@ -99,6 +99,21 @@ bool workspace_application_is_finished_launching(struct process *process)
     }
 }
 
+bool workspace_display_has_notch(uint32_t did)
+{
+    if (!CGDisplayIsBuiltin(did)) return false;
+
+    if (@available(macos 12.0, *)) {
+        for (NSScreen *screen in [NSScreen screens]) {
+            if ([[[screen deviceDescription] objectForKey:@"NSScreenNumber"] unsignedIntValue] == did) {
+                return screen.safeAreaInsets.top != 0;
+            }
+        }
+    }
+
+    return false;
+}
+
 bool workspace_is_macos_monterey(void)
 {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];

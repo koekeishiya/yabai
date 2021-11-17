@@ -205,22 +205,18 @@ bool display_manager_menu_bar_hidden(void)
 CGRect display_manager_menu_bar_rect(uint32_t did)
 {
     CGRect bounds = {};
+
+#ifdef __x86_64__
     SLSGetRevealedMenuBarBounds(&bounds, g_connection, display_space_id(did));
-
-#ifdef __arm64__
+#elif __arm64__
 
     //
-    // NOTE(koekeishiya): The above function is broken on Apple Silicon and always returns an empty rectangle,
-    // as of macOS 11.0.1, 11.1, 11.2 and 11.2.1.. The menubar height seems to be a constant of 24em always,
-    // regardless of the display being a 13" or 16", so we patch it here. The width of the menubar should be
-    // equal to the width of the display.
+    // NOTE(koekeishiya): SLSGetRevealedMenuBarBounds is broken on Apple Silicon and always returns an empty rectangle,
+    // The menubar height seems to be a constant of 24/44em always, regardless of the display being a 13" or 16",
+    // so we patch it here. The width of the menubar should be equal to the width of the display.
     //
 
-    if (bounds.size.width == 0 && bounds.size.height == 0) {
-        CGRect frame = display_bounds(did);
-        bounds.size.height = 24;
-        bounds.size.width = frame.size.width;
-    }
+    bounds.size.height = workspace_display_has_notch(did) ? 44 : 24;
 
 #endif
 
