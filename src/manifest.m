@@ -65,6 +65,7 @@
 
 #include "mach_loader.c"
 #include "sa.m"
+#include "mission_control.c"
 #include "event_loop.c"
 #include "event.c"
 #include "event_signal.c"
@@ -83,5 +84,4 @@
 #include "space_manager.c"
 #include "window_manager.c"
 #include "mouse.c"
-
 #include "yabai.c"

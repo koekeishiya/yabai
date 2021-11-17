@@ -40,7 +40,7 @@ int g_connection;
 
 struct signal *g_signal_event[SIGNAL_TYPE_COUNT];
 struct memory_pool g_signal_storage;
-bool g_mission_control_active;
+int g_mission_control_active;
 char g_sa_socket_file[MAXLEN];
 char g_socket_file[MAXLEN];
 char g_config_file[4096];
@@ -312,7 +312,12 @@ int main(int argc, char **argv)
     process_manager_begin(&g_process_manager);
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
+
+    if (workspace_is_macos_monterey()) {
+        mission_control_observe();
+    } else {
+        SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
+    }
 
     if (!message_loop_begin(g_socket_file)) {
         error("yabai: could not initialize message_loop! abort..\n");

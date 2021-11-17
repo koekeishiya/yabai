@@ -18,6 +18,7 @@ bool workspace_application_is_finished_launching(struct process *process);
 void workspace_application_observe_finished_launching(void *context, struct process *process);
 void workspace_application_observe_activation_policy(void *context, struct process *process);
 bool workspace_display_has_notch(uint32_t did);
+pid_t workspace_get_dock_pid(void);
 bool workspace_is_macos_monterey(void);
 bool workspace_is_macos_bigsur(void);
 bool workspace_is_macos_catalina(void);

@@ -114,6 +114,18 @@ bool workspace_display_has_notch(uint32_t did)
     return false;
 }
 
+pid_t workspace_get_dock_pid(void)
+{
+    NSArray *list = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.dock"];
+
+    if (list.count == 1) {
+        NSRunningApplication *dock = list[0];
+        return [dock processIdentifier];
+    }
+
+    return 0;
+}
+
 bool workspace_is_macos_monterey(void)
 {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];

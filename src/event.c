@@ -4,7 +4,7 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
-extern bool g_mission_control_active;
+extern int g_mission_control_active;
 extern int g_connection;
 extern void *g_workspace_context;
 
@@ -927,10 +927,52 @@ out:
     return EVENT_SUCCESS;
 }
 
+static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_SHOW_ALL_WINDOWS)
+{
+    debug("%s:\n", __FUNCTION__);
+    g_mission_control_active = 2;
+
+    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
+        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
+        SLSOrderWindow(g_connection, feedback_wid, 0, 0);
+    }
+
+    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_SHOW_FRONT_WINDOWS)
+{
+    debug("%s:\n", __FUNCTION__);
+    g_mission_control_active = 3;
+
+    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
+        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
+        SLSOrderWindow(g_connection, feedback_wid, 0, 0);
+    }
+
+    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_SHOW_DESKTOP)
+{
+    debug("%s:\n", __FUNCTION__);
+    g_mission_control_active = 4;
+
+    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
+        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
+        SLSOrderWindow(g_connection, feedback_wid, 0, 0);
+    }
+
+    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
+    return EVENT_SUCCESS;
+}
+
 static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
 {
     debug("%s:\n", __FUNCTION__);
-    g_mission_control_active = true;
+    g_mission_control_active = 1;
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
@@ -992,15 +1034,19 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
 static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
 {
     debug("%s:\n", __FUNCTION__);
-    g_mission_control_active = false;
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 1, 0);
     }
 
-    window_manager_correct_for_mission_control_changes(&g_space_manager, &g_window_manager);
+    if (g_mission_control_active == 1 || g_mission_control_active == 2) {
+        window_manager_correct_for_mission_control_changes(&g_space_manager, &g_window_manager);
+    }
+
     event_signal_push(SIGNAL_MISSION_CONTROL_EXIT, NULL);
+
+    g_mission_control_active = 0;
     return EVENT_SUCCESS;
 }
 
@@ -1022,6 +1068,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
                 bucket = bucket->next;
             }
         }
+    }
+
+    if (workspace_is_macos_monterey()) {
+        mission_control_unobserve();
+        mission_control_observe();
     }
 
     event_signal_push(SIGNAL_DOCK_DID_RESTART, NULL);

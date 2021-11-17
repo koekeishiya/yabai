@@ -243,18 +243,6 @@ static void scripting_addition_restart_dock(void)
     [dock makeObjectsPerformSelector:@selector(terminate)];
 }
 
-static pid_t scripting_addition_get_dock_pid(void)
-{
-    NSArray *list = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.dock"];
-
-    if (list.count == 1) {
-        NSRunningApplication *dock = list[0];
-        return [dock processIdentifier];
-    }
-
-    return 0;
-}
-
 static bool scripting_addition_is_sip_friendly(void)
 {
     uint32_t config = 0;
@@ -428,7 +416,7 @@ int scripting_addition_load(void)
             goto out;
         }
 
-        pid_t pid = scripting_addition_get_dock_pid();
+        pid_t pid = workspace_get_dock_pid();
         if (!pid) {
             notify("scripting-addition", "could not locate pid of Dock.app!");
             warn("yabai: scripting-addition could not locate pid of Dock.app!\n");
