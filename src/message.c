@@ -1055,10 +1055,10 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         if (value.type == TOKEN_TYPE_INVALID) {
             fprintf(rsp, "%f\n", g_window_manager.window_opacity_duration);
         } else if (value.type == TOKEN_TYPE_FLOAT) {
-            if (!workspace_is_macos_catalina() && !workspace_is_macos_bigsur()) {
+            if (!workspace_is_macos_monterey() && !workspace_is_macos_bigsur() && !workspace_is_macos_catalina()) {
                 g_window_manager.window_opacity_duration = value.float_value;
             } else {
-                daemon_fail(rsp, "'%s' cannot be changed on macOS Catalina/Big Sur because of an Apple bug in the WindowServer\n", COMMAND_CONFIG_OPACITY_DURATION);
+                daemon_fail(rsp, "'%s' cannot be changed on macOS Catalina/Big Sur/Monterey because of an Apple bug in the WindowServer\n", COMMAND_CONFIG_OPACITY_DURATION);
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
