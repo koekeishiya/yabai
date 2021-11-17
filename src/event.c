@@ -791,7 +791,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
 
         uint32_t did = display_manager_point_display_id(new_point);
         if (did) {
-            CGRect bounds = display_bounds(did);
+            CGRect bounds = display_bounds_constrained(did);
             if (new_point.y < bounds.origin.y) new_point.y = bounds.origin.y;
         }
 
