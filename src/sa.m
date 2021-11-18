@@ -31,6 +31,7 @@ static char osax_sdefn_file[MAXLEN];
 static char osax_payload_plist[MAXLEN];
 static char osax_bin_loader[MAXLEN];
 static char osax_bin_payload[MAXLEN];
+static char osax_bin_mach_loader[MAXLEN];
 
 static char sa_def[] =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -134,6 +135,7 @@ static void scripting_addition_set_path(void)
 
     snprintf(osax_payload_plist, sizeof(osax_payload_plist), "%s/%s", osax_payload_contents_dir, "Info.plist");
     snprintf(osax_bin_loader, sizeof(osax_bin_loader), "%s/%s", osax_contents_macos_dir, "loader");
+    snprintf(osax_bin_mach_loader, sizeof(osax_bin_mach_loader), "%s/%s", osax_contents_macos_dir, "mach_loader");
     snprintf(osax_bin_payload, sizeof(osax_bin_payload), "%s/%s", osax_payload_contents_macos_dir, "payload");
 }
 
@@ -171,6 +173,12 @@ static void scripting_addition_prepare_binaries(void)
     system(cmd);
 
     snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_loader, "2>/dev/null");
+    system(cmd);
+
+    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_mach_loader);
+    system(cmd);
+
+    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_mach_loader, "2>/dev/null");
     system(cmd);
 
     snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_payload);
@@ -324,6 +332,10 @@ int scripting_addition_install(void)
         goto cleanup;
     }
 
+    if (!scripting_addition_write_file((char *) __src_osax_mach_loader, __src_osax_mach_loader_len, osax_bin_mach_loader, "wb")) {
+        goto cleanup;
+    }
+
     if (!scripting_addition_write_file((char *) __src_osax_payload, __src_osax_payload_len, osax_bin_payload, "wb")) {
         goto cleanup;
     }
@@ -392,6 +404,23 @@ static bool drop_sudo_privileges_and_set_sa_socket_path(void)
     return true;
 }
 
+static bool mach_loader_inject_payload(void)
+{
+    FILE *handle = popen("/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/mach_loader", "r");
+    if (!handle) return false;
+
+    int result = pclose(handle);
+    if (WIFEXITED(result)) {
+        return WEXITSTATUS(result) == 0;
+    } else if (WIFSIGNALED(result)) {
+        return false;
+    } else if (WIFSTOPPED(result)) {
+        return false;
+    }
+
+    return false;
+}
+
 int scripting_addition_load(void)
 {
     int result = 0;
@@ -416,15 +445,7 @@ int scripting_addition_load(void)
             goto out;
         }
 
-        pid_t pid = workspace_get_dock_pid();
-        if (!pid) {
-            notify("scripting-addition", "could not locate pid of Dock.app!");
-            warn("yabai: scripting-addition could not locate pid of Dock.app!\n");
-            result = 1;
-            goto out;
-        }
-
-        if (mach_loader_inject_payload(pid)) {
+        if (mach_loader_inject_payload()) {
             debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
             if (drop_sudo_privileges_and_set_sa_socket_path()) {
                 scripting_addition_perform_validation(false);
