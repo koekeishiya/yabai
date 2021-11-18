@@ -43,7 +43,6 @@ extern CGError CGSSetWindowLevel(int cid, uint32_t wid, int level);
 extern OSStatus CGSMoveWindowWithGroup(const int cid, const uint32_t wid, CGPoint *point);
 extern CGError CGSReassociateWindowsSpacesByGeometry(int cid, CFArrayRef window_list);
 extern CGError CGSGetWindowOwner(int cid, uint32_t wid, int *window_cid);
-extern CGError CGSInvalidateWindowShadow(int cid, CGWindowID wid);
 extern CGError CGSSetWindowTags(int cid, uint32_t wid, const int tags[2], size_t maxTagSize);
 extern CGError CGSClearWindowTags(int cid, uint32_t wid, const int tags[2], size_t maxTagSize);
 extern CGError CGSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
@@ -715,7 +714,6 @@ static void do_window_shadow(const char *message)
     } else {
         CGSSetWindowTags(_connection, wid, tags, 32);
     }
-    CGSInvalidateWindowShadow(_connection, wid);
 }
 
 static void do_window_group_add(const char *message)
