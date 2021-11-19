@@ -218,9 +218,12 @@ CGRect display_manager_menu_bar_rect(uint32_t did)
     //
 
     int notch_height = workspace_display_has_notch(did);
-    if (!notch_height) notch_height = 24;
+    if (notch_height) {
+        bounds.size.height = notch_height + 6;
+    } else {
+        bounds.size.height = 24;
+    }
 
-    bounds.size.height = notch_height;
     bounds.size.width = CGDisplayPixelsWide(did);
 #endif
 
