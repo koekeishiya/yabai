@@ -106,7 +106,6 @@ int workspace_display_has_notch(uint32_t did)
     if (__builtin_available(macos 12.0, *)) {
         for (NSScreen *screen in [NSScreen screens]) {
             if ([[[screen deviceDescription] objectForKey:@"NSScreenNumber"] unsignedIntValue] == did) {
-                printf("safeAreaInsets.top = %f\n", screen.safeAreaInsets.top);
                 return screen.safeAreaInsets.top;
             }
         }
