@@ -99,19 +99,20 @@ bool workspace_application_is_finished_launching(struct process *process)
     }
 }
 
-bool workspace_display_has_notch(uint32_t did)
+int workspace_display_has_notch(uint32_t did)
 {
-    if (!CGDisplayIsBuiltin(did)) return false;
+    if (!CGDisplayIsBuiltin(did)) return 0;
 
     if (__builtin_available(macos 12.0, *)) {
         for (NSScreen *screen in [NSScreen screens]) {
             if ([[[screen deviceDescription] objectForKey:@"NSScreenNumber"] unsignedIntValue] == did) {
-                return screen.safeAreaInsets.top != 0;
+                printf("safeAreaInsets.top = %f\n", screen.safeAreaInsets.top);
+                return screen.safeAreaInsets.top;
             }
         }
     }
 
-    return false;
+    return 0;
 }
 
 pid_t workspace_get_dock_pid(void)

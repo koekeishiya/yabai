@@ -102,9 +102,10 @@ CGRect display_bounds_constrained(uint32_t did)
     }
 
     if (display_manager_menu_bar_hidden()) {
-        if (workspace_display_has_notch(did)) {
-            frame.origin.y    += 38;
-            frame.size.height -= 38;
+        int notch_height = workspace_display_has_notch(did);
+        if (notch_height) {
+            frame.origin.y    += notch_height;
+            frame.size.height -= notch_height;
         }
     } else {
         CGRect menu = display_manager_menu_bar_rect(did);
