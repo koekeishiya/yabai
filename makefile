@@ -20,9 +20,9 @@ install: BUILD_FLAGS=-std=c99 -Wall -DNDEBUG -O2 -fvisibility=hidden -mmacosx-ve
 install: clean-build $(BINS)
 
 $(OSAX_SRC): $(OSAX_PATH)/loader.m $(OSAX_PATH)/payload.m
-	clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -arch x86_64 -o $(OSAX_PATH)/loader -framework Foundation
-	clang $(OSAX_PATH)/payload.m -shared -fPIC -O2 -mmacosx-version-min=10.13 -arch x86_64 -arch arm64e -o $(OSAX_PATH)/payload -framework Foundation -framework Carbon
-	clang $(OSAX_PATH)/mach_loader.m -O2 -mmacosx-version-min=10.13 -arch x86_64 -arch arm64e -o $(OSAX_PATH)/mach_loader -framework Cocoa
+	xcrun clang $(OSAX_PATH)/loader.m -shared -O2 -mmacosx-version-min=10.13 -arch x86_64 -o $(OSAX_PATH)/loader -framework Foundation
+	xcrun clang $(OSAX_PATH)/payload.m -shared -fPIC -O2 -mmacosx-version-min=10.13 -arch x86_64 -arch arm64e -o $(OSAX_PATH)/payload -framework Foundation -framework Carbon
+	xcrun clang $(OSAX_PATH)/mach_loader.m -O2 -mmacosx-version-min=10.13 -arch x86_64 -arch arm64e -o $(OSAX_PATH)/mach_loader -framework Cocoa
 	xxd -i -a $(OSAX_PATH)/loader $(OSAX_PATH)/loader_bin.c
 	xxd -i -a $(OSAX_PATH)/payload $(OSAX_PATH)/payload_bin.c
 	xxd -i -a $(OSAX_PATH)/mach_loader $(OSAX_PATH)/mach_loader_bin.c
@@ -56,4 +56,4 @@ clean: clean-build
 
 $(BUILD_PATH)/yabai: $(YABAI_SRC)
 	mkdir -p $(BUILD_PATH)
-	clang $^ $(BUILD_FLAGS) $(FRAMEWORK_PATH) $(FRAMEWORK) -o $@
+	xcrun clang $^ $(BUILD_FLAGS) $(FRAMEWORK_PATH) $(FRAMEWORK) -o $@
