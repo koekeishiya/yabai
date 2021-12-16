@@ -6,7 +6,7 @@
 
 uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
-        return 0xA500;
+        return 0x9000;
     } else if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
         return 0x8d00;
     } if (os_version.minorVersion == 15) {
