@@ -537,210 +537,109 @@ out:
     return result;
 }
 
-bool scripting_addition_create_space(uint64_t sid)
+static bool scripting_addition_run_command(char *message)
 {
     int sockfd;
-    char message[MAXLEN];
+    bool result = false;
 
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "space_create %lld", sid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
+    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
+        if (socket_write(sockfd, message)) {
+            socket_wait(sockfd);
+            result = true;
+        }
     }
 
     socket_close(sockfd);
     return result;
+}
+
+bool scripting_addition_create_space(uint64_t sid)
+{
+    char message[MAXLEN];
+    snprintf(message, sizeof(message), "space_create %lld", sid);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_destroy_space(uint64_t sid)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "space_destroy %lld", sid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "space_destroy %lld", sid);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_focus_space(uint64_t sid)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "space %lld", sid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "space %lld", sid);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "space_move %lld %lld %d", src_sid, dst_sid, focus);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "space_move %lld %lld %d", src_sid, dst_sid, focus);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_add_to_window_group(uint32_t child_wid, uint32_t parent_wid)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_group_add %d %d", parent_wid, child_wid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_group_add %d %d", parent_wid, child_wid);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_group_remove %d %d", parent_wid, child_wid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_group_remove %d %d", parent_wid, child_wid);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_move_window(uint32_t wid, int x, int y)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_move %d %d %d", wid, x, y);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_move %d %d %d", wid, x, y);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", wid, opacity, duration);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_alpha_fade %d %f %f", wid, opacity, duration);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_set_layer(uint32_t wid, int layer)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_level %d %d", wid, layer);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_level %d %d", wid, layer);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_set_sticky(uint32_t wid, bool sticky)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_sticky %d %d", wid, sticky);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_sticky %d %d", wid, sticky);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_set_shadow(uint32_t wid, bool shadow)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_shadow %d %d", wid, shadow);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_shadow %d %d", wid, shadow);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_focus_window(uint32_t wid)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_focus %d", wid);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_focus %d", wid);
+    return scripting_addition_run_command(message);
 }
 
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h)
 {
-    int sockfd;
     char message[MAXLEN];
-
-    bool result = socket_connect_un(&sockfd, g_sa_socket_file);
-    if (result) {
-        snprintf(message, sizeof(message), "window_scale %d %f %f %f %f", wid, x, y, w, h);
-        socket_write(sockfd, message);
-        socket_wait(sockfd);
-    }
-
-    socket_close(sockfd);
-    return result;
+    snprintf(message, sizeof(message), "window_scale %d %f %f %f %f", wid, x, y, w, h);
+    return scripting_addition_run_command(message);
 }
