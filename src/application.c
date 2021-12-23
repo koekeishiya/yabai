@@ -51,6 +51,7 @@ bool application_observe(struct application *application)
             if (result == kAXErrorSuccess || result == kAXErrorNotificationAlreadyRegistered) {
                 application->notification |= 1 << i;
             } else {
+                if (result == kAXErrorCannotComplete) application->ax_retry = true;
                 debug("%s: notification %s failed with error %s for %s\n", __FUNCTION__, ax_application_notification_str[i], ax_error_str[-result], application->name);
             }
         }
