@@ -332,14 +332,7 @@ int main(int argc, char **argv)
     }
 
     exec_config_file();
-
-    for (;;) {
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        CFRunLoopRunResult result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 60, true);
-        [pool drain];
-
-        if (result == kCFRunLoopRunFinished || result == kCFRunLoopRunStopped) break;
-    }
+    CFRunLoopRun();
 
     return 0;
 }
