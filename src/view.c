@@ -785,8 +785,8 @@ void view_serialize(FILE *rsp, struct view *view)
             buffer,
             first_leaf ? first_leaf->window_order[0] : 0,
             last_leaf ? last_leaf->window_order[0] : 0,
-            json_bool(space_is_visible(view->sid)),
             json_bool(view->sid == g_space_manager.current_space_id),
+            json_bool(space_is_visible(view->sid)),
             json_bool(space_is_fullscreen(view->sid)));
 }
 
