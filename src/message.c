@@ -2495,6 +2495,8 @@ bool message_loop_begin(char *socket_path)
         return false;
     }
 
+    fcntl(g_message_loop.sockfd, F_SETFD, FD_CLOEXEC | fcntl(g_message_loop.sockfd, F_GETFD));
+
     g_message_loop.is_running = true;
     pthread_create(&g_message_loop.thread, NULL, &message_loop_run, NULL);
 

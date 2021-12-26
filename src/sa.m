@@ -194,8 +194,8 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
     bool result = false;
     char rsp[BUFSIZ] = {};
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        if (socket_write(sockfd, "handshake")) {
+    if (socket_connect(&sockfd, g_sa_socket_file)) {
+        if (send(sockfd, "handshake", 9, 0) != -1) {
             int length = recv(sockfd, rsp, sizeof(rsp)-1, 0);
             if (length <= 0) goto out;
 
@@ -540,11 +540,12 @@ out:
 static bool scripting_addition_run_command(char *message)
 {
     int sockfd;
+    char dummy;
     bool result = false;
 
-    if (socket_connect_un(&sockfd, g_sa_socket_file)) {
-        if (socket_write(sockfd, message)) {
-            socket_wait(sockfd);
+    if (socket_connect(&sockfd, g_sa_socket_file)) {
+        if (send(sockfd, message, strlen(message), 0) != -1) {
+            recv(sockfd, &dummy, 1, 0);
             result = true;
         }
     }

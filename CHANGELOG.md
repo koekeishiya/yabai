@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - New config *window_origin_display* to specify which display a window should become managed at upon creation [#951](https://github.com/koekeishiya/yabai/issues/951)
 
 ### Changed
+- Fixed an issue with the way unix sockets were handled that would cause an incoming connection to drop in rare occasions [#1107](https://github.com/koekeishiya/yabai/issues/1107)
 - Update scripting addition to support macOS 12.1.0 [#1054](https://github.com/koekeishiya/yabai/issues/1054)
 - Fixed an issue that would cause the target window to snap back to its previous position when moved between displays using the cursor inside mission-control [#820](https://github.com/koekeishiya/yabai/issues/820)
 - Properly drain autoreleased objects (from Apple frameworks) [#751](https://github.com/koekeishiya/yabai/issues/751)

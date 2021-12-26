@@ -14,6 +14,8 @@
 #define in_range_ei(a, b, c) (((a) >  (b)) && ((a) <= (c)))
 #define in_range_ee(a, b, c) (((a) >  (b)) && ((a) <  (c)))
 
+#define FAILURE_MESSAGE "\x07"
+
 #define MAXLEN 512
 
 #define REGEX_MATCH_UD  0

@@ -58,14 +58,6 @@ static int client_send_message(int argc, char **argv)
         error("yabai-msg: 'env USER' not set! abort..\n");
     }
 
-    int sockfd;
-    char socket_file[MAXLEN];
-    snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
-
-    if (!socket_connect_un(&sockfd, socket_file)) {
-        error("yabai-msg: failed to connect to socket..\n");
-    }
-
     int message_length = argc;
     int argl[argc];
 
@@ -74,7 +66,7 @@ static int client_send_message(int argc, char **argv)
         message_length += argl[i];
     }
 
-    char message[message_length];
+    char *message = malloc(message_length);
     char *temp = message;
 
     for (int i = 1; i < argc; ++i) {
@@ -84,36 +76,37 @@ static int client_send_message(int argc, char **argv)
     }
     *temp++ = '\0';
 
-    if (!socket_write_bytes(sockfd, message, message_length)) {
+    int sockfd;
+    char socket_file[MAXLEN];
+    snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
+
+    if (!socket_connect(&sockfd, socket_file)) {
+        error("yabai-msg: failed to connect to socket..\n");
+    }
+
+    if (send(sockfd, message, message_length, 0) == -1) {
         error("yabai-msg: failed to send data..\n");
     }
 
     shutdown(sockfd, SHUT_WR);
+    free(message);
 
     int result = EXIT_SUCCESS;
-    int byte_count = 0;
+    FILE *output = stdout;
+    int bytes_read = 0;
     char rsp[BUFSIZ];
 
-    struct pollfd fds[] = {
-        { sockfd, POLLIN, 0 }
-    };
+    while ((bytes_read = read(sockfd, rsp, sizeof(rsp)-1)) > 0) {
+        rsp[bytes_read] = '\0';
 
-    while (poll(fds, 1, -1) > 0) {
-        if (fds[0].revents & POLLIN) {
-            if ((byte_count = recv(sockfd, rsp, sizeof(rsp)-1, 0)) <= 0) {
-                break;
-            }
-
-            rsp[byte_count] = '\0';
-
-            if (rsp[0] == FAILURE_MESSAGE[0]) {
-                result = EXIT_FAILURE;
-                fprintf(stderr, "%s", rsp + 1);
-                fflush(stderr);
-            } else {
-                fprintf(stdout, "%s", rsp);
-                fflush(stdout);
-            }
+        if (rsp[0] == FAILURE_MESSAGE[0]) {
+            result = EXIT_FAILURE;
+            output = stderr;
+            fprintf(output, "%s", rsp + 1);
+            fflush(output);
+        } else {
+            fprintf(output, "%s", rsp);
+            fflush(output);
         }
     }
 

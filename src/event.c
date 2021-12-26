@@ -1187,9 +1187,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 
             fflush(rsp);
             fclose(rsp);
+
+            return EVENT_SUCCESS;
         }
     }
 
     socket_close(param1);
-    return EVENT_SUCCESS;
+    return EVENT_FAILURE;
 }
