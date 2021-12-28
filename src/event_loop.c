@@ -31,8 +31,6 @@ empty:
 
 void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1, volatile uint32_t *info)
 {
-    assert(event_loop->is_running);
-
     bool success;
     struct event_loop_item *tail, *new_tail;
 
@@ -72,15 +70,19 @@ bool event_loop_init(struct event_loop *event_loop)
 bool event_loop_begin(struct event_loop *event_loop)
 {
     if (event_loop->is_running) return false;
+
     event_loop->is_running = true;
     pthread_create(&event_loop->thread, NULL, &event_loop_run, event_loop);
+
     return true;
 }
 
 bool event_loop_end(struct event_loop *event_loop)
 {
     if (!event_loop->is_running) return false;
+
     event_loop->is_running = false;
     pthread_join(event_loop->thread, NULL);
+
     return true;
 }
