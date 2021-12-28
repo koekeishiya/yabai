@@ -468,6 +468,8 @@ static inline id display_space_for_space_with_id(uint64_t space_id)
 
 static void do_space_move(const char *message)
 {
+    if (dock_spaces == nil || dp_desktop_picture_manager == nil || move_space_fp == 0) return;
+
     Token source_token = get_token(&message);
     uint64_t source_space_id = token_to_uint64t(source_token);
 
@@ -511,6 +513,8 @@ static void do_space_move(const char *message)
 typedef void (*remove_space_call)(id space, id display_space, id dock_spaces, uint64_t space_id1, uint64_t space_id2);
 static void do_space_destroy(const char *message)
 {
+    if (dock_spaces == nil || remove_space_fp == 0) return;
+
     Token space_id_token = get_token(&message);
     uint64_t space_id = token_to_uint64t(space_id_token);
     CFStringRef display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
@@ -534,6 +538,8 @@ static void do_space_destroy(const char *message)
 
 static void do_space_create(const char *message)
 {
+    if (dock_spaces == nil || add_space_fp == 0) return;
+
     Token space_id_token = get_token(&message);
     uint64_t space_id = token_to_uint64t(space_id_token);
     CFStringRef __block display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
@@ -547,6 +553,8 @@ static void do_space_create(const char *message)
 
 static void do_space_change(const char *message)
 {
+    if (dock_spaces == nil) return;
+
     Token token = get_token(&message);
     uint64_t dest_space_id = token_to_uint64t(token);
     if (dest_space_id) {
@@ -570,6 +578,7 @@ static void do_space_change(const char *message)
                 }
             }
         }
+
         CFRelease(dest_display);
     }
 }
@@ -688,6 +697,8 @@ static void do_window_sticky(const char *message)
 typedef void (*focus_window_call)(ProcessSerialNumber psn, uint32_t wid);
 static void do_window_focus(const char *message)
 {
+    if (set_front_window_fp == 0) return;
+
     int window_connection;
     ProcessSerialNumber window_psn;
 
@@ -744,31 +755,6 @@ static void do_window_group_remove(const char *message)
     CGSRemoveFromOrderingGroup(_connection, child);
 }
 
-static inline bool can_focus_space()
-{
-    return dock_spaces != nil;
-}
-
-static inline bool can_create_space()
-{
-    return dock_spaces != nil && add_space_fp != 0;
-}
-
-static inline bool can_destroy_space()
-{
-    return dock_spaces != nil && remove_space_fp != 0;
-}
-
-static inline bool can_move_space()
-{
-    return dock_spaces != nil && dp_desktop_picture_manager != nil && move_space_fp != 0;
-}
-
-static inline bool can_focus_window()
-{
-    return set_front_window_fp != 0;
-}
-
 static void do_handshake(int sockfd)
 {
     uint32_t attrib = 0;
@@ -795,26 +781,16 @@ static void do_handshake(int sockfd)
 
 static void handle_message(int sockfd, const char *message)
 {
-    /*
-     * NOTE(koekeishiya): interaction is supposed to happen through an
-     * external program (yabai), and so we do not bother doing input
-     * validation, as the program in question should do this.
-     */
-
     Token token = get_token(&message);
     if (token_equals(token, "handshake")) {
         do_handshake(sockfd);
     } else if (token_equals(token, "space")) {
-        if (!can_focus_space()) return;
         do_space_change(message);
     } else if (token_equals(token, "space_create")) {
-        if (!can_create_space()) return;
         do_space_create(message);
     } else if (token_equals(token, "space_destroy")) {
-        if (!can_destroy_space()) return;
         do_space_destroy(message);
     } else if (token_equals(token, "space_move")) {
-        if (!can_move_space()) return;
         do_space_move(message);
     } else if (token_equals(token, "window_scale")) {
         do_window_scale(message);
@@ -829,7 +805,6 @@ static void handle_message(int sockfd, const char *message)
     } else if (token_equals(token, "window_sticky")) {
         do_window_sticky(message);
     } else if (token_equals(token, "window_focus")) {
-        if (!can_focus_window()) return;
         do_window_focus(message);
     } else if (token_equals(token, "window_shadow")) {
         do_window_shadow(message);
@@ -840,24 +815,23 @@ static void handle_message(int sockfd, const char *message)
     }
 }
 
-static bool recv_socket(int sockfd, char *message, size_t message_size)
+static inline bool read_message(int sockfd, char *message, size_t length)
 {
-    int len = recv(sockfd, message, message_size, 0);
-    if (len > 0) {
-        message[len] = '\0';
-        return true;
-    }
-    return false;
+    int len = recv(sockfd, message, length, 0);
+    if (len <= 0) return false;
+
+    message[len] = '\0';
+    return true;
 }
 
 static void *handle_connection(void *unused)
 {
-    while (1) {
+    for (;;) {
         int sockfd = accept(daemon_sockfd, NULL, 0);
         if (sockfd == -1) continue;
 
         char message[BUF_SIZE];
-        if (recv_socket(sockfd, message, sizeof(message))) {
+        if (read_message(sockfd, message, sizeof(message))) {
             handle_message(sockfd, message);
         }
 
@@ -891,21 +865,17 @@ static bool start_daemon(char *socket_path)
         return false;
     }
 
+    init_instances();
     pthread_create(&daemon_thread, NULL, &handle_connection, NULL);
+
     return true;
 }
 
 void load_payload(void)
 {
-    NSLog(@"[yabai-sa] loaded payload");
-    init_instances();
+    NSLog(@"[yabai-sa] loaded payload..");
 
     const char *user = getenv("USER");
-    if (!user) {
-        NSString *ns_user = NSUserName();
-        if (ns_user) user = [ns_user UTF8String];
-    }
-
     if (!user) {
         NSLog(@"[yabai-sa] could not get 'env USER'! abort..");
         return;
