@@ -6,12 +6,12 @@ static void *event_loop_run(void *context)
     while (event_loop->is_running) {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-        do {
-            head = event_loop->head;
-            if (!head->next) break;
-        } while (!__sync_bool_compare_and_swap(&event_loop->head, head, head->next));
+        for (;;) {
+            do {
+                head = event_loop->head;
+                if (!head->next) goto empty;
+            } while (!__sync_bool_compare_and_swap(&event_loop->head, head, head->next));
 
-        if (head->next) {
             struct event *event = &head->next->event;
 
             uint32_t result = event_handler[event->type](event->context, event->param1);
@@ -19,11 +19,11 @@ static void *event_loop_run(void *context)
 
             event_signal_flush();
             ts_reset();
-        } else {
-            sem_wait(event_loop->semaphore);
         }
 
+empty:
         [pool drain];
+        sem_wait(event_loop->semaphore);
     }
 
     return NULL;
