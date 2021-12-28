@@ -1,7 +1,26 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-const CFStringRef kAXEnhancedUserInterface = CFSTR("AXEnhancedUserInterface");
+struct rgba_color
+{
+    uint32_t p;
+    float r;
+    float g;
+    float b;
+    float a;
+};
+
+static const CFStringRef kAXEnhancedUserInterface = CFSTR("AXEnhancedUserInterface");
+
+static const char *bool_str[] = { "off", "on" };
+
+static const char *layer_str[] =
+{
+    [0] = "",
+    [LAYER_BELOW] = "below",
+    [LAYER_NORMAL] = "normal",
+    [LAYER_ABOVE] = "above"
+};
 
 static inline bool socket_connect(int *sockfd, char *socket_path)
 {
@@ -34,26 +53,7 @@ static inline char *json_bool(bool value)
     return value ? "true" : "false";
 }
 
-static const char *bool_str[] = { "off", "on" };
-
-static const char *layer_str[] =
-{
-    [0] = "",
-    [LAYER_BELOW] = "below",
-    [LAYER_NORMAL] = "normal",
-    [LAYER_ABOVE] = "above"
-};
-
-struct rgba_color
-{
-    uint32_t p;
-    float r;
-    float g;
-    float b;
-    float a;
-};
-
-struct rgba_color rgba_color_from_hex(uint32_t color)
+static inline struct rgba_color rgba_color_from_hex(uint32_t color)
 {
     struct rgba_color result;
     result.p = color;
@@ -140,22 +140,7 @@ static inline char *ts_string_escape(char *s)
     return result;
 }
 
-/*
-static inline char *string_escape(char *s)
-{
-    int size_in_bytes;
-    char *cursor = _string_escape_pre(s, &size_in_bytes);
-    if (!cursor) return NULL;
-
-    char *result = malloc(sizeof(char) * (size_in_bytes+1));
-    result[size_in_bytes] = '\0';
-    _string_escape_post(s, cursor, result);
-
-    return result;
-}
-*/
-
-static CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
+static inline CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
 {
     CFNumberRef temp[count];
 
@@ -250,7 +235,7 @@ static inline bool ensure_executable_permission(char *filename)
     return true;
 }
 
-static bool ax_privilege(void)
+static inline bool ax_privilege(void)
 {
     const void *keys[] = { kAXTrustedCheckOptionPrompt };
     const void *values[] = { kCFBooleanTrue };
@@ -310,13 +295,13 @@ static inline int euclidean_distance(CGPoint p1, CGPoint p2)
     return dx*dx + dy*dy;
 }
 
-static bool cgrect_contains_point(CGRect r, CGPoint p)
+static inline bool cgrect_contains_point(CGRect r, CGPoint p)
 {
     return p.x >= r.origin.x && p.x <= r.origin.x + r.size.width &&
            p.y >= r.origin.y && p.y <= r.origin.y + r.size.height;
 }
 
-static bool triangle_contains_point(CGPoint t[3], CGPoint p)
+static inline bool triangle_contains_point(CGPoint t[3], CGPoint p)
 {
     float l1 = (p.x - t[0].x) * (t[2].y - t[0].y) - (t[2].x - t[0].x) * (p.y - t[0].y);
     float l2 = (p.x - t[1].x) * (t[0].y - t[1].y) - (t[0].x - t[1].x) * (p.y - t[1].y);
@@ -325,7 +310,7 @@ static bool triangle_contains_point(CGPoint t[3], CGPoint p)
     return (l1 > 0.0f && l2 > 0.0f && l3 > 0.0f) || (l1 < 0.0f && l2 < 0.0f && l3 < 0.0f);
 }
 
-static int regex_match(bool valid, regex_t *regex, const char *match)
+static inline int regex_match(bool valid, regex_t *regex, const char *match)
 {
     if (!valid) return REGEX_MATCH_UD;
 
