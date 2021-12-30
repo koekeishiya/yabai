@@ -398,7 +398,7 @@ struct window_node *window_node_find_prev_leaf(struct window_node *node)
         return node->parent->left;
     }
 
-    return window_node_find_first_leaf(node->parent->left->right);
+    return window_node_find_last_leaf(node->parent->left->right);
 }
 
 struct window_node *window_node_find_next_leaf(struct window_node *node)
