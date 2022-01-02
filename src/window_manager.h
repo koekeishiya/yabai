@@ -82,11 +82,15 @@ struct window_manager
     enum purify_mode purify_mode;
     enum window_origin_mode window_origin_mode;
     bool enable_window_border;
+    bool enable_window_blur;
     bool enable_window_opacity;
     bool enable_window_topmost;
     float active_window_opacity;
     float normal_window_opacity;
     float window_opacity_duration;
+    uint32_t window_blur_radius;
+    // uint32_t active_window_blur_radius;
+    // uint32_t normal_window_blur_radius;
     uint32_t *insert_feedback_windows;
     int border_width;
     struct rgba_color insert_feedback_color;
@@ -153,6 +157,11 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
 void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool enabled);
 bool window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
+// void window_manager_set_active_window_blur(struct window_manager *wm, float blur);
+// void window_manager_set_normal_window_blur(struct window_manager *wm, float blur);
+bool window_manager_set_blur_radius(struct window_manager *wm, struct window *window, uint32_t radius);
+void window_manager_set_window_blur_enabled(struct window_manager *wm, bool enabled);
+// bool window_manager_set_blur(struct window_manager *wm, struct window *window, float blur);
 void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled);
 void window_manager_set_window_border_width(struct window_manager *wm, int width);
 void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);

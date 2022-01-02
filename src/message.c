@@ -28,6 +28,8 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
+#define COMMAND_CONFIG_BLUR                  "window_blur"
+#define COMMAND_CONFIG_BLUR_RADIUS           "window_blur_radius"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
 #define COMMAND_CONFIG_BORDER_ACTIVE_COLOR   "active_window_border_color"
@@ -128,6 +130,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_CLOSE      "--close"
 #define COMMAND_WINDOW_LAYER      "--layer"
 #define COMMAND_WINDOW_OPACITY    "--opacity"
+#define COMMAND_WINDOW_BLUR       "--blur"
 #define COMMAND_WINDOW_TOGGLE     "--toggle"
 #define COMMAND_WINDOW_DISPLAY    "--display"
 #define COMMAND_WINDOW_SPACE      "--space"
@@ -174,6 +177,7 @@ extern bool g_verbose;
 #define ARGUMENT_RULE_KEY_DISPLAY "display"
 #define ARGUMENT_RULE_KEY_SPACE   "space"
 #define ARGUMENT_RULE_KEY_ALPHA   "opacity"
+#define ARGUMENT_RULE_KEY_BLUR    "blur"
 #define ARGUMENT_RULE_KEY_MANAGE  "manage"
 #define ARGUMENT_RULE_KEY_STICKY  "sticky"
 #define ARGUMENT_RULE_KEY_MFF     "mouse_follows_focus"
@@ -1050,6 +1054,26 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
         }
+    } else if (token_equals(command, COMMAND_CONFIG_BLUR)) {
+        struct token value = get_token(&message);
+        if (!token_is_valid(value)) {
+            fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_blur]);
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+            window_manager_set_window_blur_enabled(&g_window_manager, false);
+        } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+            window_manager_set_window_blur_enabled(&g_window_manager, true);
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_CONFIG_BLUR_RADIUS)) {
+        struct token_value value = token_to_value(get_token(&message), false);
+        if (value.type == TOKEN_TYPE_INVALID) {
+            fprintf(rsp, "%d\n", g_window_manager.window_blur_radius);
+        } else if (value.type == TOKEN_TYPE_INT && value.int_value) {
+            g_window_manager.window_blur_radius = value.int_value;
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
+        }
     } else if (token_equals(command, COMMAND_CONFIG_OPACITY_DURATION)) {
         struct token_value value = token_to_value(get_token(&message), false);
         if (value.type == TOKEN_TYPE_INVALID) {
@@ -1900,6 +1924,17 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 acting_window->opacity = value.float_value;
             } else {
                 daemon_fail(rsp, "could not change opacity of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+            }
+        } else {
+            daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
+        }
+    } else if (token_equals(command, COMMAND_WINDOW_BLUR)) {
+        struct token_value value = token_to_value(get_token(&message), false);
+        if (value.type == TOKEN_TYPE_U32 && value.u32_value) {
+            if (window_manager_set_blur_radius(&g_window_manager, acting_window, value.u32_value)) {
+                acting_window->blur_radius = value.u32_value;
+            } else {
+                daemon_fail(rsp, "could not change blur radius of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
             }
         } else {
             daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);

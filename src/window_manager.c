@@ -256,6 +256,22 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
     }
 }
 
+void window_manager_set_window_blur_enabled(struct window_manager *wm, bool enabled)
+{
+    wm->enable_window_blur = enabled;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                window_manager_set_blur_radius(wm, window, enabled ? window->blur_radius : 0);
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
 void window_manager_center_mouse(struct window_manager *wm, struct window *window)
 {
     if (window->rule_mff) {
@@ -468,6 +484,13 @@ bool window_manager_set_opacity(struct window_manager *wm, struct window *window
     }
 
     return scripting_addition_set_opacity(window->id, opacity, wm->window_opacity_duration);
+}
+
+bool window_manager_set_blur_radius(struct window_manager *wm, struct window *window, uint32_t radius)
+{
+    if ((!window->rule_manage) && (!window_is_standard(window)) && (!window_is_dialog(window))) return false;
+    if (window->blur_radius == radius) return true;
+    return scripting_addition_set_blur(window->id, radius);
 }
 
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
@@ -1628,9 +1651,11 @@ void window_manager_init(struct window_manager *wm)
     wm->enable_mff = false;
     wm->enable_window_border = false;
     wm->enable_window_opacity = false;
+    wm->enable_window_blur = false;
     wm->enable_window_topmost = false;
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
+    wm->window_blur_radius = 0;
     wm->window_opacity_duration = 0.0f;
     wm->insert_feedback_windows = NULL;
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);

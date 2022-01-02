@@ -43,6 +43,7 @@ struct window
     bool is_floating;
     bool is_sticky;
     float opacity;
+    uint32_t blur_radius;
     bool rule_manage;
     bool rule_fullscreen;
     bool rule_mff;

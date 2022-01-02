@@ -20,6 +20,7 @@ bool scripting_addition_add_to_window_group(uint32_t child_wid, uint32_t parent_
 bool scripting_addition_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid);
 bool scripting_addition_move_window(uint32_t wid, int x, int y);
 bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration);
+bool scripting_addition_set_blur(uint32_t wid, uint32_t radius);
 bool scripting_addition_set_layer(uint32_t wid, int layer);
 bool scripting_addition_set_sticky(uint32_t wid, bool sticky);
 bool scripting_addition_set_shadow(uint32_t wid, bool shadow);

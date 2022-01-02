@@ -107,6 +107,7 @@ void window_serialize(FILE *rsp, struct window *window)
     bool visible = !is_minimized && !window->application->is_hidden && (window->is_sticky || space_is_visible(sid));
     bool border = window->border.id ? 1 : 0;
     float opacity = window_opacity(window);
+    uint32_t blur_radius = window->blur_radius;
     bool grabbed = window == g_mouse_state.window;
 
     CFStringRef cfrole = window_role(window);
@@ -143,6 +144,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"space\":%d,\n"
             "\t\"level\":%d,\n"
             "\t\"opacity\":%.4f,\n"
+            "\t\"blur-radius\":%d,\n"
             "\t\"split-type\":\"%s\",\n"
             "\t\"stack-index\":%d,\n"
             "\t\"can-move\":%s,\n"
@@ -172,6 +174,7 @@ void window_serialize(FILE *rsp, struct window *window)
             space,
             window_level(window),
             opacity,
+            blur_radius,
             split,
             stack_index,
             json_bool(window_can_move(window)),

@@ -610,6 +610,13 @@ bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
     return scripting_addition_run_command(message);
 }
 
+bool scripting_addition_set_blur(uint32_t wid, uint32_t radius)
+{
+    char message[MAXLEN];
+    snprintf(message, sizeof(message), "window_blur %d %d", wid, radius);
+    return scripting_addition_run_command(message);
+}
+
 bool scripting_addition_set_layer(uint32_t wid, int layer)
 {
     char message[MAXLEN];
