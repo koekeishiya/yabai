@@ -325,13 +325,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     if (!window) goto out;
 
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
-        uint64_t sid;
+        uint64_t sid = 0;
 
         if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_DEFAULT) {
             sid = window_space(window);
         } else if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_FOCUSED) {
             sid = g_space_manager.current_space_id;
-        } else /* if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_CURSOR) */ {
+        }
+
+        if (!sid) /* if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_CURSOR) */ {
             sid = space_manager_cursor_space();
         }
 
