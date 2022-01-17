@@ -905,16 +905,18 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
             int window_count;
             uint32_t *window_list = space_window_list(g_space_manager.current_space_id, &window_count, false);
 
-            for (int i = 0; i < window_count; ++i) {
-                uint32_t wid = window_list[i];
-                if (wid == window->id) break;
+            if (window_list) {
+                for (int i = 0; i < window_count; ++i) {
+                    uint32_t wid = window_list[i];
+                    if (wid == window->id) break;
 
-                struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
-                if (!sub_window) continue;
+                    struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
+                    if (!sub_window) continue;
 
-                if (CGRectContainsRect(window->frame, sub_window->frame)) {
-                    occludes_window = true;
-                    break;
+                    if (CGRectContainsRect(window->frame, sub_window->frame)) {
+                        occludes_window = true;
+                        break;
+                    }
                 }
             }
 
