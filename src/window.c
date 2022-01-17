@@ -36,7 +36,7 @@ CFStringRef window_display_uuid(struct window *window)
     return uuid;
 }
 
-int window_display_id(struct window *window)
+uint32_t window_display_id(struct window *window)
 {
     CFStringRef uuid_string = window_display_uuid(window);
     if (!uuid_string) return 0;

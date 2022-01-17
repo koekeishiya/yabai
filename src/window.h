@@ -51,7 +51,7 @@ struct window
 };
 
 CFStringRef window_display_uuid(struct window *window);
-int window_display_id(struct window *window);
+uint32_t window_display_id(struct window *window);
 uint64_t window_space(struct window *window);
 uint64_t *window_space_list(struct window *window, int *count);
 void window_serialize(FILE *rsp, struct window *window);
