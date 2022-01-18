@@ -38,6 +38,14 @@ static inline uint64_t ts_align(uint64_t used, uint64_t align)
     return ptr - (uintptr_t) g_temp_storage.memory;
 }
 
+static inline void ts_assert_within_bounds(void)
+{
+    if (g_temp_storage.used > g_temp_storage.size) {
+        fprintf(stderr, "fatal error: temporary_storage exceeded amount of allocated memory. requested %lld, but allocated size is %lld\n", g_temp_storage.used, g_temp_storage.size);
+        exit(EXIT_FAILURE);
+    }
+}
+
 static inline void *ts_alloc_aligned(uint64_t elem_size, uint64_t elem_count)
 {
     for (;;) {
@@ -46,6 +54,7 @@ static inline void *ts_alloc_aligned(uint64_t elem_size, uint64_t elem_count)
         uint64_t new_used = aligned + (elem_size * elem_count);
 
         if (__sync_bool_compare_and_swap(&g_temp_storage.used, used, new_used)) {
+            ts_assert_within_bounds();
             return g_temp_storage.memory + aligned;
         }
     }
@@ -54,6 +63,7 @@ static inline void *ts_alloc_aligned(uint64_t elem_size, uint64_t elem_count)
 static inline void *ts_alloc_unaligned(uint64_t size)
 {
     uint64_t used = __sync_fetch_and_add(&g_temp_storage.used, size);
+    ts_assert_within_bounds();
     return g_temp_storage.memory + used;
 }
 
@@ -62,6 +72,7 @@ static inline void *ts_expand(void *ptr, uint64_t old_size, uint64_t increment)
     if (ptr) {
         assert(ptr == g_temp_storage.memory + g_temp_storage.used - old_size);
         __sync_fetch_and_add(&g_temp_storage.used, increment);
+        ts_assert_within_bounds();
     } else {
         ptr = ts_alloc_unaligned(increment);
     }
