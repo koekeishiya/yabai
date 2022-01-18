@@ -19,7 +19,6 @@ struct event_tap
 {
     CFMachPortRef handle;
     CFRunLoopSourceRef runloop_source;
-    CGEventMask mask;
 };
 
 #define EVENT_TAP_CALLBACK(name) \

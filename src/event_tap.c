@@ -43,37 +43,26 @@ static EVENT_TAP_CALLBACK(mouse_handler)
 
 bool event_tap_enabled(struct event_tap *event_tap)
 {
-    bool result = (event_tap->handle && CGEventTapIsEnabled(event_tap->handle));
-    return result;
+    return event_tap->handle && CGEventTapIsEnabled(event_tap->handle);
 }
 
 bool event_tap_begin(struct event_tap *event_tap, uint32_t mask, event_tap_callback *callback)
 {
-    event_tap->mask = mask;
-    event_tap->handle = CGEventTapCreate(kCGSessionEventTap,
-                                         kCGHeadInsertEventTap,
-                                         kCGEventTapOptionDefault,
-                                         event_tap->mask,
-                                         callback,
-                                         event_tap);
+    event_tap->handle = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, callback, event_tap);
+    if (!event_tap_enabled(event_tap)) return false;
 
-    bool result = event_tap_enabled(event_tap);
-    if (result) {
-        event_tap->runloop_source = CFMachPortCreateRunLoopSource(NULL, event_tap->handle, 0);
-        CFRunLoopAddSource(CFRunLoopGetMain(), event_tap->runloop_source, kCFRunLoopCommonModes);
-    }
+    event_tap->runloop_source = CFMachPortCreateRunLoopSource(NULL, event_tap->handle, 0);
+    CFRunLoopAddSource(CFRunLoopGetMain(), event_tap->runloop_source, kCFRunLoopCommonModes);
 
-    return result;
+    return true;
 }
 
 void event_tap_end(struct event_tap *event_tap)
 {
-    if (event_tap_enabled(event_tap)) {
-        CGEventTapEnable(event_tap->handle, false);
-        CFMachPortInvalidate(event_tap->handle);
-        CFRunLoopRemoveSource(CFRunLoopGetMain(), event_tap->runloop_source, kCFRunLoopCommonModes);
-        CFRelease(event_tap->runloop_source);
-        CFRelease(event_tap->handle);
-        event_tap->handle = NULL;
-    }
+    CGEventTapEnable(event_tap->handle, false);
+    CFMachPortInvalidate(event_tap->handle);
+    CFRunLoopRemoveSource(CFRunLoopGetMain(), event_tap->runloop_source, kCFRunLoopCommonModes);
+    CFRelease(event_tap->runloop_source);
+    CFRelease(event_tap->handle);
+    event_tap->handle = NULL;
 }
