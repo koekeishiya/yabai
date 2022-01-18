@@ -194,24 +194,27 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
     bool result = false;
     char rsp[BUFSIZ] = {};
 
-    if (socket_connect(&sockfd, g_sa_socket_file)) {
-        if (send(sockfd, "handshake", 9, 0) != -1) {
-            int length = recv(sockfd, rsp, sizeof(rsp)-1, 0);
-            if (length <= 0) goto out;
+    if (socket_open(&sockfd)) {
+        if (socket_connect(sockfd, g_sa_socket_file)) {
+            if (send(sockfd, "handshake", 9, 0) != -1) {
+                int length = recv(sockfd, rsp, sizeof(rsp)-1, 0);
+                if (length <= 0) goto out;
 
-            char *zero = rsp;
-            while (*zero != '\0') ++zero;
+                char *zero = rsp;
+                while (*zero != '\0') ++zero;
 
-            assert(*zero == '\0');
-            memcpy(version, rsp, zero - rsp + 1);
-            memcpy(attrib, zero+1, sizeof(uint32_t));
+                assert(*zero == '\0');
+                memcpy(version, rsp, zero - rsp + 1);
+                memcpy(attrib, zero+1, sizeof(uint32_t));
 
-            result = true;
+                result = true;
+            }
         }
-    }
 
 out:
-    socket_close(sockfd);
+        socket_close(sockfd);
+    }
+
     return result;
 }
 
@@ -543,14 +546,17 @@ static bool scripting_addition_run_command(char *message)
     char dummy;
     bool result = false;
 
-    if (socket_connect(&sockfd, g_sa_socket_file)) {
-        if (send(sockfd, message, strlen(message), 0) != -1) {
-            recv(sockfd, &dummy, 1, 0);
-            result = true;
+    if (socket_open(&sockfd)) {
+        if (socket_connect(sockfd, g_sa_socket_file)) {
+            if (send(sockfd, message, strlen(message), 0) != -1) {
+                recv(sockfd, &dummy, 1, 0);
+                result = true;
+            }
         }
+
+        socket_close(sockfd);
     }
 
-    socket_close(sockfd);
     return result;
 }
 

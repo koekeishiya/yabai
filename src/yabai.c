@@ -80,7 +80,11 @@ static int client_send_message(int argc, char **argv)
     char socket_file[MAXLEN];
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
 
-    if (!socket_connect(&sockfd, socket_file)) {
+    if (!socket_open(&sockfd)) {
+        error("yabai-msg: failed to open socket..\n");
+    }
+
+    if (!socket_connect(sockfd, socket_file)) {
         error("yabai-msg: failed to connect to socket..\n");
     }
 

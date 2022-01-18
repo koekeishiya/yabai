@@ -22,16 +22,19 @@ static const char *layer_str[] =
     [LAYER_ABOVE] = "above"
 };
 
-static inline bool socket_connect(int *sockfd, char *socket_path)
+static inline bool socket_open(int *sockfd)
+{
+    *sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    return *sockfd != -1;
+}
+
+static inline bool socket_connect(int sockfd, char *socket_path)
 {
     struct sockaddr_un socket_address;
     socket_address.sun_family = AF_UNIX;
 
-    *sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (*sockfd == -1) return false;
-
     snprintf(socket_address.sun_path, sizeof(socket_address.sun_path), "%s", socket_path);
-    return connect(*sockfd, (struct sockaddr *) &socket_address, sizeof(socket_address)) != -1;
+    return connect(sockfd, (struct sockaddr *) &socket_address, sizeof(socket_address)) != -1;
 }
 
 static inline void socket_close(int sockfd)
