@@ -50,10 +50,37 @@ uint32_t window_display_id(struct window *window)
     return id;
 }
 
+static uint64_t window_display_space(struct window *window)
+{
+    CFStringRef uuid = window_display_uuid(window);
+    if (!uuid) return 0;
+
+    uint64_t sid = SLSManagedDisplayGetCurrentSpace(g_connection, uuid);
+    CFRelease(uuid);
+
+    return sid;
+}
+
 uint64_t window_space(struct window *window)
 {
-    uint32_t did = window_display_id(window);
-    return display_space_id(did);
+    uint64_t sid = 0;
+
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+    CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
+    if (!space_list_ref) goto err;
+
+    int count = CFArrayGetCount(space_list_ref);
+    if (!count) goto free;
+
+    CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, 0);
+    CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &sid);
+
+free:
+    CFRelease(space_list_ref);
+err:
+    CFRelease(window_list_ref);
+
+    return sid ? sid : window_display_space(window);
 }
 
 uint64_t *window_space_list(struct window *window, int *count)
