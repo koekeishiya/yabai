@@ -404,9 +404,10 @@ struct view *space_manager_tile_window_on_space_with_insertion_point(struct spac
     }
 
     view_add_window_node(view, window);
-    view_flush(view);
 
-    if (!space_is_visible(view->sid)) {
+    if (space_is_visible(view->sid)) {
+        view_flush(view);
+    } else {
         view->is_dirty = true;
     }
 
@@ -632,7 +633,21 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
 
     if (scripting_addition_focus_space(sid)) {
-        if (focus_display) display_manager_focus_display(new_did);
+        if (focus_display) {
+            while (true) {
+
+                /*
+                 * NOTE(koekeishiya): On macOS Monterey (Apple Silicon) it appears that the API we use take some
+                 * time to update before they actually reflect the system state. Because of that we need to spin-
+                 * lock here until the system has caught up with the space change before we can proceed.
+                 * */
+
+                uint64_t tmp = display_space_id(new_did);
+                if (tmp == sid) break;
+            }
+
+            display_manager_focus_display(new_did);
+        }
     } else {
         return SPACE_OP_ERROR_SCRIPTING_ADDITION;
     }
