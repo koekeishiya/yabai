@@ -415,9 +415,11 @@ void window_manager_move_window(struct window *window, float x, float y)
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
     if (!position_ref) return;
 
+    if (window->border.id) scripting_addition_remove_from_window_group(window->border.id, window->id);
     if (AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref) == kAXErrorSuccess) {
         if (window->border.id) SLSMoveWindow(g_connection, window->border.id, &position);
     }
+    if (window->border.id) scripting_addition_add_to_window_group(window->border.id, window->id);
 
     CFRelease(position_ref);
 }
