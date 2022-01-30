@@ -126,15 +126,15 @@ pid_t workspace_get_dock_pid(void)
     return 0;
 }
 
-static int _workspace_is_macos_version[5] = { -1 };
+static int _workspace_is_macos_version[5] = { -1, -1, -1, -1, -1 };
 
-static bool workspace_is_macos_major(int major_version)
+static int workspace_is_macos_major(long major_version)
 {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
     return version.majorVersion == major_version;
 }
 
-static bool workspace_is_macos_minor(int major_version, int minor_version)
+static int workspace_is_macos_minor(long major_version, long minor_version)
 {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
     return version.majorVersion == major_version && version.minorVersion == minor_version;
