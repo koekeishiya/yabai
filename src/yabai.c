@@ -214,7 +214,11 @@ static inline void init_misc_settings(void)
 
 static CONNECTION_CALLBACK(connection_handler)
 {
-    event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
+    if (type == 1204) {
+        event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
+    } else if (type == 806) {
+        event_loop_post(&g_event_loop, SLS_WINDOW_MOVED, (void *) (intptr_t) (*(uint32_t *) data), 0, NULL);
+    }
 }
 
 static void parse_arguments(int argc, char **argv)
@@ -312,9 +316,11 @@ int main(int argc, char **argv)
 
     if (workspace_is_macos_monterey()) {
         mission_control_observe();
+        SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 806, NULL);
     } else {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     }
+
 
     if (!message_loop_begin(g_socket_file)) {
         error("yabai: could not initialize message_loop! abort..\n");

@@ -39,7 +39,7 @@ extern int CGSMainConnectionID(void);
 extern CGError CGSGetConnectionPSN(int cid, ProcessSerialNumber *psn);
 extern CGError CGSSetWindowAlpha(int cid, uint32_t wid, float alpha);
 extern CGError CGSSetWindowListAlpha(int cid, const uint32_t *window_list, int window_count, float alpha, float duration);
-extern CGError CGSSetWindowLevel(int cid, uint32_t wid, int level);
+extern CGError CGSSetWindowLevelForGroup(int cid, uint32_t wid, int level);
 extern OSStatus CGSMoveWindowWithGroup(const int cid, const uint32_t wid, CGPoint *point);
 extern CGError CGSReassociateWindowsSpacesByGeometry(int cid, CFArrayRef window_list);
 extern CGError CGSGetWindowOwner(int cid, uint32_t wid, int *window_cid);
@@ -197,6 +197,12 @@ uint64_t decode_adrp_add(uint64_t addr, uint64_t offset)
     return (offset & 0xf000) + value_64 + imm12;
 }
 #endif
+
+static bool is_macos_monterey(void)
+{
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return version.majorVersion == 12;
+}
 
 static bool verify_os_version(NSOperatingSystemVersion os_version)
 {
@@ -675,7 +681,7 @@ static void do_window_level(const char *message)
 
     Token key_token = get_token(&message);
     int key = token_to_int(key_token);
-    CGSSetWindowLevel(_connection, wid, CGWindowLevelForKey(key));
+    CGSSetWindowLevelForGroup(_connection, wid, CGWindowLevelForKey(key));
 }
 
 static void do_window_sticky(const char *message)
@@ -737,7 +743,10 @@ static void do_window_group_add(const char *message)
     uint32_t child = token_to_uint32t(child_token);
     if (!child) return;
 
-    CGSAddWindowToWindowMovementGroup(_connection, parent, child);
+    if (!is_macos_monterey()) {
+        CGSAddWindowToWindowMovementGroup(_connection, parent, child);
+    }
+
     CGSAddWindowToWindowOrderingGroup(_connection, parent, child, 1);
 }
 
@@ -751,7 +760,10 @@ static void do_window_group_remove(const char *message)
     uint32_t child = token_to_uint32t(child_token);
     if (!child) return;
 
-    CGSRemoveWindowFromWindowMovementGroup(_connection, parent, child);
+    if (!is_macos_monterey()) {
+        CGSRemoveWindowFromWindowMovementGroup(_connection, parent, child);
+    }
+
     CGSRemoveFromOrderingGroup(_connection, child);
 }
 

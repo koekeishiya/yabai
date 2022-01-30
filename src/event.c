@@ -435,6 +435,21 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MOVED)
     return EVENT_SUCCESS;
 }
 
+static EVENT_CALLBACK(EVENT_HANDLER_SLS_WINDOW_MOVED)
+{
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return EVENT_FAILURE;
+
+    if (window->border.id) {
+        CGRect frame = {};
+        SLSGetWindowBounds(g_connection, window->id, &frame);
+        SLSMoveWindow(g_connection, window->border.id, &frame.origin);
+    }
+
+    return EVENT_SUCCESS;
+}
+
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;

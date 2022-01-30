@@ -415,8 +415,16 @@ void window_manager_move_window(struct window *window, float x, float y)
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
     if (!position_ref) return;
 
-    if (AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref) == kAXErrorSuccess) {
-        if (window->border.id) SLSMoveWindow(g_connection, window->border.id, &position);
+    if (workspace_is_macos_monterey()) {
+        AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref);
+    } else {
+        if (window->border.id) scripting_addition_remove_from_window_group(window->border.id, window->id);
+
+        if (AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref) == kAXErrorSuccess) {
+            if (window->border.id) SLSMoveWindow(g_connection, window->border.id, &position);
+        }
+
+        if (window->border.id) scripting_addition_add_to_window_group(window->border.id, window->id);
     }
 
     CFRelease(position_ref);
@@ -953,6 +961,27 @@ struct window **window_manager_find_application_windows(struct window_manager *w
     return window_list;
 }
 
+static void window_manager_update_window_notifications(void)
+{
+    int window_count = 0;
+    uint32_t window_list[1024] = {};
+
+    struct window_manager *wm = &g_window_manager;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                window_list[window_count++] = window->id;
+            }
+
+            bucket = bucket->next;
+        }
+    }
+
+    SLSRequestNotificationsForWindows(g_connection, window_list, window_count);
+}
+
 struct window *window_manager_create_and_add_window(struct space_manager *sm, struct window_manager *wm, struct application *application, AXUIElementRef window_ref, uint32_t window_id)
 {
     struct window *window = window_create(application, window_ref, window_id);
@@ -990,6 +1019,11 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     window_manager_add_window(wm, window);
+
+    if (workspace_is_macos_monterey()) {
+        window_manager_update_window_notifications();
+    }
+
     window_manager_apply_rules_to_window(sm, wm, window);
 
     if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {

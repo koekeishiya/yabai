@@ -126,34 +126,58 @@ pid_t workspace_get_dock_pid(void)
     return 0;
 }
 
-bool workspace_is_macos_monterey(void)
+static int _workspace_is_macos_version[5] = { -1 };
+
+static bool workspace_is_macos_major(int major_version)
 {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion == 12;
+    return version.majorVersion == major_version;
+}
+
+static bool workspace_is_macos_minor(int major_version, int minor_version)
+{
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return version.majorVersion == major_version && version.minorVersion == minor_version;
+}
+
+bool workspace_is_macos_monterey(void)
+{
+    if (_workspace_is_macos_version[0] == -1) {
+        _workspace_is_macos_version[0] = workspace_is_macos_major(12);
+    }
+    return _workspace_is_macos_version[0];
 }
 
 bool workspace_is_macos_bigsur(void)
 {
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return (version.majorVersion == 11) || (version.majorVersion == 10 && version.minorVersion == 16);
+    if (_workspace_is_macos_version[1] == -1) {
+        _workspace_is_macos_version[1] = workspace_is_macos_major(11);
+    }
+    return _workspace_is_macos_version[1];
 }
 
 bool workspace_is_macos_catalina(void)
 {
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion == 10 && version.minorVersion == 15;
+    if (_workspace_is_macos_version[2] == -1) {
+        _workspace_is_macos_version[2] = workspace_is_macos_minor(10, 15);
+    }
+    return _workspace_is_macos_version[2];
 }
 
 bool workspace_is_macos_mojave(void)
 {
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion == 10 && version.minorVersion == 14;
+    if (_workspace_is_macos_version[3] == -1) {
+        _workspace_is_macos_version[3] = workspace_is_macos_minor(10, 14);
+    }
+    return _workspace_is_macos_version[3];
 }
 
 bool workspace_is_macos_highsierra(void)
 {
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion == 10 && version.minorVersion == 13;
+    if (_workspace_is_macos_version[4] == -1) {
+        _workspace_is_macos_version[4] = workspace_is_macos_minor(10, 13);
+    }
+    return _workspace_is_macos_version[4];
 }
 
 @implementation workspace_context
