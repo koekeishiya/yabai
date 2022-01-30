@@ -744,6 +744,8 @@ static void do_window_group_add(const char *message)
     if (!child) return;
 
     if (!is_macos_monterey()) {
+        // NOTE: Causes a crash on Monterey, disabled for now.
+        // This will make borders not work properly, as they will not follow the window.
         CGSAddWindowToWindowMovementGroup(_connection, parent, child);
     }
 
@@ -761,6 +763,8 @@ static void do_window_group_remove(const char *message)
     if (!child) return;
 
     if (!is_macos_monterey()) {
+        // NOTE: Causes a crash on Monterey, disabled for now.
+        // This will make borders not work properly, as they will not follow the window.
         CGSRemoveWindowFromWindowMovementGroup(_connection, parent, child);
     }
 
