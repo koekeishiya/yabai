@@ -372,6 +372,11 @@ struct window_node *window_node_find_first_leaf(struct window_node *root)
 {
     struct window_node *node = root;
     while (!window_node_is_leaf(node)) {
+        if (node->right && node->right->zoom == node) {
+          node = node->right;
+          break;
+        }
+
         node = node->left;
     }
     return node;
