@@ -123,9 +123,13 @@ static inline enum window_node_child window_node_get_child(struct window_node *n
     return node->child != CHILD_NONE ? node->child : g_space_manager.window_placement;
 }
 
-static inline enum window_node_split window_node_get_split(struct window_node *node)
+static inline enum window_node_split window_node_get_split(struct view *view, struct window_node *node)
 {
-    return node->split != SPLIT_NONE ? node->split : node->area.w / node->area.h >= 1.1618f ? SPLIT_Y : SPLIT_X;
+  if (view->layout == VIEW_MASTER) {
+    return view_get_window_count(view) == 2 ? SPLIT_Y : SPLIT_X;
+  }
+
+  return node->split != SPLIT_NONE ? node->split : node->area.w / node->area.h >= 1.1618f ? SPLIT_Y : SPLIT_X;
 }
 
 static inline float window_node_get_ratio(struct window_node *node)
@@ -140,7 +144,7 @@ static inline float window_node_get_gap(struct view *view)
 
 static void area_make_pair(struct view *view, struct window_node *node)
 {
-    enum window_node_split split = window_node_get_split(node);
+    enum window_node_split split = window_node_get_split(view, node);
     float ratio = window_node_get_ratio(node);
     float gap   = window_node_get_gap(view);
 
@@ -272,7 +276,7 @@ static void window_node_split(struct view *view, struct window_node *node, struc
 
 void window_node_update(struct view *view, struct window_node *node)
 {
-    if (window_node_is_intermediate(node)) {
+    if (window_node_is_intermediate(node) && (view->layout != VIEW_MASTER)) {
         area_make_pair(view, node->parent);
     }
 
@@ -645,11 +649,12 @@ void view_stack_window_node(struct view *view, struct window_node *node, struct 
 
 void view_add_window_node(struct view *view, struct window *window)
 {
-    if (!window_node_is_occupied(view->root) &&
-        window_node_is_leaf(view->root)) {
+    if (!window_node_is_occupied(view->root) && window_node_is_leaf(view->root)) {
         view->root->window_list[0] = window->id;
         view->root->window_order[0] = window->id;
         view->root->window_count = 1;
+    } else if (view->layout == VIEW_STACK) {
+        view_stack_window_node(view, view->root, window);
     } else if (view->layout == VIEW_BSP) {
         struct window_node *leaf = NULL;
 
@@ -679,8 +684,22 @@ void view_add_window_node(struct view *view, struct window *window)
             window_node_equalize(view->root, SPLIT_X | SPLIT_Y);
             view_update(view);
         }
-    } else if (view->layout == VIEW_STACK) {
-        view_stack_window_node(view, view->root, window);
+    } else if (view->layout == VIEW_MASTER) {
+        struct window_node *leaf = NULL;
+
+        if (view_get_window_count(view) == 2) {
+          if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
+          if (!leaf) leaf = view_find_window_node(view, g_window_manager.focused_window_id);
+        } else {
+          leaf = window_node_find_last_leaf(view->root);
+        }
+
+        if (!leaf) {
+          error("%s: leaf not detectd, can't go any further.'", __FUNCTION__);
+          return;
+        }
+
+        window_node_split(view, leaf, window);
     }
 }
 
@@ -706,6 +725,22 @@ uint32_t *view_find_window_list(struct view *view, int *window_count)
     }
 
     return window_list;
+}
+
+int view_get_window_count(struct view *view) {
+  int window_count = 0;
+  uint32_t *window_list = space_window_list(view->sid, &window_count, false);
+
+  int count = 0;
+  if (window_list) {
+    for (int i = 0; i < window_count; ++i) {
+      if (window_manager_find_window(&g_window_manager, window_list[i])) {
+        count += 1;
+      }
+    }
+  }
+
+  return count;
 }
 
 bool view_is_invalid(struct view *view)
