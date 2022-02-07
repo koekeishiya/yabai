@@ -92,10 +92,12 @@ CGRect display_bounds(uint32_t did)
 CGRect display_bounds_constrained(uint32_t did)
 {
     CGRect frame  = display_bounds(did);
+    int top_padding = 0;
 
     if ((g_display_manager.mode == EXTERNAL_BAR_MAIN &&
          did == display_manager_main_display_id()) ||
         (g_display_manager.mode == EXTERNAL_BAR_ALL)) {
+        top_padding = g_display_manager.top_padding; 
         frame.origin.y    += g_display_manager.top_padding;
         frame.size.height -= g_display_manager.top_padding;
         frame.size.height -= g_display_manager.bottom_padding;
@@ -103,9 +105,9 @@ CGRect display_bounds_constrained(uint32_t did)
 
     if (display_manager_menu_bar_hidden()) {
         int notch_height = workspace_display_has_notch(did);
-        if (notch_height) {
-            frame.origin.y    += notch_height;
-            frame.size.height -= notch_height;
+        if (notch_height && notch_height > top_padding) {
+            frame.origin.y    += notch_height - top_padding;
+            frame.size.height -= notch_height - top_padding;
         }
     } else {
         CGRect menu = display_manager_menu_bar_rect(did);
