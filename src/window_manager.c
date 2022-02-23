@@ -630,6 +630,20 @@ struct window *window_manager_find_closest_managed_window_in_direction(struct wi
     return window_manager_find_window(wm, closest->window_order[0]);
 }
 
+struct window *window_manager_find_farthest_managed_window_in_direction(struct window_manager *wm, struct window *window, int direction)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node) return NULL;
+
+    struct window_node *farthest = view_find_farthest_window_node_in_direction(view, node, direction);
+    if (!farthest) return NULL;
+
+    return window_manager_find_window(wm, farthest->window_order[0]);
+}
+
 struct window *window_manager_find_prev_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());

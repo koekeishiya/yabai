@@ -123,6 +123,7 @@ struct window_node *window_node_find_prev_leaf(struct window_node *node);
 struct window_node *window_node_find_next_leaf(struct window_node *node);
 
 struct window_node *view_find_window_node_in_direction(struct view *view, struct window_node *source, int direction);
+struct window_node *view_find_farthest_window_node_in_direction(struct view *view, struct window_node *source, int direction);
 struct window_node *view_find_window_node(struct view *view, uint32_t window_id);
 void view_stack_window_node(struct view *view, struct window_node *node, struct window *window);
 void view_add_window_node(struct view *view, struct window *window);
