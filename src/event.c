@@ -267,6 +267,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         struct window *window = window_list[i];
         if (window->is_minimized) continue;
 
+        border_show(window);
+
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) continue;
 
@@ -294,6 +296,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
+
+        border_hide(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -467,7 +471,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
 
     if (!was_fullscreen && is_fullscreen) {
         window_manager_make_window_topmost(&g_window_manager, window, false);
-        border_enter_fullscreen(window);
+        border_hide(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -483,7 +487,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
 
-        border_exit_fullscreen(window);
+        border_show(window);
         window_manager_make_window_topmost(&g_window_manager, window, window->is_floating);
     } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
@@ -505,6 +509,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     window->is_minimized = true;
+    border_hide(window);
 
     if (window->id == g_window_manager.last_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
@@ -536,6 +541,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
     uint64_t sid = space_manager_active_space();
     if (space_manager_is_window_on_space(sid, window)) {
         debug("%s: window %s %d is deminimized on active space\n", __FUNCTION__, window->application->name, window->id);
+        if (window->border.id && border_should_order_in(window)) {
+            border_ensure_same_space(window);
+            SLSOrderWindow(g_connection, window->border.id, 1, window->id);
+        }
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct window *last_window = window_manager_find_window(&g_window_manager, g_window_manager.last_window_id);
             uint32_t insertion_point = last_window && last_window->application->pid != window->application->pid ? last_window->id : 0;

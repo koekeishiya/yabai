@@ -114,14 +114,14 @@ void border_ensure_same_space(struct window *window)
     }
 }
 
-void border_enter_fullscreen(struct window *window)
+void border_hide(struct window *window)
 {
     if (!window->border.id) return;
 
     SLSOrderWindow(g_connection, window->border.id, 0, 0);
 }
 
-void border_exit_fullscreen(struct window *window)
+void border_show(struct window *window)
 {
     if (!window->border.id) return;
 
