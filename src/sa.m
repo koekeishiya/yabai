@@ -588,20 +588,6 @@ bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_si
     return scripting_addition_run_command(message);
 }
 
-bool scripting_addition_add_to_window_group(uint32_t child_wid, uint32_t parent_wid)
-{
-    char message[MAXLEN];
-    snprintf(message, sizeof(message), "window_group_add %d %d", parent_wid, child_wid);
-    return scripting_addition_run_command(message);
-}
-
-bool scripting_addition_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid)
-{
-    char message[MAXLEN];
-    snprintf(message, sizeof(message), "window_group_remove %d %d", parent_wid, child_wid);
-    return scripting_addition_run_command(message);
-}
-
 bool scripting_addition_move_window(uint32_t wid, int x, int y)
 {
     char message[MAXLEN];

@@ -489,8 +489,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
         }
-
-        border_resize(window);
     }
 
     return EVENT_SUCCESS;
@@ -570,6 +568,142 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_TITLE_CHANGED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_TITLE_CHANGED, window);
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_SLS_WINDOW_MOVED)
+{
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return EVENT_FAILURE;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_FAILURE;
+    }
+
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+
+    struct border *border = &window->border;
+    if (border->id && border_should_order_in(window)) {
+        CGRect frame = {};
+        SLSGetWindowBounds(g_connection, window_id, &frame);
+        SLSMoveWindow(g_connection, border->id, &frame.origin);
+    }
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_SLS_WINDOW_RESIZED)
+{
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return EVENT_FAILURE;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_FAILURE;
+    }
+
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+
+    struct border *border = &window->border;
+    if (border->id && border_should_order_in(window)) {
+        if (border->region) CFRelease(border->region);
+        if (border->path)   CGPathRelease(border->path);
+
+        CGRect frame = {};
+        SLSGetWindowBounds(g_connection, window_id, &frame);
+
+        CGSNewRegionWithRect(&frame, &border->region);
+        border->frame.size = frame.size;
+
+        border->path = CGPathCreateMutable();
+        CGPathAddRoundedRect(border->path, NULL, border->frame, 0, 0);
+
+        SLSDisableUpdate(g_connection);
+        SLSOrderWindow(g_connection, border->id, 0, 0);
+        SLSSetWindowShape(g_connection, border->id, 0.0f, 0.0f, border->region);
+        CGContextClearRect(border->context, border->frame);
+        CGContextAddPath(border->context, border->path);
+        CGContextStrokePath(border->context);
+        CGContextFlush(border->context);
+        SLSOrderWindow(g_connection, border->id, 1, window->id);
+        SLSReenableUpdate(g_connection);
+    }
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_SLS_WINDOW_ORDER_CHANGED)
+{
+    if (g_mission_control_active) return EVENT_SUCCESS;
+
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return EVENT_FAILURE;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_FAILURE;
+    }
+
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+
+    struct border *border = &window->border;
+    if (border->id && border_should_order_in(window)) {
+        int window_level = 0;
+        SLSGetWindowLevel(g_connection, window_id, &window_level);
+        SLSSetWindowLevel(g_connection, border->id, window_level);
+        SLSOrderWindow(g_connection, border->id, 1, window_id);
+    }
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_SLS_WINDOW_IS_VISIBLE)
+{
+    if (g_mission_control_active) return EVENT_SUCCESS;
+
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return EVENT_FAILURE;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_FAILURE;
+    }
+
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+
+    struct border *border = &window->border;
+    if (border->id && border_should_order_in(window)) {
+        border_ensure_same_space(window);
+        SLSOrderWindow(g_connection, border->id, 1, window_id);
+    }
+
+    return EVENT_SUCCESS;
+}
+
+static EVENT_CALLBACK(EVENT_HANDLER_SLS_WINDOW_IS_INVISIBLE)
+{
+    uint32_t window_id = (uint32_t)(intptr_t) context;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return EVENT_FAILURE;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return EVENT_FAILURE;
+    }
+
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+
+    struct border *border = &window->border;
+    if (border->id && border_should_order_in(window)) {
+        SLSOrderWindow(g_connection, border->id, 0, 0);
+        border_ensure_same_space(window);
+    }
 
     return EVENT_SUCCESS;
 }
@@ -945,6 +1079,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_SHOW_ALL_WINDOWS)
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 2;
 
+    border_hide_all();
+
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
@@ -958,6 +1094,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_SHOW_FRONT_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 3;
+
+    border_hide_all();
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
@@ -973,6 +1111,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_SHOW_DESKTOP)
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 4;
 
+    border_hide_all();
+
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
@@ -986,6 +1126,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_ENTER)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 1;
+
+    border_hide_all();
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
@@ -1047,6 +1189,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_CHECK_FOR_EXIT)
 static EVENT_CALLBACK(EVENT_HANDLER_MISSION_CONTROL_EXIT)
 {
     debug("%s:\n", __FUNCTION__);
+
+    border_show_all();
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];

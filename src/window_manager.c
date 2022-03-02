@@ -415,10 +415,7 @@ void window_manager_move_window(struct window *window, float x, float y)
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
     if (!position_ref) return;
 
-    if (AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref) == kAXErrorSuccess) {
-        if (window->border.id) SLSMoveWindow(g_connection, window->border.id, &position);
-    }
-
+    AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref);
     CFRelease(position_ref);
 }
 
@@ -1359,10 +1356,12 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
                 window_manager_purify_window(wm, window);
             }
             window_manager_make_window_topmost(wm, window, true);
+            if (window->border.id) border_ensure_same_space(window);
             window->is_sticky = true;
         }
     } else {
         if (scripting_addition_set_sticky(window->id, false)) {
+            if (window->border.id) border_ensure_same_space(window);
             window->is_sticky = false;
 
             if (!window->is_floating) {
