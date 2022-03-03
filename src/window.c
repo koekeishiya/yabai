@@ -118,7 +118,7 @@ void window_serialize(FILE *rsp, struct window *window)
     int display = display_arrangement(space_display_id(sid));
     bool is_topmost = window_is_topmost(window);
     bool is_minimized = window_is_minimized(window);
-    bool visible = !is_minimized && !window->application->is_hidden && (window->is_sticky || space_is_visible(sid));
+    bool visible = !is_minimized && !window->application->is_hidden && (window_check_flag(window, WINDOW_STICKY) || space_is_visible(sid));
     bool border = window->border.id ? 1 : 0;
     float opacity = window_opacity(window);
     bool grabbed = window == g_mouse_state.window;
@@ -191,7 +191,7 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(window_can_move(window)),
             json_bool(window_can_resize(window)),
             json_bool(window->id == g_window_manager.focused_window_id),
-            json_bool(window->has_shadow),
+            json_bool(window_check_flag(window, WINDOW_SHADOW)),
             json_bool(border),
             json_bool(zoom_parent),
             json_bool(zoom_fullscreen),
@@ -199,8 +199,8 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(visible),
             json_bool(is_minimized),
             json_bool(window->application->is_hidden),
-            json_bool(window->is_floating),
-            json_bool(window->is_sticky),
+            json_bool(window_check_flag(window, WINDOW_FLOAT)),
+            json_bool(window_check_flag(window, WINDOW_STICKY)),
             json_bool(is_topmost),
             json_bool(grabbed));
 }
@@ -307,7 +307,7 @@ bool window_is_minimized(struct window *window)
         CFRelease(value);
     }
 
-    return result || window->is_minimized;
+    return result || window_check_flag(window, WINDOW_MINIMIZE);
 }
 
 bool window_is_fullscreen(struct window *window)
@@ -463,15 +463,23 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->application = application;
     window->ref = window_ref;
     window->id = window_id;
+    window->id_ptr = &window->id;
     SLSGetWindowOwner(g_connection, window->id, &window->connection);
     window->frame = window_ax_frame(window);
-    window->is_minimized = window_is_minimized(window);
-    window->is_fullscreen = window_is_fullscreen(window) || space_is_fullscreen(window_space(window));
-    window->is_sticky = window_is_sticky(window);
-    window->id_ptr = &window->id;
-    window->has_shadow = true;
+    window_set_flag(window, WINDOW_SHADOW);
 
-    if (g_window_manager.enable_window_border) border_create(window);
+    if (window_is_minimized(window)) {
+        window_set_flag(window, WINDOW_MINIMIZE);
+    }
+
+    if ((window_is_fullscreen(window)) ||
+        (space_is_fullscreen(window_space(window)))) {
+        window_set_flag(window, WINDOW_FULLSCREEN);
+    }
+
+    if (window_is_sticky(window)) {
+        window_set_flag(window, WINDOW_STICKY);
+    }
 
     return window;
 }

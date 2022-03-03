@@ -109,7 +109,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (window->is_minimized) goto next;
+        if (window_check_flag(window, WINDOW_MINIMIZE)) goto next;
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) goto next;
@@ -265,7 +265,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (window->is_minimized) continue;
+        if (window_check_flag(window, WINDOW_MINIMIZE)) continue;
 
         border_show(window);
 
@@ -464,9 +464,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_RESIZED, window);
 
-    bool was_fullscreen = window->is_fullscreen;
+    bool was_fullscreen = window_check_flag(window, WINDOW_FULLSCREEN);
+
     bool is_fullscreen = window_is_fullscreen(window);
-    window->is_fullscreen = is_fullscreen;
+    if (is_fullscreen) {
+        window_set_flag(window, WINDOW_FULLSCREEN);
+    } else {
+        window_clear_flag(window, WINDOW_FULLSCREEN);
+    }
+
     window->frame = new_frame;
 
     if (!was_fullscreen && is_fullscreen) {
@@ -488,7 +494,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_RESIZED)
         }
 
         border_show(window);
-        window_manager_make_window_topmost(&g_window_manager, window, window->is_floating);
+        window_manager_make_window_topmost(&g_window_manager, window, window_check_flag(window, WINDOW_FLOAT));
     } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
@@ -508,7 +514,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_MINIMIZED)
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    window->is_minimized = true;
+    window_set_flag(window, WINDOW_MINIMIZE);
     border_hide(window);
 
     if (window->id == g_window_manager.last_window_id) {
@@ -536,7 +542,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_DEMINIMIZED)
         return EVENT_FAILURE;
     }
 
-    window->is_minimized = false;
+    window_clear_flag(window, WINDOW_MINIMIZE);
 
     uint64_t sid = space_manager_active_space();
     if (space_manager_is_window_on_space(sid, window)) {
@@ -995,7 +1001,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     if (window) {
         if (window->id == g_window_manager.focused_window_id) goto out;
 
-        if (!window->rule_manage) {
+        if (!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
             if (!window_level_is_standard(window))                            goto out;
             if ((!window_is_standard(window)) && (!window_is_dialog(window))) goto out;
         }

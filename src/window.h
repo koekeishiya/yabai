@@ -37,18 +37,37 @@ struct window
     uint32_t *volatile id_ptr;
     CGRect frame;
     uint8_t notification;
-    bool has_shadow;
-    bool is_fullscreen;
-    bool is_minimized;
-    bool is_floating;
-    bool is_sticky;
+    uint8_t rule_flags;
+    uint8_t flags;
     float opacity;
-    bool rule_manage;
-    bool rule_fullscreen;
-    bool rule_mff;
-    bool enable_mff;
     struct border border;
 };
+
+enum window_flag
+{
+    WINDOW_SHADOW     = 1 << 0,
+    WINDOW_FULLSCREEN = 1 << 1,
+    WINDOW_MINIMIZE   = 1 << 2,
+    WINDOW_FLOAT      = 1 << 3,
+    WINDOW_STICKY     = 1 << 4,
+};
+
+#define window_check_flag(w, x) ((w)->flags  &  (x))
+#define window_clear_flag(w, x) ((w)->flags &= ~(x))
+#define window_set_flag(w, x)   ((w)->flags |=  (x))
+
+enum window_rule_flag
+{
+    WINDOW_RULE_MANAGED    = 1 << 0,
+    WINDOW_RULE_FULLSCREEN = 1 << 1,
+    WINDOW_RULE_MFF        = 1 << 2,
+    WINDOW_RULE_MFF_VALUE  = 1 << 3,
+    WINDOW_RULE_BORDER     = 1 << 4,
+};
+
+#define window_rule_check_flag(w, x) ((w)->rule_flags  &  (x))
+#define window_rule_clear_flag(w, x) ((w)->rule_flags &= ~(x))
+#define window_rule_set_flag(w, x)   ((w)->rule_flags |=  (x))
 
 CFStringRef window_display_uuid(struct window *window);
 uint32_t window_display_id(struct window *window);

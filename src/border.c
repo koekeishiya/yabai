@@ -27,7 +27,7 @@ static void border_update_window_notifications(uint32_t wid)
 
 bool border_should_order_in(struct window *window)
 {
-    return !window->application->is_hidden && !window->is_minimized && !window->is_fullscreen;
+    return !window->application->is_hidden && !window_check_flag(window, WINDOW_MINIMIZE) && !window_check_flag(window, WINDOW_FULLSCREEN);
 }
 
 void border_show_all(void)
@@ -132,7 +132,11 @@ void border_create(struct window *window)
 {
     if (window->border.id) return;
 
-    if ((!window->rule_manage) && (!window_is_standard(window)) && (!window_is_dialog(window))) return;
+    if ((!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) &&
+        (!window_is_standard(window)) &&
+        (!window_is_dialog(window))) {
+        return;
+    }
 
     CGSNewRegionWithRect(&window->frame, &window->border.region);
     window->border.frame.size = window->frame.size;
