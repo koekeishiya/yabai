@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - v4.0.0
+## [Unreleased]
+
+## [4.0.0] - 2022-03-16
 ### Added
 - New config *window_origin_display* to specify which display a window should become managed at upon creation [#951](https://github.com/koekeishiya/yabai/issues/951)
 
@@ -378,7 +380,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.10...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/koekeishiya/yabai/compare/v3.3.10...v4.0.0
 [3.3.10]: https://github.com/koekeishiya/yabai/compare/v3.3.9...v3.3.10
 [3.3.9]: https://github.com/koekeishiya/yabai/compare/v3.3.8...v3.3.9
 [3.3.8]: https://github.com/koekeishiya/yabai/compare/v3.3.7...v3.3.8
