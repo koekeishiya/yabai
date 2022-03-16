@@ -164,6 +164,7 @@ void border_create(struct window *window)
     border_redraw(window);
 
     if (border_should_order_in(window)) {
+        border_ensure_same_space(window);
         SLSOrderWindow(g_connection, window->border.id, 1, window->id);
     }
 
