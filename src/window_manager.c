@@ -124,10 +124,10 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (rule->manage == RULE_PROP_ON) {
-        window->rule_manage = true;
+        window_rule_set_flag(window, WINDOW_RULE_MANAGED);
         window_manager_make_window_floating(sm, wm, window, false);
     } else if (rule->manage == RULE_PROP_OFF) {
-        window->rule_manage = false;
+        window_rule_clear_flag(window, WINDOW_RULE_MANAGED);
         window_manager_make_window_floating(sm, wm, window, true);
     }
 
@@ -138,11 +138,11 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (rule->mff == RULE_PROP_ON) {
-        window->rule_mff = true;
-        window->enable_mff = true;
+        window_rule_set_flag(window, WINDOW_RULE_MFF);
+        window_rule_set_flag(window, WINDOW_RULE_MFF_VALUE);
     } else if (rule->mff == RULE_PROP_OFF) {
-        window->rule_mff = true;
-        window->enable_mff = false;
+        window_rule_set_flag(window, WINDOW_RULE_MFF);
+        window_rule_clear_flag(window, WINDOW_RULE_MFF_VALUE);
     }
 
     if (rule->layer) {
@@ -150,14 +150,16 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (rule->border == RULE_PROP_ON) {
+        window_rule_set_flag(window, WINDOW_RULE_BORDER);
         border_create(window);
     } else if (rule->border == RULE_PROP_OFF) {
+        window_rule_set_flag(window, WINDOW_RULE_BORDER);
         border_destroy(window);
     }
 
     if (rule->fullscreen == RULE_PROP_ON) {
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
-        window->rule_fullscreen = true;
+        window_rule_set_flag(window, WINDOW_RULE_FULLSCREEN);
     }
 
     if (rule->grid[0] != 0 && rule->grid[1] != 0) {
@@ -258,10 +260,14 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
 
 void window_manager_center_mouse(struct window_manager *wm, struct window *window)
 {
-    if (window->rule_mff) {
-        if (!window->enable_mff) return;
+    if (window_rule_check_flag(window, WINDOW_RULE_MFF)) {
+        if (window_rule_check_flag(window, WINDOW_RULE_MFF_VALUE)) {
+            return;
+        }
     } else {
-        if (!wm->enable_mff)     return;
+        if (!wm->enable_mff) {
+            return;
+        }
     }
 
     CGPoint cursor;
@@ -284,9 +290,9 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
 
 bool window_manager_should_manage_window(struct window *window)
 {
-    if (window->is_floating)      return false;
+    if (window_check_flag(window, WINDOW_FLOAT)) return false;
     if (window_is_sticky(window)) return false;
-    if (window->rule_manage)      return true;
+    if (window_rule_check_flag(window, WINDOW_RULE_MANAGED)) return true;
 
     return ((window_level_is_standard(window)) &&
             (window_is_standard(window)) &&
@@ -415,10 +421,7 @@ void window_manager_move_window(struct window *window, float x, float y)
     CFTypeRef position_ref = AXValueCreate(kAXValueTypeCGPoint, (void *) &position);
     if (!position_ref) return;
 
-    if (AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref) == kAXErrorSuccess) {
-        if (window->border.id) SLSMoveWindow(g_connection, window->border.id, &position);
-    }
-
+    AXUIElementSetAttributeValue(window->ref, kAXPositionAttribute, position_ref);
     CFRelease(position_ref);
 }
 
@@ -474,7 +477,12 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct window 
 {
     if (!wm->enable_window_opacity) return;
     if (window->opacity != 0.0f)    return;
-    if ((!window->rule_manage) && (!window_is_standard(window)) && (!window_is_dialog(window))) return;
+
+    if ((!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) &&
+        (!window_is_standard(window)) &&
+        (!window_is_dialog(window))) {
+        return;
+    }
 
     window_manager_set_opacity(wm, window, opacity);
 }
@@ -564,7 +572,13 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
         value = 0;
     }
 
-    if (scripting_addition_set_shadow(window->id, value)) window->has_shadow = value;
+    if (scripting_addition_set_shadow(window->id, value)) {
+        if (value) {
+            window_set_flag(window, WINDOW_SHADOW);
+        } else {
+            window_clear_flag(window, WINDOW_SHADOW);
+        }
+    }
 }
 
 struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
@@ -1002,20 +1016,28 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         window_manager_remove_lost_focused_event(wm, window->id);
     }
 
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+    debug("%s:%d %s - %s\n", __FUNCTION__, window->id, window->application->name, window_title(window));
     window_manager_add_window(wm, window);
     window_manager_apply_rules_to_window(sm, wm, window);
 
-    if ((!application->is_hidden) && (!window->is_minimized) && (!window->is_fullscreen) && (!window->rule_manage)) {
-        if (window->rule_fullscreen) {
-            window->rule_fullscreen = false;
+    if ((g_window_manager.enable_window_border) &&
+        (!window_rule_check_flag(window, WINDOW_RULE_BORDER))) {
+        border_create(window);
+    }
+
+    if ((!application->is_hidden) &&
+        (!window_check_flag(window, WINDOW_MINIMIZE)) &&
+        (!window_check_flag(window, WINDOW_FULLSCREEN)) &&
+        (!window_rule_check_flag(window, WINDOW_RULE_MANAGED))) {
+        if (window_rule_check_flag(window, WINDOW_RULE_FULLSCREEN)) {
+            window_rule_clear_flag(window, WINDOW_RULE_FULLSCREEN);
         } else if ((!window_level_is_standard(window)) ||
                    (!window_is_standard(window)) ||
                    (!window_can_move(window)) ||
                    (window_is_sticky(window)) ||
                    (!window_can_resize(window) && window_is_undersized(window))) {
             window_manager_make_window_topmost(wm, window, true);
-            window->is_floating = true;
+            window_set_flag(window, WINDOW_FLOAT);
         }
     }
 
@@ -1099,10 +1121,10 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
         space_manager_untile_window(sm, b_view, b);
         window_manager_remove_managed_window(wm, b->id);
         window_manager_purify_window(wm, b);
-    } else if (b->is_floating) {
-        b->is_floating = false;
+    } else if (window_check_flag(b, WINDOW_FLOAT)) {
+        window_clear_flag(b, WINDOW_FLOAT);
         window_manager_make_window_topmost(wm, b, false);
-        if (b->is_sticky) window_manager_make_window_sticky(sm, wm, b, false);
+        if (window_check_flag(b, WINDOW_STICKY)) window_manager_make_window_sticky(sm, wm, b, false);
     }
 
     struct window_node *a_node = view_find_window_node(a_view, a->id);
@@ -1236,7 +1258,7 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
 enum window_op_error window_manager_minimize_window(struct window *window)
 {
     if (!window_can_minimize(window)) return WINDOW_OP_ERROR_CANT_MINIMIZE;
-    if (window->is_minimized)         return WINDOW_OP_ERROR_ALREADY_MINIMIZED;
+    if (window_check_flag(window, WINDOW_MINIMIZE)) return WINDOW_OP_ERROR_ALREADY_MINIMIZED;
 
     AXError result = AXUIElementSetAttributeValue(window->ref, kAXMinimizedAttribute, kCFBooleanTrue);
     return result == kAXErrorSuccess ? WINDOW_OP_ERROR_SUCCESS : WINDOW_OP_ERROR_MINIMIZE_FAILED;
@@ -1244,7 +1266,7 @@ enum window_op_error window_manager_minimize_window(struct window *window)
 
 enum window_op_error window_manager_deminimize_window(struct window *window)
 {
-    if (!window->is_minimized) return WINDOW_OP_ERROR_NOT_MINIMIZED;
+    if (!window_check_flag(window, WINDOW_MINIMIZE)) return WINDOW_OP_ERROR_NOT_MINIMIZED;
 
     AXError result = AXUIElementSetAttributeValue(window->ref, kAXMinimizedAttribute, kCFBooleanFalse);
     return result == kAXErrorSuccess ? WINDOW_OP_ERROR_SUCCESS : WINDOW_OP_ERROR_DEMINIMIZE_FAILED;
@@ -1285,7 +1307,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
     space_manager_move_window_to_space(dst_sid, window);
 
-    if (window_manager_should_manage_window(window) && !window->is_minimized) {
+    if (window_manager_should_manage_window(window) && !window_check_flag(window, WINDOW_MINIMIZE)) {
         struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
         window_manager_add_managed_window(wm, window, view);
     }
@@ -1348,11 +1370,11 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
             window_manager_purify_window(wm, window);
         }
         window_manager_make_window_topmost(wm, window, true);
-        window->is_floating = true;
+        window_set_flag(window, WINDOW_FLOAT);
     } else {
-        window->is_floating = false;
+        window_clear_flag(window, WINDOW_FLOAT);
 
-        if (!window->is_sticky) {
+        if (!window_check_flag(window, WINDOW_STICKY)) {
             window_manager_make_window_topmost(wm, window, false);
             if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
                 struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
@@ -1373,13 +1395,15 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
                 window_manager_purify_window(wm, window);
             }
             window_manager_make_window_topmost(wm, window, true);
-            window->is_sticky = true;
+            if (window->border.id) border_ensure_same_space(window);
+            window_set_flag(window, WINDOW_STICKY);
         }
     } else {
         if (scripting_addition_set_sticky(window->id, false)) {
-            window->is_sticky = false;
+            if (window->border.id) border_ensure_same_space(window);
+            window_clear_flag(window, WINDOW_STICKY);
 
-            if (!window->is_floating) {
+            if (!window_check_flag(window, WINDOW_FLOAT)) {
                 window_manager_make_window_topmost(wm, window, false);
 
                 if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
@@ -1393,8 +1417,14 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
 
 void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
-    bool shadow = !window->has_shadow;
-    if (scripting_addition_set_shadow(window->id, shadow)) window->has_shadow = shadow;
+    bool shadow = !window_check_flag(window, WINDOW_SHADOW);
+    if (scripting_addition_set_shadow(window->id, shadow)) {
+        if (shadow) {
+            window_set_flag(window, WINDOW_SHADOW);
+        } else {
+            window_clear_flag(window, WINDOW_SHADOW);
+        }
+    }
 }
 
 void window_manager_wait_for_native_fullscreen_transition(struct window *window)
@@ -1553,7 +1583,8 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(wm, window_list[i]);
         if (!window || !window_manager_should_manage_window(window)) continue;
-        if (window->is_minimized || window->application->is_hidden)  continue;
+        if (window_check_flag(window, WINDOW_MINIMIZE)) continue;
+        if (window->application->is_hidden) continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
         if (existing_view && existing_view->layout != VIEW_FLOAT && existing_view->sid != sid) {

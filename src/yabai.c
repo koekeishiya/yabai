@@ -22,10 +22,6 @@
 #define MINOR  0
 #define PATCH  0
 
-#define CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context, int cid)
-typedef CONNECTION_CALLBACK(connection_callback);
-extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);
-
 struct event_loop g_event_loop;
 void *g_workspace_context;
 struct process_manager g_process_manager;
@@ -214,7 +210,19 @@ static inline void init_misc_settings(void)
 
 static CONNECTION_CALLBACK(connection_handler)
 {
-    event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
+    if (type == 1204) {
+        event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
+    } else if (type == 806) {
+        event_loop_post(&g_event_loop, SLS_WINDOW_MOVED, (void *) (intptr_t) (*(uint32_t *) data), 0, NULL);
+    } else if (type == 807) {
+        event_loop_post(&g_event_loop, SLS_WINDOW_RESIZED, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+    } else if (type == 808) {
+        event_loop_post(&g_event_loop, SLS_WINDOW_ORDER_CHANGED, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+    } else if (type == 815) {
+        event_loop_post(&g_event_loop, SLS_WINDOW_IS_VISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+    } else if (type == 816) {
+        event_loop_post(&g_event_loop, SLS_WINDOW_IS_INVISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+    }
 }
 
 static void parse_arguments(int argc, char **argv)
@@ -315,6 +323,12 @@ int main(int argc, char **argv)
     } else {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     }
+
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 806, NULL);
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 807, NULL);
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 808, NULL);
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 815, NULL);
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 816, NULL);
 
     if (!message_loop_begin(g_socket_file)) {
         error("yabai: could not initialize message_loop! abort..\n");

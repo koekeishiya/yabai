@@ -4,14 +4,17 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - v4.0.0
+## [Unreleased]
+
+## [4.0.0] - 2022-03-16
 ### Added
 - New config *window_origin_display* to specify which display a window should become managed at upon creation [#951](https://github.com/koekeishiya/yabai/issues/951)
 
 ### Changed
+- Window borders no longer require SIP to be disabled [#1054](https://github.com/koekeishiya/yabai/issues/1054)
 - WINDOW_SEL *prev* should correctly identify the correct window in a nested tree [#1114](https://github.com/koekeishiya/yabai/issues/1114)
 - Fixed an issue with the way unix sockets were handled that would cause an incoming connection to drop in rare occasions [#1107](https://github.com/koekeishiya/yabai/issues/1107)
-- Update scripting addition to support macOS 12.1.0 [#1054](https://github.com/koekeishiya/yabai/issues/1054)
+- Update scripting addition to support macOS 12.0.0 -> 12.3 [#1054](https://github.com/koekeishiya/yabai/issues/1054)
 - Fixed an issue that would cause the target window to snap back to its previous position when moved between displays using the cursor inside mission-control [#820](https://github.com/koekeishiya/yabai/issues/820)
 - Properly drain autoreleased objects (from Apple frameworks) [#751](https://github.com/koekeishiya/yabai/issues/751)
 - Detect and manage windows that are moved into the first space of a display when a space with active windows on it is destroyed [#813](https://github.com/koekeishiya/yabai/issues/813)
@@ -377,7 +380,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v3.3.10...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/koekeishiya/yabai/compare/v3.3.10...v4.0.0
 [3.3.10]: https://github.com/koekeishiya/yabai/compare/v3.3.9...v3.3.10
 [3.3.9]: https://github.com/koekeishiya/yabai/compare/v3.3.8...v3.3.9
 [3.3.8]: https://github.com/koekeishiya/yabai/compare/v3.3.7...v3.3.8

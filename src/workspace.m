@@ -99,7 +99,7 @@ bool workspace_application_is_finished_launching(struct process *process)
     }
 }
 
-int workspace_display_has_notch(uint32_t did)
+int workspace_display_notch_height(uint32_t did)
 {
     if (!CGDisplayIsBuiltin(did)) return 0;
 

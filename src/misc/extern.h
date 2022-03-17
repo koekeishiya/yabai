@@ -1,6 +1,10 @@
+#define CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context, int cid)
+typedef CONNECTION_CALLBACK(connection_callback);
+
 extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 extern int SLSMainConnectionID(void);
-// extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
+extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);
+extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
 extern CGError SLSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
 extern CGError SLSSetWindowResolution(int cid, uint32_t wid, double resolution);
@@ -13,6 +17,7 @@ extern CGError SLSReenableUpdate(int cid);
 extern CGError SLSNewWindow(int cid, int type, float x, float y, CFTypeRef region, uint32_t *wid);
 extern CGError SLSReleaseWindow(int cid, uint32_t wid);
 extern CGError SLSSetWindowTags(int cid, uint32_t wid, uint64_t *tags, int tag_size);
+extern CGError SLSClearWindowTags(int cid, uint32_t wid, uint64_t *tags, int tag_size);
 extern CGError SLSSetWindowShape(int cid, uint32_t wid, float x_offset, float y_offset, CFTypeRef shape);
 extern CGError SLSSetWindowOpacity(int cid, uint32_t wid, bool opaque);
 extern CGError SLSOrderWindow(int cid, uint32_t wid, int mode, uint32_t rel_wid);
@@ -56,7 +61,8 @@ extern CGError _SLPSSetFrontProcessWithOptions(ProcessSerialNumber *psn, uint32_
 extern CGError SLPSPostEventRecordTo(ProcessSerialNumber *psn, uint8_t *bytes);
 extern OSStatus SLSFindWindowByGeometry(int cid, int zero, int one, int zero_again, CGPoint *screen_point, CGPoint *window_point, uint32_t *wid, int *wcid);
 extern CGError SLSGetCurrentCursorLocation(int cid, CGPoint *point);
-// extern CGError SLSRequestNotificationsForWindows(int cid, uint32_t *window_list, int window_count);
+extern CGError SLSSetWindowShadowParameters(int cid, uint32_t wid, uint32_t arg1, uint32_t arg2, double arg3, double arg4);
+extern CGError SLSRequestNotificationsForWindows(int cid, uint32_t *window_list, int window_count);
 
 #if 0
 extern CFArrayRef _LSCopyApplicationArrayInFrontToBackOrder(int negative_one, int one);

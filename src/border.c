@@ -1,14 +1,67 @@
 extern int g_connection;
 extern struct window_manager g_window_manager;
 
-static void border_order_in(struct window *window)
+static void border_update_window_notifications(uint32_t wid)
 {
-    SLSOrderWindow(g_connection, window->border.id, 1, window->id);
+    int window_count = 0;
+    uint32_t window_list[1024] = {};
+
+    if (wid) window_list[window_count++] = wid;
+
+    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+        struct bucket *bucket = g_window_manager.window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id) {
+                    window_list[window_count++] = window->id;
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+
+    SLSRequestNotificationsForWindows(g_connection, window_list, window_count);
 }
 
-static void border_order_out(struct window *window)
+bool border_should_order_in(struct window *window)
 {
-    SLSOrderWindow(g_connection, window->border.id, 0, window->id);
+    return !window->application->is_hidden && !window_check_flag(window, WINDOW_MINIMIZE) && !window_check_flag(window, WINDOW_FULLSCREEN);
+}
+
+void border_show_all(void)
+{
+    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+        struct bucket *bucket = g_window_manager.window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id && border_should_order_in(window)) {
+                    SLSOrderWindow(g_connection, window->border.id, 1, window->id);
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+void border_hide_all(void)
+{
+    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+        struct bucket *bucket = g_window_manager.window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id) {
+                    SLSOrderWindow(g_connection, window->border.id, 0, 0);
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
 }
 
 void border_redraw(struct window *window)
@@ -45,40 +98,58 @@ void border_deactivate(struct window *window)
     border_redraw(window);
 }
 
-void border_enter_fullscreen(struct window *window)
+void border_ensure_same_space(struct window *window)
 {
-    if (!window->border.id) return;
+    int space_count;
+    uint64_t *space_list = window_space_list(window, &space_count);
+    if (!space_list) return;
 
-    scripting_addition_remove_from_window_group(window->border.id, window->id);
-    border_order_out(window);
+    if (space_count > 1) {
+        uint64_t tag = 1ULL << 11;
+        SLSSetWindowTags(g_connection, window->border.id, &tag, 64);
+    } else {
+        uint64_t tag = 1ULL << 11;
+        SLSClearWindowTags(g_connection, window->border.id, &tag, 64);
+        SLSMoveWindowsToManagedSpace(g_connection, window->border.id_ref, space_list[0]);
+    }
 }
 
-void border_exit_fullscreen(struct window *window)
+void border_hide(struct window *window)
 {
     if (!window->border.id) return;
 
-    border_order_in(window);
-    scripting_addition_add_to_window_group(window->border.id, window->id);
+    SLSOrderWindow(g_connection, window->border.id, 0, 0);
+}
+
+void border_show(struct window *window)
+{
+    if (!window->border.id) return;
+
+    SLSOrderWindow(g_connection, window->border.id, 1, window->id);
 }
 
 void border_create(struct window *window)
 {
     if (window->border.id) return;
 
-    if ((!window->rule_manage) && (!window_is_standard(window)) && (!window_is_dialog(window))) return;
+    if ((!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) &&
+        (!window_is_standard(window)) &&
+        (!window_is_dialog(window))) {
+        return;
+    }
 
     CGSNewRegionWithRect(&window->frame, &window->border.region);
     window->border.frame.size = window->frame.size;
 
-    window->border.path = CGPathCreateMutable();
-    CGPathAddRoundedRect(window->border.path, NULL, window->border.frame, 0, 0);
-
-    uint64_t tags = kCGSIgnoreForEventsTagBit | kCGSDisableShadowTagBit;
+    uint64_t tag = 1ULL << 46;
     SLSNewWindow(g_connection, 2, 0, 0, window->border.region, &window->border.id);
-    SLSSetWindowTags(g_connection, window->border.id, &tags, 64);
+    SLSSetWindowTags(g_connection, window->border.id, &tag, 64);
+    SLSSetWindowShadowParameters(g_connection, window->border.id, 0, 0, 0.0, 0.0);
     SLSSetWindowResolution(g_connection, window->border.id, 1.0f);
     SLSSetWindowOpacity(g_connection, window->border.id, 0);
     SLSSetWindowLevel(g_connection, window->border.id, window_level(window));
+
+    window->border.id_ref = cfarray_of_cfnumbers(&window->border.id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     window->border.context = SLWindowContextCreate(g_connection, window->border.id, 0);
     CGContextSetLineWidth(window->border.context, g_window_manager.border_width);
     CGContextSetRGBStrokeColor(window->border.context,
@@ -86,45 +157,31 @@ void border_create(struct window *window)
                                g_window_manager.normal_border_color.g,
                                g_window_manager.normal_border_color.b,
                                g_window_manager.normal_border_color.a);
-    scripting_addition_add_to_window_group(window->border.id, window->id);
 
-    border_redraw(window);
-
-    if ((!window->application->is_hidden) &&
-        (!window->is_minimized) &&
-        (!window->is_fullscreen)) {
-        border_order_in(window);
-    }
-}
-
-void border_resize(struct window *window)
-{
-    if (!window->border.id) return;
-
-    if (window->border.region) CFRelease(window->border.region);
-    CGSNewRegionWithRect(&window->frame, &window->border.region);
-    window->border.frame.size = window->frame.size;
-
-    if (window->border.path) CGPathRelease(window->border.path);
     window->border.path = CGPathCreateMutable();
     CGPathAddRoundedRect(window->border.path, NULL, window->border.frame, 0, 0);
 
-    SLSDisableUpdate(g_connection);
-    SLSSetWindowShape(g_connection, window->border.id, 0.0f, 0.0f, window->border.region);
-    CGContextClearRect(window->border.context, window->border.frame);
-    CGContextAddPath(window->border.context, window->border.path);
-    CGContextStrokePath(window->border.context);
-    CGContextFlush(window->border.context);
-    SLSReenableUpdate(g_connection);
+    border_redraw(window);
+
+    if (border_should_order_in(window)) {
+        border_ensure_same_space(window);
+        SLSOrderWindow(g_connection, window->border.id, 1, window->id);
+    }
+
+    border_update_window_notifications(window->id);
 }
 
 void border_destroy(struct window *window)
 {
     if (!window->border.id) return;
 
+    if (window->border.id_ref) CFRelease(window->border.id_ref);
     if (window->border.region) CFRelease(window->border.region);
-    if (window->border.path) CGPathRelease(window->border.path);
+    if (window->border.path)   CGPathRelease(window->border.path);
+
     CGContextRelease(window->border.context);
     SLSReleaseWindow(g_connection, window->border.id);
     memset(&window->border, 0, sizeof(struct border));
+
+    border_update_window_notifications(0);
 }

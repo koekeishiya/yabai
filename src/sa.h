@@ -16,8 +16,6 @@ bool scripting_addition_create_space(uint64_t sid);
 bool scripting_addition_destroy_space(uint64_t sid);
 bool scripting_addition_focus_space(uint64_t sid);
 bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus);
-bool scripting_addition_add_to_window_group(uint32_t child_wid, uint32_t parent_wid);
-bool scripting_addition_remove_from_window_group(uint32_t child_wid, uint32_t parent_wid);
 bool scripting_addition_move_window(uint32_t wid, int x, int y);
 bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration);
 bool scripting_addition_set_layer(uint32_t wid, int layer);

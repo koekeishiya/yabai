@@ -217,7 +217,7 @@ CGRect display_manager_menu_bar_rect(uint32_t did)
     // that windows can be placed at. The width of the menubar should be equal to the width of the display.
     //
 
-    int notch_height = workspace_display_has_notch(did);
+    int notch_height = workspace_display_notch_height(did);
     if (notch_height) {
         bounds.size.height = notch_height + 6;
     } else {
