@@ -581,6 +581,19 @@ void window_manager_purify_window(struct window_manager *wm, struct window *wind
     }
 }
 
+int window_manager_find_rank_of_window_in_list(uint32_t wid, uint32_t *window_list, int window_count)
+{
+    for (int i = 0, rank = 0; i < window_count; ++i) {
+        if (window_list[i] == wid) {
+            return rank;
+        } else {
+            ++rank;
+        }
+    }
+
+    return INT_MAX;
+}
+
 struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
 {
     int count;

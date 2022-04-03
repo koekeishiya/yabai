@@ -152,43 +152,23 @@ uint32_t display_manager_find_closest_display_in_direction(uint32_t source_did, 
 
     uint32_t best_did = 0;
     int best_distance = INT_MAX;
-    CGRect source_bounds = display_bounds(source_did);
-    CGPoint source_point = (CGPoint) { source_bounds.origin.x + source_bounds.size.width/2, source_bounds.origin.y + source_bounds.size.height/2 };
+
+    struct area source_area = area_from_cgrect(display_bounds(source_did));
+    CGPoint source_area_max = { source_area.x + source_area.w, source_area.y + source_area.h };
 
     for (int i = 0; i < display_count; ++i) {
         uint32_t did = display_list[i];
         if (did == source_did) continue;
 
-        CGRect bounds = display_bounds(did);
-        CGPoint point = (CGPoint) { bounds.origin.x + bounds.size.width/2, bounds.origin.y + bounds.size.height/2 };
-        int distance = euclidean_distance(source_point, point);
-        if (distance >= best_distance) continue;
+        struct area target_area = area_from_cgrect(display_bounds(did));
+        CGPoint target_area_max = { target_area.x + target_area.w, target_area.y + target_area.h };
 
-        switch (direction) {
-        case DIR_EAST: {
-            if (bounds.origin.x >= source_bounds.origin.x + source_bounds.size.width) {
+        if (area_is_in_direction(&source_area, source_area_max, &target_area, target_area_max, direction)) {
+            int distance = area_distance_in_direction(&source_area, source_area_max, &target_area, target_area_max, direction);
+            if (distance < best_distance) {
                 best_did = did;
                 best_distance = distance;
             }
-        } break;
-        case DIR_SOUTH: {
-            if (bounds.origin.y >= source_bounds.origin.y + source_bounds.size.height) {
-                best_did = did;
-                best_distance = distance;
-            }
-        } break;
-        case DIR_WEST: {
-            if (bounds.origin.x + bounds.size.width <= source_bounds.origin.x) {
-                best_did = did;
-                best_distance = distance;
-            }
-        } break;
-        case DIR_NORTH: {
-            if (bounds.origin.y + bounds.size.height <= source_bounds.origin.y) {
-                best_did = did;
-                best_distance = distance;
-            }
-        } break;
         }
     }
 

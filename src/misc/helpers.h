@@ -291,13 +291,6 @@ static inline bool psn_equals(ProcessSerialNumber *a, ProcessSerialNumber *b)
 }
 #pragma clang diagnostic pop
 
-static inline int euclidean_distance(CGPoint p1, CGPoint p2)
-{
-    int dx = p1.x - p2.x;
-    int dy = p1.y - p2.y;
-    return dx*dx + dy*dy;
-}
-
 static inline bool cgrect_contains_point(CGRect r, CGPoint p)
 {
     return p.x >= r.origin.x && p.x <= r.origin.x + r.size.width &&
