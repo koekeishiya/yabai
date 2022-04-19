@@ -40,6 +40,22 @@ uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
     return 0;
 }
 
+uint64_t get_fix_animation_offset(NSOperatingSystemVersion os_version) {
+    if (os_version.majorVersion == 12) {
+        return 0x0;
+    } else if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
+        return 0x232000;
+    } else if (os_version.minorVersion == 15) {
+        return 0x0;
+    } else if (os_version.minorVersion == 14) {
+        return 0x0;
+    } else if (os_version.minorVersion == 13) {
+        return 0x0;
+    }
+
+    return 0;
+}
+
 uint64_t get_add_space_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
         return 0x230000;
@@ -145,6 +161,23 @@ const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
         return "?? ?? ?? 00 48 89 C6 E8 ?? ?? 3C 00 4D 85 FF 0F 84 AC 06 00 00 48 8B 3D ?? 00 4C 00 48 8B 35 ?? A4 4B 00 FF 15 ?? ?? 43 00 48 89 C7 E8 ?? 6B 3C 00 48 89 85 10 FF FF FF C7 85 1C FF FF FF 00 00 00 00 E8 ?? 69 3C 00 48 8D 75 B0 89 C7 E8 ?? 6A 3C 00";
     } else if (os_version.minorVersion == 13) {
         return "?? ?? ?? 00 4C 89 FE E8 99 6D 4A 00 4D 85 FF 0F 84 A2 06 00 00 48 8B 3D EB ED 5A 00 48 8B 35 AC 90 5A 00 FF 15 BE 1B 52 00 48 89 C7 E8 5C 6D 4A 00 48 89 85 30 FF FF FF 48 8D 3D A4 11 4E 00 E8 5A 8B 17 00 88 05 5D 28 5D 00 84 C0 74 14 48 8B 3D 6A";
+    }
+
+    return NULL;
+}
+
+
+const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
+    if (os_version.majorVersion == 12) {
+        return NULL;
+    } else if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
+        return "F2 0F 10 05 ?? ?? 0F 00 4C 89 EF 48 8B 75 B8 4C 89 F2 44 8B 45 A8 4C 8B 8D 28 FF FF FF 4C 8B 6D 98 50 56 6A 01 49 89 DF 53 41 54 E8 ?? ?? 08 00 48 83 C4 30 48 89 45 98";
+    } else if (os_version.minorVersion == 15) {
+        return NULL;
+    } else if (os_version.minorVersion == 14) {
+        return NULL;
+    } else if (os_version.minorVersion == 13) {
+        return NULL;
     }
 
     return NULL;
@@ -258,3 +291,4 @@ const char *get_set_front_window_pattern(NSOperatingSystemVersion os_version) {
 
     return NULL;
 }
+

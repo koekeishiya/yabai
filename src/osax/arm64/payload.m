@@ -20,6 +20,14 @@ uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
     return 0;
 }
 
+uint64_t get_fix_animation_offset(NSOperatingSystemVersion os_version) {
+    if (os_version.majorVersion == 12) {
+        return 0x0;
+    }
+
+    return 0;
+}
+
 uint64_t get_add_space_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
         return 0x220000;
@@ -63,6 +71,14 @@ const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
 const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
         return "?? 21 00 ?? 00 ?? ?? 91 E1 03 13 AA ?? ?? 0C 94 ?? ?? 00 B4 ?? 20 00 ?? 00 ?? ?? F9 ?? ?? 00 ?? 19 ?? ?? F9 E1 03 19 AA ?? ?? 0C 94 FD 03 1D AA ?? ?? 0C 94 F4 03 00 AA ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 00 ?? ?? ?? 00 ?? ?? ?? ?? ??";
+    }
+
+    return NULL;
+}
+
+const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
+    if (os_version.majorVersion == 12) {
+        return NULL;
     }
 
     return NULL;

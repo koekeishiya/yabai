@@ -324,6 +324,22 @@ static void init_instances()
 #endif
     }
 
+    uint64_t animation_time_addr = hex_find_seq(baseaddr + get_fix_animation_offset(os_version), get_fix_animation_pattern(os_version));
+    if (animation_time_addr == 0x0) {
+        NSLog(@"[yabai-sa] failed to get pointer to animation-time..");
+    } else {
+#ifdef __x86_64__
+        uint8_t *offset_instr = (uint8_t *) animation_time_addr + 4;
+        uint64_t offset_value = (offset_instr[3] << 24) + (offset_instr[2] << 16) + (offset_instr[1] << 8) + *offset_instr;
+        uint64_t target_addr = animation_time_addr + 8 + offset_value;
+
+        NSLog(@"[yabai-sa] (0x%llx) animation_time_addr found at address 0x%llX (0x%llx)", baseaddr, animation_time_addr, animation_time_addr - baseaddr);
+        vm_protect(mach_task_self(), target_addr, 8ULL, 0, 23);
+        *(double *)target_addr = 0.0001;
+#elif __arm64__
+#endif
+    }
+
     managed_space = objc_getClass("Dock.ManagedSpace");
     _connection = CGSMainConnectionID();
 }
