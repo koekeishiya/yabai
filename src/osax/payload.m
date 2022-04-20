@@ -239,7 +239,7 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
 }
 
 #ifdef __x86_64__
-static double animation_time = 0;
+static double animation_time = 0.0001;
 #endif
 
 static void init_instances()
