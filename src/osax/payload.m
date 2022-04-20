@@ -1,7 +1,10 @@
 #include <Foundation/Foundation.h>
 #include <mach-o/getsect.h>
 #include <mach-o/dyld.h>
-
+#include <mach/mach.h>
+#include <mach/mach_vm.h>
+#include <mach/vm_map.h>
+#include <mach/vm_page_size.h>
 #include <objc/message.h>
 #include <objc/runtime.h>
 
@@ -28,6 +31,8 @@
 #include "arm64/payload.m"
 #include <ptrauth.h>
 #endif
+
+#define page_align(addr) (vm_address_t)((uintptr_t)(addr) & (~(vm_page_size - 1)))
 
 #define SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 
@@ -233,6 +238,10 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
 #endif
 }
 
+#ifdef __x86_64__
+static double animation_time = 0;
+#endif
+
 static void init_instances()
 {
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
@@ -328,16 +337,17 @@ static void init_instances()
     if (animation_time_addr == 0x0) {
         NSLog(@"[yabai-sa] failed to get pointer to animation-time..");
     } else {
-#ifdef __x86_64__
-        uint8_t *offset_instr = (uint8_t *) animation_time_addr + 4;
-        uint64_t offset_value = (offset_instr[3] << 24) + (offset_instr[2] << 16) + (offset_instr[1] << 8) + *offset_instr;
-        uint64_t target_addr = animation_time_addr + 8 + offset_value;
-
         NSLog(@"[yabai-sa] (0x%llx) animation_time_addr found at address 0x%llX (0x%llx)", baseaddr, animation_time_addr, animation_time_addr - baseaddr);
-        vm_protect(mach_task_self(), target_addr, 8ULL, 0, 23);
-        *(double *)target_addr = 0.0001;
+        if (vm_protect(mach_task_self(), page_align(animation_time_addr), vm_page_size, 0, VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY) == KERN_SUCCESS) {
+#ifdef __x86_64__
+            *(uint32_t *)(animation_time_addr + 4) = (uint32_t)((uint64_t)&animation_time - (animation_time_addr + 8));
 #elif __arm64__
+            *(uint32_t *) animation_time_addr = 0x2f00e400;
 #endif
+            vm_protect(mach_task_self(), page_align(animation_time_addr), vm_page_size, 0, VM_PROT_READ | VM_PROT_EXECUTE);
+        } else {
+            NSLog(@"[yabai-sa] animation_time_addr vm_protect failed; unable to patch instruction!");
+        }
     }
 
     managed_space = objc_getClass("Dock.ManagedSpace");

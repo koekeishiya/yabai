@@ -42,15 +42,9 @@ uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_fix_animation_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
-        return 0x0;
+        return 0x230000;
     } else if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
         return 0x232000;
-    } else if (os_version.minorVersion == 15) {
-        return 0x0;
-    } else if (os_version.minorVersion == 14) {
-        return 0x0;
-    } else if (os_version.minorVersion == 13) {
-        return 0x0;
     }
 
     return 0;
@@ -169,15 +163,9 @@ const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
-        return NULL;
+        return "F2 0F 10 05 ?? ?? ?? 00 4C 89 ?? 48 8B 75 ?? ?? 89 ?? 44 8B 85 ?? FF FF FF 4C 8B 8D ?? FF FF FF 4C 8B 6D ?? 50 56 6A 01 ?? ?? ?? ?? ?? ??";
     } else if ((os_version.majorVersion == 11) || (os_version.majorVersion == 10 && os_version.minorVersion == 16)) {
         return "F2 0F 10 05 ?? ?? 0F 00 4C 89 EF 48 8B 75 B8 4C 89 F2 44 8B 45 A8 4C 8B 8D 28 FF FF FF 4C 8B 6D 98 50 56 6A 01 49 89 DF 53 41 54 E8 ?? ?? 08 00 48 83 C4 30 48 89 45 98";
-    } else if (os_version.minorVersion == 15) {
-        return NULL;
-    } else if (os_version.minorVersion == 14) {
-        return NULL;
-    } else if (os_version.minorVersion == 13) {
-        return NULL;
     }
 
     return NULL;

@@ -22,7 +22,7 @@ uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_fix_animation_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
-        return 0x0;
+        return 0x230000;
     }
 
     return 0;
@@ -78,7 +78,7 @@ const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 12) {
-        return NULL;
+        return "00 10 6A 1E E0 03 14 AA E2 03 13 AA A8 43 01 D1 04 01 50 B8";
     }
 
     return NULL;
