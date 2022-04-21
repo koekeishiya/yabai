@@ -543,8 +543,9 @@ struct window_node *view_find_window_node_in_direction(struct view *view, struct
 
     struct window_node *target = window_node_find_first_leaf(view->root);
     while (target) {
-        CGPoint target_area_max = { target->area.x + target->area.w, target->area.y + target->area.h };
+        if (source == target) goto next;
 
+        CGPoint target_area_max = { target->area.x + target->area.w, target->area.y + target->area.h };
         if (area_is_in_direction(&source->area, source_area_max, &target->area, target_area_max, direction)) {
             int distance = area_distance_in_direction(&source->area, source_area_max, &target->area, target_area_max, direction);
             int rank = window_manager_find_rank_of_window_in_list(target->window_order[0], window_list, window_count);
@@ -555,6 +556,7 @@ struct window_node *view_find_window_node_in_direction(struct view *view, struct
             }
         }
 
+next:
         target = window_node_find_next_leaf(target);
     }
 
