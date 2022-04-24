@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - The scripting-addition will now also remove the space switch animation when using cmd+tab, clicking on an item in the Dock, and using the numeric macOS mission-control keyboard shortcuts [#1235](https://github.com/koekeishiya/yabai/issues/1235)
 - Improved logic used to determine the target window in a given direction [#1220](https://github.com/koekeishiya/yabai/issues/1220)
+- Improve behaviour of *focus_follows_mouse autoraise*, preventing a window from being raised if it would occlude some other **floating window**. [#1246](https://github.com/koekeishiya/yabai/issues/1246)
 
 ## [4.0.0] - 2022-03-16
 ### Added
