@@ -22,6 +22,7 @@ bool scripting_addition_set_layer(uint32_t wid, int layer);
 bool scripting_addition_set_sticky(uint32_t wid, bool sticky);
 bool scripting_addition_set_shadow(uint32_t wid, bool shadow);
 bool scripting_addition_focus_window(uint32_t wid);
+bool scripting_addition_sloppy_focus_window(uint32_t wid);
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h);
 
 extern bool workspace_is_macos_monterey(void);

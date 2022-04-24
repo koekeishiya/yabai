@@ -52,6 +52,7 @@ extern bool g_verbose;
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
+#define ARGUMENT_CONFIG_FFM_AUTOFOCUS_SIP     "autofocus_sip_friendly"
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS         "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE         "autoraise"
 #define ARGUMENT_CONFIG_WINDOW_ORIGIN_DEFAULT "default"
@@ -997,6 +998,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             fprintf(rsp, "%s\n", ffm_mode_str[g_window_manager.ffm_mode]);
         } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
             g_window_manager.ffm_mode = FFM_DISABLED;
+        } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTOFOCUS_SIP)) {
+            g_window_manager.ffm_mode = FFM_AUTOFOCUS_SIP;
         } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTOFOCUS)) {
             g_window_manager.ffm_mode = FFM_AUTOFOCUS;
         } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTORAISE)) {
