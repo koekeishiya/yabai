@@ -261,7 +261,7 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
 void window_manager_center_mouse(struct window_manager *wm, struct window *window)
 {
     if (window_rule_check_flag(window, WINDOW_RULE_MFF)) {
-        if (window_rule_check_flag(window, WINDOW_RULE_MFF_VALUE)) {
+        if (!window_rule_check_flag(window, WINDOW_RULE_MFF_VALUE)) {
             return;
         }
     } else {
