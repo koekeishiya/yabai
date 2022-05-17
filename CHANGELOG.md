@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Improve behaviour of *focus_follows_mouse autoraise*, preventing a window from being raised if it would occlude some other **floating window** [#1246](https://github.com/koekeishiya/yabai/issues/1246)
 - Added an improved implementation of *focus_follows_mouse autofocus* that uses the scripting-addition. prior autofocus has been renamed to **autofocus_sip_friendly** [#1247](https://github.com/koekeishiya/yabai/issues/1247)
 - The rule option *mouse_follows_focus* should now work properly (values were inverted) [#1267](https://github.com/koekeishiya/yabai/issues/1267)
+- Remove minor shadow artifact from border windows [#1056](https://github.com/koekeishiya/yabai/issues/1056)
 
 ## [4.0.0] - 2022-03-16
 ### Added

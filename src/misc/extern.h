@@ -61,7 +61,7 @@ extern CGError _SLPSSetFrontProcessWithOptions(ProcessSerialNumber *psn, uint32_
 extern CGError SLPSPostEventRecordTo(ProcessSerialNumber *psn, uint8_t *bytes);
 extern OSStatus SLSFindWindowByGeometry(int cid, int zero, int one, int zero_again, CGPoint *screen_point, CGPoint *window_point, uint32_t *wid, int *wcid);
 extern CGError SLSGetCurrentCursorLocation(int cid, CGPoint *point);
-extern CGError SLSSetWindowShadowParameters(int cid, uint32_t wid, uint32_t arg1, uint32_t arg2, double arg3, double arg4);
+extern CGError SLSWindowSetShadowProperties(uint32_t wid, CFDictionaryRef options);
 extern CGError SLSRequestNotificationsForWindows(int cid, uint32_t *window_list, int window_count);
 
 #if 0

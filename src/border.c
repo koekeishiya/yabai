@@ -144,7 +144,7 @@ void border_create(struct window *window)
     uint64_t tag = 1ULL << 46;
     SLSNewWindow(g_connection, 2, 0, 0, window->border.region, &window->border.id);
     SLSSetWindowTags(g_connection, window->border.id, &tag, 64);
-    SLSSetWindowShadowParameters(g_connection, window->border.id, 0, 0, 0.0, 0.0);
+    sls_window_disable_shadow(window->border.id);
     SLSSetWindowResolution(g_connection, window->border.id, 1.0f);
     SLSSetWindowOpacity(g_connection, window->border.id, 0);
     SLSSetWindowLevel(g_connection, window->border.id, window_level(window));

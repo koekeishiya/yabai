@@ -143,6 +143,22 @@ static inline char *ts_string_escape(char *s)
     return result;
 }
 
+static inline CFNumberRef CFNUM32(int32_t num)
+{
+    return CFNumberCreate(NULL, kCFNumberSInt32Type, &num);
+}
+
+static inline void sls_window_disable_shadow(uint32_t id)
+{
+    CFNumberRef density = CFNUM32(0);
+    const void *keys[1] = { CFSTR("com.apple.WindowShadowDensity") };
+    const void *values[1] = { density };
+    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    SLSWindowSetShadowProperties(id, options);
+    CFRelease(density);
+    CFRelease(options);
+}
+
 static inline CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
 {
     CFNumberRef temp[count];
