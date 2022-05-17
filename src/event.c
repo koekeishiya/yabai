@@ -1007,7 +1007,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
         }
 
 
-        if (g_window_manager.ffm_mode == FFM_AUTOFOCUS_SIP) {
+        if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
 
             //
             // NOTE(koekeishiya): Look for a window with role AXSheet or AXDrawer
@@ -1037,10 +1037,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
             }
 
             CFRelease(window_list);
-            window_manager_focus_window_without_raise_sip_friendly(&window->application->psn, window->id);
-            g_mouse_state.ffm_window_id = window->id;
-        } else if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
-            window_manager_focus_window_without_raise(window->id);
+            window_manager_focus_window_without_raise(&window->application->psn, window->id);
             g_mouse_state.ffm_window_id = window->id;
         } else if (g_window_manager.ffm_mode == FFM_AUTORAISE) {
 

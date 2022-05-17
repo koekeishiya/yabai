@@ -630,13 +630,6 @@ bool scripting_addition_focus_window(uint32_t wid)
     return scripting_addition_run_command(message);
 }
 
-bool scripting_addition_sloppy_focus_window(uint32_t wid)
-{
-    char message[MAXLEN];
-    snprintf(message, sizeof(message), "window_sloppy_focus %d", wid);
-    return scripting_addition_run_command(message);
-}
-
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h)
 {
     char message[MAXLEN];

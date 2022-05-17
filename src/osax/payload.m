@@ -40,9 +40,6 @@
 #define kCGSOnAllWorkspacesTagBit (1 << 11)
 #define kCGSNoShadowTagBit (1 << 3)
 
-#define CONNECTION_CALLBACK(name) void name(uint32_t type, void *data, size_t data_length, void *context, int cid)
-typedef CONNECTION_CALLBACK(connection_callback);
-
 extern int CGSMainConnectionID(void);
 extern CGError CGSGetConnectionPSN(int cid, ProcessSerialNumber *psn);
 extern CGError CGSSetWindowAlpha(int cid, uint32_t wid, float alpha);
@@ -62,11 +59,6 @@ extern CFArrayRef CGSCopyManagedDisplaySpaces(const int cid);
 extern CFStringRef CGSCopyManagedDisplayForSpace(const int cid, uint64_t spid);
 extern void CGSShowSpaces(int cid, CFArrayRef spaces);
 extern void CGSHideSpaces(int cid, CFArrayRef spaces);
-extern CFArrayRef CGSCopyWindowsWithOptionsAndTags(int cid, uint32_t owner, CFArrayRef spaces, uint32_t options, uint64_t *set_tags, uint64_t *clear_tags);
-extern CFArrayRef CGSCopySpacesForWindows(int cid, int selector, CFArrayRef window_list);
-extern CGError CGSOrderWindowList(int cid, const uint32_t *window_list, const int *window_order, const uint32_t *window_rel, int window_count);
-extern CGError CGSRequestNotificationsForWindows(int cid, uint32_t *window_list, int window_count);
-extern CGError CGSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);
 
 static int _connection;
 static id dock_spaces;
@@ -438,45 +430,6 @@ static Token get_token(const char **message)
     return token;
 }
 
-static inline CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
-{
-    CFNumberRef temp[count];
-
-    for (int i = 0; i < count; ++i) {
-        temp[i] = CFNumberCreate(NULL, type, ((char *)values) + (size * i));
-    }
-
-    CFArrayRef result = CFArrayCreate(NULL, (const void **)temp, count, &kCFTypeArrayCallBacks);
-
-    for (int i = 0; i < count; ++i) {
-        CFRelease(temp[i]);
-    }
-
-    return result;
-}
-
-static uint64_t window_space(uint32_t wid)
-{
-    uint64_t sid = 0;
-
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
-    CFArrayRef space_list_ref = CGSCopySpacesForWindows(_connection, 0x7, window_list_ref);
-    if (!space_list_ref) goto err;
-
-    int count = CFArrayGetCount(space_list_ref);
-    if (!count) goto free;
-
-    CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, 0);
-    CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &sid);
-
-free:
-    CFRelease(space_list_ref);
-err:
-    CFRelease(window_list_ref);
-
-    return sid;
-}
-
 static inline id get_ivar_value(id instance, const char *name)
 {
     id result = nil;
@@ -786,69 +739,6 @@ static void do_window_focus(const char *message)
     ((focus_window_call) set_front_window_fp)(window_psn, window_id);
 }
 
-static volatile bool g_sloppy_focus_spin = false;
-static CONNECTION_CALLBACK(connection_handler)
-{
-    g_sloppy_focus_spin = false;
-}
-
-static void do_window_sloppy_focus(const char *message)
-{
-    if (set_front_window_fp == 0) return;
-
-    int window_connection;
-    ProcessSerialNumber window_psn;
-
-    Token wid_token = get_token(&message);
-    uint32_t window_id = token_to_uint32t(wid_token);
-
-    uint64_t set_tags = 0;
-    uint64_t clear_tags = 0;
-    uint32_t options = 0x2;
-    uint64_t window_sid = window_space(window_id);
-
-    CFArrayRef space_list_ref = cfarray_of_cfnumbers(&window_sid, sizeof(uint64_t), 1, kCFNumberSInt64Type);
-    CFArrayRef window_list_ref = CGSCopyWindowsWithOptionsAndTags(_connection, 0, space_list_ref, options, &set_tags, &clear_tags);
-    CFRelease(space_list_ref);
-
-    if (window_list_ref) {
-        g_sloppy_focus_spin = true;
-        CGSRequestNotificationsForWindows(_connection, &window_id, 1);
-
-        int window_list_count = CFArrayGetCount(window_list_ref);
-        int window_count = 0;
-
-        uint32_t window_list[window_list_count];
-        uint32_t window_rel[window_list_count];
-        int window_order[window_list_count];
-
-        for (int i = 0; i < window_list_count && i < 128; ++i) {
-            uint32_t value = 0;
-            CFNumberRef id_ref = CFArrayGetValueAtIndex(window_list_ref, i);
-            CFNumberGetValue(id_ref, CFNumberGetType(id_ref), &value);
-
-            if (value != window_id) {
-                window_list[window_count] = value;
-                window_rel[window_count] = window_id;
-                window_order[window_count] = 1;
-                ++window_count;
-            } else {
-                break;
-            }
-        }
-
-        CGSGetWindowOwner(_connection, window_id, &window_connection);
-        CGSGetConnectionPSN(window_connection, &window_psn);
-        ((focus_window_call) set_front_window_fp)(window_psn, window_id);
-
-        for (;;) { if (!g_sloppy_focus_spin) break; }
-
-        CGSOrderWindowList(_connection, window_list, window_order, window_rel, window_count);
-        CGSRequestNotificationsForWindows(_connection, &window_id, 0);
-        CFRelease(window_list_ref);
-    }
-}
-
 static void do_window_shadow(const char *message)
 {
     Token wid_token = get_token(&message);
@@ -916,8 +806,6 @@ static void handle_message(int sockfd, const char *message)
         do_window_sticky(message);
     } else if (token_equals(token, "window_focus")) {
         do_window_focus(message);
-    } else if (token_equals(token, "window_sloppy_focus")) {
-        do_window_sloppy_focus(message);
     } else if (token_equals(token, "window_shadow")) {
         do_window_shadow(message);
     }
@@ -974,7 +862,6 @@ static bool start_daemon(char *socket_path)
     }
 
     init_instances();
-    CGSRegisterConnectionNotifyProc(_connection, connection_handler, 808, NULL);
     pthread_create(&daemon_thread, NULL, &handle_connection, NULL);
 
     return true;

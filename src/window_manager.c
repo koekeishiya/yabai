@@ -842,7 +842,7 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     SLPSPostEventRecordTo(window_psn, bytes2);
 }
 
-void window_manager_focus_window_without_raise_sip_friendly(ProcessSerialNumber *window_psn, uint32_t window_id)
+void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
         uint8_t bytes1[0xf8] = { [0x04] = 0xf8, [0x08] = 0x0d, [0x8a] = 0x02 };
@@ -862,11 +862,6 @@ void window_manager_focus_window_without_raise_sip_friendly(ProcessSerialNumber 
 
     _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
     window_manager_make_key_window(window_psn, window_id);
-}
-
-void window_manager_focus_window_without_raise(uint32_t window_id)
-{
-    scripting_addition_sloppy_focus_window(window_id);
 }
 
 void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uint32_t window_id, AXUIElementRef window_ref)

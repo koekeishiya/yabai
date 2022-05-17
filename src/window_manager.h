@@ -40,7 +40,6 @@ static const char *purify_mode_str[] =
 enum ffm_mode
 {
     FFM_DISABLED,
-    FFM_AUTOFOCUS_SIP,
     FFM_AUTOFOCUS,
     FFM_AUTORAISE
 };
@@ -48,7 +47,6 @@ enum ffm_mode
 static const char *ffm_mode_str[] =
 {
     "disabled",
-    "autofocus_sip_friendly",
     "autofocus",
     "autoraise"
 };
@@ -127,8 +125,7 @@ struct window *window_manager_find_last_window_in_stack(struct space_manager *sm
 struct window *window_manager_find_recent_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_largest_managed_window(struct space_manager *sm, struct window_manager *wm);
 struct window *window_manager_find_smallest_managed_window(struct space_manager *sm, struct window_manager *wm);
-void window_manager_focus_window_without_raise_sip_friendly(ProcessSerialNumber *window_psn, uint32_t window_id);
-void window_manager_focus_window_without_raise(uint32_t window_id);
+void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id);
 void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uint32_t window_id, AXUIElementRef window_ref);
 struct window *window_manager_focused_window(struct window_manager *wm);
 struct application *window_manager_focused_application(struct window_manager *wm);
