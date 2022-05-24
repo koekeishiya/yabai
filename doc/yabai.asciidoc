@@ -121,9 +121,9 @@ Global Settings
 
 *focus_follows_mouse* ['autofocus|autoraise|off']::
     Automatically focus the window under the mouse.
-    'autofocus': Focus the window without raising it.
+    'autofocus': Only focus the window.
     'autoraise': Focus the window *and* bring it to the front.
-    'off': Do not focus the window under the mouse pointer.
+    'off': Do not automatically focus the window under the mouse pointer.
 
 *window_origin_display* ['default|focused|cursor']::
     Specify which display a newly created window should be managed in. +
