@@ -41,12 +41,15 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
 
     while (SLSWindowIteratorAdvance(iterator)) {
         uint64_t tags = SLSWindowIteratorGetTags(iterator);
-        if (((tags & 0x1) || (tags & 0x2)) && (tags & 0x8) && (tags & 0x80000) && !(tags & 0x200) && !(tags & 0x10000)) {
-            window_list[window_count++] = SLSWindowIteratorGetWindowID(iterator);
+        uint64_t attributes = SLSWindowIteratorGetAttributes(iterator);
+
+        if ((attributes == 0x2) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+            uint32_t wid = SLSWindowIteratorGetWindowID(iterator);
+            window_list[window_count++] = wid;
         }
     }
-    *count = window_count;
 
+    *count = window_count;
     CFRelease(query);
     CFRelease(iterator);
 out:
