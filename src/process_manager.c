@@ -81,6 +81,11 @@ static bool process_is_observable(struct process *process)
         return false;
     }
 
+    if (string_equals(process->name, "Universal Control")) {
+        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
+        return false;
+    }
+
     if (string_equals(process->name, "Dock")) {
         debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
         return false;
