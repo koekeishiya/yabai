@@ -22,7 +22,7 @@ uint32_t space_display_id(uint64_t sid)
 uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count, int cid, int *count, bool include_minimized)
 {
     uint32_t *window_list = NULL;
-    uint64_t set_tags = 0;
+    uint64_t set_tags = 1;
     uint64_t clear_tags = 0;
     uint32_t options = include_minimized ? 0x7 : 0x2;
 
