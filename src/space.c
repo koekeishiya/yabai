@@ -42,10 +42,10 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
     while (SLSWindowIteratorAdvance(iterator)) {
         uint64_t tags = SLSWindowIteratorGetTags(iterator);
         uint64_t attributes = SLSWindowIteratorGetAttributes(iterator);
+        uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
 
-        if ((attributes == 0x2) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
-            uint32_t wid = SLSWindowIteratorGetWindowID(iterator);
-            window_list[window_count++] = wid;
+        if ((parent_wid == 0) && (attributes == 0x2) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+            window_list[window_count++] = SLSWindowIteratorGetWindowID(iterator);
         }
     }
 
