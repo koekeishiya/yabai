@@ -89,7 +89,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     window_manager_add_application(&g_window_manager, application);
-    window_manager_add_application_windows(&g_space_manager, &g_window_manager, application);
+    window_manager_add_application_windows(&g_space_manager, &g_window_manager, application, -1);
     event_signal_push(SIGNAL_APPLICATION_LAUNCHED, application);
 
     int window_count;

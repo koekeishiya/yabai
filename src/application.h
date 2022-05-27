@@ -68,6 +68,7 @@ static CFStringRef ax_application_notification[] =
 struct application
 {
     AXUIElementRef ref;
+    int connection;
     ProcessSerialNumber psn;
     uint32_t pid;
     char *name;

@@ -134,6 +134,8 @@ struct application *application_create(struct process *process)
     application->pid = process->pid;
     application->name = process->name;
     application->is_hidden = application_is_hidden(application);
+    SLSGetConnectionIDForPSN(g_connection, &application->psn, &application->connection);
+
     return application;
 }
 

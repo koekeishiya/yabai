@@ -32,7 +32,6 @@ struct window
 {
     struct application *application;
     AXUIElementRef ref;
-    int connection;
     uint32_t id;
     uint32_t *volatile id_ptr;
     CGRect frame;

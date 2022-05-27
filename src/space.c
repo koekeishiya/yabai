@@ -19,14 +19,14 @@ uint32_t space_display_id(uint64_t sid)
     return id;
 }
 
-uint32_t *space_window_list_for_connection(uint64_t sid, int cid, int *count, bool include_minimized)
+uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count, int cid, int *count, bool include_minimized)
 {
     uint32_t *window_list = NULL;
     uint64_t set_tags = 0;
     uint64_t clear_tags = 0;
     uint32_t options = include_minimized ? 0x7 : 0x2;
 
-    CFArrayRef space_list_ref = cfarray_of_cfnumbers(&sid, sizeof(uint64_t), 1, kCFNumberSInt64Type);
+    CFArrayRef space_list_ref = cfarray_of_cfnumbers(space_list, sizeof(uint64_t), space_count, kCFNumberSInt64Type);
     CFArrayRef window_list_ref = SLSCopyWindowsWithOptionsAndTags(g_connection, cid, space_list_ref, options, &set_tags, &clear_tags);
     if (!window_list_ref) goto err;
 
@@ -49,7 +49,7 @@ err:
 
 uint32_t *space_window_list(uint64_t sid, int *count, bool include_minimized)
 {
-    return space_window_list_for_connection(sid, 0, count, include_minimized);
+    return space_window_list_for_connection(&sid, 1, 0, count, include_minimized);
 }
 
 CFStringRef space_uuid(uint64_t sid)

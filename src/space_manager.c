@@ -914,16 +914,14 @@ void space_manager_mark_spaces_invalid(struct space_manager *sm)
 
 bool space_manager_refresh_application_windows(struct space_manager *sm)
 {
+    int refresh_count = buf_len(g_window_manager.applications_to_refresh);
+    if (!refresh_count) return false;
+
     int window_count = g_window_manager.window.count;
-    for (int i = 0; i < g_window_manager.application.capacity; ++i) {
-        struct bucket *bucket = g_window_manager.application.buckets[i];
-        while (bucket) {
-            if (bucket->value) {
-                struct application *application = bucket->value;
-                window_manager_add_application_windows(sm, &g_window_manager, application);
-            }
-            bucket = bucket->next;
-        }
+    for (int i = 0; i < refresh_count; ++i) {
+        struct application *application = g_window_manager.applications_to_refresh[i];
+        debug("%s: %s has windows that are not yet resolved\n", __FUNCTION__, application->name);
+        window_manager_add_application_windows(sm, &g_window_manager, application, i);
     }
 
     return window_count != g_window_manager.window.count;

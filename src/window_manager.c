@@ -1043,12 +1043,42 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     return window;
 }
 
-void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application)
+static uint32_t *window_manager_application_window_list(struct application *application, int *window_count)
 {
-    CFArrayRef window_list_ref = application_window_list(application);
-    if (!window_list_ref) return;
+    uint32_t display_count;
+    uint32_t *display_list = display_manager_active_display_list(&display_count);
+    if (!display_list) return NULL;
 
-    int window_count = CFArrayGetCount(window_list_ref);
+    int space_count = 0;
+    uint64_t *space_list = NULL;
+
+    for (int i = 0; i < display_count; ++i) {
+        int count;
+        uint64_t *list = display_space_list(display_list[i], &count);
+        if (!list) continue;
+
+        //
+        // NOTE(koekeishiya): display_space_list(..) uses a linear allocator,
+        // and so we only need to track the beginning of the first list along
+        // with the total number of windows that have been allocated.
+        //
+
+        if (!space_list) space_list = list;
+        space_count += count;
+    }
+
+    return space_list ? space_window_list_for_connection(space_list, space_count, application->connection, window_count, false) : NULL;
+}
+
+void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
+{
+    int global_window_count;
+    uint32_t *global_window_list = window_manager_application_window_list(application, &global_window_count);
+    if (!global_window_list) return;
+
+    CFArrayRef window_list_ref = application_window_list(application);
+    int window_count = window_list_ref ? CFArrayGetCount(window_list_ref) : 0;
+
     for (int i = 0; i < window_count; ++i) {
         AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list_ref, i);
         uint32_t window_id = ax_window_id(window_ref);
@@ -1056,7 +1086,31 @@ void window_manager_add_application_windows(struct space_manager *sm, struct win
         window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
     }
 
-    CFRelease(window_list_ref);
+    if (global_window_count == window_count) {
+        if (refresh_index != -1) {
+            debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
+            buf_del(g_window_manager.applications_to_refresh, refresh_index);
+        }
+    } else {
+        bool missing_window = false;
+        for (int i = 0; i < global_window_count; ++i) {
+            struct window *window = window_manager_find_window(&g_window_manager, global_window_list[i]);
+            if (!window) {
+                missing_window = true;
+                break;
+            }
+        }
+
+        if (refresh_index == -1 && missing_window) {
+            debug("%s: %s has windows that are not yet resolved\n", __FUNCTION__, application->name);
+            buf_push(g_window_manager.applications_to_refresh, application);
+        } else if (refresh_index != -1 && !missing_window) {
+            debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
+            buf_del(g_window_manager.applications_to_refresh, refresh_index);
+        }
+    }
+
+    if (window_list_ref) CFRelease(window_list_ref);
 }
 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
@@ -1428,7 +1482,7 @@ void window_manager_toggle_window_shadow(struct space_manager *sm, struct window
 
 void window_manager_wait_for_native_fullscreen_transition(struct window *window)
 {
-    if (workspace_is_macos_mojave()) {
+    if (workspace_is_macos_mojave() || workspace_is_macos_monterey()) {
         while (!space_is_user(space_manager_active_space())) {
 
             //
@@ -1440,6 +1494,8 @@ void window_manager_wait_for_native_fullscreen_transition(struct window *window)
             // display_manager API to check for animation status:
             //
             //  - https://github.com/koekeishiya/yabai/issues/690
+            //
+            // The display_manager API does not work on macOS Monterey.
             //
 
             usleep(100000);
@@ -1701,7 +1757,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 
                 if (application_observe(application)) {
                     window_manager_add_application(wm, application);
-                    window_manager_add_application_windows(sm, wm, application);
+                    window_manager_add_application_windows(sm, wm, application, -1);
                 } else {
                     application_unobserve(application);
                     application_destroy(application);

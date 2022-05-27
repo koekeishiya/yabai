@@ -74,6 +74,7 @@ struct window_manager
     struct table window_lost_focused_event;
     struct table application_lost_front_switched_event;
     struct rule *rules;
+    struct application **applications_to_refresh;
     uint32_t focused_window_id;
     ProcessSerialNumber focused_window_psn;
     uint32_t last_window_id;
@@ -167,7 +168,7 @@ enum window_op_error window_manager_deminimize_window(struct window *window);
 bool window_manager_close_window(struct window *window);
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t sid, bool moved_by_rule);
 struct window *window_manager_create_and_add_window(struct space_manager *sm, struct window_manager *wm, struct application *application, AXUIElementRef window_ref, uint32_t window_id);
-void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application);
+void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index);
 enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h);
 void window_manager_purify_window(struct window_manager *wm, struct window *window);
 void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float);

@@ -464,7 +464,6 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->ref = window_ref;
     window->id = window_id;
     window->id_ptr = &window->id;
-    SLSGetWindowOwner(g_connection, window->id, &window->connection);
     window->frame = window_ax_frame(window);
     window_set_flag(window, WINDOW_SHADOW);
 
