@@ -1067,7 +1067,7 @@ static uint32_t *window_manager_application_window_list(struct application *appl
         space_count += count;
     }
 
-    return space_list ? space_window_list_for_connection(space_list, space_count, application->connection, window_count, false) : NULL;
+    return space_list ? space_window_list_for_connection(space_list, space_count, application->connection, window_count, true) : NULL;
 }
 
 void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)

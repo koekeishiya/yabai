@@ -768,24 +768,14 @@ void view_serialize(FILE *rsp, struct view *view)
     char buffer[MAXLEN] = {};
     char *cursor = buffer;
 
-    int count = 0;
-    uint32_t windows[MAXLEN] = {};
-
     int window_count = 0;
     uint32_t *window_list = space_window_list(view->sid, &window_count, true);
-    if (window_list) {
-        for (int i = 0; i < window_count; ++i) {
-            if (window_manager_find_window(&g_window_manager, window_list[i])) {
-                windows[count++] = window_list[i];
-            }
-        }
-    }
 
-    for (int i = 0; i < count; ++i) {
-        if (i < count - 1) {
-            bytes_written = snprintf(cursor, buffer_size, "%d, ", windows[i]);
+    for (int i = 0; i < window_count; ++i) {
+        if (i < window_count - 1) {
+            bytes_written = snprintf(cursor, buffer_size, "%d, ", window_list[i]);
         } else {
-            bytes_written = snprintf(cursor, buffer_size, "%d", windows[i]);
+            bytes_written = snprintf(cursor, buffer_size, "%d", window_list[i]);
         }
 
         cursor += bytes_written;
