@@ -44,7 +44,7 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
         uint64_t attributes = SLSWindowIteratorGetAttributes(iterator);
         uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
 
-        if ((parent_wid == 0) && (attributes == 0x2) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+        if ((parent_wid == 0) && (attributes == 0x2 || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
             window_list[window_count++] = SLSWindowIteratorGetWindowID(iterator);
         }
     }
