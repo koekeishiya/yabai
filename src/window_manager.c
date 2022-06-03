@@ -26,22 +26,7 @@ void window_manager_query_window_rules(FILE *rsp)
 static struct window **window_manager_find_windows_for_spaces(uint64_t *space_list, int space_count, int *window_aggregate_count)
 {
     int window_count = 0;
-    uint32_t *window_list = NULL;
-
-    for (int i = 0; i < space_count; ++i) {
-        int count;
-        uint32_t *list = space_window_list(space_list[i], &count, true);
-        if (!list) continue;
-
-        //
-        // NOTE(koekeishiya): space_window_list(..) uses a linear allocator,
-        // and so we only need to track the beginning of the first list along
-        // with the total number of windows that have been allocated.
-        //
-
-        if (!window_list) window_list = list;
-        window_count += count;
-    }
+    uint32_t *window_list = space_window_list_for_connection(space_list, space_count, 0, &window_count, true);
 
     *window_aggregate_count = 0;
     struct window **window_aggregate_list = ts_alloc_aligned(sizeof(struct window *), window_count);

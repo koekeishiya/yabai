@@ -80,6 +80,17 @@ static inline void *ts_expand(void *ptr, uint64_t old_size, uint64_t increment)
     return ptr;
 }
 
+static inline void *ts_resize(void *ptr, uint64_t old_size, uint64_t new_size)
+{
+    assert(ptr == g_temp_storage.memory + g_temp_storage.used - old_size);
+    if (new_size > old_size) {
+        __sync_fetch_and_add(&g_temp_storage.used, new_size - old_size);
+    } else if (new_size < old_size) {
+        __sync_fetch_and_sub(&g_temp_storage.used, old_size - new_size);
+    }
+    return ptr;
+}
+
 static inline void ts_reset(void)
 {
     g_temp_storage.used = 0;

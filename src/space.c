@@ -49,7 +49,9 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
         }
     }
 
+    window_list = ts_resize(window_list, sizeof(uint32_t) * *count, sizeof(uint32_t) * window_count);
     *count = window_count;
+
     CFRelease(query);
     CFRelease(iterator);
 out:
