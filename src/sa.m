@@ -440,7 +440,7 @@ int scripting_addition_load(void)
         goto out;
     }
 
-    if (workspace_is_macos_monterey() || workspace_is_macos_bigsur()) {
+    if (workspace_is_macos_ventura() || workspace_is_macos_monterey() || workspace_is_macos_bigsur()) {
         if (!is_root()) {
             warn("yabai: scripting-addition must be loaded as root!\n");
             notify("scripting-addition", "must be loaded as root!");

@@ -318,7 +318,7 @@ int main(int argc, char **argv)
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
 
-    if (workspace_is_macos_monterey()) {
+    if (workspace_is_macos_ventura() || workspace_is_macos_monterey()) {
         mission_control_observe();
     } else {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
@@ -334,7 +334,7 @@ int main(int argc, char **argv)
         error("yabai: could not initialize message_loop! abort..\n");
     }
 
-    if (!workspace_is_macos_monterey() && !workspace_is_macos_bigsur()) {
+    if (!workspace_is_macos_ventura() && !workspace_is_macos_monterey() && !workspace_is_macos_bigsur()) {
         if (scripting_addition_is_installed()) {
             scripting_addition_load();
         } else {

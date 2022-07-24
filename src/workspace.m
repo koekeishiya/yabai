@@ -126,7 +126,7 @@ pid_t workspace_get_dock_pid(void)
     return 0;
 }
 
-static int _workspace_is_macos_version[5] = { -1, -1, -1, -1, -1 };
+static int _workspace_is_macos_version[6] = {-1, -1, -1, -1, -1, -1 };
 
 static int workspace_is_macos_major(long major_version)
 {
@@ -140,44 +140,52 @@ static int workspace_is_macos_minor(long major_version, long minor_version)
     return version.majorVersion == major_version && version.minorVersion == minor_version;
 }
 
-bool workspace_is_macos_monterey(void)
+bool workspace_is_macos_ventura(void) 
 {
     if (_workspace_is_macos_version[0] == -1) {
-        _workspace_is_macos_version[0] = workspace_is_macos_major(12);
+        _workspace_is_macos_version[0] = workspace_is_macos_major(13);
     }
     return _workspace_is_macos_version[0];
 }
 
-bool workspace_is_macos_bigsur(void)
+bool workspace_is_macos_monterey(void)
 {
     if (_workspace_is_macos_version[1] == -1) {
-        _workspace_is_macos_version[1] = workspace_is_macos_major(11);
+        _workspace_is_macos_version[1] = workspace_is_macos_major(12);
     }
     return _workspace_is_macos_version[1];
 }
 
-bool workspace_is_macos_catalina(void)
+bool workspace_is_macos_bigsur(void)
 {
     if (_workspace_is_macos_version[2] == -1) {
-        _workspace_is_macos_version[2] = workspace_is_macos_minor(10, 15);
+        _workspace_is_macos_version[2] = workspace_is_macos_major(11);
     }
     return _workspace_is_macos_version[2];
 }
 
-bool workspace_is_macos_mojave(void)
+bool workspace_is_macos_catalina(void)
 {
     if (_workspace_is_macos_version[3] == -1) {
-        _workspace_is_macos_version[3] = workspace_is_macos_minor(10, 14);
+        _workspace_is_macos_version[3] = workspace_is_macos_minor(10, 15);
     }
     return _workspace_is_macos_version[3];
 }
 
-bool workspace_is_macos_highsierra(void)
+bool workspace_is_macos_mojave(void)
 {
     if (_workspace_is_macos_version[4] == -1) {
-        _workspace_is_macos_version[4] = workspace_is_macos_minor(10, 13);
+        _workspace_is_macos_version[4] = workspace_is_macos_minor(10, 14);
     }
     return _workspace_is_macos_version[4];
+}
+
+bool workspace_is_macos_highsierra(void)
+{
+    if (_workspace_is_macos_version[5] == -1) {
+        _workspace_is_macos_version[5] = workspace_is_macos_minor(10, 13);
+    }
+    return _workspace_is_macos_version[5];
 }
 
 @implementation workspace_context
