@@ -1318,7 +1318,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
     int bytes_to_read = 0;
 
     if (read(param1, &bytes_to_read, sizeof(int)) == sizeof(int)) {
-        char *message  = ts_alloc_unaligned(bytes_to_read);
+        char *message = ts_alloc_unaligned(bytes_to_read);
 
         do {
             int cur_read = read(param1, message+bytes_read, bytes_to_read-bytes_read);
