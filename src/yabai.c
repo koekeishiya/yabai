@@ -62,9 +62,10 @@ static int client_send_message(int argc, char **argv)
         message_length += argl[i];
     }
 
-    char *message = malloc(message_length);
-    char *temp = message;
+    char *message = malloc(sizeof(int)+message_length);
+    char *temp = sizeof(int)+message;
 
+    memcpy(message, &message_length, sizeof(int));
     for (int i = 1; i < argc; ++i) {
         memcpy(temp, argv[i], argl[i]);
         temp += argl[i];
@@ -84,7 +85,7 @@ static int client_send_message(int argc, char **argv)
         error("yabai-msg: failed to connect to socket..\n");
     }
 
-    if (send(sockfd, message, message_length, 0) == -1) {
+    if (send(sockfd, message, sizeof(int)+message_length, 0) == -1) {
         error("yabai-msg: failed to send data..\n");
     }
 

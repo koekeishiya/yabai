@@ -1313,35 +1313,21 @@ static EVENT_CALLBACK(EVENT_HANDLER_SYSTEM_WOKE)
 
 static EVENT_CALLBACK(EVENT_HANDLER_DAEMON_MESSAGE)
 {
-    int cursor = 0;
-    int bytes_read = 0;
-    char *message = NULL;
-    char buffer[BUFSIZ];
+    FILE *rsp         = NULL;
+    int bytes_read    = 0;
+    int bytes_to_read = 0;
 
-    while ((bytes_read = read(param1, buffer, sizeof(buffer)-1)) > 0) {
-        message = ts_expand(message, cursor, bytes_read);
-        memcpy(message+cursor, buffer, bytes_read);
-        cursor += bytes_read;
+    if (read(param1, &bytes_to_read, sizeof(int)) == sizeof(int)) {
+        char *message  = ts_alloc_unaligned(bytes_to_read);
 
-        if (((message+cursor)[-1] == '\0') &&
-            ((message+cursor)[-2] == '\0')) {
+        do {
+            int cur_read = read(param1, message+bytes_read, bytes_to_read-bytes_read);
+            if (cur_read <= 0) break;
 
-            //
-            // NOTE(koekeishiya): if our message ends with double null-terminator we
-            // have successfully received the entire message. this was added because
-            // on macOS Big Sur we would in a few rare cases read the message AND YET
-            // still enter another call to *read* above that would block, because the
-            // client was finished sending its message and is blocking in a poll loop
-            // waiting for a response.
-            //
+            bytes_read += cur_read;
+        } while (bytes_read < bytes_to_read);
 
-            break;
-        }
-    }
-
-    if (message && bytes_read != -1) {
-        FILE *rsp = fdopen(param1, "w");
-        if (rsp) {
+        if ((bytes_read == bytes_to_read) && (rsp = fdopen(param1, "w"))) {
             debug_message(__FUNCTION__, message);
             handle_message(rsp, message);
 
