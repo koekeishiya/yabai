@@ -54,7 +54,7 @@ void event_loop_post(struct event_loop *event_loop, enum event_type type, void *
 
 bool event_loop_init(struct event_loop *event_loop)
 {
-    if (!memory_pool_init(&event_loop->pool, KILOBYTES(128))) return false;
+    if (!memory_pool_init(&event_loop->pool, KILOBYTES(512))) return false;
 
     event_loop->head = memory_pool_push(&event_loop->pool, sizeof(struct event_loop_item));
     event_loop->head->next = NULL;
