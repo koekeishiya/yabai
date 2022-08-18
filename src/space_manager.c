@@ -637,20 +637,6 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
 
     if (scripting_addition_focus_space(sid)) {
         if (focus_display) {
-#if 0
-            while (true) {
-
-                /*
-                 * NOTE(koekeishiya): On macOS Monterey it appears that the API we use take some time to update
-                 * before they actually reflect the system state. Because of that we need to spin- lock here
-                 * until the system has caught up with the space change before we can proceed.
-                 * */
-
-                uint64_t tmp = display_space_id(new_did);
-                if (tmp == sid) break;
-            }
-#endif
-
             display_manager_focus_display(new_did, sid);
         }
     } else {
