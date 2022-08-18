@@ -637,6 +637,7 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
 
     if (scripting_addition_focus_space(sid)) {
         if (focus_display) {
+#if 0
             while (true) {
 
                 /*
@@ -648,8 +649,9 @@ enum space_op_error space_manager_focus_space(uint64_t sid)
                 uint64_t tmp = display_space_id(new_did);
                 if (tmp == sid) break;
             }
+#endif
 
-            display_manager_focus_display(new_did);
+            display_manager_focus_display(new_did, sid);
         }
     } else {
         return SPACE_OP_ERROR_SCRIPTING_ADDITION;

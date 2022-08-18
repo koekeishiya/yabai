@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Improve behaviour of *focus_follows_mouse autoraise*, preventing a window from being raised if it would occlude some other **floating window** [#1246](https://github.com/koekeishiya/yabai/issues/1246)
 - The rule option *mouse_follows_focus* should now work properly (values were inverted) [#1267](https://github.com/koekeishiya/yabai/issues/1267)
 - Remove minor shadow artifact from border windows [#1056](https://github.com/koekeishiya/yabai/issues/1056)
+- Fixed an issue that in rare occasions caused yabai to freeze when focusing an inactve space on an inactive display [#1309](https://github.com/koekeishiya/yabai/issues/1309).
 
 ## [4.0.0] - 2022-03-16
 ### Added

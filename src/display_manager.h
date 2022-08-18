@@ -56,7 +56,7 @@ bool display_manager_display_is_animating(uint32_t did);
 uint32_t display_manager_active_display_count(void);
 uint32_t *display_manager_active_display_list(uint32_t *count);
 void display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool update_cursor_position);
-void display_manager_focus_display(uint32_t did);
+void display_manager_focus_display(uint32_t did, uint64_t sid);
 bool display_manager_begin(struct display_manager *dm);
 bool display_manager_end(void);
 
