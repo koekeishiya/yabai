@@ -423,7 +423,6 @@ void window_manager_resize_window(struct window *window, float width, float heig
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height)
 {
     AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
-        window_manager_resize_window(window, width, height);
         window_manager_move_window(window, x, y);
         window_manager_resize_window(window, width, height);
     });
