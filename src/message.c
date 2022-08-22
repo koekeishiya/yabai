@@ -298,7 +298,7 @@ static bool token_equals(struct token token, char *match)
     return *at == 0;
 }
 
-static bool token_is_valid(struct token token)
+static inline bool token_is_valid(struct token token)
 {
     return token.text && token.length > 0;
 }
@@ -2131,7 +2131,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
         struct rule rule = {};
 
         struct token token = get_token(&message);
-        while (token.text && token.length > 0) {
+        while (token_is_valid(token)) {
             char *key = NULL;
             char *value = NULL;
             bool exclusion = false;
@@ -2333,7 +2333,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
         struct signal signal = {};
 
         struct token token = get_token(&message);
-        while (token.text && token.length > 0) {
+        while (token_is_valid(token)) {
             char *key = NULL;
             char *value = NULL;
             bool exclusion = false;
