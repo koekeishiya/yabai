@@ -429,6 +429,8 @@ static void get_key_value_pair(char *token, char **key, char **value, bool *excl
 
 static inline void daemon_fail(FILE *rsp, char *fmt, ...)
 {
+    if (!rsp) return;
+
     va_list ap;
     va_start(ap, fmt);
     fprintf(rsp, FAILURE_MESSAGE);
@@ -438,6 +440,8 @@ static inline void daemon_fail(FILE *rsp, char *fmt, ...)
 
 __unused static inline void daemon_deprecated(FILE *rsp, char *fmt, ...)
 {
+    if (!rsp) return;
+
     va_list ap;
     va_start(ap, fmt);
     fprintf(rsp, "deprecation warning: ");
