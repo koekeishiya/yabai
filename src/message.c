@@ -427,26 +427,20 @@ static void get_key_value_pair(char *token, char **key, char **value, bool *excl
     }
 }
 
-static void daemon_fail(FILE *rsp, char *fmt, ...)
+static inline void daemon_fail(FILE *rsp, char *fmt, ...)
 {
-    if (!rsp) return;
-
-    fprintf(rsp, FAILURE_MESSAGE);
-
     va_list ap;
     va_start(ap, fmt);
+    fprintf(rsp, FAILURE_MESSAGE);
     vfprintf(rsp, fmt, ap);
     va_end(ap);
 }
 
-__unused static void daemon_deprecated(FILE *rsp, char *fmt, ...)
+__unused static inline void daemon_deprecated(FILE *rsp, char *fmt, ...)
 {
-    if (!rsp) return;
-
-    fprintf(rsp, "deprecation warning: ");
-
     va_list ap;
     va_start(ap, fmt);
+    fprintf(rsp, "deprecation warning: ");
     vfprintf(rsp, fmt, ap);
     va_end(ap);
 }
