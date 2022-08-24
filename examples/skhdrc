@@ -96,7 +96,7 @@
 
 # create desktop, move window and follow focus - uses jq for parsing json (brew install jq)
 # shift + cmd - n : yabai -m space --create && \
-#                   index="$(yabai -m query --spaces --display | jq 'map(select(."native-fullscreen" == 0))[-1].index')" && \
+#                   index="$(yabai -m query --spaces --display | jq 'map(select(."is-native-fullscreen" == false))[-1].index')" && \
 #                   yabai -m window --space "${index}" && \
 #                   yabai -m space --focus "${index}"
 
@@ -139,10 +139,7 @@
 # alt - e : yabai -m window --toggle split
 
 # float / unfloat window and center on screen
-# alt - t : yabai -m window --toggle float;\
-#           yabai -m window --grid 4:4:1:1:2:2
+# alt - t : yabai -m window --toggle float --grid 4:4:1:1:2:2
 
 # toggle sticky(+float), topmost, picture-in-picture
-# alt - p : yabai -m window --toggle sticky;\
-#           yabai -m window --toggle topmost;\
-#           yabai -m window --toggle pip
+# alt - p : yabai -m window --toggle sticky --toggle topmost --toggle pip
