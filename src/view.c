@@ -845,7 +845,7 @@ struct view *view_create(uint64_t sid)
     view->enable_padding = true;
     view->enable_gap = true;
     view->sid = sid;
-    view->suuid = space_uuid(sid);
+    view->suuid = SLSSpaceCopyName(g_connection, sid);
 
     if (space_is_user(view->sid)) {
         if (!view->custom_layout)         view->layout         = g_space_manager.layout;

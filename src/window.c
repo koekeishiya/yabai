@@ -214,7 +214,7 @@ char *window_title(struct window *window)
     CFTypeRef value = NULL;
 
 #if 0
-    SLSCopyWindowProperty(g_connection, window->id, CFSTR("kCGSWindowTitle"), &value);
+    SLSCopyWindowProperty(g_connection, window->id, CFSTR("kCGSWindowTitle"), &value); // NOTE(koekeishiya): More efficient than the AX API, but requires Screen Recording permissions.
 #else
     AXUIElementCopyAttributeValue(window->ref, kAXTitleAttribute, &value);
 #endif

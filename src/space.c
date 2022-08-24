@@ -1,13 +1,8 @@
 extern int g_connection;
 
-CFStringRef space_display_uuid(uint64_t sid)
-{
-    return SLSCopyManagedDisplayForSpace(g_connection, sid);
-}
-
 uint32_t space_display_id(uint64_t sid)
 {
-    CFStringRef uuid_string = space_display_uuid(sid);
+    CFStringRef uuid_string = SLSCopyManagedDisplayForSpace(g_connection, sid);
     if (!uuid_string) return 0;
 
     CFUUIDRef uuid = CFUUIDCreateFromString(NULL, uuid_string);
@@ -66,29 +61,19 @@ uint32_t *space_window_list(uint64_t sid, int *count, bool include_minimized)
     return space_window_list_for_connection(&sid, 1, 0, count, include_minimized);
 }
 
-CFStringRef space_uuid(uint64_t sid)
-{
-    return SLSSpaceCopyName(g_connection, sid);
-}
-
-int space_type(uint64_t sid)
-{
-    return SLSSpaceGetType(g_connection, sid);
-}
-
 bool space_is_user(uint64_t sid)
 {
-    return space_type(sid) == 0;
+    return SLSSpaceGetType(g_connection, sid) == 0;
 }
 
 bool space_is_fullscreen(uint64_t sid)
 {
-    return space_type(sid) == 4;
+    return SLSSpaceGetType(g_connection, sid) == 4;
 }
 
 bool space_is_system(uint64_t sid)
 {
-    return space_type(sid) == 2;
+    return SLSSpaceGetType(g_connection, sid) == 2;
 }
 
 bool space_is_visible(uint64_t sid)

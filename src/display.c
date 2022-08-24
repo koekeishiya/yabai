@@ -16,7 +16,7 @@ static DISPLAY_EVENT_HANDLER(display_handler)
 
 void display_serialize(FILE *rsp, uint32_t did)
 {
-    CGRect frame = display_bounds(did);
+    CGRect frame = CGDisplayBounds(did);
 
     char *uuid = NULL;
     CFStringRef uuid_ref = display_uuid(did);
@@ -84,14 +84,9 @@ uint32_t display_id(CFStringRef uuid)
     return did;
 }
 
-CGRect display_bounds(uint32_t did)
-{
-    return CGDisplayBounds(did);
-}
-
 CGRect display_bounds_constrained(uint32_t did)
 {
-    CGRect frame  = display_bounds(did);
+    CGRect frame  = CGDisplayBounds(did);
     int effective_ext_top_padding = 0;
 
     if ((g_display_manager.mode == EXTERNAL_BAR_MAIN &&
@@ -139,7 +134,7 @@ CGRect display_bounds_constrained(uint32_t did)
 
 CGPoint display_center(uint32_t did)
 {
-    CGRect bounds = display_bounds(did);
+    CGRect bounds = CGDisplayBounds(did);
     return (CGPoint) { bounds.origin.x + bounds.size.width/2, bounds.origin.y + bounds.size.height/2 };
 }
 

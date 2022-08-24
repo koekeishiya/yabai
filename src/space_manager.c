@@ -932,7 +932,7 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
 
     for (int i = 0; i < space_count; ++i) {
         uint64_t sid = space_list[i];
-        CFStringRef uuid = space_uuid(sid);
+        CFStringRef uuid = SLSSpaceCopyName(g_connection, sid);
         if (!uuid) continue;
 
         for (int j = 0; j < list_count; ++j) {

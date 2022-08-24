@@ -267,7 +267,7 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
         window->frame.origin.y + window->frame.size.height / 2
     };
 
-    CGRect bounds = display_bounds(did);
+    CGRect bounds = CGDisplayBounds(did);
     if (!CGRectContainsPoint(bounds, center)) return;
 
     CGWarpMouseCursorPosition(center);

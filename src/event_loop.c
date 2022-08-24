@@ -40,7 +40,6 @@ void event_loop_post(struct event_loop *event_loop, enum event_type type, void *
     new_tail->event.param1 = param1;
     new_tail->event.info = info;
     new_tail->next = NULL;
-
     __asm__ __volatile__ ("" ::: "memory");
 
     do {
