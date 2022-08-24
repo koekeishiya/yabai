@@ -61,7 +61,7 @@ void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
 
 void window_manager_query_windows_for_displays(FILE *rsp)
 {
-    uint32_t display_count = 0;
+    int display_count = 0;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
 
     int space_count = 0;
@@ -1031,7 +1031,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
 static uint32_t *window_manager_application_window_list(struct application *application, int *window_count)
 {
-    uint32_t display_count;
+    int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return NULL;
 
@@ -1612,11 +1612,13 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
             struct window *window = window_manager_find_window(wm, view_window_list[i]);
             if (!window) continue;
 
-            space_manager_untile_window(sm, view, window);
+            view_remove_window_node(view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
     }
+
+    view_flush(view);
 }
 
 static void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid, uint32_t *window_list, int window_count)
@@ -1643,17 +1645,15 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
 
 void window_manager_validate_and_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
-    int window_count;
+    int window_count = 0;
     uint32_t *window_list = space_window_list(sid, &window_count, false);
-    if (!window_list) return;
-
     window_manager_validate_windows_on_space(sm, wm, sid, window_list, window_count);
     window_manager_check_for_windows_on_space(sm, wm, sid, window_list, window_count);
 }
 
 void window_manager_correct_for_mission_control_changes(struct space_manager *sm, struct window_manager *wm)
 {
-    uint32_t display_count = 0;
+    int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return;
 
@@ -1665,12 +1665,12 @@ void window_manager_correct_for_mission_control_changes(struct space_manager *sm
         if (!space_list) continue;
 
         uint64_t sid = display_space_id(did);
-        for (int i = 0; i < space_count; ++i) {
-            if (space_list[i] == sid) {
+        for (int j = 0; j < space_count; ++j) {
+            if (space_list[j] == sid) {
                 window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sid);
                 space_manager_refresh_view(sm, sid);
             } else {
-                space_manager_mark_view_invalid(sm, space_list[i]);
+                space_manager_mark_view_invalid(sm, space_list[j]);
             }
         }
     }

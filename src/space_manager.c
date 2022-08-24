@@ -67,7 +67,7 @@ bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
 
 bool space_manager_query_spaces_for_displays(FILE *rsp)
 {
-    uint32_t display_count;
+    int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return false;
 
@@ -883,7 +883,7 @@ void space_manager_mark_spaces_invalid_for_display(struct space_manager *sm, uin
 
 void space_manager_mark_spaces_invalid(struct space_manager *sm)
 {
-    uint32_t display_count = 0;
+    int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return;
 
@@ -976,7 +976,7 @@ void space_manager_init(struct space_manager *sm)
 
     table_init(&sm->view, 23, hash_view, compare_view);
 
-    uint32_t display_count;
+    int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return;
 

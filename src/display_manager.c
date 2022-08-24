@@ -4,7 +4,7 @@ extern int g_connection;
 
 bool display_manager_query_displays(FILE *rsp)
 {
-    uint32_t count = 0;
+    int count;
     uint32_t *display_list = display_manager_active_display_list(&count);
     if (!display_list) return false;
 
@@ -146,7 +146,7 @@ uint32_t display_manager_last_display_id(void)
 
 uint32_t display_manager_find_closest_display_in_direction(uint32_t source_did, int direction)
 {
-    uint32_t display_count;
+    int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return 0;
 
@@ -253,18 +253,18 @@ bool display_manager_display_is_animating(uint32_t did)
     return result;
 }
 
-uint32_t display_manager_active_display_count(void)
+int display_manager_active_display_count(void)
 {
     uint32_t count;
     CGGetActiveDisplayList(0, NULL, &count);
-    return count;
+    return (int)count;
 }
 
-uint32_t *display_manager_active_display_list(uint32_t *count)
+uint32_t *display_manager_active_display_list(int *count)
 {
     int display_count = display_manager_active_display_count();
     uint32_t *result = ts_alloc_aligned(sizeof(uint32_t), display_count);
-    CGGetActiveDisplayList(display_count, result, count);
+    CGGetActiveDisplayList(display_count, result, (uint32_t*)count);
     return result;
 }
 
