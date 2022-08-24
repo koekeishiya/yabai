@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [4.0.2] - 2022-08-24
 ### Changed
 - Fixed an issue that in rare occasions caused yabai to freeze when focusing an inactve space on an inactive display [#1309](https://github.com/koekeishiya/yabai/issues/1309).
 - Fixed an issue that caused a window to incorrectly become focused when assigned to a space through rules [#1370](https://github.com/koekeishiya/yabai/issues/1370)
@@ -392,7 +394,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v4.0.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v4.0.2...HEAD
+[4.0.2]: https://github.com/koekeishiya/yabai/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/koekeishiya/yabai/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/koekeishiya/yabai/compare/v3.3.10...v4.0.0
 [3.3.10]: https://github.com/koekeishiya/yabai/compare/v3.3.9...v3.3.10
