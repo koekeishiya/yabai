@@ -578,7 +578,7 @@ int window_manager_find_rank_of_window_in_list(uint32_t wid, uint32_t *window_li
     return INT_MAX;
 }
 
-struct window *window_manager_find_window_on_space_by_rank(struct window_manager *wm, uint64_t sid, int rank)
+struct window *window_manager_find_window_on_space_by_rank_filtering_window(struct window_manager *wm, uint64_t sid, int rank, uint32_t filter_wid)
 {
     int count;
     uint32_t *window_list = space_window_list(sid, &count, false);
@@ -586,6 +586,8 @@ struct window *window_manager_find_window_on_space_by_rank(struct window_manager
 
     struct window *result = NULL;
     for (int i = 0, j = 0; i < count; ++i) {
+        if (window_list[i] == filter_wid) continue;
+
         struct window *window = window_manager_find_window(wm, window_list[i]);
         if (!window) continue;
 
@@ -1219,7 +1221,7 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
             window_manager_add_managed_window(wm, a, b_view);
 
             if (wm->focused_window_id == a->id) {
-                struct window *next = window_manager_find_window_on_space_by_rank(wm, a_view->sid, 2);
+                struct window *next = window_manager_find_window_on_space_by_rank_filtering_window(wm, a_view->sid, 2, 0);
                 if (next) {
                     window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
                 } else {
@@ -1334,7 +1336,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
     }
 
     if ((space_is_visible(src_sid) && (moved_by_rule || wm->focused_window_id == window->id))) {
-        struct window *next = window_manager_find_window_on_space_by_rank(wm, src_sid, 2);
+        struct window *next = window_manager_find_window_on_space_by_rank_filtering_window(wm, src_sid, 1, window->id);
         if (next) {
             window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
         } else {

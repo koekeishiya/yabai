@@ -125,14 +125,6 @@ void space_manager_mark_view_invalid(struct space_manager *sm,  uint64_t sid)
     view->is_valid = false;
 }
 
-void space_manager_mark_view_dirty(struct space_manager *sm,  uint64_t sid)
-{
-    struct view *view = space_manager_find_view(sm, sid);
-    if (view->layout == VIEW_FLOAT) return;
-
-    view->is_dirty = true;
-}
-
 void space_manager_untile_window(struct space_manager *sm, struct view *view, struct window *window)
 {
     if (view->layout == VIEW_FLOAT) return;

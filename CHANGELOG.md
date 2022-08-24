@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Fixed an issue that in rare occasions caused yabai to freeze when focusing an inactve space on an inactive display [#1309](https://github.com/koekeishiya/yabai/issues/1309).
+- Fixed an issue that caused a window to incorrectly become focused when assigned to a space through rules [#1370](https://github.com/koekeishiya/yabai/issues/1370)
 
 ## [4.0.1] - 2022-05-17
 ### Changed

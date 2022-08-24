@@ -319,7 +319,7 @@ out:;
 
 void display_manager_focus_display(uint32_t did, uint64_t sid)
 {
-    struct window *window = window_manager_find_window_on_space_by_rank(&g_window_manager, sid, 1);
+    struct window *window = window_manager_find_window_on_space_by_rank_filtering_window(&g_window_manager, sid, 1, 0);
     if (window) {
         window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
     } else {
