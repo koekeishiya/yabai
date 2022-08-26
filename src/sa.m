@@ -193,10 +193,11 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
     int sockfd;
     bool result = false;
     char rsp[BUFSIZ] = {};
+    char bytes[0x100] = { 0x01, 0x0C };
 
     if (socket_open(&sockfd)) {
         if (socket_connect(sockfd, g_sa_socket_file)) {
-            if (send(sockfd, "handshake", 9, 0) != -1) {
+            if (send(sockfd, bytes, 2, 0) != -1) {
                 int length = recv(sockfd, rsp, sizeof(rsp)-1, 0);
                 if (length <= 0) goto out;
 
@@ -221,7 +222,7 @@ out:
 static int scripting_addition_perform_validation(bool loaded)
 {
     uint32_t attrib = 0;
-    char version[MAXLEN] = {};
+    char version[0x100] = {};
 
     if (!scripting_addition_request_handshake(version, &attrib)) {
         notify("scripting-addition", "connection failed!");
@@ -564,134 +565,145 @@ static bool scripting_addition_send_bytes(char *bytes, int length)
 
 bool scripting_addition_focus_space(uint64_t sid)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x01;
+    char length = 2;
     pack(bytes, sid, length);
+    bytes[1] = 0x01;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_create_space(uint64_t sid)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x02;
+    char length = 2;
     pack(bytes, sid, length);
+    bytes[1] = 0x02;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_destroy_space(uint64_t sid)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x03;
+    char length = 2;
     pack(bytes, sid, length);
+    bytes[1] = 0x03;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x04;
+    char length = 2;
     pack(bytes, src_sid, length);
     pack(bytes, dst_sid, length);
     pack(bytes, focus, length);
+    bytes[1] = 0x04;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_move_window(uint32_t wid, int x, int y)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x05;
+    char length = 2;
     pack(bytes, wid, length);
     pack(bytes, x, length);
     pack(bytes, y, length);
+    bytes[1] = 0x05;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x06;
+    char length = 2;
     pack(bytes, wid, length);
     pack(bytes, opacity, length);
     pack(bytes, duration, length);
+    bytes[1] = 0x06;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_set_layer(uint32_t wid, int layer)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x07;
+    char length = 2;
     pack(bytes, wid, length);
     pack(bytes, layer, length);
+    bytes[1] = 0x07;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_set_sticky(uint32_t wid, bool sticky)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x08;
+    char length = 2;
     pack(bytes, wid, length);
     pack(bytes, sticky, length);
+    bytes[1] = 0x08;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_set_shadow(uint32_t wid, bool shadow)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x09;
+    char length = 2;
     pack(bytes, wid, length);
     pack(bytes, shadow, length);
+    bytes[1] = 0x09;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_focus_window(uint32_t wid)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x0A;
+    char length = 2;
     pack(bytes, wid, length);
+    bytes[1] = 0x0A;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }
 
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h)
 {
-    char bytes[MAXLEN];
+    char bytes[0x100];
 
-    int length = 0;
-    bytes[length++] = 0x0B;
+    char length = 2;
     pack(bytes, wid, length);
     pack(bytes, x, length);
     pack(bytes, y, length);
     pack(bytes, w, length);
     pack(bytes, h, length);
+    bytes[1] = 0x0B;
+    bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
 }

@@ -38,7 +38,6 @@
 
 #define SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 
-#define MAXLEN 512
 #define kCGSOnAllWorkspacesTagBit (1 << 11)
 #define kCGSNoShadowTagBit (1 << 3)
 
@@ -748,13 +747,22 @@ static void handle_message(int sockfd, char *message)
     }
 }
 
-static inline bool read_message(int sockfd, char *message, size_t length)
+static inline bool read_message(int sockfd, char *message)
 {
-    int len = recv(sockfd, message, length, 0);
-    if (len <= 0) return false;
+    int bytes_read    = 0;
+    int bytes_to_read = 0;
 
-    message[len] = '\0';
-    return true;
+    if (read(sockfd, &bytes_to_read, sizeof(char)) == sizeof(char)) {
+        do {
+            int cur_read = read(sockfd, message+bytes_read, bytes_to_read-bytes_read);
+            if (cur_read <= 0) break;
+
+            bytes_read += cur_read;
+        } while (bytes_read < bytes_to_read);
+        return bytes_read == bytes_to_read;
+    }
+
+    return false;
 }
 
 static void *handle_connection(void *unused)
@@ -763,8 +771,8 @@ static void *handle_connection(void *unused)
         int sockfd = accept(daemon_sockfd, NULL, 0);
         if (sockfd == -1) continue;
 
-        char message[MAXLEN];
-        if (read_message(sockfd, message, sizeof(message))) {
+        char message[0x100];
+        if (read_message(sockfd, message)) {
             handle_message(sockfd, message);
         }
 
