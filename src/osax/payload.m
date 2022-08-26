@@ -424,10 +424,8 @@ static void do_space_move(char *message)
 {
     if (dock_spaces == nil || dp_desktop_picture_manager == nil || move_space_fp == 0) return;
 
-    uint64_t source_space_id;
+    uint64_t source_space_id, dest_space_id;
     unpack(message, source_space_id);
-
-    uint64_t dest_space_id;
     unpack(message, dest_space_id);
 
     bool focus_dest_space;
@@ -583,10 +581,8 @@ static void do_window_move(char *message)
     unpack(message, wid);
     if (!wid) return;
 
-    int x;
+    int x, y;
     unpack(message, x);
-
-    int y;
     unpack(message, y);
 
     CGPoint point = CGPointMake(x, y);
@@ -615,10 +611,8 @@ static void do_window_opacity_fade(char *message)
     unpack(message, wid);
     if (!wid) return;
 
-    float alpha;
+    float alpha, duration;
     unpack(message, alpha);
-
-    float duration;
     unpack(message, duration);
 
     CGSSetWindowListAlpha(_connection, &wid, 1, alpha, duration);
