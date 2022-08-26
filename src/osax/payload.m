@@ -34,9 +34,11 @@
 
 #define page_align(addr) (vm_address_t)((uintptr_t)(addr) & (~(vm_page_size - 1)))
 
+#define unpack(b,v) memcpy(&v, b, sizeof(v)); b += sizeof(v)
+
 #define SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 
-#define BUF_SIZE 256
+#define MAXLEN 512
 #define kCGSOnAllWorkspacesTagBit (1 << 11)
 #define kCGSNoShadowTagBit (1 << 3)
 
@@ -354,82 +356,6 @@ static void init_instances()
     _connection = CGSMainConnectionID();
 }
 
-typedef struct
-{
-    const char *text;
-    unsigned int length;
-} Token;
-
-static bool token_equals(Token token, const char *match)
-{
-    const char *at = match;
-    for (int i = 0; i < token.length; ++i, ++at) {
-        if ((*at == 0) || (token.text[i] != *at)) {
-            return false;
-        }
-    }
-    return *at == 0;
-}
-
-static uint64_t token_to_uint64t(Token token)
-{
-    uint64_t result = 0;
-    char buffer[token.length + 1];
-    memcpy(buffer, token.text, token.length);
-    buffer[token.length] = '\0';
-    sscanf(buffer, "%lld", &result);
-    return result;
-}
-
-static uint32_t token_to_uint32t(Token token)
-{
-    uint32_t result = 0;
-    char buffer[token.length + 1];
-    memcpy(buffer, token.text, token.length);
-    buffer[token.length] = '\0';
-    sscanf(buffer, "%d", &result);
-    return result;
-}
-
-static int token_to_int(Token token)
-{
-    int result = 0;
-    char buffer[token.length + 1];
-    memcpy(buffer, token.text, token.length);
-    buffer[token.length] = '\0';
-    sscanf(buffer, "%d", &result);
-    return result;
-}
-
-static float token_to_float(Token token)
-{
-    float result = 0.0f;
-    char buffer[token.length + 1];
-    memcpy(buffer, token.text, token.length);
-    buffer[token.length] = '\0';
-    sscanf(buffer, "%f", &result);
-    return result;
-}
-
-static Token get_token(const char **message)
-{
-    Token token;
-
-    token.text = *message;
-    while (**message && !isspace(**message)) {
-        ++(*message);
-    }
-    token.length = *message - token.text;
-
-    if (isspace(**message)) {
-        ++(*message);
-    } else {
-        // NOTE(koekeishiya): don't go past the null-terminator
-    }
-
-    return token;
-}
-
 static inline id get_ivar_value(id instance, const char *name)
 {
     id result = nil;
@@ -494,18 +420,18 @@ static inline id display_space_for_space_with_id(uint64_t space_id)
     return nil;
 }
 
-static void do_space_move(const char *message)
+static void do_space_move(char *message)
 {
     if (dock_spaces == nil || dp_desktop_picture_manager == nil || move_space_fp == 0) return;
 
-    Token source_token = get_token(&message);
-    uint64_t source_space_id = token_to_uint64t(source_token);
+    uint64_t source_space_id;
+    unpack(message, source_space_id);
 
-    Token dest_token = get_token(&message);
-    uint64_t dest_space_id = token_to_uint64t(dest_token);
+    uint64_t dest_space_id;
+    unpack(message, dest_space_id);
 
-    Token focus_token = get_token(&message);
-    bool focus_dest_space = token_to_int(focus_token);
+    bool focus_dest_space;
+    unpack(message, focus_dest_space);
 
     CFStringRef source_display_uuid = CGSCopyManagedDisplayForSpace(_connection, source_space_id);
     id source_space = space_for_display_with_id(source_display_uuid, source_space_id);
@@ -539,12 +465,13 @@ static void do_space_move(const char *message)
 }
 
 typedef void (*remove_space_call)(id space, id display_space, id dock_spaces, uint64_t space_id1, uint64_t space_id2);
-static void do_space_destroy(const char *message)
+static void do_space_destroy(char *message)
 {
     if (dock_spaces == nil || remove_space_fp == 0) return;
 
-    Token space_id_token = get_token(&message);
-    uint64_t space_id = token_to_uint64t(space_id_token);
+    uint64_t space_id;
+    unpack(message, space_id);
+
     CFStringRef display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
     uint64_t active_space_id = CGSManagedDisplayGetCurrentSpace(_connection, display_uuid);
 
@@ -564,12 +491,13 @@ static void do_space_destroy(const char *message)
     CFRelease(display_uuid);
 }
 
-static void do_space_create(const char *message)
+static void do_space_create(char *message)
 {
     if (dock_spaces == nil || add_space_fp == 0) return;
 
-    Token space_id_token = get_token(&message);
-    uint64_t space_id = token_to_uint64t(space_id_token);
+    uint64_t space_id;
+    unpack(message, space_id);
+
     CFStringRef __block display_uuid = CGSCopyManagedDisplayForSpace(_connection, space_id);
     dispatch_sync(dispatch_get_main_queue(), ^{
         id new_space = [[managed_space alloc] init];
@@ -579,12 +507,13 @@ static void do_space_create(const char *message)
     });
 }
 
-static void do_space_change(const char *message)
+static void do_space_focus(char *message)
 {
     if (dock_spaces == nil) return;
 
-    Token token = get_token(&message);
-    uint64_t dest_space_id = token_to_uint64t(token);
+    uint64_t dest_space_id;
+    unpack(message, dest_space_id);
+
     if (dest_space_id) {
         CFStringRef dest_display = CGSCopyManagedDisplayForSpace(_connection, dest_space_id);
         id source_space = ((id (*)(id, SEL, CFStringRef)) objc_msgSend)(dock_spaces, @selector(currentSpaceforDisplayUUID:), dest_display);
@@ -611,10 +540,10 @@ static void do_space_change(const char *message)
     }
 }
 
-static void do_window_scale(const char *message)
+static void do_window_scale(char *message)
 {
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
     if (!wid) return;
 
     CGRect frame = {};
@@ -625,14 +554,11 @@ static void do_window_scale(const char *message)
     CGSGetWindowTransform(_connection, wid, &current_transform);
 
     if (CGAffineTransformEqualToTransform(current_transform, original_transform)) {
-        Token dx_token = get_token(&message);
-        float dx = token_to_float(dx_token);
-        Token dy_token = get_token(&message);
-        float dy = token_to_float(dy_token);
-        Token dw_token = get_token(&message);
-        float dw = token_to_float(dw_token);
-        Token dh_token = get_token(&message);
-        float dh = token_to_float(dh_token);
+        float dx, dy, dw, dh;
+        unpack(message, dx);
+        unpack(message, dy);
+        unpack(message, dw);
+        unpack(message, dh);
 
         int target_width  = dw / 4;
         int target_height = target_width / (frame.size.width/frame.size.height);
@@ -651,17 +577,17 @@ static void do_window_scale(const char *message)
     }
 }
 
-static void do_window_move(const char *message)
+static void do_window_move(char *message)
 {
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
     if (!wid) return;
 
-    Token x_token = get_token(&message);
-    int x = token_to_int(x_token);
+    int x;
+    unpack(message, x);
 
-    Token y_token = get_token(&message);
-    int y = token_to_int(y_token);
+    int y;
+    unpack(message, y);
 
     CGPoint point = CGPointMake(x, y);
     CGSMoveWindowWithGroup(_connection, wid, &point);
@@ -671,49 +597,54 @@ static void do_window_move(const char *message)
     [window_list release];
 }
 
-static void do_window_alpha(const char *message)
+static void do_window_opacity(char *message)
 {
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
     if (!wid) return;
 
-    Token alpha_token = get_token(&message);
-    float alpha = token_to_float(alpha_token);
+    float alpha;
+    unpack(message, alpha);
+
     CGSSetWindowAlpha(_connection, wid, alpha);
 }
 
-static void do_window_alpha_fade(const char *message)
+static void do_window_opacity_fade(char *message)
 {
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
     if (!wid) return;
 
-    Token alpha_token = get_token(&message);
-    float alpha = token_to_float(alpha_token);
-    Token duration_token = get_token(&message);
-    float duration = token_to_float(duration_token);
+    float alpha;
+    unpack(message, alpha);
+
+    float duration;
+    unpack(message, duration);
+
     CGSSetWindowListAlpha(_connection, &wid, 1, alpha, duration);
 }
 
-static void do_window_level(const char *message)
+static void do_window_layer(char *message)
 {
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
     if (!wid) return;
 
-    Token key_token = get_token(&message);
-    int key = token_to_int(key_token);
-    CGSSetWindowLevelForGroup(_connection, wid, CGWindowLevelForKey(key));
+    int layer;
+    unpack(message, layer);
+
+    CGSSetWindowLevelForGroup(_connection, wid, CGWindowLevelForKey(layer));
 }
 
-static void do_window_sticky(const char *message)
+static void do_window_sticky(char *message)
 {
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
     if (!wid) return;
 
-    Token value_token = get_token(&message);
-    int value = token_to_int(value_token);
+    int value;
+    unpack(message, value);
+
     int tags[2] = { kCGSOnAllWorkspacesTagBit, 0 };
     if (value == 1) {
         CGSSetWindowTags(_connection, wid, tags, 32);
@@ -723,30 +654,31 @@ static void do_window_sticky(const char *message)
 }
 
 typedef void (*focus_window_call)(ProcessSerialNumber psn, uint32_t wid);
-static void do_window_focus(const char *message)
+static void do_window_focus(char *message)
 {
     if (set_front_window_fp == 0) return;
 
     int window_connection;
     ProcessSerialNumber window_psn;
 
-    Token wid_token = get_token(&message);
-    uint32_t window_id = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
 
-    CGSGetWindowOwner(_connection, window_id, &window_connection);
+    CGSGetWindowOwner(_connection, wid, &window_connection);
     CGSGetConnectionPSN(window_connection, &window_psn);
 
-    ((focus_window_call) set_front_window_fp)(window_psn, window_id);
+    ((focus_window_call) set_front_window_fp)(window_psn, wid);
 }
 
-static void do_window_shadow(const char *message)
+static void do_window_shadow(char *message)
 {
-    Token wid_token = get_token(&message);
-    uint32_t wid = token_to_uint32t(wid_token);
+    uint32_t wid;
+    unpack(message, wid);
     if (!wid) return;
 
-    Token value_token = get_token(&message);
-    int value = token_to_int(value_token);
+    int value;
+    unpack(message, value);
+
     int tags[2] = { kCGSNoShadowTagBit,  0};
     if (value == 1) {
         CGSClearWindowTags(_connection, wid, tags, 32);
@@ -779,35 +711,46 @@ static void do_handshake(int sockfd)
     send(sockfd, bytes, bytes_length+1, 0);
 }
 
-static void handle_message(int sockfd, const char *message)
+static void handle_message(int sockfd, char *message)
 {
-    Token token = get_token(&message);
-    if (token_equals(token, "handshake")) {
-        do_handshake(sockfd);
-    } else if (token_equals(token, "space")) {
-        do_space_change(message);
-    } else if (token_equals(token, "space_create")) {
+    char op_code = *message++;
+    switch (op_code) {
+    case 0x01: {
+        do_space_focus(message);
+    } break;
+    case 0x02: {
         do_space_create(message);
-    } else if (token_equals(token, "space_destroy")) {
+    } break;
+    case 0x03: {
         do_space_destroy(message);
-    } else if (token_equals(token, "space_move")) {
+    } break;
+    case 0x04: {
         do_space_move(message);
-    } else if (token_equals(token, "window_scale")) {
-        do_window_scale(message);
-    } else if (token_equals(token, "window_move")) {
+    } break;
+    case 0x05: {
         do_window_move(message);
-    } else if (token_equals(token, "window_alpha")) {
-        do_window_alpha(message);
-    } else if (token_equals(token, "window_alpha_fade")) {
-        do_window_alpha_fade(message);
-    } else if (token_equals(token, "window_level")) {
-        do_window_level(message);
-    } else if (token_equals(token, "window_sticky")) {
+    } break;
+    case 0x06: {
+        do_window_opacity_fade(message);
+    } break;
+    case 0x07: {
+        do_window_layer(message);
+    } break;
+    case 0x08: {
         do_window_sticky(message);
-    } else if (token_equals(token, "window_focus")) {
-        do_window_focus(message);
-    } else if (token_equals(token, "window_shadow")) {
+    } break;
+    case 0x09: {
         do_window_shadow(message);
+    } break;
+    case 0x0A: {
+        do_window_focus(message);
+    } break;
+    case 0x0B: {
+        do_window_scale(message);
+    } break;
+    case 0x0C: {
+        do_handshake(sockfd);
+    } break;
     }
 }
 
@@ -826,7 +769,7 @@ static void *handle_connection(void *unused)
         int sockfd = accept(daemon_sockfd, NULL, 0);
         if (sockfd == -1) continue;
 
-        char message[BUF_SIZE];
+        char message[MAXLEN];
         if (read_message(sockfd, message, sizeof(message))) {
             handle_message(sockfd, message);
         }
