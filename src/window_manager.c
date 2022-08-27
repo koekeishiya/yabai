@@ -1684,7 +1684,6 @@ void window_manager_correct_for_mission_control_changes(struct space_manager *sm
         for (int j = 0; j < space_count; ++j) {
             if (space_list[j] == sid) {
                 window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sid);
-                space_manager_refresh_view(sm, sid);
             } else {
                 space_manager_mark_view_invalid(sm, space_list[j]);
             }
