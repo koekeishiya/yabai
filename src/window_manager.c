@@ -1,4 +1,5 @@
 extern struct event_loop g_event_loop;
+extern struct event_tap g_event_tap;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;
 
@@ -157,6 +158,19 @@ void window_manager_apply_rules_to_window(struct space_manager *sm, struct windo
     for (int i = 0; i < buf_len(wm->rules); ++i) {
         window_manager_apply_rule_to_window(sm, wm, window, &wm->rules[i]);
     }
+}
+
+void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode)
+{
+    event_tap_end(&g_event_tap);
+
+    if (mode == FFM_DISABLED) {
+        event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+    } else {
+        event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE_FFM, mouse_handler);
+    }
+
+    wm->ffm_mode = mode;
 }
 
 void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled)

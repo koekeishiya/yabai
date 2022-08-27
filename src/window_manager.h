@@ -155,6 +155,7 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
 void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool enabled);
 bool window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
+void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode);
 void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled);
 void window_manager_set_window_border_width(struct window_manager *wm, int width);
 void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);

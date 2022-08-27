@@ -995,11 +995,11 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             if (!token_is_valid(value)) {
                 fprintf(rsp, "%s\n", ffm_mode_str[g_window_manager.ffm_mode]);
             } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                g_window_manager.ffm_mode = FFM_DISABLED;
+                window_manager_set_focus_follows_mouse(&g_window_manager, FFM_DISABLED);
             } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTOFOCUS)) {
-                g_window_manager.ffm_mode = FFM_AUTOFOCUS;
+                window_manager_set_focus_follows_mouse(&g_window_manager, FFM_AUTOFOCUS);
             } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTORAISE)) {
-                g_window_manager.ffm_mode = FFM_AUTORAISE;
+                window_manager_set_focus_follows_mouse(&g_window_manager, FFM_AUTORAISE);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

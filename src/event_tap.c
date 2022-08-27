@@ -41,15 +41,18 @@ static EVENT_TAP_CALLBACK(mouse_handler)
 }
 #pragma clang diagnostic pop
 
-bool event_tap_enabled(struct event_tap *event_tap)
-{
-    return event_tap->handle && CGEventTapIsEnabled(event_tap->handle);
-}
-
 bool event_tap_begin(struct event_tap *event_tap, uint32_t mask, event_tap_callback *callback)
 {
+    if (event_tap->handle) return true;
+
     event_tap->handle = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, callback, event_tap);
-    if (!event_tap_enabled(event_tap)) return false;
+    if (!event_tap->handle) return false;
+
+    if (!CGEventTapIsEnabled(event_tap->handle)) {
+        CFMachPortInvalidate(event_tap->handle);
+        CFRelease(event_tap->handle);
+        return false;
+    }
 
     event_tap->runloop_source = CFMachPortCreateRunLoopSource(NULL, event_tap->handle, 0);
     CFRunLoopAddSource(CFRunLoopGetMain(), event_tap->runloop_source, kCFRunLoopCommonModes);
@@ -59,6 +62,8 @@ bool event_tap_begin(struct event_tap *event_tap, uint32_t mask, event_tap_callb
 
 void event_tap_end(struct event_tap *event_tap)
 {
+    if (!event_tap->handle) return;
+
     CGEventTapEnable(event_tap->handle, false);
     CFMachPortInvalidate(event_tap->handle);
     CFRunLoopRemoveSource(CFRunLoopGetMain(), event_tap->runloop_source, kCFRunLoopCommonModes);
