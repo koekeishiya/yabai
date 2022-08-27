@@ -387,27 +387,16 @@ bool space_manager_balance_space(struct space_manager *sm, uint64_t sid, uint32_
 
 struct view *space_manager_tile_window_on_space_with_insertion_point(struct space_manager *sm, struct window *window, uint64_t sid, uint32_t insertion_point)
 {
-    uint32_t prev_insertion_point;
-
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout == VIEW_FLOAT) return view;
 
-    if (view->layout == VIEW_BSP && insertion_point) {
-        prev_insertion_point = view->insertion_point;
-        view->insertion_point = insertion_point;
-    }
-
-    struct window_node *node = view_add_window_node(view, window);
+    struct window_node *node = view_add_window_node_with_insertion_point(view, window, insertion_point);
     assert(node);
 
     if (space_is_visible(view->sid)) {
         window_node_flush(node);
     } else {
         view->is_dirty = true;
-    }
-
-    if (view->layout == VIEW_BSP && insertion_point) {
-        view->insertion_point = prev_insertion_point;
     }
 
     return view;

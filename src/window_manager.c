@@ -1606,10 +1606,9 @@ void window_manager_toggle_window_border(struct window_manager *wm, struct windo
     }
 }
 
-static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid, uint32_t *window_list, int window_count)
+static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
 {
     int view_window_count;
-    struct view *view = space_manager_find_view(sm, sid);
     uint32_t *view_window_list = view_find_window_list(view, &view_window_count);
 
     for (int i = 0; i < view_window_count; ++i) {
@@ -1633,11 +1632,9 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
             view->is_dirty = true;
         }
     }
-
-    if (view_is_dirty(view)) view_flush(view);
 }
 
-static void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid, uint32_t *window_list, int window_count)
+static void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
 {
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(wm, window_list[i]);
@@ -1646,25 +1643,31 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
         if (window->application->is_hidden) continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
-        if (existing_view && existing_view->layout != VIEW_FLOAT && existing_view->sid != sid) {
+        if (existing_view && existing_view->layout != VIEW_FLOAT && existing_view != view) {
             space_manager_untile_window(sm, existing_view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
 
-        if (!existing_view || (existing_view->layout != VIEW_FLOAT && existing_view->sid != sid)) {
-            struct view *view = space_manager_tile_window_on_space(sm, window, sid);
+        if (!existing_view || (existing_view->layout != VIEW_FLOAT && existing_view != view)) {
+            view_add_window_node(view, window);
             window_manager_add_managed_window(wm, window, view);
+            view->is_dirty = true;
         }
     }
 }
 
 void window_manager_validate_and_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid)
 {
+    struct view *view = space_manager_find_view(sm, sid);
+    if (view->layout == VIEW_FLOAT) return;
+
     int window_count = 0;
     uint32_t *window_list = space_window_list(sid, &window_count, false);
-    window_manager_validate_windows_on_space(sm, wm, sid, window_list, window_count);
-    window_manager_check_for_windows_on_space(sm, wm, sid, window_list, window_count);
+    window_manager_validate_windows_on_space(sm, wm, view, window_list, window_count);
+    window_manager_check_for_windows_on_space(sm, wm, view, window_list, window_count);
+
+    if (view_is_dirty(view)) view_flush(view);
 }
 
 void window_manager_correct_for_mission_control_changes(struct space_manager *sm, struct window_manager *wm)
@@ -1702,7 +1705,10 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
             int window_count;
             uint32_t *window_list = space_window_list(space_list[i], &window_count, false);
             if (window_list) {
-                window_manager_check_for_windows_on_space(sm, wm, space_list[i], window_list, window_count);
+                struct view *view = space_manager_find_view(sm, space_list[i]);
+                if (view->layout != VIEW_FLOAT) {
+                    window_manager_check_for_windows_on_space(sm, wm, view, window_list, window_count);
+                }
             }
             break;
         }

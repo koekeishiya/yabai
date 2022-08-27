@@ -672,7 +672,7 @@ void view_stack_window_node(struct view *view, struct window_node *node, struct 
     ++node->window_count;
 }
 
-struct window_node *view_add_window_node(struct view *view, struct window *window)
+struct window_node *view_add_window_node_with_insertion_point(struct view *view, struct window *window, uint32_t insertion_point)
 {
     if (!window_node_is_occupied(view->root) &&
         window_node_is_leaf(view->root)) {
@@ -681,11 +681,17 @@ struct window_node *view_add_window_node(struct view *view, struct window *windo
         view->root->window_count = 1;
         return view->root;
     } else if (view->layout == VIEW_BSP) {
+        uint32_t prev_insertion_point = 0;
         struct window_node *leaf = NULL;
+
+        if (insertion_point) {
+            prev_insertion_point = view->insertion_point;
+            view->insertion_point = insertion_point;
+        }
 
         if (view->insertion_point) {
             leaf = view_find_window_node(view, view->insertion_point);
-            view->insertion_point = 0;
+            view->insertion_point = prev_insertion_point;
 
             if (leaf) {
                 bool do_stack = leaf->insert_dir == STACK;
@@ -718,6 +724,11 @@ struct window_node *view_add_window_node(struct view *view, struct window *windo
     }
 
     return NULL;
+}
+
+struct window_node *view_add_window_node(struct view *view, struct window *window)
+{
+    return view_add_window_node_with_insertion_point(view, window, 0);
 }
 
 uint32_t *view_find_window_list(struct view *view, int *window_count)
