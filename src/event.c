@@ -179,13 +179,30 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
     int window_count;
     struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
 
+    int view_count = 0;
+    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
-            space_manager_untile_window(&g_space_manager, view, window);
+
+            //
+            // @cleanup
+            //
+            // :AXBatching
+            //
+            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+            //
+
+            view_remove_window_node(view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
+
+            view->is_dirty = true;
+            view_list[view_count++] = view;
         }
 
         if (g_mouse_state.window == window) g_mouse_state.window = NULL;
@@ -198,6 +215,20 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
 
     application_unobserve(application);
     application_destroy(application);
+
+    //
+    // @cleanup
+    //
+    // :AXBatching
+    //
+    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+    //
+
+    for (int i = 0; i < view_count; ++i) {
+        struct view *view = view_list[i];
+        if (view_is_dirty(view)) view_flush(view);
+    }
 
 out:
     process_destroy(process);
