@@ -10,7 +10,7 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     case kCGEventTapDisabledByTimeout:
     case kCGEventTapDisabledByUserInput: {
         struct event_tap *event_tap = (struct event_tap *) reference;
-        CGEventTapEnable(event_tap->handle, true);
+        if (event_tap->handle) CGEventTapEnable(event_tap->handle, true);
     } break;
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {

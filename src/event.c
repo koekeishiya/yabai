@@ -89,11 +89,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     window_manager_add_application(&g_window_manager, application);
-    window_manager_add_application_windows(&g_space_manager, &g_window_manager, application, -1);
     event_signal_push(SIGNAL_APPLICATION_LAUNCHED, application);
 
     int window_count;
-    struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
+    struct window **window_list = window_manager_add_application_windows(&g_space_manager, &g_window_manager, application, &window_count);
     uint32_t prev_window_id = g_window_manager.focused_window_id;
 
     uint64_t sid;
@@ -107,6 +106,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         }
     }
 
+    int view_count = 0;
+    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
         if (window_check_flag(window, WINDOW_MINIMIZE)) goto next;
@@ -117,14 +119,44 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
         if (window_manager_should_manage_window(window)) {
             if (default_origin) sid = window_space(window);
 
-            struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, sid, prev_window_id);
+            struct view *view = space_manager_find_view(&g_space_manager, sid);
+            if (view->layout == VIEW_FLOAT) goto next;
+
+            //
+            // @cleanup
+            //
+            // :AXBatching
+            //
+            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+            //
+
+            view_add_window_node_with_insertion_point(view, window, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
+
+            view->is_dirty = true;
+            view_list[view_count++] = view;
 
             prev_window_id = window->id;
         }
 
 next:
         event_signal_push(SIGNAL_WINDOW_CREATED, window);
+    }
+
+    //
+    // @cleanup
+    //
+    // :AXBatching
+    //
+    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+    //
+
+    for (int i = 0; i < view_count; ++i) {
+        struct view *view = view_list[i];
+        if (view_is_dirty(view)) view_flush(view);
     }
 
     return EVENT_SUCCESS;
@@ -263,6 +295,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
     struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
     uint32_t prev_window_id = g_window_manager.last_window_id;
 
+    int view_count = 0;
+    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
         if (window_check_flag(window, WINDOW_MINIMIZE)) continue;
@@ -273,10 +308,41 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
         if (view) continue;
 
         if (window_manager_should_manage_window(window)) {
-            struct view *view = space_manager_tile_window_on_space_with_insertion_point(&g_space_manager, window, window_space(window), prev_window_id);
+            struct view *view = space_manager_find_view(&g_space_manager, window_space(window));
+            if (view->layout == VIEW_FLOAT) continue;
+
+            //
+            // @cleanup
+            //
+            // :AXBatching
+            //
+            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+            //
+
+            view_add_window_node_with_insertion_point(view, window, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
+
+            view->is_dirty = true;
+            view_list[view_count++] = view;
+
             prev_window_id = window->id;
         }
+    }
+
+    //
+    // @cleanup
+    //
+    // :AXBatching
+    //
+    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+    //
+
+    for (int i = 0; i < view_count; ++i) {
+        struct view *view = view_list[i];
+        if (view_is_dirty(view)) view_flush(view);
     }
 
     event_signal_push(SIGNAL_APPLICATION_VISIBLE, application);
@@ -294,6 +360,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
     int window_count;
     struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
 
+    int view_count = 0;
+    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
 
@@ -301,10 +370,38 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
-            space_manager_untile_window(&g_space_manager, view, window);
+
+            //
+            // @cleanup
+            //
+            // :AXBatching
+            //
+            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+            //
+
+            view_remove_window_node(view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
             window_manager_purify_window(&g_window_manager, window);
+
+            view->is_dirty = true;
+            view_list[view_count++] = view;
         }
+    }
+
+    //
+    // @cleanup
+    //
+    // :AXBatching
+    //
+    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+    //
+
+    for (int i = 0; i < view_count; ++i) {
+        struct view *view = view_list[i];
+        if (view_is_dirty(view)) view_flush(view);
     }
 
     event_signal_push(SIGNAL_APPLICATION_HIDDEN, application);

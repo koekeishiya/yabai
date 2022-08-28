@@ -436,9 +436,26 @@ void window_manager_resize_window(struct window *window, float width, float heig
 
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height)
 {
+    //
+    // :AXBatching
+    //
+    // NOTE(koekeishiya): Prevent unnecessary calls to the AX API to avoid sluggishness.
+    // We are comparing the target dimensions with the frame that was previously cached
+    // in our event-handlers for both the window move and resize-notifications.
+    //
+
+    bool should_move   = !(window->frame.origin.x   == x     && window->frame.origin.y    == y);
+    bool should_resize = !(window->frame.size.width == width && window->frame.size.height == height);
+    if (!should_move && !should_resize) return;
+
     AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
-        window_manager_move_window(window, x, y);
-        window_manager_resize_window(window, width, height);
+        if (should_move) {
+            window_manager_move_window(window, x, y);
+        }
+
+        if (should_resize) {
+            window_manager_resize_window(window, width, height);
+        }
     });
 }
 
@@ -1043,7 +1060,27 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     return window;
 }
 
-static uint32_t *window_manager_application_window_list(struct application *application, int *window_count)
+struct window **window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int *count)
+{
+    *count = 0;
+    CFArrayRef window_list = application_window_list(application);
+    if (!window_list) return NULL;
+
+    int window_count = CFArrayGetCount(window_list);
+    struct window **list = ts_alloc_aligned(sizeof(struct window *), window_count);
+
+    for (int i = 0; i < window_count; ++i) {
+        AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list, i);
+        uint32_t window_id = ax_window_id(window_ref);
+        if (!window_id || window_manager_find_window(wm, window_id)) continue;
+        list[(*count)++] = window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
+    }
+
+    CFRelease(window_list);
+    return list;
+}
+
+static uint32_t *window_manager_existing_application_window_list(struct application *application, int *window_count)
 {
     int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
@@ -1070,23 +1107,42 @@ static uint32_t *window_manager_application_window_list(struct application *appl
     return space_list ? space_window_list_for_connection(space_list, space_count, application->connection, window_count, true) : NULL;
 }
 
-void window_manager_add_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
+void window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
 {
     int global_window_count;
-    uint32_t *global_window_list = window_manager_application_window_list(application, &global_window_count);
+    uint32_t *global_window_list = window_manager_existing_application_window_list(application, &global_window_count);
     if (!global_window_list) return;
+
 
     CFArrayRef window_list_ref = application_window_list(application);
     int window_count = window_list_ref ? CFArrayGetCount(window_list_ref) : 0;
 
+    int empty_count = 0;
     for (int i = 0; i < window_count; ++i) {
         AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list_ref, i);
         uint32_t window_id = ax_window_id(window_ref);
-        if (!window_id || window_manager_find_window(wm, window_id)) continue;
-        window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
+
+        //
+        // @cleanup
+        //
+        // :Workaround
+        //
+        // NOTE(koekeishiya): The AX API appears to always include a single element for Finder that returns an empty window id.
+        // This is likely the desktop window. Other similar cases should be handled the same way; simply ignore the window when
+        // we attempt to do an equality check to see if we have correctly discovered the number of windows to track.
+        //
+
+        if (!window_id) {
+            ++empty_count;
+            continue;
+        }
+
+        if (!window_manager_find_window(wm, window_id)) {
+            window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
+        }
     }
 
-    if (global_window_count == window_count) {
+    if (global_window_count == window_count-empty_count) {
         if (refresh_index != -1) {
             debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
             buf_del(g_window_manager.applications_to_refresh, refresh_index);
@@ -1625,6 +1681,16 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
             struct window *window = window_manager_find_window(wm, view_window_list[i]);
             if (!window) continue;
 
+            //
+            // @cleanup
+            //
+            // :AXBatching
+            //
+            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+            //
+
             view_remove_window_node(view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
@@ -1650,6 +1716,17 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
         }
 
         if (!existing_view || (existing_view->layout != VIEW_FLOAT && existing_view != view)) {
+
+            //
+            // @cleanup
+            //
+            // :AXBatching
+            //
+            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+            //
+
             view_add_window_node(view, window);
             window_manager_add_managed_window(wm, window, view);
             view->is_dirty = true;
@@ -1666,6 +1743,15 @@ void window_manager_validate_and_check_for_windows_on_space(struct space_manager
     uint32_t *window_list = space_window_list(sid, &window_count, false);
     window_manager_validate_windows_on_space(sm, wm, view, window_list, window_count);
     window_manager_check_for_windows_on_space(sm, wm, view, window_list, window_count);
+
+    //
+    // @cleanup
+    //
+    // :AXBatching
+    //
+    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+    //
 
     if (view_is_dirty(view)) view_flush(view);
 }
@@ -1764,7 +1850,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 
                 if (application_observe(application)) {
                     window_manager_add_application(wm, application);
-                    window_manager_add_application_windows(sm, wm, application, -1);
+                    window_manager_add_existing_application_windows(sm, wm, application, -1);
                 } else {
                     application_unobserve(application);
                     application_destroy(application);
