@@ -1710,9 +1710,21 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
         if (existing_view && existing_view->layout != VIEW_FLOAT && existing_view != view) {
-            space_manager_untile_window(sm, existing_view, window);
+
+            //
+            // @cleanup
+            //
+            // :AXBatching
+            //
+            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+            //
+
+            view_remove_window_node(existing_view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
+            existing_view->is_dirty = true;
         }
 
         if (!existing_view || (existing_view->layout != VIEW_FLOAT && existing_view != view)) {

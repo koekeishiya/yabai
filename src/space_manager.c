@@ -132,11 +132,7 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     struct window_node *node = view_remove_window_node(view, window);
     if (!node) return;
 
-    if (space_is_visible(view->sid)) {
-        window_node_flush(node);
-    } else {
-        view->is_dirty = true;
-    }
+    window_node_flush(node);
 }
 
 struct space_label *space_manager_get_label_for_space(struct space_manager *sm, uint64_t sid)
@@ -393,12 +389,7 @@ struct view *space_manager_tile_window_on_space_with_insertion_point(struct spac
     struct window_node *node = view_add_window_node_with_insertion_point(view, window, insertion_point);
     assert(node);
 
-    if (space_is_visible(view->sid)) {
-        window_node_flush(node);
-    } else {
-        view->is_dirty = true;
-    }
-
+    window_node_flush(node);
     return view;
 }
 
