@@ -45,7 +45,10 @@ bool event_tap_begin(struct event_tap *event_tap, uint32_t mask, event_tap_callb
 {
     if (event_tap->handle) return true;
 
-    event_tap->handle = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, callback, event_tap);
+    // Use kCGAnnotatedSessionEventTap so that mouse events carry the window ID they're associated
+    // with, which is needed during resizing, when the border can be grabbed from a coordinate
+    // that is outside the window frame
+    event_tap->handle = CGEventTapCreate(kCGAnnotatedSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, callback, event_tap);
     if (!event_tap->handle) return false;
 
     if (!CGEventTapIsEnabled(event_tap->handle)) {

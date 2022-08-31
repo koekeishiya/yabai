@@ -959,7 +959,15 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     CGPoint point = CGEventGetLocation(context);
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
-    struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
+    struct window *window = NULL;
+    // Matching the event point to the window doesn't always give the window
+    // that the mouse down event *affects* as when resizing using the window
+    // border, because the resize cursor appears at the edge of the focused
+    // window *before* the cursor coordinates are actually inside the window
+    // frame rectangle.
+    int64_t window_id = CGEventGetIntegerValueField(context, kCGMouseEventWindowUnderMousePointerThatCanHandleThisEvent);
+    if (window_id) window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) window = window_manager_find_window_at_point(&g_window_manager, point);
     if (!window) window = window_manager_focused_window(&g_window_manager);
     if (!window || window_is_fullscreen(window)) goto out;
 
