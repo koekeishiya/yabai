@@ -86,20 +86,25 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     window_manager_query_windows_for_spaces(rsp, space_list, space_count);
 }
 
-void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
+bool window_manager_rule_match_window(struct rule *rule, struct window *window)
 {
     int regex_match_app = rule->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == regex_match_app) return;
+    if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == regex_match_app) return false;
 
     int regex_match_title = rule->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title_ts(window)) == regex_match_title) return;
+    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title_ts(window)) == regex_match_title) return false;
 
     int regex_match_role = rule->role_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->role_regex_valid, &rule->role_regex, window_role_ts(window)) == regex_match_role) return;
+    if (regex_match(rule->role_regex_valid, &rule->role_regex, window_role_ts(window)) == regex_match_role) return false;
 
     int regex_match_subrole = rule->subrole_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole_ts(window)) == regex_match_subrole) return;
+    if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole_ts(window)) == regex_match_subrole) return false;
 
+    return true;
+}
+
+void window_manager_apply_rule_to_window_unfiltered(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
+{
     if (rule->sid || rule->did) {
         if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
             uint64_t sid = rule->did ? display_space_id(rule->did) : rule->sid;
@@ -159,11 +164,29 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 }
 
+void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
+{
+    if (window_manager_rule_match_window(rule, window))
+        window_manager_apply_rule_to_window_unfiltered(sm, wm, window, rule);
+
+}
+
 void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
+    bool did_match = false;
+    struct rule combined_rule = {};
+
     for (int i = 0; i < buf_len(wm->rules); ++i) {
-        window_manager_apply_rule_to_window(sm, wm, window, &wm->rules[i]);
+        struct rule *rule = &wm->rules[i];
+        if (window_manager_rule_match_window(rule, window)) {
+            did_match = true;
+            rule_merge_actions(rule, &combined_rule);
+        }
     }
+    if (did_match)
+        window_manager_apply_rule_to_window_unfiltered(sm, wm, window, &combined_rule);
+
+    rule_destroy(&combined_rule);
 }
 
 void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode)

@@ -44,6 +44,56 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->grid[4], rule->grid[5]);
 }
 
+void rule_apply(struct rule *rule)
+{
+    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+        struct bucket *bucket = g_window_manager.window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule);
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+void rule_merge_actions(struct rule *from, struct rule *to)
+{
+    /*
+     * Do not merge rule filter fields:
+     * app, title, role, subrole
+     */
+    to->follow_space = from->follow_space;
+    if (from->did)
+        to->did = from->did;
+    if (from->sid)
+        to->sid = from->sid;
+    if (in_range_ei(from->alpha, 0.0f, 1.0f))
+        to->alpha = from->alpha;
+    if (from->manage != RULE_PROP_UD)
+        to->manage = from->manage;
+    if (from->sticky != RULE_PROP_UD)
+        to->sticky = from->sticky;
+    if (from->mff != RULE_PROP_UD)
+        to->mff = from->mff;
+    if (from->layer)
+        to->layer = from->layer;
+    if (from->border != RULE_PROP_UD)
+        to->border = from->border;
+    if (from->fullscreen != RULE_PROP_UD)
+        to->fullscreen = from->fullscreen;
+    if (from->grid[0] != 0 && from->grid[1] != 0) {
+        to->grid[0] = from->grid[0];
+        to->grid[1] = from->grid[1];
+        to->grid[2] = from->grid[2];
+        to->grid[3] = from->grid[3];
+        to->grid[4] = from->grid[4];
+        to->grid[5] = from->grid[5];
+    }
+}
+
 bool rule_remove_by_index(int index)
 {
     for (int i = 0; i < buf_len(g_window_manager.rules); ++i) {
@@ -74,18 +124,7 @@ void rule_add(struct rule *rule)
 {
     if (rule->label) rule_remove_by_label(rule->label);
     buf_push(g_window_manager.rules, *rule);
-
-    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
-        struct bucket *bucket = g_window_manager.window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule);
-            }
-
-            bucket = bucket->next;
-        }
-    }
+    rule_apply(rule);
 }
 
 void rule_destroy(struct rule *rule)
