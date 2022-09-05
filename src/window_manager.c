@@ -446,14 +446,24 @@ void window_manager_set_window_frame(struct window *window, float x, float y, fl
 
     bool should_move   = !(window->frame.origin.x   == x     && window->frame.origin.y    == y);
     bool should_resize = !(window->frame.size.width == width && window->frame.size.height == height);
+    bool shrinking     =  (window->frame.size.width  > width || window->frame.size.height  > height);
     if (!should_move && !should_resize) return;
 
     AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
+        // Window getting smaller should resize before
+        // moving to avoid conflict with system window
+        // manager boundaries (display edges, etc.)
+        if (should_resize && shrinking) {
+            window_manager_resize_window(window, width, height);
+        }
+
         if (should_move) {
             window_manager_move_window(window, x, y);
         }
 
-        if (should_resize) {
+        // Window getting bigger should wait to resize
+        // until moved into position (e.g. higher up)
+        if (should_resize && !shrinking) {
             window_manager_resize_window(window, width, height);
         }
     });
