@@ -487,10 +487,10 @@ ARGUMENT
     Title of window. If '!' is present, invert the match.
 
 *role[!]='<REGEX>'*::
-    [Accessibility role of window](https://developer.apple.com/documentation/applicationservices/carbon_accessibility/roles?language=objc). If '!' is present, invert the match.
+    https://developer.apple.com/documentation/applicationservices/carbon_accessibility/roles?language=objc[Accessibility role of window]. If '!' is present, invert the match.
 
 *subrole[!]='<REGEX>'*::
-    [Accessibility subrole of window](https://developer.apple.com/documentation/applicationservices/carbon_accessibility/subroles?language=objc). If '!' is present, invert the match.
+    https://developer.apple.com/documentation/applicationservices/carbon_accessibility/subroles?language=objc[Accessibility subrole of window]. If '!' is present, invert the match.
 
 *display='[^]<DISPLAY_SEL>'*::
     Send window to display. If '^' is present, follow focus.
