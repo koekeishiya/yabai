@@ -1083,7 +1083,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DRAGGED)
             if (new_point.y < bounds.origin.y) new_point.y = bounds.origin.y;
         }
 
-        scripting_addition_move_window(g_mouse_state.window->id, new_point.x, new_point.y);
+        if (!scripting_addition_move_window(g_mouse_state.window->id, new_point.x, new_point.y)) {
+            printf("FALLBACK move window\n");
+            window_manager_move_window(g_mouse_state.window, new_point.x, new_point.y);
+        }
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         uint64_t event_time = CGEventGetTimestamp(context);
         float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
