@@ -957,9 +957,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     if (g_mouse_state.current_action != MOUSE_MODE_NONE) goto out;
 
     CGPoint point = CGEventGetLocation(context);
-    debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
+    uint32_t wid = CGEventGetIntegerValueField(context, kCGMouseEventWindowUnderMousePointer);
+    debug("%s: %d %.2f, %.2f\n", __FUNCTION__, wid, point.x, point.y);
 
-    struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
+    struct window *window = wid ? window_manager_find_window(&g_window_manager, wid) : window_manager_find_window_at_point(&g_window_manager, point);
     if (!window) window = window_manager_focused_window(&g_window_manager);
     if (!window || window_is_fullscreen(window)) goto out;
 
@@ -1125,10 +1126,11 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
     float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1.0f / 1E6);
     if (dt < 25.0f) goto out;
 
+    uint32_t wid = CGEventGetIntegerValueField(context, kCGMouseEventWindowUnderMousePointer);
     CGPoint point = CGEventGetLocation(context);
     g_mouse_state.last_moved_time = event_time;
 
-    struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
+    struct window *window = wid ? window_manager_find_window(&g_window_manager, wid) : window_manager_find_window_at_point(&g_window_manager, point);
     if (window) {
         if (window->id == g_window_manager.focused_window_id) goto out;
 
