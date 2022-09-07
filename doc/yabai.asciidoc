@@ -493,7 +493,8 @@ ARGUMENT
     Send window to space. If '^' is present, follow focus.
 
 *manage='<BOOL_SEL>'*::
-    Window should be managed (tile vs float).
+    Window should be managed (tile vs float). +
+    Most windows will be managed automatically, so this should mainly be used to make a window float.
 
 *sticky='<BOOL_SEL>'*::
     Window appears on all spaces.
