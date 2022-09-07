@@ -961,7 +961,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_DOWN)
     debug("%s: %d %.2f, %.2f\n", __FUNCTION__, wid, point.x, point.y);
 
     struct window *window = wid ? window_manager_find_window(&g_window_manager, wid) : window_manager_find_window_at_point(&g_window_manager, point);
-    if (!window) window = window_manager_focused_window(&g_window_manager);
     if (!window || window_is_fullscreen(window)) goto out;
 
     g_mouse_state.window = window;
@@ -1138,7 +1137,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
             if (!window_level_is_standard(window))                            goto out;
             if ((!window_is_standard(window)) && (!window_is_dialog(window))) goto out;
         }
-
 
         if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
 
