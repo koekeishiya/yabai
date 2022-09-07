@@ -437,25 +437,24 @@ void window_manager_resize_window(struct window *window, float width, float heig
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height)
 {
     //
-    // :AXBatching
+    // NOTE(koekeishiya): Attempting to check the window frame cache to prevent unnecessary movement and resize calls to the AX API
+    // is not reliable because it is possible to perform operations that should be applied, at a higher rate than the AX API events
+    // are received, causing our cache to become out of date and incorrectly guard against some changes that **should** be applied.
+    // This causes the window layout to **not** be modified the way we expect.
     //
-    // NOTE(koekeishiya): Prevent unnecessary calls to the AX API to avoid sluggishness.
-    // We are comparing the target dimensions with the frame that was previously cached
-    // in our event-handlers for both the window move and resize-notifications.
+    // A possible solution is to use the faster CG window notifications, as they are **a lot** more responsive, and can be used to
+    // track changes to the window frame in real-time without delay.
     //
-
-    bool should_move   = !(window->frame.origin.x   == x     && window->frame.origin.y    == y);
-    bool should_resize = !(window->frame.size.width == width && window->frame.size.height == height);
-    if (!should_move && !should_resize) return;
 
     AX_ENHANCED_UI_WORKAROUND(window->application->ref, {
-        if (should_move) {
-            window_manager_move_window(window, x, y);
-        }
 
-        if (should_resize) {
-            window_manager_resize_window(window, width, height);
-        }
+        // NOTE(koekeishiya): Due to macOS constraints (visible screen-area), we might need to resize the window *before* moving it.
+        window_manager_resize_window(window, width, height);
+
+        window_manager_move_window(window, x, y);
+
+        // NOTE(koekeishiya): Due to macOS constraints (visible screen-area), we might need to resize the window *after* moving it.
+        window_manager_resize_window(window, width, height);
     });
 }
 
