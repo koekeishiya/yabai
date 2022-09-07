@@ -2318,7 +2318,7 @@ rnext:
                 daemon_fail(rsp, "rule with index '%d' not found.\n", value.int_value);
             }
         } else if (value.type == TOKEN_TYPE_STRING) {
-            if (!rule_remove(value.string_value)) {
+            if (!rule_remove_by_label(value.string_value)) {
                 daemon_fail(rsp, "rule with label '%s' not found.\n", value.string_value);
             }
         } else {
