@@ -641,6 +641,20 @@ Name of application. If \fI!\fP is present, invert the match.
 Title of window. If \fI!\fP is present, invert the match.
 .RE
 .sp
+\fBrole[!]=\fI<REGEX>\fP\fP
+.RS 4
+[Accessibility role of window](\c
+.URL "https://developer.apple.com/documentation/applicationservices/carbon_accessibility/roles?language=objc" "" ")."
+If \fI!\fP is present, invert the match.
+.RE
+.sp
+\fBsubrole[!]=\fI<REGEX>\fP\fP
+.RS 4
+[Accessibility subrole of window](\c
+.URL "https://developer.apple.com/documentation/applicationservices/carbon_accessibility/subroles?language=objc" "" ")."
+If \fI!\fP is present, invert the match.
+.RE
+.sp
 \fBdisplay=\fI[^]<DISPLAY_SEL>\fP\fP
 .RS 4
 Send window to display. If \fI^\fP is present, follow focus.
@@ -702,6 +716,8 @@ Set window frame based on a self\-defined grid.
     "label": string,
     "app": string,
     "title": string,
+    "role": string,
+    "subrole": string,
     "display": number,
     "space": number,
     "follow_space": bool,

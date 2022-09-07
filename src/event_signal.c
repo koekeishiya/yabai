@@ -189,7 +189,7 @@ void event_signal_push(enum signal_type type, void *context)
         snprintf(es->arg_value[0], arg_size, "%d", window->id);
 
         es->app   = window->application->name;
-        es->title = window_title(window);
+        es->title = window_title_ts(window);
     } break;
     case SIGNAL_WINDOW_DESTROYED: {
         struct window *window = context;
@@ -216,7 +216,7 @@ void event_signal_push(enum signal_type type, void *context)
         snprintf(es->arg_value[0], arg_size, "%d", window->id);
 
         es->app   = window->application->name;
-        es->title = window_title(window);
+        es->title = window_title_ts(window);
         es->active = g_window_manager.focused_window_id == window->id;
     } break;
     case SIGNAL_SPACE_CHANGED: {

@@ -109,9 +109,9 @@ err:
 
 void window_serialize(FILE *rsp, struct window *window)
 {
-    char *role = NULL;
-    char *subrole = NULL;
-    char *title = window_title(window);
+    char *role = window_role_ts(window);
+    char *subrole = window_subrole_ts(window);
+    char *title = window_title_ts(window);
     char *escaped_title = ts_string_escape(title);
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
@@ -123,18 +123,6 @@ void window_serialize(FILE *rsp, struct window *window)
     float opacity = window_opacity(window);
     bool grabbed = window == g_mouse_state.window;
     uint64_t tags = window_tags(window);
-
-    CFStringRef cfrole = window_role(window);
-    if (cfrole) {
-        role = ts_cfstring_copy(cfrole);
-        CFRelease(cfrole);
-    }
-
-    CFStringRef cfsubrole = window_subrole(window);
-    if (cfsubrole) {
-        subrole = ts_cfstring_copy(cfsubrole);
-        CFRelease(cfsubrole);
-    }
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     struct window_node *node = view ? view_find_window_node(view, window->id) : NULL;
@@ -182,8 +170,8 @@ void window_serialize(FILE *rsp, struct window *window)
             window->application->name,
             escaped_title ? escaped_title : title,
             window->frame.origin.x, window->frame.origin.y, window->frame.size.width, window->frame.size.height,
-            role ? role : "",
-            subrole ? subrole : "",
+            role,
+            subrole,
             tags,
             display,
             space,
@@ -208,25 +196,15 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(grabbed));
 }
 
-char *window_title(struct window *window)
+char *window_title_ts(struct window *window)
 {
-    char *title = NULL;
     CFTypeRef value = NULL;
-
-#if 0
-    SLSCopyWindowProperty(g_connection, window->id, CFSTR("kCGSWindowTitle"), &value); // NOTE(koekeishiya): More efficient than the AX API, but requires Screen Recording permissions.
-#else
     AXUIElementCopyAttributeValue(window->ref, kAXTitleAttribute, &value);
-#endif
+    if (!value) return ts_string_copy("");
 
-    if (value) {
-        title = ts_cfstring_copy(value);
-        CFRelease(value);
-    } else {
-        title = ts_string_copy("");
-    }
-
-    return title;
+    char *result = ts_cfstring_copy(value);
+    CFRelease(value);
+    return result;
 }
 
 CGPoint window_ax_origin(struct window *window)
@@ -385,11 +363,31 @@ CFStringRef window_role(struct window *window)
     return role;
 }
 
+char *window_role_ts(struct window *window)
+{
+    CFStringRef role = window_role(window);
+    if (!role) return ts_string_copy("");
+
+    char *result = ts_cfstring_copy(role);
+    CFRelease(role);
+    return result;
+}
+
 CFStringRef window_subrole(struct window *window)
 {
     const void *srole = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXSubroleAttribute, &srole);
     return srole;
+}
+
+char *window_subrole_ts(struct window *window)
+{
+    CFStringRef subrole = window_subrole(window);
+    if (!subrole) return ts_string_copy("");
+
+    char *result = ts_cfstring_copy(subrole);
+    CFRelease(subrole);
+    return result;
 }
 
 bool window_level_is_standard(struct window *window)

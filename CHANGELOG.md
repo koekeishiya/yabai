@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Allow combining commands for *config*, *space*, and *window* domains [#1371](https://github.com/koekeishiya/yabai/issues/1371)
 - Fallback to using the AX API for *mouse_action move* if the scripting-addition is not available [#1376](https://github.com/koekeishiya/yabai/issues/1376)
+- Add *role* and *subrole* filter to window rules [#1398](https://github.com/koekeishiya/yabai/issues/1398)
 
 ## [4.0.2] - 2022-08-24
 ### Changed

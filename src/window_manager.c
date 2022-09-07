@@ -89,10 +89,16 @@ void window_manager_query_windows_for_displays(FILE *rsp)
 void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
 {
     int regex_match_app = rule->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == regex_match_app)   return;
+    if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == regex_match_app) return;
 
     int regex_match_title = rule->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title(window)) == regex_match_title)      return;
+    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title_ts(window)) == regex_match_title) return;
+
+    int regex_match_role = rule->role_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->role_regex_valid, &rule->role_regex, window_role_ts(window)) == regex_match_role) return;
+
+    int regex_match_subrole = rule->subrole_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole_ts(window)) == regex_match_subrole) return;
 
     if (rule->sid || rule->did) {
         if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
@@ -1031,7 +1037,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         window_manager_remove_lost_focused_event(wm, window->id);
     }
 
-    debug("%s:%d %s - %s\n", __FUNCTION__, window->id, window->application->name, window_title(window));
+    debug("%s:%d %s - %s\n", __FUNCTION__, window->id, window->application->name, window_title_ts(window));
     window_manager_add_window(wm, window);
     window_manager_apply_rules_to_window(sm, wm, window);
 
