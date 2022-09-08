@@ -1076,9 +1076,12 @@ struct window **window_manager_add_application_windows(struct space_manager *sm,
 
     for (int i = 0; i < window_count; ++i) {
         AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list, i);
+
         uint32_t window_id = ax_window_id(window_ref);
         if (!window_id || window_manager_find_window(wm, window_id)) continue;
-        list[(*count)++] = window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
+
+        struct window *window = window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
+        if (window) list[(*count)++] = window;
     }
 
     CFRelease(window_list);
