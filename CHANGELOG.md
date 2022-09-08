@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [4.0.4] - 2022-09-08
+### Changed
+- Fix null-deref when an application is spawned with a non-standard window [#1399](https://github.com/koekeishiya/yabai/issues/1399)
+
 ## [4.0.3] - 2022-09-07
 ### Changed
 - Allow combining commands for *config*, *space*, and *window* domains [#1371](https://github.com/koekeishiya/yabai/issues/1371)
@@ -400,7 +404,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v4.0.3...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v4.0.4...HEAD
+[4.0.4]: https://github.com/koekeishiya/yabai/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/koekeishiya/yabai/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/koekeishiya/yabai/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/koekeishiya/yabai/compare/v4.0.0...v4.0.1
