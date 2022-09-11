@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Implemented a workaround to support *window_opacity_duration*, bypassing the Apple bug [#1406](https://github.com/koekeishiya/yabai/issues/1406)
 
 ## [4.0.4] - 2022-09-08
 ### Changed

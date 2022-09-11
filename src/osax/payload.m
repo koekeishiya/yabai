@@ -32,9 +32,15 @@
 #include <ptrauth.h>
 #endif
 
+#define HASHTABLE_IMPLEMENTATION
+#include "../misc/hashtable.h"
+#undef HASHTABLE_IMPLEMENTATION
+
 #define page_align(addr) (vm_address_t)((uintptr_t)(addr) & (~(vm_page_size - 1)))
 
 #define unpack(b,v) memcpy(&v, b, sizeof(v)); b += sizeof(v)
+
+#define lerp(a, t, b) (((1.0-t)*a) + (t*b))
 
 #define SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 
@@ -43,8 +49,8 @@
 
 extern int CGSMainConnectionID(void);
 extern CGError CGSGetConnectionPSN(int cid, ProcessSerialNumber *psn);
+extern CGError CGSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
 extern CGError CGSSetWindowAlpha(int cid, uint32_t wid, float alpha);
-extern CGError CGSSetWindowListAlpha(int cid, const uint32_t *window_list, int window_count, float alpha, float duration);
 extern CGError CGSSetWindowLevelForGroup(int cid, uint32_t wid, int level);
 extern OSStatus CGSMoveWindowWithGroup(const int cid, const uint32_t wid, CGPoint *point);
 extern CGError CGSReassociateWindowsSpacesByGeometry(int cid, CFArrayRef window_list);
@@ -60,6 +66,18 @@ extern CFArrayRef CGSCopyManagedDisplaySpaces(const int cid);
 extern CFStringRef CGSCopyManagedDisplayForSpace(const int cid, uint64_t spid);
 extern void CGSShowSpaces(int cid, CFArrayRef spaces);
 extern void CGSHideSpaces(int cid, CFArrayRef spaces);
+
+struct window_fade_context
+{
+    pthread_t thread;
+    uint32_t wid;
+    volatile float alpha;
+    volatile float duration;
+    volatile bool skip;
+};
+
+pthread_mutex_t window_fade_lock;
+struct table window_fade_table;
 
 static int _connection;
 static id dock_spaces;
@@ -604,6 +622,49 @@ static void do_window_opacity(char *message)
     CGSSetWindowAlpha(_connection, wid, alpha);
 }
 
+static void *window_fade_thread_proc(void *data)
+{
+entry:;
+    struct window_fade_context *context = (struct window_fade_context *) data;
+    context->skip = false;
+
+    float start_alpha;
+    float end_alpha = context->alpha;
+    CGSGetWindowAlpha(_connection, context->wid, &start_alpha);
+
+    int frame_duration = 8;
+    int total_duration = (int)(context->duration * 1000.0f);
+    int frame_count = (int)(((float) total_duration / (float) frame_duration) + 0.5f);
+
+    int duration = 0;
+    for (int i = 0; i < frame_count; ++i) {
+        if (context->skip) goto entry;
+
+        float t = (float) duration / (float) total_duration;
+        if (t < 0.0f) t = 0.0f;
+        if (t > 1.0f) t = 1.0f;
+
+        float alpha = lerp(start_alpha, t, end_alpha);
+        CGSSetWindowAlpha(_connection, context->wid, alpha);
+
+        duration += frame_duration;
+        usleep(frame_duration*1000);
+    }
+
+    CGSSetWindowAlpha(_connection, context->wid, end_alpha);
+    pthread_mutex_lock(&window_fade_lock);
+
+    if (!context->skip) {
+        table_remove(&window_fade_table, &context->wid);
+        pthread_mutex_unlock(&window_fade_lock);
+        free(context);
+        return NULL;
+    }
+
+    pthread_mutex_unlock(&window_fade_lock);
+    goto entry;
+}
+
 static void do_window_opacity_fade(char *message)
 {
     uint32_t wid;
@@ -614,7 +675,28 @@ static void do_window_opacity_fade(char *message)
     unpack(message, alpha);
     unpack(message, duration);
 
-    CGSSetWindowListAlpha(_connection, &wid, 1, alpha, duration);
+    pthread_mutex_lock(&window_fade_lock);
+    struct window_fade_context *context = table_find(&window_fade_table, &wid);
+
+    if (context) {
+        context->alpha = alpha;
+        context->duration = duration;
+        __asm__ __volatile__ ("" ::: "memory");
+
+        context->skip = true;
+        pthread_mutex_unlock(&window_fade_lock);
+    } else {
+        context = malloc(sizeof(struct window_fade_context));
+        context->wid = wid;
+        context->alpha = alpha;
+        context->duration = duration;
+        context->skip = false;
+        __asm__ __volatile__ ("" ::: "memory");
+
+        table_add(&window_fade_table, &wid, context);
+        pthread_mutex_unlock(&window_fade_lock);
+        pthread_create(&context->thread, NULL, &window_fade_thread_proc, context);
+    }
 }
 
 static void do_window_layer(char *message)
@@ -744,6 +826,9 @@ static void handle_message(int sockfd, char *message)
     case 0x0C: {
         do_handshake(sockfd);
     } break;
+    case 0x0D: {
+        do_window_opacity(message);
+    } break;
     }
 }
 
@@ -783,6 +868,16 @@ static void *handle_connection(void *unused)
     return NULL;
 }
 
+static TABLE_HASH_FUNC(hash_wid)
+{
+    return *(uint32_t *) key;
+}
+
+static TABLE_COMPARE_FUNC(compare_wid)
+{
+    return *(uint32_t *) key_a == *(uint32_t *) key_b;
+}
+
 static bool start_daemon(char *socket_path)
 {
     struct sockaddr_un socket_address;
@@ -807,6 +902,8 @@ static bool start_daemon(char *socket_path)
     }
 
     init_instances();
+    pthread_mutex_init(&window_fade_lock, NULL);
+    table_init(&window_fade_table, 150, hash_wid, compare_wid);
     pthread_create(&daemon_thread, NULL, &handle_connection, NULL);
 
     return true;

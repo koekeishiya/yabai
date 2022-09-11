@@ -635,7 +635,7 @@ bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
     pack(bytes, wid, length);
     pack(bytes, opacity, length);
     pack(bytes, duration, length);
-    bytes[1] = 0x06;
+    bytes[1] = duration > 0 ? 0x06 : 0x0D;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);

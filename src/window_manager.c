@@ -110,11 +110,6 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         }
     }
 
-    if (in_range_ei(rule->alpha, 0.0f, 1.0f)) {
-        window->opacity = rule->alpha;
-        window_manager_set_opacity(wm, window, rule->alpha);
-    }
-
     if (rule->manage == RULE_PROP_ON) {
         window_rule_set_flag(window, WINDOW_RULE_MANAGED);
         window_manager_make_window_floating(sm, wm, window, false);
@@ -147,6 +142,11 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     } else if (rule->border == RULE_PROP_OFF) {
         window_rule_set_flag(window, WINDOW_RULE_BORDER);
         border_destroy(window);
+    }
+
+    if (in_range_ei(rule->alpha, 0.0f, 1.0f)) {
+        window->opacity = rule->alpha;
+        window_manager_set_opacity(wm, window, rule->alpha);
     }
 
     if (rule->fullscreen == RULE_PROP_ON) {
@@ -490,7 +490,12 @@ bool window_manager_set_opacity(struct window_manager *wm, struct window *window
         }
     }
 
-    return scripting_addition_set_opacity(window->id, opacity, wm->window_opacity_duration);
+    bool result = scripting_addition_set_opacity(window->id, opacity, wm->window_opacity_duration);
+    if (result && window->border.id) {
+        scripting_addition_set_opacity(window->border.id, opacity, wm->window_opacity_duration);
+    }
+
+    return result;
 }
 
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
