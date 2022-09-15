@@ -126,7 +126,7 @@ static inline enum window_node_split window_node_get_split(struct window_node *n
 
 static inline float window_node_get_ratio(struct window_node *node)
 {
-    return clampf_range(node->ratio, 0.1f, 0.9f);
+    return (node->ratio <= 0.0f) ? g_space_manager.split_ratio : clampf_range(node->ratio, 0.1f, 0.9f);
 }
 
 static inline float window_node_get_gap(struct view *view)
