@@ -40,7 +40,9 @@ struct rule
 void rule_serialize(FILE *rsp, struct rule *rule, int index);
 bool rule_remove_by_index(int index);
 bool rule_remove_by_label(char *label);
+void rule_add_without_apply(struct rule *rule);
 void rule_add(struct rule *rule);
+void rule_add_multiple(struct rule *rules);
 void rule_merge_actions(struct rule *from, struct rule *to);
 void rule_destroy(struct rule *rule);
 

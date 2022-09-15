@@ -120,11 +120,35 @@ bool rule_remove_by_label(char *label)
     return false;
 }
 
-void rule_add(struct rule *rule)
+void rule_add_without_apply(struct rule *rule)
 {
     if (rule->label) rule_remove_by_label(rule->label);
     buf_push(g_window_manager.rules, *rule);
+
+}
+
+void rule_add(struct rule *rule)
+{
+    rule_add_without_apply(rule);
     rule_apply(rule);
+}
+
+void rule_add_multiple(struct rule *rules)
+{
+    for (int i = 0; i < buf_len(rules); ++i) {
+        rule_add_without_apply(&rules[i]);
+    }
+    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
+        struct bucket *bucket = g_window_manager.window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window);
+            }
+
+            bucket = bucket->next;
+        }
+    }
 }
 
 void rule_destroy(struct rule *rule)

@@ -2136,6 +2136,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
         char *unsupported_exclusion = NULL;
         bool did_parse = true;
         bool has_filter = false;
+        struct rule *rules = NULL;
         struct rule rule = {};
 
         struct token token = get_token(&message);
@@ -2143,6 +2144,12 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             char *key = NULL;
             char *value = NULL;
             bool exclusion = false;
+
+            if (token_equals(token, COMMAND_RULE_ADD)) {
+                rule = (struct rule){};
+                token = get_token(&message);
+            }
+
             get_key_value_pair(token.text, &key, &value, &exclusion);
 
             if (!key || !value) {
@@ -2310,23 +2317,37 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
 rnext:
             token = get_token(&message);
+            if (!token_is_valid(token) || token_equals(token, COMMAND_RULE_ADD)) {
+                buf_push(rules, rule);
+
+                if (!has_filter) {
+                    daemon_fail(rsp, "missing required key-value pair 'app[!]=..' or 'title[!]=..'\n");
+                    did_parse = false;
+                }
+
+                if (unsupported_exclusion) {
+                    daemon_fail(rsp, "unsupported token '!' (exclusion) given for key '%s'\n", unsupported_exclusion);
+                    did_parse = false;
+                }
+
+                if (!did_parse) {
+                    for (int i = 0; i < buf_len(rules); ++i) {
+                        rule_destroy(&rules[i]);
+                    }
+                    goto add_out;
+                }
+            }
         }
 
-        if (!has_filter) {
-            daemon_fail(rsp, "missing required key-value pair 'app[!]=..' or 'title[!]=..'\n");
-            did_parse = false;
-        }
-
-        if (unsupported_exclusion) {
-            daemon_fail(rsp, "unsupported token '!' (exclusion) given for key '%s'\n", unsupported_exclusion);
-            did_parse = false;
-        }
-
-        if (did_parse) {
-            rule_add(&rule);
+        if (buf_len(rules) == 1) {
+            rule_add(&rules[0]);
         } else {
-            rule_destroy(&rule);
+            rule_add_multiple(rules);
         }
+
+add_out:
+        buf_free(rules);
+
     } else if (token_equals(command, COMMAND_RULE_REM)) {
         struct token_value value = token_to_value(get_token(&message), true);
         if (value.type == TOKEN_TYPE_INT) {
