@@ -619,7 +619,20 @@ static void do_window_opacity(char *message)
     float alpha;
     unpack(message, alpha);
 
-    CGSSetWindowAlpha(_connection, wid, alpha);
+    pthread_mutex_lock(&window_fade_lock);
+    struct window_fade_context *context = table_find(&window_fade_table, &wid);
+
+    if (context) {
+        context->alpha = alpha;
+        context->duration = 0.0f;
+        __asm__ __volatile__ ("" ::: "memory");
+
+        context->skip = true;
+        pthread_mutex_unlock(&window_fade_lock);
+    } else {
+        CGSSetWindowAlpha(_connection, wid, alpha);
+        pthread_mutex_unlock(&window_fade_lock);
+    }
 }
 
 static void *window_fade_thread_proc(void *data)
@@ -634,24 +647,21 @@ entry:;
 
     int frame_duration = 8;
     int total_duration = (int)(context->duration * 1000.0f);
-    int frame_count = (int)(((float) total_duration / (float) frame_duration) + 0.5f);
+    int frame_count = (int)(((float) total_duration / (float) frame_duration) + 1.0f);
 
-    int duration = 0;
-    for (int i = 0; i < frame_count; ++i) {
+    for (int frame_index = 1; frame_index <= frame_count; ++frame_index) {
         if (context->skip) goto entry;
 
-        float t = (float) duration / (float) total_duration;
+        float t = (float) frame_index / (float) frame_count;
         if (t < 0.0f) t = 0.0f;
         if (t > 1.0f) t = 1.0f;
 
         float alpha = lerp(start_alpha, t, end_alpha);
         CGSSetWindowAlpha(_connection, context->wid, alpha);
 
-        duration += frame_duration;
         usleep(frame_duration*1000);
     }
 
-    CGSSetWindowAlpha(_connection, context->wid, end_alpha);
     pthread_mutex_lock(&window_fade_lock);
 
     if (!context->skip) {
@@ -662,6 +672,7 @@ entry:;
     }
 
     pthread_mutex_unlock(&window_fade_lock);
+
     goto entry;
 }
 
