@@ -2137,7 +2137,10 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
         bool did_parse = true;
         bool has_filter = false;
         struct rule *rules = NULL;
-        struct rule rule = {};
+        struct rule EMPTY_RULE = { 0 };
+        buf_push(rules, EMPTY_RULE);
+
+        struct rule *rule = &buf_last(rules);
 
         struct token token = get_token(&message);
         while (token_is_valid(token)) {
@@ -2146,7 +2149,8 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             bool exclusion = false;
 
             if (token_equals(token, COMMAND_RULE_ADD)) {
-                rule = (struct rule){};
+                buf_push(rules, EMPTY_RULE);
+                rule = &buf_last(rules);
                 token = get_token(&message);
             }
 
@@ -2160,40 +2164,40 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
             if (string_equals(key, ARGUMENT_RULE_KEY_LABEL)) {
                 if (exclusion) unsupported_exclusion = key;
-                rule.label = string_copy(value);
+                rule->label = string_copy(value);
             } else if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
                 has_filter = true;
-                rule.app = string_copy(value);
-                rule.app_regex_exclude = exclusion;
-                rule.app_regex_valid = regcomp(&rule.app_regex, value, REG_EXTENDED) == 0;
-                if (!rule.app_regex_valid) {
+                rule->app = string_copy(value);
+                rule->app_regex_exclude = exclusion;
+                rule->app_regex_valid = regcomp(&rule->app_regex, value, REG_EXTENDED) == 0;
+                if (!rule->app_regex_valid) {
                     daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_TITLE)) {
                 has_filter = true;
-                rule.title = string_copy(value);
-                rule.title_regex_exclude = exclusion;
-                rule.title_regex_valid = regcomp(&rule.title_regex, value, REG_EXTENDED) == 0;
-                if (!rule.title_regex_valid) {
+                rule->title = string_copy(value);
+                rule->title_regex_exclude = exclusion;
+                rule->title_regex_valid = regcomp(&rule->title_regex, value, REG_EXTENDED) == 0;
+                if (!rule->title_regex_valid) {
                     daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_ROLE)) {
                 has_filter = true;
-                rule.role = string_copy(value);
-                rule.role_regex_exclude = exclusion;
-                rule.role_regex_valid = regcomp(&rule.role_regex, value, REG_EXTENDED) == 0;
-                if (!rule.role_regex_valid) {
+                rule->role = string_copy(value);
+                rule->role_regex_exclude = exclusion;
+                rule->role_regex_valid = regcomp(&rule->role_regex, value, REG_EXTENDED) == 0;
+                if (!rule->role_regex_valid) {
                     daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_SUBROLE)) {
                 has_filter = true;
-                rule.subrole = string_copy(value);
-                rule.subrole_regex_exclude = exclusion;
-                rule.subrole_regex_valid = regcomp(&rule.subrole_regex, value, REG_EXTENDED) == 0;
-                if (!rule.subrole_regex_valid) {
+                rule->subrole = string_copy(value);
+                rule->subrole_regex_exclude = exclusion;
+                rule->subrole_regex_valid = regcomp(&rule->subrole_regex, value, REG_EXTENDED) == 0;
+                if (!rule->subrole_regex_valid) {
                     daemon_fail(rsp, "invalid regex pattern '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
@@ -2202,12 +2206,12 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
                 if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
                     ++value;
-                    rule.follow_space = true;
+                    rule->follow_space = true;
                 }
 
                 struct selector selector = parse_display_selector(rsp, &value, display_manager_active_display_id(), false);
                 if (selector.did_parse && selector.did) {
-                    rule.did = selector.did;
+                    rule->did = selector.did;
                 } else {
                     did_parse = false;
                 }
@@ -2216,12 +2220,12 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
                 if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
                     ++value;
-                    rule.follow_space = true;
+                    rule->follow_space = true;
                 }
 
                 struct selector selector = parse_space_selector(rsp, &value, space_manager_active_space(), false);
                 if (selector.did_parse && selector.sid) {
-                    rule.sid = selector.sid;
+                    rule->sid = selector.sid;
                 } else {
                     did_parse = false;
                 }
@@ -2229,16 +2233,16 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 if ((sscanf(value, ARGUMENT_RULE_VALUE_GRID,
-                            &rule.grid[0], &rule.grid[1],
-                            &rule.grid[2], &rule.grid[3],
-                            &rule.grid[4], &rule.grid[5]) != 6)) {
+                            &rule->grid[0], &rule->grid[1],
+                            &rule->grid[2], &rule->grid[3],
+                            &rule->grid[4], &rule->grid[5]) != 6)) {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
             } else if (string_equals(key, ARGUMENT_RULE_KEY_ALPHA)) {
                 if (exclusion) unsupported_exclusion = key;
 
-                if ((sscanf(value, "%f", &rule.alpha) != 1) || (!in_range_ei(rule.alpha, 0.0f, 1.0f))) {
+                if ((sscanf(value, "%f", &rule->alpha) != 1) || (!in_range_ei(rule->alpha, 0.0f, 1.0f))) {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }
@@ -2246,9 +2250,9 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.manage = RULE_PROP_ON;
+                    rule->manage = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.manage = RULE_PROP_OFF;
+                    rule->manage = RULE_PROP_OFF;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
@@ -2257,9 +2261,9 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.sticky = RULE_PROP_ON;
+                    rule->sticky = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.sticky = RULE_PROP_OFF;
+                    rule->sticky = RULE_PROP_OFF;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
@@ -2268,9 +2272,9 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.mff = RULE_PROP_ON;
+                    rule->mff = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.mff = RULE_PROP_OFF;
+                    rule->mff = RULE_PROP_OFF;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
@@ -2279,11 +2283,11 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 if (string_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
-                    rule.layer = LAYER_BELOW;
+                    rule->layer = LAYER_BELOW;
                 } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_NORMAL)) {
-                    rule.layer = LAYER_NORMAL;
+                    rule->layer = LAYER_NORMAL;
                 } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
-                    rule.layer = LAYER_ABOVE;
+                    rule->layer = LAYER_ABOVE;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
@@ -2292,9 +2296,9 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.border = RULE_PROP_ON;
+                    rule->border = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.border = RULE_PROP_OFF;
+                    rule->border = RULE_PROP_OFF;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
@@ -2303,9 +2307,9 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                 if (exclusion) unsupported_exclusion = key;
 
                 if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.fullscreen = RULE_PROP_ON;
+                    rule->fullscreen = RULE_PROP_ON;
                 } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.fullscreen = RULE_PROP_OFF;
+                    rule->fullscreen = RULE_PROP_OFF;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
@@ -2318,8 +2322,6 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 rnext:
             token = get_token(&message);
             if (!token_is_valid(token) || token_equals(token, COMMAND_RULE_ADD)) {
-                buf_push(rules, rule);
-
                 if (!has_filter) {
                     daemon_fail(rsp, "missing required key-value pair 'app[!]=..' or 'title[!]=..'\n");
                     did_parse = false;
