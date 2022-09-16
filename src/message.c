@@ -2137,7 +2137,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
         bool did_parse = true;
         bool has_filter = false;
         struct rule *rules = NULL;
-        struct rule EMPTY_RULE = { 0 };
+        static const struct rule EMPTY_RULE;
         buf_push(rules, EMPTY_RULE);
 
         struct rule *rule = &buf_last(rules);
