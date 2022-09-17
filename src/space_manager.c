@@ -389,7 +389,12 @@ struct view *space_manager_tile_window_on_space_with_insertion_point(struct spac
     struct window_node *node = view_add_window_node_with_insertion_point(view, window, insertion_point);
     assert(node);
 
-    window_node_flush(node);
+    if (space_is_visible(view->sid)) {
+        window_node_flush(node);
+    } else {
+        view->is_dirty = true;
+    }
+
     return view;
 }
 
