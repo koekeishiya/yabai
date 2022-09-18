@@ -111,12 +111,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (window_check_flag(window, WINDOW_MINIMIZE)) goto next;
 
-        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-        if (view) goto next;
-
-        if (window_manager_should_manage_window(window)) {
+        if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             if (default_origin) sid = window_space(window);
 
             struct view *view = space_manager_find_view(&g_space_manager, sid);
@@ -331,14 +327,9 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (window_check_flag(window, WINDOW_MINIMIZE)) continue;
-
         border_show(window);
 
-        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-        if (view) continue;
-
-        if (window_manager_should_manage_window(window)) {
+        if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct view *view = space_manager_find_view(&g_space_manager, window_space(window));
             if (view->layout == VIEW_FLOAT) continue;
 
@@ -396,7 +387,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-
         border_hide(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);

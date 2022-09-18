@@ -295,8 +295,11 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
 
 bool window_manager_should_manage_window(struct window *window)
 {
-    if (window_check_flag(window, WINDOW_FLOAT)) return false;
-    if (window_is_sticky(window)) return false;
+    if (window_check_flag(window, WINDOW_FLOAT))    return false;
+    if (window_is_sticky(window))                   return false;
+    if (window_check_flag(window, WINDOW_MINIMIZE)) return false;
+    if (window->application->is_hidden)             return false;
+
     if (window_rule_check_flag(window, WINDOW_RULE_MANAGED)) return true;
 
     return ((window_level_is_standard(window)) &&
@@ -1429,7 +1432,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
     space_manager_move_window_to_space(dst_sid, window);
 
-    if (window_manager_should_manage_window(window) && !window_check_flag(window, WINDOW_MINIMIZE)) {
+    if (window_manager_should_manage_window(window)) {
         struct view *view = space_manager_tile_window_on_space(sm, window, dst_sid);
         window_manager_add_managed_window(wm, window, view);
     }
@@ -1718,8 +1721,6 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(wm, window_list[i]);
         if (!window || !window_manager_should_manage_window(window)) continue;
-        if (window_check_flag(window, WINDOW_MINIMIZE)) continue;
-        if (window->application->is_hidden) continue;
 
         struct view *existing_view = window_manager_find_managed_window(wm, window);
         if (existing_view && existing_view->layout != VIEW_FLOAT && existing_view != view) {
