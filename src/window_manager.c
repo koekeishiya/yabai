@@ -397,12 +397,12 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
 
         if (y_fence) {
             float sr = y_fence->ratio + (float) dx / (float) y_fence->area.w;
-            y_fence->ratio = min(1, max(0, sr));
+            y_fence->ratio = clampf_range(sr, 0.1f, 0.9f);
         }
 
         if (x_fence) {
             float sr = x_fence->ratio + (float) dy / (float) x_fence->area.h;
-            x_fence->ratio = min(1, max(0, sr));
+            x_fence->ratio = clampf_range(sr, 0.1f, 0.9f);
         }
 
         view_update(view);

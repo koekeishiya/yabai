@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Implemented a workaround to support *window_opacity_duration*, bypassing the Apple bug [#1406](https://github.com/koekeishiya/yabai/issues/1406)
 - Fix regression causing a window to be moved to the active space of an inactive display when sent to an inactive space of an inactive display [#1053](https://github.com/koekeishiya/yabai/issues/1053)
 - Fix regression causing hidden windows to not show in window queries [#1421](https://github.com/koekeishiya/yabai/issues/1421)
+- Clamp split ratio instead of resetting when an out of range / invalid value is given [#1401](https://github.com/koekeishiya/yabai/pull/1401)
 
 ## [4.0.4] - 2022-09-08
 ### Changed
