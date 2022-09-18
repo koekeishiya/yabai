@@ -729,7 +729,7 @@ static void do_window_sticky(char *message)
     unpack(message, wid);
     if (!wid) return;
 
-    int value;
+    bool value;
     unpack(message, value);
 
     int tags[2] = { kCGSOnAllWorkspacesTagBit, 0 };
@@ -763,7 +763,7 @@ static void do_window_shadow(char *message)
     unpack(message, wid);
     if (!wid) return;
 
-    int value;
+    bool value;
     unpack(message, value);
 
     int tags[2] = { kCGSNoShadowTagBit,  0};
