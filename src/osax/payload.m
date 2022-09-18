@@ -707,6 +707,7 @@ static void do_window_opacity_fade(char *message)
         table_add(&window_fade_table, &wid, context);
         pthread_mutex_unlock(&window_fade_lock);
         pthread_create(&context->thread, NULL, &window_fade_thread_proc, context);
+        pthread_detach(context->thread);
     }
 }
 
