@@ -486,7 +486,6 @@ struct window *window_create(struct application *application, AXUIElementRef win
 
 void window_destroy(struct window *window)
 {
-    border_destroy(window);
     CFRelease(window->ref);
     free(window);
 }

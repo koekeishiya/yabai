@@ -73,6 +73,8 @@ struct window_manager
     struct table managed_window;
     struct table window_lost_focused_event;
     struct table application_lost_front_switched_event;
+    struct table window_animations_table;
+    pthread_mutex_t window_animations_lock;
     struct rule *rules;
     struct application **applications_to_refresh;
     uint32_t focused_window_id;
@@ -88,6 +90,7 @@ struct window_manager
     float active_window_opacity;
     float normal_window_opacity;
     float window_opacity_duration;
+    float window_animation_duration;
     uint32_t *insert_feedback_windows;
     int border_width;
     struct rgba_color insert_feedback_color;
@@ -107,6 +110,8 @@ void window_manager_tile_window(struct window_manager *wm, struct window *window
 void window_manager_move_window(struct window *window, float x, float y);
 void window_manager_resize_window(struct window *window, float width, float height);
 enum window_op_error window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int action, float ratio);
+void window_manager_animate_window(struct window_capture capture);
+void window_manager_animate_window_list(struct window_capture *window_list, int window_count);
 void window_manager_set_window_frame(struct window *window, float x, float y, float width, float height);
 int window_manager_find_rank_of_window_in_list(uint32_t wid, uint32_t *window_list, int window_count);
 struct window *window_manager_find_window_on_space_by_rank_filtering_window(struct window_manager *wm, uint64_t sid, int rank, uint32_t filter_wid);
@@ -147,8 +152,8 @@ void window_manager_remove_application(struct window_manager *wm, pid_t pid);
 void window_manager_add_application(struct window_manager *wm, struct application *application);
 struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application, int *window_count);
 enum window_op_error window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy);
-void window_manager_resize_window_relative_internal(struct window *window, CGRect frame, int direction, float dx, float dy);
-enum window_op_error window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy);
+void window_manager_resize_window_relative_internal(struct window *window, CGRect frame, int direction, float dx, float dy, bool animate);
+enum window_op_error window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy, bool animate);
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode);
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity);
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity);

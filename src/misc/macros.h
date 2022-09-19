@@ -13,6 +13,7 @@
 #define in_range_ie(a, b, c) (((a) >= (b)) && ((a) <  (c)))
 #define in_range_ei(a, b, c) (((a) >  (b)) && ((a) <= (c)))
 #define in_range_ee(a, b, c) (((a) >  (b)) && ((a) <  (c)))
+#define lerp(a, t, b) (((1.0-t)*a) + (t*b))
 
 #define FAILURE_MESSAGE "\x07"
 

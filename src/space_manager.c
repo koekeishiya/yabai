@@ -132,7 +132,11 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     struct window_node *node = view_remove_window_node(view, window);
     if (!node) return;
 
-    window_node_flush(node);
+    if (space_is_visible(view->sid)) {
+        window_node_flush(node);
+    } else {
+        view->is_dirty = true;
+    }
 }
 
 struct space_label *space_manager_get_label_for_space(struct space_manager *sm, uint64_t sid)

@@ -22,6 +22,34 @@ static const char *layer_str[] =
     [LAYER_ABOVE] = "above"
 };
 
+static inline float ease_out_cubic(float t)
+{
+    return 1.0f - powf(1.0f - t, 3.0f);
+}
+
+#define ANIMATE(animation_duration, easing_function, code_block)                       \
+{                                                                                      \
+    int frame_duration = 4;                                                            \
+    int total_duration = (int)(animation_duration * 1000.0f);                          \
+    int frame_count = (int)(((float) total_duration / (float) frame_duration) + 1.0f); \
+                                                                                       \
+    for (int frame_index = 1; frame_index <= frame_count; ++frame_index) {             \
+        float t = (float) frame_index / (float) frame_count;                           \
+        if (t < 0.0f) t = 0.0f;                                                        \
+        if (t > 1.0f) t = 1.0f;                                                        \
+                                                                                       \
+        float mt = easing_function(t);                                                 \
+        CFTypeRef transaction = SLSTransactionCreate(g_connection);                    \
+                                                                                       \
+        code_block                                                                     \
+                                                                                       \
+        SLSTransactionCommit(transaction, 0);                                          \
+        CFRelease(transaction);                                                        \
+                                                                                       \
+        usleep(frame_duration*1000);                                                   \
+    }                                                                                  \
+}
+
 static inline bool socket_open(int *sockfd)
 {
     *sockfd = socket(AF_UNIX, SOCK_STREAM, 0);

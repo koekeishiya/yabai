@@ -128,6 +128,31 @@ void border_show(struct window *window)
     SLSOrderWindow(g_connection, window->border.id, 1, window->id);
 }
 
+void border_resize(struct window *window)
+{
+    struct border *border = &window->border;
+
+    if (border->region) CFRelease(border->region);
+    if (border->path)   CGPathRelease(border->path);
+
+    CGRect frame = {};
+    SLSGetWindowBounds(g_connection, window->id, &frame);
+
+    CGSNewRegionWithRect(&frame, &border->region);
+    border->frame.size = frame.size;
+
+    border->path = CGPathCreateMutable();
+    CGPathAddRoundedRect(border->path, NULL, border->frame, 0, 0);
+
+    SLSOrderWindow(g_connection, border->id, 0, 0);
+    SLSSetWindowShape(g_connection, border->id, 0.0f, 0.0f, border->region);
+    CGContextClearRect(border->context, border->frame);
+    CGContextAddPath(border->context, border->path);
+    CGContextStrokePath(border->context);
+    CGContextFlush(border->context);
+    SLSOrderWindow(g_connection, border->id, 1, window->id);
+}
+
 void border_create(struct window *window)
 {
     if (window->border.id) return;

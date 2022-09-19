@@ -60,12 +60,16 @@ extern CGError CGSClearWindowTags(int cid, uint32_t wid, const int tags[2], size
 extern CGError CGSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError CGSGetWindowTransform(int cid, uint32_t wid, CGAffineTransform *t);
 extern CGError CGSSetWindowTransform(int cid, uint32_t wid, CGAffineTransform t);
+extern CGError CGSOrderWindow(int cid, uint32_t wid, int order, uint32_t rel_wid);
 extern void CGSManagedDisplaySetCurrentSpace(int cid, CFStringRef display_ref, uint64_t spid);
 extern uint64_t CGSManagedDisplayGetCurrentSpace(int cid, CFStringRef display_ref);
-extern CFArrayRef CGSCopyManagedDisplaySpaces(const int cid);
 extern CFStringRef CGSCopyManagedDisplayForSpace(const int cid, uint64_t spid);
 extern void CGSShowSpaces(int cid, CFArrayRef spaces);
 extern void CGSHideSpaces(int cid, CFArrayRef spaces);
+
+extern CFTypeRef SLSTransactionCreate(int cid);
+extern CGError SLSTransactionCommit(CFTypeRef transaction, int unknown);
+extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
 
 struct window_fade_context
 {
@@ -774,6 +778,23 @@ static void do_window_shadow(char *message)
     }
 }
 
+static void do_window_order_swap(char *message)
+{
+    uint32_t a_wid;
+    unpack(message, a_wid);
+    if (!a_wid) return;
+
+    uint32_t b_wid;
+    unpack(message, b_wid);
+    if (!b_wid) return;
+
+    CFTypeRef transaction = SLSTransactionCreate(_connection);
+    SLSTransactionOrderWindow(transaction, a_wid, 1, b_wid);
+    SLSTransactionOrderWindow(transaction, b_wid, 0, 0);
+    SLSTransactionCommit(transaction, 0);
+    CFRelease(transaction);
+}
+
 static void do_handshake(int sockfd)
 {
     uint32_t attrib = 0;
@@ -841,6 +862,10 @@ static void handle_message(int sockfd, char *message)
     case 0x0D: {
         do_window_opacity(message);
     } break;
+    case 0x0E: {
+        do_window_order_swap(message);
+    } break;
+
     }
 }
 

@@ -1,7 +1,7 @@
 #ifndef SA_COMMON_H
 #define SA_COMMON_H
 
-#define OSAX_VERSION                "2.0.8"
+#define OSAX_VERSION                "2.0.9"
 
 #define OSAX_PAYLOAD_SUCCESS        0
 #define OSAX_PAYLOAD_NOT_FOUND      1

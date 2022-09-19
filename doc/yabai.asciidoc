@@ -143,6 +143,9 @@ Global Settings
 *window_opacity_duration* ['<floating point number>']::
     Duration of transition between active / normal opacity.
 
+*window_animation_duration* ['<floating point number>']::
+    Duration of window frame animation. If 0.0, the change in dimension is not animated.
+
 *active_window_opacity* ['<FLOAT_SEL>']::
     Opacity of the focused window.
 

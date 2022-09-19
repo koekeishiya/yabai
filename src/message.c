@@ -28,6 +28,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
+#define COMMAND_CONFIG_ANIMATION_DURATION    "window_animation_duration"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
 #define COMMAND_CONFIG_BORDER_ACTIVE_COLOR   "active_window_border_color"
@@ -1064,6 +1065,15 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
+        } else if (token_equals(command, COMMAND_CONFIG_ANIMATION_DURATION)) {
+            struct token_value value = token_to_value(get_token(&message), false);
+            if (value.type == TOKEN_TYPE_INVALID) {
+                fprintf(rsp, "%f\n", g_window_manager.window_animation_duration);
+            } else if (value.type == TOKEN_TYPE_FLOAT) {
+                g_window_manager.window_animation_duration = value.float_value;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
+            }
         } else if (token_equals(command, COMMAND_CONFIG_BORDER)) {
             struct token value = get_token(&message);
             if (!token_is_valid(value)) {
@@ -1830,7 +1840,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             char handle[MAXLEN];
             struct token value = get_token(&message);
             if ((sscanf(value.text, ARGUMENT_WINDOW_RESIZE, handle, &w, &h) == 3)) {
-                enum window_op_error result = window_manager_resize_window_relative(&g_window_manager, acting_window, parse_resize_handle(handle), w, h);
+                enum window_op_error result = window_manager_resize_window_relative(&g_window_manager, acting_window, parse_resize_handle(handle), w, h, true);
                 if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
                     daemon_fail(rsp, "cannot locate bsp node for the managed window.\n");
                 } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {

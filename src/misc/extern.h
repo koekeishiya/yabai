@@ -7,6 +7,7 @@ extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *han
 extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
 extern CGError SLSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
+extern CGError SLSSetWindowAlpha(int cid, uint32_t wid, float alpha);
 extern CGError SLSSetWindowResolution(int cid, uint32_t wid, double resolution);
 extern CGError SLSCopyWindowProperty(int cid, uint32_t wid, CFStringRef property, CFTypeRef *value);
 extern CFStringRef SLSCopyManagedDisplayForWindow(int cid, uint32_t wid);
@@ -65,6 +66,12 @@ extern OSStatus SLSFindWindowByGeometry(int cid, int zero, int one, int zero_aga
 extern CGError SLSGetCurrentCursorLocation(int cid, CGPoint *point);
 extern CGError SLSWindowSetShadowProperties(uint32_t wid, CFDictionaryRef options);
 extern CGError SLSRequestNotificationsForWindows(int cid, uint32_t *window_list, int window_count);
+extern CGError SLSSetWindowTransform(int cid, uint32_t wid, CGAffineTransform t);
+extern CFTypeRef SLSTransactionCreate(int cid);
+extern CGError SLSTransactionCommit(CFTypeRef transaction, int unknown);
+extern CGError SLSTransactionSetWindowTransform(CFTypeRef transaction, uint32_t wid, int unknown, int unknown2, CGAffineTransform t);
+extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
+extern CFArrayRef SLSHWCaptureWindowList(int cid, uint32_t *window_list, int window_count, uint32_t options);
 
 #if 0
 extern CFArrayRef _LSCopyApplicationArrayInFrontToBackOrder(int negative_one, int one);

@@ -24,6 +24,7 @@ yabai -m config                                 \
     window_shadow                on             \
     window_opacity               off            \
     window_opacity_duration      0.0            \
+    window_animation_duration    0.0            \
     active_window_opacity        1.0            \
     normal_window_opacity        0.90           \
     window_border                off            \

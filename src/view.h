@@ -11,6 +11,28 @@ struct area
     float h;
 };
 
+struct window_capture
+{
+    struct window *window;
+    float x, y, w, h;
+};
+
+struct window_proxy
+{
+    uint32_t id;
+    CGContextRef context;
+    float tx, ty, tw, th;
+    CGRect frame;
+};
+
+struct window_animation
+{
+    uint32_t wid;
+    float x, y, w, h;
+    struct window_proxy proxy;
+    volatile bool skip;
+};
+
 struct equalize_node
 {
     int y_count;
@@ -123,6 +145,7 @@ struct window_node *window_node_find_first_leaf(struct window_node *root);
 struct window_node *window_node_find_last_leaf(struct window_node *root);
 struct window_node *window_node_find_prev_leaf(struct window_node *node);
 struct window_node *window_node_find_next_leaf(struct window_node *node);
+void window_node_capture_windows(struct window_node *node, struct window_capture **window_list);
 
 struct window_node *view_find_window_node_in_direction(struct view *view, struct window_node *source, int direction);
 struct window_node *view_find_window_node(struct view *view, uint32_t window_id);

@@ -50,6 +50,12 @@ void mouse_drop_action_stack(struct space_manager *sm, struct window_manager *wm
     if (dst_node->window_count+1 < NODE_MAX_WINDOW_COUNT) {
         view_stack_window_node(dst_view, dst_node, src_window);
         window_manager_add_managed_window(wm, src_window, dst_view);
+
+        if (dst_node->zoom) {
+            window_manager_animate_window((struct window_capture) { src_window, dst_node->zoom->area.x, dst_node->zoom->area.y, dst_node->zoom->area.w, dst_node->zoom->area.h });
+        } else {
+            window_manager_animate_window((struct window_capture) { src_window, dst_node->area.x, dst_node->area.y, dst_node->area.w, dst_node->area.h });
+        }
     }
 }
 
@@ -75,8 +81,10 @@ void mouse_drop_action_swap(struct window_manager *wm, struct view *src_view, st
         }
     }
 
-    window_node_flush(src_node);
-    window_node_flush(dst_node);
+    struct window_capture *window_list = NULL;
+    window_node_capture_windows(src_node, &window_list);
+    window_node_capture_windows(dst_node, &window_list);
+    window_manager_animate_window_list(window_list, ts_buf_len(window_list));
 }
 
 void mouse_drop_action_warp(struct space_manager *sm, struct window_manager *wm, struct view *src_view, struct window_node *src_node, struct window *src_window, struct view *dst_view, struct window_node *dst_node, struct window *dst_window, enum window_node_split split, enum window_node_child child)
@@ -96,12 +104,24 @@ void mouse_drop_action_warp(struct space_manager *sm, struct window_manager *wm,
         dst_node->child = child;
     }
 
-    space_manager_untile_window(sm, src_view, src_window);
+    struct window_node *src_node_rm = view_remove_window_node(src_view, src_window);
     window_manager_remove_managed_window(wm, src_window->id);
     window_manager_purify_window(wm, src_window);
 
-    struct view *view = space_manager_tile_window_on_space_with_insertion_point(sm, src_window, dst_view->sid, dst_window->id);
-    window_manager_add_managed_window(wm, src_window, view);
+    struct window_node *src_node_add = view_add_window_node_with_insertion_point(dst_view, src_window, dst_window->id);
+    window_manager_add_managed_window(wm, src_window, dst_view);
+
+    struct window_capture *window_list = NULL;
+
+    if (src_node_rm) {
+        window_node_capture_windows(src_node_rm, &window_list);
+    }
+
+    if (src_node_rm != src_node_add && src_node_rm != src_node_add->parent) {
+        window_node_capture_windows(src_node_add, &window_list);
+    }
+
+    window_manager_animate_window_list(window_list, ts_buf_len(window_list));
 }
 
 void mouse_drop_no_target(struct space_manager *sm, struct window_manager *wm, struct view *src_view, struct view *dst_view, struct window *window, struct window_node *node)
@@ -132,7 +152,7 @@ void mouse_drop_try_adjust_bsp_grid(struct window_manager *wm, struct view *view
         uint8_t direction = 0;
         if (info->changed_x) direction |= HANDLE_LEFT;
         if (info->changed_y) direction |= HANDLE_TOP;
-        if (window_manager_resize_window_relative(wm, window, direction, info->dx, info->dy) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+        if (window_manager_resize_window_relative(wm, window, direction, info->dx, info->dy, true) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
             success = false;
         }
     }
@@ -141,7 +161,7 @@ void mouse_drop_try_adjust_bsp_grid(struct window_manager *wm, struct view *view
         uint8_t direction = 0;
         if (info->changed_w && !info->changed_x) direction |= HANDLE_RIGHT;
         if (info->changed_h && !info->changed_y) direction |= HANDLE_BOTTOM;
-        if (window_manager_resize_window_relative(wm, window, direction, info->dw, info->dh) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+        if (window_manager_resize_window_relative(wm, window, direction, info->dw, info->dh, true) == WINDOW_OP_ERROR_INVALID_DST_NODE) {
             success = false;
         }
     }
