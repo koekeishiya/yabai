@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Applying rule with property *manage=on* would cause both minimized and hidden windows to be managed, even though the window is not visible [#1418](https://github.com/koekeishiya/yabai/issues/1418)
 - Fix regression causing window sticky to not work properly [#1424](https://github.com/koekeishiya/yabai/issues/1424)
 - Make window zoom more flexible, allow parent-zoomed window to enter fullscreen and vice versa [#1429](https://github.com/koekeishiya/yabai/issues/1429)
+- Added new command to manually specify the default *split_type* [#1423](https://github.com/koekeishiya/yabai/issues/1423)
 
 ## [4.0.4] - 2022-09-08
 ### Changed

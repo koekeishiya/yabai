@@ -121,7 +121,9 @@ static inline enum window_node_child window_node_get_child(struct window_node *n
 
 static inline enum window_node_split window_node_get_split(struct window_node *node)
 {
-    return node->split != SPLIT_NONE ? node->split : node->area.w / node->area.h >= 1.1618f ? SPLIT_Y : SPLIT_X;
+    if (node->split                != SPLIT_NONE) return node->split;
+    if (g_space_manager.split_type != SPLIT_AUTO) return g_space_manager.split_type;
+    return node->area.w / node->area.h >= 1.618f ? SPLIT_Y : SPLIT_X;
 }
 
 static inline float window_node_get_ratio(struct window_node *node)

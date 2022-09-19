@@ -43,6 +43,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_LAYOUT                "layout"
 #define COMMAND_CONFIG_WINDOW_GAP            "window_gap"
 #define COMMAND_CONFIG_SPLIT_RATIO           "split_ratio"
+#define COMMAND_CONFIG_SPLIT_TYPE            "split_type"
 #define COMMAND_CONFIG_AUTO_BALANCE          "auto_balance"
 #define COMMAND_CONFIG_MOUSE_MOD             "mouse_modifier"
 #define COMMAND_CONFIG_MOUSE_ACTION1         "mouse_action1"
@@ -63,6 +64,9 @@ extern bool g_verbose;
 #define ARGUMENT_CONFIG_LAYOUT_BSP            "bsp"
 #define ARGUMENT_CONFIG_LAYOUT_STACK          "stack"
 #define ARGUMENT_CONFIG_LAYOUT_FLOAT          "float"
+#define ARGUMENT_CONFIG_SPLIT_TYPE_Y          "vertical"
+#define ARGUMENT_CONFIG_SPLIT_TYPE_X          "horizontal"
+#define ARGUMENT_CONFIG_SPLIT_TYPE_AUTO       "auto"
 #define ARGUMENT_CONFIG_MOUSE_MOD_ALT         "alt"
 #define ARGUMENT_CONFIG_MOUSE_MOD_SHIFT       "shift"
 #define ARGUMENT_CONFIG_MOUSE_MOD_CMD         "cmd"
@@ -1309,6 +1313,19 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 g_space_manager.split_ratio = value.float_value;
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_SPLIT_TYPE)) {
+            struct token value = get_token(&message);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%s\n", window_node_split_str[g_space_manager.split_type]);
+            } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_Y)) {
+                g_space_manager.split_type = SPLIT_Y;
+            } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_X)) {
+                g_space_manager.split_type = SPLIT_X;
+            } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_AUTO)) {
+                g_space_manager.split_type = SPLIT_AUTO;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_AUTO_BALANCE)) {
             struct token value = get_token(&message);

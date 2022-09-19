@@ -32,6 +32,7 @@ yabai -m config                                 \
     normal_window_border_color   0xff555555     \
     insert_feedback_color        0xffd75f5f     \
     split_ratio                  0.50           \
+    split_type                   auto           \
     auto_balance                 off            \
     mouse_modifier               fn             \
     mouse_action1                move           \

@@ -167,6 +167,12 @@ Global Settings
 *split_ratio* ['<FLOAT_SEL>']::
     Default split ratio.
 
+*split_type* ['vertical|horizontal|auto']::
+    Specify how a window should be split. +
+    'vertical': The window is split along the y-axis. +
+    'horizontal': The window is split along the x-axis. +
+    'auto': The axis is determined based on width/height ratio.
+
 *auto_balance* ['<BOOL_SEL>']::
     Balance the window tree upon change, so that all windows occupy the same area.
 

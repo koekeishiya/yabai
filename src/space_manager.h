@@ -20,6 +20,7 @@ struct space_manager
     int right_padding;
     int window_gap;
     float split_ratio;
+    enum window_node_split split_type;
     enum window_node_child window_placement;
     bool auto_balance;
     struct space_label *labels;

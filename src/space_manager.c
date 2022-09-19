@@ -956,6 +956,7 @@ void space_manager_init(struct space_manager *sm)
     sm->layout = VIEW_FLOAT;
     sm->split_ratio = 0.5f;
     sm->auto_balance = false;
+    sm->split_type = SPLIT_AUTO;
     sm->window_placement = CHILD_SECOND;
     sm->labels = NULL;
 

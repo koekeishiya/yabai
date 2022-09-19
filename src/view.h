@@ -35,14 +35,16 @@ enum window_node_split
 {
     SPLIT_NONE,
     SPLIT_Y,
-    SPLIT_X
+    SPLIT_X,
+    SPLIT_AUTO
 };
 
 static const char *window_node_split_str[] =
 {
     "none",
     "vertical",
-    "horizontal"
+    "horizontal",
+    "auto"
 };
 
 struct feedback_window
