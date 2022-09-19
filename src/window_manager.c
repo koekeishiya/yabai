@@ -1617,13 +1617,13 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
     struct window_node *node = view_find_window_node(view, window->id);
     assert(node);
 
-    if (node->zoom) {
+    if (node->zoom == node->parent) {
         node->zoom = NULL;
+        window_node_flush(node);
     } else if (node->parent) {
         node->zoom = node->parent;
+        window_node_flush(node);
     }
-
-    window_node_flush(node);
 }
 
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -1634,13 +1634,13 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     struct window_node *node = view_find_window_node(view, window->id);
     assert(node);
 
-    if (node->zoom) {
+    if (node->zoom == view->root) {
         node->zoom = NULL;
+        window_node_flush(node);
     } else {
         node->zoom = view->root;
+        window_node_flush(node);
     }
-
-    window_node_flush(node);
 }
 
 void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window)
