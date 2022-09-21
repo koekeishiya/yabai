@@ -1073,7 +1073,12 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%f\n", g_window_manager.window_animation_duration);
             } else if (value.type == TOKEN_TYPE_FLOAT) {
-                g_window_manager.window_animation_duration = value.float_value;
+                if (CGPreflightScreenCaptureAccess()) {
+                    g_window_manager.window_animation_duration = value.float_value;
+                } else {
+                    daemon_fail(rsp, "command '%.*s' for domain '%.*s' requires Screen Recording permissions! ignoring request..\n", command.length, command.text, domain.length, domain.text);
+                    CGRequestScreenCaptureAccess();
+                }
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
