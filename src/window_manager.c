@@ -188,10 +188,12 @@ void window_manager_set_window_border_enabled(struct window_manager *wm, bool en
         while (bucket) {
             if (bucket->value) {
                 struct window *window = bucket->value;
-                if (enabled) {
-                    border_create(window);
-                } else {
-                    border_destroy(window);
+                if (!window_rule_check_flag(window, WINDOW_RULE_BORDER)) {
+                    if (enabled) {
+                        border_create(window);
+                    } else {
+                        border_destroy(window);
+                    }
                 }
             }
 
@@ -213,6 +215,26 @@ void window_manager_set_window_border_width(struct window_manager *wm, int width
                 struct window *window = bucket->value;
                 if (window->border.id) {
                     CGContextSetLineWidth(window->border.context, width);
+                    border_redraw(window);
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+void window_manager_set_window_border_radius(struct window_manager *wm, int radius)
+{
+    wm->border_radius = radius;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id) {
+                    if (window->border.path_ref) CGPathRelease(window->border.path_ref);
+                    window->border.path_ref = CGPathCreateWithRoundedRect(window->border.path, border_radius_clamp_x(window->border.path, g_window_manager.border_radius), border_radius_clamp_y(window->border.path, g_window_manager.border_radius), NULL);
                     border_redraw(window);
                 }
             }
@@ -446,40 +468,38 @@ void window_manager_resize_window(struct window *window, float width, float heig
     CFRelease(size_ref);
 }
 
-static void window_manager_create_window_proxy(uint32_t wid, struct window_proxy *proxy)
+static void window_manager_create_window_proxy(int animation_connection, uint32_t wid, struct window_proxy *proxy)
 {
-    CFArrayRef image = SLSHWCaptureWindowList(g_connection, &wid, 1, (1 << 11) | (1 << 8));
+    CFArrayRef image = SLSHWCaptureWindowList(animation_connection, &wid, 1, (1 << 11) | (1 << 8));
     if (!image) return;
 
     CFTypeRef frame_region;
     CGSNewRegionWithRect(&proxy->frame, &frame_region);
-    SLSNewWindow(g_connection, 2, 0, 0, frame_region, &proxy->id);
+    SLSNewWindow(animation_connection, 2, 0, 0, frame_region, &proxy->id);
 
     int level = 0;
-    SLSGetWindowLevel(g_connection, wid, &level);
+    SLSGetWindowLevel(animation_connection, wid, &level);
 
     uint64_t tag = 1ULL << 46;
-    SLSSetWindowTags(g_connection, proxy->id, &tag, 64);
+    SLSSetWindowTags(animation_connection, proxy->id, &tag, 64);
 
     sls_window_disable_shadow(proxy->id);
-    SLSSetWindowOpacity(g_connection, proxy->id, 0);
-    SLSSetWindowResolution(g_connection, proxy->id, 2.0f);
-    SLSSetWindowAlpha(g_connection, proxy->id, 1.0f);
-    SLSSetWindowLevel(g_connection, proxy->id, CGWindowLevelForKey(level));
-    proxy->context = SLWindowContextCreate(g_connection, proxy->id, 0);
+    SLSSetWindowOpacity(animation_connection, proxy->id, 0);
+    SLSSetWindowResolution(animation_connection, proxy->id, 2.0f);
+    SLSSetWindowAlpha(animation_connection, proxy->id, 1.0f);
+    SLSSetWindowLevel(animation_connection, proxy->id, CGWindowLevelForKey(level));
+    proxy->context = SLWindowContextCreate(animation_connection, proxy->id, 0);
 
     CGRect frame = { {0, 0}, proxy->frame.size };
-    SLSDisableUpdate(g_connection);
     CGContextClearRect(proxy->context, frame);
     CGContextDrawImage(proxy->context, frame, (CGImageRef) CFArrayGetValueAtIndex(image, 0));
     CGContextFlush(proxy->context);
-    SLSReenableUpdate(g_connection);
 
     CFRelease(frame_region);
     CFRelease(image);
 }
 
-static void window_manager_destroy_window_proxy(struct window_proxy *proxy)
+static void window_manager_destroy_window_proxy(int animation_connection, struct window_proxy *proxy)
 {
     if (proxy->context) {
         CGContextRelease(proxy->context);
@@ -487,40 +507,43 @@ static void window_manager_destroy_window_proxy(struct window_proxy *proxy)
     }
 
     if (proxy->id) {
-        SLSReleaseWindow(g_connection, proxy->id);
+        SLSReleaseWindow(animation_connection, proxy->id);
         proxy->id = 0;
     }
 }
 
-void *window_manager_animate_window_list_thread_proc(void *context)
+void *window_manager_animate_window_list_thread_proc(void *data)
 {
-    struct window_animation *animation_list = (struct window_animation *)((uint8_t *) context + sizeof(int));
-    int animation_count = *(int *) context;
+    struct window_animation_context *context = data;
+    int animation_count = buf_len(context->animation_list);
 
-    ANIMATE(g_window_manager.window_animation_duration, ease_out_cubic, {
+    ANIMATE(context->animation_connection, g_window_manager.window_animation_duration, ease_out_cubic, {
         for (int i = 0; i < animation_count; ++i) {
-            if (animation_list[i].skip) continue;
+            if (context->animation_list[i].skip) continue;
 
-            animation_list[i].proxy.tx = lerp(animation_list[i].proxy.frame.origin.x,    mt, animation_list[i].x);
-            animation_list[i].proxy.ty = lerp(animation_list[i].proxy.frame.origin.y,    mt, animation_list[i].y);
-            animation_list[i].proxy.tw = lerp(animation_list[i].proxy.frame.size.width,  mt, animation_list[i].w);
-            animation_list[i].proxy.th = lerp(animation_list[i].proxy.frame.size.height, mt, animation_list[i].h);
+            context->animation_list[i].proxy.tx = lerp(context->animation_list[i].proxy.frame.origin.x,    mt, context->animation_list[i].x);
+            context->animation_list[i].proxy.ty = lerp(context->animation_list[i].proxy.frame.origin.y,    mt, context->animation_list[i].y);
+            context->animation_list[i].proxy.tw = lerp(context->animation_list[i].proxy.frame.size.width,  mt, context->animation_list[i].w);
+            context->animation_list[i].proxy.th = lerp(context->animation_list[i].proxy.frame.size.height, mt, context->animation_list[i].h);
 
-            CGAffineTransform transform = CGAffineTransformMakeTranslation(-animation_list[i].proxy.tx, -animation_list[i].proxy.ty);
-            CGAffineTransform scale = CGAffineTransformMakeScale(animation_list[i].proxy.frame.size.width / animation_list[i].proxy.tw, animation_list[i].proxy.frame.size.height / animation_list[i].proxy.th);
-            SLSTransactionSetWindowTransform(transaction, animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
+            CGAffineTransform transform = CGAffineTransformMakeTranslation(-context->animation_list[i].proxy.tx, -context->animation_list[i].proxy.ty);
+            CGAffineTransform scale = CGAffineTransformMakeScale(context->animation_list[i].proxy.frame.size.width / context->animation_list[i].proxy.tw, context->animation_list[i].proxy.frame.size.height / context->animation_list[i].proxy.th);
+            SLSTransactionSetWindowTransform(transaction, context->animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
         }
     });
 
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
     for (int i = 0; i < animation_count; ++i) {
-        if (animation_list[i].skip) continue;
+        if (context->animation_list[i].skip) continue;
 
-        table_remove(&g_window_manager.window_animations_table, &animation_list[i].wid);
-        scripting_addition_swap_window_order(animation_list[i].wid, animation_list[i].proxy.id);
-        window_manager_destroy_window_proxy(&animation_list[i].proxy);
+        table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
+        scripting_addition_swap_window_order(context->animation_list[i].wid, context->animation_list[i].proxy.id);
+        window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
     }
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
+
+    SLSReleaseConnection(context->animation_connection);
+    buf_free(context->animation_list);
 
     free(context);
     return NULL;
@@ -528,43 +551,66 @@ void *window_manager_animate_window_list_thread_proc(void *context)
 
 void window_manager_animate_window_list_async(struct window_capture *window_list, int window_count)
 {
-    void *context = malloc(sizeof(int) + (window_count * sizeof(struct window_animation)));
-    struct window_animation *animation_list = (struct window_animation *)((uint8_t *) context + sizeof(int));
-    *(int *) context = window_count;
+    struct window_animation_context *context = malloc(sizeof(struct window_animation_context));
+
+    SLSNewConnection(0, &context->animation_connection);
+    context->animation_list = NULL;
 
     for (int i = 0; i < window_count; ++i) {
-        animation_list[i] = (struct window_animation) { .wid = window_list[i].window->id, .x = window_list[i].x, .y = window_list[i].y, .w = window_list[i].w, .h = window_list[i].h, .proxy = {0}, .skip = false };
+        struct window_capture *capture = &window_list[i];
+
+        buf_push(context->animation_list, ((struct window_animation) {
+            .wid   = capture->window->id,
+            .x     = capture->x,
+            .y     = capture->y,
+            .w     = capture->w,
+            .h     = capture->h,
+            .proxy = {0},
+            .skip  = false
+        }));
+
+        if (capture->window->border.id) {
+            buf_push(context->animation_list, ((struct window_animation) {
+                .wid   = capture->window->border.id,
+                .x     = capture->x - g_window_manager.border_width,
+                .y     = capture->y - g_window_manager.border_width,
+                .w     = capture->w + g_window_manager.border_width * 2.0f,
+                .h     = capture->h + g_window_manager.border_width * 2.0f,
+                .proxy = {0},
+                .skip  = false
+            }));
+        }
     }
 
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
-    for (int i = 0; i < window_count; ++i) {
-        struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &animation_list[i].wid);
+    for (int i = 0; i < buf_len(context->animation_list); ++i) {
+        struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         if (existing_animation) {
-            table_remove(&g_window_manager.window_animations_table, &animation_list[i].wid);
+            table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
 
             existing_animation->skip = true;
-            animation_list[i].proxy.frame.origin.x    = (int)(existing_animation->proxy.tx);
-            animation_list[i].proxy.frame.origin.y    = (int)(existing_animation->proxy.ty);
-            animation_list[i].proxy.frame.size.width  = (int)(existing_animation->proxy.tw);
-            animation_list[i].proxy.frame.size.height = (int)(existing_animation->proxy.th);
+            context->animation_list[i].proxy.frame.origin.x    = (int)(existing_animation->proxy.tx);
+            context->animation_list[i].proxy.frame.origin.y    = (int)(existing_animation->proxy.ty);
+            context->animation_list[i].proxy.frame.size.width  = (int)(existing_animation->proxy.tw);
+            context->animation_list[i].proxy.frame.size.height = (int)(existing_animation->proxy.th);
             __asm__ __volatile__ ("" ::: "memory");
 
-            window_manager_create_window_proxy(animation_list[i].wid, &animation_list[i].proxy);
+            window_manager_create_window_proxy(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy);
 
-            CFTypeRef transaction = SLSTransactionCreate(g_connection);
-            SLSTransactionOrderWindow(transaction, animation_list[i].proxy.id, 1, existing_animation->proxy.id);
+            CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
+            SLSTransactionOrderWindow(transaction, context->animation_list[i].proxy.id, 1, existing_animation->proxy.id);
             SLSTransactionOrderWindow(transaction, existing_animation->proxy.id, 0, 0);
             SLSTransactionCommit(transaction, 0);
             CFRelease(transaction);
 
-            window_manager_destroy_window_proxy(&existing_animation->proxy);
+            window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
         } else {
-            SLSGetWindowBounds(g_connection, animation_list[i].wid, &animation_list[i].proxy.frame);
-            window_manager_create_window_proxy(animation_list[i].wid, &animation_list[i].proxy);
-            scripting_addition_swap_window_order(animation_list[i].proxy.id, animation_list[i].wid);
+            SLSGetWindowBounds(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.frame);
+            window_manager_create_window_proxy(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy);
+            scripting_addition_swap_window_order(context->animation_list[i].proxy.id, context->animation_list[i].wid);
         }
 
-        table_add(&g_window_manager.window_animations_table, &animation_list[i].wid, &animation_list[i]);
+        table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
     }
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
@@ -646,12 +692,7 @@ bool window_manager_set_opacity(struct window_manager *wm, struct window *window
         }
     }
 
-    bool result = scripting_addition_set_opacity(window->id, opacity, wm->window_opacity_duration);
-    if (result && window->border.id) {
-        scripting_addition_set_opacity(window->border.id, opacity, wm->window_opacity_duration);
-    }
-
-    return result;
+    return scripting_addition_set_opacity(window->id, opacity, wm->window_opacity_duration);
 }
 
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
@@ -804,6 +845,8 @@ struct window *window_manager_find_window_at_point_filtering_window(struct windo
     int window_cid;
 
     SLSFindWindowByGeometry(g_connection, filter_wid, -1, 0, &point, &window_point, &window_id, &window_cid);
+    if (g_connection == window_cid) SLSFindWindowByGeometry(g_connection, window_id, -1, 0, &point, &window_point, &window_id, &window_cid);
+
     return window_manager_find_window(wm, window_id);
 }
 
@@ -2046,7 +2089,8 @@ void window_manager_init(struct window_manager *wm)
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
     wm->active_border_color = rgba_color_from_hex(0xff775759);
     wm->normal_border_color = rgba_color_from_hex(0xff555555);
-    wm->border_width = 6;
+    wm->border_width = 4;
+    wm->border_radius = 12;
 
     table_init(&wm->application, 150, hash_wm, compare_wm);
     table_init(&wm->window, 150, hash_wm, compare_wm);

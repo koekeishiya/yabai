@@ -31,6 +31,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_ANIMATION_DURATION    "window_animation_duration"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
+#define COMMAND_CONFIG_BORDER_RADIUS         "window_border_radius"
 #define COMMAND_CONFIG_BORDER_ACTIVE_COLOR   "active_window_border_color"
 #define COMMAND_CONFIG_BORDER_NORMAL_COLOR   "normal_window_border_color"
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
@@ -1091,6 +1092,15 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 fprintf(rsp, "%d\n", g_window_manager.border_width);
             } else if (value.type == TOKEN_TYPE_INT && value.int_value) {
                 window_manager_set_window_border_width(&g_window_manager, value.int_value + ((value.int_value&0x1) ? 1 : 0));
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_BORDER_RADIUS)) {
+            struct token_value value = token_to_value(get_token(&message), false);
+            if (value.type == TOKEN_TYPE_INVALID) {
+                fprintf(rsp, "%.4f\n", g_window_manager.border_radius);
+            } else if (value.type == TOKEN_TYPE_INT) {
+                window_manager_set_window_border_radius(&g_window_manager, value.int_value);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }

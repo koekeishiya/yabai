@@ -321,6 +321,12 @@ void window_node_capture_windows(struct window_node *node, struct window_capture
             struct window *window = window_manager_find_window(&g_window_manager, node->window_list[i]);
             if (window) {
                 struct area area = node->zoom ? node->zoom->area : node->area;
+                if (window->border.id) {
+                    area.x += g_window_manager.border_width;
+                    area.y += g_window_manager.border_width;
+                    area.w -= g_window_manager.border_width * 2.0f;
+                    area.h -= g_window_manager.border_width * 2.0f;
+                }
                 ts_buf_push(*window_list, ((struct window_capture) { .window = window, .x = area.x, .y = area.y, .w = area.w, .h = area.h }));
             }
         }

@@ -27,7 +27,7 @@ static inline float ease_out_cubic(float t)
     return 1.0f - powf(1.0f - t, 3.0f);
 }
 
-#define ANIMATE(animation_duration, easing_function, code_block)                       \
+#define ANIMATE(animation_connection, animation_duration, easing_function, code_block) \
 {                                                                                      \
     int frame_duration = 4;                                                            \
     int total_duration = (int)(animation_duration * 1000.0f);                          \
@@ -39,7 +39,7 @@ static inline float ease_out_cubic(float t)
         if (t > 1.0f) t = 1.0f;                                                        \
                                                                                        \
         float mt = easing_function(t);                                                 \
-        CFTypeRef transaction = SLSTransactionCreate(g_connection);                    \
+        CFTypeRef transaction = SLSTransactionCreate(animation_connection);            \
                                                                                        \
         code_block                                                                     \
                                                                                        \

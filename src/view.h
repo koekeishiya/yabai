@@ -33,6 +33,12 @@ struct window_animation
     volatile bool skip;
 };
 
+struct window_animation_context
+{
+    int animation_connection;
+    struct window_animation *animation_list;
+};
+
 struct equalize_node
 {
     int y_count;

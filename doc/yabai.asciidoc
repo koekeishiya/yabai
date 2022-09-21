@@ -158,6 +158,9 @@ Global Settings
 *window_border_width* ['<even integer number>']::
     Width of window borders. If the given width is an odd number, it will be incremented by 1.
 
+*window_border_radius* ['<integer number>']::
+    Radius of window borders.
+
 *active_window_border_color* ['0xAARRGGBB']::
     Color of the border of the focused window.
 

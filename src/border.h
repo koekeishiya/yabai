@@ -8,7 +8,8 @@ struct border
     CGContextRef context;
     CFTypeRef region;
     CGRect frame;
-    CGMutablePathRef path;
+    CGRect path;
+    CGPathRef path_ref;
 };
 
 struct window;
@@ -19,7 +20,8 @@ void border_hide(struct window *window);
 void border_show(struct window *window);
 void border_ensure_same_space(struct window *window);
 void border_redraw(struct window *window);
-void border_resize(struct window *window);
+void border_resize(struct window *window, CGRect frame);
+void border_move(struct window *window, CGRect frame);
 void border_activate(struct window *window);
 void border_deactivate(struct window *window);
 void border_create(struct window *window);

@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fix regression causing window sticky to not work properly [#1424](https://github.com/koekeishiya/yabai/issues/1424)
 - Make window zoom more flexible, allow parent-zoomed window to enter fullscreen and vice versa [#1429](https://github.com/koekeishiya/yabai/issues/1429)
 - Added new command to manually specify the default *split_type* [#1423](https://github.com/koekeishiya/yabai/issues/1423)
+- Borders are now placed below and outside the window, corners rounded, and with a filled blur to act as a backdrop [#1430](https://github.com/koekeishiya/yabai/issues/1430)
 
 ## [4.0.4] - 2022-09-08
 ### Changed

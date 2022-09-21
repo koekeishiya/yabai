@@ -3,6 +3,8 @@ typedef CONNECTION_CALLBACK(connection_callback);
 
 extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 extern int SLSMainConnectionID(void);
+extern CGError SLSNewConnection(int zero, int *cid);
+extern CGError SLSReleaseConnection(int cid);
 extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);
 extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
@@ -21,7 +23,9 @@ extern CGError SLSSetWindowTags(int cid, uint32_t wid, uint64_t *tags, int tag_s
 extern CGError SLSClearWindowTags(int cid, uint32_t wid, uint64_t *tags, int tag_size);
 extern CGError SLSSetWindowShape(int cid, uint32_t wid, float x_offset, float y_offset, CFTypeRef shape);
 extern CGError SLSSetWindowOpacity(int cid, uint32_t wid, bool opaque);
+extern CGError SLSSetWindowBackgroundBlurRadiusStyle(int cid, uint32_t wid, int radius, int style);
 extern CGError SLSOrderWindow(int cid, uint32_t wid, int mode, uint32_t rel_wid);
+extern CGError SLSWindowIsOrderedIn(int cid, uint32_t wid, uint8_t *value);
 extern CGError SLSSetWindowLevel(int cid, uint32_t wid, int level);
 extern CGContextRef SLWindowContextCreate(int cid, uint32_t wid, CFDictionaryRef options);
 extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *region);
