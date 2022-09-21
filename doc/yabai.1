@@ -63,6 +63,8 @@ Use the specified configuration file.
 Install scripting\-addition. Must be run as root.
 .br
 Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-uninstall\-sa\fP
@@ -70,6 +72,8 @@ Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/Sc
 Uninstall scripting\-addition. Must be run as root.
 .br
 Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-check\-sa\fP
@@ -80,6 +84,8 @@ Returns a zero exit\-code if the latest version of the scripting\-addition is in
 \fB\-\-load\-sa\fP
 .RS 4
 Loads the scripting\-addition into Dock.app.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .SH "DEFINITIONS"
 .sp
@@ -173,36 +179,50 @@ Specify whether managed windows should become the first or second leaf\-node.
 \fBwindow_topmost\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Make floating windows stay on top.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBwindow_shadow\fP [\fI<BOOL_SEL>|float\fP]
 .RS 4
 Draw shadow for windows.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBwindow_opacity\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Enable opacity for windows.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBwindow_opacity_duration\fP [\fI<floating point number>\fP]
 .RS 4
 Duration of transition between active / normal opacity.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBwindow_animation_duration\fP [\fI<floating point number>\fP]
 .RS 4
 Duration of window frame animation. If 0.0, the change in dimension is not animated.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBactive_window_opacity\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Opacity of the focused window.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBnormal_window_opacity\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Opacity of an unfocused window.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBwindow_border\fP [\fI<BOOL_SEL>\fP]
@@ -210,14 +230,26 @@ Opacity of an unfocused window.
 Draw border for windows.
 .RE
 .sp
+\fBwindow_border_hidpi\fP [\fI<BOOL_SEL>\fP]
+.RS 4
+Draw border in high resolution mode; for High Dots Per Inch ("Retina") displays.
+.br
+HiDPI uses significantly more memory.
+.RE
+.sp
+\fBwindow_border_blur\fP [\fI<BOOL_SEL>\fP]
+.RS 4
+Blur border allowing it to act as a backdrop for transparent windows.
+.RE
+.sp
 \fBwindow_border_width\fP [\fI<even integer number>\fP]
 .RS 4
-Width of window borders. If the given width is an odd number, it will be incremented by 1.
+Width of window border. If the given width is an odd number, it will be incremented by 1.
 .RE
 .sp
 \fBwindow_border_radius\fP [\fI<integer number>\fP]
 .RS 4
-Radius of window borders.
+Radius of window border.
 .RE
 .sp
 \fBactive_window_border_color\fP [\fI0xAARRGGBB\fP]
@@ -237,7 +269,7 @@ Color of the \fBwindow \-\-insert\fP message selection.
 .sp
 \fBsplit_ratio\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
-Default split ratio.
+Specify the size distribution when a window is split.
 .RE
 .sp
 \fBsplit_type\fP [\fIvertical|horizontal|auto\fP]
@@ -325,16 +357,22 @@ yabai \-m space [\fI<SPACE_SEL>\fP] \fI<COMMAND>\fP
 \fB\-\-focus\fP \fI<SPACE_SEL>\fP
 .RS 4
 Focus the given space.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-create\fP  [\fI<SPACE_SEL>\fP]
 .RS 4
 Create a new space on the display of the given space. If none specified, use the selected space instead.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-destroy\fP [\fI<SPACE_SEL>\fP]
 .RS 4
 Remove the given space. If none specified, use the selected space instead.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-move\fP \fI<SPACE_SEL>\fP
@@ -342,6 +380,8 @@ Remove the given space. If none specified, use the selected space instead.
 Move position of the selected space to the position of the given space.
 .br
 The selected space and given space must both belong to the same display.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-swap\fP \fI<SPACE_SEL>\fP
@@ -349,11 +389,15 @@ The selected space and given space must both belong to the same display.
 Swap the selected space with the given space.
 .br
 The selected space and given space must both belong to the same display.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-display\fP \fI<DISPLAY_SEL>\fP
 .RS 4
 Send the selected space to the given display.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-balance\fP [\fIx\-axis|y\-axis\fP]
@@ -455,11 +499,15 @@ If type is \fIrel\fP the split ratio of the selected window is changed by \fIdr\
 \fB\-\-toggle\fP \fIfloat|sticky|topmost|pip|shadow|border|split|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
 .RS 4
 Toggle the given property of the selected window.
+.br
+The following properties require System Integrity Protection to be partially disabled: sticky, topmost, pip, shadow.
 .RE
 .sp
 \fB\-\-layer\fP \fI<LAYER>\fP
 .RS 4
 Set the stacking layer of the selected window.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-opacity\fP \fI<floating point number>\fP
@@ -467,6 +515,8 @@ Set the stacking layer of the selected window.
 Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change.
 .br
 Specify the value \fI0.0\fP to reset back to full opacity OR have it be automatically managed through focus changes.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-display\fP \fI<DISPLAY_SEL>\fP
@@ -626,6 +676,8 @@ WINDOW
 All registered rules that match the given filter will apply to a window in the order they were added.
 .br
 If multiple rules specify a value for the same argument, the latter rule will override that value as it was applied last.
+.br
+The following properties require System Integrity Protection to be partially disabled: sticky, layer, opacity.
 .SS "General Syntax"
 .sp
 yabai \-m rule \fI<COMMAND>\fP

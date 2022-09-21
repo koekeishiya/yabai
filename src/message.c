@@ -30,6 +30,8 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
 #define COMMAND_CONFIG_ANIMATION_DURATION    "window_animation_duration"
 #define COMMAND_CONFIG_BORDER                "window_border"
+#define COMMAND_CONFIG_BORDER_HIDPI          "window_border_hidpi"
+#define COMMAND_CONFIG_BORDER_BLUR           "window_border_blur"
 #define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
 #define COMMAND_CONFIG_BORDER_RADIUS         "window_border_radius"
 #define COMMAND_CONFIG_BORDER_ACTIVE_COLOR   "active_window_border_color"
@@ -1083,6 +1085,28 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 window_manager_set_window_border_enabled(&g_window_manager, false);
             } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                 window_manager_set_window_border_enabled(&g_window_manager, true);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_BORDER_HIDPI)) {
+            struct token value = get_token(&message);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                window_manager_set_window_border_resolution(&g_window_manager, 1.0f);
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                window_manager_set_window_border_resolution(&g_window_manager, 2.0f);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_BORDER_BLUR)) {
+            struct token value = get_token(&message);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                window_manager_set_window_border_blur(&g_window_manager, false);
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                window_manager_set_window_border_blur(&g_window_manager, true);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

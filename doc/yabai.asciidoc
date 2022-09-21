@@ -47,17 +47,21 @@ Options
 
 *--install-sa*::
     Install scripting-addition. Must be run as root. +
-    Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+    Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer. +
+    System Integrity Protection must be partially disabled.
+
 
 *--uninstall-sa*::
     Uninstall scripting-addition. Must be run as root. +
-    Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+    Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer. +
+    System Integrity Protection must be partially disabled.
 
 *--check-sa*::
     Returns a zero exit-code if the latest version of the scripting-addition is installed.
 
 *--load-sa*::
-    Loads the scripting-addition into Dock.app.
+    Loads the scripting-addition into Dock.app. +
+    System Integrity Protection must be partially disabled.
 
 Definitions
 -----------
@@ -132,34 +136,48 @@ Global Settings
     Specify whether managed windows should become the first or second leaf-node.
 
 *window_topmost* ['<BOOL_SEL>']::
-    Make floating windows stay on top.
+    Make floating windows stay on top. +
+    System Integrity Protection must be partially disabled.
 
 *window_shadow* ['<BOOL_SEL>|float']::
-    Draw shadow for windows.
+    Draw shadow for windows. +
+    System Integrity Protection must be partially disabled.
 
 *window_opacity* ['<BOOL_SEL>']::
-    Enable opacity for windows.
+    Enable opacity for windows. +
+    System Integrity Protection must be partially disabled.
 
 *window_opacity_duration* ['<floating point number>']::
-    Duration of transition between active / normal opacity.
+    Duration of transition between active / normal opacity. +
+    System Integrity Protection must be partially disabled.
 
 *window_animation_duration* ['<floating point number>']::
-    Duration of window frame animation. If 0.0, the change in dimension is not animated.
+    Duration of window frame animation. If 0.0, the change in dimension is not animated. +
+    System Integrity Protection must be partially disabled.
 
 *active_window_opacity* ['<FLOAT_SEL>']::
-    Opacity of the focused window.
+    Opacity of the focused window. +
+    System Integrity Protection must be partially disabled.
 
 *normal_window_opacity* ['<FLOAT_SEL>']::
-    Opacity of an unfocused window.
+    Opacity of an unfocused window. +
+    System Integrity Protection must be partially disabled.
 
 *window_border* ['<BOOL_SEL>']::
     Draw border for windows.
 
+*window_border_hidpi* ['<BOOL_SEL>']::
+    Draw border in high resolution mode; for High Dots Per Inch ("Retina") displays. +
+    HiDPI uses significantly more memory.
+
+*window_border_blur* ['<BOOL_SEL>']::
+    Blur border allowing it to act as a backdrop for transparent windows.
+
 *window_border_width* ['<even integer number>']::
-    Width of window borders. If the given width is an odd number, it will be incremented by 1.
+    Width of window border. If the given width is an odd number, it will be incremented by 1.
 
 *window_border_radius* ['<integer number>']::
-    Radius of window borders.
+    Radius of window border.
 
 *active_window_border_color* ['0xAARRGGBB']::
     Color of the border of the focused window.
@@ -171,7 +189,7 @@ Global Settings
     Color of the *window --insert* message selection.
 
 *split_ratio* ['<FLOAT_SEL>']::
-    Default split ratio.
+    Specify the size distribution when a window is split.
 
 *split_type* ['vertical|horizontal|auto']::
     Specify how a window should be split. +
@@ -241,24 +259,30 @@ COMMAND
 ^^^^^^^
 
 *--focus* '<SPACE_SEL>'::
-    Focus the given space.
+    Focus the given space. +
+    System Integrity Protection must be partially disabled.
 
 *--create*  ['<SPACE_SEL>']::
-    Create a new space on the display of the given space. If none specified, use the selected space instead.
+    Create a new space on the display of the given space. If none specified, use the selected space instead. +
+    System Integrity Protection must be partially disabled.
 
 *--destroy* ['<SPACE_SEL>']::
-    Remove the given space. If none specified, use the selected space instead.
+    Remove the given space. If none specified, use the selected space instead. +
+    System Integrity Protection must be partially disabled.
 
 *--move* '<SPACE_SEL>'::
     Move position of the selected space to the position of the given space. +
-    The selected space and given space must both belong to the same display.
+    The selected space and given space must both belong to the same display. +
+    System Integrity Protection must be partially disabled.
 
 *--swap* '<SPACE_SEL>'::
     Swap the selected space with the given space. +
-    The selected space and given space must both belong to the same display.
+    The selected space and given space must both belong to the same display. +
+    System Integrity Protection must be partially disabled.
 
 *--display* '<DISPLAY_SEL>'::
-    Send the selected space to the given display.
+    Send the selected space to the given display. +
+    System Integrity Protection must be partially disabled.
 
 *--balance* ['x-axis|y-axis']::
     Adjust the split ratios on the selected space so that all windows along the given axis occupy the same area. If no axis is specified, use both.
@@ -326,14 +350,17 @@ COMMAND
     If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.
 
 *--toggle* 'float|sticky|topmost|pip|shadow|border|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
-    Toggle the given property of the selected window.
+    Toggle the given property of the selected window. +
+    The following properties require System Integrity Protection to be partially disabled: sticky, topmost, pip, shadow.
 
 *--layer* '<LAYER>'::
-    Set the stacking layer of the selected window.
+    Set the stacking layer of the selected window. +
+    System Integrity Protection must be partially disabled.
 
 *--opacity* '<floating point number>'::
     Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change. +
-    Specify the value '0.0' to reset back to full opacity OR have it be automatically managed through focus changes.
+    Specify the value '0.0' to reset back to full opacity OR have it be automatically managed through focus changes. +
+    System Integrity Protection must be partially disabled.
 
 *--display* '<DISPLAY_SEL>'::
     Send the selected window to the given display.
@@ -467,7 +494,8 @@ Rule
 ~~~~
 
 All registered rules that match the given filter will apply to a window in the order they were added. +
-If multiple rules specify a value for the same argument, the latter rule will override that value as it was applied last.
+If multiple rules specify a value for the same argument, the latter rule will override that value as it was applied last. +
+The following properties require System Integrity Protection to be partially disabled: sticky, layer, opacity.
 
 General Syntax
 ^^^^^^^^^^^^^^

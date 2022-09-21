@@ -27,11 +27,13 @@ yabai -m config                                 \
     active_window_opacity        1.0            \
     normal_window_opacity        0.90           \
     window_opacity               off            \
-    window_border_width          4              \
-    window_border_radius         12             \
+    insert_feedback_color        0xffd75f5f     \
     active_window_border_color   0xff775759     \
     normal_window_border_color   0xff555555     \
-    insert_feedback_color        0xffd75f5f     \
+    window_border_width          4              \
+    window_border_radius         12             \
+    window_border_blur           off            \
+    window_border_hidpi          on             \
     window_border                off            \
     split_ratio                  0.50           \
     split_type                   auto           \

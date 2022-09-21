@@ -92,6 +92,8 @@ struct window_manager
     float window_opacity_duration;
     float window_animation_duration;
     uint32_t *insert_feedback_windows;
+    float border_resolution;
+    bool border_blur;
     int border_width;
     float border_radius;
     struct rgba_color insert_feedback_color;
@@ -163,6 +165,8 @@ bool window_manager_set_opacity(struct window_manager *wm, struct window *window
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode);
 void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled);
+void window_manager_set_window_border_resolution(struct window_manager *wm, float resolution);
+void window_manager_set_window_border_blur(struct window_manager *wm, bool enabled);
 void window_manager_set_window_border_width(struct window_manager *wm, int width);
 void window_manager_set_window_border_radius(struct window_manager *wm, int radius);
 void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);

@@ -205,6 +205,49 @@ void window_manager_set_window_border_enabled(struct window_manager *wm, bool en
     if (window) border_activate(window);
 }
 
+void window_manager_set_window_border_resolution(struct window_manager *wm, float resolution)
+{
+    wm->border_resolution = resolution;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id) {
+                    SLSSetWindowResolution(g_connection, window->border.id, resolution);
+                    border_redraw(window);
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+void window_manager_set_window_border_blur(struct window_manager *wm, bool enabled)
+{
+    wm->border_blur = enabled;
+    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
+        struct bucket *bucket = wm->window.buckets[window_index];
+        while (bucket) {
+            if (bucket->value) {
+                struct window *window = bucket->value;
+                if (window->border.id) {
+                    if (enabled) {
+                        SLSSetWindowBackgroundBlurRadiusStyle(g_connection, window->border.id, 24, 1);
+                        border_redraw(window);
+                    } else {
+                        SLSSetWindowBackgroundBlurRadiusStyle(g_connection, window->border.id, 0, 0);
+                        border_redraw(window);
+                    }
+                }
+            }
+
+            bucket = bucket->next;
+        }
+    }
+}
+
 void window_manager_set_window_border_width(struct window_manager *wm, int width)
 {
     wm->border_width = width;
@@ -2093,6 +2136,8 @@ void window_manager_init(struct window_manager *wm)
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
     wm->active_border_color = rgba_color_from_hex(0xff775759);
     wm->normal_border_color = rgba_color_from_hex(0xff555555);
+    wm->border_resolution = 2.0f;
+    wm->border_blur = true;
     wm->border_width = 4;
     wm->border_radius = 12;
 

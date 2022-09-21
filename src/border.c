@@ -76,7 +76,13 @@ void border_redraw(struct window *window)
 
     CGContextClearRect(window->border.context, window->border.frame);
     CGContextAddPath(window->border.context, window->border.path_ref);
-    CGContextDrawPath(window->border.context, kCGPathFillStroke);
+
+    if (g_window_manager.border_blur) {
+        CGContextDrawPath(window->border.context, kCGPathFillStroke);
+    } else {
+        CGContextStrokePath(window->border.context);
+    }
+
     CGContextFlush(window->border.context);
 
     if (is_ordered_in) {
@@ -124,7 +130,13 @@ void border_resize(struct window *window, CGRect frame)
     SLSSetWindowShape(g_connection, window->border.id, 0.0f, 0.0f, window->border.region);
     CGContextClearRect(window->border.context, window->border.frame);
     CGContextAddPath(window->border.context, window->border.path_ref);
-    CGContextDrawPath(window->border.context, kCGPathFillStroke);
+
+    if (g_window_manager.border_blur) {
+        CGContextDrawPath(window->border.context, kCGPathFillStroke);
+    } else {
+        CGContextStrokePath(window->border.context);
+    }
+
     CGContextFlush(window->border.context);
 
     if (is_ordered_in) {
@@ -210,10 +222,13 @@ void border_create(struct window *window)
     SLSNewWindow(g_connection, 2, 0, 0, window->border.region, &window->border.id);
     SLSSetWindowTags(g_connection, window->border.id, &tag, 64);
     sls_window_disable_shadow(window->border.id);
-    SLSSetWindowResolution(g_connection, window->border.id, 2.0f);
+    SLSSetWindowResolution(g_connection, window->border.id, g_window_manager.border_resolution);
     SLSSetWindowOpacity(g_connection, window->border.id, 0);
     SLSSetWindowLevel(g_connection, window->border.id, window_level(window));
-    SLSSetWindowBackgroundBlurRadiusStyle(g_connection, window->border.id, 24, 1);
+
+    if (g_window_manager.border_blur) {
+        SLSSetWindowBackgroundBlurRadiusStyle(g_connection, window->border.id, 24, 1);
+    }
 
     window->border.id_ref = cfarray_of_cfnumbers(&window->border.id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     window->border.context = SLWindowContextCreate(g_connection, window->border.id, 0);
