@@ -63,9 +63,16 @@ void insert_feedback_show(struct window_node *node)
         clip_w = -midx + g_window_manager.border_width;
         clip_h = g_window_manager.border_width;
     } break;
+    case STACK: {
+        clip_x = -0.5f * g_window_manager.border_width;
+        clip_y = -0.5f * g_window_manager.border_width;
+        clip_w = g_window_manager.border_width;
+        clip_h = g_window_manager.border_width;
+    } break;
     }
 
     CGRect rect = (CGRect) {{ 0.5f*g_window_manager.border_width, 0.5f*g_window_manager.border_width }, { frame.size.width - g_window_manager.border_width, frame.size.height - g_window_manager.border_width }};
+    CGRect fill = CGRectInset(rect, 0.5f*g_window_manager.border_width, 0.5f*g_window_manager.border_width);
     CGRect clip = { { rect.origin.x + clip_x, rect.origin.y + clip_y }, { rect.size.width + clip_w, rect.size.height + clip_h } };
     CGPathRef path = CGPathCreateWithRoundedRect(rect, cgrect_clamp_x_radius(rect, g_window_manager.border_radius), cgrect_clamp_y_radius(rect, g_window_manager.border_radius), NULL);
 
@@ -74,7 +81,7 @@ void insert_feedback_show(struct window_node *node)
     SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
     CGContextClearRect(node->feedback_window.context, frame);
     CGContextClipToRect(node->feedback_window.context, clip);
-    CGContextFillRect(node->feedback_window.context, rect);
+    CGContextFillRect(node->feedback_window.context, fill);
     CGContextAddPath(node->feedback_window.context, path);
     CGContextStrokePath(node->feedback_window.context);
     CGContextResetClip(node->feedback_window.context);
