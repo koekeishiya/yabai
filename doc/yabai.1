@@ -32,7 +32,7 @@
 yabai
 .SH "SYNOPSIS"
 .sp
-\fByabai\fP [\fB\-v\fP,\fB\-\-version\fP|\fB\-V\fP,\fB\-\-verbose\fP|\fB\-m\fP,\fB\-\-message\fP \fImsg\fP|\fB\-c\fP,\fB\-\-config\fP \fIconfig_file\fP|\fB\-\-install\-sa\fP|\fB\-\-uninstall\-sa\fP|\fB\-\-check\-sa\fP|\fB\-\-load\-sa\fP]
+\fByabai\fP [\fB\-v\fP,\fB\-\-version\fP|\fB\-V\fP,\fB\-\-verbose\fP|\fB\-m\fP,\fB\-\-message\fP \fImsg\fP|\fB\-c\fP,\fB\-\-config\fP \fIconfig_file\fP|\fB\-\-uninstall\-sa\fP|\fB\-\-load\-sa\fP]
 .SH "DESCRIPTION"
 .sp
 \fByabai\fP is a tiling window manager for macOS based on binary space partitioning.
@@ -58,32 +58,22 @@ Send message to a running instance of yabai.
 Use the specified configuration file.
 .RE
 .sp
-\fB\-\-install\-sa\fP
-.RS 4
-Install scripting\-addition. Must be run as root.
-.br
-Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
-.br
-System Integrity Protection must be partially disabled.
-.RE
-.sp
 \fB\-\-uninstall\-sa\fP
 .RS 4
-Uninstall scripting\-addition. Must be run as root.
+Uninstall the scripting\-addition. Must be run as root.
 .br
-Path is /System/Library/ScriptingAdditions on macOS High Sierra, and /Library/ScriptingAdditions on Mojave and newer.
+Path is /Library/ScriptingAdditions/yabai.osax.
 .br
 System Integrity Protection must be partially disabled.
-.RE
-.sp
-\fB\-\-check\-sa\fP
-.RS 4
-Returns a zero exit\-code if the latest version of the scripting\-addition is installed.
 .RE
 .sp
 \fB\-\-load\-sa\fP
 .RS 4
-Loads the scripting\-addition into Dock.app.
+Load the scripting\-addition into Dock.app.
+.br
+Installs and updates the scripting\-addition when necessary.
+.br
+Path is /Library/ScriptingAdditions/yabai.osax.
 .br
 System Integrity Protection must be partially disabled.
 .RE

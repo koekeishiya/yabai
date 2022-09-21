@@ -1,12 +1,7 @@
 #ifndef SA_COMMON_H
 #define SA_COMMON_H
 
-#define OSAX_VERSION                "2.0.9"
-
-#define OSAX_PAYLOAD_SUCCESS        0
-#define OSAX_PAYLOAD_NOT_FOUND      1
-#define OSAX_PAYLOAD_ALREADY_LOADED 2
-#define OSAX_PAYLOAD_NOT_LOADED     3
+#define OSAX_VERSION                "2.0.10"
 
 #define OSAX_ATTRIB_DOCK_SPACES     0x01
 #define OSAX_ATTRIB_DPPM            0x02

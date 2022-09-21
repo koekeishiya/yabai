@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Added new command to manually specify the default *split_type* [#1423](https://github.com/koekeishiya/yabai/issues/1423)
 - Borders are now placed below and outside the window, corners rounded, and with a filled blur to act as a backdrop [#1430](https://github.com/koekeishiya/yabai/issues/1430)
 - Fix border size issue when moving a window to a different display on macOS Big Sur [#1229](https://github.com/koekeishiya/yabai/issues/1229)
+- Removed launch arguments *--install-sa* and *--check-sa*. Running *--load-sa* will automatically install/update the scripting-addition when necessary [#1287](https://github.com/koekeishiya/yabai/issues/1287)
 
 ### Removed
 - Removed support for macOS High Sierra, Mojave, and Catalina.

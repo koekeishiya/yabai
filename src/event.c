@@ -1350,22 +1350,6 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
 {
     debug("%s:\n", __FUNCTION__);
 
-    if (!workspace_is_macos_monterey() && !workspace_is_macos_bigsur() && scripting_addition_is_installed()) {
-        scripting_addition_load();
-
-        for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
-            struct bucket *bucket = g_window_manager.window.buckets[window_index];
-            while (bucket) {
-                if (bucket->value) {
-                    struct window *window = bucket->value;
-                    window_manager_purify_window(&g_window_manager, window);
-                }
-
-                bucket = bucket->next;
-            }
-        }
-    }
-
     if (workspace_is_macos_monterey()) {
         mission_control_unobserve();
         mission_control_observe();
