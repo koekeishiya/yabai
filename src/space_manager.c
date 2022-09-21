@@ -596,7 +596,10 @@ uint64_t space_manager_active_space(void)
 
 void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 {
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+    int window_count = window->border.id ? 2 : 1;
+    uint32_t window_list[2] = { window->id, window->border.id };
+
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), window_count, kCFNumberSInt32Type);
     SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
     CFRelease(window_list_ref);
 }

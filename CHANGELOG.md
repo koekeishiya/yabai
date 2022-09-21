@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Make window zoom more flexible, allow parent-zoomed window to enter fullscreen and vice versa [#1429](https://github.com/koekeishiya/yabai/issues/1429)
 - Added new command to manually specify the default *split_type* [#1423](https://github.com/koekeishiya/yabai/issues/1423)
 - Borders are now placed below and outside the window, corners rounded, and with a filled blur to act as a backdrop [#1430](https://github.com/koekeishiya/yabai/issues/1430)
+- Fix border size issue when moving a window to a different display on macOS Big Sur [#1229](https://github.com/koekeishiya/yabai/issues/1229)
 
 ## [4.0.4] - 2022-09-08
 ### Changed
