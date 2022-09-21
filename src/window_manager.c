@@ -487,7 +487,7 @@ static void window_manager_create_window_proxy(int animation_connection, uint32_
     SLSSetWindowOpacity(animation_connection, proxy->id, 0);
     SLSSetWindowResolution(animation_connection, proxy->id, 2.0f);
     SLSSetWindowAlpha(animation_connection, proxy->id, 1.0f);
-    SLSSetWindowLevel(animation_connection, proxy->id, CGWindowLevelForKey(level));
+    SLSSetWindowLevel(animation_connection, proxy->id, level);
     proxy->context = SLWindowContextCreate(animation_connection, proxy->id, 0);
 
     CGRect frame = { {0, 0}, proxy->frame.size };
@@ -533,6 +533,7 @@ void *window_manager_animate_window_list_thread_proc(void *data)
     });
 
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
+    SLSDisableUpdate(context->animation_connection);
     for (int i = 0; i < animation_count; ++i) {
         if (context->animation_list[i].skip) continue;
 
@@ -540,6 +541,7 @@ void *window_manager_animate_window_list_thread_proc(void *data)
         scripting_addition_swap_window_order(context->animation_list[i].wid, context->animation_list[i].proxy.id);
         window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
     }
+    SLSReenableUpdate(context->animation_connection);
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
     SLSReleaseConnection(context->animation_connection);
@@ -559,16 +561,6 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     for (int i = 0; i < window_count; ++i) {
         struct window_capture *capture = &window_list[i];
 
-        buf_push(context->animation_list, ((struct window_animation) {
-            .wid   = capture->window->id,
-            .x     = capture->x,
-            .y     = capture->y,
-            .w     = capture->w,
-            .h     = capture->h,
-            .proxy = {0},
-            .skip  = false
-        }));
-
         if (capture->window->border.id) {
             buf_push(context->animation_list, ((struct window_animation) {
                 .wid   = capture->window->border.id,
@@ -580,9 +572,20 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
                 .skip  = false
             }));
         }
+
+        buf_push(context->animation_list, ((struct window_animation) {
+            .wid   = capture->window->id,
+            .x     = capture->x,
+            .y     = capture->y,
+            .w     = capture->w,
+            .h     = capture->h,
+            .proxy = {0},
+            .skip  = false
+        }));
     }
 
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
+    SLSDisableUpdate(context->animation_connection);
     for (int i = 0; i < buf_len(context->animation_list); ++i) {
         struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         if (existing_animation) {
@@ -612,6 +615,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
     }
+    SLSReenableUpdate(context->animation_connection);
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
     for (int i = 0; i < window_count; ++i) {

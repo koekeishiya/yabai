@@ -15,7 +15,7 @@ void insert_feedback_show(struct window_node *node)
         SLSNewWindow(g_connection, 2, 0, 0, frame_region, &node->feedback_window.id);
         SLSSetWindowTags(g_connection, node->feedback_window.id, &tag, 64);
         sls_window_disable_shadow(node->feedback_window.id);
-        SLSSetWindowResolution(g_connection, node->feedback_window.id, 1.0f);
+        SLSSetWindowResolution(g_connection, node->feedback_window.id, 2.0f);
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
         SLSSetWindowLevel(g_connection, node->feedback_window.id, g_floating_window_level);
         node->feedback_window.context = SLWindowContextCreate(g_connection, node->feedback_window.id, 0);

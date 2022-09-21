@@ -152,7 +152,10 @@ next:
 
     for (int i = 0; i < view_count; ++i) {
         struct view *view = view_list[i];
-        if (view_is_dirty(view)) view_flush(view);
+        if (!space_is_visible(view->sid)) continue;
+        if (!view_is_dirty(view))         continue;
+
+        view_flush(view);
     }
 
     return EVENT_SUCCESS;
@@ -224,7 +227,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_TERMINATED)
 
     for (int i = 0; i < view_count; ++i) {
         struct view *view = view_list[i];
-        if (view_is_dirty(view)) view_flush(view);
+        if (!space_is_visible(view->sid)) continue;
+        if (!view_is_dirty(view))         continue;
+
+        view_flush(view);
     }
 
 out:
@@ -365,7 +371,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_VISIBLE)
 
     for (int i = 0; i < view_count; ++i) {
         struct view *view = view_list[i];
-        if (view_is_dirty(view)) view_flush(view);
+        if (!space_is_visible(view->sid)) continue;
+        if (!view_is_dirty(view))         continue;
+
+        view_flush(view);
     }
 
     event_signal_push(SIGNAL_APPLICATION_VISIBLE, application);
@@ -423,7 +432,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 
     for (int i = 0; i < view_count; ++i) {
         struct view *view = view_list[i];
-        if (view_is_dirty(view)) view_flush(view);
+        if (!space_is_visible(view->sid)) continue;
+        if (!view_is_dirty(view))         continue;
+
+        view_flush(view);
     }
 
     event_signal_push(SIGNAL_APPLICATION_HIDDEN, application);
