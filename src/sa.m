@@ -14,10 +14,7 @@ static char osax_contents_res_dir[MAXLEN];
 static char osax_payload_dir[MAXLEN];
 static char osax_payload_contents_dir[MAXLEN];
 static char osax_payload_contents_macos_dir[MAXLEN];
-static char osax_info_plist[MAXLEN];
-static char osax_sdefn_file[MAXLEN];
 static char osax_payload_plist[MAXLEN];
-static char osax_bin_loader[MAXLEN];
 static char osax_bin_payload[MAXLEN];
 static char osax_bin_mach_loader[MAXLEN];
 
@@ -61,11 +58,7 @@ static void scripting_addition_set_path(void)
     snprintf(osax_payload_contents_dir, sizeof(osax_payload_contents_dir), "%s/%s", osax_payload_dir, "Contents");
     snprintf(osax_payload_contents_macos_dir, sizeof(osax_payload_contents_macos_dir), "%s/%s", osax_payload_contents_dir, "MacOS");
 
-    snprintf(osax_info_plist, sizeof(osax_info_plist), "%s/%s", osax_contents_dir, "Info.plist");
-    snprintf(osax_sdefn_file, sizeof(osax_sdefn_file), "%s/%s", osax_contents_res_dir, "yabai.sdef");
-
     snprintf(osax_payload_plist, sizeof(osax_payload_plist), "%s/%s", osax_payload_contents_dir, "Info.plist");
-    snprintf(osax_bin_loader, sizeof(osax_bin_loader), "%s/%s", osax_contents_macos_dir, "loader");
     snprintf(osax_bin_mach_loader, sizeof(osax_bin_mach_loader), "%s/%s", osax_contents_macos_dir, "mach_loader");
     snprintf(osax_bin_payload, sizeof(osax_bin_payload), "%s/%s", osax_payload_contents_macos_dir, "payload");
 }
@@ -99,12 +92,6 @@ static bool scripting_addition_write_file(char *buffer, unsigned int size, char 
 static void scripting_addition_prepare_binaries(void)
 {
     char cmd[MAXLEN];
-
-    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_loader);
-    system(cmd);
-
-    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_loader, "2>/dev/null");
-    system(cmd);
 
     snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_mach_loader);
     system(cmd);
