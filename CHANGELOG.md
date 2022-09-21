@@ -6,7 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Added
-- Implemented support for animating window move/resize operations (*config window_animation_duration*)[#148](https://github.com/koekeishiya/yabai/issues/148)
+- Support for animating window move/resize operations (*config window_animation_duration*) [#148](https://github.com/koekeishiya/yabai/issues/148)
+- Command to manually specify the default *split_type* [#1423](https://github.com/koekeishiya/yabai/issues/1423)
+- Window borders are now placed below and outside the window; new commands to specify hidpi, blur to act as a backdrop, and corner radius [#1430](https://github.com/koekeishiya/yabai/issues/1430)
 
 ### Changed
 - Implemented a workaround to support *window_opacity_duration*, bypassing the Apple bug [#1406](https://github.com/koekeishiya/yabai/issues/1406)
@@ -16,13 +18,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Applying rule with property *manage=on* would cause both minimized and hidden windows to be managed, even though the window is not visible [#1418](https://github.com/koekeishiya/yabai/issues/1418)
 - Fix regression causing window sticky to not work properly [#1424](https://github.com/koekeishiya/yabai/issues/1424)
 - Make window zoom more flexible, allow parent-zoomed window to enter fullscreen and vice versa [#1429](https://github.com/koekeishiya/yabai/issues/1429)
-- Added new command to manually specify the default *split_type* [#1423](https://github.com/koekeishiya/yabai/issues/1423)
-- Borders are now placed below and outside the window, corners rounded, and with a filled blur to act as a backdrop [#1430](https://github.com/koekeishiya/yabai/issues/1430)
 - Fix border size issue when moving a window to a different display on macOS Big Sur [#1229](https://github.com/koekeishiya/yabai/issues/1229)
-- Removed launch arguments *--install-sa* and *--check-sa*. Running *--load-sa* will automatically install/update the scripting-addition when necessary [#1287](https://github.com/koekeishiya/yabai/issues/1287)
 
 ### Removed
 - Removed support for macOS High Sierra, Mojave, and Catalina.
+- Removed launch arguments *--install-sa* and *--check-sa*. Running *--load-sa* will automatically install/update the scripting-addition when necessary [#1287](https://github.com/koekeishiya/yabai/issues/1287)
 
 ## [4.0.4] - 2022-09-08
 ### Changed
