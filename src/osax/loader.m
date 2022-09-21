@@ -104,7 +104,9 @@ static pid_t get_dock_pid(void)
 
     if (list.count == 1) {
         NSRunningApplication *dock = list[0];
-        return [dock processIdentifier];
+        if ([dock isFinishedLaunching] == YES) {
+            return [dock processIdentifier];
+        }
     }
 
     return 0;
