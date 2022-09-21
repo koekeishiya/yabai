@@ -1834,18 +1834,13 @@ void window_manager_toggle_window_shadow(struct space_manager *sm, struct window
 
 void window_manager_wait_for_native_fullscreen_transition(struct window *window)
 {
-    if (workspace_is_macos_mojave() || workspace_is_macos_monterey()) {
+    if (workspace_is_macos_monterey()) {
         while (!space_is_user(space_manager_active_space())) {
 
             //
             // NOTE(koekeishiya): Window has exited native-fullscreen mode.
             // We need to spin lock until the display is finished animating
             // because we are not actually able to interact with the window.
-            //
-            // macOS Mojave freezes fullscreen applications when using the
-            // display_manager API to check for animation status:
-            //
-            //  - https://github.com/koekeishiya/yabai/issues/690
             //
             // The display_manager API does not work on macOS Monterey.
             //

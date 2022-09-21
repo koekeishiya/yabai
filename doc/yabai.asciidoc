@@ -153,6 +153,7 @@ Global Settings
 
 *window_animation_duration* ['<floating point number>']::
     Duration of window frame animation. If 0.0, the change in dimension is not animated. +
+    Requires Screen Recording permissions. +
     System Integrity Protection must be partially disabled.
 
 *active_window_opacity* ['<FLOAT_SEL>']::

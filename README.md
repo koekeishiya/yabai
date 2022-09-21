@@ -6,9 +6,6 @@
   <b>Tiling window management for the Mac.</b>
 </p>
 <p align="center">
-  <a href="https://travis-ci.org/koekeishiya/yabai">
-    <img src="https://travis-ci.org/koekeishiya/yabai.svg?branch=master" alt="CI Status Badge">
-  </a>
   <a href="https://github.com/koekeishiya/yabai/blob/master/LICENSE.txt">
     <img src="https://img.shields.io/github/license/koekeishiya/yabai.svg?color=green" alt="License Badge">
   </a>
@@ -43,15 +40,17 @@ Make sure you fulfil all of them before filing an issue.
 
 |Requirement|Note|
 |-:|:-|
-|Operating&nbsp;System|macOS&nbsp;High&nbsp;Sierra&nbsp;10.13.6, Mojave&nbsp;10.14.4+, Catalina 10.15.0+, Big Sur 11.0.1+ and Monterey 12.0.0+ is supported.|
+|Operating&nbsp;System&nbsp;Intel x86-64|Big Sur 11.0.1+ and Monterey 12.0.0+ is supported.|
+|Operating&nbsp;System&nbsp;Apple Silicon|Monterey 12.0.0+ is supported.|
 |Accessibility&nbsp;API|yabai must be given permission to utilize the Accessibility API and will request access upon launch. The application must be restarted after access has been granted.|
+|Screen Recording|yabai must be given Screen Recording permission if and only if you want to enable window animations, and will request access when necessary. The application must be restarted after access has been granted.|
 |Mission&nbsp;Control|In the Mission Control preferences pane in System Preferences, the setting "Displays have separate Spaces" must be enabled.|
 
 Please also take note of the following caveats.
 
 |Caveat|Note|
 |-:|:-|
-|System&nbsp;Integrity&nbsp;Protection|System Integrity Protection needs to be (partially) disabled for yabai to inject a scripting addition into Dock.app for controlling windows with functions that require elevated privileges. This enables control of the window server, which is the sole owner of all window connections, and enables additional features of yabai. If you are running on macOS High Sierra 10.13.6, you can reenable SIP after the scripting addition has been installed.|
+|System&nbsp;Integrity&nbsp;Protection|System Integrity Protection needs to be (partially) disabled for yabai to inject a scripting addition into Dock.app for controlling windows with functions that require elevated privileges. This enables control of the window server, which is the sole owner of all window connections, and enables additional features of yabai.|
 |Code&nbsp;Signing|When building from source (or installing from HEAD), it is recommended to codesign the binary so it retains its accessibility and automation privileges when updated or rebuilt.|
 |Mission&nbsp;Control|In the Mission Control preferences pane in System Preferences, the setting "Automatically rearrange Spaces based on most recent use" should be disabled for commands that rely on the ordering of spaces to work reliably.|
 

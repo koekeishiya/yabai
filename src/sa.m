@@ -4,20 +4,8 @@ extern int csr_get_active_config(uint32_t *config);
 #define CSR_ALLOW_UNRESTRICTED_FS 0x02
 #define CSR_ALLOW_TASK_FOR_PID    0x04
 
-#define SA_SOCKET_PATH_FMT      "/tmp/yabai-sa_%s.socket"
+#define SA_SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 extern char g_sa_socket_file[MAXLEN];
-
-@interface SALoader : NSObject<SBApplicationDelegate> {}
-- (void) eventDidFail:(const AppleEvent*)event withError:(NSError*)error;
-@end
-
-@implementation SALoader { @public int result; }
-- (void) eventDidFail:(const AppleEvent*)event withError:(NSError*)error
-{
-    NSNumber *errorNumber = [[error userInfo] objectForKey:@"ErrorNumber"];
-    result = [errorNumber intValue];
-}
-@end
 
 static char osax_base_dir[MAXLEN];
 static char osax_contents_dir[MAXLEN];
@@ -32,58 +20,6 @@ static char osax_payload_plist[MAXLEN];
 static char osax_bin_loader[MAXLEN];
 static char osax_bin_payload[MAXLEN];
 static char osax_bin_mach_loader[MAXLEN];
-
-static char sa_def[] =
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<!DOCTYPE dictionary SYSTEM \"file://localhost/System/Library/DTDs/sdef.dtd\">\n"
-    "<dictionary title=\"Yabai Terminology\">\n"
-    "<suite name=\"Yabai Suite\" code=\"YBSA\" description=\"Yabai Scripting Addition\">\n"
-    "<command name=\"init Yabai\" code=\"YBSAload\" description=\"Install payload into the process\"/>\n"
-    "</suite>\n"
-    "</dictionary>";
-
-static char sa_plist[] =
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-    "<plist version=\"1.0\">\n"
-    "<dict>\n"
-    "<key>CFBundleDevelopmentRegion</key>\n"
-    "<string>en</string>\n"
-    "<key>CFBundleExecutable</key>\n"
-    "<string>loader</string>\n"
-    "<key>CFBundleIdentifier</key>\n"
-    "<string>com.koekeishiya.yabai-osax</string>\n"
-    "<key>CFBundleInfoDictionaryVersion</key>\n"
-    "<string>6.0</string>\n"
-    "<key>CFBundleName</key>\n"
-    "<string>yabai</string>\n"
-    "<key>CFBundlePackageType</key>\n"
-    "<string>osax</string>\n"
-    "<key>CFBundleShortVersionString</key>\n"
-    "<string>"OSAX_VERSION"</string>\n"
-    "<key>CFBundleVersion</key>\n"
-    "<string>"OSAX_VERSION"</string>\n"
-    "<key>NSHumanReadableCopyright</key>\n"
-    "<string>Copyright © 2019 Åsmund Vikane. All rights reserved.</string>\n"
-    "<key>OSAScriptingDefinition</key>\n"
-    "<string>yabai.sdef</string>\n"
-    "<key>OSAXHandlers</key>\n"
-    "<dict>\n"
-    "<key>Events</key>\n"
-    "<dict>\n"
-    "<key>YBSAload</key>\n"
-    "<dict>\n"
-    "<key>Context</key>\n"
-    "<string>Process</string>\n"
-    "<key>Handler</key>\n"
-    "<string>yabai_osax_load</string>\n"
-    "<key>ThreadSafe</key>\n"
-    "<false/>\n"
-    "</dict>\n"
-    "</dict>\n"
-    "</dict>\n"
-    "</dict>\n"
-    "</plist>";
 
 static char sa_bundle_plist[] =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -115,12 +51,7 @@ static char sa_bundle_plist[] =
 
 static void scripting_addition_set_path(void)
 {
-    NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if (os_version.majorVersion >= 11 || os_version.minorVersion >= 14) {
-        snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/Library/ScriptingAdditions/yabai.osax");
-    } else {
-        snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/System/Library/ScriptingAdditions/yabai.osax");
-    }
+    snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/Library/ScriptingAdditions/yabai.osax");
 
     snprintf(osax_contents_dir, sizeof(osax_contents_dir), "%s/%s", osax_base_dir, "Contents");
     snprintf(osax_contents_macos_dir, sizeof(osax_contents_macos_dir), "%s/%s", osax_contents_dir, "MacOS");
@@ -320,19 +251,7 @@ int scripting_addition_install(void)
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file(sa_plist, strlen(sa_plist), osax_info_plist, "w")) {
-        goto cleanup;
-    }
-
-    if (!scripting_addition_write_file(sa_def, strlen(sa_def), osax_sdefn_file, "w")) {
-        goto cleanup;
-    }
-
     if (!scripting_addition_write_file(sa_bundle_plist, strlen(sa_bundle_plist), osax_payload_plist, "w")) {
-        goto cleanup;
-    }
-
-    if (!scripting_addition_write_file((char *) __src_osax_loader, __src_osax_loader_len, osax_bin_loader, "wb")) {
         goto cleanup;
     }
 
@@ -435,8 +354,7 @@ int scripting_addition_load(void)
         goto out;
     }
 
-    if (!workspace_is_macos_highsierra() &&
-        !scripting_addition_is_sip_friendly()) {
+    if (!scripting_addition_is_sip_friendly()) {
         result = 1;
         goto out;
     }
@@ -462,78 +380,6 @@ int scripting_addition_load(void)
             result = 1;
             goto out;
         }
-    } else {
-        if (is_root()) {
-            warn("yabai: scripting-addition should not be loaded as root!\n");
-            notify("scripting-addition", "should not be loaded as root!");
-            result = 1;
-            goto out;
-        }
-
-        SALoader *loader = [[SALoader alloc] init];
-        loader->result = OSAX_PAYLOAD_SUCCESS;
-
-        // temporarily redirect stderr to /dev/null to silence
-        // meaningless warning reported by the scripting-bridge
-        // framework, because Dock.app does not provide a .sdef
-
-        int stderr_fd = dup(2);
-        int null_fd = open("/dev/null", O_WRONLY);
-        fflush(stderr);
-        dup2(null_fd, 2);
-        close(null_fd);
-
-        // @memory_leak
-        // [SBApplication applicationWithBundleIdentifier] leaks memory and there is nothing we
-        // can do about it.. So much for all the automatic memory management techniques in objc
-
-        SBApplication *dock = [SBApplication applicationWithBundleIdentifier:@"com.apple.Dock"];
-        [dock setTimeout:10*60];
-        [dock setSendMode:kAEWaitReply];
-        [dock sendEvent:'ascr' id:'gdut' parameters:0];
-        [dock setDelegate:loader];
-        [dock sendEvent:'YBSA' id:'load' parameters:0];
-
-        //
-        // restore stderr back to normal
-        //
-
-        fflush(stderr);
-        dup2(stderr_fd, 2);
-        close(stderr_fd);
-
-        int result = loader->result;
-        [loader release];
-
-        if (result == OSAX_PAYLOAD_SUCCESS) {
-            debug("yabai: scripting-addition successfully injected payload into Dock.app..\n");
-            scripting_addition_perform_validation(false);
-            result = 0;
-            goto out;
-        } else if (result == OSAX_PAYLOAD_ALREADY_LOADED) {
-            debug("yabai: scripting-addition payload was already injected into Dock.app!\n");
-            scripting_addition_perform_validation(true);
-            result = 0;
-            goto out;
-        } else if (result == OSAX_PAYLOAD_NOT_LOADED) {
-            notify("scripting-addition", "failed to inject payload into Dock.app!");
-            warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
-            result = 1;
-            goto out;
-        } else if (result == OSAX_PAYLOAD_NOT_FOUND) {
-            notify("scripting-addition", "payload could not be found!");
-            warn("yabai: scripting-addition payload could not be found!\n");
-            result = 1;
-            goto out;
-        } else {
-            notify("scripting-addition", "failed to load or inject payload into Dock.app!");
-            warn("yabai: scripting-addition either failed to load or could not inject payload into Dock.app! Error: %d\n", result);
-            result = 1;
-            goto out;
-        }
-
-        result = 0;
-        goto out;
     }
 
 out:

@@ -1,5 +1,0 @@
-language: c
-os: osx
-osx_image: xcode10.1
-compiler: clang
-script: make install

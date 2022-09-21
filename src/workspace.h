@@ -21,8 +21,5 @@ int workspace_display_notch_height(uint32_t did);
 pid_t workspace_get_dock_pid(void);
 bool workspace_is_macos_monterey(void);
 bool workspace_is_macos_bigsur(void);
-bool workspace_is_macos_catalina(void);
-bool workspace_is_macos_mojave(void);
-bool workspace_is_macos_highsierra(void);
 
 #endif

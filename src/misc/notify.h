@@ -4,6 +4,9 @@
 static bool g_notify_init;
 static NSImage *g_notify_img;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 @implementation NSBundle(swizzle)
 - (NSString *)fake_bundleIdentifier
 {
@@ -58,3 +61,5 @@ static void notify(const char *subtitle, const char *format, ...)
 
     [pool drain];
 }
+
+#pragma clang diagnostic pop

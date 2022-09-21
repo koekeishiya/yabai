@@ -233,30 +233,20 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
     NSLog(@"[yabai-sa] checking for macOS %ld.%ld.%ld compatibility!", os_version.majorVersion, os_version.minorVersion, os_version.patchVersion);
 
 #ifdef __x86_64__
-    if (os_version.majorVersion == 10) {
-        if (os_version.minorVersion == 13 && os_version.patchVersion == 6) {
-            return true; // High Sierra 10.13.6
-        } else if (os_version.minorVersion == 14 && os_version.patchVersion >= 4) {
-            return true; // Mojave 10.14.4-6
-        } else if (os_version.minorVersion == 15 && os_version.patchVersion >= 0) {
-            return true; // Catalina 10.15.0-6
-        } else if (os_version.minorVersion == 16) {
-            return true; // Big Sur 10.16 (Some beta versions)
-        }
-    } else if (os_version.majorVersion == 11) {
+    if (os_version.majorVersion == 11) {
         return true; // Big Sur 11.0
     } else if (os_version.majorVersion == 12) {
         return true; // Monterey 12.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS High Sierra 10.13.6, Mojave 10.14.4-6, Catalina 10.15.0-6, Big Sur 11.0-6, and Monterey 12.0");
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0-6, and Monterey 12.0.0+");
     return false;
 #elif __arm64__
     if (os_version.majorVersion == 12) {
         return true; // Monterey 12.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0");
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+");
     return false;
 #endif
 }

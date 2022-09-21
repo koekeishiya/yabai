@@ -20,6 +20,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Borders are now placed below and outside the window, corners rounded, and with a filled blur to act as a backdrop [#1430](https://github.com/koekeishiya/yabai/issues/1430)
 - Fix border size issue when moving a window to a different display on macOS Big Sur [#1229](https://github.com/koekeishiya/yabai/issues/1229)
 
+### Removed
+- Removed support for macOS High Sierra, Mojave, and Catalina.
+
 ## [4.0.4] - 2022-09-08
 ### Changed
 - Fix null-deref when an application is spawned with a non-standard window [#1399](https://github.com/koekeishiya/yabai/issues/1399)
