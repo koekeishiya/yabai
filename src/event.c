@@ -1181,7 +1181,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_MOUSE_MOVED)
                     if (wid == window->id) break;
 
                     struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
-                    if (!sub_window || !window_check_flag(sub_window, WINDOW_FLOAT)) continue;
+                    if (!sub_window) continue;
+
+                    if (!window_check_flag(sub_window, WINDOW_FLOAT)) continue;
+                    if (window_is_topmost(sub_window))                continue;
 
                     if (CGRectContainsRect(window->frame, sub_window->frame)) {
                         occludes_window = true;
