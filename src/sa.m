@@ -16,7 +16,7 @@ static char osax_payload_contents_dir[MAXLEN];
 static char osax_payload_contents_macos_dir[MAXLEN];
 static char osax_payload_plist[MAXLEN];
 static char osax_bin_payload[MAXLEN];
-static char osax_bin_mach_loader[MAXLEN];
+static char osax_bin_loader[MAXLEN];
 
 static char sa_bundle_plist[] =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -59,7 +59,7 @@ static void scripting_addition_set_path(void)
     snprintf(osax_payload_contents_macos_dir, sizeof(osax_payload_contents_macos_dir), "%s/%s", osax_payload_contents_dir, "MacOS");
 
     snprintf(osax_payload_plist, sizeof(osax_payload_plist), "%s/%s", osax_payload_contents_dir, "Info.plist");
-    snprintf(osax_bin_mach_loader, sizeof(osax_bin_mach_loader), "%s/%s", osax_contents_macos_dir, "mach_loader");
+    snprintf(osax_bin_loader, sizeof(osax_bin_loader), "%s/%s", osax_contents_macos_dir, "loader");
     snprintf(osax_bin_payload, sizeof(osax_bin_payload), "%s/%s", osax_payload_contents_macos_dir, "payload");
 }
 
@@ -93,10 +93,10 @@ static void scripting_addition_prepare_binaries(void)
 {
     char cmd[MAXLEN];
 
-    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_mach_loader);
+    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_loader);
     system(cmd);
 
-    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_mach_loader, "2>/dev/null");
+    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_loader, "2>/dev/null");
     system(cmd);
 
     snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_payload);
@@ -242,7 +242,7 @@ int scripting_addition_install(void)
         goto cleanup;
     }
 
-    if (!scripting_addition_write_file((char *) __src_osax_mach_loader, __src_osax_mach_loader_len, osax_bin_mach_loader, "wb")) {
+    if (!scripting_addition_write_file((char *) __src_osax_loader, __src_osax_loader_len, osax_bin_loader, "wb")) {
         goto cleanup;
     }
 
@@ -316,7 +316,7 @@ static bool drop_sudo_privileges_and_set_sa_socket_path(void)
 
 static bool mach_loader_inject_payload(void)
 {
-    FILE *handle = popen("/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/mach_loader", "r");
+    FILE *handle = popen("/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader", "r");
     if (!handle) return false;
 
     int result = pclose(handle);

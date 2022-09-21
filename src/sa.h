@@ -30,7 +30,7 @@ extern bool workspace_is_macos_bigsur(void);
 
 extern unsigned char __src_osax_payload[];
 extern unsigned int __src_osax_payload_len;
-extern unsigned char __src_osax_mach_loader[];
-extern unsigned int __src_osax_mach_loader_len;
+extern unsigned char __src_osax_loader[];
+extern unsigned int __src_osax_loader_len;
 
 #endif
