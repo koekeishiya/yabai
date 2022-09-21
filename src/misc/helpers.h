@@ -335,6 +335,22 @@ static inline bool psn_equals(ProcessSerialNumber *a, ProcessSerialNumber *b)
 }
 #pragma clang diagnostic pop
 
+static inline float cgrect_clamp_x_radius(CGRect frame, float radius)
+{
+    if (radius * 2 > CGRectGetWidth(frame)) {
+        radius = CGRectGetWidth(frame) / 2;
+    }
+    return radius;
+}
+
+static inline float cgrect_clamp_y_radius(CGRect frame, float radius)
+{
+    if (radius * 2 > CGRectGetHeight(frame)) {
+        radius = CGRectGetHeight(frame) / 2;
+    }
+    return radius;
+}
+
 static inline bool cgrect_contains_point(CGRect r, CGPoint p)
 {
     return p.x >= r.origin.x && p.x <= r.origin.x + r.size.width &&

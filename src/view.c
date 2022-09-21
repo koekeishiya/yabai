@@ -7,7 +7,7 @@ extern struct window_manager g_window_manager;
 void insert_feedback_show(struct window_node *node)
 {
     CFTypeRef frame_region;
-    CGRect frame = {{(int)node->area.x, (int)node->area.y},{(int)(node->area.w+0.5f), (int)(node->area.h+0.5f)}};
+    CGRect frame = {{node->area.x, node->area.y},{node->area.w, node->area.h}};
     CGSNewRegionWithRect(&frame, &frame_region);
 
     if (!node->feedback_window.id) {
@@ -19,8 +19,7 @@ void insert_feedback_show(struct window_node *node)
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
         SLSSetWindowLevel(g_connection, node->feedback_window.id, g_floating_window_level);
         node->feedback_window.context = SLWindowContextCreate(g_connection, node->feedback_window.id, 0);
-        int width = g_window_manager.enable_window_border ? g_window_manager.border_width : 2;
-        CGContextSetLineWidth(node->feedback_window.context, width);
+        CGContextSetLineWidth(node->feedback_window.context, g_window_manager.border_width);
         CGContextSetRGBFillColor(node->feedback_window.context,
                                    g_window_manager.insert_feedback_color.r,
                                    g_window_manager.insert_feedback_color.g,
@@ -35,61 +34,54 @@ void insert_feedback_show(struct window_node *node)
     }
 
     frame.origin.x = 0; frame.origin.y = 0;
-    CGFloat x1, y1, x2, y2, x3, y3, x4, y4;
-    CGFloat minx = CGRectGetMinX(frame), midx = CGRectGetMidX(frame), maxx = CGRectGetMaxX(frame);
-    CGFloat miny = CGRectGetMinY(frame), midy = CGRectGetMidY(frame), maxy = CGRectGetMaxY(frame);
+    CGFloat clip_x, clip_y, clip_w, clip_h;
+    CGFloat midx = CGRectGetMidX(frame);
+    CGFloat midy = CGRectGetMidY(frame);
 
     switch (node->insert_dir) {
     case DIR_NORTH: {
-        x1 = minx; y1 = midy;
-        x2 = minx; y2 = maxy;
-        x3 = maxx; y3 = maxy;
-        x4 = maxx; y4 = midy;
+        clip_x = -0.5f * g_window_manager.border_width;
+        clip_y = midy - 0.5f * g_window_manager.border_width;
+        clip_w = g_window_manager.border_width;
+        clip_h = g_window_manager.border_width;
     } break;
     case DIR_EAST: {
-        x1 = midx; y1 = miny;
-        x2 = maxx; y2 = miny;
-        x3 = maxx; y3 = maxy;
-        x4 = midx; y4 = maxy;
+        clip_x = midx - 0.5f * g_window_manager.border_width;
+        clip_y = -0.5f * g_window_manager.border_width;
+        clip_w = g_window_manager.border_width;
+        clip_h = g_window_manager.border_width;
     } break;
     case DIR_SOUTH: {
-        x1 = minx; y1 = midy;
-        x2 = minx; y2 = miny;
-        x3 = maxx; y3 = miny;
-        x4 = maxx; y4 = midy;
+        clip_x = -0.5f * g_window_manager.border_width;
+        clip_y = -0.5f * g_window_manager.border_width;
+        clip_w = g_window_manager.border_width;
+        clip_h = -midy + g_window_manager.border_width;
     } break;
     case DIR_WEST: {
-        x1 = midx; y1 = miny;
-        x2 = minx; y2 = miny;
-        x3 = minx; y3 = maxy;
-        x4 = midx; y4 = maxy;
-    } break;
-    case STACK: {
-        x1 = minx; y1 = miny;
-        x2 = minx; y2 = maxy;
-        x3 = maxx; y3 = maxy;
-        x4 = maxx; y4 = miny;
+        clip_x = -0.5f * g_window_manager.border_width;
+        clip_y = -0.5f * g_window_manager.border_width;
+        clip_w = -midx + g_window_manager.border_width;
+        clip_h = g_window_manager.border_width;
     } break;
     }
 
-    CGRect fill = { {x1, y1}, { x3 - x1, y3 - y1 } };
-    CGMutablePathRef outline = CGPathCreateMutable();
-    CGPathMoveToPoint(outline, NULL, x1, y1);
-    CGPathAddLineToPoint(outline, NULL, x2, y2);
-    CGPathAddLineToPoint(outline, NULL, x3, y3);
-    CGPathAddLineToPoint(outline, NULL, x4, y4);
+    CGRect rect = (CGRect) {{ 0.5f*g_window_manager.border_width, 0.5f*g_window_manager.border_width }, { frame.size.width - g_window_manager.border_width, frame.size.height - g_window_manager.border_width }};
+    CGRect clip = { { rect.origin.x + clip_x, rect.origin.y + clip_y }, { rect.size.width + clip_w, rect.size.height + clip_h } };
+    CGPathRef path = CGPathCreateWithRoundedRect(rect, cgrect_clamp_x_radius(rect, g_window_manager.border_radius), cgrect_clamp_y_radius(rect, g_window_manager.border_radius), NULL);
 
     SLSDisableUpdate(g_connection);
     SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_order[0]);
     SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
     CGContextClearRect(node->feedback_window.context, frame);
-    CGContextFillRect(node->feedback_window.context, fill);
-    CGContextAddPath(node->feedback_window.context, outline);
+    CGContextClipToRect(node->feedback_window.context, clip);
+    CGContextFillRect(node->feedback_window.context, rect);
+    CGContextAddPath(node->feedback_window.context, path);
     CGContextStrokePath(node->feedback_window.context);
+    CGContextResetClip(node->feedback_window.context);
     CGContextFlush(node->feedback_window.context);
     SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
     SLSReenableUpdate(g_connection);
-    CGPathRelease(outline);
+    CGPathRelease(path);
     CFRelease(frame_region);
 }
 

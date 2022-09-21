@@ -91,22 +91,6 @@ void border_redraw(struct window *window)
     }
 }
 
-static inline float border_radius_clamp_x(CGRect frame, float radius)
-{
-    if (radius * 2 > CGRectGetWidth(frame)) {
-        radius = CGRectGetWidth(frame) / 2;
-    }
-    return radius;
-}
-
-static inline float border_radius_clamp_y(CGRect frame, float radius)
-{
-    if (radius * 2 > CGRectGetHeight(frame)) {
-        radius = CGRectGetHeight(frame) / 2;
-    }
-    return radius;
-}
-
 void border_resize(struct window *window, CGRect frame)
 {
     if (window->border.region)   CFRelease(window->border.region);
@@ -117,7 +101,7 @@ void border_resize(struct window *window, CGRect frame)
     window->border.frame.size = frame.size;
 
     window->border.path = (CGRect) {{ 0.5f*g_window_manager.border_width, 0.5f*g_window_manager.border_width }, { frame.size.width - g_window_manager.border_width, frame.size.height - g_window_manager.border_width }};
-    window->border.path_ref = CGPathCreateWithRoundedRect(window->border.path, border_radius_clamp_x(window->border.path, g_window_manager.border_radius), border_radius_clamp_y(window->border.path, g_window_manager.border_radius), NULL);
+    window->border.path_ref = CGPathCreateWithRoundedRect(window->border.path, cgrect_clamp_x_radius(window->border.path, g_window_manager.border_radius), cgrect_clamp_y_radius(window->border.path, g_window_manager.border_radius), NULL);
 
     uint8_t is_ordered_in = false;
     SLSWindowIsOrderedIn(g_connection, window->border.id, &is_ordered_in);

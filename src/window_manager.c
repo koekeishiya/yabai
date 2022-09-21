@@ -277,7 +277,7 @@ void window_manager_set_window_border_radius(struct window_manager *wm, int radi
                 struct window *window = bucket->value;
                 if (window->border.id) {
                     if (window->border.path_ref) CGPathRelease(window->border.path_ref);
-                    window->border.path_ref = CGPathCreateWithRoundedRect(window->border.path, border_radius_clamp_x(window->border.path, g_window_manager.border_radius), border_radius_clamp_y(window->border.path, g_window_manager.border_radius), NULL);
+                    window->border.path_ref = CGPathCreateWithRoundedRect(window->border.path, cgrect_clamp_x_radius(window->border.path, g_window_manager.border_radius), cgrect_clamp_y_radius(window->border.path, g_window_manager.border_radius), NULL);
                     border_redraw(window);
                 }
             }
