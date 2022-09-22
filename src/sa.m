@@ -525,13 +525,15 @@ bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, fl
     return scripting_addition_send_bytes(bytes, length);
 }
 
-bool scripting_addition_swap_window_order(uint32_t a_wid, uint32_t b_wid)
+bool scripting_addition_swap_window_proxy(uint32_t a_wid, uint32_t b_wid, float opacity, int order)
 {
     char bytes[0x100];
 
     char length = 2;
     pack(bytes, a_wid, length);
     pack(bytes, b_wid, length);
+    pack(bytes, opacity, length);
+    pack(bytes, order, length);
     bytes[1] = 0x0E;
     bytes[0] = length-1;
 

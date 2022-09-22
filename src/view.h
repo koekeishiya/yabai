@@ -22,7 +22,9 @@ struct window_proxy
     uint32_t id;
     CGContextRef context;
     float tx, ty, tw, th;
+    float alpha;
     CGRect frame;
+    CFArrayRef image;
 };
 
 struct window_animation

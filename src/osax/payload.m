@@ -1,4 +1,5 @@
 #include <Foundation/Foundation.h>
+
 #include <mach-o/getsect.h>
 #include <mach-o/dyld.h>
 #include <mach/mach.h>
@@ -70,6 +71,7 @@ extern void CGSHideSpaces(int cid, CFArrayRef spaces);
 extern CFTypeRef SLSTransactionCreate(int cid);
 extern CGError SLSTransactionCommit(CFTypeRef transaction, int unknown);
 extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
+extern CGError SLSTransactionSetWindowAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
 
 struct window_fade_context
 {
@@ -78,6 +80,7 @@ struct window_fade_context
     volatile float alpha;
     volatile float duration;
     volatile bool skip;
+    volatile bool abort;
 };
 
 pthread_mutex_t window_fade_lock;
@@ -633,7 +636,8 @@ static void *window_fade_thread_proc(void *data)
 {
 entry:;
     struct window_fade_context *context = (struct window_fade_context *) data;
-    context->skip = false;
+    context->abort = false;
+    context->skip  = false;
 
     float start_alpha;
     float end_alpha = context->alpha;
@@ -644,7 +648,8 @@ entry:;
     int frame_count = (int)(((float) total_duration / (float) frame_duration) + 1.0f);
 
     for (int frame_index = 1; frame_index <= frame_count; ++frame_index) {
-        if (context->skip) goto entry;
+        if (context->abort) goto abort;
+        if (context->skip)  goto entry;
 
         float t = (float) frame_index / (float) frame_count;
         if (t < 0.0f) t = 0.0f;
@@ -656,15 +661,14 @@ entry:;
         usleep(frame_duration*1000);
     }
 
+abort:
     pthread_mutex_lock(&window_fade_lock);
-
-    if (!context->skip) {
+    if (context->abort || !context->skip) {
         table_remove(&window_fade_table, &context->wid);
         pthread_mutex_unlock(&window_fade_lock);
         free(context);
         return NULL;
     }
-
     pthread_mutex_unlock(&window_fade_lock);
 
     goto entry;
@@ -695,6 +699,7 @@ static void do_window_opacity_fade(char *message)
         context->wid = wid;
         context->alpha = alpha;
         context->duration = duration;
+        context->abort = false;
         context->skip = false;
         __asm__ __volatile__ ("" ::: "memory");
 
@@ -768,7 +773,7 @@ static void do_window_shadow(char *message)
     }
 }
 
-static void do_window_order_swap(char *message)
+static void do_window_swap_proxy(char *message)
 {
     uint32_t a_wid;
     unpack(message, a_wid);
@@ -778,9 +783,24 @@ static void do_window_order_swap(char *message)
     unpack(message, b_wid);
     if (!b_wid) return;
 
+    float alpha;
+    unpack(message, alpha);
+
+    int order;
+    unpack(message, order);
+
+    pthread_mutex_lock(&window_fade_lock);
+    struct window_fade_context *context = table_find(&window_fade_table, &a_wid);
+    if (context) {
+        context->abort = true;
+        __asm__ __volatile__ ("" ::: "memory");
+        usleep(8 * 1000);
+    }
+    pthread_mutex_unlock(&window_fade_lock);
+
     CFTypeRef transaction = SLSTransactionCreate(_connection);
-    SLSTransactionOrderWindow(transaction, a_wid, -1, b_wid);
-    SLSTransactionOrderWindow(transaction, b_wid, 0, 0);
+    SLSTransactionOrderWindow(transaction, b_wid, order, a_wid);
+    SLSTransactionSetWindowAlpha(transaction, a_wid, alpha);
     SLSTransactionCommit(transaction, 0);
     CFRelease(transaction);
 }
@@ -853,7 +873,7 @@ static void handle_message(int sockfd, char *message)
         do_window_opacity(message);
     } break;
     case 0x0E: {
-        do_window_order_swap(message);
+        do_window_swap_proxy(message);
     } break;
 
     }
