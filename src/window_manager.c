@@ -1657,9 +1657,9 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
             window_manager_add_managed_window(wm, window, a_view);
         }
 
-        if (a_visible && a->id == wm->focused_window_id) {
+        if (a_visible && !b_visible && a->id == wm->focused_window_id) {
             window_manager_focus_window_with_raise(&b->application->psn, b->id, b->ref);
-        } else if (b_visible && b->id == wm->focused_window_id) {
+        } else if (b_visible && !a_visible && b->id == wm->focused_window_id) {
             window_manager_focus_window_with_raise(&a->application->psn, a->id, a->ref);
         }
     }
