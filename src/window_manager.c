@@ -645,7 +645,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             window_manager_create_window_proxy(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy);
 
             CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
-            SLSTransactionOrderWindow(transaction, context->animation_list[i].proxy.id, 1, existing_animation->proxy.id);
+            SLSTransactionOrderWindow(transaction, context->animation_list[i].proxy.id, -1, existing_animation->proxy.id);
             SLSTransactionOrderWindow(transaction, existing_animation->proxy.id, 0, 0);
             SLSTransactionCommit(transaction, 0);
             CFRelease(transaction);

@@ -779,7 +779,7 @@ static void do_window_order_swap(char *message)
     if (!b_wid) return;
 
     CFTypeRef transaction = SLSTransactionCreate(_connection);
-    SLSTransactionOrderWindow(transaction, a_wid, 1, b_wid);
+    SLSTransactionOrderWindow(transaction, a_wid, -1, b_wid);
     SLSTransactionOrderWindow(transaction, b_wid, 0, 0);
     SLSTransactionCommit(transaction, 0);
     CFRelease(transaction);
