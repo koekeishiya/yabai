@@ -72,6 +72,7 @@ extern CFTypeRef SLSTransactionCreate(int cid);
 extern CGError SLSTransactionCommit(CFTypeRef transaction, int unknown);
 extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
 extern CGError SLSTransactionSetWindowAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
+extern CGError SLSTransactionSetWindowSystemAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
 
 struct window_fade_context
 {
@@ -80,7 +81,6 @@ struct window_fade_context
     volatile float alpha;
     volatile float duration;
     volatile bool skip;
-    volatile bool abort;
 };
 
 pthread_mutex_t window_fade_lock;
@@ -636,7 +636,6 @@ static void *window_fade_thread_proc(void *data)
 {
 entry:;
     struct window_fade_context *context = (struct window_fade_context *) data;
-    context->abort = false;
     context->skip  = false;
 
     float start_alpha;
@@ -648,8 +647,7 @@ entry:;
     int frame_count = (int)(((float) total_duration / (float) frame_duration) + 1.0f);
 
     for (int frame_index = 1; frame_index <= frame_count; ++frame_index) {
-        if (context->abort) goto abort;
-        if (context->skip)  goto entry;
+        if (context->skip) goto entry;
 
         float t = (float) frame_index / (float) frame_count;
         if (t < 0.0f) t = 0.0f;
@@ -661,9 +659,8 @@ entry:;
         usleep(frame_duration*1000);
     }
 
-abort:
     pthread_mutex_lock(&window_fade_lock);
-    if (context->abort || !context->skip) {
+    if (!context->skip) {
         table_remove(&window_fade_table, &context->wid);
         pthread_mutex_unlock(&window_fade_lock);
         free(context);
@@ -699,7 +696,6 @@ static void do_window_opacity_fade(char *message)
         context->wid = wid;
         context->alpha = alpha;
         context->duration = duration;
-        context->abort = false;
         context->skip = false;
         __asm__ __volatile__ ("" ::: "memory");
 
@@ -789,18 +785,9 @@ static void do_window_swap_proxy(char *message)
     int order;
     unpack(message, order);
 
-    pthread_mutex_lock(&window_fade_lock);
-    struct window_fade_context *context = table_find(&window_fade_table, &a_wid);
-    if (context) {
-        context->abort = true;
-        __asm__ __volatile__ ("" ::: "memory");
-        usleep(8 * 1000);
-    }
-    pthread_mutex_unlock(&window_fade_lock);
-
     CFTypeRef transaction = SLSTransactionCreate(_connection);
     SLSTransactionOrderWindow(transaction, b_wid, order, a_wid);
-    SLSTransactionSetWindowAlpha(transaction, a_wid, alpha);
+    SLSTransactionSetWindowSystemAlpha(transaction, a_wid, alpha);
     SLSTransactionCommit(transaction, 0);
     CFRelease(transaction);
 }
