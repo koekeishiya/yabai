@@ -1522,6 +1522,7 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
 
     view_stack_window_node(a_view, a_node, b);
     window_manager_add_managed_window(wm, b, a_view);
+    scripting_addition_order_window(b->id, 1, a_node->window_order[1]);
 
     if (a_node->zoom) {
         window_manager_animate_window((struct window_capture) { b, a_node->zoom->area.x, a_node->zoom->area.y, a_node->zoom->area.w, a_node->zoom->area.h });

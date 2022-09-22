@@ -681,8 +681,9 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
 
 void view_stack_window_node(struct view *view, struct window_node *node, struct window *window)
 {
-    node->window_list[node->window_count] = window->id;
-    node->window_order[node->window_count] = window->id;
+    node->window_list[node->window_count]  = window->id;
+    memmove(node->window_order + 1, node->window_order, sizeof(uint32_t) * node->window_count);
+    node->window_order[0] = window->id;
     ++node->window_count;
 }
 

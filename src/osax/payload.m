@@ -805,6 +805,22 @@ static void do_window_swap_proxy(char *message)
     CFRelease(transaction);
 }
 
+static void do_window_order(char *message)
+{
+    uint32_t a_wid;
+    unpack(message, a_wid);
+    if (!a_wid) return;
+
+    int order;
+    unpack(message, order);
+
+    uint32_t b_wid;
+    unpack(message, b_wid);
+    if (!b_wid) return;
+
+    CGSOrderWindow(_connection, a_wid, order, b_wid);
+}
+
 static void do_handshake(int sockfd)
 {
     uint32_t attrib = 0;
@@ -874,6 +890,9 @@ static void handle_message(int sockfd, char *message)
     } break;
     case 0x0E: {
         do_window_swap_proxy(message);
+    } break;
+    case 0x0F: {
+        do_window_order(message);
     } break;
 
     }

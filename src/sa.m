@@ -539,3 +539,17 @@ bool scripting_addition_swap_window_proxy(uint32_t a_wid, uint32_t b_wid, float 
 
     return scripting_addition_send_bytes(bytes, length);
 }
+
+bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
+{
+    char bytes[0x100];
+
+    char length = 2;
+    pack(bytes, a_wid, length);
+    pack(bytes, order, length);
+    pack(bytes, b_wid, length);
+    bytes[1] = 0x0F;
+    bytes[0] = length-1;
+
+    return scripting_addition_send_bytes(bytes, length);
+}
