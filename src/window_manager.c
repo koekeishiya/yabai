@@ -671,6 +671,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
     for (int i = 0; i < window_count; ++i) {
         window_manager_set_window_frame(window_list[i].window, window_list[i].x, window_list[i].y, window_list[i].w, window_list[i].h);
+        border_resize(window_list[i].window, window_ax_frame(window_list[i].window));
     }
 
     pthread_t thread;
