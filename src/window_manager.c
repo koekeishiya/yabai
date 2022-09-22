@@ -560,7 +560,7 @@ void *window_manager_animate_window_list_thread_proc(void *data)
     struct window_animation_context *context = data;
     int animation_count = buf_len(context->animation_list);
 
-    ANIMATE(context->animation_connection, g_window_manager.window_animation_duration, ease_out_cubic, {
+    ANIMATE(context->animation_connection, context->animation_duration, ease_out_cubic, {
         for (int i = 0; i < animation_count; ++i) {
             if (context->animation_list[i].skip) continue;
 
@@ -599,6 +599,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     struct window_animation_context *context = malloc(sizeof(struct window_animation_context));
 
     SLSNewConnection(0, &context->animation_connection);
+    context->animation_duration = g_window_manager.window_animation_duration;
     context->animation_list = NULL;
 
     for (int i = 0; i < window_count; ++i) {
@@ -2054,7 +2055,7 @@ void window_manager_validate_and_check_for_windows_on_space(struct space_manager
     // This is necessary to make sure that we do not call the AX API for each modification to the tree.
     //
 
-    if (view_is_dirty(view)) view_flush(view);
+    if (space_is_visible(view->sid) && view_is_dirty(view)) view_flush(view);
 }
 
 void window_manager_correct_for_mission_control_changes(struct space_manager *sm, struct window_manager *wm)
@@ -2062,6 +2063,9 @@ void window_manager_correct_for_mission_control_changes(struct space_manager *sm
     int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return;
+
+    float animation_duration = g_window_manager.window_animation_duration;
+    g_window_manager.window_animation_duration = 0.0f;
 
     for (int i = 0; i < display_count; ++i) {
         uint32_t did = display_list[i];
@@ -2079,6 +2083,8 @@ void window_manager_correct_for_mission_control_changes(struct space_manager *sm
             }
         }
     }
+
+    g_window_manager.window_animation_duration = animation_duration;
 }
 
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did)

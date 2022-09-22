@@ -36,6 +36,7 @@ struct window_animation
 struct window_animation_context
 {
     int animation_connection;
+    float animation_duration;
     struct window_animation *animation_list;
 };
 
