@@ -1524,12 +1524,15 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
     window_manager_add_managed_window(wm, b, a_view);
     scripting_addition_order_window(b->id, 1, a_node->window_order[1]);
 
-    if (a_node->zoom) {
-        window_manager_animate_window((struct window_capture) { b, a_node->zoom->area.x, a_node->zoom->area.y, a_node->zoom->area.w, a_node->zoom->area.h });
-    } else {
-        window_manager_animate_window((struct window_capture) { b, a_node->area.x, a_node->area.y, a_node->area.w, a_node->area.h });
+    struct area area = a_node->zoom ? a_node->zoom->area : a_node->area;
+    if (b->border.id) {
+        area.x += g_window_manager.border_width;
+        area.y += g_window_manager.border_width;
+        area.w -= g_window_manager.border_width * 2.0f;
+        area.h -= g_window_manager.border_width * 2.0f;
     }
 
+    window_manager_animate_window((struct window_capture) { b, area.x, area.y, area.w, area.h });
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
