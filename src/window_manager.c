@@ -1587,7 +1587,7 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
                 window_node_capture_windows(a_node_rm, &window_list);
             }
 
-            if (a_node_rm != a_node_add->parent) {
+            if (a_node_rm != a_node_add && a_node_rm != a_node_add->parent) {
                 window_node_capture_windows(a_node_add, &window_list);
             }
 
