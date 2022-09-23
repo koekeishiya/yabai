@@ -77,9 +77,11 @@ SIGNAL_SEL  := <index> | LABEL
 
 DIR_SEL     := north | east | south | west
 
+FARTHEST_DIR_SEL := farthest_north | farthest_east | farthest_south | farthest_west
+
 STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent
 
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | STACK_SEL | DIR_SEL | <window id>
+WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | STACK_SEL | DIR_SEL | FARTHEST_DIR_SEL | <window id>
 
 DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1-based)>
 

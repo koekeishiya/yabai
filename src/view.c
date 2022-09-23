@@ -583,6 +583,91 @@ next:
     return best_node;
 }
 
+struct window_node *view_find_farthest_window_node_in_direction(struct view *view, struct window_node *source, int direction)
+{
+    // Maximize parallel part of direction and minimize orthogonal part of direction
+    // measured from center of source window (source_point) to center of
+    // - west border of target for DIR_WEST
+    // - east border of target for DIR_EAST
+    // - north border of target for DIR_NORTH
+    // - south border of target for DIR_SOUTH
+    // Note coordinate origin: (x=0 (vertical),y=0 (horizontal)) is at top, left corner of screen.
+
+    int best_distance_parallel = 0, best_distance_orthogonal = INT_MAX;
+    CGPoint source_point = area_center(source->area);
+
+    struct window_node *best_node = NULL;
+    struct window_node *target = window_node_find_first_leaf(view->root);
+
+    while (target) {
+        CGPoint target_point = area_center(target->area);
+
+        int distance_parallel=0, distance_orthogonal=0;
+        switch (direction) {
+            case DIR_EAST: {
+                distance_parallel = (source_point.x-(target->area.x+target->area.w))*(source_point.x-(target->area.x+target->area.w));
+                distance_orthogonal = (source_point.y-target_point.y)*(source_point.y-target_point.y);
+            } break;
+            case DIR_WEST: {
+                distance_parallel = (source_point.x-target->area.x)*(source_point.x-target->area.x);
+                distance_orthogonal = (source_point.y-target_point.y)*(source_point.y-target_point.y);
+            } break;
+            case DIR_NORTH: {
+                distance_parallel = (source_point.y-target->area.y)*(source_point.y-target->area.y);
+                distance_orthogonal = (source_point.x-target_point.x)*(source_point.x-target_point.x);
+            } break;
+            case DIR_SOUTH: {
+                distance_parallel = (source_point.y-(target->area.y+target->area.h))*(source_point.y-(target->area.y+target->area.h));
+                distance_orthogonal = (source_point.x-target_point.x)*(source_point.x-target_point.x);
+            } break;
+        }
+
+        // Skip if parallel dir is not farther and orthogonal dir is not closer
+        if (distance_parallel <= best_distance_parallel &&
+            distance_orthogonal >= best_distance_orthogonal) goto next;
+
+        switch (direction) {
+            case DIR_EAST: {
+                // Accept only if target is actually in the east: compare left of target with right of source
+                if (target->area.x >= source->area.x + source->area.w) {
+                    best_node = target;
+                    best_distance_parallel = distance_parallel;
+                    best_distance_orthogonal = distance_orthogonal;
+                }
+            } break;
+            case DIR_SOUTH: {
+                // Accept only if target is actually in the south: compare top of target with bottom of source
+                if (target->area.y >= source->area.y + source->area.h) {
+                    best_node = target;
+                    best_distance_parallel = distance_parallel;
+                    best_distance_orthogonal = distance_orthogonal;
+                }
+            } break;
+            case DIR_WEST: {
+                // Accept only if target is actually in the west: compare right of target with left of source
+                if (target->area.x + target->area.w <= source->area.x) {
+                    best_node = target;
+                    best_distance_parallel = distance_parallel;
+                    best_distance_orthogonal = distance_orthogonal;
+                }
+            } break;
+            case DIR_NORTH: {
+                // Accept only if target is actually in the north: compare bottom of target with top of source
+                if (target->area.y + target->area.h <= source->area.y) {
+                    best_node = target;
+                    best_distance_parallel = distance_parallel;
+                    best_distance_orthogonal = distance_orthogonal;
+                }
+            } break;
+        }
+
+next:
+        target = window_node_find_next_leaf(target);
+    }
+
+    return best_node;
+}
+
 struct window_node *view_find_window_node(struct view *view, uint32_t window_id)
 {
     struct window_node *node = window_node_find_first_leaf(view->root);
