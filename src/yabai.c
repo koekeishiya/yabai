@@ -15,9 +15,9 @@
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
 #define SCRPT_ADD_LOAD_OPT      "--load-sa"
 
-#define MAJOR  4
+#define MAJOR  5
 #define MINOR  0
-#define PATCH  4
+#define PATCH  0
 
 struct event_loop g_event_loop;
 void *g_workspace_context;
