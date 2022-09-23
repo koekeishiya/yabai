@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Support for animating window move/resize operations (*config window_animation_duration*) [#148](https://github.com/koekeishiya/yabai/issues/148)
 - Command to manually specify the default *split_type* [#1423](https://github.com/koekeishiya/yabai/issues/1423)
 - Window borders are now placed below and outside the window; new commands to specify hidpi, blur to act as a backdrop, and corner radius [#1430](https://github.com/koekeishiya/yabai/issues/1430)
+- Add *split-child* to output of window query and introduce new options for WINDOW_SEL: *sibling*, *first_nephew*, *second_nephew*, *uncle*, *first_cousin*, *second_cousin* [#192](https://github.com/koekeishiya/yabai/issues/192)
 
 ### Changed
 - Implemented a workaround to support *window_opacity_duration*, bypassing the Apple bug [#1406](https://github.com/koekeishiya/yabai/issues/1406)

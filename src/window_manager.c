@@ -1106,6 +1106,99 @@ struct window *window_manager_find_smallest_managed_window(struct space_manager 
     return best_id ? window_manager_find_window(wm, best_id) : NULL;
 }
 
+struct window *window_manager_find_sibling_for_managed_window(struct window_manager *wm, struct window *window)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node || !node->parent) return NULL;
+
+    struct window_node *sibling_node = window_node_is_left_child(node) ? node->parent->right : node->parent->left;
+    if (!window_node_is_leaf(sibling_node)) return NULL;
+
+    return window_manager_find_window(wm, sibling_node->window_order[0]);
+}
+
+struct window *window_manager_find_first_nephew_for_managed_window(struct window_manager *wm, struct window *window)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node || !node->parent) return NULL;
+
+    struct window_node *sibling_node = window_node_is_left_child(node) ? node->parent->right : node->parent->left;
+    if (window_node_is_leaf(sibling_node) || !window_node_is_leaf(sibling_node->left)) return NULL;
+
+    return window_manager_find_window(wm, sibling_node->left->window_order[0]);
+}
+
+struct window *window_manager_find_second_nephew_for_managed_window(struct window_manager *wm, struct window *window)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node || !node->parent) return NULL;
+
+    struct window_node *sibling_node = window_node_is_left_child(node) ? node->parent->right : node->parent->left;
+    if (window_node_is_leaf(sibling_node) || !window_node_is_leaf(sibling_node->right)) return NULL;
+
+    return window_manager_find_window(wm, sibling_node->right->window_order[0]);
+}
+
+struct window *window_manager_find_uncle_for_managed_window(struct window_manager *wm, struct window *window)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node || !node->parent) return NULL;
+
+    struct window_node *grandparent = node->parent->parent;
+    if (!grandparent) return NULL;
+
+    struct window_node *uncle_node = window_node_is_left_child(node->parent) ? grandparent->right : grandparent->left;
+    if (!window_node_is_leaf(uncle_node)) return NULL;
+
+    return window_manager_find_window(wm, uncle_node->window_order[0]);
+}
+
+struct window *window_manager_find_first_cousin_for_managed_window(struct window_manager *wm, struct window *window)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node || !node->parent) return NULL;
+
+    struct window_node *grandparent = node->parent->parent;
+    if (!grandparent) return NULL;
+
+    struct window_node *uncle_node = window_node_is_left_child(node->parent) ? grandparent->right : grandparent->left;
+    if (window_node_is_leaf(uncle_node) || !window_node_is_leaf(uncle_node->left)) return NULL;
+
+    return window_manager_find_window(wm, uncle_node->left->window_order[0]);
+}
+
+struct window *window_manager_find_second_cousin_for_managed_window(struct window_manager *wm, struct window *window)
+{
+    struct view *view = window_manager_find_managed_window(wm, window);
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node || !node->parent) return NULL;
+
+    struct window_node *grandparent = node->parent->parent;
+    if (!grandparent) return NULL;
+
+    struct window_node *uncle_node = window_node_is_left_child(node->parent) ? grandparent->right : grandparent->left;
+    if (window_node_is_leaf(uncle_node) || !window_node_is_leaf(uncle_node->right)) return NULL;
+
+    return window_manager_find_window(wm, uncle_node->right->window_order[0]);
+}
+
 static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     uint8_t bytes1[0xf8] = { [0x04] = 0xf8, [0x08] = 0x01, [0x3a] = 0x10 };

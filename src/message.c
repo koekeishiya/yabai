@@ -142,6 +142,12 @@ extern bool g_verbose;
 
 #define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
 #define ARGUMENT_WINDOW_SEL_SMALLEST  "smallest"
+#define ARGUMENT_WINDOW_SEL_SIBLING   "sibling"
+#define ARGUMENT_WINDOW_SEL_FNEPHEW   "first_nephew"
+#define ARGUMENT_WINDOW_SEL_SNEPHEW   "second_nephew"
+#define ARGUMENT_WINDOW_SEL_UNCLE     "uncle"
+#define ARGUMENT_WINDOW_SEL_FCOUSIN   "first_cousin"
+#define ARGUMENT_WINDOW_SEL_SCOUSIN   "second_cousin"
 #define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
 #define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
 #define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
@@ -826,6 +832,72 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
                 result.window = area_window;
             } else {
                 daemon_fail(rsp, "could not locate window with the smallest area.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_WINDOW_SEL_SIBLING)) {
+            if (acting_window) {
+                struct window *sibling_window = window_manager_find_sibling_for_managed_window(&g_window_manager, acting_window);
+                if (sibling_window) {
+                    result.window = sibling_window;
+                } else {
+                    daemon_fail(rsp, "could not locate sibling of window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_WINDOW_SEL_FNEPHEW)) {
+            if (acting_window) {
+                struct window *nephew_window = window_manager_find_first_nephew_for_managed_window(&g_window_manager, acting_window);
+                if (nephew_window) {
+                    result.window = nephew_window;
+                } else {
+                    daemon_fail(rsp, "could not locate first nephew of window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_WINDOW_SEL_SNEPHEW)) {
+            if (acting_window) {
+                struct window *nephew_window = window_manager_find_second_nephew_for_managed_window(&g_window_manager, acting_window);
+                if (nephew_window) {
+                    result.window = nephew_window;
+                } else {
+                    daemon_fail(rsp, "could not locate second nephew of window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_WINDOW_SEL_UNCLE)) {
+            if (acting_window) {
+                struct window *uncle_window = window_manager_find_uncle_for_managed_window(&g_window_manager, acting_window);
+                if (uncle_window) {
+                    result.window = uncle_window;
+                } else {
+                    daemon_fail(rsp, "could not locate uncle of window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_WINDOW_SEL_FCOUSIN)) {
+            if (acting_window) {
+                struct window *cousin_window = window_manager_find_first_cousin_for_managed_window(&g_window_manager, acting_window);
+                if (cousin_window) {
+                    result.window = cousin_window;
+                } else {
+                    daemon_fail(rsp, "could not locate first cousin of window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_WINDOW_SEL_SCOUSIN)) {
+            if (acting_window) {
+                struct window *cousin_window = window_manager_find_second_cousin_for_managed_window(&g_window_manager, acting_window);
+                if (cousin_window) {
+                    result.window = cousin_window;
+                } else {
+                    daemon_fail(rsp, "could not locate second cousin of window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
             }
         } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_PREV)) {
             if (acting_window) {

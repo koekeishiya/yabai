@@ -129,6 +129,10 @@ void window_serialize(FILE *rsp, struct window *window)
 
     char split[MAXLEN];
     snprintf(split, sizeof(split), "%s", window_node_split_str[node && node->parent ? node->parent->split : 0]);
+
+    char child[MAXLEN];
+    snprintf(child, sizeof(child), "%s", window_node_child_str[node ? window_node_is_left_child(node) ? CHILD_FIRST : CHILD_SECOND : CHILD_NONE]);
+
     bool zoom_parent = node && node->zoom && node->zoom == node->parent;
     bool zoom_fullscreen = node && node->zoom && node->zoom == view->root;
     int stack_index = node && node->window_count > 1 ? window_node_index_of_window(node, window->id)+1 : 0;
@@ -148,6 +152,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"level\":%d,\n"
             "\t\"opacity\":%.4f,\n"
             "\t\"split-type\":\"%s\",\n"
+            "\t\"split-child\":\"%s\",\n"
             "\t\"stack-index\":%d,\n"
             "\t\"can-move\":%s,\n"
             "\t\"can-resize\":%s,\n"
@@ -178,6 +183,7 @@ void window_serialize(FILE *rsp, struct window *window)
             window_level(window),
             opacity,
             split,
+            child,
             stack_index,
             json_bool(window_can_move(window)),
             json_bool(window_can_resize(window)),
