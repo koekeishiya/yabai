@@ -23,6 +23,7 @@ struct window_proxy
     CGContextRef context;
     float tx, ty, tw, th;
     CGRect frame;
+    int level;
     CFArrayRef image;
 };
 

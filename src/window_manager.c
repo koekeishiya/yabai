@@ -511,16 +511,13 @@ void window_manager_resize_window(struct window *window, float width, float heig
     CFRelease(size_ref);
 }
 
-static void window_manager_create_window_proxy(int animation_connection, uint32_t wid, struct window_proxy *proxy)
+static void window_manager_create_window_proxy(int animation_connection, struct window_proxy *proxy)
 {
     if (!proxy->image) return;
 
     CFTypeRef frame_region;
     CGSNewRegionWithRect(&proxy->frame, &frame_region);
     SLSNewWindow(animation_connection, 2, 0, 0, frame_region, &proxy->id);
-
-    int level = 0;
-    SLSGetWindowLevel(animation_connection, wid, &level);
 
     uint64_t tag = 1ULL << 46;
     SLSSetWindowTags(animation_connection, proxy->id, &tag, 64);
@@ -529,7 +526,7 @@ static void window_manager_create_window_proxy(int animation_connection, uint32_
     SLSSetWindowOpacity(animation_connection, proxy->id, 0);
     SLSSetWindowResolution(animation_connection, proxy->id, 2.0f);
     SLSSetWindowAlpha(animation_connection, proxy->id, 1.0f);
-    SLSSetWindowLevel(animation_connection, proxy->id, level);
+    SLSSetWindowLevel(animation_connection, proxy->id, proxy->level);
     proxy->context = SLWindowContextCreate(animation_connection, proxy->id, 0);
 
     CGRect frame = { {0, 0}, proxy->frame.size };
@@ -643,10 +640,11 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             context->animation_list[i].proxy.frame.origin.y    = (int)(existing_animation->proxy.ty);
             context->animation_list[i].proxy.frame.size.width  = (int)(existing_animation->proxy.tw);
             context->animation_list[i].proxy.frame.size.height = (int)(existing_animation->proxy.th);
+            context->animation_list[i].proxy.level             = existing_animation->proxy.level;
             context->animation_list[i].proxy.image             = CFRetain(existing_animation->proxy.image);
             __asm__ __volatile__ ("" ::: "memory");
 
-            window_manager_create_window_proxy(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy);
+            window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
 
             CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
             SLSTransactionOrderWindow(transaction, context->animation_list[i].proxy.id, 1, context->animation_list[i].wid);
@@ -656,9 +654,10 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
             window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
         } else {
+            SLSGetWindowLevel(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.level);
             SLSGetWindowBounds(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.frame);
             context->animation_list[i].proxy.image = SLSHWCaptureWindowList(context->animation_connection, &context->animation_list[i].wid, 1, (1 << 11) | (1 << 8));
-            window_manager_create_window_proxy(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy);
+            window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
             scripting_addition_swap_window_proxy(context->animation_list[i].wid, context->animation_list[i].proxy.id, 0.0f, 1);
         }
 
