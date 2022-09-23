@@ -249,10 +249,18 @@ static void window_node_split(struct view *view, struct window_node *node, struc
     struct window_node *right = malloc(sizeof(struct window_node));
     memset(right, 0, sizeof(struct window_node));
 
+    struct window_node *zoom = !node->zoom
+                             ? NULL
+                             : node->zoom == node->parent
+                             ? node
+                             : view->root;
+
     if (window_node_get_child(node) == CHILD_SECOND) {
         memcpy(left->window_list, node->window_list, sizeof(uint32_t) * node->window_count);
         memcpy(left->window_order, node->window_order, sizeof(uint32_t) * node->window_count);
         left->window_count = node->window_count;
+        left->zoom = zoom;
+
         right->window_list[0] = window->id;
         right->window_order[0] = window->id;
         right->window_count = 1;
@@ -260,6 +268,8 @@ static void window_node_split(struct view *view, struct window_node *node, struc
         memcpy(right->window_list, node->window_list, sizeof(uint32_t) * node->window_count);
         memcpy(right->window_order, node->window_order, sizeof(uint32_t) * node->window_count);
         right->window_count = node->window_count;
+        right->zoom = zoom;
+
         left->window_list[0] = window->id;
         left->window_order[0] = window->id;
         left->window_count = 1;
@@ -301,16 +311,6 @@ static void window_node_destroy(struct window_node *node)
 
     insert_feedback_destroy(node);
     free(node);
-}
-
-static void window_node_clear_zoom(struct window_node *node)
-{
-    node->zoom = NULL;
-
-    if (!window_node_is_leaf(node)) {
-        window_node_clear_zoom(node->left);
-        window_node_clear_zoom(node->right);
-    }
 }
 
 void window_node_capture_windows(struct window_node *node, struct window_capture **window_list)
@@ -646,7 +646,11 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
 
     parent->left      = NULL;
     parent->right     = NULL;
-    parent->zoom      = NULL;
+    parent->zoom      = !child->zoom
+                      ? NULL
+                      : child->zoom == parent
+                      ? parent->parent
+                      : view->root;
 
     if (child->insert_dir) {
         parent->feedback_window = child->feedback_window;
@@ -657,16 +661,24 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
     }
 
     if (window_node_is_intermediate(child) && !window_node_is_leaf(child)) {
-        parent->left = child->left;
-        parent->left->parent = parent;
-        parent->left->zoom = NULL;
+        parent->left          = child->left;
+        parent->left->parent  = parent;
+        parent->left->zoom    = !child->left->zoom
+                              ? NULL
+                              : child->left->zoom == child
+                              ? parent
+                              : view->root;
 
-        parent->right = child->right;
+        parent->right         = child->right;
         parent->right->parent = parent;
-        parent->right->zoom = NULL;
+        parent->right->zoom   = !child->right->zoom
+                              ? NULL
+                              : child->right->zoom == child
+                              ? parent
+                              : view->root;
 
-        window_node_clear_zoom(parent);
-        window_node_update(view, parent);
+        window_node_update(view, parent->left);
+        window_node_update(view, parent->right);
     }
 
     insert_feedback_destroy(node);

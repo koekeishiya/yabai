@@ -127,7 +127,6 @@ void mouse_drop_action_warp(struct space_manager *sm, struct window_manager *wm,
 void mouse_drop_no_target(struct space_manager *sm, struct window_manager *wm, struct view *src_view, struct view *dst_view, struct window *window, struct window_node *node)
 {
     if (src_view->sid == dst_view->sid) {
-        node->zoom = NULL;
         window_node_flush(node);
     } else {
         space_manager_untile_window(sm, src_view, window);
