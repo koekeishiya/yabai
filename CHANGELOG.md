@@ -22,6 +22,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fix border size issue when moving a window to a different display on macOS Big Sur [#1229](https://github.com/koekeishiya/yabai/issues/1229)
 - Check Dock.app isFinishedLaunching property before attempting to inject scripting addition [#749](https://github.com/koekeishiya/yabai/issues/749)
 - Properly update window ordering when a window is added to the top of a stack [#1311](https://github.com/koekeishiya/yabai/issues/1311)
+- Properly update insertion point in a window stack when the marked window is removed from the stack [#1275](https://github.com/koekeishiya/yabai/issues/1275)
 
 ### Removed
 - Removed support for macOS High Sierra, Mojave, and Catalina.

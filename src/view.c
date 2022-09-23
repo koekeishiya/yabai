@@ -619,6 +619,10 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
         assert(removed_order);
         --node->window_count;
 
+        if (view->insertion_point == window->id) {
+            view->insertion_point = node->window_order[0];
+        }
+
         return NULL;
     }
 
