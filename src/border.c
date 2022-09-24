@@ -3,8 +3,8 @@ extern struct window_manager g_window_manager;
 
 static void border_update_window_notifications(uint32_t wid)
 {
-    int window_count = 0;
-    uint32_t window_list[1024] = {};
+    int window_count = 1;
+    uint32_t window_list[1024] = {0};
 
     if (wid) window_list[window_count++] = wid;
 

@@ -1,6 +1,7 @@
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 #include <objc/objc-runtime.h>
+#include <mach/mach_time.h>
 
 #include <stdio.h>
 #include <stdlib.h>

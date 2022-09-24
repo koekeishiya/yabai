@@ -33,6 +33,7 @@ struct window_animation
     float x, y, w, h;
     struct window_proxy proxy;
     volatile bool skip;
+    bool spawned;
 };
 
 struct window_animation_context

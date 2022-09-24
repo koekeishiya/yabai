@@ -564,14 +564,18 @@ void *window_manager_animate_window_list_thread_proc(void *data)
         for (int i = 0; i < animation_count; ++i) {
             if (context->animation_list[i].skip) continue;
 
-            context->animation_list[i].proxy.tx = lerp(context->animation_list[i].proxy.frame.origin.x,    mt, context->animation_list[i].x);
-            context->animation_list[i].proxy.ty = lerp(context->animation_list[i].proxy.frame.origin.y,    mt, context->animation_list[i].y);
-            context->animation_list[i].proxy.tw = lerp(context->animation_list[i].proxy.frame.size.width,  mt, context->animation_list[i].w);
-            context->animation_list[i].proxy.th = lerp(context->animation_list[i].proxy.frame.size.height, mt, context->animation_list[i].h);
+            if (context->animation_list[i].spawned) {
+                scripting_addition_set_system_alpha(context->animation_list[i].wid, lerp(0.0f, t, 1.0f));
+            } else {
+                context->animation_list[i].proxy.tx = lerp(context->animation_list[i].proxy.frame.origin.x,    mt, context->animation_list[i].x);
+                context->animation_list[i].proxy.ty = lerp(context->animation_list[i].proxy.frame.origin.y,    mt, context->animation_list[i].y);
+                context->animation_list[i].proxy.tw = lerp(context->animation_list[i].proxy.frame.size.width,  mt, context->animation_list[i].w);
+                context->animation_list[i].proxy.th = lerp(context->animation_list[i].proxy.frame.size.height, mt, context->animation_list[i].h);
 
-            CGAffineTransform transform = CGAffineTransformMakeTranslation(-context->animation_list[i].proxy.tx, -context->animation_list[i].proxy.ty);
-            CGAffineTransform scale = CGAffineTransformMakeScale(context->animation_list[i].proxy.frame.size.width / context->animation_list[i].proxy.tw, context->animation_list[i].proxy.frame.size.height / context->animation_list[i].proxy.th);
-            SLSTransactionSetWindowTransform(transaction, context->animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
+                CGAffineTransform transform = CGAffineTransformMakeTranslation(-context->animation_list[i].proxy.tx, -context->animation_list[i].proxy.ty);
+                CGAffineTransform scale = CGAffineTransformMakeScale(context->animation_list[i].proxy.frame.size.width / context->animation_list[i].proxy.tw, context->animation_list[i].proxy.frame.size.height / context->animation_list[i].proxy.th);
+                SLSTransactionSetWindowTransform(transaction, context->animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
+            }
         }
     });
 
@@ -581,8 +585,10 @@ void *window_manager_animate_window_list_thread_proc(void *data)
         if (context->animation_list[i].skip) continue;
 
         table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
-        scripting_addition_swap_window_proxy(context->animation_list[i].wid, context->animation_list[i].proxy.id, 1.0f, 0);
-        window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
+        if (!context->animation_list[i].spawned) {
+            scripting_addition_swap_window_proxy(context->animation_list[i].wid, context->animation_list[i].proxy.id, 1.0f, 0);
+            window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
+        }
     }
     SLSReenableUpdate(context->animation_connection);
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
@@ -613,7 +619,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
                 .w     = capture->w + g_window_manager.border_width * 2.0f,
                 .h     = capture->h + g_window_manager.border_width * 2.0f,
                 .proxy = {0},
-                .skip  = false
+                .skip  = false,
+                .spawned = false
             }));
         }
 
@@ -624,7 +631,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             .w     = capture->w,
             .h     = capture->h,
             .proxy = {0},
-            .skip  = false
+            .skip  = false,
+            .spawned = window_check_flag(capture->window, WINDOW_SPAWNED)
         }));
     }
 
@@ -632,7 +640,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     SLSDisableUpdate(context->animation_connection);
     for (int i = 0; i < buf_len(context->animation_list); ++i) {
         struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
-        if (existing_animation) {
+        if (existing_animation && !existing_animation->spawned) {
             table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
 
             existing_animation->skip = true;
@@ -654,11 +662,17 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
             window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
         } else {
-            SLSGetWindowLevel(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.level);
-            SLSGetWindowBounds(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.frame);
-            context->animation_list[i].proxy.image = SLSHWCaptureWindowList(context->animation_connection, &context->animation_list[i].wid, 1, (1 << 11) | (1 << 8));
-            window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
-            scripting_addition_swap_window_proxy(context->animation_list[i].wid, context->animation_list[i].proxy.id, 0.0f, 1);
+            if (!context->animation_list[i].spawned) {
+                if (existing_animation && existing_animation->spawned) {
+                    existing_animation->skip = true;
+                    __asm__ __volatile__ ("" ::: "memory");
+                }
+                SLSGetWindowLevel(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.level);
+                SLSGetWindowBounds(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.frame);
+                context->animation_list[i].proxy.image = SLSHWCaptureWindowList(context->animation_connection, &context->animation_list[i].wid, 1, (1 << 11) | (1 << 8));
+                window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
+                scripting_addition_swap_window_proxy(context->animation_list[i].wid, context->animation_list[i].proxy.id, 0.0f, 1);
+            }
         }
 
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
@@ -669,6 +683,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     for (int i = 0; i < window_count; ++i) {
         window_manager_set_window_frame(window_list[i].window, window_list[i].x, window_list[i].y, window_list[i].w, window_list[i].h);
         border_resize(window_list[i].window, window_ax_frame(window_list[i].window));
+        window_clear_flag(window_list[i].window, WINDOW_SPAWNED);
     }
 
     pthread_t thread;
@@ -683,6 +698,10 @@ void window_manager_animate_window_list(struct window_capture *window_list, int 
     } else {
         for (int i = 0; i < window_count; ++i) {
             window_manager_set_window_frame(window_list[i].window, window_list[i].x, window_list[i].y, window_list[i].w, window_list[i].h);
+            if (window_check_flag(window_list[i].window, WINDOW_SPAWNED)) {
+                window_clear_flag(window_list[i].window, WINDOW_SPAWNED);
+                scripting_addition_set_system_alpha(window_list[i].window->id, 1.0f);
+            }
         }
     }
 }
@@ -693,6 +712,10 @@ void window_manager_animate_window(struct window_capture capture)
         window_manager_animate_window_list_async(&capture, 1);
     } else {
         window_manager_set_window_frame(capture.window, capture.x, capture.y, capture.w, capture.h);
+        if (window_check_flag(capture.window, WINDOW_SPAWNED)) {
+            window_clear_flag(capture.window, WINDOW_SPAWNED);
+            scripting_addition_set_system_alpha(capture.window->id, 1.0f);
+        }
     }
 }
 
@@ -1434,7 +1457,10 @@ struct window **window_manager_add_application_windows(struct space_manager *sm,
         if (!window_id || window_manager_find_window(wm, window_id)) continue;
 
         struct window *window = window_manager_create_and_add_window(sm, wm, application, CFRetain(window_ref), window_id);
-        if (window) list[(*count)++] = window;
+        if (window) {
+            window_set_flag(window, WINDOW_SPAWNED);
+            list[(*count)++] = window;
+        }
     }
 
     CFRelease(window_list);

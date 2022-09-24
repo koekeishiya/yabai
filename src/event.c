@@ -135,6 +135,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_LAUNCHED)
             view_list[view_count++] = view;
 
             prev_window_id = window->id;
+        } else {
+            scripting_addition_set_system_alpha(window_list[i]->id, 1.0f);
         }
 
 next:
@@ -444,10 +446,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_APPLICATION_HIDDEN)
 
 static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 {
-    uint32_t window_id = ax_window_id(context);
-    if (!window_id) goto err;
-
-    struct window *existing_window = window_manager_find_window(&g_window_manager, window_id);
+    struct window *existing_window = window_manager_find_window(&g_window_manager, param1);
     if (existing_window) goto err;
 
     pid_t window_pid = ax_window_pid(context);
@@ -456,8 +455,10 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
     struct application *application = window_manager_find_application(&g_window_manager, window_pid);
     if (!application) goto err;
 
-    struct window *window = window_manager_create_and_add_window(&g_space_manager, &g_window_manager, application, context, window_id);
+    struct window *window = window_manager_create_and_add_window(&g_space_manager, &g_window_manager, application, context, param1);
     if (!window) goto out;
+
+    window_set_flag(window, WINDOW_SPAWNED);
 
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
         uint64_t sid;
@@ -472,6 +473,8 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 
         struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, sid);
         window_manager_add_managed_window(&g_window_manager, window, view);
+    } else {
+        scripting_addition_set_system_alpha(param1, 1.0f);
     }
 
     event_signal_push(SIGNAL_WINDOW_CREATED, window);
@@ -480,6 +483,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_WINDOW_CREATED)
 err:
     CFRelease(context);
 out:
+    scripting_addition_set_system_alpha(param1, 1.0f);
     return EVENT_FAILURE;
 }
 

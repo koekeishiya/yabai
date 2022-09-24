@@ -49,6 +49,7 @@ enum window_flag
     WINDOW_MINIMIZE   = 1 << 2,
     WINDOW_FLOAT      = 1 << 3,
     WINDOW_STICKY     = 1 << 4,
+    WINDOW_SPAWNED    = 1 << 5,
 };
 
 #define window_check_flag(w, x) ((w)->flags  &  (x))

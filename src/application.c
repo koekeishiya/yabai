@@ -3,7 +3,8 @@ extern struct event_loop g_event_loop;
 static OBSERVER_CALLBACK(application_notification_handler)
 {
     if (CFEqual(notification, kAXCreatedNotification)) {
-        event_loop_post(&g_event_loop, WINDOW_CREATED, (void *) CFRetain(element), 0, NULL);
+        uint32_t wid = ax_window_id(element);
+        if (wid) event_loop_post(&g_event_loop, WINDOW_CREATED, (void *) CFRetain(element), wid, NULL);
     } else if (CFEqual(notification, kAXFocusedWindowChangedNotification)) {
         event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) ax_window_id(element), 0, NULL);
     } else if (CFEqual(notification, kAXWindowMovedNotification)) {

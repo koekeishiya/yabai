@@ -808,6 +808,21 @@ static void do_window_order(char *message)
     CGSOrderWindow(_connection, a_wid, order, b_wid);
 }
 
+static void do_window_system_alpha(char *message)
+{
+    uint32_t wid;
+    unpack(message, wid);
+    if (!wid) return;
+
+    float alpha;
+    unpack(message, alpha);
+
+    CFTypeRef transaction = SLSTransactionCreate(_connection);
+    SLSTransactionSetWindowSystemAlpha(transaction, wid, alpha);
+    SLSTransactionCommit(transaction, 0);
+    CFRelease(transaction);
+}
+
 static void do_handshake(int sockfd)
 {
     uint32_t attrib = 0;
@@ -880,6 +895,9 @@ static void handle_message(int sockfd, char *message)
     } break;
     case 0x0F: {
         do_window_order(message);
+    } break;
+    case 0x10: {
+        do_window_system_alpha(message);
     } break;
 
     }

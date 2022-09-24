@@ -206,9 +206,78 @@ static inline void init_misc_settings(void)
 }
 #pragma clang diagnostic pop
 
+static inline uint64_t get_time(void) {
+    return mach_absolute_time();
+}
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static inline uint64_t get_time_elapsed_ns(uint64_t start, uint64_t end)
+{
+    uint64_t elapsed = end - start;
+    Nanoseconds nano = AbsoluteToNanoseconds(*(AbsoluteTime *) &elapsed);
+    return *(uint64_t *) &nano;
+}
+#pragma clang diagnostic pop
+
+static inline double get_time_elapsed_ms(uint64_t start, uint64_t end)
+{
+    uint64_t ns = get_time_elapsed_ns(start, end);
+    return (double)(ns / 1000000.0);
+}
+
+static bool real_window(CFArrayRef window_ref)
+{
+    bool result = false;
+    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);
+    CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
+
+    while (SLSWindowIteratorAdvance(iterator)) {
+        uint64_t tags = SLSWindowIteratorGetTags(iterator);
+        uint64_t attributes = SLSWindowIteratorGetAttributes(iterator);
+        uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
+
+        if (((parent_wid == 0) && ((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000))))) {
+            result = true;
+        }
+    }
+
+    CFRelease(query);
+    CFRelease(iterator);
+    return result;
+}
+
+static void *window_created_thread_proc(void *data)
+{
+    uint32_t wid        = (uint32_t)(uintptr_t) data;
+    NSArray *window_ref = @[@(wid)];
+    uint64_t start_time = get_time();
+
+    for (;;) {
+        if (real_window((__bridge CFArrayRef) window_ref)) {
+            scripting_addition_set_system_alpha(wid, 0.0f);
+            return NULL;
+        }
+
+        if (get_time_elapsed_ms(start_time, get_time()) > 500.0f) break;
+    }
+
+    return NULL;
+}
+
 static CONNECTION_CALLBACK(connection_handler)
 {
-    if (type == 1204) {
+    if (type == 811) {
+        uint32_t wid = (*(uint32_t *) data);
+        NSArray *window_ref = @[@(wid)];
+        if (real_window((__bridge CFArrayRef) window_ref)) {
+            scripting_addition_set_system_alpha(wid, 0.0f);
+        } else {
+            pthread_t thread;
+            pthread_create(&thread, NULL, &window_created_thread_proc, (void *)(uintptr_t) wid);
+            pthread_detach(thread);
+        }
+    } else if (type == 1204) {
         event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
     } else if (type == 806) {
         event_loop_post(&g_event_loop, SLS_WINDOW_MOVED, (void *) (intptr_t) (*(uint32_t *) data), 0, NULL);
@@ -314,11 +383,15 @@ int main(int argc, char **argv)
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     }
 
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 811, NULL);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 806, NULL);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 807, NULL);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 808, NULL);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 815, NULL);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 816, NULL);
+
+    uint32_t zero = 0;
+    SLSRequestNotificationsForWindows(g_connection, &zero, 1);
 
     if (!message_loop_begin(g_socket_file)) {
         error("yabai: could not initialize message_loop! abort..\n");

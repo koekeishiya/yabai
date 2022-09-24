@@ -25,5 +25,6 @@ bool scripting_addition_focus_window(uint32_t wid);
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h);
 bool scripting_addition_swap_window_proxy(uint32_t a_wid, uint32_t b_wid, float opacity, int order);
 bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid);
+bool scripting_addition_set_system_alpha(uint32_t wid, float opacity);
 
 #endif
