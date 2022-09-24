@@ -332,13 +332,13 @@ int scripting_addition_load(void)
         goto out;
     }
 
-    if (!scripting_addition_is_installed()) {
-        result = scripting_addition_install();
+    if (!scripting_addition_is_sip_friendly()) {
+        result = 1;
         goto out;
     }
 
-    if (!scripting_addition_is_sip_friendly()) {
-        result = 1;
+    if (scripting_addition_check() != 0) {
+        result = scripting_addition_install();
         goto out;
     }
 

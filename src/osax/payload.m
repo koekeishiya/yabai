@@ -962,6 +962,7 @@ static bool start_daemon(char *socket_path)
     return true;
 }
 
+__attribute__((constructor))
 void load_payload(void)
 {
     NSLog(@"[yabai-sa] loaded payload..");
@@ -981,14 +982,3 @@ void load_payload(void)
         NSLog(@"[yabai-sa] failed to spawn thread..");
     }
 }
-
-@interface Payload : NSObject
-+ (void) load;
-@end
-
-@implementation Payload
-+ (void) load
-{
-    load_payload();
-}
-@end
