@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Only allow *window_animation_duration* to be set if System Integrity Protection is partially disabled [#148](https://github.com/koekeishiya/yabai/issues/148)
+- Output useless dummy .plist file for scripting addition to silence weird AppleScript warning [#1449](https://github.com/koekeishiya/yabai/issues/1449)
 
 ## [5.0.0] - 2022-09-23
 ### Added
