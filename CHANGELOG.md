@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.1] - 2022-09-26
 ### Changed
 - Only allow *window_animation_duration* to be set if System Integrity Protection is partially disabled [#148](https://github.com/koekeishiya/yabai/issues/148)
 - Output useless dummy .plist file for scripting addition to silence weird AppleScript warning [#1449](https://github.com/koekeishiya/yabai/issues/1449)
@@ -432,7 +434,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.1...HEAD
+[5.0.1]: https://github.com/koekeishiya/yabai/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/koekeishiya/yabai/compare/v4.0.4...v5.0.0
 [4.0.4]: https://github.com/koekeishiya/yabai/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/koekeishiya/yabai/compare/v4.0.2...v4.0.3
