@@ -307,14 +307,10 @@ static bool scripting_addition_is_sip_friendly(void)
     csr_get_active_config(&config);
 
     if (!(config & CSR_ALLOW_UNRESTRICTED_FS)) {
-        warn("yabai: System Integrity Protection: Filesystem Protections must be disabled!\n");
-        notify("scripting-addition", "System Integrity Protection: Filesystem Protections must be disabled!");
         return false;
     }
 
     if (!(config & CSR_ALLOW_TASK_FOR_PID)) {
-        warn("yabai: System Integrity Protection: Debugging Restrictions must be disabled!\n");
-        notify("scripting-addition", "System Integrity Protection: Debugging Restrictions must be disabled!");
         return false;
     }
 
@@ -341,6 +337,8 @@ static bool mach_loader_inject_payload(void)
 int scripting_addition_uninstall(void)
 {
     if (!scripting_addition_is_sip_friendly()) {
+        warn("yabai: System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!\n");
+        notify("scripting-addition", "System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!");
         return 1;
     }
 
@@ -368,6 +366,8 @@ int scripting_addition_load(void)
     }
 
     if (!scripting_addition_is_sip_friendly()) {
+        warn("yabai: System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!\n");
+        notify("scripting-addition", "System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!");
         result = 1;
         goto out;
     }
