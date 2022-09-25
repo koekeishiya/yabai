@@ -11,12 +11,42 @@ static char osax_base_dir[MAXLEN];
 static char osax_contents_dir[MAXLEN];
 static char osax_contents_macos_dir[MAXLEN];
 static char osax_contents_res_dir[MAXLEN];
+static char osax_info_plist[MAXLEN];
 static char osax_payload_dir[MAXLEN];
 static char osax_payload_contents_dir[MAXLEN];
 static char osax_payload_contents_macos_dir[MAXLEN];
 static char osax_payload_plist[MAXLEN];
 static char osax_bin_payload[MAXLEN];
 static char osax_bin_loader[MAXLEN];
+
+static char sa_plist[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+    "<plist version=\"1.0\">\n"
+    "<dict>\n"
+    "<key>CFBundleDevelopmentRegion</key>\n"
+    "<string>en</string>\n"
+    "<key>CFBundleExecutable</key>\n"
+    "<string>loader</string>\n"
+    "<key>CFBundleIdentifier</key>\n"
+    "<string>com.koekeishiya.yabai-osax</string>\n"
+    "<key>CFBundleInfoDictionaryVersion</key>\n"
+    "<string>6.0</string>\n"
+    "<key>CFBundleName</key>\n"
+    "<string>yabai</string>\n"
+    "<key>CFBundlePackageType</key>\n"
+    "<string>osax</string>\n"
+    "<key>CFBundleShortVersionString</key>\n"
+    "<string>"OSAX_VERSION"</string>\n"
+    "<key>CFBundleVersion</key>\n"
+    "<string>"OSAX_VERSION"</string>\n"
+    "<key>NSHumanReadableCopyright</key>\n"
+    "<string>Copyright © 2019 Åsmund Vikane. All rights reserved.</string>\n"
+    "<key>OSAXHandlers</key>\n"
+    "<dict>\n"
+    "</dict>\n"
+    "</dict>\n"
+    "</plist>";
 
 static char sa_bundle_plist[] =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -53,12 +83,13 @@ static void scripting_addition_set_path(void)
     snprintf(osax_contents_dir, sizeof(osax_contents_dir), "%s/%s", osax_base_dir, "Contents");
     snprintf(osax_contents_macos_dir, sizeof(osax_contents_macos_dir), "%s/%s", osax_contents_dir, "MacOS");
     snprintf(osax_contents_res_dir, sizeof(osax_contents_res_dir), "%s/%s", osax_contents_dir, "Resources");
+    snprintf(osax_info_plist, sizeof(osax_info_plist), "%s/%s", osax_contents_dir, "Info.plist");
 
     snprintf(osax_payload_dir, sizeof(osax_payload_dir), "%s/%s", osax_contents_res_dir, "payload.bundle");
     snprintf(osax_payload_contents_dir, sizeof(osax_payload_contents_dir), "%s/%s", osax_payload_dir, "Contents");
     snprintf(osax_payload_contents_macos_dir, sizeof(osax_payload_contents_macos_dir), "%s/%s", osax_payload_contents_dir, "MacOS");
-
     snprintf(osax_payload_plist, sizeof(osax_payload_plist), "%s/%s", osax_payload_contents_dir, "Info.plist");
+
     snprintf(osax_bin_loader, sizeof(osax_bin_loader), "%s/%s", osax_contents_macos_dir, "loader");
     snprintf(osax_bin_payload, sizeof(osax_bin_payload), "%s/%s", osax_payload_contents_macos_dir, "payload");
 }
@@ -180,6 +211,10 @@ static int scripting_addition_install(void)
     }
 
     if (!scripting_addition_create_directory()) {
+        goto cleanup;
+    }
+
+    if (!scripting_addition_write_file(sa_plist, strlen(sa_plist), osax_info_plist, "w")) {
         goto cleanup;
     }
 
