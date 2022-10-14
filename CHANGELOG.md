@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Fixed issue that could cause yabai to crash during a window query operation under certain conditions when a window closes [#1475](https://github.com/koekeishiya/yabai/issues/1475)
 
 ## [5.0.1] - 2022-09-26
 ### Changed

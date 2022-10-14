@@ -349,15 +349,21 @@ uint64_t window_tags(struct window *window)
 {
     uint64_t tags = 0;
     CFArrayRef window_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+
     CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);
+    if (!query) goto err2;
+
     CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
+    if (!iterator) goto err1;
 
     if (SLSWindowIteratorAdvance(iterator)) {
         tags = SLSWindowIteratorGetTags(iterator);
     }
 
-    CFRelease(query);
     CFRelease(iterator);
+err1:
+    CFRelease(query);
+err2:
     CFRelease(window_ref);
     return tags;
 }
