@@ -459,7 +459,6 @@ WINDOW
     },
     "role": string,
     "subrole": string,
-    "tags": string,
     "display": number,
     "space": number,
     "level": number,

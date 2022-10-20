@@ -122,7 +122,6 @@ void window_serialize(FILE *rsp, struct window *window)
     bool border = window->border.id ? 1 : 0;
     float opacity = window_opacity(window);
     bool grabbed = window == g_mouse_state.window;
-    uint64_t tags = window_tags(window);
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     struct window_node *node = view ? view_find_window_node(view, window->id) : NULL;
@@ -146,7 +145,6 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
             "\t\"role\":\"%s\",\n"
             "\t\"subrole\":\"%s\",\n"
-            "\t\"tags\":\"0x%016llx\",\n"
             "\t\"display\":%d,\n"
             "\t\"space\":%d,\n"
             "\t\"level\":%d,\n"
@@ -177,7 +175,6 @@ void window_serialize(FILE *rsp, struct window *window)
             window->frame.origin.x, window->frame.origin.y, window->frame.size.width, window->frame.size.height,
             role,
             subrole,
-            tags,
             display,
             space,
             window_level(window),
