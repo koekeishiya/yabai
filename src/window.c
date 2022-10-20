@@ -111,6 +111,8 @@ void window_serialize(FILE *rsp, struct window *window)
 {
     char *role = window_role_ts(window);
     char *subrole = window_subrole_ts(window);
+    char *app = window->application->name;
+    char *escaped_app = ts_string_escape(app);
     char *title = window_title_ts(window);
     char *escaped_title = ts_string_escape(title);
     uint64_t sid = window_space(window);
@@ -170,7 +172,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "}",
             window->id,
             window->application->pid,
-            window->application->name,
+            escaped_app ? escaped_app : app,
             escaped_title ? escaped_title : title,
             window->frame.origin.x, window->frame.origin.y, window->frame.size.width, window->frame.size.height,
             role,
