@@ -134,20 +134,28 @@ static int workspace_is_macos_major(long major_version)
     return version.majorVersion == major_version;
 }
 
-bool workspace_is_macos_monterey(void)
+bool workspace_is_macos_ventura(void)
 {
     if (_workspace_is_macos_version[0] == -1) {
-        _workspace_is_macos_version[0] = workspace_is_macos_major(12);
+        _workspace_is_macos_version[0] = workspace_is_macos_major(13);
     }
     return _workspace_is_macos_version[0];
 }
 
-bool workspace_is_macos_bigsur(void)
+bool workspace_is_macos_monterey(void)
 {
     if (_workspace_is_macos_version[1] == -1) {
-        _workspace_is_macos_version[1] = workspace_is_macos_major(11);
+        _workspace_is_macos_version[1] = workspace_is_macos_major(12);
     }
     return _workspace_is_macos_version[1];
+}
+
+bool workspace_is_macos_bigsur(void)
+{
+    if (_workspace_is_macos_version[2] == -1) {
+        _workspace_is_macos_version[2] = workspace_is_macos_major(11);
+    }
+    return _workspace_is_macos_version[2];
 }
 
 @implementation workspace_context

@@ -308,7 +308,7 @@ int main(int argc, char **argv)
     workspace_event_handler_begin(&g_workspace_context);
     event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
 
-    if (workspace_is_macos_monterey()) {
+    if (workspace_is_macos_monterey() || workspace_is_macos_ventura()) {
         mission_control_observe();
     } else {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);

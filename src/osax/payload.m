@@ -204,6 +204,21 @@ loop:
 }
 
 #if __arm64__
+static int log2_hash_table[32] = { 0,  9,  1, 10, 13, 21,  2, 29, 11, 14, 16, 18, 22, 25,  3, 30, 8, 12, 20, 28, 15, 17, 24,  7, 19, 27, 23,  6, 26,  5,  4, 31};
+static uint64_t get_page_address(uint64_t addr)
+{
+    uint32_t key = PAGE_SIZE;
+
+    key |= key >> 1;
+    key |= key >> 2;
+    key |= key >> 4;
+    key |= key >> 8;
+    key |= key >> 16;
+
+    int bits = log2_hash_table[(uint32_t)(key*0x07C4ACDD) >> 27];
+    return (addr >> (bits - 1)) << (bits - 1);
+}
+
 uint64_t decode_adrp_add(uint64_t addr, uint64_t offset)
 {
     uint32_t adrp_instr = *(uint32_t *) addr;
@@ -221,15 +236,9 @@ uint64_t decode_adrp_add(uint64_t addr, uint64_t offset)
         imm12 <<= 12;
     }
 
-    return (offset & 0xf000) + value_64 + imm12;
+    return get_page_address(offset) + value_64 + imm12;
 }
 #endif
-
-static bool is_macos_monterey(void)
-{
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion == 12;
-}
 
 static bool verify_os_version(NSOperatingSystemVersion os_version)
 {
@@ -240,18 +249,22 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
         return true; // Big Sur 11.0
     } else if (os_version.majorVersion == 12) {
         return true; // Monterey 12.0
+    } else if (os_version.majorVersion == 13) {
+        return true; // Ventura 13.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0-6, and Monterey 12.0.0+");
-    return false;
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0-6, Monterey 12.0.0+, and Ventura 13.0.0");
 #elif __arm64__
     if (os_version.majorVersion == 12) {
         return true; // Monterey 12.0
+    } else if (os_version.majorVersion == 13) {
+        return true; // Ventura 13.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+");
-    return false;
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+, and Ventura 13.0.0");
 #endif
+
+    return false;
 }
 
 #ifdef __x86_64__

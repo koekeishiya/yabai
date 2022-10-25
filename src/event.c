@@ -1350,7 +1350,7 @@ static EVENT_CALLBACK(EVENT_HANDLER_DOCK_DID_RESTART)
 {
     debug("%s:\n", __FUNCTION__);
 
-    if (workspace_is_macos_monterey()) {
+    if (workspace_is_macos_monterey() || workspace_is_macos_ventura()) {
         mission_control_unobserve();
         mission_control_observe();
     }
