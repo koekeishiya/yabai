@@ -21,6 +21,8 @@ enum window_op_error
     WINDOW_OP_ERROR_DEMINIMIZE_FAILED,
     WINDOW_OP_ERROR_MAX_STACK,
     WINDOW_OP_ERROR_SAME_STACK,
+    WINDOW_OP_ERROR_DIFFERENT_SPACES,
+    WINDOW_OP_ERROR_DIFFERENT_STACK,
 };
 
 enum purify_mode
@@ -181,6 +183,7 @@ enum window_op_error window_manager_set_window_insertion(struct space_manager *s
 enum window_op_error window_manager_stack_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
+enum window_op_error window_manager_swap_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_minimize_window(struct window *window);
 enum window_op_error window_manager_deminimize_window(struct window *window);
 bool window_manager_close_window(struct window *window);

@@ -1767,6 +1767,43 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
+enum window_op_error window_manager_swap_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
+{
+    if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
+
+    uint64_t a_sid = window_space(a);
+    uint64_t b_sid = window_space(b);
+
+    if (a_sid != b_sid) return WINDOW_OP_ERROR_DIFFERENT_SPACES;
+
+    struct view *view = space_manager_find_view(sm, a_sid);
+    struct window_node *node = view_find_window_node(view, a->id);
+    if (!node) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
+
+    struct window_node *node_b = view_find_window_node(view, b->id);
+    if (!node_b) return WINDOW_OP_ERROR_INVALID_DST_NODE;
+
+    if (node != node_b) return WINDOW_OP_ERROR_DIFFERENT_STACK;
+
+    for (int i = 0; i < node->window_count; ++i) {
+        if (node->window_list[i] == a->id) {
+            node->window_list[i] = b->id;
+        } else if (node->window_list[i] == b->id) {
+            node->window_list[i] = a->id;
+        }
+    }
+
+    for (int i = 0; i < node->window_count; ++i) {
+        if (node->window_order[i] == a->id) {
+            node->window_order[i] = b->id;
+        } else if (node->window_order[i] == b->id) {
+            node->window_order[i] = a->id;
+        }
+    }
+
+    return WINDOW_OP_ERROR_SUCCESS;
+}
+
 enum window_op_error window_manager_minimize_window(struct window *window)
 {
     if (!window_can_minimize(window)) return WINDOW_OP_ERROR_CANT_MINIMIZE;

@@ -124,6 +124,7 @@ extern bool g_verbose;
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
 #define COMMAND_WINDOW_FOCUS      "--focus"
 #define COMMAND_WINDOW_SWAP       "--swap"
+#define COMMAND_WINDOW_SWAP_STACK  "--swap-stack"
 #define COMMAND_WINDOW_WARP       "--warp"
 #define COMMAND_WINDOW_STACK      "--stack"
 #define COMMAND_WINDOW_INSERT     "--insert"
@@ -1885,6 +1886,22 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "cannot swap a window with a window in the same stack.\n");
                 } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
                     daemon_fail(rsp, "cannot swap a window with itself.\n");
+                }
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_SWAP_STACK)) {
+            struct selector selector = parse_window_selector(rsp, &message, acting_window, false);
+            if (selector.did_parse && selector.window) {
+                enum window_op_error result = window_manager_swap_window_in_stack(&g_space_manager, &g_window_manager, acting_window, selector.window);
+                if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
+                    daemon_fail(rsp, "the acting window is not managed.\n");
+                } else if (result == WINDOW_OP_ERROR_INVALID_DST_NODE) {
+                    daemon_fail(rsp, "the selected window is not managed.\n");
+                } else if (result == WINDOW_OP_ERROR_SAME_WINDOW) {
+                    daemon_fail(rsp, "cannot swap a window with itself.\n");
+                } else if (result == WINDOW_OP_ERROR_DIFFERENT_SPACES) {
+                    daemon_fail(rsp, "cannot swap a window with a window in different spaces.\n");
+                } else if (result == WINDOW_OP_ERROR_DIFFERENT_STACK) {
+                    daemon_fail(rsp, "cannot swap a window with a window in different stacks.\n");
                 }
             }
         } else if (token_equals(command, COMMAND_WINDOW_WARP)) {
