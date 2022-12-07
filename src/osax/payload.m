@@ -204,21 +204,6 @@ loop:
 }
 
 #if __arm64__
-static int log2_hash_table[32] = { 0,  9,  1, 10, 13, 21,  2, 29, 11, 14, 16, 18, 22, 25,  3, 30, 8, 12, 20, 28, 15, 17, 24,  7, 19, 27, 23,  6, 26,  5,  4, 31};
-static uint64_t get_page_address(uint64_t addr)
-{
-    uint32_t key = PAGE_SIZE;
-
-    key |= key >> 1;
-    key |= key >> 2;
-    key |= key >> 4;
-    key |= key >> 8;
-    key |= key >> 16;
-
-    int bits = log2_hash_table[(uint32_t)(key*0x07C4ACDD) >> 27];
-    return (addr >> (bits - 1)) << (bits - 1);
-}
-
 uint64_t decode_adrp_add(uint64_t addr, uint64_t offset)
 {
     uint32_t adrp_instr = *(uint32_t *) addr;
@@ -236,7 +221,7 @@ uint64_t decode_adrp_add(uint64_t addr, uint64_t offset)
         imm12 <<= 12;
     }
 
-    return get_page_address(offset) + value_64 + imm12;
+    return (offset & 0xfffffffffffff000) + value_64 + imm12;
 }
 #endif
 
