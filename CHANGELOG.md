@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Updated scripting-addition to support macOS Ventura 13.0.0 [#1297](https://github.com/koekeishiya/yabai/issues/1297)
 - Properly escape application name when returned in window queries [#1489](https://github.com/koekeishiya/yabai/issues/1489)
 - Remove window tags used for debugging purposes from result of window query because it could cause a crash under certain conditions when a window closes [#1475](https://github.com/koekeishiya/yabai/issues/1475)
+- Change window placement of warp command to be more natural when warping windows within the same space [#1435](https://github.com/koekeishiya/yabai/issues/1435)
 
 ## [5.0.1] - 2022-09-26
 ### Changed

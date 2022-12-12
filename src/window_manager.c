@@ -1663,6 +1663,31 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
         }
     } else {
         if (a_view->sid == b_view->sid) {
+
+            //
+            // :NaturalWarp
+            //
+            // NOTE(koekeishiya): Precalculate both target areas and select the one that has the closest distance to the source area.
+            // This allows the warp to feel more natural in terms of where the window is placed on screen, however, this is only utilized
+            // for warp operations where both operands belong to the same space. There may be a better system to handle this if/when multiple
+            // monitors should be supported.
+            //
+
+            struct area cf, cs;
+            area_make_pair(window_node_get_split(b_node), window_node_get_gap(b_view), window_node_get_ratio(b_node), &b_node->area, &cf, &cs);
+
+            CGPoint ca = { (int)(0.5f + a_node->area.x + a_node->area.w / 2.0f), (int)(0.5f + a_node->area.y + a_node->area.h / 2.0f) };
+            float dcf = powf((ca.x - (int)(0.5f + cf.x + cf.w / 2.0f)), 2.0f) + powf((ca.y - (int)(0.5f + cf.y + cf.h / 2.0f)), 2.0f);
+            float dcs = powf((ca.x - (int)(0.5f + cs.x + cs.w / 2.0f)), 2.0f) + powf((ca.y - (int)(0.5f + cs.y + cs.h / 2.0f)), 2.0f);
+
+            if (dcf < dcs) {
+                b_node->child = CHILD_FIRST;
+            } else if (dcf > dcs) {
+                b_node->child = CHILD_SECOND;
+            } else {
+                b_node->child = window_node_is_left_child(a_node) ? CHILD_FIRST : CHILD_SECOND;
+            }
+
             struct window_node *a_node_rm = view_remove_window_node(a_view, a);
             struct window_node *a_node_add = view_add_window_node_with_insertion_point(b_view, a, b->id);
 
@@ -1685,6 +1710,14 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
                     _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
                 }
             }
+
+            //
+            // :NaturalWarp
+            //
+            // TODO(koekeishiya): Warp operations with operands that belong to different monitors does not yet implement a heuristic to select
+            // the target area that feels the most natural in terms of where the window is placed on screen. Is it possible to do better when
+            // warping between spaces that belong to the same monitor as well??
+            //
 
             space_manager_untile_window(sm, a_view, a);
             window_manager_remove_managed_window(wm, a->id);
