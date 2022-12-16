@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.2] - 2022-12-16
 ### Changed
-- Updated scripting-addition to support macOS Ventura 13.0.0 [#1297](https://github.com/koekeishiya/yabai/issues/1297)
+- Updated scripting-addition to support macOS Ventura 13.0.0-13.1.0 [#1297](https://github.com/koekeishiya/yabai/issues/1297)
 - Properly escape application name when returned in window queries [#1489](https://github.com/koekeishiya/yabai/issues/1489)
 - Remove window tags used for debugging purposes from result of window query because it could cause a crash under certain conditions when a window closes [#1475](https://github.com/koekeishiya/yabai/issues/1475)
 - Change window placement of warp command to be more natural when warping windows within the same space [#1435](https://github.com/koekeishiya/yabai/issues/1435)
@@ -439,7 +441,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.2...HEAD
+[5.0.2]: https://github.com/koekeishiya/yabai/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/koekeishiya/yabai/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/koekeishiya/yabai/compare/v4.0.4...v5.0.0
 [4.0.4]: https://github.com/koekeishiya/yabai/compare/v4.0.3...v4.0.4
