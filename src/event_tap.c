@@ -14,7 +14,15 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     } break;
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {
-        uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
+        CGEventFlags flags = CGEventGetFlags(cgevent);
+        // If the value of flags is just equal to NX_COMMANDMASK without bit NX_DEVICELCMDKEYMASK or NX_DEVICERCMDKEYMASK set,
+        // that means that this mouse event was artificially generated and we shouldn't handle it.
+        // For example, if this was a real mouse event flags would be equal to 0x100008 if the left command was held.
+        // 
+        // Specifically this works around issue https://github.com/koekeishiya/yabai/issues/1551,
+        // where setting mouse_modifier to cmd makes yabai unable to change focus from one app to another
+        if (flags == 0x100000) return cgevent;
+        uint8_t mod = mouse_mod_from_cgflags(flags);
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod, NULL);
 
         consume_mouse_click = mod == g_mouse_state.modifier;
