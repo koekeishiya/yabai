@@ -142,4 +142,4 @@
 # alt - t : yabai -m window --toggle float --grid 4:4:1:1:2:2
 
 # toggle sticky(+float), topmost, picture-in-picture
-# alt - p : yabai -m window --toggle sticky --toggle topmost --toggle pip
+# ctrl - p : yabai -m window --toggle sticky --toggle topmost --toggle pip
