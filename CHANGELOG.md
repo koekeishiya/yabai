@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Fixed issue with window focusing caused by incorrectly intercepting a synthesized mouse event [#1551](https://github.com/koekeishiya/yabai/issues/1551)
+- Fixed issue with window warping across displays with only a single window tiled at both displays [#1577](https://github.com/koekeishiya/yabai/issues/1577)
 
 ## [5.0.2] - 2022-12-16
 ### Changed

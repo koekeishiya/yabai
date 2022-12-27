@@ -1648,7 +1648,9 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
 
     if (a_node == b_node) return WINDOW_OP_ERROR_SAME_STACK;
 
-    if (a_node->parent == b_node->parent && a_node->window_count == 1) {
+    if (a_node->parent && b_node->parent &&
+        a_node->parent == b_node->parent &&
+        a_node->window_count == 1) {
         if (window_node_contains_window(b_node, b_view->insertion_point)) {
             b_node->parent->split = b_node->split;
             b_node->parent->child = b_node->child;
