@@ -1201,6 +1201,15 @@ struct window *window_manager_find_second_cousin_for_managed_window(struct windo
 
 static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
+    //
+    // :SynthesizedEvent
+    //
+    // NOTE(koekeishiya): These events will be picked up by an event-tap
+    // registered at the "Annotated Session" location; specifying that an
+    // event-tap is placed at the point where session events have been
+    // annotated to flow to an application.
+    //
+
     uint8_t bytes1[0xf8] = { [0x04] = 0xf8, [0x08] = 0x01, [0x3a] = 0x10 };
     uint8_t bytes2[0xf8] = { [0x04] = 0xf8, [0x08] = 0x02, [0x3a] = 0x10 };
 
@@ -1221,10 +1230,13 @@ void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, 
         memcpy(bytes1 + 0x3c, &g_window_manager.focused_window_id, sizeof(uint32_t));
         SLPSPostEventRecordTo(&g_window_manager.focused_window_psn, bytes1);
 
+        //
         // @hack
         // Artificially delay the activation by 1ms. This is necessary
         // because some applications appear to be confused if both of
         // the events appear instantaneously.
+        //
+
         usleep(10000);
 
         uint8_t bytes2[0xf8] = { [0x04] = 0xf8, [0x08] = 0x0d, [0x8a] = 0x01 };

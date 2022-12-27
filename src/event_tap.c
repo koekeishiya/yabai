@@ -1,5 +1,6 @@
 extern struct event_loop g_event_loop;
 extern struct mouse_state g_mouse_state;
+extern pid_t g_pid;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch"
@@ -14,6 +15,18 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     } break;
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {
+
+        //
+        // :SynthesizedEvent
+        //
+        // NOTE(koekeishiya): This event-tap is placed at the "Annotated Session" location, which
+        // causes yabai to also intercept events that we post (notably, the way in which window
+        // focusing between separate applications have been implemented). Skip these events...
+        //
+
+        pid_t source_pid = CGEventGetIntegerValueField(cgevent, kCGEventSourceUnixProcessID);
+        if (source_pid == g_pid) return cgevent;
+
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(cgevent));
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(cgevent), mod, NULL);
 
@@ -22,6 +35,18 @@ static EVENT_TAP_CALLBACK(mouse_handler)
     } break;
     case kCGEventLeftMouseUp:
     case kCGEventRightMouseUp: {
+
+        //
+        // :SynthesizedEvent
+        //
+        // NOTE(koekeishiya): This event-tap is placed at the "Annotated Session" location, which
+        // causes yabai to also intercept events that we post (notably, the way in which window
+        // focusing between separate applications have been implemented). Skip these events...
+        //
+
+        pid_t source_pid = CGEventGetIntegerValueField(cgevent, kCGEventSourceUnixProcessID);
+        if (source_pid == g_pid) return cgevent;
+
         event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(cgevent), 0, NULL);
         if (consume_mouse_click) return NULL;
     } break;

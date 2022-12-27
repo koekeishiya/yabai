@@ -30,6 +30,7 @@ struct event_tap g_event_tap;
 int g_normal_window_level;
 int g_floating_window_level;
 int g_connection;
+pid_t g_pid;
 
 struct signal *g_signal_event[SIGNAL_TYPE_COUNT];
 struct memory_pool g_signal_storage;
@@ -122,7 +123,7 @@ static void acquire_lockfile(void)
     struct flock lockfd = {
         .l_start  = 0,
         .l_len    = 0,
-        .l_pid    = getpid(),
+        .l_pid    = g_pid,
         .l_type   = F_WRLCK,
         .l_whence = SEEK_SET
     };
@@ -194,6 +195,7 @@ static inline void init_misc_settings(void)
     signal(SIGPIPE, SIG_IGN);
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
+    g_pid = getpid();
     g_connection = SLSMainConnectionID();
     g_normal_window_level   = CGWindowLevelForKey(LAYER_NORMAL);
     g_floating_window_level = CGWindowLevelForKey(LAYER_ABOVE);
