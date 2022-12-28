@@ -409,7 +409,7 @@ struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct
 
 void space_manager_toggle_window_split(struct space_manager *sm, struct window *window)
 {
-    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    struct view *view = space_manager_find_view(sm, window_space(window));
     if (view->layout != VIEW_BSP) return;
 
     struct window_node *node = view_find_window_node(view, window->id);
