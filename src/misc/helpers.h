@@ -22,32 +22,64 @@ static const char *layer_str[] =
     [LAYER_ABOVE] = "above"
 };
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static inline uint64_t get_wall_clock(void)
+{
+    uint64_t absolute = mach_absolute_time();
+    Nanoseconds result = AbsoluteToNanoseconds(*(AbsoluteTime *) &absolute);
+    return *(uint64_t *) &result;
+}
+#pragma clang diagnostic pop
+
+static inline float get_seconds_elapsed(uint64_t start, uint64_t end)
+{
+    float result = ((float)(end - start) / 1000.0f) / 1000000.0f;
+    return result;
+}
+
 static inline float ease_out_cubic(float t)
 {
     return 1.0f - powf(1.0f - t, 3.0f);
 }
 
-#define ANIMATE(animation_connection, animation_duration, easing_function, code_block) \
-{                                                                                      \
-    int frame_duration = 4;                                                            \
-    int total_duration = (int)(animation_duration * 1000.0f);                          \
-    int frame_count = (int)(((float) total_duration / (float) frame_duration) + 1.0f); \
-                                                                                       \
-    for (int frame_index = 1; frame_index <= frame_count; ++frame_index) {             \
-        float t = (float) frame_index / (float) frame_count;                           \
-        if (t < 0.0f) t = 0.0f;                                                        \
-        if (t > 1.0f) t = 1.0f;                                                        \
-                                                                                       \
-        float mt = easing_function(t);                                                 \
-        CFTypeRef transaction = SLSTransactionCreate(animation_connection);            \
-                                                                                       \
-        code_block                                                                     \
-                                                                                       \
-        SLSTransactionCommit(transaction, 0);                                          \
-        CFRelease(transaction);                                                        \
-                                                                                       \
-        usleep(frame_duration*1000);                                                   \
-    }                                                                                  \
+#define ANIMATE_DELAY(current_frame_duration)                                                    \
+    while (frame_elapsed < current_frame_duration) {                                             \
+        uint32_t sleep_ms = (uint32_t)(1000.0f * (current_frame_duration - frame_elapsed));      \
+        usleep(sleep_ms * 700.0f);                                                               \
+        frame_elapsed = get_seconds_elapsed(last_counter, get_wall_clock());                     \
+    }
+
+#define ANIMATE(connection, frame_rate, duration, easing_function, code_block)                   \
+{                                                                                                \
+    float frame_duration = 1.0f / (float)frame_rate;                                             \
+    int frame_count = (int)((duration / frame_duration) + 1.0f);                                 \
+    uint64_t last_counter = get_wall_clock();                                                    \
+                                                                                                 \
+    for (int frame_index = 1; frame_index <= frame_count; ++frame_index) {                       \
+        float t = (float) frame_index / (float) frame_count;                                     \
+        if (t < 0.0f) t = 0.0f;                                                                  \
+        if (t > 1.0f) t = 1.0f;                                                                  \
+                                                                                                 \
+        float mt = easing_function(t);                                                           \
+        CFTypeRef transaction = SLSTransactionCreate(connection);                                \
+                                                                                                 \
+        code_block                                                                               \
+                                                                                                 \
+        SLSTransactionCommit(transaction, 0);                                                    \
+        CFRelease(transaction);                                                                  \
+                                                                                                 \
+        float frame_elapsed = get_seconds_elapsed(last_counter, get_wall_clock());               \
+        if (frame_elapsed < frame_duration) {                                                    \
+            ANIMATE_DELAY(frame_duration);                                                       \
+        } else {                                                                                 \
+            int frame_skip = (int)((frame_elapsed / frame_duration) + 0.5f);                     \
+            frame_index += frame_skip;                                                           \
+            ANIMATE_DELAY(frame_duration * frame_skip);                                          \
+        }                                                                                        \
+                                                                                                 \
+        last_counter = get_wall_clock();                                                         \
+    }                                                                                            \
 }
 
 static inline bool socket_open(int *sockfd)

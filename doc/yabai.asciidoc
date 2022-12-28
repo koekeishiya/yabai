@@ -152,6 +152,10 @@ Global Settings
     Requires Screen Recording permissions. +
     System Integrity Protection must be partially disabled.
 
+*window_animation_frame_rate* ['<integer number>']::
+    Frame rate (expressed in frames per second) of window frame animation. +
+    This setting does nothing if *window_animation_duration* is set to 0.0.
+
 *active_window_opacity* ['<FLOAT_SEL>']::
     Opacity of the focused window. +
     System Integrity Protection must be partially disabled.

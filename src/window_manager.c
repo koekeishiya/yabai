@@ -560,7 +560,7 @@ void *window_manager_animate_window_list_thread_proc(void *data)
     struct window_animation_context *context = data;
     int animation_count = buf_len(context->animation_list);
 
-    ANIMATE(context->animation_connection, context->animation_duration, ease_out_cubic, {
+    ANIMATE(context->animation_connection, context->animation_frame_rate, context->animation_duration, ease_out_cubic, {
         for (int i = 0; i < animation_count; ++i) {
             if (context->animation_list[i].skip) continue;
 
@@ -600,6 +600,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
     SLSNewConnection(0, &context->animation_connection);
     context->animation_duration = g_window_manager.window_animation_duration;
+    context->animation_frame_rate = g_window_manager.window_animation_frame_rate;
     context->animation_list = NULL;
 
     for (int i = 0; i < window_count; ++i) {
@@ -2286,6 +2287,7 @@ void window_manager_init(struct window_manager *wm)
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.0f;
     wm->window_animation_duration = 0.0f;
+    wm->window_animation_frame_rate = 120;
     wm->insert_feedback_windows = NULL;
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
     wm->active_border_color = rgba_color_from_hex(0xff775759);

@@ -30,6 +30,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
 #define COMMAND_CONFIG_ANIMATION_DURATION    "window_animation_duration"
+#define COMMAND_CONFIG_ANIMATION_FRAME_RATE  "window_animation_frame_rate"
 #define COMMAND_CONFIG_BORDER                "window_border"
 #define COMMAND_CONFIG_BORDER_HIDPI          "window_border_hidpi"
 #define COMMAND_CONFIG_BORDER_BLUR           "window_border_blur"
@@ -1167,6 +1168,15 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "command '%.*s' for domain '%.*s' requires Screen Recording permissions! ignoring request..\n", command.length, command.text, domain.length, domain.text);
                     CGRequestScreenCaptureAccess();
                 }
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_ANIMATION_FRAME_RATE)) {
+            struct token_value value = token_to_value(get_token(&message), false);
+            if (value.type == TOKEN_TYPE_INVALID) {
+                fprintf(rsp, "%d\n", g_window_manager.window_animation_frame_rate);
+            } else if (value.type == TOKEN_TYPE_INT && value.int_value) {
+                g_window_manager.window_animation_frame_rate = value.int_value;
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
