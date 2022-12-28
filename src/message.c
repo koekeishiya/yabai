@@ -25,6 +25,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_FFM                   "focus_follows_mouse"
 #define COMMAND_CONFIG_WINDOW_ORIGIN         "window_origin_display"
 #define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
+#define COMMAND_CONFIG_WINDOW_ZOOM_PERSIST   "window_zoom_persist"
 #define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
@@ -1106,6 +1107,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 g_space_manager.window_placement = CHILD_FIRST;
             } else if (token_equals(value, ARGUMENT_CONFIG_WINDOW_PLACEMENT_SND)) {
                 g_space_manager.window_placement = CHILD_SECOND;
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_WINDOW_ZOOM_PERSIST)) {
+            struct token value = get_token(&message);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%s\n", bool_str[g_space_manager.window_zoom_persist]);
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                g_space_manager.window_zoom_persist = false;
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                g_space_manager.window_zoom_persist = true;
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

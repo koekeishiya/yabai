@@ -22,6 +22,7 @@ struct space_manager
     float split_ratio;
     enum window_node_split split_type;
     enum window_node_child window_placement;
+    bool window_zoom_persist;
     bool auto_balance;
     struct space_label *labels;
 };

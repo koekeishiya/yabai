@@ -17,6 +17,7 @@ yabai -m config                                 \
     focus_follows_mouse          off            \
     window_origin_display        default        \
     window_placement             second_child   \
+    window_zoom_persist          on             \
     window_topmost               off            \
     window_shadow                on             \
     window_animation_duration    0.0            \
