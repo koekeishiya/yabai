@@ -76,9 +76,3 @@ extern CGError SLSTransactionCommit(CFTypeRef transaction, int unknown);
 extern CGError SLSTransactionSetWindowTransform(CFTypeRef transaction, uint32_t wid, int unknown, int unknown2, CGAffineTransform t);
 extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
 extern CFArrayRef SLSHWCaptureWindowList(int cid, uint32_t *window_list, int window_count, uint32_t options);
-
-#if 0
-extern CFArrayRef _LSCopyApplicationArrayInFrontToBackOrder(int negative_one, int one);
-extern void _LSASNExtractHighAndLowParts(const void *asn, uint32_t *high, uint32_t *low);
-extern CFTypeID _LSASNGetTypeID(void);
-#endif

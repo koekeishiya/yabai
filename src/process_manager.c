@@ -11,29 +11,58 @@ static TABLE_COMPARE_FUNC(compare_psn)
     return psn_equals(key_a, key_b);
 }
 
+static const char *process_name_blacklist[] =
+{
+    "loginwindow",
+    "ScreenSaverEngine",
+    "callservicesd",
+    "UIKitSystem",
+    "imklaunchagent",
+    "LinkedNotesUIService",
+    "Universal Control",
+    "Dock",
+    "WindowManager",
+    "photolibraryd",
+    "siriactionsd"
+};
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 struct process *process_create(ProcessSerialNumber psn)
 {
-    struct process *process = malloc(sizeof(struct process));
-
-    CFStringRef process_name_ref;
-    if (CopyProcessName(&psn, &process_name_ref) == noErr) {
-        process->name = cfstring_copy(process_name_ref);
-        CFRelease(process_name_ref);
-    } else {
-        process->name = string_copy("<unknown>");
-    }
-
     ProcessInfoRec process_info = { .processInfoLength = sizeof(ProcessInfoRec) };
     GetProcessInformation(&psn, &process_info);
 
-    process->psn = psn;
-    process->terminated = false;
-    process->xpc = process_info.processType == 'XPC!';
-    GetProcessPID(&process->psn, &process->pid);
-    process->ns_application = workspace_application_create_running_ns_application(process);
+    if (process_info.processType == 'XPC!') {
+        debug("%s: xpc service detected! ignoring..\n", __FUNCTION__);
+        return NULL;
+    }
 
+    CFStringRef process_name_ref = NULL;
+    CopyProcessName(&psn, &process_name_ref);
+
+    if (!process_name_ref) {
+        debug("%s: could not retrieve process name! ignoring..\n", __FUNCTION__);
+        return NULL;
+    }
+
+    char *process_name = cfstring_copy(process_name_ref);
+    CFRelease(process_name_ref);
+
+    for (int i = 0; i < array_count(process_name_blacklist); ++i) {
+        if (string_equals(process_name, process_name_blacklist[i])) {
+            debug("%s: %s is blacklisted! ignoring..\n", __FUNCTION__, process_name);
+            free(process_name);
+            return NULL;
+        }
+    }
+
+    struct process *process = malloc(sizeof(struct process));
+    process->psn = psn;
+    GetProcessPID(&process->psn, &process->pid);
+    process->name = process_name;
+    process->terminated = false;
+    process->ns_application = workspace_application_create_running_ns_application(process);
     return process;
 }
 
@@ -42,56 +71,6 @@ void process_destroy(struct process *process)
     workspace_application_destroy_running_ns_application(g_workspace_context, process);
     free(process->name);
     free(process);
-}
-
-static bool process_is_observable(struct process *process)
-{
-    if (process->xpc) {
-        debug("%s: %s (%d) was marked as xpc service! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "loginwindow")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "ScreenSaverEngine")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "callservicesd")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "UIKitSystem")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "imklaunchagent")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "LinkedNotesUIService")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "Universal Control")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    if (string_equals(process->name, "Dock")) {
-        debug("%s: %s (%d) is blacklisted! ignoring..\n", __FUNCTION__, process->name, process->pid);
-        return false;
-    }
-
-    return true;
 }
 
 static PROCESS_EVENT_HANDLER(process_handler)
@@ -119,12 +98,8 @@ static PROCESS_EVENT_HANDLER(process_handler)
         struct process *process = process_create(psn);
         if (!process) return noErr;
 
-        if (process_is_observable(process)) {
-            process_manager_add_process(pm, process);
-            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
-        } else {
-            process_destroy(process);
-        }
+        process_manager_add_process(pm, process);
+        event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
     } break;
     case kEventAppTerminated: {
         struct process *process = process_manager_find_process(pm, &psn);
@@ -132,7 +107,6 @@ static PROCESS_EVENT_HANDLER(process_handler)
 
         process->terminated = true;
         process_manager_remove_process(pm, &psn);
-
         __asm__ __volatile__ ("" ::: "memory");
 
         event_loop_post(&g_event_loop, APPLICATION_TERMINATED, process, 0, NULL);
@@ -156,16 +130,12 @@ process_manager_add_running_processes(struct process_manager *pm)
         struct process *process = process_create(psn);
         if (!process) continue;
 
-        if (process_is_observable(process)) {
-            if (string_equals(process->name, "Finder")) {
-                debug("%s: %s (%d) was found! caching psn..\n", __FUNCTION__, process->name, process->pid);
-                pm->finder_psn = psn;
-            }
-
-            process_manager_add_process(pm, process);
-        } else {
-            process_destroy(process);
+        if (string_equals(process->name, "Finder")) {
+            debug("%s: %s (%d) was found! caching psn..\n", __FUNCTION__, process->name, process->pid);
+            pm->finder_psn = psn;
         }
+
+        process_manager_add_process(pm, process);
     }
 }
 #pragma clang diagnostic pop
@@ -184,29 +154,6 @@ void process_manager_add_process(struct process_manager *pm, struct process *pro
 {
     table_add(&pm->process, &process->psn, process);
 }
-
-#if 0
-bool process_manager_next_process(ProcessSerialNumber *next_psn)
-{
-    CFArrayRef applications =_LSCopyApplicationArrayInFrontToBackOrder(0xFFFFFFFE, 1);
-    if (!applications) return false;
-
-    bool found_front_psn = false;
-    ProcessSerialNumber front_psn;
-    _SLPSGetFrontProcess(&front_psn);
-
-    for (int i = 0; i < CFArrayGetCount(applications); ++i) {
-        CFTypeRef asn = CFArrayGetValueAtIndex(applications, i);
-        assert(CFGetTypeID(asn) == _LSASNGetTypeID());
-        _LSASNExtractHighAndLowParts(asn, &next_psn->highLongOfPSN, &next_psn->lowLongOfPSN);
-        if (found_front_psn) break;
-        found_front_psn = psn_equals(&front_psn, next_psn);
-    }
-
-    CFRelease(applications);
-    return true;
-}
-#endif
 
 void process_manager_init(struct process_manager *pm)
 {
