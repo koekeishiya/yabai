@@ -129,6 +129,7 @@ struct application *application_create(struct process *process)
 {
     struct application *application = malloc(sizeof(struct application));
     memset(application, 0, sizeof(struct application));
+
     application->ref = AXUIElementCreateApplication(process->pid);
     application->psn = process->psn;
     application->pid = process->pid;
