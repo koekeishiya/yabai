@@ -2,4 +2,3 @@
 /archive
 /src/osax/loader_bin.c
 /src/osax/payload_bin.c
-/src/osax/mach_loader_bin.c
