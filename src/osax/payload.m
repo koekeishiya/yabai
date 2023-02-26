@@ -162,39 +162,47 @@ static uint64_t image_slide(void)
     return 0;
 }
 
+// This function searches for a sequence of bytes (specified by the pattern) 
+// starting at a given memory address (baddr).
+// It returns the memory address where the sequence is found, or 0 if not found.
 static uint64_t hex_find_seq(uint64_t baddr, const char *c_pattern)
 {
     if (!baddr || !c_pattern) return 0;
 
     uint64_t addr = baddr;
     uint64_t pattern_length = (strlen(c_pattern) + 1) / 3;
-    char buffer_a[pattern_length];
-    char buffer_b[pattern_length];
-    memset(buffer_a, 0, sizeof(buffer_a));
-    memset(buffer_b, 0, sizeof(buffer_b));
+    char buffer_seq[pattern_length];
+    char buffer_mask[pattern_length];
+    memset(buffer_seq, 0, sizeof(buffer_seq));
+    memset(buffer_mask, 0, sizeof(buffer_mask));
 
+    // Parse the pattern and store it in the buffers
     char *pattern = (char *) c_pattern + 1;
     for (int i = 0; i < pattern_length; ++i) {
         char c = pattern[-1];
-        if (c == '?') {
-            buffer_b[i] = 1;
+        if (c == '?' || c == '.') {
+            buffer_mask[i] = 1;
         } else {
-            int temp = c <= '9' ? 0 : 9;
+            int temp = (c <= '9') ? 0 : 9;
             temp = (temp + c) << 0x4;
             c = pattern[0];
-            int temp2 = c <= '9' ? 0xd0 : 0xc9;
-            buffer_a[i] = temp2 + c + temp;
+            int temp2 = (c <= '9') ? 0xd0 : 0xc9;
+            buffer_seq[i] = temp2 + c + temp;
         }
         pattern += 3;
     }
-
+    
+    // Loop through memory, checking if the sequence matches the pattern
 loop:
     for (int counter = 0; counter < pattern_length; ++counter) {
-        if ((buffer_b[counter] == 0) && (((char *)addr)[counter] != buffer_a[counter])) {
+        if ((buffer_mask[counter] == 0) && (((char *)addr)[counter] != buffer_seq[counter])) {
+            // If the sequence doesn't match, move to the next memory address
             addr = (uint64_t)((char *)addr + 1);
             if (addr - baddr < 0x286a0) {
+                // If we haven't searched too far, continue searching
                 goto loop;
             } else {
+                // If we've searched too far, give up and return 0
                 return 0;
             }
         }
@@ -262,6 +270,8 @@ static void init_instances()
     if (!verify_os_version(os_version)) return;
 
     uint64_t baseaddr = static_base_address() + image_slide();
+
+    NSLog(@"[yabai-sa] base address is: 0x%llx", baseaddr);
 
     uint64_t dock_spaces_addr = hex_find_seq(baseaddr + get_dock_spaces_offset(os_version), get_dock_spaces_pattern(os_version));
     if (dock_spaces_addr == 0) {
