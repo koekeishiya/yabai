@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.3] - 2023-03-28
 ### Changed
+- Updated scripting-addition to support macOS Ventura 13.3 [#1297](https://github.com/koekeishiya/yabai/issues/1297)
 - Fixed issue with window focusing caused by incorrectly intercepting a synthesized mouse event [#1551](https://github.com/koekeishiya/yabai/issues/1551)
 - Fixed issue with window warping across displays with only a single window tiled at both displays [#1577](https://github.com/koekeishiya/yabai/issues/1577)
 - Fixed issue preventing window split from being toggled for windwos on an inactive space/display [#1557](https://github.com/koekeishiya/yabai/issues/1557)
@@ -447,7 +450,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.3...HEAD
+[5.0.3]: https://github.com/koekeishiya/yabai/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/koekeishiya/yabai/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/koekeishiya/yabai/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/koekeishiya/yabai/compare/v4.0.4...v5.0.0
