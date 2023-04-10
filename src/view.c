@@ -526,10 +526,10 @@ struct window_node *view_find_min_depth_leaf_node(struct window_node *node)
 
 static inline bool area_is_in_direction(struct area *r1, CGPoint r1_max, struct area *r2, CGPoint r2_max, int direction)
 {
-    if (direction == DIR_NORTH && r1_max.y <= r2->y) return false;
-    if (direction == DIR_EAST  && r2_max.x <= r1->x) return false;
-    if (direction == DIR_SOUTH && r2_max.y <= r1->y) return false;
-    if (direction == DIR_WEST  && r1_max.x <= r2->x) return false;
+    if (direction == DIR_NORTH && r1->y <= r2->y) return false;
+    if (direction == DIR_EAST  && r2_max.x <= r1->x + 1) return false;
+    if (direction == DIR_SOUTH && r1->y > r2->y) return false;
+    if (direction == DIR_WEST  && r2_max.x > r1->x + 1) return false;
 
     if (direction == DIR_NORTH || direction == DIR_SOUTH) {
         return ((r2_max.x >  r1->x && r2_max.x <= r1_max.x) ||
