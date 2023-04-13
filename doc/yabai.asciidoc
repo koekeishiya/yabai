@@ -24,7 +24,7 @@ yabai
 Synopsis
 --------
 
-*yabai* [*-v*,*--version*|*-V*,*--verbose*|*-m*,*--message* 'msg'|*-c*,*--config* 'config_file'|*--uninstall-sa*|*--load-sa*]
+*yabai* [*-v*,*--version*|*-V*,*--verbose*|*-m*,*--message* 'msg'|*-c*,*--config* 'config_file'|*--uninstall-sa*|*--load-sa*|*--install-service*|*--uninstall-service*|*--start-service*|*--restart-service*|*--stop-service*]
 
 Description
 -----------

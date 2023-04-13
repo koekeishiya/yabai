@@ -15,6 +15,12 @@
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
 #define SCRPT_ADD_LOAD_OPT      "--load-sa"
 
+#define SERVICE_INSTALL_OPT     "--install-service"
+#define SERVICE_UNINSTALL_OPT   "--uninstall-service"
+#define SERVICE_START_OPT       "--start-service"
+#define SERVICE_RESTART_OPT     "--restart-service"
+#define SERVICE_STOP_OPT        "--stop-service"
+
 #define MAJOR  5
 #define MINOR  0
 #define PATCH  3
@@ -244,6 +250,26 @@ static void parse_arguments(int argc, char **argv)
 
     if (string_equals(argv[1], SCRPT_ADD_LOAD_OPT)) {
         exit(scripting_addition_load());
+    }
+
+    if (string_equals(argv[1], SERVICE_INSTALL_OPT)) {
+        exit(service_install());
+    }
+
+    if (string_equals(argv[1], SERVICE_UNINSTALL_OPT)) {
+        exit(service_uninstall());
+    }
+
+    if (string_equals(argv[1], SERVICE_START_OPT)) {
+        exit(service_start());
+    }
+
+    if (string_equals(argv[1], SERVICE_RESTART_OPT)) {
+        exit(service_restart());
+    }
+
+    if (string_equals(argv[1], SERVICE_STOP_OPT)) {
+        exit(service_stop());
     }
 
     for (int i = 1; i < argc; ++i) {

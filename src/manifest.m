@@ -27,6 +27,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <pwd.h>
+#include <spawn.h>
 
 #include "misc/extern.h"
 #include "misc/macros.h"
@@ -40,6 +41,7 @@
 #define HASHTABLE_IMPLEMENTATION
 #include "misc/hashtable.h"
 #undef HASHTABLE_IMPLEMENTATION
+#include "misc/service.h"
 
 #include "osax/common.h"
 
