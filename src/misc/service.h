@@ -83,15 +83,8 @@ static void populate_plist(char *yabai_plist, int size)
     snprintf(yabai_plist, size, _YABAI_PLIST, exe_path, path_env);
 }
 
-static int service_install(void)
+static int service_install_internal(char *yabai_plist_path)
 {
-    char yabai_plist_path[MAXLEN];
-    populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
-
-    if (file_exists(yabai_plist_path)) {
-        error("yabai: service file '%s' is already installed! abort..\n", yabai_plist_path);
-    }
-
     char yabai_plist[4096];
     populate_plist(yabai_plist, sizeof(yabai_plist));
 
@@ -103,6 +96,18 @@ static int service_install(void)
     fclose(handle);
 
     return result;
+}
+
+static int service_install(void)
+{
+    char yabai_plist_path[MAXLEN];
+    populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
+
+    if (file_exists(yabai_plist_path)) {
+        error("yabai: service file '%s' is already installed! abort..\n", yabai_plist_path);
+    }
+
+    return service_install_internal(yabai_plist_path);
 }
 
 static int service_uninstall(void)
@@ -123,7 +128,12 @@ static int service_start(void)
     populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
 
     if (!file_exists(yabai_plist_path)) {
-        error("yabai: service file '%s' is not installed! abort..\n", yabai_plist_path);
+        warn("yabai: service file '%s' is not installed! attempting installation..\n", yabai_plist_path);
+
+        int result = service_install_internal(yabai_plist_path);
+        if (result) {
+            error("yabai: service file '%s' could not be installed! abort..\n", yabai_plist_path);
+        }
     }
 
     const char *const args[] = { _PATH_LAUNCHCTL, "load", "-w", yabai_plist_path, NULL };
