@@ -317,6 +317,22 @@ static bool scripting_addition_is_sip_friendly(void)
     return true;
 }
 
+#ifdef __arm64__
+static bool scripting_addition_is_arm64e_enabled(void)
+{
+    char bootargs[2048];
+	size_t len = sizeof(bootargs) - 1;
+
+	if (sysctlbyname("kern.bootargs", bootargs, &len, NULL, 0) == 0) {
+		if (strnstr(bootargs, "-arm64e_preview_abi", len)) {
+            return true;
+		}
+	}
+
+    return false;
+}
+#endif
+
 static bool mach_loader_inject_payload(void)
 {
     FILE *handle = popen("/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader", "r");
@@ -376,6 +392,15 @@ int scripting_addition_load(void)
         result = scripting_addition_install();
         goto out;
     }
+
+#ifdef __arm64__
+    if (!scripting_addition_is_arm64e_enabled()) {
+        warn("yabai: missing required nvram boot-arg '-arm64e_preview_abi'!\n");
+        notify("scripting-addition", "missing required nvram boot-arg '-arm64e_preview_abi'!");
+        result = 1;
+        goto out;
+    }
+#endif
 
     if (!mach_loader_inject_payload()) {
         warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");

@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Added
 - Added launch arguments to manage launchd service: `--install-service`, `--uninstall-service`, `--start-service`, `--restart-service`, `--stop-service` [#1619](https://github.com/koekeishiya/yabai/issues/1619)
+- Check for `-arm64e_preview_abi` bootflag on Apple Silicon before attempting to load scripting addition.
 
 ## [5.0.3] - 2023-03-28
 ### Changed
