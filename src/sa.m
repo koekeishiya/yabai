@@ -321,13 +321,13 @@ static bool scripting_addition_is_sip_friendly(void)
 static bool scripting_addition_is_arm64e_enabled(void)
 {
     char bootargs[2048];
-	size_t len = sizeof(bootargs) - 1;
+    size_t len = sizeof(bootargs) - 1;
 
-	if (sysctlbyname("kern.bootargs", bootargs, &len, NULL, 0) == 0) {
-		if (strnstr(bootargs, "-arm64e_preview_abi", len)) {
+    if (sysctlbyname("kern.bootargs", bootargs, &len, NULL, 0) == 0) {
+        if (strnstr(bootargs, "-arm64e_preview_abi", len)) {
             return true;
-		}
-	}
+        }
+    }
 
     return false;
 }
