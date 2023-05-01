@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.4] - 2023-05-01
 ### Added
 - Added launch arguments to manage launchd service: `--install-service`, `--uninstall-service`, `--start-service`, `--restart-service`, `--stop-service` [#1619](https://github.com/koekeishiya/yabai/issues/1619)
 - Check for `-arm64e_preview_abi` bootflag on Apple Silicon before attempting to load scripting addition.
@@ -453,7 +455,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.3...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.4...HEAD
+[5.0.4]: https://github.com/koekeishiya/yabai/compare/v5.0.3...v5.0.4
 [5.0.3]: https://github.com/koekeishiya/yabai/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/koekeishiya/yabai/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/koekeishiya/yabai/compare/v5.0.0...v5.0.1
