@@ -1,9 +1,9 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
-#define _NAME_YABAI_PLIST   "com.koekeishiya.yabai"
-#define _PATH_YABAI_PLIST	"/Users/%s/Library/LaunchAgents/"_NAME_YABAI_PLIST".plist"
-#define _PATH_LAUNCHCTL     "/bin/launchctl"
+#define _PATH_LAUNCHCTL   "/bin/launchctl"
+#define _NAME_YABAI_PLIST "com.koekeishiya.yabai"
+#define _PATH_YABAI_PLIST "/Users/%s/Library/LaunchAgents/"_NAME_YABAI_PLIST".plist"
 
 #define _YABAI_PLIST \
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
@@ -26,9 +26,9 @@
     "    <key>KeepAlive</key>\n" \
     "    <true/>\n" \
     "    <key>StandardOutPath</key>\n" \
-    "    <string>/tmp/yabai.out.log</string>\n" \
+    "    <string>/tmp/yabai_%s.out.log</string>\n" \
     "    <key>StandardErrorPath</key>\n" \
-    "    <string>/tmp/yabai.err.log</string>\n" \
+    "    <string>/tmp/yabai_%s.err.log</string>\n" \
     "    <key>ThrottleInterval</key>\n" \
     "    <integer>30</integer>\n" \
     "    <key>ProcessType</key>\n" \
@@ -69,6 +69,11 @@ static void populate_plist_path(char *yabai_plist_path, int size)
 
 static void populate_plist(char *yabai_plist, int size)
 {
+    char *user = getenv("USER");
+    if (!user) {
+        error("yabai: 'env USER' not set! abort..\n");
+    }
+
     char *path_env = getenv("PATH");
     if (!path_env) {
         error("yabai: 'env PATH' not set! abort..\n");
@@ -80,7 +85,7 @@ static void populate_plist(char *yabai_plist, int size)
         error("yabai: unable to retrieve path of executable! abort..\n");
     }
 
-    snprintf(yabai_plist, size, _YABAI_PLIST, exe_path, path_env);
+    snprintf(yabai_plist, size, _YABAI_PLIST, exe_path, path_env, user, user);
 }
 
 static int service_install_internal(char *yabai_plist_path)
