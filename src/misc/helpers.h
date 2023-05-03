@@ -298,6 +298,17 @@ static inline bool file_exists(char *filename)
     return true;
 }
 
+static inline bool directory_exists(char *filename)
+{
+    struct stat buffer;
+
+    if (stat(filename, &buffer) != 0) {
+        return false;
+    }
+
+    return S_ISDIR(buffer.st_mode);
+}
+
 static inline bool ensure_executable_permission(char *filename)
 {
     struct stat buffer;
