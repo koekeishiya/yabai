@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Create `LaunchAgents` folder in `~/Library` when installing service file, if the directory does not already exist [#1728](https://github.com/koekeishiya/yabai/issues/1728)
+- Changed how the users home directory is determined when managing service file [#1742](https://github.com/koekeishiya/yabai/issues/1742)
 
 ## [5.0.4] - 2023-05-01
 ### Added

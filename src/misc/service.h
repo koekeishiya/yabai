@@ -3,7 +3,7 @@
 
 #define _PATH_LAUNCHCTL   "/bin/launchctl"
 #define _NAME_YABAI_PLIST "com.koekeishiya.yabai"
-#define _PATH_YABAI_PLIST "/Users/%s/Library/LaunchAgents/"_NAME_YABAI_PLIST".plist"
+#define _PATH_YABAI_PLIST "%s/Library/LaunchAgents/"_NAME_YABAI_PLIST".plist"
 
 #define _YABAI_PLIST \
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
@@ -59,12 +59,14 @@ static int safe_exec(char *const argv[])
 
 static void populate_plist_path(char *yabai_plist_path, int size)
 {
-    char *user = getenv("USER");
-    if (!user) {
-        error("yabai: 'env USER' not set! abort..\n");
+    CFStringRef home_ref = (__bridge CFStringRef) NSHomeDirectoryForUser(NULL);
+    char *home = home_ref ? cfstring_copy(home_ref) : NULL;
+
+    if (!home) {
+        error("yabai: unable to retrieve home directory! abort..\n");
     }
 
-    snprintf(yabai_plist_path, size, _PATH_YABAI_PLIST, user);
+    snprintf(yabai_plist_path, size, _PATH_YABAI_PLIST, home);
 }
 
 static void populate_plist(char *yabai_plist, int size)
