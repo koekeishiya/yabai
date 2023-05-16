@@ -1040,7 +1040,7 @@ struct window *window_manager_find_first_window_in_stack(struct space_manager *s
     struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return NULL;
 
-    return window_manager_find_window(wm, node->window_list[0]);
+    return node->window_count > 1 ? window_manager_find_window(wm, node->window_list[0]) : NULL;
 }
 
 struct window *window_manager_find_last_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -1051,7 +1051,7 @@ struct window *window_manager_find_last_window_in_stack(struct space_manager *sm
     struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return NULL;
 
-    return window_manager_find_window(wm, node->window_list[node->window_count-1]);
+    return node->window_count > 1 ? window_manager_find_window(wm, node->window_list[node->window_count-1]) : NULL;
 }
 
 struct window *window_manager_find_recent_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -1062,11 +1062,7 @@ struct window *window_manager_find_recent_window_in_stack(struct space_manager *
     struct window_node *node = view_find_window_node(view, window->id);
     if (!node) return NULL;
 
-    if (node->window_count > 1) {
-        return window_manager_find_window(wm, node->window_order[1]);
-    }
-
-    return NULL;
+    return node->window_count > 1 ? window_manager_find_window(wm, node->window_order[1]) : NULL;
 }
 
 struct window *window_manager_find_largest_managed_window(struct space_manager *sm, struct window_manager *wm)
