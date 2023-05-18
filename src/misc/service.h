@@ -57,7 +57,7 @@ static int safe_exec(char *const argv[])
     }
 }
 
-static void populate_plist_path(char *yabai_plist_path, int size)
+static char *populate_plist_path(void)
 {
     CFStringRef home_ref = (__bridge CFStringRef) NSHomeDirectoryForUser(NULL);
     char *home = home_ref ? cfstring_copy(home_ref) : NULL;
@@ -66,10 +66,19 @@ static void populate_plist_path(char *yabai_plist_path, int size)
         error("yabai: unable to retrieve home directory! abort..\n");
     }
 
-    snprintf(yabai_plist_path, size, _PATH_YABAI_PLIST, home);
+    int size = strlen(_PATH_YABAI_PLIST)-2 + strlen(home) + 1;
+    char *result = malloc(size);
+    if (!result) {
+        error("yabai: could not allocate memory for plist path! abort..\n");
+    }
+
+    memset(result, 0, size);
+    snprintf(result, size, _PATH_YABAI_PLIST, home);
+
+    return result;
 }
 
-static void populate_plist(char *yabai_plist, int size)
+static char *populate_plist(int *length)
 {
     char *user = getenv("USER");
     if (!user) {
@@ -87,7 +96,17 @@ static void populate_plist(char *yabai_plist, int size)
         error("yabai: unable to retrieve path of executable! abort..\n");
     }
 
-    snprintf(yabai_plist, size, _YABAI_PLIST, exe_path, path_env, user, user);
+    int size = strlen(_YABAI_PLIST)-8 + strlen(exe_path) + strlen(path_env) + (2*strlen(user)) + 1;
+    char *result = malloc(size);
+    if (!result) {
+        error("yabai: could not allocate memory for plist contents! abort..\n");
+    }
+
+    memset(result, 0, size);
+    snprintf(result, size, _YABAI_PLIST, exe_path, path_env, user, user);
+    *length = size-1;
+
+    return result;
 }
 
 static inline void ensure_directory_exists(char *yabai_plist_path)
@@ -115,14 +134,14 @@ static inline void ensure_directory_exists(char *yabai_plist_path)
 
 static int service_install_internal(char *yabai_plist_path)
 {
-    char yabai_plist[4096];
-    populate_plist(yabai_plist, sizeof(yabai_plist));
+    int yabai_plist_length;
+    char *yabai_plist = populate_plist(&yabai_plist_length);
     ensure_directory_exists(yabai_plist_path);
 
     FILE *handle = fopen(yabai_plist_path, "w");
     if (!handle) return 1;
 
-    size_t bytes = fwrite(yabai_plist, strlen(yabai_plist), 1, handle);
+    size_t bytes = fwrite(yabai_plist, yabai_plist_length, 1, handle);
     int result = bytes == 1 ? 0 : 1;
     fclose(handle);
 
@@ -131,8 +150,7 @@ static int service_install_internal(char *yabai_plist_path)
 
 static int service_install(void)
 {
-    char yabai_plist_path[MAXLEN];
-    populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
+    char *yabai_plist_path = populate_plist_path();
 
     if (file_exists(yabai_plist_path)) {
         error("yabai: service file '%s' is already installed! abort..\n", yabai_plist_path);
@@ -143,8 +161,7 @@ static int service_install(void)
 
 static int service_uninstall(void)
 {
-    char yabai_plist_path[MAXLEN];
-    populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
+    char *yabai_plist_path = populate_plist_path();
 
     if (!file_exists(yabai_plist_path)) {
         error("yabai: service file '%s' is not installed! abort..\n", yabai_plist_path);
@@ -155,8 +172,7 @@ static int service_uninstall(void)
 
 static int service_start(void)
 {
-    char yabai_plist_path[MAXLEN];
-    populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
+    char *yabai_plist_path = populate_plist_path();
 
     if (!file_exists(yabai_plist_path)) {
         warn("yabai: service file '%s' is not installed! attempting installation..\n", yabai_plist_path);
@@ -173,8 +189,7 @@ static int service_start(void)
 
 static int service_restart(void)
 {
-    char yabai_plist_path[MAXLEN];
-    populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
+    char *yabai_plist_path = populate_plist_path();
 
     if (!file_exists(yabai_plist_path)) {
         error("yabai: service file '%s' is not installed! abort..\n", yabai_plist_path);
@@ -189,8 +204,7 @@ static int service_restart(void)
 
 static int service_stop(void)
 {
-    char yabai_plist_path[MAXLEN];
-    populate_plist_path(yabai_plist_path, sizeof(yabai_plist_path));
+    char *yabai_plist_path = populate_plist_path();
 
     if (!file_exists(yabai_plist_path)) {
         error("yabai: service file '%s' is not installed! abort..\n", yabai_plist_path);

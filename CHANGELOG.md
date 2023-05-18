@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Create `LaunchAgents` folder in `~/Library` when installing service file, if the directory does not already exist [#1728](https://github.com/koekeishiya/yabai/issues/1728)
 - Changed how the users home directory is determined when managing service file [#1742](https://github.com/koekeishiya/yabai/issues/1742)
+- Calculate memory requirement of service file path and contents instead of using static storage [#1749](https://github.com/koekeishiya/yabai/issues/1749)
 - Window selector `stack.first` and `stack.last` should return an error when there is no stack [#1748](https://github.com/koekeishiya/yabai/issues/1748)
 
 ## [5.0.4] - 2023-05-01
