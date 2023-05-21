@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.5] - 2023-05-21
 ### Changed
 - Create `LaunchAgents` folder in `~/Library` when installing service file, if the directory does not already exist [#1728](https://github.com/koekeishiya/yabai/issues/1728)
 - Changed how the users home directory is determined when managing service file [#1742](https://github.com/koekeishiya/yabai/issues/1742)
@@ -461,7 +463,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.4...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.5...HEAD
+[5.0.5]: https://github.com/koekeishiya/yabai/compare/v5.0.4...v5.0.5
 [5.0.4]: https://github.com/koekeishiya/yabai/compare/v5.0.3...v5.0.4
 [5.0.3]: https://github.com/koekeishiya/yabai/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/koekeishiya/yabai/compare/v5.0.1...v5.0.2
