@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Changed how the users home directory is determined when managing service file [#1742](https://github.com/koekeishiya/yabai/issues/1742)
 - Calculate memory requirement of service file path and contents instead of using static storage [#1749](https://github.com/koekeishiya/yabai/issues/1749)
 - Window selector `stack.first` and `stack.last` should return an error when there is no stack [#1748](https://github.com/koekeishiya/yabai/issues/1748)
+- Fixed off-by-one when checking frame positions in `xxx_in_direction` [#1511](https://github.com/koekeishiya/yabai/issues/1511) [#1463](https://github.com/koekeishiya/yabai/issues/1463)
 
 ## [5.0.4] - 2023-05-01
 ### Added

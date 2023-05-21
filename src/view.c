@@ -576,13 +576,13 @@ struct window_node *view_find_window_node_in_direction(struct view *view, struct
     int best_rank = INT_MAX;
     struct window_node *best_node = NULL;
 
-    CGPoint source_area_max = { source->area.x + source->area.w, source->area.y + source->area.h };
+    CGPoint source_area_max = { source->area.x + source->area.w - 1, source->area.y + source->area.h - 1};
 
     struct window_node *target = window_node_find_first_leaf(view->root);
     while (target) {
         if (source == target) goto next;
 
-        CGPoint target_area_max = { target->area.x + target->area.w, target->area.y + target->area.h };
+        CGPoint target_area_max = { target->area.x + target->area.w - 1, target->area.y + target->area.h - 1 };
         if (area_is_in_direction(&source->area, source_area_max, &target->area, target_area_max, direction)) {
             int distance = area_distance_in_direction(&source->area, source_area_max, &target->area, target_area_max, direction);
             int rank = window_manager_find_rank_of_window_in_list(target->window_order[0], window_list, window_count);
