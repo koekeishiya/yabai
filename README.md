@@ -9,6 +9,12 @@
   <a href="https://github.com/koekeishiya/yabai/blob/master/LICENSE.txt">
     <img src="https://img.shields.io/github/license/koekeishiya/yabai.svg?color=green" alt="License Badge">
   </a>
+  <a href="https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc">
+    <img src="https://img.shields.io/badge/view-documentation-green.svg" alt="Documentation Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/wiki">
+    <img src="https://img.shields.io/badge/view-wiki-green.svg" alt="Wiki Badge">
+  </a>
   <a href="https://github.com/koekeishiya/yabai/blob/master/CHANGELOG.md">
     <img src="https://img.shields.io/badge/view-changelog-green.svg" alt="Changelog Badge">
   </a>
