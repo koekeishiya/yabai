@@ -68,8 +68,8 @@
 
 #include "sa.m"
 #include "mission_control.c"
-#include "event_loop.c"
 #include "event.c"
+#include "event_loop.c"
 #include "event_signal.c"
 #include "event_tap.c"
 #include "workspace.m"

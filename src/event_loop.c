@@ -1,5 +1,9 @@
+#define CASE_IGNORE_EVENT(event_type) case event_type: __builtin_unreachable()
+#define CASE_HANDLE_EVENT(event_type) case event_type: result = EVENT_HANDLER_##event_type(event->context, event->param1)
 static void *event_loop_run(void *context)
 {
+    uint32_t result;
+    struct event *event;
     struct event_loop_item *head;
     struct event_loop *event_loop = (struct event_loop *) context;
 
@@ -12,9 +16,54 @@ static void *event_loop_run(void *context)
                 if (!head->next) goto empty;
             } while (!__sync_bool_compare_and_swap(&event_loop->head, head, head->next));
 
-            struct event *event = &head->next->event;
-
-            uint32_t result = event_handler[event->type](event->context, event->param1);
+            event = &head->next->event;
+            switch (event->type) {
+            CASE_IGNORE_EVENT(EVENT_TYPE_UNKNOWN);                 break;
+            CASE_HANDLE_EVENT(APPLICATION_LAUNCHED);               break;
+            CASE_HANDLE_EVENT(APPLICATION_TERMINATED);             break;
+            CASE_HANDLE_EVENT(APPLICATION_FRONT_SWITCHED);         break;
+            CASE_HANDLE_EVENT(APPLICATION_ACTIVATED);              break;
+            CASE_HANDLE_EVENT(APPLICATION_DEACTIVATED);            break;
+            CASE_HANDLE_EVENT(APPLICATION_VISIBLE);                break;
+            CASE_HANDLE_EVENT(APPLICATION_HIDDEN);                 break;
+            CASE_HANDLE_EVENT(WINDOW_CREATED);                     break;
+            CASE_HANDLE_EVENT(WINDOW_DESTROYED);                   break;
+            CASE_HANDLE_EVENT(WINDOW_FOCUSED);                     break;
+            CASE_HANDLE_EVENT(WINDOW_MOVED);                       break;
+            CASE_HANDLE_EVENT(WINDOW_RESIZED);                     break;
+            CASE_HANDLE_EVENT(WINDOW_MINIMIZED);                   break;
+            CASE_HANDLE_EVENT(WINDOW_DEMINIMIZED);                 break;
+            CASE_HANDLE_EVENT(WINDOW_TITLE_CHANGED);               break;
+            CASE_HANDLE_EVENT(SLS_WINDOW_MOVED);                   break;
+            CASE_HANDLE_EVENT(SLS_WINDOW_RESIZED);                 break;
+            CASE_HANDLE_EVENT(SLS_WINDOW_ORDER_CHANGED);           break;
+            CASE_HANDLE_EVENT(SLS_WINDOW_IS_VISIBLE);              break;
+            CASE_HANDLE_EVENT(SLS_WINDOW_IS_INVISIBLE);            break;
+            CASE_HANDLE_EVENT(SPACE_CHANGED);                      break;
+            CASE_HANDLE_EVENT(DISPLAY_ADDED);                      break;
+            CASE_HANDLE_EVENT(DISPLAY_REMOVED);                    break;
+            CASE_HANDLE_EVENT(DISPLAY_MOVED);                      break;
+            CASE_HANDLE_EVENT(DISPLAY_RESIZED);                    break;
+            CASE_HANDLE_EVENT(DISPLAY_CHANGED);                    break;
+            CASE_HANDLE_EVENT(MOUSE_DOWN);                         break;
+            CASE_HANDLE_EVENT(MOUSE_UP);                           break;
+            CASE_HANDLE_EVENT(MOUSE_DRAGGED);                      break;
+            CASE_HANDLE_EVENT(MOUSE_MOVED);                        break;
+            CASE_HANDLE_EVENT(MISSION_CONTROL_SHOW_ALL_WINDOWS);   break;
+            CASE_HANDLE_EVENT(MISSION_CONTROL_SHOW_FRONT_WINDOWS); break;
+            CASE_HANDLE_EVENT(MISSION_CONTROL_SHOW_DESKTOP);       break;
+            CASE_HANDLE_EVENT(MISSION_CONTROL_ENTER);              break;
+            CASE_HANDLE_EVENT(MISSION_CONTROL_CHECK_FOR_EXIT);     break;
+            CASE_HANDLE_EVENT(MISSION_CONTROL_EXIT);               break;
+            CASE_HANDLE_EVENT(DOCK_DID_RESTART);                   break;
+            CASE_HANDLE_EVENT(MENU_OPENED);                        break;
+            CASE_HANDLE_EVENT(MENU_CLOSED);                        break;
+            CASE_HANDLE_EVENT(MENU_BAR_HIDDEN_CHANGED);            break;
+            CASE_HANDLE_EVENT(DOCK_DID_CHANGE_PREF);               break;
+            CASE_HANDLE_EVENT(SYSTEM_WOKE);                        break;
+            CASE_HANDLE_EVENT(DAEMON_MESSAGE);                     break;
+            CASE_IGNORE_EVENT(EVENT_TYPE_COUNT);                   break;
+            }
             if (event->info) *event->info = (result << 0x1) | EVENT_PROCESSED;
 
             event_signal_flush();
@@ -28,6 +77,8 @@ empty:
 
     return NULL;
 }
+#undef CASE_HANDLE_EVENT
+#undef CASE_IGNORE_EVENT
 
 void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1, volatile uint32_t *info)
 {
