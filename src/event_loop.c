@@ -41,7 +41,7 @@ static void window_did_receive_focus(struct window_manager *wm, struct mouse_sta
     }
 }
 
-static EVENT_CALLBACK(APPLICATION_LAUNCHED)
+static EVENT_HANDLER(APPLICATION_LAUNCHED)
 {
     struct process *process = context;
 
@@ -161,7 +161,7 @@ next:
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(APPLICATION_TERMINATED)
+static EVENT_HANDLER(APPLICATION_TERMINATED)
 {
     struct process *process = context;
     struct application *application = window_manager_find_application(&g_window_manager, process->pid);
@@ -240,7 +240,7 @@ out:
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-static EVENT_CALLBACK(APPLICATION_FRONT_SWITCHED)
+static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
 {
     struct process *process = context;
     struct application *application = window_manager_find_application(&g_window_manager, process->pid);
@@ -263,7 +263,7 @@ static EVENT_CALLBACK(APPLICATION_FRONT_SWITCHED)
 }
 #pragma clang diagnostic pop
 
-static EVENT_CALLBACK(APPLICATION_ACTIVATED)
+static EVENT_HANDLER(APPLICATION_ACTIVATED)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
     if (!application) return EVENT_FAILURE;
@@ -292,7 +292,7 @@ static EVENT_CALLBACK(APPLICATION_ACTIVATED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(APPLICATION_DEACTIVATED)
+static EVENT_HANDLER(APPLICATION_DEACTIVATED)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
     if (!application) return EVENT_FAILURE;
@@ -317,7 +317,7 @@ static EVENT_CALLBACK(APPLICATION_DEACTIVATED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(APPLICATION_VISIBLE)
+static EVENT_HANDLER(APPLICATION_VISIBLE)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
     if (!application) return EVENT_FAILURE;
@@ -381,7 +381,7 @@ static EVENT_CALLBACK(APPLICATION_VISIBLE)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(APPLICATION_HIDDEN)
+static EVENT_HANDLER(APPLICATION_HIDDEN)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
     if (!application) return EVENT_FAILURE;
@@ -442,7 +442,7 @@ static EVENT_CALLBACK(APPLICATION_HIDDEN)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(WINDOW_CREATED)
+static EVENT_HANDLER(WINDOW_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
     if (!window_id) goto err;
@@ -483,7 +483,7 @@ out:
     return EVENT_FAILURE;
 }
 
-static EVENT_CALLBACK(WINDOW_DESTROYED)
+static EVENT_HANDLER(WINDOW_DESTROYED)
 {
     struct window *window = context;
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -505,7 +505,7 @@ static EVENT_CALLBACK(WINDOW_DESTROYED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(WINDOW_FOCUSED)
+static EVENT_HANDLER(WINDOW_FOCUSED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
@@ -542,7 +542,7 @@ static EVENT_CALLBACK(WINDOW_FOCUSED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(WINDOW_MOVED)
+static EVENT_HANDLER(WINDOW_MOVED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
@@ -571,7 +571,7 @@ static EVENT_CALLBACK(WINDOW_MOVED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(WINDOW_RESIZED)
+static EVENT_HANDLER(WINDOW_RESIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
@@ -636,7 +636,7 @@ static EVENT_CALLBACK(WINDOW_RESIZED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(WINDOW_MINIMIZED)
+static EVENT_HANDLER(WINDOW_MINIMIZED)
 {
     struct window *window = context;
 
@@ -664,7 +664,7 @@ static EVENT_CALLBACK(WINDOW_MINIMIZED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(WINDOW_DEMINIMIZED)
+static EVENT_HANDLER(WINDOW_DEMINIMIZED)
 {
     struct window *window = context;
 
@@ -702,7 +702,7 @@ static EVENT_CALLBACK(WINDOW_DEMINIMIZED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(WINDOW_TITLE_CHANGED)
+static EVENT_HANDLER(WINDOW_TITLE_CHANGED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
@@ -719,7 +719,7 @@ static EVENT_CALLBACK(WINDOW_TITLE_CHANGED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(SLS_WINDOW_MOVED)
+static EVENT_HANDLER(SLS_WINDOW_MOVED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
@@ -742,7 +742,7 @@ static EVENT_CALLBACK(SLS_WINDOW_MOVED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(SLS_WINDOW_RESIZED)
+static EVENT_HANDLER(SLS_WINDOW_RESIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
@@ -765,7 +765,7 @@ static EVENT_CALLBACK(SLS_WINDOW_RESIZED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(SLS_WINDOW_ORDER_CHANGED)
+static EVENT_HANDLER(SLS_WINDOW_ORDER_CHANGED)
 {
     if (g_mission_control_active) return EVENT_SUCCESS;
 
@@ -791,7 +791,7 @@ static EVENT_CALLBACK(SLS_WINDOW_ORDER_CHANGED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(SLS_WINDOW_IS_VISIBLE)
+static EVENT_HANDLER(SLS_WINDOW_IS_VISIBLE)
 {
     if (g_mission_control_active) return EVENT_SUCCESS;
 
@@ -815,7 +815,7 @@ static EVENT_CALLBACK(SLS_WINDOW_IS_VISIBLE)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(SLS_WINDOW_IS_INVISIBLE)
+static EVENT_HANDLER(SLS_WINDOW_IS_INVISIBLE)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
@@ -837,7 +837,7 @@ static EVENT_CALLBACK(SLS_WINDOW_IS_INVISIBLE)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(SPACE_CHANGED)
+static EVENT_HANDLER(SPACE_CHANGED)
 {
     g_space_manager.last_space_id = g_space_manager.current_space_id;
     g_space_manager.current_space_id = space_manager_active_space();
@@ -864,7 +864,7 @@ static EVENT_CALLBACK(SPACE_CHANGED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DISPLAY_CHANGED)
+static EVENT_HANDLER(DISPLAY_CHANGED)
 {
     uint32_t new_did = display_manager_active_display_id();
     if (g_display_manager.current_display_id == new_did) {
@@ -906,7 +906,7 @@ static EVENT_CALLBACK(DISPLAY_CHANGED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DISPLAY_ADDED)
+static EVENT_HANDLER(DISPLAY_ADDED)
 {
     uint32_t did = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, did);
@@ -916,7 +916,7 @@ static EVENT_CALLBACK(DISPLAY_ADDED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DISPLAY_REMOVED)
+static EVENT_HANDLER(DISPLAY_REMOVED)
 {
     uint32_t did = display_manager_main_display_id();
     debug("%s: %d\n", __FUNCTION__, did);
@@ -925,7 +925,7 @@ static EVENT_CALLBACK(DISPLAY_REMOVED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DISPLAY_MOVED)
+static EVENT_HANDLER(DISPLAY_MOVED)
 {
     uint32_t did = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, did);
@@ -934,7 +934,7 @@ static EVENT_CALLBACK(DISPLAY_MOVED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DISPLAY_RESIZED)
+static EVENT_HANDLER(DISPLAY_RESIZED)
 {
     uint32_t did = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, did);
@@ -943,7 +943,7 @@ static EVENT_CALLBACK(DISPLAY_RESIZED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MOUSE_DOWN)
+static EVENT_HANDLER(MOUSE_DOWN)
 {
     if (g_mission_control_active)                        goto out;
     if (g_mouse_state.current_action != MOUSE_MODE_NONE) goto out;
@@ -973,7 +973,7 @@ out:
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MOUSE_UP)
+static EVENT_HANDLER(MOUSE_UP)
 {
     if (g_mission_control_active) goto out;
     if (!g_mouse_state.window)    goto out;
@@ -1049,7 +1049,7 @@ out:
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MOUSE_DRAGGED)
+static EVENT_HANDLER(MOUSE_DRAGGED)
 {
     if (g_mission_control_active) goto out;
     if (!g_mouse_state.window)    goto out;
@@ -1106,7 +1106,7 @@ out:
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MOUSE_MOVED)
+static EVENT_HANDLER(MOUSE_MOVED)
 {
     if (g_window_manager.ffm_mode == FFM_DISABLED) goto out;
     if (g_mission_control_active)                  goto out;
@@ -1213,7 +1213,7 @@ out:
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MISSION_CONTROL_SHOW_ALL_WINDOWS)
+static EVENT_HANDLER(MISSION_CONTROL_SHOW_ALL_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 2;
@@ -1229,7 +1229,7 @@ static EVENT_CALLBACK(MISSION_CONTROL_SHOW_ALL_WINDOWS)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
+static EVENT_HANDLER(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 3;
@@ -1245,7 +1245,7 @@ static EVENT_CALLBACK(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MISSION_CONTROL_SHOW_DESKTOP)
+static EVENT_HANDLER(MISSION_CONTROL_SHOW_DESKTOP)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 4;
@@ -1261,7 +1261,7 @@ static EVENT_CALLBACK(MISSION_CONTROL_SHOW_DESKTOP)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MISSION_CONTROL_ENTER)
+static EVENT_HANDLER(MISSION_CONTROL_ENTER)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 1;
@@ -1281,7 +1281,7 @@ static EVENT_CALLBACK(MISSION_CONTROL_ENTER)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MISSION_CONTROL_CHECK_FOR_EXIT)
+static EVENT_HANDLER(MISSION_CONTROL_CHECK_FOR_EXIT)
 {
     if (!g_mission_control_active) return EVENT_FAILURE;
 
@@ -1325,7 +1325,7 @@ static EVENT_CALLBACK(MISSION_CONTROL_CHECK_FOR_EXIT)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MISSION_CONTROL_EXIT)
+static EVENT_HANDLER(MISSION_CONTROL_EXIT)
 {
     debug("%s:\n", __FUNCTION__);
 
@@ -1346,7 +1346,7 @@ static EVENT_CALLBACK(MISSION_CONTROL_EXIT)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DOCK_DID_RESTART)
+static EVENT_HANDLER(DOCK_DID_RESTART)
 {
     debug("%s:\n", __FUNCTION__);
 
@@ -1362,7 +1362,7 @@ static EVENT_CALLBACK(DOCK_DID_RESTART)
 static enum ffm_mode ffm_value;
 static int is_menu_open = 0;
 
-static EVENT_CALLBACK(MENU_OPENED)
+static EVENT_HANDLER(MENU_OPENED)
 {
     debug("%s\n", __FUNCTION__);
 
@@ -1379,7 +1379,7 @@ static EVENT_CALLBACK(MENU_OPENED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MENU_CLOSED)
+static EVENT_HANDLER(MENU_CLOSED)
 {
     debug("%s\n", __FUNCTION__);
 
@@ -1390,7 +1390,7 @@ static EVENT_CALLBACK(MENU_CLOSED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(MENU_BAR_HIDDEN_CHANGED)
+static EVENT_HANDLER(MENU_BAR_HIDDEN_CHANGED)
 {
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
@@ -1398,7 +1398,7 @@ static EVENT_CALLBACK(MENU_BAR_HIDDEN_CHANGED)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DOCK_DID_CHANGE_PREF)
+static EVENT_HANDLER(DOCK_DID_CHANGE_PREF)
 {
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
@@ -1406,7 +1406,7 @@ static EVENT_CALLBACK(DOCK_DID_CHANGE_PREF)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(SYSTEM_WOKE)
+static EVENT_HANDLER(SYSTEM_WOKE)
 {
     debug("%s:\n", __FUNCTION__);
 
@@ -1420,7 +1420,7 @@ static EVENT_CALLBACK(SYSTEM_WOKE)
     return EVENT_SUCCESS;
 }
 
-static EVENT_CALLBACK(DAEMON_MESSAGE)
+static EVENT_HANDLER(DAEMON_MESSAGE)
 {
     FILE *rsp         = NULL;
     int bytes_read    = 0;

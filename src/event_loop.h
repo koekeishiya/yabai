@@ -10,7 +10,7 @@
 #define event_status(e) ((e)  & 0x1)
 #define event_result(e) ((e) >> 0x1)
 
-#define EVENT_CALLBACK(event_type) uint32_t EVENT_HANDLER_##event_type(void *context, int param1)
+#define EVENT_HANDLER(event_type) uint32_t EVENT_HANDLER_##event_type(void *context, int param1)
 
 #define EVENT_TYPE_LIST \
     EVENT_TYPE_ENTRY(APPLICATION_LAUNCHED) \
