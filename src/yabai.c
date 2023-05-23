@@ -183,9 +183,7 @@ static void exec_config_file(void)
     }
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-static inline void init_misc_settings(void)
+static inline void init_user_filepaths(void)
 {
     char *user = getenv("USER");
     if (!user) {
@@ -195,12 +193,18 @@ static inline void init_misc_settings(void)
     snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, user);
     snprintf(g_socket_file, sizeof(g_socket_file), SOCKET_PATH_FMT, user);
     snprintf(g_lock_file, sizeof(g_lock_file), LCFILE_PATH_FMT, user);
+}
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static inline void init_misc_settings(void)
+{
     NSApplicationLoad();
     signal(SIGCHLD, SIG_IGN);
     signal(SIGPIPE, SIG_IGN);
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
+
     g_pid = getpid();
     g_connection = SLSMainConnectionID();
     g_normal_window_level   = CGWindowLevelForKey(LAYER_NORMAL);
@@ -303,10 +307,7 @@ int main(int argc, char **argv)
         error("yabai: could not access accessibility features! abort..\n");
     }
 
-    init_misc_settings();
-    acquire_lockfile();
-
-    if (!space_manager_has_separate_spaces()) {
+    if (!(SLSGetSpaceManagementMode(SLSMainConnectionID()) == 1)) {
         error("yabai: 'display has separate spaces' is disabled! abort..\n");
     }
 
@@ -321,6 +322,10 @@ int main(int argc, char **argv)
     if (!ts_init(MEGABYTES(4))) {
         error("yabai: could not allocate temporary storage! abort..\n");
     }
+
+    init_user_filepaths();
+    acquire_lockfile();
+    init_misc_settings();
 
     process_manager_init(&g_process_manager);
     workspace_event_handler_init(&g_workspace_context);

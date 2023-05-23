@@ -12,11 +12,6 @@ static TABLE_COMPARE_FUNC(compare_view)
     return *(uint64_t *) key_a == *(uint64_t *) key_b;
 }
 
-bool space_manager_has_separate_spaces(void)
-{
-    return SLSGetSpaceManagementMode(g_connection) == 1;
-}
-
 bool space_manager_query_space(FILE *rsp, uint64_t sid)
 {
     struct view *view = space_manager_query_view(&g_space_manager, sid);
