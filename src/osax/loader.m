@@ -111,6 +111,7 @@ static pid_t get_dock_pid(void)
 
     return 0;
 }
+
 int main(int argc, char **argv)
 {
     int result = 0;
