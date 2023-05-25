@@ -197,8 +197,6 @@ static bool scripting_addition_remove(void)
     snprintf(cmd, sizeof(cmd), "%s %s %s", "rm -rf", osax_base_dir, "2>/dev/null");
 
     int code = system(cmd);
-    if (code ==  -1) return false;
-    if (code == 127) return false;
     return code == 0;
 }
 
