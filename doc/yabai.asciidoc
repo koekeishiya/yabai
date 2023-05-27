@@ -56,6 +56,24 @@ Options
     Path is /Library/ScriptingAdditions/yabai.osax. +
     System Integrity Protection must be partially disabled.
 
+*--install-service*::
+    Writes a lunchd service file to disk. +
+    Path is ~/Library/LaunchAgents/com.koekeishiya.yabai.plist.
+
+*--uninstall-service*::
+    Removes a lunchd service file from disk. +
+    Path is ~/Library/LaunchAgents/com.koekeishiya.yabai.plist.
+
+*--start-service*::
+    Enables, loads, and starts the launchd service. +
+    Will install service file if it does not exist.
+
+*--restart-service*::
+    Attempts to restart the service instance.
+
+*--stop-service*::
+    Stops a running instance of the service and unloads it.
+
 Definitions
 -----------
 

@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.18
-.\"      Date: 2023-04-14
+.\"      Date: 2023-05-27
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2023-04-14" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2023-05-27" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -76,6 +76,37 @@ Installs and updates the scripting\-addition when necessary.
 Path is /Library/ScriptingAdditions/yabai.osax.
 .br
 System Integrity Protection must be partially disabled.
+.RE
+.sp
+\fB\-\-install\-service\fP
+.RS 4
+Writes a lunchd service file to disk.
+.br
+Path is ~/Library/LaunchAgents/com.koekeishiya.yabai.plist.
+.RE
+.sp
+\fB\-\-uninstall\-service\fP
+.RS 4
+Removes a lunchd service file from disk.
+.br
+Path is ~/Library/LaunchAgents/com.koekeishiya.yabai.plist.
+.RE
+.sp
+\fB\-\-start\-service\fP
+.RS 4
+Enables, loads, and starts the launchd service.
+.br
+Will install service file if it does not exist.
+.RE
+.sp
+\fB\-\-restart\-service\fP
+.RS 4
+Attempts to restart the service instance.
+.RE
+.sp
+\fB\-\-stop\-service\fP
+.RS 4
+Stops a running instance of the service and unloads it.
 .RE
 .SH "DEFINITIONS"
 .sp
