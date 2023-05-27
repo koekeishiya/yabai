@@ -203,7 +203,7 @@ static int service_start(void)
     }
 
     char service_target[MAXLEN];
-    snprintf(service_target, sizeof(sevice_target), "gui/%d/%s", getuid(), _NAME_YABAI_PLIST);
+    snprintf(service_target, sizeof(service_target), "gui/%d/%s", getuid(), _NAME_YABAI_PLIST);
 
     char domain_target[MAXLEN];
     snprintf(domain_target, sizeof(domain_target), "gui/%d", getuid());
