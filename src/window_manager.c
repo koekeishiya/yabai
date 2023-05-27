@@ -1,5 +1,4 @@
 extern struct event_loop g_event_loop;
-extern struct event_tap g_event_tap;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;
 
@@ -168,12 +167,12 @@ void window_manager_apply_rules_to_window(struct space_manager *sm, struct windo
 
 void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode)
 {
-    event_tap_end(&g_event_tap);
+    mouse_handler_end(&g_mouse_state);
 
     if (mode == FFM_DISABLED) {
-        event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+        mouse_handler_begin(&g_mouse_state, MOUSE_EVENT_MASK);
     } else {
-        event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE_FFM, mouse_handler);
+        mouse_handler_begin(&g_mouse_state, MOUSE_EVENT_MASK_FFM);
     }
 
     wm->ffm_mode = mode;
@@ -277,7 +276,7 @@ void window_manager_set_window_border_radius(struct window_manager *wm, int radi
                 struct window *window = bucket->value;
                 if (window->border.id) {
                     if (window->border.path_ref) CGPathRelease(window->border.path_ref);
-                    window->border.path_ref = CGPathCreateWithRoundedRect(window->border.path, cgrect_clamp_x_radius(window->border.path, g_window_manager.border_radius), cgrect_clamp_y_radius(window->border.path, g_window_manager.border_radius), NULL);
+                    window->border.path_ref = CGPathCreateWithRoundedRect(window->border.path, cgrect_clamp_x_radius(window->border.path, wm->border_radius), cgrect_clamp_y_radius(window->border.path, wm->border_radius), NULL);
                     border_redraw(window);
                 }
             }
@@ -1403,7 +1402,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     window_manager_add_window(wm, window);
     window_manager_apply_rules_to_window(sm, wm, window);
 
-    if ((g_window_manager.enable_window_border) &&
+    if ((wm->enable_window_border) &&
         (!window_rule_check_flag(window, WINDOW_RULE_BORDER))) {
         border_create(window);
     }
@@ -1515,12 +1514,12 @@ void window_manager_add_existing_application_windows(struct space_manager *sm, s
     if (global_window_count == window_count-empty_count) {
         if (refresh_index != -1) {
             debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
-            buf_del(g_window_manager.applications_to_refresh, refresh_index);
+            buf_del(wm->applications_to_refresh, refresh_index);
         }
     } else {
         bool missing_window = false;
         for (int i = 0; i < global_window_count; ++i) {
-            struct window *window = window_manager_find_window(&g_window_manager, global_window_list[i]);
+            struct window *window = window_manager_find_window(wm, global_window_list[i]);
             if (!window) {
                 missing_window = true;
                 break;
@@ -1529,10 +1528,10 @@ void window_manager_add_existing_application_windows(struct space_manager *sm, s
 
         if (refresh_index == -1 && missing_window) {
             debug("%s: %s has windows that are not yet resolved\n", __FUNCTION__, application->name);
-            buf_push(g_window_manager.applications_to_refresh, application);
+            buf_push(wm->applications_to_refresh, application);
         } else if (refresh_index != -1 && !missing_window) {
             debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
-            buf_del(g_window_manager.applications_to_refresh, refresh_index);
+            buf_del(wm->applications_to_refresh, refresh_index);
         }
     }
 
@@ -1615,10 +1614,10 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
 
     struct area area = a_node->zoom ? a_node->zoom->area : a_node->area;
     if (b->border.id) {
-        area.x += g_window_manager.border_width;
-        area.y += g_window_manager.border_width;
-        area.w -= g_window_manager.border_width * 2.0f;
-        area.h -= g_window_manager.border_width * 2.0f;
+        area.x += wm->border_width;
+        area.y += wm->border_width;
+        area.w -= wm->border_width * 2.0f;
+        area.h -= wm->border_width * 2.0f;
     }
 
     window_manager_animate_window((struct window_capture) { b, area.x, area.y, area.w, area.h });
@@ -2214,8 +2213,8 @@ void window_manager_correct_for_mission_control_changes(struct space_manager *sm
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return;
 
-    float animation_duration = g_window_manager.window_animation_duration;
-    g_window_manager.window_animation_duration = 0.0f;
+    float animation_duration = wm->window_animation_duration;
+    wm->window_animation_duration = 0.0f;
 
     for (int i = 0; i < display_count; ++i) {
         uint32_t did = display_list[i];
@@ -2227,14 +2226,14 @@ void window_manager_correct_for_mission_control_changes(struct space_manager *sm
         uint64_t sid = display_space_id(did);
         for (int j = 0; j < space_count; ++j) {
             if (space_list[j] == sid) {
-                window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sid);
+                window_manager_validate_and_check_for_windows_on_space(sm, wm, sid);
             } else {
                 space_manager_mark_view_invalid(sm, space_list[j]);
             }
         }
     }
 
-    g_window_manager.window_animation_duration = animation_duration;
+    wm->window_animation_duration = animation_duration;
 }
 
 void window_manager_handle_display_add_and_remove(struct space_manager *sm, struct window_manager *wm, uint32_t did)

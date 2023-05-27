@@ -953,7 +953,7 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
     sm->last_space_id = sm->current_space_id;
 }
 
-void space_manager_init(struct space_manager *sm)
+void space_manager_begin(struct space_manager *sm)
 {
     sm->layout = VIEW_FLOAT;
     sm->split_ratio = 0.5f;
@@ -962,7 +962,6 @@ void space_manager_init(struct space_manager *sm)
     sm->window_placement = CHILD_SECOND;
     sm->window_zoom_persist = true;
     sm->labels = NULL;
-
     table_init(&sm->view, 23, hash_view, compare_view);
 
     int display_count;
@@ -979,10 +978,7 @@ void space_manager_init(struct space_manager *sm)
             table_add(&sm->view, &space_list[j], view);
         }
     }
-}
 
-void space_manager_begin(struct space_manager *sm)
-{
     sm->current_space_id = space_manager_active_space();
     sm->last_space_id = sm->current_space_id;
     sm->did_begin = true;

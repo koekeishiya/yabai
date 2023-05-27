@@ -58,6 +58,5 @@ uint32_t *display_manager_active_display_list(int *count);
 void display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool update_cursor_position);
 void display_manager_focus_display(uint32_t did, uint64_t sid);
 bool display_manager_begin(struct display_manager *dm);
-bool display_manager_end(void);
 
 #endif

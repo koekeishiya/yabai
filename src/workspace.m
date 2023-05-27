@@ -1,21 +1,14 @@
 extern struct event_loop g_event_loop;
 
-void workspace_event_handler_init(void **context)
+bool workspace_event_handler_begin(void **context)
 {
     workspace_context *ws_context = [workspace_context alloc];
-    *context = ws_context;
-}
+    if (!ws_context) return false;
 
-void workspace_event_handler_begin(void **context)
-{
-    workspace_context *ws_context = *context;
     [ws_context init];
-}
+    *context = ws_context;
 
-void workspace_event_handler_end(void *context)
-{
-    workspace_context *ws_context = (workspace_context *) context;
-    [ws_context dealloc];
+    return true;
 }
 
 void *workspace_application_create_running_ns_application(struct process *process)

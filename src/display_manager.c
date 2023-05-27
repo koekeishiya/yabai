@@ -336,8 +336,3 @@ bool display_manager_begin(struct display_manager *dm)
     dm->bottom_padding = 0;
     return CGDisplayRegisterReconfigurationCallback(display_handler, NULL) == kCGErrorSuccess;
 }
-
-bool display_manager_end(void)
-{
-    return CGDisplayRemoveReconfigurationCallback(display_handler, NULL) == kCGErrorSuccess;
-}

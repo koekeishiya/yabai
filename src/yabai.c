@@ -32,7 +32,6 @@ struct display_manager g_display_manager;
 struct space_manager g_space_manager;
 struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
-struct event_tap g_event_tap;
 int g_normal_window_level;
 int g_floating_window_level;
 int g_connection;
@@ -119,26 +118,6 @@ static int client_send_message(int argc, char **argv)
     return result;
 }
 
-static void acquire_lockfile(void)
-{
-    int handle = open(g_lock_file, O_CREAT | O_WRONLY, 0600);
-    if (handle == -1) {
-        error("yabai: could not create lock-file! abort..\n");
-    }
-
-    struct flock lockfd = {
-        .l_start  = 0,
-        .l_len    = 0,
-        .l_pid    = g_pid,
-        .l_type   = F_WRLCK,
-        .l_whence = SEEK_SET
-    };
-
-    if (fcntl(handle, F_SETLK, &lockfd) == -1) {
-        error("yabai: could not acquire lock-file! abort..\n");
-    }
-}
-
 static bool get_config_file(char *restrict filename, char *restrict buffer, int buffer_size)
 {
     char *xdg_home = getenv("XDG_CONFIG_HOME");
@@ -183,7 +162,9 @@ static void exec_config_file(void)
     }
 }
 
-static inline void init_user_filepaths(void)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static inline bool configure_settings_and_acquire_lock(void)
 {
     char *user = getenv("USER");
     if (!user) {
@@ -193,28 +174,39 @@ static inline void init_user_filepaths(void)
     snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, user);
     snprintf(g_socket_file, sizeof(g_socket_file), SOCKET_PATH_FMT, user);
     snprintf(g_lock_file, sizeof(g_lock_file), LCFILE_PATH_FMT, user);
-}
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-static inline void init_misc_settings(void)
-{
-    NSApplicationLoad();
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGPIPE, SIG_IGN);
-    CGSetLocalEventsSuppressionInterval(0.0f);
-    CGEnableEventStateCombining(false);
 
     g_pid = getpid();
     g_connection = SLSMainConnectionID();
     g_normal_window_level   = CGWindowLevelForKey(LAYER_NORMAL);
     g_floating_window_level = CGWindowLevelForKey(LAYER_ABOVE);
 
+    NSApplicationLoad();
+    signal(SIGCHLD, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
+    CGSetLocalEventsSuppressionInterval(0.0f);
+    CGEnableEventStateCombining(false);
+    mouse_state_init(&g_mouse_state);
+
 #if 0
     hook_nsobject_autorelease();
     hook_autoreleasepool_drain();
     hook_autoreleasepool_release();
 #endif
+
+    int handle = open(g_lock_file, O_CREAT | O_WRONLY, 0600);
+    if (handle == -1) {
+        error("yabai: could not create lock-file! abort..\n");
+    }
+
+    struct flock lockfd = {
+        .l_start  = 0,
+        .l_len    = 0,
+        .l_pid    = g_pid,
+        .l_type   = F_WRLCK,
+        .l_whence = SEEK_SET
+    };
+
+    return fcntl(handle, F_SETLK, &lockfd) != -1;
 }
 #pragma clang diagnostic pop
 
@@ -300,46 +292,48 @@ int main(int argc, char **argv)
     }
 
     if (is_root()) {
-        error("yabai: running as root is not allowed! abort..\n");
+        require("yabai: running as root is not allowed! abort..\n");
     }
 
     if (!ax_privilege()) {
-        error("yabai: could not access accessibility features! abort..\n");
+        require("yabai: could not access accessibility features! abort..\n");
     }
 
     if (!(SLSGetSpaceManagementMode(SLSMainConnectionID()) == 1)) {
-        error("yabai: 'display has separate spaces' is disabled! abort..\n");
-    }
-
-    if (!event_loop_init(&g_event_loop)) {
-        error("yabai: could not initialize event_loop! abort..\n");
-    }
-
-    if (!memory_pool_init(&g_signal_storage, KILOBYTES(128))) {
-        error("yabai: could not allocate memory for event_signal! abort..\n");
+        require("yabai: 'display has separate spaces' is disabled! abort..\n");
     }
 
     if (!ts_init(MEGABYTES(4))) {
         error("yabai: could not allocate temporary storage! abort..\n");
     }
 
-    init_user_filepaths();
-    acquire_lockfile();
-    init_misc_settings();
+    if (!memory_pool_init(&g_signal_storage, KILOBYTES(128))) {
+        error("yabai: could not allocate event signal storage! abort..\n");
+    }
 
-    process_manager_init(&g_process_manager);
-    workspace_event_handler_init(&g_workspace_context);
-    space_manager_init(&g_space_manager);
-    window_manager_init(&g_window_manager);
-    mouse_state_init(&g_mouse_state);
+    if (!configure_settings_and_acquire_lock()) {
+        error("yabai: could not acquire lock-file! abort..\n");
+    }
 
-    event_loop_begin(&g_event_loop);
-    display_manager_begin(&g_display_manager);
-    space_manager_begin(&g_space_manager);
-    window_manager_begin(&g_space_manager, &g_window_manager);
-    process_manager_begin(&g_process_manager);
-    workspace_event_handler_begin(&g_workspace_context);
-    event_tap_begin(&g_event_tap, EVENT_MASK_MOUSE, mouse_handler);
+    if (!event_loop_begin(&g_event_loop)) {
+        error("yabai: could not start event loop! abort..\n");
+    }
+
+    if (!workspace_event_handler_begin(&g_workspace_context)) {
+        error("yabai: could not start workspace context! abort..\n");
+    }
+
+    if (!process_manager_begin(&g_process_manager)) {
+        error("yabai: could not start process manager! abort..\n");
+    }
+
+    if (!display_manager_begin(&g_display_manager)) {
+        error("yabai: could not start display manager! abort..\n");
+    }
+
+    if (!mouse_handler_begin(&g_mouse_state, MOUSE_EVENT_MASK)) {
+        error("yabai: could not start mouse handler! abort..\n");
+    }
 
     if (workspace_is_macos_monterey() || workspace_is_macos_ventura()) {
         mission_control_observe();
@@ -353,8 +347,12 @@ int main(int argc, char **argv)
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 815, NULL);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 816, NULL);
 
+    window_manager_init(&g_window_manager);
+    space_manager_begin(&g_space_manager);
+    window_manager_begin(&g_space_manager, &g_window_manager);
+
     if (!message_loop_begin(g_socket_file)) {
-        error("yabai: could not initialize message_loop! abort..\n");
+        error("yabai: could not start message loop! abort..\n");
     }
 
     exec_config_file();

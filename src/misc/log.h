@@ -35,6 +35,17 @@ error(const char *format, ...)
 }
 
 static inline void
+require(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+
+    exit(EXIT_SUCCESS);
+}
+
+static inline void
 debug_message(const char *prefix, char *message)
 {
     if (!g_verbose) return;

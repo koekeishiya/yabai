@@ -24,13 +24,16 @@
     "    <key>RunAtLoad</key>\n" \
     "    <true/>\n" \
     "    <key>KeepAlive</key>\n" \
-    "    <true/>\n" \
+    "    <dict>\n" \
+    "        <key>SuccessfulExit</key>\n" \
+    " 	     <false/>\n" \
+    " 	     <key>Crashed</key>\n" \
+    " 	     <true/>\n" \
+    "    </dict>\n" \
     "    <key>StandardOutPath</key>\n" \
     "    <string>/tmp/yabai_%s.out.log</string>\n" \
     "    <key>StandardErrorPath</key>\n" \
     "    <string>/tmp/yabai_%s.err.log</string>\n" \
-    "    <key>ThrottleInterval</key>\n" \
-    "    <integer>30</integer>\n" \
     "    <key>ProcessType</key>\n" \
     "    <string>Interactive</string>\n" \
     "    <key>Nice</key>\n" \
@@ -38,10 +41,27 @@
     "</dict>\n" \
     "</plist>"
 
-static int safe_exec(char *const argv[])
+//
+// NOTE(koekeishiya): A launchd service has the following states:
+//
+//          1. Installed / Uninstalled
+//          2. Active (Enable / Disable)
+//          3. Bootstrapped (Load / Unload)
+//          4. Running (Start / Stop)
+//
+
+static int safe_exec(char *const argv[], bool suppress_output)
 {
     pid_t pid;
-    int status = posix_spawn(&pid, argv[0], NULL, NULL, argv, NULL);
+    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_init(&actions);
+
+    if (suppress_output) {
+        posix_spawn_file_actions_addopen(&actions, STDOUT_FILENO, "/dev/null", O_WRONLY|O_APPEND, 0);
+        posix_spawn_file_actions_addopen(&actions, STDERR_FILENO, "/dev/null", O_WRONLY|O_APPEND, 0);
+    }
+
+    int status = posix_spawn(&pid, argv[0], &actions, NULL, argv, NULL);
     if (status) return 1;
 
     while ((waitpid(pid, &status, 0) == -1) && (errno == EINTR)) {
@@ -173,7 +193,6 @@ static int service_uninstall(void)
 static int service_start(void)
 {
     char *yabai_plist_path = populate_plist_path();
-
     if (!file_exists(yabai_plist_path)) {
         warn("yabai: service file '%s' is not installed! attempting installation..\n", yabai_plist_path);
 
@@ -183,35 +202,110 @@ static int service_start(void)
         }
     }
 
-    const char *const args[] = { _PATH_LAUNCHCTL, "load", "-w", yabai_plist_path, NULL };
-    return safe_exec((char *const*)args);
+    char service_target[MAXLEN];
+    snprintf(service_target, sizeof(sevice_target), "gui/%d/%s", getuid(), _NAME_YABAI_PLIST);
+
+    char domain_target[MAXLEN];
+    snprintf(domain_target, sizeof(domain_target), "gui/%d", getuid());
+
+    //
+    // NOTE(koekeishiya): Check if service is bootstrapped
+    //
+
+    const char *const args[] = { _PATH_LAUNCHCTL, "print", service_target, NULL };
+    int is_bootstrapped = safe_exec((char *const*)args, true);
+
+    if (is_bootstrapped != 0) {
+
+        //
+        // NOTE(koekeishiya): Service is not bootstrapped and could be disabled.
+        // There is no way to query if the service is disabled, and we cannot
+        // bootstrap a disabled service. Try to enable the service. This will be
+        // a no-op if the service is already enabled.
+        //
+
+        const char *const args[] = { _PATH_LAUNCHCTL, "enable", service_target, NULL };
+        safe_exec((char *const*)args, false);
+
+        //
+        // NOTE(koekeishiya): Bootstrap service into the target domain.
+        // This will also start the program **iff* RunAtLoad is set to true.
+        //
+
+        const char *const args2[] = { _PATH_LAUNCHCTL, "bootstrap", domain_target, yabai_plist_path, NULL };
+        return safe_exec((char *const*)args2, false);
+    } else {
+
+        //
+        // NOTE(koekeishiya): The service has already been bootstrapped.
+        // Tell the bootstrapped service to launch immediately; it is an
+        // error to bootstrap a service that has already been bootstrapped.
+        //
+
+        const char *const args[] = { _PATH_LAUNCHCTL, "kickstart", service_target, NULL };
+        return safe_exec((char *const*)args, false);
+    }
 }
 
 static int service_restart(void)
 {
     char *yabai_plist_path = populate_plist_path();
-
     if (!file_exists(yabai_plist_path)) {
         error("yabai: service file '%s' is not installed! abort..\n", yabai_plist_path);
     }
 
-    char yabai_service_id[MAXLEN];
-    snprintf(yabai_service_id, sizeof(yabai_service_id), "gui/%d/%s", getuid(), _NAME_YABAI_PLIST);
+    char service_target[MAXLEN];
+    snprintf(service_target, sizeof(service_target), "gui/%d/%s", getuid(), _NAME_YABAI_PLIST);
 
-    const char *const args[] = { _PATH_LAUNCHCTL, "kickstart", "-k", yabai_service_id, NULL };
-    return safe_exec((char *const*)args);
+    const char *const args[] = { _PATH_LAUNCHCTL, "kickstart", "-k", service_target, NULL };
+    return safe_exec((char *const*)args, false);
 }
 
 static int service_stop(void)
 {
     char *yabai_plist_path = populate_plist_path();
-
     if (!file_exists(yabai_plist_path)) {
         error("yabai: service file '%s' is not installed! abort..\n", yabai_plist_path);
     }
 
-    const char *const args[] = { _PATH_LAUNCHCTL, "unload", "-w", yabai_plist_path, NULL };
-    return safe_exec((char *const*)args);
+    char service_target[MAXLEN];
+    snprintf(service_target, sizeof(service_target), "gui/%d/%s", getuid(), _NAME_YABAI_PLIST);
+
+    char domain_target[MAXLEN];
+    snprintf(domain_target, sizeof(domain_target), "gui/%d", getuid());
+
+    //
+    // NOTE(koekeishiya): Check if service is bootstrapped
+    //
+
+    const char *const args[] = { _PATH_LAUNCHCTL, "print", service_target, NULL };
+    int is_bootstrapped = safe_exec((char *const*)args, true);
+
+    if (is_bootstrapped != 0) {
+
+        //
+        // NOTE(koekeishiya): Service is not bootstrapped, but the program
+        // could still be running an instance that was started **while the service
+        // was bootstrapped**, so we tell it to stop said service.
+        //
+
+        const char *const args[] = { _PATH_LAUNCHCTL, "kill", "SIGTERM", service_target, NULL };
+        return safe_exec((char *const*)args, false);
+    } else {
+
+        //
+        // NOTE(koekeishiya): Service is bootstrapped; we stop a potentially
+        // running instance of the program and unload the service, making it
+        // not trigger automatically in the future.
+        //
+        // This is NOT the same as disabling the service, which will prevent
+        // it from being boostrapped in the future (without explicitly re-enabling
+        // it first).
+        //
+
+        const char *const args[] = { _PATH_LAUNCHCTL, "bootout", domain_target, yabai_plist_path, NULL };
+        return safe_exec((char *const*)args, false);
+    }
 }
 
 #endif

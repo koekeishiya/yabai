@@ -6,10 +6,6 @@
 - (id)init;
 @end
 
-void workspace_event_handler_init(void **context);
-void workspace_event_handler_begin(void **context);
-void workspace_event_handler_end(void *context);
-
 struct process;
 void *workspace_application_create_running_ns_application(struct process *process);
 void workspace_application_destroy_running_ns_application(void *context, struct process *process);
@@ -22,5 +18,6 @@ pid_t workspace_get_dock_pid(void);
 bool workspace_is_macos_ventura(void);
 bool workspace_is_macos_monterey(void);
 bool workspace_is_macos_bigsur(void);
+bool workspace_event_handler_begin(void **context);
 
 #endif

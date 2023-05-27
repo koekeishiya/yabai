@@ -1,3 +1,83 @@
+extern struct event_loop g_event_loop;
+extern pid_t g_pid;
+
+static inline uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
+{
+    uint8_t flags = 0;
+
+    if ((cgflags & kCGEventFlagMaskAlternate)   == kCGEventFlagMaskAlternate)   flags |= MOUSE_MOD_ALT;
+    if ((cgflags & kCGEventFlagMaskShift)       == kCGEventFlagMaskShift)       flags |= MOUSE_MOD_SHIFT;
+    if ((cgflags & kCGEventFlagMaskCommand)     == kCGEventFlagMaskCommand)     flags |= MOUSE_MOD_CMD;
+    if ((cgflags & kCGEventFlagMaskControl)     == kCGEventFlagMaskControl)     flags |= MOUSE_MOD_CTRL;
+    if ((cgflags & kCGEventFlagMaskSecondaryFn) == kCGEventFlagMaskSecondaryFn) flags |= MOUSE_MOD_FN;
+
+    return flags;
+}
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch"
+static MOUSE_HANDLER(mouse_handler)
+{
+    struct mouse_state *mouse_state = (struct mouse_state *) context;
+
+    switch (type) {
+    case kCGEventTapDisabledByTimeout:
+    case kCGEventTapDisabledByUserInput: {
+        if (mouse_state->handle) CGEventTapEnable(mouse_state->handle, true);
+    } break;
+    case kCGEventLeftMouseDown:
+    case kCGEventRightMouseDown: {
+
+        //
+        // :SynthesizedEvent
+        //
+        // NOTE(koekeishiya): This event-tap is placed at the "Annotated Session" location, which
+        // causes yabai to also intercept events that we post (notably, the way in which window
+        // focusing between separate applications have been implemented). Skip these events...
+        //
+
+        pid_t source_pid = CGEventGetIntegerValueField(event, kCGEventSourceUnixProcessID);
+        if (source_pid == g_pid) return event;
+
+        uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
+        event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(event), mod, NULL);
+
+        mouse_state->consume_mouse_click = mod == mouse_state->modifier;
+        if (mouse_state->consume_mouse_click) return NULL;
+    } break;
+    case kCGEventLeftMouseUp:
+    case kCGEventRightMouseUp: {
+
+        //
+        // :SynthesizedEvent
+        //
+        // NOTE(koekeishiya): This event-tap is placed at the "Annotated Session" location, which
+        // causes yabai to also intercept events that we post (notably, the way in which window
+        // focusing between separate applications have been implemented). Skip these events...
+        //
+
+        pid_t source_pid = CGEventGetIntegerValueField(event, kCGEventSourceUnixProcessID);
+        if (source_pid == g_pid) return event;
+
+        event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(event), 0, NULL);
+        if (mouse_state->consume_mouse_click) return NULL;
+    } break;
+    case kCGEventLeftMouseDragged:
+    case kCGEventRightMouseDragged: {
+        event_loop_post(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(event), 0, NULL);
+    } break;
+    case kCGEventMouseMoved: {
+        uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
+        if (mod == mouse_state->modifier) return event;
+
+        event_loop_post(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(event), mod, NULL);
+    } break;
+    }
+
+    return event;
+}
+#pragma clang diagnostic pop
+
 void mouse_window_info_populate(struct mouse_state *ms, struct mouse_window_info *info)
 {
     CGRect frame = ms->window->frame;
@@ -170,4 +250,43 @@ end:
         struct window_node *node = view_find_window_node(view, window->id);
         if (node) window_node_flush(node);
     }
+}
+
+void mouse_state_init(struct mouse_state *state)
+{
+    state->modifier    = MOUSE_MOD_FN;
+    state->action1     = MOUSE_MODE_MOVE;
+    state->action2     = MOUSE_MODE_RESIZE;
+    state->drop_action = MOUSE_MODE_SWAP;
+}
+
+bool mouse_handler_begin(struct mouse_state *mouse_state, uint32_t mask)
+{
+    if (mouse_state->handle) return true;
+
+    mouse_state->handle = CGEventTapCreate(kCGAnnotatedSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, mouse_handler, mouse_state);
+    if (!mouse_state->handle) return false;
+
+    if (!CGEventTapIsEnabled(mouse_state->handle)) {
+        CFMachPortInvalidate(mouse_state->handle);
+        CFRelease(mouse_state->handle);
+        return false;
+    }
+
+    mouse_state->runloop_source = CFMachPortCreateRunLoopSource(NULL, mouse_state->handle, 0);
+    CFRunLoopAddSource(CFRunLoopGetMain(), mouse_state->runloop_source, kCFRunLoopCommonModes);
+
+    return true;
+}
+
+void mouse_handler_end(struct mouse_state *mouse_state)
+{
+    if (!mouse_state->handle) return;
+
+    CGEventTapEnable(mouse_state->handle, false);
+    CFMachPortInvalidate(mouse_state->handle);
+    CFRunLoopRemoveSource(CFRunLoopGetMain(), mouse_state->runloop_source, kCFRunLoopCommonModes);
+    CFRelease(mouse_state->runloop_source);
+    CFRelease(mouse_state->handle);
+    mouse_state->handle = NULL;
 }

@@ -155,7 +155,9 @@ void process_manager_add_process(struct process_manager *pm, struct process *pro
     table_add(&pm->process, &process->psn, process);
 }
 
-void process_manager_init(struct process_manager *pm)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+bool process_manager_begin(struct process_manager *pm)
 {
     pm->target = GetApplicationEventTarget();
     pm->handler = NewEventHandlerUPP(process_handler);
@@ -170,22 +172,12 @@ void process_manager_init(struct process_manager *pm)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     process_manager_add_running_processes(pm);
     [pool drain];
-}
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-bool process_manager_begin(struct process_manager *pm)
-{
     ProcessSerialNumber front_psn;
     _SLPSGetFrontProcess(&front_psn);
-    GetProcessPID(&front_psn, &g_process_manager.front_pid);
-    g_process_manager.last_front_pid = g_process_manager.front_pid;
-    g_process_manager.switch_event_time = GetCurrentEventTime();
+    GetProcessPID(&front_psn, &pm->front_pid);
+    pm->last_front_pid = pm->front_pid;
+    pm->switch_event_time = GetCurrentEventTime();
     return InstallEventHandler(pm->target, pm->handler, 3, pm->type, pm, &pm->ref) == noErr;
 }
 #pragma clang diagnostic pop
-
-bool process_manager_end(struct process_manager *pm)
-{
-    return RemoveEventHandler(pm->ref) == noErr;
-}

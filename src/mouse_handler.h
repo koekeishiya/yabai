@@ -1,6 +1,23 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
+#define MOUSE_EVENT_MASK_FFM (1 << kCGEventMouseMoved) | \
+                             (1 << kCGEventLeftMouseDown) | \
+                             (1 << kCGEventLeftMouseUp) | \
+                             (1 << kCGEventLeftMouseDragged) | \
+                             (1 << kCGEventRightMouseDown) | \
+                             (1 << kCGEventRightMouseUp) | \
+                             (1 << kCGEventRightMouseDragged)
+
+#define MOUSE_EVENT_MASK     (1 << kCGEventLeftMouseDown) | \
+                             (1 << kCGEventLeftMouseUp) | \
+                             (1 << kCGEventLeftMouseDragged) | \
+                             (1 << kCGEventRightMouseDown) | \
+                             (1 << kCGEventRightMouseUp) | \
+                             (1 << kCGEventRightMouseDragged)
+
+#define MOUSE_HANDLER(name) CGEventRef name(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *context)
+
 enum mouse_drop_action
 {
     MOUSE_DROP_ACTION_NONE,
@@ -42,11 +59,14 @@ struct mouse_window_info
 
 struct mouse_state
 {
-    enum mouse_mode current_action;
+    CFMachPortRef handle;
+    CFRunLoopSourceRef runloop_source;
+    bool consume_mouse_click;
     enum mouse_mode action1;
     enum mouse_mode action2;
-    enum mouse_mode drop_action;
     volatile uint8_t modifier;
+    enum mouse_mode drop_action;
+    enum mouse_mode current_action;
     CGPoint down_location;
     uint64_t last_moved_time;
     struct window *window;
@@ -73,27 +93,6 @@ static char *mouse_mode_str[] =
     [MOUSE_MODE_STACK]  = "stack"
 };
 
-static inline uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
-{
-    uint8_t flags = 0;
-
-    if ((cgflags & EVENT_MASK_ALT)   == EVENT_MASK_ALT)   flags |= MOUSE_MOD_ALT;
-    if ((cgflags & EVENT_MASK_SHIFT) == EVENT_MASK_SHIFT) flags |= MOUSE_MOD_SHIFT;
-    if ((cgflags & EVENT_MASK_CMD)   == EVENT_MASK_CMD)   flags |= MOUSE_MOD_CMD;
-    if ((cgflags & EVENT_MASK_CTRL)  == EVENT_MASK_CTRL)  flags |= MOUSE_MOD_CTRL;
-    if ((cgflags & EVENT_MASK_FN)    == EVENT_MASK_FN)    flags |= MOUSE_MOD_FN;
-
-    return flags;
-}
-
-static inline void mouse_state_init(struct mouse_state *state)
-{
-    state->modifier    = MOUSE_MOD_FN;
-    state->action1     = MOUSE_MODE_MOVE;
-    state->action2     = MOUSE_MODE_RESIZE;
-    state->drop_action = MOUSE_MODE_SWAP;
-}
-
 void mouse_window_info_populate(struct mouse_state *ms, struct mouse_window_info *info);
 enum mouse_drop_action mouse_determine_drop_action(struct mouse_state *ms, struct window_node *src_node, struct window *dst_window, CGPoint point);
 void mouse_drop_action_stack(struct space_manager *sm, struct window_manager *wm, struct view *src_view, struct window *src_window, struct view *dst_view, struct window *dst_window);
@@ -101,5 +100,9 @@ void mouse_drop_action_swap(struct window_manager *wm, struct view *src_view, st
 void mouse_drop_action_warp(struct space_manager *sm, struct window_manager *wm, struct view *src_view, struct window_node *src_node, struct window *src_window, struct view *dst_view, struct window_node *dst_node, struct window *dst_window, enum window_node_split split, enum window_node_child child);
 void mouse_drop_no_target(struct space_manager *sm, struct window_manager *wm, struct view *src_view, struct view *dst_view, struct window *window, struct window_node *node);
 void mouse_drop_try_adjust_bsp_grid(struct window_manager *wm, struct view *view, struct window *window, struct mouse_window_info *info);
+
+void mouse_state_init(struct mouse_state *mouse_state);
+bool mouse_handler_begin(struct mouse_state *mouse_state, uint32_t mask);
+void mouse_handler_end(struct mouse_state *mouse_state);
 
 #endif
