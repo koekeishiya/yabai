@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
-- Change launchd service to only restart automatically upon crashes [#1755](https://github.com/koekeishiya/yabai/issues/1755)
+- Change launchd service to only restart automatically upon crashes. You will need to run `yabai --uninstall-service` and `yabai --install-service`. [#1755](https://github.com/koekeishiya/yabai/issues/1755)
 
 ## [5.0.5] - 2023-05-21
 ### Changed
