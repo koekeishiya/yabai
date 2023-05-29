@@ -83,7 +83,6 @@ You acknowledge that you understand the potential risk that may come from disabl
 
 <!-- Links to other GitHub projects/users -->
 [gh-skhd]: https://github.com/koekeishiya/skhd
-[gh-chunkwm]: https://github.com/koekeishiya/chunkwm
 [gh-fools-mate]: https://github.com/fools-mate
 [gh-dominiklohmann]: https://github.com/dominiklohmann
 
