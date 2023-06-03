@@ -363,12 +363,8 @@ static bool token_is_hexadecimal(struct token token, uint32_t *value)
 
 static bool token_is_float(struct token token, float *value)
 {
-    char buffer[token.length + 1];
-    memcpy(buffer, token.text, token.length);
-    buffer[token.length] = '\0';
-
     char *end = NULL;
-    float v = strtof(buffer, &end);
+    float v = strtof(token.text, &end);
 
     if (!end || *end) {
         *value = 0.0f;
@@ -379,18 +375,7 @@ static bool token_is_float(struct token token, float *value)
     }
 }
 
-static char *token_to_string(struct token token, bool temp)
-{
-    unsigned int length = token.length + 1;
-    char *result = temp ? ts_alloc_unaligned(length) : malloc(length);
-    if (!result) return NULL;
-
-    memcpy(result, token.text, token.length);
-    result[token.length] = '\0';
-    return result;
-}
-
-static struct token_value token_to_value(struct token token, bool allocate_string)
+static struct token_value token_to_value(struct token token)
 {
     struct token_value value = { .token = token, .type = TOKEN_TYPE_INVALID };
 
@@ -401,9 +386,7 @@ static struct token_value token_to_value(struct token token, bool allocate_strin
             value.type = TOKEN_TYPE_U32;
         } else if (token_is_float(token, &value.float_value)) {
             value.type = TOKEN_TYPE_FLOAT;
-        } else if (!allocate_string) {
-            value.type = TOKEN_TYPE_STRING;
-        } else if ((value.string_value = token_to_string(token, true))) {
+        } else if ((value.string_value = token.text)) {
             value.type = TOKEN_TYPE_STRING;
         } else {
             value.type = TOKEN_TYPE_UNKNOWN;
@@ -497,7 +480,7 @@ static char *reserved_space_identifiers[] =
 static bool parse_label(FILE *rsp, char **message, enum label_type type, char **label)
 {
     struct token token = get_token(message);
-    struct token_value value = token_to_value(token, false);
+    struct token_value value = token_to_value(token);
 
     if (value.type == TOKEN_TYPE_INVALID) {
         *label = NULL;
@@ -521,7 +504,12 @@ static bool parse_label(FILE *rsp, char **message, enum label_type type, char **
     } break;
     }
 
-    *label = token_to_string(token, false);
+    *label = malloc(token.length + 1);
+    if (!(*label)) return false;
+
+    memcpy(*label, token.text, token.length);
+    (*label)[token.length] = '\0';
+
     return true;
 }
 
@@ -565,7 +553,7 @@ static struct selector parse_display_selector(FILE *rsp, char **message, uint32_
 {
     struct selector result = { .token = get_token(message), .did_parse = true };
 
-    struct token_value value = token_to_value(result.token, false);
+    struct token_value value = token_to_value(result.token);
     if (value.type == TOKEN_TYPE_INT) {
         uint32_t did = display_manager_arrangement_display_id(value.int_value);
         if (did) {
@@ -682,7 +670,7 @@ static struct selector parse_space_selector(FILE *rsp, char **message, uint64_t 
 {
     struct selector result = { .token = get_token(message), .did_parse = true };
 
-    struct token_value value = token_to_value(result.token, true);
+    struct token_value value = token_to_value(result.token);
     if (value.type == TOKEN_TYPE_INT) {
         uint64_t sid = space_manager_mission_control_space(value.int_value);
         if (sid) {
@@ -761,7 +749,7 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
 {
     struct selector result = { .token = get_token(message), .did_parse = true };
 
-    struct token_value value = token_to_value(result.token, false);
+    struct token_value value = token_to_value(result.token);
     if (value.type == TOKEN_TYPE_INT) {
         struct window *window = window_manager_find_window(&g_window_manager, value.int_value);
         if (window) {
@@ -1145,7 +1133,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_OPACITY_DURATION)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%f\n", g_window_manager.window_opacity_duration);
             } else if (value.type == TOKEN_TYPE_FLOAT) {
@@ -1154,7 +1142,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_ANIMATION_DURATION)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%f\n", g_window_manager.window_animation_duration);
             } else if (value.type == TOKEN_TYPE_FLOAT) {
@@ -1172,7 +1160,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_ANIMATION_FRAME_RATE)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%d\n", g_window_manager.window_animation_frame_rate);
             } else if (value.type == TOKEN_TYPE_INT && value.int_value) {
@@ -1214,7 +1202,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_BORDER_WIDTH)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%d\n", g_window_manager.border_width);
             } else if (value.type == TOKEN_TYPE_INT && value.int_value) {
@@ -1223,7 +1211,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_BORDER_RADIUS)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%.4f\n", g_window_manager.border_radius);
             } else if (value.type == TOKEN_TYPE_INT) {
@@ -1232,7 +1220,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_BORDER_ACTIVE_COLOR)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "0x%x\n", g_window_manager.active_border_color.p);
             } else if (value.type == TOKEN_TYPE_U32 && value.u32_value) {
@@ -1241,7 +1229,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_BORDER_NORMAL_COLOR)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "0x%x\n", g_window_manager.normal_border_color.p);
             } else if (value.type == TOKEN_TYPE_U32 && value.u32_value) {
@@ -1263,7 +1251,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%.4f\n", g_window_manager.active_window_opacity);
             } else if (value.type == TOKEN_TYPE_FLOAT && in_range_ei(value.float_value, 0.0f, 1.0f)) {
@@ -1272,7 +1260,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_NORMAL_WINDOW_OPACITY)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%.4f\n", g_window_manager.normal_window_opacity);
             } else if (value.type == TOKEN_TYPE_FLOAT && in_range_ei(value.float_value, 0.0f, 1.0f)) {
@@ -1281,7 +1269,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_INSERT_FEEDBACK_COLOR)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "0x%x\n", g_window_manager.insert_feedback_color.p);
             } else if (value.type == TOKEN_TYPE_U32 && value.u32_value) {
@@ -1290,7 +1278,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_TOP_PADDING)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (sel_sid) {
                 struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
                 if (value.type == TOKEN_TYPE_INVALID) {
@@ -1313,7 +1301,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             }
         } else if (token_equals(command, COMMAND_CONFIG_BOTTOM_PADDING)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (sel_sid) {
                 struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
                 if (value.type == TOKEN_TYPE_INVALID) {
@@ -1336,7 +1324,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             }
         } else if (token_equals(command, COMMAND_CONFIG_LEFT_PADDING)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (sel_sid) {
                 struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
                 if (value.type == TOKEN_TYPE_INVALID) {
@@ -1359,7 +1347,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             }
         } else if (token_equals(command, COMMAND_CONFIG_RIGHT_PADDING)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (sel_sid) {
                 struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
                 if (value.type == TOKEN_TYPE_INVALID) {
@@ -1382,7 +1370,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             }
         } else if (token_equals(command, COMMAND_CONFIG_WINDOW_GAP)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (sel_sid) {
                 struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
                 if (value.type == TOKEN_TYPE_INVALID) {
@@ -1453,7 +1441,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             }
         } else if (token_equals(command, COMMAND_CONFIG_SPLIT_RATIO)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%.4f\n", g_space_manager.split_ratio);
             } else if (value.type == TOKEN_TYPE_FLOAT && in_range_ii(value.float_value, 0.1f, 0.9f)) {
@@ -2063,7 +2051,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_WINDOW_OPACITY)) {
-            struct token_value value = token_to_value(get_token(&message), false);
+            struct token_value value = token_to_value(get_token(&message));
             if (value.type == TOKEN_TYPE_FLOAT && in_range_ii(value.float_value, 0.0f, 1.0f)) {
                 if (window_manager_set_opacity(&g_window_manager, acting_window, value.float_value)) {
                     acting_window->opacity = value.float_value;
@@ -2492,7 +2480,7 @@ rnext:
             rule_destroy(&rule);
         }
     } else if (token_equals(command, COMMAND_RULE_REM)) {
-        struct token_value value = token_to_value(get_token(&message), true);
+        struct token_value value = token_to_value(get_token(&message));
         if (value.type == TOKEN_TYPE_INT) {
             if (!rule_remove_by_index(value.int_value)) {
                 daemon_fail(rsp, "rule with index '%d' not found.\n", value.int_value);
@@ -2609,7 +2597,7 @@ snext:
             event_signal_destroy(&signal);
         }
     } else if (token_equals(command, COMMAND_SIGNAL_REM)) {
-        struct token_value value = token_to_value(get_token(&message), true);
+        struct token_value value = token_to_value(get_token(&message));
         if (value.type == TOKEN_TYPE_INT) {
             if (!event_signal_remove_by_index(value.int_value)) {
                 daemon_fail(rsp, "signal with index '%d' not found.\n", value.int_value);
