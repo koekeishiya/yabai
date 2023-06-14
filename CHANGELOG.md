@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Allow window swap commands to work on windows that are in the same stack, using the stack window selectors [#960](https://github.com/koekeishiya/yabai/issues/960)
 
 ## [5.0.6] - 2023-05-27
 ### Changed

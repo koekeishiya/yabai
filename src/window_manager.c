@@ -1758,7 +1758,41 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
     struct window_node *b_node = view_find_window_node(b_view, b->id);
     if (!b_node) return WINDOW_OP_ERROR_INVALID_DST_NODE;
 
-    if (a_node == b_node) return WINDOW_OP_ERROR_SAME_STACK;
+    if (a_node == b_node) {
+        int a_list_index = 0;
+        int a_order_index = 0;
+
+        int b_list_index = 0;
+        int b_order_index = 0;
+
+        for (int i = 0; i < a_node->window_count; ++i) {
+            if (a_node->window_list[i] == a->id) {
+                a_list_index = i;
+            } else if (a_node->window_list[i] == b->id) {
+                b_list_index = i;
+            }
+
+            if (a_node->window_order[i] == a->id) {
+                a_order_index = i;
+            } else if (a_node->window_order[i] == b->id) {
+                b_order_index = i;
+            }
+        }
+
+        a_node->window_list[a_list_index] = b->id;
+        a_node->window_order[a_order_index] = b->id;
+
+        a_node->window_list[b_list_index] = a->id;
+        a_node->window_order[b_order_index] = a->id;
+
+        if (a->id == wm->focused_window_id) {
+            window_manager_focus_window_with_raise(&b->application->psn, b->id, b->ref);
+        } else if (b->id == wm->focused_window_id) {
+            window_manager_focus_window_with_raise(&a->application->psn, a->id, a->ref);
+        }
+
+        return WINDOW_OP_ERROR_SUCCESS;
+    }
 
     if (window_node_contains_window(a_node, a_view->insertion_point)) {
         a_view->insertion_point = b->id;
