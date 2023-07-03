@@ -12,6 +12,12 @@ kern_return_t (*_thread_convert_thread_state)(thread_act_t thread, int direction
 
 static char *payload_path = "/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload";
 
+//
+// :Attribution
+//
+// The arm64e injection path is based on work by Jeremy Legendre (https://github.com/jslegendre)
+//
+
 static char shell_code[] =
 #ifdef __x86_64__
 "\x55"                             // push       rbp
