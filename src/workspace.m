@@ -1,4 +1,32 @@
-extern struct event_loop g_event_loop;
+enum macos_version
+{
+#define SUPPORT_MACOS_VERSION(name, version) macos_##name,
+    SUPPORTED_MACOS_VERSION_LIST
+#undef SUPPORT_MACOS_VERSION
+};
+
+static int _workspace_is_macos_version[] = {
+#define SUPPORT_MACOS_VERSION(name, version) -1,
+    SUPPORTED_MACOS_VERSION_LIST
+#undef SUPPORT_MACOS_VERSION
+};
+
+static int workspace_is_macos_major(long major_version)
+{
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return version.majorVersion == major_version;
+}
+
+#define SUPPORT_MACOS_VERSION(name, version) \
+bool workspace_is_macos_##name(void) \
+{ \
+    if (_workspace_is_macos_version[macos_##name] == -1) { \
+        _workspace_is_macos_version[macos_##name] = workspace_is_macos_major(version); \
+    } \
+    return _workspace_is_macos_version[macos_##name]; \
+}
+    SUPPORTED_MACOS_VERSION_LIST
+#undef SUPPORT_MACOS_VERSION
 
 bool workspace_event_handler_begin(void **context)
 {
@@ -119,38 +147,7 @@ pid_t workspace_get_dock_pid(void)
     return 0;
 }
 
-static int _workspace_is_macos_version[5] = { -1, -1, -1, -1, -1 };
-
-static int workspace_is_macos_major(long major_version)
-{
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion == major_version;
-}
-
-bool workspace_is_macos_ventura(void)
-{
-    if (_workspace_is_macos_version[0] == -1) {
-        _workspace_is_macos_version[0] = workspace_is_macos_major(13);
-    }
-    return _workspace_is_macos_version[0];
-}
-
-bool workspace_is_macos_monterey(void)
-{
-    if (_workspace_is_macos_version[1] == -1) {
-        _workspace_is_macos_version[1] = workspace_is_macos_major(12);
-    }
-    return _workspace_is_macos_version[1];
-}
-
-bool workspace_is_macos_bigsur(void)
-{
-    if (_workspace_is_macos_version[2] == -1) {
-        _workspace_is_macos_version[2] = workspace_is_macos_major(11);
-    }
-    return _workspace_is_macos_version[2];
-}
-
+extern struct event_loop g_event_loop;
 @implementation workspace_context
 - (id)init
 {
