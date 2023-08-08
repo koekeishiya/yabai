@@ -48,19 +48,19 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
     if (process->terminated) {
         debug("%s: %s (%d) terminated during launch\n", __FUNCTION__, process->name, process->pid);
         window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
-        return EVENT_FAILURE;
+        return;
     }
 
     if (!workspace_application_is_observable(process)) {
         debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
         workspace_application_observe_activation_policy(g_workspace_context, process);
-        return EVENT_FAILURE;
+        return;
     }
 
     if (!workspace_application_is_finished_launching(process)) {
         debug("%s: %s (%d) is not finished launching, subscribing to finishedLaunching changes\n", __FUNCTION__, process->name, process->pid);
         workspace_application_observe_finished_launching(g_workspace_context, process);
-        return EVENT_FAILURE;
+        return;
     }
 
     struct application *application = application_create(process);
@@ -75,15 +75,15 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
             __block ProcessSerialNumber psn = process->psn;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 struct process *_process = process_manager_find_process(&g_process_manager, &psn);
-                if (_process) event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, _process, 0, NULL);
+                if (_process) event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, _process, 0);
             });
         }
 
-        return EVENT_FAILURE;
+        return;
     }
 
     if (window_manager_find_lost_front_switched_event(&g_window_manager, process->pid)) {
-        event_loop_post(&g_event_loop, APPLICATION_FRONT_SWITCHED, process, 0, NULL);
+        event_loop_post(&g_event_loop, APPLICATION_FRONT_SWITCHED, process, 0);
         window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
     }
 
@@ -157,8 +157,6 @@ next:
 
         view_flush(view);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(APPLICATION_TERMINATED)
@@ -235,7 +233,6 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
 out:
     process_destroy(process);
-    return EVENT_SUCCESS;
 }
 
 #pragma clang diagnostic push
@@ -247,11 +244,11 @@ static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
 
     if (!application) {
         window_manager_add_lost_front_switched_event(&g_window_manager, process->pid);
-        return EVENT_FAILURE;
+        return;
     }
 
-    event_loop_post(&g_event_loop, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid, 0, NULL);
-    event_loop_post(&g_event_loop, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid, 0, NULL);
+    event_loop_post(&g_event_loop, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid, 0);
+    event_loop_post(&g_event_loop, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid, 0);
 
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     g_process_manager.switch_event_time = GetCurrentEventTime();
@@ -259,14 +256,13 @@ static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
     g_process_manager.front_pid = process->pid;
 
     event_signal_push(SIGNAL_APPLICATION_FRONT_SWITCHED, NULL);
-    return EVENT_SUCCESS;
 }
 #pragma clang diagnostic pop
 
 static EVENT_HANDLER(APPLICATION_ACTIVATED)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILURE;
+    if (!application) return;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     event_signal_push(SIGNAL_APPLICATION_ACTIVATED, application);
@@ -277,31 +273,29 @@ static EVENT_HANDLER(APPLICATION_ACTIVATED)
         g_window_manager.focused_window_id = 0;
         g_window_manager.focused_window_psn = application->psn;
         g_mouse_state.ffm_window_id = 0;
-        return EVENT_SUCCESS;
+        return;
     }
 
     struct window *window = window_manager_find_window(&g_window_manager, application_focused_window_id);
     if (!window) {
         window_manager_add_lost_focused_event(&g_window_manager, application_focused_window_id);
-        return EVENT_SUCCESS;
+        return;
     }
 
     window_did_receive_focus(&g_window_manager, &g_mouse_state, window);
     event_signal_push(SIGNAL_WINDOW_FOCUSED, window);
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(APPLICATION_DEACTIVATED)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILURE;
+    if (!application) return;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     event_signal_push(SIGNAL_APPLICATION_DEACTIVATED, application);
 
     struct window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
-    if (!focused_window) return EVENT_SUCCESS;
+    if (!focused_window) return;
 
     window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
     border_deactivate(focused_window);
@@ -313,14 +307,12 @@ static EVENT_HANDLER(APPLICATION_DEACTIVATED)
             border_deactivate(main_window);
         }
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(APPLICATION_VISIBLE)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILURE;
+    if (!application) return;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = false;
@@ -378,13 +370,12 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
     }
 
     event_signal_push(SIGNAL_APPLICATION_VISIBLE, application);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(APPLICATION_HIDDEN)
 {
     struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return EVENT_FAILURE;
+    if (!application) return;
 
     debug("%s: %s\n", __FUNCTION__, application->name);
     application->is_hidden = true;
@@ -439,25 +430,24 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
     }
 
     event_signal_push(SIGNAL_APPLICATION_HIDDEN, application);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(WINDOW_CREATED)
 {
     uint32_t window_id = ax_window_id(context);
-    if (!window_id) goto err;
+    if (!window_id) { CFRelease(context); return; }
 
     struct window *existing_window = window_manager_find_window(&g_window_manager, window_id);
-    if (existing_window) goto err;
+    if (existing_window) { CFRelease(context); return; }
 
     pid_t window_pid = ax_window_pid(context);
-    if (!window_pid) goto err;
+    if (!window_pid) { CFRelease(context); return; }
 
     struct application *application = window_manager_find_application(&g_window_manager, window_pid);
-    if (!application) goto err;
+    if (!application) { CFRelease(context); return; }
 
     struct window *window = window_manager_create_and_add_window(&g_space_manager, &g_window_manager, application, context, window_id);
-    if (!window) goto out;
+    if (!window) return;
 
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
         uint64_t sid;
@@ -475,12 +465,6 @@ static EVENT_HANDLER(WINDOW_CREATED)
     }
 
     event_signal_push(SIGNAL_WINDOW_CREATED, window);
-    return EVENT_SUCCESS;
-
-err:
-    CFRelease(context);
-out:
-    return EVENT_FAILURE;
 }
 
 static EVENT_HANDLER(WINDOW_DESTROYED)
@@ -501,8 +485,6 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
     event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
     window_manager_remove_window(&g_window_manager, window->id);
     window_destroy(window);
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(WINDOW_FOCUSED)
@@ -512,21 +494,21 @@ static EVENT_HANDLER(WINDOW_FOCUSED)
 
     if (!window) {
         window_manager_add_lost_focused_event(&g_window_manager, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     if (window_is_minimized(window)) {
         window_manager_add_lost_focused_event(&g_window_manager, window->id);
-        return EVENT_SUCCESS;
+        return;
     }
 
     if (!application_is_frontmost(window->application)) {
-        return EVENT_SUCCESS;
+        return;
     }
 
     struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
@@ -538,59 +520,55 @@ static EVENT_HANDLER(WINDOW_FOCUSED)
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     window_did_receive_focus(&g_window_manager, &g_mouse_state, window);
     event_signal_push(SIGNAL_WINDOW_FOCUSED, window);
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(WINDOW_MOVED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     if (window->application->is_hidden) {
         debug("%s: %d was moved while the application is hidden, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     CGPoint new_origin = window_ax_origin(window);
     if (CGPointEqualToPoint(new_origin, window->frame.origin)) {
         debug("%s:DEBOUNCED %s %d\n", __FUNCTION__, window->application->name, window->id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_MOVED, window);
     window->frame.origin = new_origin;
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(WINDOW_RESIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     if (window->application->is_hidden) {
         debug("%s: %d was resized while the application is hidden, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     CGRect new_frame = window_ax_frame(window);
     if (CGRectEqualToRect(new_frame, window->frame)) {
         debug("%s:DEBOUNCED %s %d\n", __FUNCTION__, window->application->name, window->id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -632,8 +610,6 @@ static EVENT_HANDLER(WINDOW_RESIZED)
             g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
         }
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(WINDOW_MINIMIZED)
@@ -642,7 +618,7 @@ static EVENT_HANDLER(WINDOW_MINIMIZED)
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window->id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -661,7 +637,6 @@ static EVENT_HANDLER(WINDOW_MINIMIZED)
     }
 
     event_signal_push(SIGNAL_WINDOW_MINIMIZED, window);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(WINDOW_DEMINIMIZED)
@@ -671,7 +646,7 @@ static EVENT_HANDLER(WINDOW_DEMINIMIZED)
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window->id);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
-        return EVENT_FAILURE;
+        return;
     }
 
     window_clear_flag(window, WINDOW_MINIMIZE);
@@ -694,40 +669,37 @@ static EVENT_HANDLER(WINDOW_DEMINIMIZED)
     }
 
     if (window_manager_find_lost_focused_event(&g_window_manager, window->id)) {
-        event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id, 0, NULL);
+        event_loop_post(&g_event_loop, WINDOW_FOCUSED, (void *)(intptr_t) window->id, 0);
         window_manager_remove_lost_focused_event(&g_window_manager, window->id);
     }
 
     event_signal_push(SIGNAL_WINDOW_DEMINIMIZED, window);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(WINDOW_TITLE_CHANGED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_TITLE_CHANGED, window);
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(SLS_WINDOW_MOVED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -738,19 +710,17 @@ static EVENT_HANDLER(SLS_WINDOW_MOVED)
         SLSGetWindowBounds(g_connection, window_id, &frame);
         border_move(window, frame);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(SLS_WINDOW_RESIZED)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -761,21 +731,19 @@ static EVENT_HANDLER(SLS_WINDOW_RESIZED)
         SLSGetWindowBounds(g_connection, window_id, &frame);
         border_resize(window, frame);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(SLS_WINDOW_ORDER_CHANGED)
 {
-    if (g_mission_control_active) return EVENT_SUCCESS;
+    if (g_mission_control_active) return;
 
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -787,21 +755,19 @@ static EVENT_HANDLER(SLS_WINDOW_ORDER_CHANGED)
         SLSSetWindowLevel(g_connection, border->id, window_level);
         SLSOrderWindow(g_connection, border->id, -1, window_id);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(SLS_WINDOW_IS_VISIBLE)
 {
-    if (g_mission_control_active) return EVENT_SUCCESS;
+    if (g_mission_control_active) return;
 
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -811,19 +777,17 @@ static EVENT_HANDLER(SLS_WINDOW_IS_VISIBLE)
         border_ensure_same_space(window);
         SLSOrderWindow(g_connection, border->id, -1, window_id);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(SLS_WINDOW_IS_INVISIBLE)
 {
     uint32_t window_id = (uint32_t)(intptr_t) context;
     struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return EVENT_FAILURE;
+    if (!window) return;
 
     if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -833,8 +797,6 @@ static EVENT_HANDLER(SLS_WINDOW_IS_INVISIBLE)
         SLSOrderWindow(g_connection, border->id, 0, 0);
         border_ensure_same_space(window);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(SPACE_CHANGED)
@@ -861,7 +823,6 @@ static EVENT_HANDLER(SPACE_CHANGED)
     }
 
     event_signal_push(SIGNAL_SPACE_CHANGED, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DISPLAY_CHANGED)
@@ -869,7 +830,7 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
     uint32_t new_did = display_manager_active_display_id();
     if (g_display_manager.current_display_id == new_did) {
         debug("%s: newly activated display %d was already active (%d)! ignoring event..\n", __FUNCTION__, g_display_manager.current_display_id, new_did);
-        return EVENT_FAILURE;
+        return;
     }
 
     g_display_manager.last_display_id = g_display_manager.current_display_id;
@@ -881,7 +842,7 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
     uint32_t expected_display_id = space_display_id(g_space_manager.current_space_id);
     if (g_display_manager.current_display_id != expected_display_id) {
         debug("%s: %d %lld did not match %d! ignoring event..\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id, expected_display_id);
-        return EVENT_FAILURE;
+        return;
     }
 
     debug("%s: %d %lld\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id);
@@ -903,7 +864,6 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
     }
 
     event_signal_push(SIGNAL_DISPLAY_CHANGED, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DISPLAY_ADDED)
@@ -913,7 +873,6 @@ static EVENT_HANDLER(DISPLAY_ADDED)
     space_manager_handle_display_add(&g_space_manager, did);
     window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
     event_signal_push(SIGNAL_DISPLAY_ADDED, context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DISPLAY_REMOVED)
@@ -922,7 +881,6 @@ static EVENT_HANDLER(DISPLAY_REMOVED)
     debug("%s: %d\n", __FUNCTION__, did);
     window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
     event_signal_push(SIGNAL_DISPLAY_REMOVED, context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DISPLAY_MOVED)
@@ -931,7 +889,6 @@ static EVENT_HANDLER(DISPLAY_MOVED)
     debug("%s: %d\n", __FUNCTION__, did);
     space_manager_mark_spaces_invalid(&g_space_manager);
     event_signal_push(SIGNAL_DISPLAY_MOVED, context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DISPLAY_RESIZED)
@@ -940,7 +897,6 @@ static EVENT_HANDLER(DISPLAY_RESIZED)
     debug("%s: %d\n", __FUNCTION__, did);
     space_manager_mark_spaces_invalid_for_display(&g_space_manager, did);
     event_signal_push(SIGNAL_DISPLAY_RESIZED, context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MOUSE_DOWN)
@@ -970,7 +926,6 @@ static EVENT_HANDLER(MOUSE_DOWN)
 
 out:
     CFRelease(context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MOUSE_UP)
@@ -1046,7 +1001,6 @@ err:
 
 out:
     CFRelease(context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MOUSE_DRAGGED)
@@ -1059,7 +1013,7 @@ static EVENT_HANDLER(MOUSE_DRAGGED)
         g_mouse_state.window = NULL;
         g_mouse_state.current_action = MOUSE_MODE_NONE;
         CFRelease(context);
-        return EVENT_SUCCESS;
+        return;
     }
 
     CGPoint point = CGEventGetLocation(context);
@@ -1103,7 +1057,6 @@ static EVENT_HANDLER(MOUSE_DRAGGED)
 
 out:
     CFRelease(context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MOUSE_MOVED)
@@ -1210,7 +1163,6 @@ static EVENT_HANDLER(MOUSE_MOVED)
 
 out:
     CFRelease(context);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_SHOW_ALL_WINDOWS)
@@ -1226,7 +1178,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_ALL_WINDOWS)
     }
 
     event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
@@ -1242,7 +1193,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
     }
 
     event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_SHOW_DESKTOP)
@@ -1258,7 +1208,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_DESKTOP)
     }
 
     event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_ENTER)
@@ -1274,16 +1223,15 @@ static EVENT_HANDLER(MISSION_CONTROL_ENTER)
     }
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0, NULL);
+        event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0);
     });
 
     event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_CHECK_FOR_EXIT)
 {
-    if (!g_mission_control_active) return EVENT_FAILURE;
+    if (!g_mission_control_active) return;
 
     CFArrayRef window_list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, 0);
     int window_count = CFArrayGetCount(window_list);
@@ -1313,16 +1261,15 @@ static EVENT_HANDLER(MISSION_CONTROL_CHECK_FOR_EXIT)
 
     if (found) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0, NULL);
+            event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0);
         });
     } else {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.0f), dispatch_get_main_queue(), ^{
-            event_loop_post(&g_event_loop, MISSION_CONTROL_EXIT, NULL, 0, NULL);
+            event_loop_post(&g_event_loop, MISSION_CONTROL_EXIT, NULL, 0);
         });
     }
 
     CFRelease(window_list);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_EXIT)
@@ -1343,7 +1290,6 @@ static EVENT_HANDLER(MISSION_CONTROL_EXIT)
     event_signal_push(SIGNAL_MISSION_CONTROL_EXIT, NULL);
 
     g_mission_control_active = 0;
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DOCK_DID_RESTART)
@@ -1356,7 +1302,6 @@ static EVENT_HANDLER(DOCK_DID_RESTART)
     }
 
     event_signal_push(SIGNAL_DOCK_DID_RESTART, NULL);
-    return EVENT_SUCCESS;
 }
 
 static enum ffm_mode ffm_value;
@@ -1375,8 +1320,6 @@ static EVENT_HANDLER(MENU_OPENED)
         uint32_t window_id = (uint32_t)(intptr_t) context;
         scripting_addition_set_layer(window_id, LAYER_ABOVE);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MENU_CLOSED)
@@ -1386,8 +1329,6 @@ static EVENT_HANDLER(MENU_CLOSED)
     if (--is_menu_open == 0) {
         g_window_manager.ffm_mode = ffm_value;
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(MENU_BAR_HIDDEN_CHANGED)
@@ -1395,7 +1336,6 @@ static EVENT_HANDLER(MENU_BAR_HIDDEN_CHANGED)
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
     event_signal_push(SIGNAL_MENU_BAR_HIDDEN_CHANGED, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DOCK_DID_CHANGE_PREF)
@@ -1403,7 +1343,6 @@ static EVENT_HANDLER(DOCK_DID_CHANGE_PREF)
     debug("%s:\n", __FUNCTION__);
     space_manager_mark_spaces_invalid(&g_space_manager);
     event_signal_push(SIGNAL_DOCK_DID_CHANGE_PREF, NULL);
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(SYSTEM_WOKE)
@@ -1416,8 +1355,6 @@ static EVENT_HANDLER(SYSTEM_WOKE)
         border_activate(focused_window);
         window_manager_center_mouse(&g_window_manager, focused_window);
     }
-
-    return EVENT_SUCCESS;
 }
 
 static EVENT_HANDLER(DAEMON_MESSAGE)
@@ -1443,19 +1380,16 @@ static EVENT_HANDLER(DAEMON_MESSAGE)
             fflush(rsp);
             fclose(rsp);
 
-            return EVENT_SUCCESS;
+            return;
         }
     }
 
     socket_close(param1);
-    return EVENT_FAILURE;
 }
 
 static void *event_loop_run(void *context)
 {
-    uint32_t result;
-    struct event *event;
-    struct event_loop_item *head;
+    struct event *head;
     struct event_loop *event_loop = (struct event_loop *) context;
 
     while (event_loop->is_running) {
@@ -1467,13 +1401,11 @@ static void *event_loop_run(void *context)
                 if (!head->next) goto empty;
             } while (!__sync_bool_compare_and_swap(&event_loop->head, head, head->next));
 
-            event = &head->next->event;
-            switch (event->type) {
-#define EVENT_TYPE_ENTRY(value) case value: result = EVENT_HANDLER_##value(event->context, event->param1); break;
+            switch (head->next->type) {
+#define EVENT_TYPE_ENTRY(value) case value: EVENT_HANDLER_##value(head->next->context, head->next->param1); break;
                 EVENT_TYPE_LIST
 #undef EVENT_TYPE_ENTRY
             }
-            if (event->info) *event->info = (result << 0x1) | EVENT_PROCESSED;
 
             event_signal_flush();
             ts_reset();
@@ -1487,16 +1419,15 @@ empty:
     return NULL;
 }
 
-void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1, volatile uint32_t *info)
+void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1)
 {
     bool success;
-    struct event_loop_item *tail, *new_tail;
+    struct event *tail, *new_tail;
 
-    new_tail = memory_pool_push(&event_loop->pool, sizeof(struct event_loop_item));
-    new_tail->event.type = type;
-    new_tail->event.context = context;
-    new_tail->event.param1 = param1;
-    new_tail->event.info = info;
+    new_tail = memory_pool_push(&event_loop->pool, sizeof(struct event));
+    new_tail->type = type;
+    new_tail->param1 = param1;
+    new_tail->context = context;
     new_tail->next = NULL;
     __asm__ __volatile__ ("" ::: "memory");
 
@@ -1517,7 +1448,7 @@ bool event_loop_begin(struct event_loop *event_loop)
     sem_unlink("yabai_event_loop_semaphore");
     if (event_loop->semaphore == SEM_FAILED) return false;
 
-    event_loop->head = memory_pool_push(&event_loop->pool, sizeof(struct event_loop_item));
+    event_loop->head = memory_pool_push(&event_loop->pool, sizeof(struct event));
     event_loop->head->next = NULL;
     event_loop->tail = event_loop->head;
 

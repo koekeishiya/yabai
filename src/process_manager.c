@@ -99,7 +99,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
         if (!process) return noErr;
 
         process_manager_add_process(pm, process);
-        event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
+        event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
     } break;
     case kEventAppTerminated: {
         struct process *process = process_manager_find_process(pm, &psn);
@@ -109,13 +109,13 @@ static PROCESS_EVENT_HANDLER(process_handler)
         process_manager_remove_process(pm, &psn);
         __asm__ __volatile__ ("" ::: "memory");
 
-        event_loop_post(&g_event_loop, APPLICATION_TERMINATED, process, 0, NULL);
+        event_loop_post(&g_event_loop, APPLICATION_TERMINATED, process, 0);
     } break;
     case kEventAppFrontSwitched: {
         struct process *process = process_manager_find_process(pm, &psn);
         if (!process) return noErr;
 
-        event_loop_post(&g_event_loop, APPLICATION_FRONT_SWITCHED, process, 0, NULL);
+        event_loop_post(&g_event_loop, APPLICATION_FRONT_SWITCHED, process, 0);
     } break;
     }
 

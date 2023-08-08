@@ -14,13 +14,13 @@ static CFStringRef kAXExposeExit             = CFSTR("AXExposeExit");
 static OBSERVER_CALLBACK(mission_control_notification_handler)
 {
     if (CFEqual(notification, kAXExposeShowAllWindows)) {
-        event_loop_post(&g_event_loop, MISSION_CONTROL_SHOW_ALL_WINDOWS, NULL, 0, NULL);
+        event_loop_post(&g_event_loop, MISSION_CONTROL_SHOW_ALL_WINDOWS, NULL, 0);
     } else if (CFEqual(notification, kAXExposeShowFrontWindows)) {
-        event_loop_post(&g_event_loop, MISSION_CONTROL_SHOW_FRONT_WINDOWS, NULL, 0, NULL);
+        event_loop_post(&g_event_loop, MISSION_CONTROL_SHOW_FRONT_WINDOWS, NULL, 0);
     } else if (CFEqual(notification, kAXExposeShowDesktop)) {
-        event_loop_post(&g_event_loop, MISSION_CONTROL_SHOW_DESKTOP, NULL, 0, NULL);
+        event_loop_post(&g_event_loop, MISSION_CONTROL_SHOW_DESKTOP, NULL, 0);
     } else if (CFEqual(notification, kAXExposeExit)) {
-        event_loop_post(&g_event_loop, MISSION_CONTROL_EXIT, NULL, 0, NULL);
+        event_loop_post(&g_event_loop, MISSION_CONTROL_EXIT, NULL, 0);
     }
 }
 

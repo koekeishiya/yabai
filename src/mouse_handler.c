@@ -40,7 +40,7 @@ static MOUSE_HANDLER(mouse_handler)
         if (source_pid == g_pid) return event;
 
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
-        event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(event), mod, NULL);
+        event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(event), mod);
 
         mouse_state->consume_mouse_click = mod == mouse_state->modifier;
         if (mouse_state->consume_mouse_click) return NULL;
@@ -59,18 +59,18 @@ static MOUSE_HANDLER(mouse_handler)
         pid_t source_pid = CGEventGetIntegerValueField(event, kCGEventSourceUnixProcessID);
         if (source_pid == g_pid) return event;
 
-        event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(event), 0, NULL);
+        event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(event), 0);
         if (mouse_state->consume_mouse_click) return NULL;
     } break;
     case kCGEventLeftMouseDragged:
     case kCGEventRightMouseDragged: {
-        event_loop_post(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(event), 0, NULL);
+        event_loop_post(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(event), 0);
     } break;
     case kCGEventMouseMoved: {
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
         if (mod == mouse_state->modifier) return event;
 
-        event_loop_post(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(event), mod, NULL);
+        event_loop_post(&g_event_loop, MOUSE_MOVED, (void *) CFRetain(event), mod);
     } break;
     }
 

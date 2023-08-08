@@ -4,13 +4,13 @@ extern int g_connection;
 static DISPLAY_EVENT_HANDLER(display_handler)
 {
     if (flags & kCGDisplayAddFlag) {
-        event_loop_post(&g_event_loop, DISPLAY_ADDED, (void *)(intptr_t) did, 0, NULL);
+        event_loop_post(&g_event_loop, DISPLAY_ADDED, (void *)(intptr_t) did, 0);
     } else if (flags & kCGDisplayRemoveFlag) {
-        event_loop_post(&g_event_loop, DISPLAY_REMOVED, (void *)(intptr_t) did, 0, NULL);
+        event_loop_post(&g_event_loop, DISPLAY_REMOVED, (void *)(intptr_t) did, 0);
     } else if (flags & kCGDisplayMovedFlag) {
-        event_loop_post(&g_event_loop, DISPLAY_MOVED, (void *)(intptr_t) did, 0, NULL);
+        event_loop_post(&g_event_loop, DISPLAY_MOVED, (void *)(intptr_t) did, 0);
     } else if (flags & kCGDisplayDesktopShapeChangedFlag) {
-        event_loop_post(&g_event_loop, DISPLAY_RESIZED, (void *)(intptr_t) did, 0, NULL);
+        event_loop_post(&g_event_loop, DISPLAY_RESIZED, (void *)(intptr_t) did, 0);
     }
 }
 

@@ -213,17 +213,17 @@ static inline bool configure_settings_and_acquire_lock(void)
 static CONNECTION_CALLBACK(connection_handler)
 {
     if (type == 1204) {
-        event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0, NULL);
+        event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0);
     } else if (type == 806) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_MOVED, (void *) (intptr_t) (*(uint32_t *) data), 0, NULL);
+        event_loop_post(&g_event_loop, SLS_WINDOW_MOVED, (void *) (intptr_t) (*(uint32_t *) data), 0);
     } else if (type == 807) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_RESIZED, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+        event_loop_post(&g_event_loop, SLS_WINDOW_RESIZED, (void *) (intptr_t) (* (uint32_t *) data), 0);
     } else if (type == 808) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_ORDER_CHANGED, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+        event_loop_post(&g_event_loop, SLS_WINDOW_ORDER_CHANGED, (void *) (intptr_t) (* (uint32_t *) data), 0);
     } else if (type == 815) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_IS_VISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+        event_loop_post(&g_event_loop, SLS_WINDOW_IS_VISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0);
     } else if (type == 816) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_IS_INVISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0, NULL);
+        event_loop_post(&g_event_loop, SLS_WINDOW_IS_INVISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0);
     }
 }
 

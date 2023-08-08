@@ -1,16 +1,7 @@
 #ifndef EVENT_LOOP_H
 #define EVENT_LOOP_H
 
-#define EVENT_QUEUED    0x0
-#define EVENT_PROCESSED 0x1
-
-#define EVENT_SUCCESS 0x0
-#define EVENT_FAILURE 0x1
-
-#define event_status(e) ((e)  & 0x1)
-#define event_result(e) ((e) >> 0x1)
-
-#define EVENT_HANDLER(event_type) uint32_t EVENT_HANDLER_##event_type(void *context, int param1)
+#define EVENT_HANDLER(event_type) void EVENT_HANDLER_##event_type(void *context, int param1)
 
 #define EVENT_TYPE_LIST \
     EVENT_TYPE_ENTRY(APPLICATION_LAUNCHED) \
@@ -66,16 +57,10 @@ enum event_type
 
 struct event
 {
-    void *context;
-    volatile uint32_t *info;
     enum event_type type;
     int param1;
-};
-
-struct event_loop_item
-{
-    struct event_loop_item *next;
-    struct event event;
+    void *context;
+    struct event *next;
 };
 
 struct event_loop
@@ -84,11 +69,11 @@ struct event_loop
     pthread_t thread;
     sem_t *semaphore;
     struct memory_pool pool;
-    struct event_loop_item *head;
-    struct event_loop_item *tail;
+    struct event *head;
+    struct event *tail;
 };
 
 bool event_loop_begin(struct event_loop *event_loop);
-void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1, volatile uint32_t *info);
+void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1);
 
 #endif

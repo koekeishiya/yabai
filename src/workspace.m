@@ -213,7 +213,7 @@ extern struct event_loop g_event_loop;
             assert(!process->terminated);
 
             debug("%s: activation policy changed for %s (%d)\n", __FUNCTION__, process->name, process->pid);
-            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
+            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
 
             //
             // :WorstApiEverMade
@@ -237,7 +237,7 @@ extern struct event_loop g_event_loop;
             assert(!process->terminated);
 
             debug("%s: %s (%d) finished launching\n", __FUNCTION__, process->name, process->pid);
-            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0, NULL);
+            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
 
             //
             // :WorstApiEverMade
@@ -257,44 +257,44 @@ extern struct event_loop g_event_loop;
 
 - (void)didWake:(NSNotification *)notification
 {
-    event_loop_post(&g_event_loop, SYSTEM_WOKE, NULL, 0, NULL);
+    event_loop_post(&g_event_loop, SYSTEM_WOKE, NULL, 0);
 }
 
 - (void)didRestartDock:(NSNotification *)notification
 {
-    event_loop_post(&g_event_loop, DOCK_DID_RESTART, NULL, 0, NULL);
+    event_loop_post(&g_event_loop, DOCK_DID_RESTART, NULL, 0);
 }
 
 - (void)didChangeMenuBarHiding:(NSNotification *)notification
 {
-    event_loop_post(&g_event_loop, MENU_BAR_HIDDEN_CHANGED, NULL, 0, NULL);
+    event_loop_post(&g_event_loop, MENU_BAR_HIDDEN_CHANGED, NULL, 0);
 }
 
 - (void)didChangeDockPref:(NSNotification *)notification
 {
-    event_loop_post(&g_event_loop, DOCK_DID_CHANGE_PREF, NULL, 0, NULL);
+    event_loop_post(&g_event_loop, DOCK_DID_CHANGE_PREF, NULL, 0);
 }
 
 - (void)activeDisplayDidChange:(NSNotification *)notification
 {
-    event_loop_post(&g_event_loop, DISPLAY_CHANGED, NULL, 0, NULL);
+    event_loop_post(&g_event_loop, DISPLAY_CHANGED, NULL, 0);
 }
 
 - (void)activeSpaceDidChange:(NSNotification *)notification
 {
-    event_loop_post(&g_event_loop, SPACE_CHANGED, NULL, 0, NULL);
+    event_loop_post(&g_event_loop, SPACE_CHANGED, NULL, 0);
 }
 
 - (void)didHideApplication:(NSNotification *)notification
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-    event_loop_post(&g_event_loop, APPLICATION_HIDDEN, (void *)(intptr_t) pid, 0, NULL);
+    event_loop_post(&g_event_loop, APPLICATION_HIDDEN, (void *)(intptr_t) pid, 0);
 }
 
 - (void)didUnhideApplication:(NSNotification *)notification
 {
     pid_t pid = [[notification.userInfo objectForKey:NSWorkspaceApplicationKey] processIdentifier];
-    event_loop_post(&g_event_loop, APPLICATION_VISIBLE, (void *)(intptr_t) pid, 0, NULL);
+    event_loop_post(&g_event_loop, APPLICATION_VISIBLE, (void *)(intptr_t) pid, 0);
 }
 
 @end
