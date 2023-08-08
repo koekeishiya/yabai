@@ -832,54 +832,53 @@ static void do_handshake(int sockfd)
 
 static void handle_message(int sockfd, char *message)
 {
-    char op_code = *message++;
-    switch (op_code) {
-    case 0x01: {
-        do_space_focus(message);
-    } break;
-    case 0x02: {
-        do_space_create(message);
-    } break;
-    case 0x03: {
-        do_space_destroy(message);
-    } break;
-    case 0x04: {
-        do_space_move(message);
-    } break;
-    case 0x05: {
-        do_window_move(message);
-    } break;
-    case 0x06: {
-        do_window_opacity_fade(message);
-    } break;
-    case 0x07: {
-        do_window_layer(message);
-    } break;
-    case 0x08: {
-        do_window_sticky(message);
-    } break;
-    case 0x09: {
-        do_window_shadow(message);
-    } break;
-    case 0x0A: {
-        do_window_focus(message);
-    } break;
-    case 0x0B: {
-        do_window_scale(message);
-    } break;
-    case 0x0C: {
+    enum sa_opcode op = *message++;
+    switch (op) {
+    case SA_OPCODE_HANDSHAKE: {
         do_handshake(sockfd);
     } break;
-    case 0x0D: {
+    case SA_OPCODE_SPACE_FOCUS: {
+        do_space_focus(message);
+    } break;
+    case SA_OPCODE_SPACE_CREATE: {
+        do_space_create(message);
+    } break;
+    case SA_OPCODE_SPACE_DESTROY: {
+        do_space_destroy(message);
+    } break;
+    case SA_OPCODE_SPACE_MOVE: {
+        do_space_move(message);
+    } break;
+    case SA_OPCODE_WINDOW_MOVE: {
+        do_window_move(message);
+    } break;
+    case SA_OPCODE_WINDOW_OPACITY: {
         do_window_opacity(message);
     } break;
-    case 0x0E: {
+    case SA_OPCODE_WINDOW_OPACITY_FADE: {
+        do_window_opacity_fade(message);
+    } break;
+    case SA_OPCODE_WINDOW_LAYER: {
+        do_window_layer(message);
+    } break;
+    case SA_OPCODE_WINDOW_STICKY: {
+        do_window_sticky(message);
+    } break;
+    case SA_OPCODE_WINDOW_SHADOW: {
+        do_window_shadow(message);
+    } break;
+    case SA_OPCODE_WINDOW_FOCUS: {
+        do_window_focus(message);
+    } break;
+    case SA_OPCODE_WINDOW_SCALE: {
+        do_window_scale(message);
+    } break;
+    case SA_OPCODE_WINDOW_SWAP_PROXY: {
         do_window_swap_proxy(message);
     } break;
-    case 0x0F: {
+    case SA_OPCODE_WINDOW_ORDER: {
         do_window_order(message);
     } break;
-
     }
 }
 

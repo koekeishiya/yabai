@@ -242,7 +242,7 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
     int sockfd;
     bool result = false;
     char rsp[BUFSIZ] = {};
-    char bytes[0x100] = { 0x01, 0x0C };
+    char bytes[0x100] = { 0x01, SA_OPCODE_HANDSHAKE };
 
     if (socket_open(&sockfd)) {
         if (socket_connect(sockfd, g_sa_socket_file)) {
@@ -444,7 +444,7 @@ bool scripting_addition_focus_space(uint64_t sid)
 
     char length = 2;
     pack(bytes, sid, length);
-    bytes[1] = 0x01;
+    bytes[1] = SA_OPCODE_SPACE_FOCUS;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -456,7 +456,7 @@ bool scripting_addition_create_space(uint64_t sid)
 
     char length = 2;
     pack(bytes, sid, length);
-    bytes[1] = 0x02;
+    bytes[1] = SA_OPCODE_SPACE_CREATE;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -468,7 +468,7 @@ bool scripting_addition_destroy_space(uint64_t sid)
 
     char length = 2;
     pack(bytes, sid, length);
-    bytes[1] = 0x03;
+    bytes[1] = SA_OPCODE_SPACE_DESTROY;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -482,7 +482,7 @@ bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_si
     pack(bytes, src_sid, length);
     pack(bytes, dst_sid, length);
     pack(bytes, focus, length);
-    bytes[1] = 0x04;
+    bytes[1] = SA_OPCODE_SPACE_MOVE;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -496,7 +496,7 @@ bool scripting_addition_move_window(uint32_t wid, int x, int y)
     pack(bytes, wid, length);
     pack(bytes, x, length);
     pack(bytes, y, length);
-    bytes[1] = 0x05;
+    bytes[1] = SA_OPCODE_WINDOW_MOVE;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -510,7 +510,7 @@ bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
     pack(bytes, wid, length);
     pack(bytes, opacity, length);
     pack(bytes, duration, length);
-    bytes[1] = duration > 0 ? 0x06 : 0x0D;
+    bytes[1] = duration > 0 ? SA_OPCODE_WINDOW_OPACITY_FADE : SA_OPCODE_WINDOW_OPACITY;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -523,7 +523,7 @@ bool scripting_addition_set_layer(uint32_t wid, int layer)
     char length = 2;
     pack(bytes, wid, length);
     pack(bytes, layer, length);
-    bytes[1] = 0x07;
+    bytes[1] = SA_OPCODE_WINDOW_LAYER;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -536,7 +536,7 @@ bool scripting_addition_set_sticky(uint32_t wid, bool sticky)
     char length = 2;
     pack(bytes, wid, length);
     pack(bytes, sticky, length);
-    bytes[1] = 0x08;
+    bytes[1] = SA_OPCODE_WINDOW_STICKY;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -549,7 +549,7 @@ bool scripting_addition_set_shadow(uint32_t wid, bool shadow)
     char length = 2;
     pack(bytes, wid, length);
     pack(bytes, shadow, length);
-    bytes[1] = 0x09;
+    bytes[1] = SA_OPCODE_WINDOW_SHADOW;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -561,7 +561,7 @@ bool scripting_addition_focus_window(uint32_t wid)
 
     char length = 2;
     pack(bytes, wid, length);
-    bytes[1] = 0x0A;
+    bytes[1] = SA_OPCODE_WINDOW_FOCUS;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -577,7 +577,7 @@ bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, fl
     pack(bytes, y, length);
     pack(bytes, w, length);
     pack(bytes, h, length);
-    bytes[1] = 0x0B;
+    bytes[1] = SA_OPCODE_WINDOW_SCALE;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -592,7 +592,7 @@ bool scripting_addition_swap_window_proxy(uint32_t a_wid, uint32_t b_wid, float 
     pack(bytes, b_wid, length);
     pack(bytes, opacity, length);
     pack(bytes, order, length);
-    bytes[1] = 0x0E;
+    bytes[1] = SA_OPCODE_WINDOW_SWAP_PROXY;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
@@ -606,7 +606,7 @@ bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
     pack(bytes, a_wid, length);
     pack(bytes, order, length);
     pack(bytes, b_wid, length);
-    bytes[1] = 0x0F;
+    bytes[1] = SA_OPCODE_WINDOW_ORDER;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);
