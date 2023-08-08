@@ -1390,7 +1390,7 @@ static EVENT_HANDLER(DAEMON_MESSAGE)
 static void *event_loop_run(void *context)
 {
     struct event *head;
-    struct event_loop *event_loop = (struct event_loop *) context;
+    struct event_loop *event_loop = context;
 
     while (event_loop->is_running) {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

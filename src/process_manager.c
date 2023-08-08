@@ -75,7 +75,7 @@ void process_destroy(struct process *process)
 
 static PROCESS_EVENT_HANDLER(process_handler)
 {
-    struct process_manager *pm = (struct process_manager *) user_data;
+    struct process_manager *pm = context;
 
     ProcessSerialNumber psn;
     if (GetEventParameter(event, kEventParamProcessID, typeProcessSerialNumber, NULL, sizeof(psn), NULL, &psn) != noErr) {

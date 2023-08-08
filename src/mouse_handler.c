@@ -18,7 +18,7 @@ static inline uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
 #pragma clang diagnostic ignored "-Wswitch"
 static MOUSE_HANDLER(mouse_handler)
 {
-    struct mouse_state *mouse_state = (struct mouse_state *) context;
+    struct mouse_state *mouse_state = context;
 
     switch (type) {
     case kCGEventTapDisabledByTimeout:
