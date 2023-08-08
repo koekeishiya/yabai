@@ -1,28 +1,15 @@
 enum macos_version
 {
-#define SUPPORT_MACOS_VERSION(name, version) macos_##name,
+#define SUPPORT_MACOS_VERSION(name, major_version) macos_##name,
     SUPPORTED_MACOS_VERSION_LIST
 #undef SUPPORT_MACOS_VERSION
 };
 
-static int _workspace_is_macos_version[] = {
-#define SUPPORT_MACOS_VERSION(name, version) -1,
-    SUPPORTED_MACOS_VERSION_LIST
-#undef SUPPORT_MACOS_VERSION
-};
+static int _workspace_is_macos_version[] = {};
 
-static int workspace_is_macos_major(long major_version)
-{
-    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    return version.majorVersion == major_version;
-}
-
-#define SUPPORT_MACOS_VERSION(name, version) \
-bool workspace_is_macos_##name(void) \
+#define SUPPORT_MACOS_VERSION(name, major_version) \
+static inline bool workspace_is_macos_##name(void) \
 { \
-    if (_workspace_is_macos_version[macos_##name] == -1) { \
-        _workspace_is_macos_version[macos_##name] = workspace_is_macos_major(version); \
-    } \
     return _workspace_is_macos_version[macos_##name]; \
 }
     SUPPORTED_MACOS_VERSION_LIST
@@ -30,6 +17,11 @@ bool workspace_is_macos_##name(void) \
 
 bool workspace_event_handler_begin(void **context)
 {
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+#define SUPPORT_MACOS_VERSION(name, major_version) _workspace_is_macos_version[macos_##name] = version.majorVersion == major_version;
+    SUPPORTED_MACOS_VERSION_LIST
+#undef SUPPORT_MACOS_VERSION
+
     workspace_context *ws_context = [workspace_context alloc];
     if (!ws_context) return false;
 

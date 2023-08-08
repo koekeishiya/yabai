@@ -6,9 +6,6 @@ extern unsigned int __src_osax_payload_len;
 extern unsigned char __src_osax_loader[];
 extern unsigned int __src_osax_loader_len;
 
-extern bool workspace_is_macos_monterey(void);
-extern bool workspace_is_macos_bigsur(void);
-
 int scripting_addition_load(void);
 int scripting_addition_uninstall(void);
 
