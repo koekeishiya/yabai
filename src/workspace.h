@@ -8,7 +8,11 @@
     SUPPORT_MACOS_VERSION(bigsur,   11)
 
 #define SUPPORT_MACOS_VERSION(name, major_version) \
-static inline bool workspace_is_macos_##name(void);
+static bool _workspace_is_macos_version_##name; \
+static inline bool workspace_is_macos_##name(void) \
+{ \
+    return _workspace_is_macos_version_##name; \
+}
     SUPPORTED_MACOS_VERSION_LIST
 #undef SUPPORT_MACOS_VERSION
 
