@@ -711,6 +711,14 @@ EVENT
     Eligible for *app*, *title* and *active* filter. +
     Passes one argument: $YABAI_WINDOW_ID
 
+*space_created*::
+    Triggered when a space is created. +
+    Passes one argument: $YABAI_SPACE_ID
+
+*space_destroyed*::
+    Triggered when a space is destroyed. +
+    Passes one argument: $YABAI_SPACE_ID
+
 *space_changed*::
     Triggered when the active space has changed. +
     Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID

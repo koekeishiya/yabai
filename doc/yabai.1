@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.18
-.\"      Date: 2023-05-27
+.\"      Date: 2023-08-12
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2023-05-27" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2023-08-12" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -1002,6 +1002,20 @@ Triggered when a window changes its title.
 Eligible for \fBapp\fP, \fBtitle\fP and \fBactive\fP filter.
 .br
 Passes one argument: $YABAI_WINDOW_ID
+.RE
+.sp
+\fBspace_created\fP
+.RS 4
+Triggered when a space is created.
+.br
+Passes one argument: $YABAI_SPACE_ID
+.RE
+.sp
+\fBspace_destroyed\fP
+.RS 4
+Triggered when a space is destroyed.
+.br
+Passes one argument: $YABAI_SPACE_ID
 .RE
 .sp
 \fBspace_changed\fP

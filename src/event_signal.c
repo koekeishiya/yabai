@@ -219,6 +219,16 @@ void event_signal_push(enum signal_type type, void *context)
         es->title = window_title_ts(window);
         es->active = g_window_manager.focused_window_id == window->id;
     } break;
+    case SIGNAL_SPACE_CREATED:
+    case SIGNAL_SPACE_DESTROYED: {
+        uint64_t sid = (uint64_t)(uintptr_t) context;
+
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
+
+        snprintf(es->arg_name[0],  arg_size, "%s",   "YABAI_SPACE_ID");
+        snprintf(es->arg_value[0], arg_size, "%lld", sid);
+    } break;
     case SIGNAL_SPACE_CHANGED: {
         es->arg_name[0]  = ts_alloc_unaligned(arg_size);
         es->arg_value[0] = ts_alloc_unaligned(arg_size);

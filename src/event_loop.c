@@ -799,6 +799,81 @@ static EVENT_HANDLER(SLS_WINDOW_IS_INVISIBLE)
     }
 }
 
+static EVENT_HANDLER(SLS_SPACE_ADD_WINDOW)
+{
+    uint32_t window_id = (uint32_t) param1;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return;
+    }
+
+    uint64_t sid = (uint64_t)(intptr_t) context;
+    debug("%s: %d added to %lld\n", __FUNCTION__, window_id, sid);
+
+    if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
+        struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, sid);
+        window_manager_add_managed_window(&g_window_manager, window, view);
+    }
+
+    // event_signal_push(SIGNAL_SPACE_ADD_WINDOW, context);
+}
+
+static EVENT_HANDLER(SLS_SPACE_REMOVE_WINDOW)
+{
+    uint32_t window_id = (uint32_t) param1;
+    struct window *window = window_manager_find_window(&g_window_manager, window_id);
+    if (!window) return;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
+        return;
+    }
+
+    uint64_t sid = (uint64_t)(intptr_t) context;
+    debug("%s: %d removed from %lld\n", __FUNCTION__, window_id, sid);
+
+    struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+    if (view) {
+        struct window_node *node = view_remove_window_node(view, window);
+        window_manager_remove_managed_window(&g_window_manager, window->id);
+
+        if (node) {
+            if (space_is_visible(view->sid)) {
+                window_node_flush(node);
+            } else {
+                view->is_dirty = true;
+            }
+        }
+    }
+
+    if (window_manager_should_manage_window(window)) {
+        struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
+        window_manager_add_managed_window(&g_window_manager, window, view);
+    }
+
+    // event_signal_push(SIGNAL_SPACE_REMOVE_WINDOW, context);
+}
+
+static EVENT_HANDLER(SLS_SPACE_CREATED)
+{
+    uint64_t sid = (uint64_t)(intptr_t) context;
+    debug("%s: %lld\n", __FUNCTION__, sid);
+    event_signal_push(SIGNAL_SPACE_CREATED, context);
+}
+
+static EVENT_HANDLER(SLS_SPACE_DESTROYED)
+{
+    uint64_t sid = (uint64_t)(intptr_t) context;
+    debug("%s: %lld\n", __FUNCTION__, sid);
+
+    space_manager_remove_label_for_space(&g_space_manager, sid);
+
+    event_signal_push(SIGNAL_SPACE_DESTROYED, context);
+}
+
 static EVENT_HANDLER(SPACE_CHANGED)
 {
     g_space_manager.last_space_id = g_space_manager.current_space_id;
@@ -1283,8 +1358,10 @@ static EVENT_HANDLER(MISSION_CONTROL_EXIT)
         SLSOrderWindow(g_connection, feedback_wid, 1, 0);
     }
 
-    if (g_mission_control_active == 1 || g_mission_control_active == 2) {
-        window_manager_correct_for_mission_control_changes(&g_space_manager, &g_window_manager);
+    if (!workspace_is_macos_ventura()) {
+        if (g_mission_control_active == 1 || g_mission_control_active == 2) {
+            window_manager_correct_for_mission_control_changes(&g_space_manager, &g_window_manager);
+        }
     }
 
     event_signal_push(SIGNAL_MISSION_CONTROL_EXIT, NULL);

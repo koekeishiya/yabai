@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Allow window swap commands to work on windows that are in the same stack, using the stack window selectors [#960](https://github.com/koekeishiya/yabai/issues/960)
+- Properly remove assigned label when a space is destroyed [#1678](https://github.com/koekeishiya/yabai/issues/1678)
+- Add signals for `space_created` and `space_destroyed` [#1635](https://github.com/koekeishiya/yabai/issues/1365)
 
 ## [5.0.6] - 2023-05-27
 ### Changed

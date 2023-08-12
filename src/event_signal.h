@@ -22,6 +22,8 @@ enum signal_type
     SIGNAL_WINDOW_DEMINIMIZED,
     SIGNAL_WINDOW_TITLE_CHANGED,
 
+    SIGNAL_SPACE_CREATED,
+    SIGNAL_SPACE_DESTROYED,
     SIGNAL_SPACE_CHANGED,
 
     SIGNAL_DISPLAY_ADDED,
@@ -61,6 +63,8 @@ static const char *signal_type_str[] =
     [SIGNAL_WINDOW_DEMINIMIZED]             = "window_deminimized",
     [SIGNAL_WINDOW_TITLE_CHANGED]           = "window_title_changed",
 
+    [SIGNAL_SPACE_CREATED]                  = "space_created",
+    [SIGNAL_SPACE_DESTROYED]                = "space_destroyed",
     [SIGNAL_SPACE_CHANGED]                  = "space_changed",
 
     [SIGNAL_DISPLAY_ADDED]                  = "display_added",
