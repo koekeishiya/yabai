@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Add launch argument `--help, -h` to print available options. [#1825](https://github.com/koekeishiya/yabai/issues/1825)
+
 ### Changed
 - Allow window swap commands to work on windows that are in the same stack, using the stack window selectors [#960](https://github.com/koekeishiya/yabai/issues/960)
 - Properly remove assigned label when a space is destroyed [#1678](https://github.com/koekeishiya/yabai/issues/1678)

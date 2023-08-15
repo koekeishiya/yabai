@@ -2,24 +2,23 @@
 #define SOCKET_PATH_FMT         "/tmp/yabai_%s.socket"
 #define LCFILE_PATH_FMT         "/tmp/yabai_%s.lock"
 
-#define CLIENT_OPT_LONG         "--message"
-#define CLIENT_OPT_SHRT         "-m"
-
-#define DEBUG_VERBOSE_OPT_LONG  "--verbose"
-#define DEBUG_VERBOSE_OPT_SHRT  "-V"
-#define VERSION_OPT_LONG        "--version"
-#define VERSION_OPT_SHRT        "-v"
-#define CONFIG_OPT_LONG         "--config"
-#define CONFIG_OPT_SHRT         "-c"
-
-#define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
 #define SCRPT_ADD_LOAD_OPT      "--load-sa"
-
+#define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
 #define SERVICE_INSTALL_OPT     "--install-service"
 #define SERVICE_UNINSTALL_OPT   "--uninstall-service"
 #define SERVICE_START_OPT       "--start-service"
 #define SERVICE_RESTART_OPT     "--restart-service"
 #define SERVICE_STOP_OPT        "--stop-service"
+#define CLIENT_OPT_LONG         "--message"
+#define CLIENT_OPT_SHRT         "-m"
+#define CONFIG_OPT_LONG         "--config"
+#define CONFIG_OPT_SHRT         "-c"
+#define DEBUG_VERBOSE_OPT_LONG  "--verbose"
+#define DEBUG_VERBOSE_OPT_SHRT  "-V"
+#define VERSION_OPT_LONG        "--version"
+#define VERSION_OPT_SHRT        "-v"
+#define HELP_OPT_LONG           "--help"
+#define HELP_OPT_SHRT           "-h"
 
 #define MAJOR  5
 #define MINOR  0
@@ -237,6 +236,27 @@ static CONNECTION_CALLBACK(connection_handler)
 
 static void parse_arguments(int argc, char **argv)
 {
+    if ((string_equals(argv[1], HELP_OPT_LONG)) ||
+        (string_equals(argv[1], HELP_OPT_SHRT))) {
+        fprintf(stdout, "Usage: yabai [option]\n"
+                        "Options:\n"
+                        "    --load-sa              Install and load the scripting-addition.\n"
+                        "    --uninstall-sa         Uninstall the scripting-addition.\n"
+                        "    --install-service      Write launchd service file to disk.\n"
+                        "    --uninstall-service    Remove launchd service file from disk.\n"
+                        "    --start-service        Enable, load, and start the launchd service.\n"
+                        "    --restart-service      Attempts to restart the service instance.\n"
+                        "    --stop-service         Stops a running instance of the service.\n"
+                        "    --message, -m <msg>    Send message to a running instance of yabai.\n"
+                        "    --config, -c <config>  Use the specified configuration file.\n"
+                        "    --verbose, -V          Output debug information to stdout.\n"
+                        "    --version, -v          Print version to stdout and exit.\n"
+                        "    --help, -h             Print options to stdout and exit.\n"
+                        "Type `man yabai` for more information, or visit: "
+                        "https://github.com/koekeishiya/yabai/blob/v%d.%d.%d/doc/yabai.asciidoc\n", MAJOR, MINOR, PATCH);
+        exit(EXIT_SUCCESS);
+    }
+
     if ((string_equals(argv[1], VERSION_OPT_LONG)) ||
         (string_equals(argv[1], VERSION_OPT_SHRT))) {
         fprintf(stdout, "yabai-v%d.%d.%d\n", MAJOR, MINOR, PATCH);
