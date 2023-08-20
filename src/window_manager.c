@@ -1920,6 +1920,8 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     uint64_t sid = display_space_id(did);
     struct view *dview = space_manager_find_view(sm, sid);
 
+	float halfgap = window_node_get_gap(dview);
+
     CGRect bounds = display_bounds_constrained(did);
     if (dview && dview->enable_padding) {
         bounds.origin.x    += dview->left_padding;
@@ -1934,6 +1936,10 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     float fy = bounds.origin.y + bounds.size.height - ch * (r - y);
     float fw = cw * w;
     float fh = ch * h;
+	if (x > 0) { fx += halfgap; fw -= halfgap; }
+	if (y > 0) { fy += halfgap; fh -= halfgap; }
+	if (c > x + w) fw -= halfgap;
+	if (r > y + h) fh -= halfgap;
 
     window_manager_animate_window((struct window_capture) { .window = window, .x = fx, .y = fy, .w = fw, .h = fh });
     return WINDOW_OP_ERROR_SUCCESS;
