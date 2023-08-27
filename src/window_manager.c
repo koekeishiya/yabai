@@ -1206,6 +1206,13 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     // annotated to flow to an application.
     //
 
+    //
+    // :Sonoma
+    //
+    // TODO(koekeishiya): Causes a crash on macos Sonoma.
+    // This causes autofocus to not work.
+    //
+
     uint8_t bytes1[0xf8] = { [0x04] = 0xf8, [0x08] = 0x01, [0x3a] = 0x10 };
     uint8_t bytes2[0xf8] = { [0x04] = 0xf8, [0x08] = 0x02, [0x3a] = 0x10 };
 
@@ -1221,6 +1228,18 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
 
 void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
+    //
+    // :Sonoma
+    //
+    // TODO(koekeishiya): window_manager_make_key_window causes a crash on macos Sonoma.
+    // This causes autofocus to not work.
+    //
+
+    if (workspace_is_macos_sonoma()) {
+        debug("%s is not available on macOS Sonoma..\n", __FUNCTION__);
+        return;
+    }
+
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
         uint8_t bytes1[0xf8] = { [0x04] = 0xf8, [0x08] = 0x0d, [0x8a] = 0x02 };
         memcpy(bytes1 + 0x3c, &g_window_manager.focused_window_id, sizeof(uint32_t));
@@ -1247,9 +1266,33 @@ void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, 
 void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uint32_t window_id, AXUIElementRef window_ref)
 {
 #if 1
-    _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
-    window_manager_make_key_window(window_psn, window_id);
-    AXUIElementPerformAction(window_ref, kAXRaiseAction);
+    //
+    // :Sonoma
+    //
+    // TODO(koekeishiya): window_manager_make_key_window causes a crash on macos Sonoma.
+    // This causes autofocus to not work, and will likely reintroduce issue #102.
+    //
+    //   How to reproduce the original problem:
+    //
+    //   Display 1: Open Terminal (A) and a Chrome window (B)
+    //   Display 2: Open a Chrome window (C)
+    //
+    //   Focus Chrome (B) on Display 1, and then focus Terminal (A) on Display 1.
+    //   Try to focus Chrome (C) on Display 2.
+    //
+    //   When using the accessibility API to focus the window, Chrome (B) on Display 1 would be focused.
+    //
+    //     -  https://github.com/koekeishiya/yabai/issues/102
+    //
+
+    if (workspace_is_macos_sonoma()) {
+        _SLPSSetFrontProcessWithOptions(window_psn, 0, kCPSNoWindows);
+        AXUIElementPerformAction(window_ref, kAXRaiseAction);
+    } else {
+        _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
+        window_manager_make_key_window(window_psn, window_id);
+        AXUIElementPerformAction(window_ref, kAXRaiseAction);
+    }
 #else
     scripting_addition_focus_window(window_id);
 #endif
