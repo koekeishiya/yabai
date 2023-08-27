@@ -5,13 +5,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.7] - 2023-08-27
 ### Added
 - Add launch argument `--help, -h` to print available options. [#1825](https://github.com/koekeishiya/yabai/issues/1825)
 
 ### Changed
 - Allow window swap commands to work on windows that are in the same stack, using the stack window selectors [#960](https://github.com/koekeishiya/yabai/issues/960)
 - Properly remove assigned label when a space is destroyed [#1678](https://github.com/koekeishiya/yabai/issues/1678)
-- Add signals for `space_created` and `space_destroyed` [#1635](https://github.com/koekeishiya/yabai/issues/1365)
+- Add signals for `space_created` and `space_destroyed` [#1365](https://github.com/koekeishiya/yabai/issues/1365)
 
 ## [5.0.6] - 2023-05-27
 ### Changed
@@ -474,7 +476,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.6...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.7...HEAD
+[5.0.7]: https://github.com/koekeishiya/yabai/compare/v5.0.6...v5.0.7
 [5.0.6]: https://github.com/koekeishiya/yabai/compare/v5.0.5...v5.0.6
 [5.0.5]: https://github.com/koekeishiya/yabai/compare/v5.0.4...v5.0.5
 [5.0.4]: https://github.com/koekeishiya/yabai/compare/v5.0.3...v5.0.4

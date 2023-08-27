@@ -22,7 +22,7 @@
 
 #define MAJOR  5
 #define MINOR  0
-#define PATCH  6
+#define PATCH  7
 
 struct event_loop g_event_loop;
 void *g_workspace_context;
