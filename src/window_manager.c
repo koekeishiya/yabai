@@ -46,7 +46,7 @@ void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, in
 
     fprintf(rsp, "[");
     for (int i = 0; i < window_count; ++i) {
-        struct window *window = window_list[window_count];
+        struct window *window = window_list[i];
 
         if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
 
