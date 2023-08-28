@@ -340,7 +340,29 @@ float window_opacity(struct window *window)
 int window_level(struct window *window)
 {
     int level = 0;
-    SLSGetWindowLevel(g_connection, window->id, &level);
+
+    if (workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
+        CFArrayRef window_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+
+        CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);
+        if (!query) goto err2;
+
+        CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
+        if (!iterator) goto err1;
+
+        if (SLSWindowIteratorAdvance(iterator)) {
+            level = SLSWindowIteratorGetLevel(iterator);
+        }
+
+        CFRelease(iterator);
+    err1:
+        CFRelease(query);
+    err2:
+        CFRelease(window_ref);
+    } else {
+        SLSGetWindowLevel(g_connection, window->id, &level);
+    }
+
     return level;
 }
 

@@ -46,7 +46,22 @@ void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, in
 
     fprintf(rsp, "[");
     for (int i = 0; i < window_count; ++i) {
-        window_serialize(rsp, window_list[i]);
+        struct window *window = window_list[window_count];
+
+        if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+
+            //
+            // NOTE(koekeishiya): The window has been marked invalid by the system.
+            // Invalidation happens on the macOS event receiver thread, but our runloop
+            // is currently processing a user-initiated event so we have yet to remove
+            // our representation of said window. Do not attempt to query macOS for
+            // information about these windows.
+            //
+
+            continue;
+        }
+
+        window_serialize(rsp, window);
         if (i < window_count - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
