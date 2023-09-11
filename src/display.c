@@ -196,7 +196,7 @@ uint64_t *display_space_list(uint32_t did, int *count)
         CFArrayRef spaces_ref = CFDictionaryGetValue(display_ref, CFSTR("Spaces"));
         int spaces_count = CFArrayGetCount(spaces_ref);
 
-        space_list = ts_alloc_aligned(sizeof(uint64_t), spaces_count);
+        space_list = ts_alloc_list(uint64_t, spaces_count);
         *count = spaces_count;
 
         for (int j = 0; j < spaces_count; ++j) {

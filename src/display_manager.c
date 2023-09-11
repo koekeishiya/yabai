@@ -263,7 +263,7 @@ int display_manager_active_display_count(void)
 uint32_t *display_manager_active_display_list(int *count)
 {
     int display_count = display_manager_active_display_count();
-    uint32_t *result = ts_alloc_aligned(sizeof(uint32_t), display_count);
+    uint32_t *result = ts_alloc_list(uint32_t, display_count);
     CGGetActiveDisplayList(display_count, result, (uint32_t*)count);
     return result;
 }

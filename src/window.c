@@ -93,7 +93,7 @@ uint64_t *window_space_list(struct window *window, int *count)
     *count = CFArrayGetCount(space_list_ref);
     if (!*count) goto out;
 
-    space_list = ts_alloc_aligned(sizeof(uint64_t), *count);
+    space_list = ts_alloc_list(uint64_t, *count);
 
     for (int i = 0; i < *count; ++i) {
         CFNumberRef id_ref = CFArrayGetValueAtIndex(space_list_ref, i);

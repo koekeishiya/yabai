@@ -107,7 +107,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
     }
 
     int view_count = 0;
-    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+    struct view **view_list = ts_alloc_list(struct view *, window_count);
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
@@ -177,7 +177,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
     struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
 
     int view_count = 0;
-    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+    struct view **view_list = ts_alloc_list(struct view *, window_count);
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
@@ -322,7 +322,7 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
     uint32_t prev_window_id = g_window_manager.last_window_id;
 
     int view_count = 0;
-    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+    struct view **view_list = ts_alloc_list(struct view *, window_count);
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
@@ -384,7 +384,7 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
     struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
 
     int view_count = 0;
-    struct view **view_list = ts_alloc_aligned(sizeof(struct view *), window_count);
+    struct view **view_list = ts_alloc_list(struct view *, window_count);
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];

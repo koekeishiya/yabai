@@ -32,7 +32,7 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
     CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
 
     int window_count = 0;
-    window_list = ts_alloc_aligned(sizeof(uint32_t), *count);
+    window_list = ts_alloc_list(uint32_t, *count);
 
     while (SLSWindowIteratorAdvance(iterator)) {
         uint64_t tags = SLSWindowIteratorGetTags(iterator);

@@ -4,6 +4,7 @@
 #include <mach/mach_time.h>
 
 #include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>

@@ -29,7 +29,7 @@ static struct window **window_manager_find_windows_for_spaces(uint64_t *space_li
     uint32_t *window_list = space_window_list_for_connection(space_list, space_count, 0, &window_count, true);
 
     *window_aggregate_count = 0;
-    struct window **window_aggregate_list = ts_alloc_aligned(sizeof(struct window *), window_count);
+    struct window **window_aggregate_list = ts_alloc_list(struct window *, window_count);
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
@@ -1399,7 +1399,7 @@ void window_manager_add_application(struct window_manager *wm, struct applicatio
 struct window **window_manager_find_application_windows(struct window_manager *wm, struct application *application, int *window_count)
 {
     *window_count = 0;
-    struct window **window_list = ts_alloc_aligned(sizeof(struct window *), wm->window.count);
+    struct window **window_list = ts_alloc_list(struct window *, wm->window.count);
 
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
         struct bucket *bucket = wm->window.buckets[window_index];
@@ -1491,7 +1491,7 @@ struct window **window_manager_add_application_windows(struct space_manager *sm,
     if (!window_list) return NULL;
 
     int window_count = CFArrayGetCount(window_list);
-    struct window **list = ts_alloc_aligned(sizeof(struct window *), window_count);
+    struct window **list = ts_alloc_list(struct window *, window_count);
 
     for (int i = 0; i < window_count; ++i) {
         AXUIElementRef window_ref = CFArrayGetValueAtIndex(window_list, i);
