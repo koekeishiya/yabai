@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.8] - 2023-09-12
 ### Changed
 - Workaround for macOS Ventura reporting bad window levels when running yabai as a service, causing issues with window topmost [#1704](https://github.com/koekeishiya/yabai/issues/1704)
 
@@ -478,7 +480,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.7...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.8...HEAD
+[5.0.8]: https://github.com/koekeishiya/yabai/compare/v5.0.7...v5.0.8
 [5.0.7]: https://github.com/koekeishiya/yabai/compare/v5.0.6...v5.0.7
 [5.0.6]: https://github.com/koekeishiya/yabai/compare/v5.0.5...v5.0.6
 [5.0.5]: https://github.com/koekeishiya/yabai/compare/v5.0.4...v5.0.5
