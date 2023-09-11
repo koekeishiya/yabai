@@ -12,9 +12,15 @@ YABAI_SRC      = ./src/manifest.m $(OSAX_SRC)
 OSAX_PATH      = ./src/osax
 BINS           = $(BUILD_PATH)/yabai
 
-.PHONY: all clean install sign archive man
+.PHONY: all asan tsan install man icon archive sign clean-build clean
 
 all: clean-build $(BINS)
+
+asan: BUILD_FLAGS=-std=c99 -Wall -g -O0 -fvisibility=hidden -fsanitize=address,undefined -mmacosx-version-min=11.0 -fno-objc-arc -arch x86_64 -arch arm64
+asan: clean-build $(BINS)
+
+tsan: BUILD_FLAGS=-std=c99 -Wall -g -O0 -fvisibility=hidden -fsanitize=thread,undefined -mmacosx-version-min=11.0 -fno-objc-arc -arch x86_64 -arch arm64
+tsan: clean-build $(BINS)
 
 install: BUILD_FLAGS=-std=c99 -Wall -DNDEBUG -O2 -fvisibility=hidden -mmacosx-version-min=11.0 -fno-objc-arc -arch x86_64 -arch arm64
 install: clean-build $(BINS)
