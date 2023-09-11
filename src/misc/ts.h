@@ -46,6 +46,9 @@ static inline uint64_t ts_align(uint64_t used, uint64_t align)
     return ptr - (uintptr_t) g_temp_storage.memory;
 }
 
+#define ts_alloc_list(elem_type, elem_count) \
+    ts_alloc_aligned(__alignof__(elem_type), sizeof(elem_type) * elem_count)
+
 static inline void *ts_alloc_aligned(uint64_t alignment, uint64_t size)
 {
     for (;;) {
@@ -59,9 +62,6 @@ static inline void *ts_alloc_aligned(uint64_t alignment, uint64_t size)
         }
     }
 }
-
-#define ts_alloc_list(elem_type, elem_count) \
-    ts_alloc_aligned(__alignof__(elem_type), sizeof(elem_type) * elem_count)
 
 static inline void *ts_alloc_unaligned(uint64_t size)
 {
