@@ -209,8 +209,16 @@ static inline bool configure_settings_and_acquire_lock(void)
 }
 #pragma clang diagnostic pop
 
+__attribute__((no_sanitize("undefined")))
 static CONNECTION_CALLBACK(connection_handler)
 {
+    //
+    // NOTE(koekeishiya): Disable undefined sanitizer for this particular function.
+    // It will sometimes report load of misaligned address when reading from the
+    // data buffer, but there is nothing for us to do here because said memory is
+    // allocated and managed by macOS.
+    //
+
     if (type == 1204) {
         event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0);
     } else if (type == 806) {
