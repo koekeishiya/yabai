@@ -23,7 +23,8 @@ static MOUSE_HANDLER(mouse_handler)
     switch (type) {
     case kCGEventTapDisabledByTimeout:
     case kCGEventTapDisabledByUserInput: {
-        if (mouse_state->handle) CGEventTapEnable(mouse_state->handle, true);
+        CFMachPortRef handle = __atomic_load_n(&mouse_state->handle, __ATOMIC_RELAXED);
+        if (handle) CGEventTapEnable(handle, true);
     } break;
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {
@@ -288,5 +289,5 @@ void mouse_handler_end(struct mouse_state *mouse_state)
     CFRunLoopRemoveSource(CFRunLoopGetMain(), mouse_state->runloop_source, kCFRunLoopCommonModes);
     CFRelease(mouse_state->runloop_source);
     CFRelease(mouse_state->handle);
-    mouse_state->handle = NULL;
+    __atomic_store_n(&mouse_state->handle, NULL, __ATOMIC_RELEASE);
 }

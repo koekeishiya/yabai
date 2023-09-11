@@ -29,7 +29,7 @@ bool memory_pool_init(struct memory_pool *pool, uint64_t size)
 void *memory_pool_push(struct memory_pool *pool, uint64_t size)
 {
     for (;;) {
-        uint64_t used = pool->used;
+        uint64_t used = __atomic_load_n(&pool->used, __ATOMIC_RELAXED);
         uint64_t new_used = used + size;
 
         if (new_used < pool->size) {

@@ -45,7 +45,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
 {
     struct process *process = context;
 
-    if (process->terminated) {
+    if (__atomic_load_n(&process->terminated, __ATOMIC_RELAXED)) {
         debug("%s: %s (%d) terminated during launch\n", __FUNCTION__, process->name, process->pid);
         window_manager_remove_lost_front_switched_event(&g_window_manager, process->pid);
         return;
@@ -471,7 +471,7 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
 {
     struct window *window = context;
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    assert(!window->id_ptr);
+    assert(!__atomic_load_n(&window->id_ptr, __ATOMIC_RELAXED));
     border_destroy(window);
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
@@ -1466,7 +1466,7 @@ static EVENT_HANDLER(DAEMON_MESSAGE)
 
 static void *event_loop_run(void *context)
 {
-    struct event *head;
+    struct event *head, *next;
     struct event_loop *event_loop = context;
 
     while (event_loop->is_running) {
@@ -1474,12 +1474,13 @@ static void *event_loop_run(void *context)
 
         for (;;) {
             do {
-                head = event_loop->head;
-                if (!head->next) goto empty;
-            } while (!__sync_bool_compare_and_swap(&event_loop->head, head, head->next));
+                head = __atomic_load_n(&event_loop->head, __ATOMIC_RELAXED);
+                next = __atomic_load_n(&head->next, __ATOMIC_RELAXED);
+                if (!next) goto empty;
+            } while (!__sync_bool_compare_and_swap(&event_loop->head, head, next));
 
-            switch (head->next->type) {
-#define EVENT_TYPE_ENTRY(value) case value: EVENT_HANDLER_##value(head->next->context, head->next->param1); break;
+            switch (__atomic_load_n(&next->type, __ATOMIC_RELAXED)) {
+#define EVENT_TYPE_ENTRY(value) case value: EVENT_HANDLER_##value(__atomic_load_n(&next->context, __ATOMIC_RELAXED), __atomic_load_n(&next->param1, __ATOMIC_RELAXED)); break;
                 EVENT_TYPE_LIST
 #undef EVENT_TYPE_ENTRY
             }
@@ -1502,14 +1503,14 @@ void event_loop_post(struct event_loop *event_loop, enum event_type type, void *
     struct event *tail, *new_tail;
 
     new_tail = memory_pool_push(&event_loop->pool, sizeof(struct event));
-    new_tail->type = type;
-    new_tail->param1 = param1;
-    new_tail->context = context;
-    new_tail->next = NULL;
+    __atomic_store_n(&new_tail->type, type, __ATOMIC_RELEASE);
+    __atomic_store_n(&new_tail->param1, param1, __ATOMIC_RELEASE);
+    __atomic_store_n(&new_tail->context, context, __ATOMIC_RELEASE);
+    __atomic_store_n(&new_tail->next, NULL, __ATOMIC_RELEASE);
     __asm__ __volatile__ ("" ::: "memory");
 
     do {
-        tail = event_loop->tail;
+        tail = __atomic_load_n(&event_loop->tail, __ATOMIC_RELAXED);
         success = __sync_bool_compare_and_swap(&tail->next, NULL, new_tail);
     } while (!success);
     __sync_bool_compare_and_swap(&event_loop->tail, tail, new_tail);

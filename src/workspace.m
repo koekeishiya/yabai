@@ -21,7 +21,7 @@ void *workspace_application_create_running_ns_application(struct process *proces
 
 void workspace_application_destroy_running_ns_application(void *ws_context, struct process *process)
 {
-    NSRunningApplication *application = process->ns_application;
+    NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
 
     if (application) {
         if ([application observationInfo]) {
@@ -57,7 +57,7 @@ void workspace_application_destroy_running_ns_application(void *ws_context, stru
 
 void workspace_application_observe_finished_launching(void *context, struct process *process)
 {
-    NSRunningApplication *application = process->ns_application;
+    NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
     if (application) {
         [application addObserver:context forKeyPath:@"finishedLaunching" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:process];
     } else {
@@ -67,7 +67,7 @@ void workspace_application_observe_finished_launching(void *context, struct proc
 
 void workspace_application_observe_activation_policy(void *context, struct process *process)
 {
-    NSRunningApplication *application = process->ns_application;
+    NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
     if (application) {
         [application addObserver:context forKeyPath:@"activationPolicy" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:process];
     } else {
@@ -77,7 +77,7 @@ void workspace_application_observe_activation_policy(void *context, struct proce
 
 bool workspace_application_is_observable(struct process *process)
 {
-    NSRunningApplication *application = process->ns_application;
+    NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
     if (application) {
         return [application activationPolicy] != NSApplicationActivationPolicyProhibited;
     } else {
@@ -87,7 +87,7 @@ bool workspace_application_is_observable(struct process *process)
 
 bool workspace_application_is_finished_launching(struct process *process)
 {
-    NSRunningApplication *application = process->ns_application;
+    NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
     if (application) {
         return [application isFinishedLaunching] == YES;
     } else {

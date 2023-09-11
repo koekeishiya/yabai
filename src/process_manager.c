@@ -61,8 +61,8 @@ struct process *process_create(ProcessSerialNumber psn)
     process->psn = psn;
     GetProcessPID(&process->psn, &process->pid);
     process->name = process_name;
-    process->terminated = false;
-    process->ns_application = workspace_application_create_running_ns_application(process);
+    __atomic_store_n(&process->terminated, false, __ATOMIC_RELEASE);
+    __atomic_store_n(&process->ns_application, workspace_application_create_running_ns_application(process), __ATOMIC_RELEASE);
     return process;
 }
 
@@ -105,7 +105,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
         struct process *process = process_manager_find_process(pm, &psn);
         if (!process) return noErr;
 
-        process->terminated = true;
+        __atomic_store_n(&process->terminated, true, __ATOMIC_RELEASE);
         process_manager_remove_process(pm, &psn);
         __asm__ __volatile__ ("" ::: "memory");
 
