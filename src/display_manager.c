@@ -207,6 +207,10 @@ CGRect display_manager_menu_bar_rect(uint32_t did)
     bounds.size.width = CGDisplayPixelsWide(did);
 #endif
 
+    CGRect display_frame = CGDisplayBounds(did);
+    bounds.origin.x += display_frame.origin.x;
+    bounds.origin.y += display_frame.origin.y;
+
     return bounds;
 }
 
