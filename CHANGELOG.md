@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Prevent *focus follows mouse* from activating the menubar in vertical display arrangements [#1857](https://github.com/koekeishiya/yabai/issues/1857)
 
 ## [5.0.8] - 2023-09-12
 ### Changed

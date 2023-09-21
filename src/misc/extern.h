@@ -37,6 +37,7 @@ extern CFStringRef SLSCopyBestManagedDisplayForPoint(int cid, CGPoint point);
 extern bool SLSManagedDisplayIsAnimating(int cid, CFStringRef uuid);
 extern CGError SLSGetMenuBarAutohideEnabled(int cid, int *enabled);
 extern CGError SLSGetRevealedMenuBarBounds(CGRect *rect, int cid, uint64_t sid);
+extern CGError SLSGetDisplayMenubarHeight(uint32_t did, uint32_t *height);
 extern CGError SLSGetDockRectWithReason(int cid, CGRect *rect, int *reason);
 extern Boolean CoreDockGetAutoHideEnabled(void);
 extern void CoreDockGetOrientationAndPinning(int *orientation, int *pinning);

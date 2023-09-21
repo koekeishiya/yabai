@@ -191,20 +191,16 @@ CGRect display_manager_menu_bar_rect(uint32_t did)
 #elif __arm64__
 
     //
-    // NOTE(koekeishiya): SLSGetRevealedMenuBarBounds is broken on Apple Silicon and always returns an empty rectangle,
-    // The menubar height seems to be a constant of 24em always, regardless of the display being a 13" or 16",
-    // so we patch it here. For screens with a notch, the height of the notch determines the lowest y-coordinate
-    // that windows can be placed at. The width of the menubar should be equal to the width of the display.
+    // NOTE(koekeishiya): SLSGetRevealedMenuBarBounds is broken on Apple Silicon,
+    // but we expected it to return the full display bounds along with the menubar
+    // height. Combine this information ourselves using two separate functions..
     //
 
-    int notch_height = workspace_display_notch_height(did);
-    if (notch_height) {
-        bounds.size.height = notch_height + 6;
-    } else {
-        bounds.size.height = 24;
-    }
+    uint32_t height = 0;
+    SLSGetDisplayMenubarHeight(did, &height);
 
-    bounds.size.width = CGDisplayPixelsWide(did);
+    bounds = CGDisplayBounds(did);
+    bounds.size.height = height;
 #endif
 
     return bounds;
