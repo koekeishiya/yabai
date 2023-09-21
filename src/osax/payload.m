@@ -238,7 +238,7 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
         return true; // Ventura 13.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0-6, Monterey 12.0.0+, and Ventura 13.0.0");
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0.0+, Monterey 12.0.0+, and Ventura 13.0.0+");
 #elif __arm64__
     if (os_version.majorVersion == 12) {
         return true; // Monterey 12.0
@@ -246,7 +246,7 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
         return true; // Ventura 13.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+, and Ventura 13.0.0");
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+, and Ventura 13.0.0+");
 #endif
 
     return false;
