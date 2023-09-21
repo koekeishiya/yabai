@@ -194,7 +194,6 @@ CGRect display_manager_menu_bar_rect(uint32_t did)
     // NOTE(koekeishiya): SLSGetRevealedMenuBarBounds is broken on Apple Silicon,
     // but we expected it to return the full display bounds along with the menubar
     // height. Combine this information ourselves using two separate functions..
-    //
 
     uint32_t height = 0;
     SLSGetDisplayMenubarHeight(did, &height);
@@ -203,6 +202,12 @@ CGRect display_manager_menu_bar_rect(uint32_t did)
     bounds.size.height = height;
 #endif
 
+    //
+    // NOTE(koekeishiya): Height needs to be offset by 1 because that is the actual
+    // position on the screen that windows can be positioned at..
+    //
+
+    bounds.size.height += 1;
     return bounds;
 }
 
