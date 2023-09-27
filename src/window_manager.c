@@ -2072,7 +2072,7 @@ void window_manager_toggle_window_shadow(struct space_manager *sm, struct window
 
 void window_manager_wait_for_native_fullscreen_transition(struct window *window)
 {
-    if (workspace_is_macos_monterey() || workspace_is_macos_ventura()) {
+    if (workspace_is_macos_monterey() || workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
         while (!space_is_user(space_manager_active_space())) {
 
             //

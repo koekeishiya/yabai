@@ -1358,7 +1358,7 @@ static EVENT_HANDLER(MISSION_CONTROL_EXIT)
         SLSOrderWindow(g_connection, feedback_wid, 1, 0);
     }
 
-    if (!workspace_is_macos_ventura()) {
+    if (!workspace_is_macos_ventura() && !workspace_is_macos_sonoma()) {
         if (g_mission_control_active == 1 || g_mission_control_active == 2) {
             window_manager_correct_for_mission_control_changes(&g_space_manager, &g_window_manager);
         }
@@ -1373,7 +1373,7 @@ static EVENT_HANDLER(DOCK_DID_RESTART)
 {
     debug("%s:\n", __FUNCTION__);
 
-    if (workspace_is_macos_monterey() || workspace_is_macos_ventura()) {
+    if (workspace_is_macos_monterey() || workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
         mission_control_unobserve();
         mission_control_observe();
     }

@@ -371,7 +371,7 @@ int main(int argc, char **argv)
         error("yabai: could not start mouse handler! abort..\n");
     }
 
-    if (workspace_is_macos_monterey() || workspace_is_macos_ventura()) {
+    if (workspace_is_macos_monterey() || workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
         mission_control_observe();
     } else {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
@@ -383,7 +383,7 @@ int main(int argc, char **argv)
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 815, NULL);
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 816, NULL);
 
-    if (workspace_is_macos_ventura()) {
+    if (workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1325, NULL);
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1326, NULL);
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1327, NULL);

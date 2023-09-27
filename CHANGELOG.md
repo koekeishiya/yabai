@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Fix scripting-addition functionaltiy that uses Dock.app connection to the WindowServer for macOS Sonoma [#1772](https://github.com/koekeishiya/yabai/issues/1772)
+- Fix mission-control integration for macOS Sonoma [#1772](https://github.com/koekeishiya/yabai/issues/1772)
 - Prevent *focus follows mouse* from activating the menubar in vertical display arrangements [#1857](https://github.com/koekeishiya/yabai/issues/1857)
 
 ## [5.0.8] - 2023-09-12
