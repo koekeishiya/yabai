@@ -1221,7 +1221,7 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     // annotated to flow to an application.
     //
 
-    uint8_t *bytes = workspace_is_macos_sonoma() ? malloc(0xf8) : ts_alloc_aligned(8, 0xf8);
+    static uint8_t bytes[0xf8];
     memset(bytes, 0, 0xf8);
 
     bytes[0x04] = 0xf8;
@@ -1234,14 +1234,12 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
 
     bytes[0x08] = 0x02;
     SLPSPostEventRecordTo(window_psn, bytes);
-
-    if (workspace_is_macos_sonoma()) free(bytes);
 }
 
 void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
-        uint8_t *bytes = workspace_is_macos_sonoma() ? malloc(0xf8) : ts_alloc_aligned(8, 0xf8);
+        static uint8_t bytes[0xf8];
         memset(bytes, 0, 0xf8);
 
         bytes[0x04] = 0xf8;
@@ -1263,8 +1261,6 @@ void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, 
         bytes[0x8a] = 0x01;
         memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
         SLPSPostEventRecordTo(window_psn, bytes);
-
-        if (workspace_is_macos_sonoma()) free(bytes);
     }
 
     _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
