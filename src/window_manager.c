@@ -1222,12 +1222,11 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     //
 
     static uint8_t bytes[0xf8];
-    memset(bytes, 0, 0xf8);
 
     bytes[0x04] = 0xf8;
     bytes[0x3a] = 0x10;
     memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    memset(bytes + 0x20, 0xFF, 0x10);
+    memset(bytes + 0x20, 0xff, 0x10);
 
     bytes[0x08] = 0x01;
     SLPSPostEventRecordTo(window_psn, bytes);
@@ -1240,7 +1239,6 @@ void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, 
 {
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
         static uint8_t bytes[0xf8];
-        memset(bytes, 0, 0xf8);
 
         bytes[0x04] = 0xf8;
         bytes[0x08] = 0x0d;
