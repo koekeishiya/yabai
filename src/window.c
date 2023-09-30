@@ -118,7 +118,8 @@ void window_serialize(FILE *rsp, struct window *window)
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
-    bool is_topmost = window_is_topmost(window);
+    int level = window_level(window);
+    bool is_topmost = level == CGWindowLevelForKey(LAYER_ABOVE);
     bool is_minimized = window_is_minimized(window);
     bool visible = !is_minimized && !window->application->is_hidden && (window_check_flag(window, WINDOW_STICKY) || space_is_visible(sid));
     bool border = window->border.id ? 1 : 0;
@@ -179,7 +180,7 @@ void window_serialize(FILE *rsp, struct window *window)
             subrole,
             display,
             space,
-            window_level(window),
+            level,
             opacity,
             split,
             child,
@@ -324,12 +325,6 @@ err:
     return result;
 }
 
-bool window_is_topmost(struct window *window)
-{
-    bool is_topmost = window_level(window) == CGWindowLevelForKey(LAYER_ABOVE);
-    return is_topmost;
-}
-
 float window_opacity(struct window *window)
 {
     float alpha = 0.0f;
@@ -350,8 +345,8 @@ int window_level(struct window *window)
         CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
         if (!iterator) goto err1;
 
-        if (SLSWindowIteratorAdvance(iterator)) {
-            level = SLSWindowIteratorGetLevel(iterator);
+        if (SLSWindowIteratorGetCount(iterator) == 1) {
+            level = SLSWindowIteratorGetLevel(iterator, 0);
         }
 
         CFRelease(iterator);

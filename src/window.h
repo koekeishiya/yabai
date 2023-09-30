@@ -91,7 +91,6 @@ bool window_is_undersized(struct window *window);
 bool window_is_minimized(struct window *window);
 bool window_is_fullscreen(struct window *window);
 bool window_is_sticky(struct window *window);
-bool window_is_topmost(struct window *window);
 bool window_is_standard(struct window *window);
 bool window_is_dialog(struct window *window);
 bool window_is_popover(struct window *window);

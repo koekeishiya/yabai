@@ -1962,7 +1962,7 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
 
 void window_manager_toggle_window_topmost(struct window *window)
 {
-    bool is_topmost = window_is_topmost(window);
+    bool is_topmost = window_level(window) == CGWindowLevelForKey(LAYER_ABOVE);
     window_manager_set_window_layer(window, is_topmost ? LAYER_NORMAL : LAYER_ABOVE);
 }
 
