@@ -234,6 +234,8 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
         return true; // Monterey 12.0
     } else if (os_version.majorVersion == 13) {
         return true; // Ventura 13.0
+    } else if (os_version.majorVersion == 14) {
+        return true; // Sonoma 14.0
     }
 
     NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0.0+, Monterey 12.0.0+, and Ventura 13.0.0+");
@@ -242,6 +244,8 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
         return true; // Monterey 12.0
     } else if (os_version.majorVersion == 13) {
         return true; // Ventura 13.0
+    } else if (os_version.majorVersion == 14) {
+        return true; // Sonoma 14.0
     }
 
     NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+, and Ventura 13.0.0+");
@@ -290,6 +294,26 @@ static void init_instances()
         uint64_t dppm_offset = decode_adrp_add(dppm_addr, dppm_addr - baseaddr);
         NSLog(@"[yabai-sa] (0x%llx) dppm found at address 0x%llX (0x%llx)", baseaddr, dppm_offset, dppm_offset - baseaddr);
         dp_desktop_picture_manager = [(*(id *)(baseaddr + dppm_offset)) retain];
+#endif
+
+        //
+        // @hack
+        //
+        // NOTE(koekeishiya): For whatever reason, in Sonoma, DPDesktopPictureManager is initialized and swapped
+        // to an alternate storage location instead of where it used to be stored in previous macOS versions..
+        //
+        // This alternate storage location resides 8-bytes before the usual location, so we simply do
+        // the subtract to arrive at the correct location in cases where the usual location is null.
+        //
+
+#ifdef __x86_64__
+        if (dp_desktop_picture_manager == nil) {
+            dp_desktop_picture_manager = [(*(id *)(dppm_addr + dppm_offset + 0x4 - 0x8)) retain];
+        }
+#elif __arm64__
+        if (dp_desktop_picture_manager == nil) {
+            dp_desktop_picture_manager = [(*(id *)(baseaddr + dppm_offset - 0x8)) retain];
+        }
 #endif
     }
 
