@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.0.9] - 2023-10-01
 ### Changed
 - Updated scripting-addition to support macOS Sonoma 14.0 [#1772](https://github.com/koekeishiya/yabai/issues/1772)
 - Fix window focusing (autofocus, and autoraise across multiple monitors [#109](https://github.com/koekeishiya/yabai/issues/109)) for macOS Sonoma [#1772](https://github.com/koekeishiya/yabai/issues/1772)
@@ -486,7 +488,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.8...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v5.0.9...HEAD
+[5.0.9]: https://github.com/koekeishiya/yabai/compare/v5.0.8...v5.0.9
 [5.0.8]: https://github.com/koekeishiya/yabai/compare/v5.0.7...v5.0.8
 [5.0.7]: https://github.com/koekeishiya/yabai/compare/v5.0.6...v5.0.7
 [5.0.6]: https://github.com/koekeishiya/yabai/compare/v5.0.5...v5.0.6
