@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Fix issue causing window animations to flicker on macOS Ventura and Sonoma [#1879](https://github.com/koekeishiya/yabai/issues/1879)
 
 ## [5.0.9] - 2023-10-01
 ### Changed

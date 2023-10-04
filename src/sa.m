@@ -583,16 +583,27 @@ bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, fl
     return scripting_addition_send_bytes(bytes, length);
 }
 
-bool scripting_addition_swap_window_proxy(uint32_t a_wid, uint32_t b_wid, float opacity, int order)
+bool scripting_addition_swap_window_proxy_in(uint32_t wid, uint32_t proxy_wid)
 {
     char bytes[0x100];
 
     char length = 2;
-    pack(bytes, a_wid, length);
-    pack(bytes, b_wid, length);
-    pack(bytes, opacity, length);
-    pack(bytes, order, length);
-    bytes[1] = SA_OPCODE_WINDOW_SWAP_PROXY;
+    pack(bytes, wid, length);
+    pack(bytes, proxy_wid, length);
+    bytes[1] = SA_OPCODE_WINDOW_SWAP_PROXY_IN;
+    bytes[0] = length-1;
+
+    return scripting_addition_send_bytes(bytes, length);
+}
+
+bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid)
+{
+    char bytes[0x100];
+
+    char length = 2;
+    pack(bytes, wid, length);
+    pack(bytes, proxy_wid, length);
+    bytes[1] = SA_OPCODE_WINDOW_SWAP_PROXY_OUT;
     bytes[0] = length-1;
 
     return scripting_addition_send_bytes(bytes, length);

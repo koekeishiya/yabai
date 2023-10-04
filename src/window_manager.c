@@ -595,7 +595,7 @@ void *window_manager_animate_window_list_thread_proc(void *data)
         if (context->animation_list[i].skip) continue;
 
         table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
-        scripting_addition_swap_window_proxy(context->animation_list[i].wid, context->animation_list[i].proxy.id, 1.0f, 0);
+        scripting_addition_swap_window_proxy_out(context->animation_list[i].wid, context->animation_list[i].proxy.id);
         window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
     }
     SLSReenableUpdate(context->animation_connection);
@@ -661,11 +661,18 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
             window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
 
-            CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
-            SLSTransactionOrderWindow(transaction, context->animation_list[i].proxy.id, 1, context->animation_list[i].wid);
-            SLSTransactionOrderWindow(transaction, existing_animation->proxy.id, 0, 0);
-            SLSTransactionCommit(transaction, 0);
-            CFRelease(transaction);
+            CFTypeRef transaction1 = SLSTransactionCreate(context->animation_connection);
+            CFTypeRef transaction2 = SLSTransactionCreate(context->animation_connection);
+
+            SLSTransactionOrderWindowGroup(transaction1, context->animation_list[i].proxy.id, 1, context->animation_list[i].wid);
+            SLSTransactionSetWindowSystemAlpha(transaction2, existing_animation->proxy.id, 0);
+
+            SLSTransactionCommit(transaction1, 1);
+            usleep(10000);
+            SLSTransactionCommit(transaction2, 1);
+
+            CFRelease(transaction1);
+            CFRelease(transaction2);
 
             window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
         } else {
@@ -673,7 +680,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             SLSGetWindowBounds(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.frame);
             context->animation_list[i].proxy.image = SLSHWCaptureWindowList(context->animation_connection, &context->animation_list[i].wid, 1, (1 << 11) | (1 << 8));
             window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
-            scripting_addition_swap_window_proxy(context->animation_list[i].wid, context->animation_list[i].proxy.id, 0.0f, 1);
+            scripting_addition_swap_window_proxy_in(context->animation_list[i].wid, context->animation_list[i].proxy.id);
         }
 
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
