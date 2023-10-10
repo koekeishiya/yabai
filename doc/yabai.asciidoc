@@ -258,8 +258,8 @@ COMMAND
     Focus the given space. +
     System Integrity Protection must be partially disabled.
 
-*--create*  ['<SPACE_SEL>']::
-    Create a new space on the display of the given space. If none specified, use the selected space instead. +
+*--create*  ['<DISPLAY_SEL>']::
+    Create a new space on the given display. If none specified, use the display of the active space instead. +
     System Integrity Protection must be partially disabled.
 
 *--destroy* ['<SPACE_SEL>']::

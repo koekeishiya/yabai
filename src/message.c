@@ -1580,11 +1580,11 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 }
             }
         } else if (token_equals(command, COMMAND_SPACE_CREATE)) {
-            struct selector selector = parse_space_selector(rsp, &message, acting_sid, true);
+            struct selector selector = parse_display_selector(rsp, &message, display_manager_active_display_id(), true);
 
             if (token_is_valid(selector.token)) {
-                if (selector.did_parse && selector.sid) {
-                    acting_sid = selector.sid;
+                if (selector.did_parse && selector.did) {
+                    acting_sid = display_space_id(selector.did);
                 } else {
                     return;
                 }
