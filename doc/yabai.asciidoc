@@ -164,6 +164,14 @@ Global Settings
     Duration of transition between active / normal opacity. +
     System Integrity Protection must be partially disabled.
 
+*active_window_opacity* ['<FLOAT_SEL>']::
+    Opacity of the focused window. +
+    System Integrity Protection must be partially disabled.
+
+*normal_window_opacity* ['<FLOAT_SEL>']::
+    Opacity of an unfocused window. +
+    System Integrity Protection must be partially disabled.
+
 *window_animation_duration* ['<floating point number>']::
     Duration of window frame animation. If 0.0, the change in dimension is not animated. +
     Requires Screen Recording permissions. +
@@ -172,14 +180,6 @@ Global Settings
 *window_animation_frame_rate* ['<integer number>']::
     Frame rate (expressed in frames per second) of window frame animation. +
     This setting does nothing if *window_animation_duration* is set to 0.0.
-
-*active_window_opacity* ['<FLOAT_SEL>']::
-    Opacity of the focused window. +
-    System Integrity Protection must be partially disabled.
-
-*normal_window_opacity* ['<FLOAT_SEL>']::
-    Opacity of an unfocused window. +
-    System Integrity Protection must be partially disabled.
 
 *insert_feedback_color* ['0xAARRGGBB']::
     Color of the *window --insert* message selection.
