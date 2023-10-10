@@ -16,7 +16,7 @@ static const char *bool_str[] = { "off", "on" };
 
 static const char *layer_str[] =
 {
-    [0] = "",
+    [0] = "unknown",
     [LAYER_BELOW] = "below",
     [LAYER_NORMAL] = "normal",
     [LAYER_ABOVE] = "above"

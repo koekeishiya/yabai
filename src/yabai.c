@@ -31,8 +31,9 @@ struct display_manager g_display_manager;
 struct space_manager g_space_manager;
 struct window_manager g_window_manager;
 struct mouse_state g_mouse_state;
-int g_normal_window_level;
-int g_floating_window_level;
+int g_layer_normal_window_level;
+int g_layer_below_window_level;
+int g_layer_above_window_level;
 int g_connection;
 pid_t g_pid;
 
@@ -176,8 +177,9 @@ static inline bool configure_settings_and_acquire_lock(void)
 
     g_pid = getpid();
     g_connection = SLSMainConnectionID();
-    g_normal_window_level   = CGWindowLevelForKey(LAYER_NORMAL);
-    g_floating_window_level = CGWindowLevelForKey(LAYER_ABOVE);
+    g_layer_normal_window_level = CGWindowLevelForKey(LAYER_NORMAL);
+    g_layer_below_window_level  = CGWindowLevelForKey(LAYER_BELOW);
+    g_layer_above_window_level  = CGWindowLevelForKey(LAYER_ABOVE);
 
     NSApplicationLoad();
     signal(SIGCHLD, SIG_IGN);

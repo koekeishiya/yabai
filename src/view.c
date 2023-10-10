@@ -1,5 +1,5 @@
 extern int g_connection;
-extern int g_floating_window_level;
+extern int g_layer_above_window_level;
 extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
@@ -17,7 +17,7 @@ void insert_feedback_show(struct window_node *node)
         sls_window_disable_shadow(node->feedback_window.id);
         SLSSetWindowResolution(g_connection, node->feedback_window.id, 2.0f);
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
-        SLSSetWindowLevel(g_connection, node->feedback_window.id, g_floating_window_level);
+        SLSSetWindowLevel(g_connection, node->feedback_window.id, g_layer_above_window_level);
         node->feedback_window.context = SLWindowContextCreate(g_connection, node->feedback_window.id, 0);
         CGContextSetLineWidth(node->feedback_window.context, g_window_manager.border_width);
         CGContextSetRGBFillColor(node->feedback_window.context,

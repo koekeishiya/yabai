@@ -26,7 +26,6 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_WINDOW_ORIGIN         "window_origin_display"
 #define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
 #define COMMAND_CONFIG_WINDOW_ZOOM_PERSIST   "window_zoom_persist"
-#define COMMAND_CONFIG_TOPMOST               "window_topmost"
 #define COMMAND_CONFIG_OPACITY               "window_opacity"
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
 #define COMMAND_CONFIG_ANIMATION_DURATION    "window_animation_duration"
@@ -157,7 +156,6 @@ extern bool g_verbose;
 #define ARGUMENT_WINDOW_LAYER_BELOW   "below"
 #define ARGUMENT_WINDOW_LAYER_NORMAL  "normal"
 #define ARGUMENT_WINDOW_LAYER_ABOVE   "above"
-#define ARGUMENT_WINDOW_TOGGLE_ON_TOP "topmost"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
 #define ARGUMENT_WINDOW_TOGGLE_SHADOW "shadow"
@@ -1110,17 +1108,6 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
-        } else if (token_equals(command, COMMAND_CONFIG_TOPMOST)) {
-            struct token value = get_token(&message);
-            if (!token_is_valid(value)) {
-                fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_topmost]);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                g_window_manager.enable_window_topmost = false;
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                g_window_manager.enable_window_topmost = true;
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-            }
         } else if (token_equals(command, COMMAND_CONFIG_OPACITY)) {
             struct token value = get_token(&message);
             if (!token_is_valid(value)) {
@@ -2065,8 +2052,6 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             struct token value = get_token(&message);
             if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
                 window_manager_make_window_floating(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_FLOAT));
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_ON_TOP)) {
-                window_manager_toggle_window_topmost(acting_window);
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
                 window_manager_make_window_sticky(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_STICKY));
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SHADOW)) {

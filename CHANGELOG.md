@@ -5,8 +5,17 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Window query property `layer` has been added [#1887](https://github.com/koekeishiya/yabai/issues/1887)
+
 ### Changed
 - Fix issue causing window animations to flicker on macOS Ventura and Sonoma [#1879](https://github.com/koekeishiya/yabai/issues/1879)
+- All managed (read: tiled) windows are now automatically placed in the *below* layer. All unmanaged (read: floating) windows will use the default macOS *normal* layer and appear above the tiled layer, replicating the `window_topmost` functionality in a robust way [#1887](https://github.com/koekeishiya/yabai/issues/1887)
+
+### Removed
+- Config option `window_topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
+- Window command `--toggle` option `topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
+- Window query property `is-topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 
 ## [5.0.9] - 2023-10-01
 ### Changed

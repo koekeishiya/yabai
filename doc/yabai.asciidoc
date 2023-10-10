@@ -152,10 +152,6 @@ Global Settings
 *window_zoom_persist* ['<BOOL_SEL>']::
     Windows will keep their zoom-state through layout changes.
 
-*window_topmost* ['<BOOL_SEL>']::
-    Make floating windows stay on top. +
-    System Integrity Protection must be partially disabled.
-
 *window_shadow* ['<BOOL_SEL>|float']::
     Draw shadow for windows. +
     System Integrity Protection must be partially disabled.
@@ -371,9 +367,9 @@ COMMAND
 *--ratio* 'rel|abs:<dr>'::
     If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.
 
-*--toggle* 'float|sticky|topmost|pip|shadow|border|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
+*--toggle* 'float|sticky|pip|shadow|border|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window. +
-    The following properties require System Integrity Protection to be partially disabled: sticky, topmost, pip, shadow.
+    The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
 
 *--layer* '<LAYER>'::
     Set the stacking layer of the selected window. +
@@ -490,6 +486,7 @@ WINDOW
     "display": number,
     "space": number,
     "level": number,
+    "layer": string,
     "opacity": number,
     "split-type": string,
     "split-child": string,
@@ -507,7 +504,6 @@ WINDOW
     "is-hidden": bool,
     "is-floating": bool,
     "is-sticky": bool,
-    "is-topmost": bool,
     "is-grabbed": bool
 }
 ----

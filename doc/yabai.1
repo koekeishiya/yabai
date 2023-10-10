@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.18
-.\"      Date: 2023-08-15
+.\"      Date: 2023-10-10
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2023-08-15" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2023-10-10" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -205,13 +205,6 @@ Specify whether managed windows should become the first or second leaf\-node.
 \fBwindow_zoom_persist\fP [\fI<BOOL_SEL>\fP]
 .RS 4
 Windows will keep their zoom\-state through layout changes.
-.RE
-.sp
-\fBwindow_topmost\fP [\fI<BOOL_SEL>\fP]
-.RS 4
-Make floating windows stay on top.
-.br
-System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fBwindow_shadow\fP [\fI<BOOL_SEL>|float\fP]
@@ -536,11 +529,11 @@ Resize the selected window by moving the given handle \fIdx\fP pixels horizontal
 If type is \fIrel\fP the split ratio of the selected window is changed by \fIdr\fP, otherwise \fIdr\fP will become the new split ratio. A positive/negative delta will increase/decrease the size of the left\-child.
 .RE
 .sp
-\fB\-\-toggle\fP \fIfloat|sticky|topmost|pip|shadow|border|split|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
+\fB\-\-toggle\fP \fIfloat|sticky|pip|shadow|border|split|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
 .RS 4
 Toggle the given property of the selected window.
 .br
-The following properties require System Integrity Protection to be partially disabled: sticky, topmost, pip, shadow.
+The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
 .RE
 .sp
 \fB\-\-layer\fP \fI<LAYER>\fP
@@ -688,6 +681,7 @@ WINDOW
     "display": number,
     "space": number,
     "level": number,
+    "layer": string,
     "opacity": number,
     "split\-type": string,
     "split\-child": string,
@@ -705,7 +699,6 @@ WINDOW
     "is\-hidden": bool,
     "is\-floating": bool,
     "is\-sticky": bool,
-    "is\-topmost": bool,
     "is\-grabbed": bool
 }
 .fam

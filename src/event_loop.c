@@ -7,6 +7,7 @@ extern struct mouse_state g_mouse_state;
 extern int g_mission_control_active;
 extern int g_connection;
 extern void *g_workspace_context;
+extern int g_layer_below_window_level;
 
 static void window_did_receive_focus(struct window_manager *wm, struct mouse_state *ms, struct window *window)
 {
@@ -128,6 +129,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
             // This is necessary to make sure that we do not call the AX API for each modification to the tree.
             //
 
+            scripting_addition_set_layer(window->id, LAYER_BELOW);
             view_add_window_node_with_insertion_point(view, window, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
 
@@ -342,6 +344,7 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
             // This is necessary to make sure that we do not call the AX API for each modification to the tree.
             //
 
+            scripting_addition_set_layer(window->id, LAYER_BELOW);
             view_add_window_node_with_insertion_point(view, window, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
 
@@ -403,6 +406,7 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
             // This is necessary to make sure that we do not call the AX API for each modification to the tree.
             //
 
+            scripting_addition_set_layer(window->id, LAYER_NORMAL);
             view_remove_window_node(view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
             window_manager_purify_window(&g_window_manager, window);
@@ -586,7 +590,6 @@ static EVENT_HANDLER(WINDOW_RESIZED)
     window->frame = new_frame;
 
     if (!was_fullscreen && is_fullscreen) {
-        window_manager_make_window_topmost(&g_window_manager, window, false);
         border_hide(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
@@ -604,7 +607,6 @@ static EVENT_HANDLER(WINDOW_RESIZED)
         }
 
         border_show(window);
-        window_manager_make_window_topmost(&g_window_manager, window, window_check_flag(window, WINDOW_FLOAT));
     } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
@@ -837,6 +839,7 @@ static EVENT_HANDLER(SLS_SPACE_REMOVE_WINDOW)
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
+        scripting_addition_set_layer(window->id, LAYER_NORMAL);
         struct window_node *node = view_remove_window_node(view, window);
         window_manager_remove_managed_window(&g_window_manager, window->id);
 
@@ -1211,8 +1214,8 @@ static EVENT_HANDLER(MOUSE_MOVED)
                     struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
                     if (!sub_window) continue;
 
-                    if (!window_check_flag(sub_window, WINDOW_FLOAT))                 continue;
-                    if (window_level(sub_window) == CGWindowLevelForKey(LAYER_ABOVE)) continue;
+                    if (!window_check_flag(sub_window, WINDOW_FLOAT))           continue;
+                    if (window_level(sub_window) != g_layer_below_window_level) continue;
 
                     if (CGRectContainsRect(window->frame, sub_window->frame)) {
                         occludes_window = true;
@@ -1391,11 +1394,6 @@ static EVENT_HANDLER(MENU_OPENED)
     if (++is_menu_open == 1) {
         ffm_value = g_window_manager.ffm_mode;
         g_window_manager.ffm_mode = FFM_DISABLED;
-    }
-
-    if (g_window_manager.enable_window_topmost) {
-        uint32_t window_id = (uint32_t)(intptr_t) context;
-        scripting_addition_set_layer(window_id, LAYER_ABOVE);
     }
 }
 

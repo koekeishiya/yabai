@@ -849,14 +849,6 @@ bool window_manager_set_window_layer(struct window *window, int layer)
     return result;
 }
 
-void window_manager_make_window_topmost(struct window_manager *wm, struct window *window, bool topmost)
-{
-    if (!wm->enable_window_topmost) return;
-
-    int layer = topmost ? LAYER_ABOVE : LAYER_NORMAL;
-    window_manager_set_window_layer(window, layer);
-}
-
 void window_manager_purify_window(struct window_manager *wm, struct window *window)
 {
     int value;
@@ -1413,7 +1405,6 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
     if (!window_observe(window)) {
         debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_make_window_topmost(wm, window, true);
         window_manager_remove_lost_focused_event(wm, window->id);
         window_unobserve(window);
         border_destroy(window);
@@ -1446,7 +1437,6 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
                    (!window_can_move(window)) ||
                    (window_is_sticky(window)) ||
                    (!window_can_resize(window) && window_is_undersized(window))) {
-            window_manager_make_window_topmost(wm, window, true);
             window_set_flag(window, WINDOW_FLOAT);
         }
     }
@@ -1629,7 +1619,6 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
         window_manager_purify_window(wm, b);
     } else if (window_check_flag(b, WINDOW_FLOAT)) {
         window_clear_flag(b, WINDOW_FLOAT);
-        window_manager_make_window_topmost(wm, b, false);
         if (window_check_flag(b, WINDOW_STICKY)) window_manager_make_window_sticky(sm, wm, b, false);
     }
 
@@ -1967,12 +1956,6 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_toggle_window_topmost(struct window *window)
-{
-    bool is_topmost = window_level(window) == CGWindowLevelForKey(LAYER_ABOVE);
-    window_manager_set_window_layer(window, is_topmost ? LAYER_NORMAL : LAYER_ABOVE);
-}
-
 void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float)
 {
     if (should_float) {
@@ -1982,13 +1965,11 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
-        window_manager_make_window_topmost(wm, window, true);
         window_set_flag(window, WINDOW_FLOAT);
     } else {
         window_clear_flag(window, WINDOW_FLOAT);
 
         if (!window_check_flag(window, WINDOW_STICKY)) {
-            window_manager_make_window_topmost(wm, window, false);
             if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
                 struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
                 window_manager_add_managed_window(wm, window, view);
@@ -2007,7 +1988,6 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
                 window_manager_remove_managed_window(wm, window->id);
                 window_manager_purify_window(wm, window);
             }
-            window_manager_make_window_topmost(wm, window, true);
             if (window->border.id) border_ensure_same_space(window);
             window_set_flag(window, WINDOW_STICKY);
         }
@@ -2017,8 +1997,6 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
             window_clear_flag(window, WINDOW_STICKY);
 
             if (!window_check_flag(window, WINDOW_FLOAT)) {
-                window_manager_make_window_topmost(wm, window, false);
-
                 if ((window_manager_should_manage_window(window)) && (!window_manager_find_managed_window(wm, window))) {
                     struct view *view = space_manager_tile_window_on_space(sm, window, space_manager_active_space());
                     window_manager_add_managed_window(wm, window, view);
@@ -2195,6 +2173,7 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
             //
 
             view_remove_window_node(view, window);
+            scripting_addition_set_layer(window->id, LAYER_NORMAL);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
 
@@ -2223,6 +2202,7 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
             //
 
             view_remove_window_node(existing_view, window);
+            scripting_addition_set_layer(window->id, LAYER_NORMAL);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
             existing_view->is_dirty = true;
@@ -2241,6 +2221,7 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
             //
 
             view_add_window_node(view, window);
+            scripting_addition_set_layer(window->id, LAYER_BELOW);
             window_manager_add_managed_window(wm, window, view);
             view->is_dirty = true;
         }
@@ -2339,7 +2320,6 @@ void window_manager_init(struct window_manager *wm)
     wm->enable_mff = false;
     wm->enable_window_border = false;
     wm->enable_window_opacity = false;
-    wm->enable_window_topmost = false;
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.0f;
