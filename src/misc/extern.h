@@ -8,6 +8,7 @@ extern CGError SLSReleaseConnection(int cid);
 extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);
 extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowLevel(int cid, uint32_t wid, int *level);
+extern int SLSGetWindowSubLevel(int cid, uint32_t wid);
 extern CGError SLSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
 extern CGError SLSSetWindowAlpha(int cid, uint32_t wid, float alpha);
 extern CGError SLSSetWindowResolution(int cid, uint32_t wid, double resolution);
@@ -27,6 +28,7 @@ extern CGError SLSSetWindowBackgroundBlurRadiusStyle(int cid, uint32_t wid, int 
 extern CGError SLSOrderWindow(int cid, uint32_t wid, int mode, uint32_t rel_wid);
 extern CGError SLSWindowIsOrderedIn(int cid, uint32_t wid, uint8_t *value);
 extern CGError SLSSetWindowLevel(int cid, uint32_t wid, int level);
+extern CGError SLSSetWindowSubLevel(int cid, uint32_t wid, int sub_level);
 extern CGContextRef SLWindowContextCreate(int cid, uint32_t wid, CFDictionaryRef options);
 extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *region);
 extern CFUUIDRef CGDisplayCreateUUIDFromDisplayID(uint32_t did);

@@ -540,14 +540,14 @@ static void window_manager_create_window_proxy(int animation_connection, struct 
     SLSSetWindowOpacity(animation_connection, proxy->id, 0);
     SLSSetWindowResolution(animation_connection, proxy->id, 2.0f);
     SLSSetWindowAlpha(animation_connection, proxy->id, 1.0f);
-    SLSSetWindowLevel(animation_connection, proxy->id, proxy->level);
+    SLSSetWindowLevel(animation_connection, proxy->id, g_layer_normal_window_level);
+    SLSSetWindowSubLevel(animation_connection, proxy->id, proxy->level);
     proxy->context = SLWindowContextCreate(animation_connection, proxy->id, 0);
 
     CGRect frame = { {0, 0}, proxy->frame.size };
     CGContextClearRect(proxy->context, frame);
     CGContextDrawImage(proxy->context, frame, (CGImageRef) CFArrayGetValueAtIndex(proxy->image, 0));
     CGContextFlush(proxy->context);
-
     CFRelease(frame_region);
 }
 
