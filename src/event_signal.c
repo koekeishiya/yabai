@@ -11,8 +11,6 @@ static bool event_signal_filter(struct event_signal *es, struct signal *signal)
     default: return false;
 
     case SIGNAL_APPLICATION_LAUNCHED:
-    case SIGNAL_APPLICATION_ACTIVATED:
-    case SIGNAL_APPLICATION_DEACTIVATED:
     case SIGNAL_APPLICATION_VISIBLE: {
         int regex_match_app = signal->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
         return regex_match(signal->app_regex_valid, &signal->app_regex, es->app) == regex_match_app;
@@ -115,8 +113,6 @@ void event_signal_push(enum signal_type type, void *context)
     default: break;
 
     case SIGNAL_APPLICATION_LAUNCHED:
-    case SIGNAL_APPLICATION_ACTIVATED:
-    case SIGNAL_APPLICATION_DEACTIVATED:
     case SIGNAL_APPLICATION_VISIBLE: {
         struct application *application = context;
 

@@ -11,11 +11,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Fix issue causing window animations to flicker on macOS Ventura and Sonoma [#1879](https://github.com/koekeishiya/yabai/issues/1879)
 - All managed (read: tiled) windows are now automatically placed in the *below* layer. All unmanaged (read: floating) windows will use the default macOS *normal* layer and appear above the tiled layer, replicating the `window_topmost` functionality in a robust way [#1887](https://github.com/koekeishiya/yabai/issues/1887)
+- Automatic window opacity changes will now only apply to focus switches within the same space [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 
 ### Removed
 - Config option `window_topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 - Window command `--toggle` option `topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 - Window query property `is-topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
+- Signal `application_activated` and `application_deactivated` has been removed; use `application_front_switched` instead [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 
 ## [5.0.9] - 2023-10-01
 ### Changed

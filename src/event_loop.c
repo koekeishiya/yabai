@@ -11,6 +11,12 @@ extern int g_layer_below_window_level;
 
 static void window_did_receive_focus(struct window_manager *wm, struct mouse_state *ms, struct window *window)
 {
+    struct window *focused_window = window_manager_find_window(wm, wm->focused_window_id);
+    if (focused_window && focused_window != window && window_space(focused_window) == window_space(window)) {
+        window_manager_set_window_opacity(wm, focused_window, g_window_manager.normal_window_opacity);
+        border_deactivate(focused_window);
+    }
+
     window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
     border_activate(window);
 
@@ -249,28 +255,20 @@ static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
         return;
     }
 
-    event_loop_post(&g_event_loop, APPLICATION_DEACTIVATED, (void *)(intptr_t) g_process_manager.front_pid, 0);
-    event_loop_post(&g_event_loop, APPLICATION_ACTIVATED, (void *)(intptr_t) process->pid, 0);
-
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
     g_process_manager.switch_event_time = GetCurrentEventTime();
     g_process_manager.last_front_pid = g_process_manager.front_pid;
     g_process_manager.front_pid = process->pid;
-
     event_signal_push(SIGNAL_APPLICATION_FRONT_SWITCHED, NULL);
-}
-#pragma clang diagnostic pop
-
-static EVENT_HANDLER(APPLICATION_ACTIVATED)
-{
-    struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return;
-
-    debug("%s: %s\n", __FUNCTION__, application->name);
-    event_signal_push(SIGNAL_APPLICATION_ACTIVATED, application);
 
     uint32_t application_focused_window_id = application_focused_window(application);
     if (!application_focused_window_id) {
+        struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
+        if (focused_window) {
+            window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
+            border_deactivate(focused_window);
+        }
+
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
         g_window_manager.focused_window_id = 0;
         g_window_manager.focused_window_psn = application->psn;
@@ -280,6 +278,12 @@ static EVENT_HANDLER(APPLICATION_ACTIVATED)
 
     struct window *window = window_manager_find_window(&g_window_manager, application_focused_window_id);
     if (!window) {
+        struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
+        if (focused_window) {
+            window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
+            border_deactivate(focused_window);
+        }
+
         window_manager_add_lost_focused_event(&g_window_manager, application_focused_window_id);
         return;
     }
@@ -287,29 +291,7 @@ static EVENT_HANDLER(APPLICATION_ACTIVATED)
     window_did_receive_focus(&g_window_manager, &g_mouse_state, window);
     event_signal_push(SIGNAL_WINDOW_FOCUSED, window);
 }
-
-static EVENT_HANDLER(APPLICATION_DEACTIVATED)
-{
-    struct application *application = window_manager_find_application(&g_window_manager, (pid_t)(intptr_t) context);
-    if (!application) return;
-
-    debug("%s: %s\n", __FUNCTION__, application->name);
-    event_signal_push(SIGNAL_APPLICATION_DEACTIVATED, application);
-
-    struct window *focused_window = window_manager_find_window(&g_window_manager, application_focused_window(application));
-    if (!focused_window) return;
-
-    window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
-    border_deactivate(focused_window);
-
-    if (!window_level_is_standard(focused_window) || !window_is_standard(focused_window)) {
-        struct window *main_window = window_manager_find_window(&g_window_manager, application_main_window(application));
-        if (main_window && main_window != focused_window) {
-            window_manager_set_window_opacity(&g_window_manager, main_window, g_window_manager.normal_window_opacity);
-            border_deactivate(main_window);
-        }
-    }
-}
+#pragma clang diagnostic pop
 
 static EVENT_HANDLER(APPLICATION_VISIBLE)
 {
@@ -513,12 +495,6 @@ static EVENT_HANDLER(WINDOW_FOCUSED)
 
     if (!application_is_frontmost(window->application)) {
         return;
-    }
-
-    struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
-    if (focused_window && focused_window != window) {
-        window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
-        border_deactivate(focused_window);
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);

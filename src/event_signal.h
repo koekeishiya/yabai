@@ -8,8 +8,6 @@ enum signal_type
     SIGNAL_APPLICATION_LAUNCHED,
     SIGNAL_APPLICATION_TERMINATED,
     SIGNAL_APPLICATION_FRONT_SWITCHED,
-    SIGNAL_APPLICATION_ACTIVATED,
-    SIGNAL_APPLICATION_DEACTIVATED,
     SIGNAL_APPLICATION_VISIBLE,
     SIGNAL_APPLICATION_HIDDEN,
 
@@ -49,8 +47,6 @@ static const char *signal_type_str[] =
     [SIGNAL_APPLICATION_LAUNCHED]           = "application_launched",
     [SIGNAL_APPLICATION_TERMINATED]         = "application_terminated",
     [SIGNAL_APPLICATION_FRONT_SWITCHED]     = "application_front_switched",
-    [SIGNAL_APPLICATION_ACTIVATED]          = "application_activated",
-    [SIGNAL_APPLICATION_DEACTIVATED]        = "application_deactivated",
     [SIGNAL_APPLICATION_VISIBLE]            = "application_visible",
     [SIGNAL_APPLICATION_HIDDEN]             = "application_hidden",
 

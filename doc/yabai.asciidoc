@@ -648,16 +648,6 @@ EVENT
     Triggered when the front-most application changes. +
     Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID
 
-*application_activated*::
-    Triggered when an application is activated. +
-    Eligible for *app* filter. +
-    Passes one argument: $YABAI_PROCESS_ID
-
-*application_deactivated*::
-    Triggered when an application is deactivated. +
-    Eligible for *app* filter. +
-    Passes one argument: $YABAI_PROCESS_ID
-
 *application_visible*::
     Triggered when an application is unhidden. +
     Eligible for *app* filter. +
