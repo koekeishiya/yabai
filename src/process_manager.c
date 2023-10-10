@@ -23,7 +23,10 @@ static const char *process_name_blacklist[] =
     "Dock",
     "WindowManager",
     "photolibraryd",
-    "siriactionsd"
+    "siriactionsd",
+    "chronod",
+    "universalaccessd",
+    "softwareupdated"
 };
 
 #pragma clang diagnostic push
