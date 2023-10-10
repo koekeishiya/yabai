@@ -752,9 +752,7 @@ static EVENT_HANDLER(SLS_WINDOW_ORDER_CHANGED)
 
     struct border *border = &window->border;
     if (border->id && border_should_order_in(window)) {
-        int window_level = 0;
-        SLSGetWindowLevel(g_connection, window_id, &window_level);
-        SLSSetWindowLevel(g_connection, border->id, window_level);
+        SLSSetWindowLevel(g_connection, border->id, window_level(window_id));
         SLSOrderWindow(g_connection, border->id, -1, window_id);
     }
 }
@@ -1214,8 +1212,8 @@ static EVENT_HANDLER(MOUSE_MOVED)
                     struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
                     if (!sub_window) continue;
 
-                    if (!window_check_flag(sub_window, WINDOW_FLOAT))           continue;
-                    if (window_level(sub_window) != g_layer_below_window_level) continue;
+                    if (!window_check_flag(sub_window, WINDOW_FLOAT))               continue;
+                    if (window_level(sub_window->id) != g_layer_below_window_level) continue;
 
                     if (CGRectContainsRect(window->frame, sub_window->frame)) {
                         occludes_window = true;

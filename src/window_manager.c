@@ -676,7 +676,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
             window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
         } else {
-            SLSGetWindowLevel(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.level);
+            context->animation_list[i].proxy.level = window_level(context->animation_list[i].wid);
             SLSGetWindowBounds(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.frame);
             context->animation_list[i].proxy.image = SLSHWCaptureWindowList(context->animation_connection, &context->animation_list[i].wid, 1, (1 << 11) | (1 << 8));
             window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);

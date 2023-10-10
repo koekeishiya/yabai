@@ -208,7 +208,7 @@ void border_create(struct window *window)
     sls_window_disable_shadow(window->border.id);
     SLSSetWindowResolution(g_connection, window->border.id, g_window_manager.border_resolution);
     SLSSetWindowOpacity(g_connection, window->border.id, 0);
-    SLSSetWindowLevel(g_connection, window->border.id, window_level(window));
+    SLSSetWindowLevel(g_connection, window->border.id, window_level(window->id));
 
     if (g_window_manager.border_blur) {
         SLSSetWindowBackgroundBlurRadiusStyle(g_connection, window->border.id, 24, 1);

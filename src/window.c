@@ -127,7 +127,7 @@ void window_serialize(FILE *rsp, struct window *window)
     uint64_t sid = window_space(window);
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
-    int level = window_level(window);
+    int level = window_level(window->id);
     const char *layer = window_layer(level);
     bool is_minimized = window_is_minimized(window);
     bool visible = !is_minimized && !window->application->is_hidden && (window_check_flag(window, WINDOW_STICKY) || space_is_visible(sid));
@@ -341,12 +341,12 @@ float window_opacity(struct window *window)
     return alpha;
 }
 
-int window_level(struct window *window)
+int window_level(uint32_t wid)
 {
     int level = 0;
 
     if (workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
-        CFArrayRef window_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+        CFArrayRef window_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
 
         CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);
         if (!query) goto err2;
@@ -364,7 +364,7 @@ int window_level(struct window *window)
     err2:
         CFRelease(window_ref);
     } else {
-        SLSGetWindowLevel(g_connection, window->id, &level);
+        SLSGetWindowLevel(g_connection, wid, &level);
     }
 
     return level;
@@ -429,7 +429,7 @@ char *window_subrole_ts(struct window *window)
 
 bool window_level_is_standard(struct window *window)
 {
-    int level = window_level(window);
+    int level = window_level(window->id);
     if (level == g_layer_below_window_level)  return true;
     if (level == g_layer_normal_window_level) return true;
     if (level == g_layer_above_window_level)  return true;
