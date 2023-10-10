@@ -19,7 +19,6 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"sticky\":%s,\n"
             "\t\"mouse_follows_focus\":%s,\n"
             "\t\"layer\":\"%s\",\n"
-            "\t\"border\":%s,\n"
             "\t\"native-fullscreen\":%s,\n"
             "\t\"grid\":\"%d:%d:%d:%d:%d:%d\"\n"
             "}",
@@ -37,7 +36,6 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             json_optional_bool(rule->sticky),
             json_optional_bool(rule->mff),
             layer_str[rule->layer],
-            json_optional_bool(rule->border),
             json_optional_bool(rule->fullscreen),
             rule->grid[0], rule->grid[1],
             rule->grid[2], rule->grid[3],

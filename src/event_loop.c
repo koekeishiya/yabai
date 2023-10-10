@@ -14,11 +14,9 @@ static void window_did_receive_focus(struct window_manager *wm, struct mouse_sta
     struct window *focused_window = window_manager_find_window(wm, wm->focused_window_id);
     if (focused_window && focused_window != window && window_space(focused_window) == window_space(window)) {
         window_manager_set_window_opacity(wm, focused_window, g_window_manager.normal_window_opacity);
-        border_deactivate(focused_window);
     }
 
     window_manager_set_window_opacity(wm, window, wm->active_window_opacity);
-    border_activate(window);
 
     if (wm->focused_window_id != window->id) {
         if (ms->ffm_window_id != window->id) {
@@ -189,7 +187,6 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        border_destroy(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -266,7 +263,6 @@ static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
         struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
         if (focused_window) {
             window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
-            border_deactivate(focused_window);
         }
 
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
@@ -281,7 +277,6 @@ static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
         struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
         if (focused_window) {
             window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.normal_window_opacity);
-            border_deactivate(focused_window);
         }
 
         window_manager_add_lost_focused_event(&g_window_manager, application_focused_window_id);
@@ -310,7 +305,6 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        border_show(window);
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct view *view = space_manager_find_view(&g_space_manager, window_space(window));
@@ -373,7 +367,6 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        border_hide(window);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -458,7 +451,6 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
     struct window *window = context;
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     assert(!__atomic_load_n(&window->id_ptr, __ATOMIC_RELAXED));
-    border_destroy(window);
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
@@ -566,8 +558,6 @@ static EVENT_HANDLER(WINDOW_RESIZED)
     window->frame = new_frame;
 
     if (!was_fullscreen && is_fullscreen) {
-        border_hide(window);
-
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
             space_manager_untile_window(&g_space_manager, view, window);
@@ -581,8 +571,6 @@ static EVENT_HANDLER(WINDOW_RESIZED)
             struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
-
-        border_show(window);
     } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
@@ -601,7 +589,6 @@ static EVENT_HANDLER(WINDOW_MINIMIZED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     window_set_flag(window, WINDOW_MINIMIZE);
-    border_hide(window);
 
     if (window->id == g_window_manager.last_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
@@ -632,10 +619,6 @@ static EVENT_HANDLER(WINDOW_DEMINIMIZED)
     uint64_t sid = space_manager_active_space();
     if (space_manager_is_window_on_space(sid, window)) {
         debug("%s: window %s %d is deminimized on active space\n", __FUNCTION__, window->application->name, window->id);
-        if (window->border.id && border_should_order_in(window)) {
-            border_ensure_same_space(window);
-            SLSOrderWindow(g_connection, window->border.id, -1, window->id);
-        }
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
             struct window *last_window = window_manager_find_window(&g_window_manager, g_window_manager.last_window_id);
             uint32_t insertion_point = last_window && last_window->application->pid != window->application->pid ? last_window->id : 0;
@@ -667,112 +650,6 @@ static EVENT_HANDLER(WINDOW_TITLE_CHANGED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_TITLE_CHANGED, window);
-}
-
-static EVENT_HANDLER(SLS_WINDOW_MOVED)
-{
-    uint32_t window_id = (uint32_t)(intptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
-
-    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
-    }
-
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-    struct border *border = &window->border;
-    if (border->id && border_should_order_in(window)) {
-        CGRect frame = {};
-        SLSGetWindowBounds(g_connection, window_id, &frame);
-        border_move(window, frame);
-    }
-}
-
-static EVENT_HANDLER(SLS_WINDOW_RESIZED)
-{
-    uint32_t window_id = (uint32_t)(intptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
-
-    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
-    }
-
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-    struct border *border = &window->border;
-    if (border->id && border_should_order_in(window)) {
-        CGRect frame = {};
-        SLSGetWindowBounds(g_connection, window_id, &frame);
-        border_resize(window, frame);
-    }
-}
-
-static EVENT_HANDLER(SLS_WINDOW_ORDER_CHANGED)
-{
-    if (g_mission_control_active) return;
-
-    uint32_t window_id = (uint32_t)(intptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
-
-    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
-    }
-
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-    struct border *border = &window->border;
-    if (border->id && border_should_order_in(window)) {
-        SLSSetWindowLevel(g_connection, border->id, window_level(window_id));
-        SLSOrderWindow(g_connection, border->id, -1, window_id);
-    }
-}
-
-static EVENT_HANDLER(SLS_WINDOW_IS_VISIBLE)
-{
-    if (g_mission_control_active) return;
-
-    uint32_t window_id = (uint32_t)(intptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
-
-    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
-    }
-
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-    struct border *border = &window->border;
-    if (border->id && border_should_order_in(window)) {
-        border_ensure_same_space(window);
-        SLSOrderWindow(g_connection, border->id, -1, window_id);
-    }
-}
-
-static EVENT_HANDLER(SLS_WINDOW_IS_INVISIBLE)
-{
-    uint32_t window_id = (uint32_t)(intptr_t) context;
-    struct window *window = window_manager_find_window(&g_window_manager, window_id);
-    if (!window) return;
-
-    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
-        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, window_id);
-        return;
-    }
-
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-    struct border *border = &window->border;
-    if (border->id && border_should_order_in(window)) {
-        SLSOrderWindow(g_connection, border->id, 0, 0);
-        border_ensure_same_space(window);
-    }
 }
 
 static EVENT_HANDLER(SLS_SPACE_ADD_WINDOW)
@@ -1222,8 +1099,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_ALL_WINDOWS)
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 2;
 
-    border_hide_all();
-
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
@@ -1236,8 +1111,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 3;
-
-    border_hide_all();
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
@@ -1252,8 +1125,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_DESKTOP)
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 4;
 
-    border_hide_all();
-
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
@@ -1266,8 +1137,6 @@ static EVENT_HANDLER(MISSION_CONTROL_ENTER)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_active = 1;
-
-    border_hide_all();
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
@@ -1327,8 +1196,6 @@ static EVENT_HANDLER(MISSION_CONTROL_CHECK_FOR_EXIT)
 static EVENT_HANDLER(MISSION_CONTROL_EXIT)
 {
     debug("%s:\n", __FUNCTION__);
-
-    border_show_all();
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
@@ -1401,7 +1268,6 @@ static EVENT_HANDLER(SYSTEM_WOKE)
     struct window *focused_window = window_manager_find_window(&g_window_manager, g_window_manager.focused_window_id);
     if (focused_window) {
         window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
-        border_activate(focused_window);
         window_manager_center_mouse(&g_window_manager, focused_window);
     }
 }

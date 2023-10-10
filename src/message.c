@@ -30,13 +30,6 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
 #define COMMAND_CONFIG_ANIMATION_DURATION    "window_animation_duration"
 #define COMMAND_CONFIG_ANIMATION_FRAME_RATE  "window_animation_frame_rate"
-#define COMMAND_CONFIG_BORDER                "window_border"
-#define COMMAND_CONFIG_BORDER_HIDPI          "window_border_hidpi"
-#define COMMAND_CONFIG_BORDER_BLUR           "window_border_blur"
-#define COMMAND_CONFIG_BORDER_WIDTH          "window_border_width"
-#define COMMAND_CONFIG_BORDER_RADIUS         "window_border_radius"
-#define COMMAND_CONFIG_BORDER_ACTIVE_COLOR   "active_window_border_color"
-#define COMMAND_CONFIG_BORDER_NORMAL_COLOR   "normal_window_border_color"
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
 #define COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY "active_window_opacity"
 #define COMMAND_CONFIG_NORMAL_WINDOW_OPACITY "normal_window_opacity"
@@ -165,7 +158,6 @@ extern bool g_verbose;
 #define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_EXPOSE "expose"
 #define ARGUMENT_WINDOW_TOGGLE_PIP    "pip"
-#define ARGUMENT_WINDOW_TOGGLE_BORDER "border"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN QUERY--------------------------------- */
@@ -194,7 +186,6 @@ extern bool g_verbose;
 #define ARGUMENT_RULE_KEY_STICKY  "sticky"
 #define ARGUMENT_RULE_KEY_MFF     "mouse_follows_focus"
 #define ARGUMENT_RULE_KEY_LAYER   "layer"
-#define ARGUMENT_RULE_KEY_BORDER  "border"
 #define ARGUMENT_RULE_KEY_FULLSCR "native-fullscreen"
 #define ARGUMENT_RULE_KEY_GRID    "grid"
 #define ARGUMENT_RULE_KEY_LABEL   "label"
@@ -1155,75 +1146,6 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
-        } else if (token_equals(command, COMMAND_CONFIG_BORDER)) {
-            struct token value = get_token(&message);
-            if (!token_is_valid(value)) {
-                fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                window_manager_set_window_border_enabled(&g_window_manager, false);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                window_manager_set_window_border_enabled(&g_window_manager, true);
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_CONFIG_BORDER_HIDPI)) {
-            struct token value = get_token(&message);
-            if (!token_is_valid(value)) {
-                fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                window_manager_set_window_border_resolution(&g_window_manager, 1.0f);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                window_manager_set_window_border_resolution(&g_window_manager, 2.0f);
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_CONFIG_BORDER_BLUR)) {
-            struct token value = get_token(&message);
-            if (!token_is_valid(value)) {
-                fprintf(rsp, "%s\n", bool_str[g_window_manager.enable_window_border]);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                window_manager_set_window_border_blur(&g_window_manager, false);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                window_manager_set_window_border_blur(&g_window_manager, true);
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_CONFIG_BORDER_WIDTH)) {
-            struct token_value value = token_to_value(get_token(&message));
-            if (value.type == TOKEN_TYPE_INVALID) {
-                fprintf(rsp, "%d\n", g_window_manager.border_width);
-            } else if (value.type == TOKEN_TYPE_INT && value.int_value) {
-                window_manager_set_window_border_width(&g_window_manager, value.int_value + ((value.int_value&0x1) ? 1 : 0));
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_CONFIG_BORDER_RADIUS)) {
-            struct token_value value = token_to_value(get_token(&message));
-            if (value.type == TOKEN_TYPE_INVALID) {
-                fprintf(rsp, "%.4f\n", g_window_manager.border_radius);
-            } else if (value.type == TOKEN_TYPE_INT) {
-                window_manager_set_window_border_radius(&g_window_manager, value.int_value);
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_CONFIG_BORDER_ACTIVE_COLOR)) {
-            struct token_value value = token_to_value(get_token(&message));
-            if (value.type == TOKEN_TYPE_INVALID) {
-                fprintf(rsp, "0x%x\n", g_window_manager.active_border_color.p);
-            } else if (value.type == TOKEN_TYPE_U32 && value.u32_value) {
-                window_manager_set_active_window_border_color(&g_window_manager, value.u32_value);
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_CONFIG_BORDER_NORMAL_COLOR)) {
-            struct token_value value = token_to_value(get_token(&message));
-            if (value.type == TOKEN_TYPE_INVALID) {
-                fprintf(rsp, "0x%x\n", g_window_manager.normal_border_color.p);
-            } else if (value.type == TOKEN_TYPE_U32 && value.u32_value) {
-                window_manager_set_normal_window_border_color(&g_window_manager, value.u32_value);
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
-            }
         } else if (token_equals(command, COMMAND_CONFIG_SHADOW)) {
             struct token value = get_token(&message);
             if (!token_is_valid(value)) {
@@ -2068,8 +1990,6 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 window_manager_toggle_window_expose(&g_window_manager, acting_window);
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PIP)) {
                 window_manager_toggle_window_pip(&g_space_manager, &g_window_manager, acting_window);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_BORDER)) {
-                window_manager_toggle_window_border(&g_window_manager, acting_window);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
@@ -2414,17 +2334,6 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     rule.layer = LAYER_NORMAL;
                 } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
                     rule.layer = LAYER_ABOVE;
-                } else {
-                    daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
-                    did_parse = false;
-                }
-            } else if (string_equals(key, ARGUMENT_RULE_KEY_BORDER)) {
-                if (exclusion) unsupported_exclusion = key;
-
-                if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    rule.border = RULE_PROP_ON;
-                } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    rule.border = RULE_PROP_OFF;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;

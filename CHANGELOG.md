@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Window command `--toggle` option `topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 - Window query property `is-topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 - Signal `application_activated` and `application_deactivated` has been removed; use `application_front_switched` instead [#1887](https://github.com/koekeishiya/yabai/issues/1887)
+- Window borders (and all related options/properties) have been removed [#1889](https://github.com/koekeishiya/yabai/issues/1889)
 
 ## [5.0.9] - 2023-10-01
 ### Changed

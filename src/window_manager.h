@@ -84,7 +84,6 @@ struct window_manager
     enum ffm_mode ffm_mode;
     enum purify_mode purify_mode;
     enum window_origin_mode window_origin_mode;
-    bool enable_window_border;
     bool enable_window_opacity;
     float active_window_opacity;
     float normal_window_opacity;
@@ -92,13 +91,7 @@ struct window_manager
     float window_animation_duration;
     int window_animation_frame_rate;
     uint32_t *insert_feedback_windows;
-    float border_resolution;
-    bool border_blur;
-    int border_width;
-    float border_radius;
     struct rgba_color insert_feedback_color;
-    struct rgba_color active_border_color;
-    struct rgba_color normal_border_color;
 };
 
 void window_manager_query_window_rules(FILE *rsp);
@@ -170,13 +163,6 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
 bool window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode);
-void window_manager_set_window_border_enabled(struct window_manager *wm, bool enabled);
-void window_manager_set_window_border_resolution(struct window_manager *wm, float resolution);
-void window_manager_set_window_border_blur(struct window_manager *wm, bool enabled);
-void window_manager_set_window_border_width(struct window_manager *wm, int width);
-void window_manager_set_window_border_radius(struct window_manager *wm, int radius);
-void window_manager_set_active_window_border_color(struct window_manager *wm, uint32_t color);
-void window_manager_set_normal_window_border_color(struct window_manager *wm, uint32_t color);
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
 enum window_op_error window_manager_stack_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
@@ -199,7 +185,6 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window);
 void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window);
 void window_manager_toggle_window_pip(struct space_manager *sm, struct window_manager *wm, struct window *window);
-void window_manager_toggle_window_border(struct window_manager *wm, struct window *window);
 void window_manager_wait_for_native_fullscreen_transition(struct window *window);
 void window_manager_validate_and_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, uint64_t sid);
 void window_manager_correct_for_mission_control_changes(struct space_manager *sm, struct window_manager *wm);

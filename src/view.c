@@ -5,6 +5,8 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 
+#define INSERT_FEEDBACK_WIDTH 4
+#define INSERT_FEEDBACK_RADIUS 9
 void insert_feedback_show(struct window_node *node)
 {
     CFTypeRef frame_region;
@@ -21,7 +23,7 @@ void insert_feedback_show(struct window_node *node)
         SLSSetWindowLevel(g_connection, node->feedback_window.id, g_layer_normal_window_level);
         SLSSetWindowSubLevel(g_connection, node->feedback_window.id, g_layer_below_window_level);
         node->feedback_window.context = SLWindowContextCreate(g_connection, node->feedback_window.id, 0);
-        CGContextSetLineWidth(node->feedback_window.context, g_window_manager.border_width);
+        CGContextSetLineWidth(node->feedback_window.context, INSERT_FEEDBACK_WIDTH);
         CGContextSetRGBFillColor(node->feedback_window.context,
                                    g_window_manager.insert_feedback_color.r,
                                    g_window_manager.insert_feedback_color.g,
@@ -42,41 +44,41 @@ void insert_feedback_show(struct window_node *node)
 
     switch (node->insert_dir) {
     case DIR_NORTH: {
-        clip_x = -0.5f * g_window_manager.border_width;
-        clip_y = midy - 0.5f * g_window_manager.border_width;
-        clip_w = g_window_manager.border_width;
-        clip_h = g_window_manager.border_width;
+        clip_x = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_y = midy - 0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_w = INSERT_FEEDBACK_WIDTH;
+        clip_h = INSERT_FEEDBACK_WIDTH;
     } break;
     case DIR_EAST: {
-        clip_x = midx - 0.5f * g_window_manager.border_width;
-        clip_y = -0.5f * g_window_manager.border_width;
-        clip_w = g_window_manager.border_width;
-        clip_h = g_window_manager.border_width;
+        clip_x = midx - 0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_y = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_w = INSERT_FEEDBACK_WIDTH;
+        clip_h = INSERT_FEEDBACK_WIDTH;
     } break;
     case DIR_SOUTH: {
-        clip_x = -0.5f * g_window_manager.border_width;
-        clip_y = -0.5f * g_window_manager.border_width;
-        clip_w = g_window_manager.border_width;
-        clip_h = -midy + g_window_manager.border_width;
+        clip_x = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_y = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_w = INSERT_FEEDBACK_WIDTH;
+        clip_h = -midy + INSERT_FEEDBACK_WIDTH;
     } break;
     case DIR_WEST: {
-        clip_x = -0.5f * g_window_manager.border_width;
-        clip_y = -0.5f * g_window_manager.border_width;
-        clip_w = -midx + g_window_manager.border_width;
-        clip_h = g_window_manager.border_width;
+        clip_x = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_y = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_w = -midx + INSERT_FEEDBACK_WIDTH;
+        clip_h = INSERT_FEEDBACK_WIDTH;
     } break;
     case STACK: {
-        clip_x = -0.5f * g_window_manager.border_width;
-        clip_y = -0.5f * g_window_manager.border_width;
-        clip_w = g_window_manager.border_width;
-        clip_h = g_window_manager.border_width;
+        clip_x = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_y = -0.5f * INSERT_FEEDBACK_WIDTH;
+        clip_w = INSERT_FEEDBACK_WIDTH;
+        clip_h = INSERT_FEEDBACK_WIDTH;
     } break;
     }
 
-    CGRect rect = (CGRect) {{ 0.5f*g_window_manager.border_width, 0.5f*g_window_manager.border_width }, { frame.size.width - g_window_manager.border_width, frame.size.height - g_window_manager.border_width }};
-    CGRect fill = CGRectInset(rect, 0.5f*g_window_manager.border_width, 0.5f*g_window_manager.border_width);
+    CGRect rect = (CGRect) {{ 0.5f*INSERT_FEEDBACK_WIDTH, 0.5f*INSERT_FEEDBACK_WIDTH }, { frame.size.width - INSERT_FEEDBACK_WIDTH, frame.size.height - INSERT_FEEDBACK_WIDTH }};
+    CGRect fill = CGRectInset(rect, 0.5f*INSERT_FEEDBACK_WIDTH, 0.5f*INSERT_FEEDBACK_WIDTH);
     CGRect clip = { { rect.origin.x + clip_x, rect.origin.y + clip_y }, { rect.size.width + clip_w, rect.size.height + clip_h } };
-    CGPathRef path = CGPathCreateWithRoundedRect(rect, cgrect_clamp_x_radius(rect, g_window_manager.border_radius), cgrect_clamp_y_radius(rect, g_window_manager.border_radius), NULL);
+    CGPathRef path = CGPathCreateWithRoundedRect(rect, cgrect_clamp_x_radius(rect, INSERT_FEEDBACK_RADIUS), cgrect_clamp_y_radius(rect, INSERT_FEEDBACK_RADIUS), NULL);
 
     SLSDisableUpdate(g_connection);
     SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_order[0]);
@@ -339,12 +341,6 @@ void window_node_capture_windows(struct window_node *node, struct window_capture
             struct window *window = window_manager_find_window(&g_window_manager, node->window_list[i]);
             if (window) {
                 struct area area = node->zoom ? node->zoom->area : node->area;
-                if (window->border.id) {
-                    area.x += g_window_manager.border_width;
-                    area.y += g_window_manager.border_width;
-                    area.w -= g_window_manager.border_width * 2.0f;
-                    area.h -= g_window_manager.border_width * 2.0f;
-                }
                 ts_buf_push(*window_list, ((struct window_capture) { .window = window, .x = area.x, .y = area.y, .w = area.w, .h = area.h }));
             }
         }

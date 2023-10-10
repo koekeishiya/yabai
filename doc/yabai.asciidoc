@@ -181,28 +181,6 @@ Global Settings
     Opacity of an unfocused window. +
     System Integrity Protection must be partially disabled.
 
-*window_border* ['<BOOL_SEL>']::
-    Draw border for windows.
-
-*window_border_hidpi* ['<BOOL_SEL>']::
-    Draw border in high resolution mode; for High Dots Per Inch ("Retina") displays. +
-    HiDPI uses significantly more memory.
-
-*window_border_blur* ['<BOOL_SEL>']::
-    Blur border allowing it to act as a backdrop for transparent windows.
-
-*window_border_width* ['<even integer number>']::
-    Width of window border. If the given width is an odd number, it will be incremented by 1.
-
-*window_border_radius* ['<integer number>']::
-    Radius of window border.
-
-*active_window_border_color* ['0xAARRGGBB']::
-    Color of the border of the focused window.
-
-*normal_window_border_color* ['0xAARRGGBB']::
-    Color of the border of an unfocused window.
-
 *insert_feedback_color* ['0xAARRGGBB']::
     Color of the *window --insert* message selection.
 
@@ -367,7 +345,7 @@ COMMAND
 *--ratio* 'rel|abs:<dr>'::
     If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.
 
-*--toggle* 'float|sticky|pip|shadow|border|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
+*--toggle* 'float|sticky|pip|shadow|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window. +
     The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
 
@@ -495,7 +473,6 @@ WINDOW
     "can-resize": bool,
     "has-focus": bool,
     "has-shadow": bool,
-    "has-border": bool,
     "has-parent-zoom": bool,
     "has-fullscreen-zoom": bool,
     "is-native-fullscreen": bool,
@@ -572,9 +549,6 @@ ARGUMENT
 *opacity='<FLOAT_SEL>'*::
     Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
 
-*border='<BOOL_SEL>'*::
-    Window should draw border.
-
 *native-fullscreen='<BOOL_SEL>'*::
     Window should enter native macOS fullscreen mode.
 
@@ -601,7 +575,6 @@ DATAFORMAT
     "sticky": bool (optional),
     "mouse_follows_focus": bool (optional),
     "layer": string,
-    "border": bool (optional),
     "native-fullscreen": bool (optional),
     "grid": string
 }

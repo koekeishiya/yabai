@@ -131,7 +131,6 @@ void window_serialize(FILE *rsp, struct window *window)
     const char *layer = window_layer(level);
     bool is_minimized = window_is_minimized(window);
     bool visible = !is_minimized && !window->application->is_hidden && (window_check_flag(window, WINDOW_STICKY) || space_is_visible(sid));
-    bool border = window->border.id ? 1 : 0;
     float opacity = window_opacity(window);
     bool grabbed = window == g_mouse_state.window;
 
@@ -169,7 +168,6 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"can-resize\":%s,\n"
             "\t\"has-focus\":%s,\n"
             "\t\"has-shadow\":%s,\n"
-            "\t\"has-border\":%s,\n"
             "\t\"has-parent-zoom\":%s,\n"
             "\t\"has-fullscreen-zoom\":%s,\n"
             "\t\"is-native-fullscreen\":%s,\n"
@@ -199,7 +197,6 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(window_can_resize(window)),
             json_bool(window->id == g_window_manager.focused_window_id),
             json_bool(window_check_flag(window, WINDOW_SHADOW)),
-            json_bool(border),
             json_bool(zoom_parent),
             json_bool(zoom_fullscreen),
             json_bool(window_is_fullscreen(window)),

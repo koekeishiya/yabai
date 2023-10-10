@@ -223,16 +223,6 @@ static CONNECTION_CALLBACK(connection_handler)
 
     if (type == 1204) {
         event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0);
-    } else if (type == 806) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_MOVED, (void *) (intptr_t) (*(uint32_t *) data), 0);
-    } else if (type == 807) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_RESIZED, (void *) (intptr_t) (* (uint32_t *) data), 0);
-    } else if (type == 808) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_ORDER_CHANGED, (void *) (intptr_t) (* (uint32_t *) data), 0);
-    } else if (type == 815) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_IS_VISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0);
-    } else if (type == 816) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_IS_INVISIBLE, (void *) (intptr_t) (* (uint32_t *) data), 0);
     } else if (type == 1325) {
         event_loop_post(&g_event_loop, SLS_SPACE_ADD_WINDOW, (void *) (intptr_t) (* (uint64_t *) data), (int) (* (uint32_t *) (data + 8)));
     } else if (type == 1326) {
@@ -378,12 +368,6 @@ int main(int argc, char **argv)
     } else {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     }
-
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 806, NULL);
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 807, NULL);
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 808, NULL);
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 815, NULL);
-    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 816, NULL);
 
     if (workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1325, NULL);

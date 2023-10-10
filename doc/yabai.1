@@ -258,43 +258,6 @@ Opacity of an unfocused window.
 System Integrity Protection must be partially disabled.
 .RE
 .sp
-\fBwindow_border\fP [\fI<BOOL_SEL>\fP]
-.RS 4
-Draw border for windows.
-.RE
-.sp
-\fBwindow_border_hidpi\fP [\fI<BOOL_SEL>\fP]
-.RS 4
-Draw border in high resolution mode; for High Dots Per Inch ("Retina") displays.
-.br
-HiDPI uses significantly more memory.
-.RE
-.sp
-\fBwindow_border_blur\fP [\fI<BOOL_SEL>\fP]
-.RS 4
-Blur border allowing it to act as a backdrop for transparent windows.
-.RE
-.sp
-\fBwindow_border_width\fP [\fI<even integer number>\fP]
-.RS 4
-Width of window border. If the given width is an odd number, it will be incremented by 1.
-.RE
-.sp
-\fBwindow_border_radius\fP [\fI<integer number>\fP]
-.RS 4
-Radius of window border.
-.RE
-.sp
-\fBactive_window_border_color\fP [\fI0xAARRGGBB\fP]
-.RS 4
-Color of the border of the focused window.
-.RE
-.sp
-\fBnormal_window_border_color\fP [\fI0xAARRGGBB\fP]
-.RS 4
-Color of the border of an unfocused window.
-.RE
-.sp
 \fBinsert_feedback_color\fP [\fI0xAARRGGBB\fP]
 .RS 4
 Color of the \fBwindow \-\-insert\fP message selection.
@@ -529,7 +492,7 @@ Resize the selected window by moving the given handle \fIdx\fP pixels horizontal
 If type is \fIrel\fP the split ratio of the selected window is changed by \fIdr\fP, otherwise \fIdr\fP will become the new split ratio. A positive/negative delta will increase/decrease the size of the left\-child.
 .RE
 .sp
-\fB\-\-toggle\fP \fIfloat|sticky|pip|shadow|border|split|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
+\fB\-\-toggle\fP \fIfloat|sticky|pip|shadow|split|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
 .RS 4
 Toggle the given property of the selected window.
 .br
@@ -690,7 +653,6 @@ WINDOW
     "can\-resize": bool,
     "has\-focus": bool,
     "has\-shadow": bool,
-    "has\-border": bool,
     "has\-parent\-zoom": bool,
     "has\-fullscreen\-zoom": bool,
     "is\-native\-fullscreen": bool,
@@ -796,11 +758,6 @@ Window is ordered within the given stacking layer.
 Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
 .RE
 .sp
-\fBborder=\fI<BOOL_SEL>\fP\fP
-.RS 4
-Window should draw border.
-.RE
-.sp
 \fBnative\-fullscreen=\fI<BOOL_SEL>\fP\fP
 .RS 4
 Window should enter native macOS fullscreen mode.
@@ -830,7 +787,6 @@ Set window frame based on a self\-defined grid.
     "sticky": bool (optional),
     "mouse_follows_focus": bool (optional),
     "layer": string,
-    "border": bool (optional),
     "native\-fullscreen": bool (optional),
     "grid": string
 }

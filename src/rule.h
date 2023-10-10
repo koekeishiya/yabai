@@ -32,7 +32,6 @@ struct rule
     int sticky;
     int mff;
     int layer;
-    int border;
     int fullscreen;
     unsigned grid[6];
 };
