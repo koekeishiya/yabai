@@ -134,50 +134,35 @@ static inline float window_node_get_ratio(struct window_node *node)
     return in_range_ii(node->ratio, 0.1f, 0.9f) ? node->ratio : g_space_manager.split_ratio;
 }
 
-static inline float window_node_get_gap(struct view *view)
+static inline int window_node_get_gap(struct view *view)
 {
-    return view->enable_gap ? view->window_gap*0.5f : 0.0f;
+    return view->enable_gap ? view->window_gap : 0;
 }
 
-#define area_ax_truncate(a)  \
-    a->x = (int)(a->x + 0.5f); \
-    a->y = (int)(a->y + 0.5f); \
-    a->w = (int)(a->w + 0.5f); \
-    a->h = (int)(a->h + 0.5f);
-
-static void area_make_pair(enum window_node_split split, float gap, float ratio, struct area *parent_area, struct area *left_area, struct area *right_area)
+static void area_make_pair(enum window_node_split split, int gap, float ratio, struct area *parent_area, struct area *left_area, struct area *right_area)
 {
     if (split == SPLIT_Y) {
         *left_area = *parent_area;
-        left_area->w *= ratio;
-        left_area->w -= gap;
+        left_area->w = (int)((parent_area->w - gap) * ratio);
 
         *right_area = *parent_area;
-        right_area->x += (parent_area->w * ratio);
-        right_area->w *= (1 - ratio);
-        right_area->x += gap;
-        right_area->w -= gap;
+        right_area->x += (left_area->w + gap);
+        right_area->w = parent_area->w - left_area->w - gap;
     } else {
         *left_area = *parent_area;
-        left_area->h *= ratio;
-        left_area->h -= gap;
+        left_area->h = (int)((parent_area->h - gap) * ratio);
 
         *right_area = *parent_area;
-        right_area->y += (parent_area->h * ratio);
-        right_area->h *= (1 - ratio);
-        right_area->y += gap;
-        right_area->h -= gap;
+        right_area->y += (left_area->h + gap);
+        right_area->h = parent_area->h - left_area->h - gap;
     }
-
-    area_ax_truncate(left_area);
-    area_ax_truncate(right_area);
 }
 
 static void area_make_pair_for_node(struct view *view, struct window_node *node)
 {
     enum window_node_split split = window_node_get_split(node);
     float ratio = window_node_get_ratio(node);
-    float gap   = window_node_get_gap(view);
+    int gap     = window_node_get_gap(view);
 
     area_make_pair(split, gap, ratio, &node->area, &node->left->area, &node->right->area);
 
