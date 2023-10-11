@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fix issue causing window animations to flicker on macOS Ventura and Sonoma [#1879](https://github.com/koekeishiya/yabai/issues/1879)
 - All managed (read: tiled) windows are now automatically placed in the *below* layer. All unmanaged (read: floating) windows will use the default macOS *normal* layer and appear above the tiled layer, replicating the `window_topmost` functionality in a robust way [#1887](https://github.com/koekeishiya/yabai/issues/1887)
 - Automatic window opacity changes will now only apply to focus switches within the same space [#1887](https://github.com/koekeishiya/yabai/issues/1887)
-- `space --focus` command now takes an optional `<DISPLAY_SEL>` instead of an optional `<SPACE_SEL>`
+- `space --create` command now takes an optional `<DISPLAY_SEL>` instead of an optional `<SPACE_SEL>`
 
 ### Removed
 - Config option `window_topmost` has been removed [#1887](https://github.com/koekeishiya/yabai/issues/1887)
