@@ -584,6 +584,13 @@ void window_manager_set_window_frame(struct window *window, float x, float y, fl
 
         // NOTE(koekeishiya): Due to macOS constraints (visible screen-area), we might need to resize the window *after* moving it.
         window_manager_resize_window(window, width, height);
+
+        CGRect new_frame = window_ax_frame(window);
+        if (!CGRectEqualToRect((CGRect) {{ x, y }, { width, height }}, new_frame)) {
+            window_manager_resize_window(window, 1, 1);
+            window_manager_move_window(window, x, y);
+            window_manager_resize_window(window, width, height);
+        }
     });
 }
 
