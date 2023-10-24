@@ -1465,6 +1465,7 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
 
     view_stack_window_node(a_view, a_node, b);
     window_manager_add_managed_window(wm, b, a_view);
+    scripting_addition_set_layer(b->id, LAYER_BELOW);
     scripting_addition_order_window(b->id, 1, a_node->window_order[1]);
 
     struct area area = a_node->zoom ? a_node->zoom->area : a_node->area;

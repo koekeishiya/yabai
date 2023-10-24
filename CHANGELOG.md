@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Fix issue with focusing stacked windows due to layer changes [#1918](https://github.com/koekeishiya/yabai/issues/1918)
 
 ## [6.0.0] - 2023-10-10
 ### Added
