@@ -336,5 +336,6 @@ bool display_manager_begin(struct display_manager *dm)
     dm->mode = EXTERNAL_BAR_OFF;
     dm->top_padding = 0;
     dm->bottom_padding = 0;
+    dm->notch = true;
     return CGDisplayRegisterReconfigurationCallback(display_handler, NULL) == kCGErrorSuccess;
 }

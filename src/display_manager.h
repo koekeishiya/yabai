@@ -27,6 +27,7 @@ struct display_manager
     int top_padding;
     int bottom_padding;
     enum external_bar_mode mode;
+    bool notch;
 };
 
 bool display_manager_query_displays(FILE *rsp);

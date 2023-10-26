@@ -100,7 +100,7 @@ CGRect display_bounds_constrained(uint32_t did)
     }
 
     if (display_manager_menu_bar_hidden()) {
-        int notch_height = workspace_display_notch_height(did);
+        int notch_height = g_display_manager.notch ? workspace_display_notch_height(did) : 0;
         if (notch_height > effective_ext_top_padding) {
              frame.origin.y    += (notch_height - effective_ext_top_padding);
              frame.size.height -= (notch_height - effective_ext_top_padding);
