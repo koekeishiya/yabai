@@ -6,7 +6,6 @@ ifdef::env-github[]
 :toc:
 :toc-title:
 :toc-placement!:
-:numbered:
 endif::[]
 
 yabai(1)
