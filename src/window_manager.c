@@ -1595,11 +1595,9 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
 
     uint64_t a_sid = window_space(a);
     struct view *a_view = space_manager_find_view(sm, a_sid);
-    if (a_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     uint64_t b_sid = window_space(b);
     struct view *b_view = space_manager_find_view(sm, b_sid);
-    if (b_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_DST_VIEW;
 
     struct window_node *a_node = view_find_window_node(a_view, a->id);
     if (!a_node) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
@@ -1642,6 +1640,9 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
 
         return WINDOW_OP_ERROR_SUCCESS;
     }
+
+    if (a_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
+    if (b_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_DST_VIEW;
 
     if (window_node_contains_window(a_node, a_view->insertion_point)) {
         a_view->insertion_point = b->id;
