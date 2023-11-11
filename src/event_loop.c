@@ -187,6 +187,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
+        __atomic_store_n(&window->id_ptr, NULL, __ATOMIC_RELEASE);
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -450,7 +451,11 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
 {
     struct window *window = context;
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-    assert(!__atomic_load_n(&window->id_ptr, __ATOMIC_RELAXED));
+
+    if (!window || window->id == 0) {
+        debug("%s: window has already been destroyed, ignoring event..\n", __FUNCTION__);
+        return;
+    }
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {

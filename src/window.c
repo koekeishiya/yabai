@@ -523,6 +523,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
 
 void window_destroy(struct window *window)
 {
+    window->id = 0;
     CFRelease(window->ref);
     free(window);
 }
