@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Update scripting addition for macOS 14.1.1 (and probably 14.1) [#1936](https://github.com/koekeishiya/yabai/issues/1936)
 - Fix issue with focusing stacked windows due to layer changes [#1918](https://github.com/koekeishiya/yabai/issues/1918)
 - Allow window swap command to work on windows that are in the same space (with layout: stack), using the stack window selectors [#1952](https://github.com/koekeishiya/yabai/issues/1952)
 - Fix rare crash when processing window destroyed events [#1965](https://github.com/koekeishiya/yabai/issues/1965)

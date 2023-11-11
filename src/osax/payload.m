@@ -191,7 +191,7 @@ loop:
     for (int counter = 0; counter < pattern_length; ++counter) {
         if ((buffer_b[counter] == 0) && (((char *)addr)[counter] != buffer_a[counter])) {
             addr = (uint64_t)((char *)addr + 1);
-            if (addr - baddr < 0x286a0) {
+            if (addr - baddr < 0x1286a0) {
                 goto loop;
             } else {
                 return 0;
