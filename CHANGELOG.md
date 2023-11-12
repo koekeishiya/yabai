@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.1] - 2023-11-12
 ### Changed
 - Update scripting addition for macOS 14.1.1 (and probably 14.1) [#1936](https://github.com/koekeishiya/yabai/issues/1936)
 - Fix issue with focusing stacked windows due to layer changes [#1918](https://github.com/koekeishiya/yabai/issues/1918)
@@ -510,7 +512,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.1...HEAD
+[6.0.1]: https://github.com/koekeishiya/yabai/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/koekeishiya/yabai/compare/v5.0.9...v6.0.0
 [5.0.9]: https://github.com/koekeishiya/yabai/compare/v5.0.8...v5.0.9
 [5.0.8]: https://github.com/koekeishiya/yabai/compare/v5.0.7...v5.0.8
