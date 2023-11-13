@@ -925,7 +925,7 @@ static EVENT_HANDLER(MOUSE_UP)
         } else if (a_node) {
             mouse_drop_no_target(&g_space_manager, &g_window_manager, src_view, dst_view, g_mouse_state.window, a_node);
         }
-    } else {
+    } else if (info.changed_position || info.changed_size) {
         mouse_drop_try_adjust_bsp_grid(&g_window_manager, src_view, g_mouse_state.window, &info);
     }
 
