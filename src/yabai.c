@@ -148,14 +148,9 @@ static void exec_config_file(void)
         return;
     }
 
-    if (!ensure_executable_permission(g_config_file)) {
-        notify("configuration", "could not set the executable permission bit for '%s'", g_config_file);
-        return;
-    }
-
     int pid = fork();
     if (pid == 0) {
-        char *exec[] = { "/usr/bin/env", "sh", "-c", g_config_file, NULL};
+        char *exec[] = { "/usr/bin/env", "sh", g_config_file, NULL};
         exit(execvp(exec[0], exec));
     } else if (pid == -1) {
         notify("configuration", "failed to execute file '%s'", g_config_file);
