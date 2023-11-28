@@ -151,7 +151,7 @@ Global Settings
 *window_zoom_persist* ['<BOOL_SEL>']::
     Windows will keep their zoom-state through layout changes.
 
-*window_shadow* ['<BOOL_SEL>|float']::
+*window_shadow* ['<BOOL_SEL>']::
     Draw shadow for windows. +
     System Integrity Protection must be partially disabled.
 
