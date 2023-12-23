@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Update scripting addition for macOS Sonoma 14.2 and 14.2.1 [#2007](https://github.com/koekeishiya/yabai/issues/2007)
 - Spaces in stack layout should no longer incorrectly trigger a layout refresh on mouse down [#1493](https://github.com/koekeishiya/yabai/issues/1493)
 - Fix frame rounding issues causing small window displacement [#1680](https://github.com/koekeishiya/yabai/issues/1680)
 

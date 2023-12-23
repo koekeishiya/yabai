@@ -105,7 +105,7 @@ uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
 const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 14) {
         if (os_version.minorVersion > 0) {
-            return "?? ?? ?? 00 48 8B 38 48 8B 35 4A 2C 2F 00 89 DA 41 FF D5 48 89 C7 E8 95 53 22 00 49 89 C7 48 8B 35 BB 62 2F 00 48 89 C7 41 FF D5 48 89 C7 E8 7D 53 22 00 48 89 C3 48 8B 35 03 3E 2F 00 48 89 C7 48 8B 55 D0 41 FF D5 41 89 C5 48 89 DF FF 15 FD 34 29";
+            return "?? ?? ?? 00 48 8B 38 48 8B 35 ?? 2C 2F 00 89 DA 41 FF D5 48 89 C7 E8 ?? 53 22 00 49 89 C7 48 8B 35 ?? 62 2F 00 48 89 C7 41 FF D5 48 89 C7 E8 ?? 53 22 00 48 89 C3 48 8B 35 ?? ?? 2F 00 48 89 C7 48 8B 55 D0 41 FF D5 41 89 C5 48 89 DF FF 15 ?? 34 29";
         }
         return "?? ?? ?? 00 49 8B 3E 48 8B 35 A0 DD 2B 00 44 89 A5 78 FE FF FF 44 89 E2 49 89 DC FF D3 48 89 C7 E8 C5 66 1E 00 48 89 85 F8 FD FF FF 48 8B 3D FB 19 2C 00 E8 0A 66 1E 00 48 8B 1D 2F EA 2B 00 48 89 C7 48 89 DE 31 D2 41 FF D4 48 89 85 38 FE FF FF 49";
     } else if (os_version.majorVersion == 13) {
@@ -122,7 +122,7 @@ const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
 const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 14) {
         if (os_version.minorVersion > 0) {
-            return "?? ?? ?? 00 31 FF 5D E9 96 C7 1C 00 55 48 89 E5 FF 15 4C B8 23 00 48 8B 3D 8D 8F 2C 00 48 85 FF 75 0E 48 89 05 81 8F 2C 00 5D FF 25 2A B8 23 00 E8 B6 B0 1C 00 5D C3 55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 58 4C 89 4D A8 4D 89 C6 41 89 CD 49 89 D4 41 89 F7 48 8B 05 8B";
+            return "?? ?? ?? 00 31 FF 5D E9 ?? C7 1C 00";
         }
         return "?? ?? ?? 00 4C 89 FE E8 ?? ?? ?? 00 4D 85 FF 0F 84 ?? 06 00 00 48 8D 35 ?? ?? 42 00 31 FF E8 ?? ?? 31 00 48 8B 3D ?? ?? 3F 00 48 8B 35 ?? ?? 3F 00 FF 15 ?? ?? 39 00 48 89 C7 E8 ?? ?? 31 00 48 89 85 10 FF FF FF C7 85 1C FF FF FF 00 00 00 00 E8 ?? ?? 31 00 48 8D 75 B0 89 C7 E8";
     } else if (os_version.majorVersion == 13) {
