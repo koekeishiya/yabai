@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.2] - 2023-12-23
 ### Changed
 - Update scripting addition for macOS Sonoma 14.2 and 14.2.1 [#2007](https://github.com/koekeishiya/yabai/issues/2007)
 - Spaces in stack layout should no longer incorrectly trigger a layout refresh on mouse down [#1493](https://github.com/koekeishiya/yabai/issues/1493)
@@ -516,7 +518,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.2...HEAD
+[6.0.2]: https://github.com/koekeishiya/yabai/compare/v6.0.1...v6.0.2
 [6.0.1]: https://github.com/koekeishiya/yabai/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/koekeishiya/yabai/compare/v5.0.9...v6.0.0
 [5.0.9]: https://github.com/koekeishiya/yabai/compare/v5.0.8...v5.0.9
