@@ -304,7 +304,10 @@ static int service_stop(void)
         //
 
         const char *const args[] = { _PATH_LAUNCHCTL, "bootout", domain_target, yabai_plist_path, NULL };
-        return safe_exec((char *const*)args, false);
+        safe_exec((char *const*)args, false);
+
+        const char *const args2[] = { _PATH_LAUNCHCTL, "disable", service_target, NULL };
+        return safe_exec((char *const*)args2, false);
     }
 }
 
