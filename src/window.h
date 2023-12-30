@@ -39,6 +39,7 @@ struct window
     uint8_t rule_flags;
     uint8_t flags;
     float opacity;
+    int layer;
 };
 
 enum window_flag

@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.18
-.\"      Date: 2023-10-29
+.\"      Date: 2023-12-30
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2023-10-29" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2023-12-30" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -123,7 +123,7 @@ REGEX       := \c
 
 LABEL       := arbitrary string/text used as an identifier
 
-LAYER       := below | normal | above
+LAYER       := below | normal | above | auto
 
 BOOL_SEL    := on | off
 
@@ -501,7 +501,9 @@ The following properties require System Integrity Protection to be partially dis
 .sp
 \fB\-\-layer\fP \fI<LAYER>\fP
 .RS 4
-Set the stacking layer of the selected window.
+Set the stacking layer of the selected window.The window will no longer be eligible for automatic change in layer when managed/unmanaged.
+.br
+Specify the value \fIauto\fP to reset back to normal and make it become automatically managed.
 .br
 System Integrity Protection must be partially disabled.
 .RE
@@ -510,7 +512,7 @@ System Integrity Protection must be partially disabled.
 .RS 4
 Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change.
 .br
-Specify the value \fI0.0\fP to reset back to full opacity OR have it be automatically managed through focus changes.
+Specify the value \fI0.0\fP to reset back to full opacity and make it become automatically managed.
 .br
 System Integrity Protection must be partially disabled.
 .RE
@@ -750,7 +752,7 @@ When focusing the window, put the mouse at its center. Overrides the global \fBm
 .sp
 \fBlayer=\fI<LAYER>\fP\fP
 .RS 4
-Window is ordered within the given stacking layer.
+Window is ordered within the given stacking layer. The window will no longer be eligible for automatic change in layer when managed/unmanaged.
 .RE
 .sp
 \fBopacity=\fI<FLOAT_SEL>\fP\fP

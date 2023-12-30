@@ -124,7 +124,7 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
 {
     if (view->layout == VIEW_FLOAT) return;
 
-    scripting_addition_set_layer(window->id, LAYER_NORMAL);
+    window_manager_adjust_layer(window, LAYER_NORMAL);
     struct window_node *node = view_remove_window_node(view, window);
     if (!node) return;
 
@@ -386,7 +386,7 @@ struct view *space_manager_tile_window_on_space_with_insertion_point(struct spac
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout == VIEW_FLOAT) return view;
 
-    scripting_addition_set_layer(window->id, LAYER_BELOW);
+    window_manager_adjust_layer(window, LAYER_BELOW);
     struct window_node *node = view_add_window_node_with_insertion_point(view, window, insertion_point);
     assert(node);
 

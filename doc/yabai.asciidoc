@@ -85,7 +85,7 @@ REGEX       := https://www.gnu.org/software/findutils/manual/html_node/find_html
 
 LABEL       := arbitrary string/text used as an identifier
 
-LAYER       := below | normal | above
+LAYER       := below | normal | above | auto
 
 BOOL_SEL    := on | off
 
@@ -349,12 +349,13 @@ COMMAND
     The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
 
 *--layer* '<LAYER>'::
-    Set the stacking layer of the selected window. +
+    Set the stacking layer of the selected window.The window will no longer be eligible for automatic change in layer when managed/unmanaged. +
+    Specify the value 'auto' to reset back to normal and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
 
 *--opacity* '<floating point number>'::
     Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change. +
-    Specify the value '0.0' to reset back to full opacity OR have it be automatically managed through focus changes. +
+    Specify the value '0.0' to reset back to full opacity and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
 
 *--display* '<DISPLAY_SEL>'::
@@ -543,7 +544,7 @@ ARGUMENT
     When focusing the window, put the mouse at its center. Overrides the global *mouse_follows_focus* setting.
 
 *layer='<LAYER>'*::
-    Window is ordered within the given stacking layer.
+    Window is ordered within the given stacking layer. The window will no longer be eligible for automatic change in layer when managed/unmanaged.
 
 *opacity='<FLOAT_SEL>'*::
     Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.

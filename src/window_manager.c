@@ -655,9 +655,26 @@ next:
     }
 }
 
+void window_manager_adjust_layer(struct window *window, int layer)
+{
+    if (window->layer != LAYER_AUTO) return;
+
+    scripting_addition_set_layer(window->id, layer);
+}
+
 bool window_manager_set_window_layer(struct window *window, int layer)
 {
-    bool result = scripting_addition_set_layer(window->id, layer);
+    int parent_layer = layer;
+    int child_layer = layer;
+
+    if (layer == LAYER_AUTO) {
+        parent_layer = window_manager_find_managed_window(&g_window_manager, window) ? LAYER_BELOW : LAYER_NORMAL;
+        child_layer = LAYER_NORMAL;
+    }
+
+    window->layer = layer;
+    bool result = scripting_addition_set_layer(window->id, parent_layer);
+    if (!result) return false;
 
     CFArrayRef window_list = SLSCopyAssociatedWindows(g_connection, window->id);
     if (!window_list) return result;
@@ -683,7 +700,7 @@ bool window_manager_set_window_layer(struct window *window, int layer)
     for (int i = 0; i < check_count; ++i) {
         for (int j = 0; j < window_count; ++j) {
             if (parent_list[j] != check_list[i]) continue;
-            scripting_addition_set_layer(child_list[j], layer);
+            scripting_addition_set_layer(child_list[j], child_layer);
             check_list[check_count++] = child_list[j];
         }
     }
@@ -1465,7 +1482,7 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
 
     view_stack_window_node(a_view, a_node, b);
     window_manager_add_managed_window(wm, b, a_view);
-    scripting_addition_set_layer(b->id, LAYER_BELOW);
+    window_manager_adjust_layer(b, LAYER_BELOW);
     scripting_addition_order_window(b->id, 1, a_node->window_order[1]);
 
     struct area area = a_node->zoom ? a_node->zoom->area : a_node->area;
@@ -1994,7 +2011,7 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
             //
 
             view_remove_window_node(view, window);
-            scripting_addition_set_layer(window->id, LAYER_NORMAL);
+            window_manager_adjust_layer(window, LAYER_NORMAL);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
 
@@ -2023,7 +2040,7 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
             //
 
             view_remove_window_node(existing_view, window);
-            scripting_addition_set_layer(window->id, LAYER_NORMAL);
+            window_manager_adjust_layer(window, LAYER_NORMAL);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
             existing_view->is_dirty = true;
@@ -2042,7 +2059,7 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
             //
 
             view_add_window_node(view, window);
-            scripting_addition_set_layer(window->id, LAYER_BELOW);
+            window_manager_adjust_layer(window, LAYER_BELOW);
             window_manager_add_managed_window(wm, window, view);
             view->is_dirty = true;
         }

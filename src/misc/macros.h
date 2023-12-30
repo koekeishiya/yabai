@@ -39,6 +39,7 @@
 #define HANDLE_RIGHT  0x08
 #define HANDLE_ABS    0x10
 
+#define LAYER_AUTO    0
 #define LAYER_BELOW   kCGBackstopMenuLevelKey
 #define LAYER_NORMAL  kCGNormalWindowLevelKey
 #define LAYER_ABOVE   kCGFloatingWindowLevelKey

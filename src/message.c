@@ -149,6 +149,7 @@ extern bool g_verbose;
 #define ARGUMENT_WINDOW_LAYER_BELOW   "below"
 #define ARGUMENT_WINDOW_LAYER_NORMAL  "normal"
 #define ARGUMENT_WINDOW_LAYER_ABOVE   "above"
+#define ARGUMENT_WINDOW_LAYER_AUTO    "auto"
 #define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
 #define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
 #define ARGUMENT_WINDOW_TOGGLE_SHADOW "shadow"
@@ -1956,6 +1957,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 if (!window_manager_set_window_layer(acting_window, LAYER_ABOVE)) {
                     daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
                 }
+            } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_AUTO)) {
+                if (!window_manager_set_window_layer(acting_window, LAYER_AUTO)) {
+                    daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+                }
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
@@ -2334,6 +2339,8 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
                     rule.layer = LAYER_NORMAL;
                 } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
                     rule.layer = LAYER_ABOVE;
+                } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_AUTO)) {
+                    rule.layer = LAYER_AUTO;
                 } else {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
