@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Changing window layer using rules or `window --layer` commands will exempt that window from automatic layer changes [#1929](https://github.com/koekeishiya/yabai/issues/1929)
 - Running `yabai --stop-service` should properly prevent yabai from starting after a reboot [#1921](https://github.com/koekeishiya/yabai/issues/1921)
 - `mission_control_enter/exit` signals include an environment variable to identify which mode was activated/deactivated [#2026](https://github.com/koekeishiya/yabai/issues/2026)
-- Stricter window type filter to avoid issues with e.g Text Completion [#1919](https://github.com/koekeishiya/yabai/issues/1919)
+- Stricter window type filter to avoid issues with e.g Text Completion, Input Source changes and other non-windows-that-report-as-windows [#1919](https://github.com/koekeishiya/yabai/issues/1919) [#1910](https://github.com/koekeishiya/yabai/issues/1910) [#1997](https://github.com/koekeishiya/yabai/issues/1997)
 
 ## [6.0.2] - 2023-12-23
 ### Changed

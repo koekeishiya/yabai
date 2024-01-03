@@ -450,12 +450,12 @@ static EVENT_HANDLER(WINDOW_CREATED)
 static EVENT_HANDLER(WINDOW_DESTROYED)
 {
     struct window *window = context;
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
-
     if (!window || window->id == 0) {
         debug("%s: window has already been destroyed, ignoring event..\n", __FUNCTION__);
         return;
     }
+
+    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {

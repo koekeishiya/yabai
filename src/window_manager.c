@@ -100,19 +100,42 @@ void window_manager_query_windows_for_displays(FILE *rsp)
     window_manager_query_windows_for_spaces(rsp, space_list, space_count);
 }
 
-void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule)
+void window_manager_apply_manage_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule, char *window_title, char *window_role, char *window_subrole)
 {
     int regex_match_app = rule->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
     if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == regex_match_app) return;
 
     int regex_match_title = rule->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title_ts(window)) == regex_match_title) return;
+    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title) == regex_match_title) return;
 
     int regex_match_role = rule->role_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->role_regex_valid, &rule->role_regex, window_role_ts(window)) == regex_match_role) return;
+    if (regex_match(rule->role_regex_valid, &rule->role_regex, window_role) == regex_match_role) return;
 
     int regex_match_subrole = rule->subrole_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
-    if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole_ts(window)) == regex_match_subrole) return;
+    if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole) == regex_match_subrole) return;
+
+    if (rule->manage == RULE_PROP_ON) {
+        window_rule_set_flag(window, WINDOW_RULE_MANAGED);
+        window_manager_make_window_floating(sm, wm, window, false);
+    } else if (rule->manage == RULE_PROP_OFF) {
+        window_rule_clear_flag(window, WINDOW_RULE_MANAGED);
+        window_manager_make_window_floating(sm, wm, window, true);
+    }
+}
+
+void window_manager_apply_rule_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule *rule, char *window_title, char *window_role, char *window_subrole)
+{
+    int regex_match_app = rule->app_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->app_regex_valid,   &rule->app_regex,   window->application->name) == regex_match_app) return;
+
+    int regex_match_title = rule->title_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->title_regex_valid, &rule->title_regex, window_title) == regex_match_title) return;
+
+    int regex_match_role = rule->role_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->role_regex_valid, &rule->role_regex, window_role) == regex_match_role) return;
+
+    int regex_match_subrole = rule->subrole_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
+    if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole) == regex_match_subrole) return;
 
     if (rule->sid || rule->did) {
         if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
@@ -122,14 +145,6 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
                 space_manager_focus_space(sid);
             }
         }
-    }
-
-    if (rule->manage == RULE_PROP_ON) {
-        window_rule_set_flag(window, WINDOW_RULE_MANAGED);
-        window_manager_make_window_floating(sm, wm, window, false);
-    } else if (rule->manage == RULE_PROP_OFF) {
-        window_rule_clear_flag(window, WINDOW_RULE_MANAGED);
-        window_manager_make_window_floating(sm, wm, window, true);
     }
 
     if (rule->sticky == RULE_PROP_ON) {
@@ -165,10 +180,17 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 }
 
-void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_apply_manage_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole)
 {
     for (int i = 0; i < buf_len(wm->rules); ++i) {
-        window_manager_apply_rule_to_window(sm, wm, window, &wm->rules[i]);
+        window_manager_apply_manage_rule_to_window(sm, wm, window, &wm->rules[i], window_title, window_role, window_subrole);
+    }
+}
+
+void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole)
+{
+    for (int i = 0; i < buf_len(wm->rules); ++i) {
+        window_manager_apply_rule_to_window(sm, wm, window, &wm->rules[i], window_title, window_role, window_subrole);
     }
 }
 
@@ -1269,26 +1291,40 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         return NULL;
     }
 
-    if (!window_observe(window)) {
-        debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_remove_lost_focused_event(wm, window->id);
-        window_unobserve(window);
-        window_destroy(window);
-        return NULL;
-    }
-
     //
     // NOTE(koekeishiya): A lot of windows misreport their accessibility role, so we allow the user
     // to specify rules to make sure that we do in fact manage these windows properly.
     //
-    // These rules must be applied at this stage, and if no such rule matches this window,
-    // it will be ignored if it does not have a role of kAXWindowRole.
+    // This part of the rule must be applied at this stage (prior to other rule properties), and if
+    // no such rule matches this window, it will be ignored if it does not have a role of kAXWindowRole.
     //
 
-    window_manager_apply_rules_to_window(sm, wm, window);
+    char *window_title = window_title_ts(window);
+    char *window_role = window_role_ts(window);
+    char *window_subrole = window_subrole_ts(window);
+    window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
 
-    if (!window_is_really_window(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
-        debug("%s: not really a window %s %d\n", __FUNCTION__, window->application->name, window->id);
+    if (!window_is_standard(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+        debug("%s ignoring incorrectly marked window %s %d\n", __FUNCTION__, window->application->name, window->id);
+
+        //
+        // NOTE(koekeishiya): Print window information when debug_output is enabled.
+        // Useful for identifying and creating rules if this window should in fact be managed.
+        //
+
+        if (g_verbose) {
+            fprintf(stdout, "window info: \n");
+            window_serialize(stdout, window);
+            fprintf(stdout, "\n");
+        }
+
+        window_manager_remove_lost_focused_event(wm, window->id);
+        window_destroy(window);
+        return NULL;
+    }
+
+    if (!window_observe(window)) {
+        debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_remove_lost_focused_event(wm, window->id);
         window_unobserve(window);
         window_destroy(window);
@@ -1300,6 +1336,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         window_manager_remove_lost_focused_event(wm, window->id);
     }
 
+    window_manager_apply_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
     window_manager_add_window(wm, window);
     window_manager_purify_window(wm, window);
     window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
