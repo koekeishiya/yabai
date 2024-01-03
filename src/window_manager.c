@@ -1246,6 +1246,7 @@ struct window **window_manager_find_application_windows(struct window_manager *w
 struct window *window_manager_create_and_add_window(struct space_manager *sm, struct window_manager *wm, struct application *application, AXUIElementRef window_ref, uint32_t window_id)
 {
     struct window *window = window_create(application, window_ref, window_id);
+    debug("%s:%d %s - %s\n", __FUNCTION__, window->id, window->application->name, window_title_ts(window));
 
     if (window_is_unknown(window)) {
         debug("%s: ignoring AXUnknown window %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -1261,11 +1262,33 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         return NULL;
     }
 
-    window_manager_purify_window(wm, window);
-    window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+    if (window_is_group(window)) {
+        debug("%s: ignoring AXGroup window %s %d\n", __FUNCTION__, window->application->name, window->id);
+        window_manager_remove_lost_focused_event(wm, window->id);
+        window_destroy(window);
+        return NULL;
+    }
 
     if (!window_observe(window)) {
         debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
+        window_manager_remove_lost_focused_event(wm, window->id);
+        window_unobserve(window);
+        window_destroy(window);
+        return NULL;
+    }
+
+    //
+    // NOTE(koekeishiya): A lot of windows misreport their accessibility role, so we allow the user
+    // to specify rules to make sure that we do in fact manage these windows properly.
+    //
+    // These rules must be applied at this stage, and if no such rule matches this window,
+    // it will be ignored if it does not have a role of kAXWindowRole.
+    //
+
+    window_manager_apply_rules_to_window(sm, wm, window);
+
+    if (!window_is_really_window(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+        debug("%s: not really a window %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_remove_lost_focused_event(wm, window->id);
         window_unobserve(window);
         window_destroy(window);
@@ -1277,9 +1300,9 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         window_manager_remove_lost_focused_event(wm, window->id);
     }
 
-    debug("%s:%d %s - %s\n", __FUNCTION__, window->id, window->application->name, window_title_ts(window));
     window_manager_add_window(wm, window);
-    window_manager_apply_rules_to_window(sm, wm, window);
+    window_manager_purify_window(wm, window);
+    window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
 
     if ((!application->is_hidden) &&
         (!window_check_flag(window, WINDOW_MINIMIZE)) &&

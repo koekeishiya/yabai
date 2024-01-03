@@ -471,6 +471,28 @@ out:
     return standard_win;
 }
 
+bool window_is_really_window(struct window *window)
+{
+    CFStringRef role = window_role(window);
+    if (!role) return false;
+
+    bool result = CFEqual(role, kAXWindowRole);
+    CFRelease(role);
+
+    return result;
+}
+
+bool window_is_group(struct window *window)
+{
+    CFStringRef role = window_role(window);
+    if (!role) return false;
+
+    bool result = CFEqual(role, kAXGroupRole);
+    CFRelease(role);
+
+    return result;
+}
+
 bool window_is_popover(struct window *window)
 {
     CFStringRef role = window_role(window);
