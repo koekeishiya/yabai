@@ -1268,7 +1268,11 @@ struct window **window_manager_find_application_windows(struct window_manager *w
 struct window *window_manager_create_and_add_window(struct space_manager *sm, struct window_manager *wm, struct application *application, AXUIElementRef window_ref, uint32_t window_id)
 {
     struct window *window = window_create(application, window_ref, window_id);
-    debug("%s:%d %s - %s\n", __FUNCTION__, window->id, window->application->name, window_title_ts(window));
+
+    char *window_title = window_title_ts(window);
+    char *window_role = window_role_ts(window);
+    char *window_subrole = window_subrole_ts(window);
+    debug("%s:%d %s - %s (%s:%s)\n", __FUNCTION__, window->id, window->application->name, window_title, window_role, window_subrole);
 
     if (window_is_unknown(window)) {
         debug("%s: ignoring AXUnknown window %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -1299,9 +1303,6 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     // no such rule matches this window, it will be ignored if it does not have a role of kAXWindowRole.
     //
 
-    char *window_title = window_title_ts(window);
-    char *window_role = window_role_ts(window);
-    char *window_subrole = window_subrole_ts(window);
     window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
 
     if (!window_is_standard(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
