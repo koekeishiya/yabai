@@ -4,7 +4,7 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 extern struct mouse_state g_mouse_state;
-extern int g_mission_control_active;
+extern enum mission_control_mode g_mission_control_mode;
 extern int g_connection;
 extern void *g_workspace_context;
 extern int g_layer_below_window_level;
@@ -749,7 +749,7 @@ static EVENT_HANDLER(SPACE_CHANGED)
         }
     }
 
-    if (!g_mission_control_active && space_is_user(g_space_manager.current_space_id)) {
+    if (!mission_control_is_active() && space_is_user(g_space_manager.current_space_id)) {
         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 
         if (view_is_invalid(view)) view_update(view);
@@ -790,7 +790,7 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
         }
     }
 
-    if (!g_mission_control_active && space_is_user(g_space_manager.current_space_id)) {
+    if (!mission_control_is_active() && space_is_user(g_space_manager.current_space_id)) {
         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 
         if (view_is_invalid(view)) view_update(view);
@@ -835,7 +835,7 @@ static EVENT_HANDLER(DISPLAY_RESIZED)
 
 static EVENT_HANDLER(MOUSE_DOWN)
 {
-    if (g_mission_control_active)                        goto out;
+    if (mission_control_is_active())                     goto out;
     if (g_mouse_state.current_action != MOUSE_MODE_NONE) goto out;
 
     CGPoint point = CGEventGetLocation(context);
@@ -864,8 +864,8 @@ out:
 
 static EVENT_HANDLER(MOUSE_UP)
 {
-    if (g_mission_control_active) goto out;
-    if (!g_mouse_state.window)    goto out;
+    if (mission_control_is_active()) goto out;
+    if (!g_mouse_state.window)       goto out;
 
     if (!__sync_bool_compare_and_swap(&g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
@@ -939,8 +939,8 @@ out:
 
 static EVENT_HANDLER(MOUSE_DRAGGED)
 {
-    if (g_mission_control_active) goto out;
-    if (!g_mouse_state.window)    goto out;
+    if (mission_control_is_active()) goto out;
+    if (!g_mouse_state.window)       goto out;
 
     if (!__sync_bool_compare_and_swap(&g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
@@ -996,7 +996,7 @@ out:
 static EVENT_HANDLER(MOUSE_MOVED)
 {
     if (g_window_manager.ffm_mode == FFM_DISABLED) goto out;
-    if (g_mission_control_active)                  goto out;
+    if (mission_control_is_active())               goto out;
     if (g_mouse_state.ffm_window_id)               goto out;
 
     uint64_t event_time = CGEventGetTimestamp(context);
@@ -1102,46 +1102,46 @@ out:
 static EVENT_HANDLER(MISSION_CONTROL_SHOW_ALL_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
-    g_mission_control_active = 2;
+    g_mission_control_mode = MISSION_CONTROL_MODE_SHOW_ALL_WINDOWS;
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
     }
 
-    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
+    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, (void*)(uintptr_t)g_mission_control_mode);
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
-    g_mission_control_active = 3;
+    g_mission_control_mode = MISSION_CONTROL_MODE_SHOW_FRONT_WINDOWS;
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
     }
 
-    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
+    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, (void*)(uintptr_t)g_mission_control_mode);
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_SHOW_DESKTOP)
 {
     debug("%s:\n", __FUNCTION__);
-    g_mission_control_active = 4;
+    g_mission_control_mode = MISSION_CONTROL_MODE_SHOW_DESKTOP;
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 0, 0);
     }
 
-    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
+    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, (void*)(uintptr_t)g_mission_control_mode);
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_ENTER)
 {
     debug("%s:\n", __FUNCTION__);
-    g_mission_control_active = 1;
+    g_mission_control_mode = MISSION_CONTROL_MODE_SHOW;
 
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
@@ -1152,12 +1152,12 @@ static EVENT_HANDLER(MISSION_CONTROL_ENTER)
         event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0);
     });
 
-    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, NULL);
+    event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, (void*)(uintptr_t)g_mission_control_mode);
 }
 
 static EVENT_HANDLER(MISSION_CONTROL_CHECK_FOR_EXIT)
 {
-    if (!g_mission_control_active) return;
+    if (!mission_control_is_active()) return;
 
     CFArrayRef window_list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, 0);
     int window_count = CFArrayGetCount(window_list);
@@ -1208,14 +1208,13 @@ static EVENT_HANDLER(MISSION_CONTROL_EXIT)
     }
 
     if (!workspace_is_macos_ventura() && !workspace_is_macos_sonoma()) {
-        if (g_mission_control_active == 1 || g_mission_control_active == 2) {
+        if (g_mission_control_mode == MISSION_CONTROL_MODE_SHOW || g_mission_control_mode == MISSION_CONTROL_MODE_SHOW_ALL_WINDOWS) {
             window_manager_correct_for_mission_control_changes(&g_space_manager, &g_window_manager);
         }
     }
 
-    event_signal_push(SIGNAL_MISSION_CONTROL_EXIT, NULL);
-
-    g_mission_control_active = 0;
+    event_signal_push(SIGNAL_MISSION_CONTROL_EXIT, (void*)(uintptr_t)g_mission_control_mode);
+    g_mission_control_mode = MISSION_CONTROL_MODE_INACTIVE;
 }
 
 static EVENT_HANDLER(DOCK_DID_RESTART)

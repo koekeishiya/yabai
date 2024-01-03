@@ -706,10 +706,12 @@ EVENT
     Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
 
 *mission_control_enter*::
-    Triggered when mission-control activates.
+    Triggered when mission-control activates. +
+    Passes one argument: $YABAI_MISSION_CONTROL_MODE
 
 *mission_control_exit*::
-    Triggered when mission-control deactivates.
+    Triggered when mission-control deactivates. +
+    Passes one argument: $YABAI_MISSION_CONTROL_MODE
 
 *dock_did_restart*::
     Triggered when Dock.app restarts.

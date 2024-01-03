@@ -39,7 +39,7 @@ pid_t g_pid;
 
 struct signal *g_signal_event[SIGNAL_TYPE_COUNT];
 struct memory_pool g_signal_storage;
-int g_mission_control_active;
+enum mission_control_mode g_mission_control_mode;
 char g_sa_socket_file[MAXLEN];
 char g_socket_file[MAXLEN];
 char g_config_file[4096];
