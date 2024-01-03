@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [6.0.3] - 2023-01-03
+## [6.0.3] - 2024-01-03
 ### Changed
 - Changing window layer using rules or `window --layer` commands will exempt that window from automatic layer changes [#1929](https://github.com/koekeishiya/yabai/issues/1929)
 - Running `yabai --stop-service` should properly prevent yabai from starting after a reboot [#1921](https://github.com/koekeishiya/yabai/issues/1921)
