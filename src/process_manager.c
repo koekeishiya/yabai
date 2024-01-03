@@ -56,7 +56,8 @@ static const char *process_name_blacklist[] =
     "sketchybar",
     "Übersicht",
     "Slack Helper (Plugin)",
-    "Google Chrome Helper (Plugin)"
+    "Google Chrome Helper (Plugin)",
+    "osascript"
 };
 
 #pragma clang diagnostic push
