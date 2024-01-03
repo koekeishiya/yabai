@@ -54,7 +54,9 @@ static const char *process_name_blacklist[] =
     "skhd",
     "yabai",
     "sketchybar",
-    "Übersicht"
+    "Übersicht",
+    "Slack Helper (Plugin)",
+    "Google Chrome Helper (Plugin)"
 };
 
 #pragma clang diagnostic push
