@@ -94,7 +94,6 @@ struct process *process_create(ProcessSerialNumber psn)
     process->name = process_name;
     __atomic_store_n(&process->terminated, false, __ATOMIC_RELEASE);
     __atomic_store_n(&process->ns_application, workspace_application_create_running_ns_application(process), __ATOMIC_RELEASE);
-    printf("%s: observing process name: %s\n", __FUNCTION__, process->name);
     return process;
 }
 
