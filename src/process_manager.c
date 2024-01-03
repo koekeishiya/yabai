@@ -27,7 +27,34 @@ static const char *process_name_blacklist[] =
     "chronod",
     "universalaccessd",
     "softwareupdated",
-    "Notification Centre"
+    "Notification Centre",
+    "CoreServicesUIAgent",
+    "SystemUIServer",
+    "Control Centre",
+    "BackgroundTaskManagementAgent",
+    "Wallpaper",
+    "talagent",
+    "CoreLocationAgent",
+    "Single Sign-On",
+    "com.apple.PressAndHold",
+    "Wi-Fi",
+    "Keychain Circle Notification",
+    "TextInputMenuAgent",
+    "TextInputSwitcher",
+    "AirPlayUIAgent",
+    "AppSSODaemon",
+    "SoftwareUpdateNotificationManager",
+    "coreautha",
+    "OSDUIHelper",
+    "PowerChime",
+    "nbagent",
+    "studentd",
+    "Family",
+    "Spotlight",
+    "skhd",
+    "yabai",
+    "sketchybar",
+    "Übersicht"
 };
 
 #pragma clang diagnostic push
@@ -67,6 +94,7 @@ struct process *process_create(ProcessSerialNumber psn)
     process->name = process_name;
     __atomic_store_n(&process->terminated, false, __ATOMIC_RELEASE);
     __atomic_store_n(&process->ns_application, workspace_application_create_running_ns_application(process), __ATOMIC_RELEASE);
+    printf("%s: observing process name: %s\n", __FUNCTION__, process->name);
     return process;
 }
 
