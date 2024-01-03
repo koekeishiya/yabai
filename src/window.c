@@ -452,6 +452,27 @@ out:
     return standard_win;
 }
 
+bool window_is_really_a_window(struct window *window)
+{
+    bool win = false;
+    CFStringRef role  = NULL;
+    CFStringRef srole = NULL;
+
+    if (!(role  = window_role(window)))    goto out;
+    if (!(srole = window_subrole(window))) goto role;
+
+    win = CFEqual(role, kAXWindowRole) &&
+          (CFEqual(srole, kAXStandardWindowSubrole) ||
+           CFEqual(srole, kAXFloatingWindowSubrole) ||
+           CFEqual(srole, kAXDialogSubrole));
+
+    CFRelease(srole);
+role:
+    CFRelease(role);
+out:
+    return win;
+}
+
 bool window_is_dialog(struct window *window)
 {
     bool standard_win = false;

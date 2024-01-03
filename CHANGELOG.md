@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Changes to window detection logic [#2036](https://github.com/koekeishiya/yabai/issues/2036)
 
 ## [6.0.3] - 2024-01-03
 ### Changed

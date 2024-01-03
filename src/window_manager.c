@@ -137,6 +137,11 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     int regex_match_subrole = rule->subrole_regex_exclude ? REGEX_MATCH_YES : REGEX_MATCH_NO;
     if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole) == regex_match_subrole) return;
 
+    if (!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+        if (!rule->role_regex_valid    && !string_equals(window_role   , "AXWindow"))         return;
+        if (!rule->subrole_regex_valid && !string_equals(window_subrole, "AXStandardWindow")) return;
+    }
+
     if (rule->sid || rule->did) {
         if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
             uint64_t sid = rule->did ? display_space_id(rule->did) : rule->sid;
@@ -1305,7 +1310,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
     window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
 
-    if (!window_is_standard(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+    if (!window_is_really_a_window(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
         debug("%s ignoring incorrectly marked window %s %d\n", __FUNCTION__, window->application->name, window->id);
 
         //
