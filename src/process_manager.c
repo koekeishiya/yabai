@@ -26,7 +26,8 @@ static const char *process_name_blacklist[] =
     "siriactionsd",
     "chronod",
     "universalaccessd",
-    "softwareupdated"
+    "softwareupdated",
+    "Notification Centre"
 };
 
 #pragma clang diagnostic push
