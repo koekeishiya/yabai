@@ -115,6 +115,9 @@ void window_manager_apply_manage_rule_to_window(struct space_manager *sm, struct
     if (regex_match(rule->subrole_regex_valid, &rule->subrole_regex, window_subrole) == regex_match_subrole) return;
 
     if (rule->manage == RULE_PROP_ON) {
+        if (!rule->role_regex_valid    && !string_equals(window_role   , "AXWindow"))         return;
+        if (!rule->subrole_regex_valid && !string_equals(window_subrole, "AXStandardWindow")) return;
+
         window_rule_set_flag(window, WINDOW_RULE_MANAGED);
         window_manager_make_window_floating(sm, wm, window, false);
     } else if (rule->manage == RULE_PROP_OFF) {
@@ -260,6 +263,7 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
 
 bool window_manager_should_manage_window(struct window *window)
 {
+    if (!window_is_root_window(window))             return false;
     if (window_check_flag(window, WINDOW_FLOAT))    return false;
     if (window_is_sticky(window))                   return false;
     if (window_check_flag(window, WINDOW_MINIMIZE)) return false;
@@ -1277,24 +1281,11 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     char *window_title = window_title_ts(window);
     char *window_role = window_role_ts(window);
     char *window_subrole = window_subrole_ts(window);
-    debug("%s:%d %s - %s (%s:%s)\n", __FUNCTION__, window->id, window->application->name, window_title, window_role, window_subrole);
+    bool root_window = window_is_root_window(window);
+    debug("%s:%d %s - %s (%s:%s:%d)\n", __FUNCTION__, window->id, window->application->name, window_title, window_role, window_subrole, root_window);
 
     if (window_is_unknown(window)) {
         debug("%s: ignoring AXUnknown window %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_remove_lost_focused_event(wm, window->id);
-        window_destroy(window);
-        return NULL;
-    }
-
-    if (window_is_popover(window)) {
-        debug("%s: ignoring AXPopover window %s %d\n", __FUNCTION__, window->application->name, window->id);
-        window_manager_remove_lost_focused_event(wm, window->id);
-        window_destroy(window);
-        return NULL;
-    }
-
-    if (window_is_group(window)) {
-        debug("%s: ignoring AXGroup window %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_manager_remove_lost_focused_event(wm, window->id);
         window_destroy(window);
         return NULL;
@@ -1308,25 +1299,27 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     // no such rule matches this window, it will be ignored if it does not have a role of kAXWindowRole.
     //
 
-    window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
+    if (root_window) {
+        window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
 
-    if (!window_is_really_a_window(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
-        debug("%s ignoring incorrectly marked window %s %d\n", __FUNCTION__, window->application->name, window->id);
+        if (!window_is_really_a_window(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+            debug("%s ignoring incorrectly marked window %s %d\n", __FUNCTION__, window->application->name, window->id);
 
-        //
-        // NOTE(koekeishiya): Print window information when debug_output is enabled.
-        // Useful for identifying and creating rules if this window should in fact be managed.
-        //
+            //
+            // NOTE(koekeishiya): Print window information when debug_output is enabled.
+            // Useful for identifying and creating rules if this window should in fact be managed.
+            //
 
-        if (g_verbose) {
-            fprintf(stdout, "window info: \n");
-            window_serialize(stdout, window);
-            fprintf(stdout, "\n");
+            if (g_verbose) {
+                fprintf(stdout, "window info: \n");
+                window_serialize(stdout, window);
+                fprintf(stdout, "\n");
+            }
+
+            window_manager_remove_lost_focused_event(wm, window->id);
+            window_destroy(window);
+            return NULL;
         }
-
-        window_manager_remove_lost_focused_event(wm, window->id);
-        window_destroy(window);
-        return NULL;
     }
 
     if (!window_observe(window)) {
@@ -1342,24 +1335,29 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         window_manager_remove_lost_focused_event(wm, window->id);
     }
 
-    window_manager_apply_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
     window_manager_add_window(wm, window);
-    window_manager_purify_window(wm, window);
-    window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
 
-    if ((!application->is_hidden) &&
-        (!window_check_flag(window, WINDOW_MINIMIZE)) &&
-        (!window_check_flag(window, WINDOW_FULLSCREEN)) &&
-        (!window_rule_check_flag(window, WINDOW_RULE_MANAGED))) {
-        if (window_rule_check_flag(window, WINDOW_RULE_FULLSCREEN)) {
-            window_rule_clear_flag(window, WINDOW_RULE_FULLSCREEN);
-        } else if ((!window_level_is_standard(window)) ||
-                   (!window_is_standard(window)) ||
-                   (!window_can_move(window)) ||
-                   (window_is_sticky(window)) ||
-                   (!window_can_resize(window) && window_is_undersized(window))) {
-            window_set_flag(window, WINDOW_FLOAT);
+    if (root_window) {
+        window_manager_apply_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
+        window_manager_purify_window(wm, window);
+        window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+
+        if ((!application->is_hidden) &&
+            (!window_check_flag(window, WINDOW_MINIMIZE)) &&
+            (!window_check_flag(window, WINDOW_FULLSCREEN)) &&
+            (!window_rule_check_flag(window, WINDOW_RULE_MANAGED))) {
+            if (window_rule_check_flag(window, WINDOW_RULE_FULLSCREEN)) {
+                window_rule_clear_flag(window, WINDOW_RULE_FULLSCREEN);
+            } else if ((!window_level_is_standard(window)) ||
+                       (!window_is_standard(window)) ||
+                       (!window_can_move(window)) ||
+                       (window_is_sticky(window)) ||
+                       (!window_can_resize(window) && window_is_undersized(window))) {
+                window_set_flag(window, WINDOW_FLOAT);
+            }
         }
+    } else {
+        window_set_flag(window, WINDOW_FLOAT);
     }
 
     return window;

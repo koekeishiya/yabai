@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Attempt to separate root-windows from child/sub-windows to improve window detection and management logic [#2044](https://github.com/koekeishiya/yabai/issues/2044)
 
 ## [6.0.4] - 2024-01-03
 ### Changed

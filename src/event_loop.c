@@ -1010,6 +1010,7 @@ static EVENT_HANDLER(MOUSE_MOVED)
     struct window *window = wid ? window_manager_find_window(&g_window_manager, wid) : window_manager_find_window_at_point(&g_window_manager, point);
     if (window) {
         if (window->id == g_window_manager.focused_window_id) goto out;
+        if (!window_is_root_window(window)) goto out;
 
         if (!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
             if (!window_level_is_standard(window))                            goto out;

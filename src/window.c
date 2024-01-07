@@ -156,6 +156,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
             "\t\"role\":\"%s\",\n"
             "\t\"subrole\":\"%s\",\n"
+            "\t\"root-window\":\"%s\",\n"
             "\t\"display\":%d,\n"
             "\t\"space\":%d,\n"
             "\t\"level\":%d,\n"
@@ -185,6 +186,7 @@ void window_serialize(FILE *rsp, struct window *window)
             window->frame.origin.x, window->frame.origin.y, window->frame.size.width, window->frame.size.height,
             role,
             subrole,
+            json_bool(window_is_root_window(window)),
             display,
             space,
             level,
@@ -452,6 +454,19 @@ out:
     return standard_win;
 }
 
+bool window_is_root_window(struct window *window)
+{
+    bool result = false;
+    CFTypeRef value = NULL;
+
+    if (AXUIElementCopyAttributeValue(window->ref, kAXParentAttribute, &value) == kAXErrorSuccess) {
+        result = !(value && !CFEqual(value, window->application->ref));
+    }
+
+    if (value) CFRelease(value);
+    return result;
+}
+
 bool window_is_really_a_window(struct window *window)
 {
     bool win = false;
@@ -490,28 +505,6 @@ role:
     CFRelease(role);
 out:
     return standard_win;
-}
-
-bool window_is_group(struct window *window)
-{
-    CFStringRef role = window_role(window);
-    if (!role) return false;
-
-    bool result = CFEqual(role, kAXGroupRole);
-    CFRelease(role);
-
-    return result;
-}
-
-bool window_is_popover(struct window *window)
-{
-    CFStringRef role = window_role(window);
-    if (!role) return false;
-
-    bool result = CFEqual(role, kAXPopoverRole);
-    CFRelease(role);
-
-    return result;
 }
 
 bool window_is_unknown(struct window *window)
