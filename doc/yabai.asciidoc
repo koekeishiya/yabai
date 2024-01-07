@@ -461,7 +461,7 @@ WINDOW
     },
     "role": string,
     "subrole": string,
-    "root-window": string,
+    "root-window": bool,
     "display": number,
     "space": number,
     "level": number,
