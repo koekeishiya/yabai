@@ -1070,8 +1070,8 @@ static EVENT_HANDLER(MOUSE_MOVED)
                     struct window *sub_window = window_manager_find_window(&g_window_manager, wid);
                     if (!sub_window) continue;
 
-                    if (!window_check_flag(sub_window, WINDOW_FLOAT))               continue;
-                    if (window_level(sub_window->id) != g_layer_below_window_level) continue;
+                    if (!window_check_flag(sub_window, WINDOW_FLOAT))             continue;
+                    if (window_level(window->id) != window_level(sub_window->id)) continue;
 
                     if (CGRectContainsRect(window->frame, sub_window->frame)) {
                         occludes_window = true;
