@@ -156,7 +156,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
             "\t\"role\":\"%s\",\n"
             "\t\"subrole\":\"%s\",\n"
-            "\t\"root-window\":\"%s\",\n"
+            "\t\"root-window\":%s,\n"
             "\t\"display\":%d,\n"
             "\t\"space\":%d,\n"
             "\t\"level\":%d,\n"
