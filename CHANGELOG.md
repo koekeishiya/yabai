@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [6.0.6] - 2024-01-08
+### Changed
+- Cleanup handling of root-windows, child-windows, and window belonging to roles that are considered eligible for management [#2044](https://github.com/koekeishiya/yabai/issues/2044) [#2036](https://github.com/koekeishiya/yabai/issues/2036)
+
 ## [6.0.5] - 2024-01-07
 ### Changed
 - Attempt to separate root-windows from child/sub-windows to improve window detection and management logic [#2044](https://github.com/koekeishiya/yabai/issues/2044)
@@ -534,7 +538,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.5...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.6...HEAD
+[6.0.6]: https://github.com/koekeishiya/yabai/compare/v6.0.5...v6.0.6
 [6.0.5]: https://github.com/koekeishiya/yabai/compare/v6.0.4...v6.0.5
 [6.0.4]: https://github.com/koekeishiya/yabai/compare/v6.0.3...v6.0.4
 [6.0.3]: https://github.com/koekeishiya/yabai/compare/v6.0.2...v6.0.3
