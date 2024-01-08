@@ -84,7 +84,7 @@ void rule_add(struct rule *rule)
                     char *window_subrole = window_subrole_ts(window);
                     window_manager_apply_manage_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
 
-                    if (window_is_real(window) || window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+                    if (window_manager_is_window_eligible(window)) {
                         window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
                     }
                 }
