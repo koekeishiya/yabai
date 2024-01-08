@@ -144,7 +144,9 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
         }
 
 next:
-        event_signal_push(SIGNAL_WINDOW_CREATED, window);
+        if (window_manager_is_window_eligible(window)) {
+            event_signal_push(SIGNAL_WINDOW_CREATED, window);
+        }
     }
 
     //
@@ -211,7 +213,10 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
         if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
-        event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
+        if (window_manager_is_window_eligible(window)) {
+            event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
+        }
+
         window_manager_remove_window(&g_window_manager, window->id);
         window_unobserve(window);
         window_destroy(window);
@@ -444,7 +449,9 @@ static EVENT_HANDLER(WINDOW_CREATED)
         window_manager_add_managed_window(&g_window_manager, window, view);
     }
 
-    event_signal_push(SIGNAL_WINDOW_CREATED, window);
+    if (window_manager_is_window_eligible(window)) {
+        event_signal_push(SIGNAL_WINDOW_CREATED, window);
+    }
 }
 
 static EVENT_HANDLER(WINDOW_DESTROYED)
@@ -465,7 +472,10 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
 
     if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
-    event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
+    if (window_manager_is_window_eligible(window)) {
+        event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
+    }
+
     window_manager_remove_window(&g_window_manager, window->id);
     window_destroy(window);
 }
@@ -1010,12 +1020,7 @@ static EVENT_HANDLER(MOUSE_MOVED)
     struct window *window = wid ? window_manager_find_window(&g_window_manager, wid) : window_manager_find_window_at_point(&g_window_manager, point);
     if (window) {
         if (window->id == g_window_manager.focused_window_id) goto out;
-        if (!window_is_root_window(window)) goto out;
-
-        if (!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
-            if (!window_level_is_standard(window))                            goto out;
-            if ((!window_is_standard(window)) && (!window_is_dialog(window))) goto out;
-        }
+        if (!window_manager_is_window_eligible(window))       goto out;
 
         if (g_window_manager.ffm_mode == FFM_AUTOFOCUS) {
 

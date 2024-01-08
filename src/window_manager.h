@@ -103,6 +103,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
 void window_manager_apply_manage_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole);
 void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole);
 void window_manager_center_mouse(struct window_manager *wm, struct window *window);
+bool window_manager_is_window_eligible(struct window *window);
 bool window_manager_should_manage_window(struct window *window);
 void window_manager_tile_window(struct window_manager *wm, struct window *window);
 void window_manager_move_window(struct window *window, float x, float y);

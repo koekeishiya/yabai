@@ -186,7 +186,7 @@ void window_serialize(FILE *rsp, struct window *window)
             window->frame.origin.x, window->frame.origin.y, window->frame.size.width, window->frame.size.height,
             role,
             subrole,
-            json_bool(window_is_root_window(window)),
+            json_bool(window->is_root),
             display,
             space,
             level,
@@ -426,35 +426,7 @@ char *window_subrole_ts(struct window *window)
     return result;
 }
 
-bool window_level_is_standard(struct window *window)
-{
-    int level = window_level(window->id);
-    if (level == g_layer_below_window_level)  return true;
-    if (level == g_layer_normal_window_level) return true;
-    if (level == g_layer_above_window_level)  return true;
-    return false;
-}
-
-bool window_is_standard(struct window *window)
-{
-    bool standard_win = false;
-    CFStringRef role  = NULL;
-    CFStringRef srole = NULL;
-
-    if (!(role  = window_role(window)))    goto out;
-    if (!(srole = window_subrole(window))) goto role;
-
-    standard_win = CFEqual(role, kAXWindowRole) &&
-                   CFEqual(srole, kAXStandardWindowSubrole);
-
-    CFRelease(srole);
-role:
-    CFRelease(role);
-out:
-    return standard_win;
-}
-
-bool window_is_root_window(struct window *window)
+static bool window_is_root(struct window *window)
 {
     bool result = false;
     CFTypeRef value = NULL;
@@ -467,7 +439,7 @@ bool window_is_root_window(struct window *window)
     return result;
 }
 
-bool window_is_really_a_window(struct window *window)
+bool window_is_real(struct window *window)
 {
     bool win = false;
     CFStringRef role  = NULL;
@@ -488,7 +460,7 @@ out:
     return win;
 }
 
-bool window_is_dialog(struct window *window)
+bool window_is_standard(struct window *window)
 {
     bool standard_win = false;
     CFStringRef role  = NULL;
@@ -498,7 +470,7 @@ bool window_is_dialog(struct window *window)
     if (!(srole = window_subrole(window))) goto role;
 
     standard_win = CFEqual(role, kAXWindowRole) &&
-                   CFEqual(srole, kAXDialogSubrole);
+                   CFEqual(srole, kAXStandardWindowSubrole);
 
     CFRelease(srole);
 role:
@@ -528,6 +500,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->id = window_id;
     window->id_ptr = &window->id;
     window->frame = window_ax_frame(window);
+    window->is_root = window_is_root(window);
     window_set_flag(window, WINDOW_SHADOW);
 
     if (window_is_minimized(window)) {

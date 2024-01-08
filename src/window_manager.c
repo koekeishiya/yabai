@@ -12,6 +12,12 @@ static TABLE_COMPARE_FUNC(compare_wm)
     return *(uint32_t *) key_a == *(uint32_t *) key_b;
 }
 
+bool window_manager_is_window_eligible(struct window *window)
+{
+    bool result = window->is_root && (window_is_real(window) || window_rule_check_flag(window, WINDOW_RULE_MANAGED));
+    return result;
+}
+
 void window_manager_query_window_rules(FILE *rsp)
 {
     fprintf(rsp, "[");
@@ -223,7 +229,9 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
         while (bucket) {
             if (bucket->value) {
                 struct window *window = bucket->value;
-                window_manager_set_opacity(wm, window, enabled ? window->opacity : 1.0f);
+                if (window_manager_is_window_eligible(window)) {
+                    window_manager_set_opacity(wm, window, enabled ? window->opacity : 1.0f);
+                }
             }
 
             bucket = bucket->next;
@@ -263,17 +271,13 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
 
 bool window_manager_should_manage_window(struct window *window)
 {
-    if (!window_is_root_window(window))             return false;
+    if (!window->is_root)                           return false;
     if (window_check_flag(window, WINDOW_FLOAT))    return false;
     if (window_is_sticky(window))                   return false;
     if (window_check_flag(window, WINDOW_MINIMIZE)) return false;
     if (window->application->is_hidden)             return false;
 
-    if (window_rule_check_flag(window, WINDOW_RULE_MANAGED)) return true;
-
-    return ((window_level_is_standard(window)) &&
-            (window_is_standard(window)) &&
-            (window_can_move(window)));
+    return (window_is_standard(window) && window_can_move(window)) || window_rule_check_flag(window, WINDOW_RULE_MANAGED);
 }
 
 struct view *window_manager_find_managed_window(struct window_manager *wm, struct window *window)
@@ -626,7 +630,9 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
         while (bucket) {
             if (bucket->value) {
                 struct window *window = bucket->value;
-                window_manager_purify_window(wm, window);
+                if (window_manager_is_window_eligible(window)) {
+                    window_manager_purify_window(wm, window);
+                }
             }
 
             bucket = bucket->next;
@@ -649,14 +655,9 @@ bool window_manager_set_opacity(struct window_manager *wm, struct window *window
 
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity)
 {
-    if (!wm->enable_window_opacity) return;
-    if (window->opacity != 0.0f)    return;
-
-    if ((!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) &&
-        (!window_is_standard(window)) &&
-        (!window_is_dialog(window))) {
-        return;
-    }
+    if (!wm->enable_window_opacity)                 return;
+    if (!window_manager_is_window_eligible(window)) return;
+    if (window->opacity != 0.0f)                    return;
 
     window_manager_set_opacity(wm, window, opacity);
 }
@@ -677,7 +678,9 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
             if (bucket->value) {
                 struct window *window = bucket->value;
                 if (window->id == wm->focused_window_id) goto next;
-                window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+                if (window_manager_is_window_eligible(window)) {
+                    window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+                }
             }
 
 next:
@@ -1281,8 +1284,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     char *window_title = window_title_ts(window);
     char *window_role = window_role_ts(window);
     char *window_subrole = window_subrole_ts(window);
-    bool root_window = window_is_root_window(window);
-    debug("%s:%d %s - %s (%s:%s:%d)\n", __FUNCTION__, window->id, window->application->name, window_title, window_role, window_subrole, root_window);
+    debug("%s:%d %s - %s (%s:%s:%d)\n", __FUNCTION__, window->id, window->application->name, window_title, window_role, window_subrole, window->is_root);
 
     if (window_is_unknown(window)) {
         debug("%s: ignoring AXUnknown window %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -1292,35 +1294,8 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
     }
 
     //
-    // NOTE(koekeishiya): A lot of windows misreport their accessibility role, so we allow the user
-    // to specify rules to make sure that we do in fact manage these windows properly.
+    // NOTE(koekeishiya): Attempt to track **all** windows.
     //
-    // This part of the rule must be applied at this stage (prior to other rule properties), and if
-    // no such rule matches this window, it will be ignored if it does not have a role of kAXWindowRole.
-    //
-
-    if (root_window) {
-        window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
-
-        if (!window_is_really_a_window(window) && !window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
-            debug("%s ignoring incorrectly marked window %s %d\n", __FUNCTION__, window->application->name, window->id);
-
-            //
-            // NOTE(koekeishiya): Print window information when debug_output is enabled.
-            // Useful for identifying and creating rules if this window should in fact be managed.
-            //
-
-            if (g_verbose) {
-                fprintf(stdout, "window info: \n");
-                window_serialize(stdout, window);
-                fprintf(stdout, "\n");
-            }
-
-            window_manager_remove_lost_focused_event(wm, window->id);
-            window_destroy(window);
-            return NULL;
-        }
-    }
 
     if (!window_observe(window)) {
         debug("%s: could not observe %s %d\n", __FUNCTION__, window->application->name, window->id);
@@ -1337,29 +1312,72 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
     window_manager_add_window(wm, window);
 
-    if (root_window) {
-        window_manager_apply_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
-        window_manager_purify_window(wm, window);
-        window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+    //
+    // NOTE(koekeishiya): However, only **root windows** are eligible for management.
+    //
 
-        if ((!application->is_hidden) &&
-            (!window_check_flag(window, WINDOW_MINIMIZE)) &&
-            (!window_check_flag(window, WINDOW_FULLSCREEN)) &&
-            (!window_rule_check_flag(window, WINDOW_RULE_MANAGED))) {
+    if (window->is_root) {
+
+        //
+        // NOTE(koekeishiya): A lot of windows misreport their accessibility role, so we allow the user
+        // to specify rules to make sure that we do in fact manage these windows properly.
+        //
+        // This part of the rule must be applied at this stage (prior to other rule properties), and if
+        // no such rule matches this window, it will be ignored if it does not have a role of kAXWindowRole.
+        //
+
+        window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
+
+        if (window_manager_is_window_eligible(window)) {
+            window_manager_apply_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
+            window_manager_purify_window(wm, window);
+            window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+
+            if (application->is_hidden)                              goto out;
+            if (window_check_flag(window, WINDOW_MINIMIZE))          goto out;
+            if (window_check_flag(window, WINDOW_FULLSCREEN))        goto out;
+            if (window_rule_check_flag(window, WINDOW_RULE_MANAGED)) goto out;
+
             if (window_rule_check_flag(window, WINDOW_RULE_FULLSCREEN)) {
                 window_rule_clear_flag(window, WINDOW_RULE_FULLSCREEN);
-            } else if ((!window_level_is_standard(window)) ||
-                       (!window_is_standard(window)) ||
-                       (!window_can_move(window)) ||
-                       (window_is_sticky(window)) ||
-                       (!window_can_resize(window) && window_is_undersized(window))) {
+                goto out;
+            }
+
+            if ((window_is_sticky(window) || !window_is_standard(window) || !window_can_move(window)) ||
+                (window_is_undersized(window) && !window_can_resize(window))) {
                 window_set_flag(window, WINDOW_FLOAT);
+            }
+        } else {
+            debug("%s ignoring incorrectly marked window %s %d\n", __FUNCTION__, window->application->name, window->id);
+            window_set_flag(window, WINDOW_FLOAT);
+
+            //
+            // NOTE(koekeishiya): Print window information when debug_output is enabled.
+            // Useful for identifying and creating rules if this window should in fact be managed.
+            //
+
+            if (g_verbose) {
+                fprintf(stdout, "window info: \n");
+                window_serialize(stdout, window);
+                fprintf(stdout, "\n");
             }
         }
     } else {
+        debug("%s ignoring child window %s %d\n", __FUNCTION__, window->application->name, window->id);
         window_set_flag(window, WINDOW_FLOAT);
+
+        //
+        // NOTE(koekeishiya): Print window information when debug_output is enabled.
+        //
+
+        if (g_verbose) {
+            fprintf(stdout, "window info: \n");
+            window_serialize(stdout, window);
+            fprintf(stdout, "\n");
+        }
     }
 
+out:
     return window;
 }
 
@@ -1537,6 +1555,7 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
         window_manager_remove_managed_window(wm, b->id);
         window_manager_purify_window(wm, b);
     } else if (window_check_flag(b, WINDOW_FLOAT)) {
+        if (!window_manager_is_window_eligible(b)) return WINDOW_OP_ERROR_INVALID_SRC_NODE;
         window_clear_flag(b, WINDOW_FLOAT);
         if (window_check_flag(b, WINDOW_STICKY)) window_manager_make_window_sticky(sm, wm, b, false);
     }
@@ -1872,6 +1891,8 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
 
 void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float)
 {
+    if (!window_manager_is_window_eligible(window)) return;
+
     if (should_float) {
         struct view *view = window_manager_find_managed_window(wm, window);
         if (view) {
@@ -1894,6 +1915,8 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
 
 void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky)
 {
+    if (!window_manager_is_window_eligible(window)) return;
+
     if (should_sticky) {
         if (scripting_addition_set_sticky(window->id, true)) {
             struct view *view = window_manager_find_managed_window(wm, window);

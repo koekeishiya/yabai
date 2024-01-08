@@ -78,11 +78,16 @@ void rule_add(struct rule *rule)
         while (bucket) {
             if (bucket->value) {
                 struct window *window = bucket->value;
-                char *window_title = window_title_ts(window);
-                char *window_role = window_role_ts(window);
-                char *window_subrole = window_subrole_ts(window);
-                window_manager_apply_manage_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
-                window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
+                if (window->is_root) {
+                    char *window_title = window_title_ts(window);
+                    char *window_role = window_role_ts(window);
+                    char *window_subrole = window_subrole_ts(window);
+                    window_manager_apply_manage_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
+
+                    if (window_is_real(window) || window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+                        window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
+                    }
+                }
             }
 
             bucket = bucket->next;
