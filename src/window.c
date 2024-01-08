@@ -287,8 +287,8 @@ bool window_can_minimize(struct window *window)
 
 bool window_is_undersized(struct window *window)
 {
-    if (window->frame.size.width  < 200.0f) return true;
-    if (window->frame.size.height < 200.0f) return true;
+    if (window->frame.size.width  <= 500.0f) return true;
+    if (window->frame.size.height <= 500.0f) return true;
     return false;
 }
 
