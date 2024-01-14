@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Fix regression causing window_destroyed signal to not trigger [#2048](https://github.com/koekeishiya/yabai/issues/2048)
 
 ## [6.0.6] - 2024-01-08
 ### Changed

@@ -1329,6 +1329,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
         window_manager_apply_manage_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
 
         if (window_manager_is_window_eligible(window)) {
+            window->is_eligible = true;
             window_manager_apply_rules_to_window(sm, wm, window, window_title, window_role, window_subrole);
             window_manager_purify_window(wm, window);
             window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);

@@ -85,6 +85,7 @@ void rule_add(struct rule *rule)
                     window_manager_apply_manage_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
 
                     if (window_manager_is_window_eligible(window)) {
+                        window->is_eligible = true;
                         window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
                     }
                 }

@@ -213,7 +213,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
         if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
-        if (window_manager_is_window_eligible(window)) {
+        if (window->is_eligible) {
             event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
         }
 
@@ -472,7 +472,7 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
 
     if (g_mouse_state.window == window) g_mouse_state.window = NULL;
 
-    if (window_manager_is_window_eligible(window)) {
+    if (window->is_eligible) {
         event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
     }
 

@@ -36,6 +36,7 @@ struct window
     uint32_t *volatile id_ptr;
     CGRect frame;
     bool is_root;
+    bool is_eligible;
     uint8_t notification;
     uint8_t rule_flags;
     uint8_t flags;
