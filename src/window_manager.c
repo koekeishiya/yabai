@@ -557,8 +557,11 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
         struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         if (existing_animation) {
             pthread_t thread;
-            pthread_create(&thread, NULL, &window_manager_set_window_frame_thread_proc, &context->animation_list[i]);
-            pthread_detach(thread);
+            if (pthread_create(&thread, NULL, &window_manager_set_window_frame_thread_proc, &context->animation_list[i]) == 0) {
+                pthread_detach(thread);
+            } else {
+                window_manager_set_window_frame_thread_proc(&context->animation_list[i]);
+            }
 
             table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
 
@@ -589,8 +592,11 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
         } else {
             pthread_t thread;
-            pthread_create(&thread, NULL, &window_manager_build_window_proxy_thread_proc, &context->animation_list[i]);
-            threads[thread_count++] = thread;
+            if (pthread_create(&thread, NULL, &window_manager_build_window_proxy_thread_proc, &context->animation_list[i]) == 0) {
+                threads[thread_count++] = thread;
+            } else {
+                window_manager_build_window_proxy_thread_proc(&context->animation_list[i]);
+            }
         }
 
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
