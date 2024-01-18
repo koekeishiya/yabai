@@ -463,10 +463,31 @@ static void window_manager_destroy_window_proxy(int animation_connection, struct
     }
 }
 
-void *window_manager_animate_window_list_thread_proc(void *data)
+static void *window_manager_set_window_frame_thread_proc(void *data)
+{
+    struct window_animation *animation = data;
+    window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
+    return NULL;
+}
+
+static void *window_manager_build_window_proxy_thread_proc(void *data)
+{
+    struct window_animation *animation = data;
+
+    animation->proxy.level = window_level(animation->wid);
+    SLSGetWindowBounds(g_connection, animation->wid, &animation->proxy.frame);
+    animation->proxy.image = SLSHWCaptureWindowList(g_connection, &animation->wid, 1, (1 << 11) | (1 << 8));
+    window_manager_create_window_proxy(g_connection, &animation->proxy);
+    scripting_addition_swap_window_proxy_in(animation->wid, animation->proxy.id);
+    window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
+
+    return NULL;
+}
+
+static void *window_manager_animate_window_list_thread_proc(void *data)
 {
     struct window_animation_context *context = data;
-    int animation_count = buf_len(context->animation_list);
+    int animation_count = context->animation_count;
 
     ANIMATE(context->animation_connection, context->animation_frame_rate, context->animation_duration, ease_out_cubic, {
         for (int i = 0; i < animation_count; ++i) {
@@ -496,7 +517,7 @@ void *window_manager_animate_window_list_thread_proc(void *data)
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
     SLSReleaseConnection(context->animation_connection);
-    buf_free(context->animation_list);
+    free(context->animation_list);
 
     free(context);
     return NULL;
@@ -509,27 +530,36 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     SLSNewConnection(0, &context->animation_connection);
     context->animation_duration = g_window_manager.window_animation_duration;
     context->animation_frame_rate = g_window_manager.window_animation_frame_rate;
-    context->animation_list = NULL;
+    context->animation_list = malloc(window_count * sizeof(struct window_animation));
+    context->animation_count = window_count;
 
     for (int i = 0; i < window_count; ++i) {
         struct window_capture *capture = &window_list[i];
 
-        buf_push(context->animation_list, ((struct window_animation) {
-            .wid   = capture->window->id,
-            .x     = capture->x,
-            .y     = capture->y,
-            .w     = capture->w,
-            .h     = capture->h,
-            .proxy = {0},
-            .skip  = false
-        }));
+        context->animation_list[i] = (struct window_animation) {
+            .window = capture->window,
+            .wid    = capture->window->id,
+            .x      = capture->x,
+            .y      = capture->y,
+            .w      = capture->w,
+            .h      = capture->h,
+            .proxy  = {0},
+            .skip   = false
+        };
     }
+
+    int thread_count = 0;
+    pthread_t *threads = ts_alloc_list(pthread_t, window_count);
 
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
     SLSDisableUpdate(context->animation_connection);
-    for (int i = 0; i < buf_len(context->animation_list); ++i) {
+    for (int i = 0; i < window_count; ++i) {
         struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         if (existing_animation) {
+            pthread_t thread;
+            pthread_create(&thread, NULL, &window_manager_set_window_frame_thread_proc, &context->animation_list[i]);
+            pthread_detach(thread);
+
             table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
 
             existing_animation->skip = true;
@@ -558,11 +588,9 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
             window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
         } else {
-            context->animation_list[i].proxy.level = window_level(context->animation_list[i].wid);
-            SLSGetWindowBounds(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.frame);
-            context->animation_list[i].proxy.image = SLSHWCaptureWindowList(context->animation_connection, &context->animation_list[i].wid, 1, (1 << 11) | (1 << 8));
-            window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
-            scripting_addition_swap_window_proxy_in(context->animation_list[i].wid, context->animation_list[i].proxy.id);
+            pthread_t thread;
+            pthread_create(&thread, NULL, &window_manager_build_window_proxy_thread_proc, &context->animation_list[i]);
+            threads[thread_count++] = thread;
         }
 
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
@@ -570,8 +598,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     SLSReenableUpdate(context->animation_connection);
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
-    for (int i = 0; i < window_count; ++i) {
-        window_manager_set_window_frame(window_list[i].window, window_list[i].x, window_list[i].y, window_list[i].w, window_list[i].h);
+    for (int i = 0; i < thread_count; ++i) {
+        pthread_join(threads[i], NULL);
     }
 
     pthread_t thread;

@@ -29,6 +29,7 @@ struct window_proxy
 
 struct window_animation
 {
+    struct window *window;
     uint32_t wid;
     float x, y, w, h;
     struct window_proxy proxy;
@@ -41,6 +42,7 @@ struct window_animation_context
     float animation_duration;
     int animation_frame_rate;
     struct window_animation *animation_list;
+    int animation_count;
 };
 
 struct equalize_node
