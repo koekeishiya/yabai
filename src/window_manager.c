@@ -595,12 +595,13 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
     }
-    SLSReenableUpdate(context->animation_connection);
-    pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
     for (int i = 0; i < thread_count; ++i) {
         pthread_join(threads[i], NULL);
     }
+
+    SLSReenableUpdate(context->animation_connection);
+    pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
     pthread_t thread;
     pthread_create(&thread, NULL, &window_manager_animate_window_list_thread_proc, context);
