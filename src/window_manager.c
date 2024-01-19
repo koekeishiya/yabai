@@ -435,7 +435,7 @@ static void window_manager_create_window_proxy(int animation_connection, struct 
     SLSSetWindowResolution(animation_connection, proxy->id, 2.0f);
     SLSSetWindowAlpha(animation_connection, proxy->id, 1.0f);
     SLSSetWindowLevel(animation_connection, proxy->id, proxy->level);
-    SLSSetWindowSubLevel(animation_connection, proxy->id, proxy->sublevel);
+    SLSSetWindowSubLevel(animation_connection, proxy->id, proxy->sub_level);
     proxy->context = SLWindowContextCreate(animation_connection, proxy->id, 0);
 
     CGRect frame = { {0, 0}, proxy->frame.size };
@@ -475,7 +475,7 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     struct window_animation *animation = data;
 
     animation->proxy.level = window_level(animation->wid);
-    animation->proxy.sublevel = window_sublevel(animation->wid);
+    animation->proxy.sub_level = window_sub_level(animation->wid);
     SLSGetWindowBounds(g_connection, animation->wid, &animation->proxy.frame);
     animation->proxy.image = SLSHWCaptureWindowList(g_connection, &animation->wid, 1, (1 << 11) | (1 << 8));
     window_manager_create_window_proxy(g_connection, &animation->proxy);
@@ -572,7 +572,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             context->animation_list[i].proxy.frame.size.width  = (int)(existing_animation->proxy.tw);
             context->animation_list[i].proxy.frame.size.height = (int)(existing_animation->proxy.th);
             context->animation_list[i].proxy.level             = existing_animation->proxy.level;
-            context->animation_list[i].proxy.sublevel          = existing_animation->proxy.sublevel;
+            context->animation_list[i].proxy.sub_level         = existing_animation->proxy.sub_level;
             context->animation_list[i].proxy.image             = CFRetain(existing_animation->proxy.image);
             __asm__ __volatile__ ("" ::: "memory");
 

@@ -128,9 +128,9 @@ void window_serialize(FILE *rsp, struct window *window)
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
     int level = window_level(window->id);
-    int sublevel = window_sublevel(window->id);
+    int sub_level = window_sub_level(window->id);
     const char *layer = window_layer(level);
-    const char *sublayer = window_layer(sublevel);
+    const char *sub_layer = window_layer(sub_level);
     bool is_minimized = window_is_minimized(window);
     bool visible = !is_minimized && !window->application->is_hidden && (window_check_flag(window, WINDOW_STICKY) || space_is_visible(sid));
     float opacity = window_opacity(window);
@@ -162,9 +162,9 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"display\":%d,\n"
             "\t\"space\":%d,\n"
             "\t\"level\":%d,\n"
-            "\t\"sublevel\":%d,\n"
+            "\t\"sub-level\":%d,\n"
             "\t\"layer\":\"%s\",\n"
-            "\t\"sublayer\":\"%s\",\n"
+            "\t\"sub-layer\":\"%s\",\n"
             "\t\"opacity\":%.4f,\n"
             "\t\"split-type\":\"%s\",\n"
             "\t\"split-child\":\"%s\",\n"
@@ -194,9 +194,9 @@ void window_serialize(FILE *rsp, struct window *window)
             display,
             space,
             level,
-            sublevel,
+            sub_level,
             layer,
-            sublayer,
+            sub_layer,
             opacity,
             split,
             child,
@@ -375,7 +375,7 @@ int window_level(uint32_t wid)
     return level;
 }
 
-int window_sublevel(uint32_t wid)
+int window_sub_level(uint32_t wid)
 {
     return SLSGetWindowSubLevel(g_connection, wid);
 }
