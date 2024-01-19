@@ -74,6 +74,7 @@ extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, in
 extern CGError SLSTransactionOrderWindowGroup(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
 extern CGError SLSTransactionSetWindowAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
 extern CGError SLSTransactionSetWindowSystemAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
+extern CGError SLSSetWindowSubLevel(int cid, uint32_t wid, int sub_level);
 
 struct window_fade_context
 {
@@ -733,7 +734,7 @@ static void do_window_layer(char *message)
     int layer;
     unpack(message, layer);
 
-    CGSSetWindowLevelForGroup(CGSMainConnectionID(), wid, CGWindowLevelForKey(layer));
+    SLSSetWindowSubLevel(CGSMainConnectionID(), wid, CGWindowLevelForKey(layer));
 }
 
 static void do_window_sticky(char *message)

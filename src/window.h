@@ -79,6 +79,7 @@ CGPoint window_ax_origin(struct window *window);
 CGRect window_ax_frame(struct window *window);
 float window_opacity(struct window *window);
 int window_level(uint32_t wid);
+int window_sublevel(uint32_t wid);
 uint64_t window_tags(struct window *window);
 CFStringRef window_role(struct window *window);
 char *window_role_ts(struct window *window);

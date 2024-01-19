@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.18
-.\"      Date: 2024-01-07
+.\"      Date: 2024-01-19
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-01-07" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-01-19" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -501,7 +501,7 @@ The following properties require System Integrity Protection to be partially dis
 .sp
 \fB\-\-layer\fP \fI<LAYER>\fP
 .RS 4
-Set the stacking layer of the selected window.The window will no longer be eligible for automatic change in layer when managed/unmanaged.
+Set the stacking layer of the selected window. The window will no longer be eligible for automatic change in layer when managed/unmanaged.
 .br
 Specify the value \fIauto\fP to reset back to normal and make it become automatically managed.
 .br
@@ -647,7 +647,9 @@ WINDOW
     "display": number,
     "space": number,
     "level": number,
+    "sublevel": number,
     "layer": string,
+    "sublayer": string,
     "opacity": number,
     "split\-type": string,
     "split\-child": string,

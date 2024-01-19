@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Fix regression causing window_destroyed signal to not trigger [#2048](https://github.com/koekeishiya/yabai/issues/2048)
 - Improved snappiness of window animations (time from trigger to start of animation) [#2060](https://github.com/koekeishiya/yabai/issues/2060)
+- Change window sublayer instead of layer, resulting in a more pleasant user experience [#2062](https://github.com/koekeishiya/yabai/issues/2062)
 
 ## [6.0.6] - 2024-01-08
 ### Changed

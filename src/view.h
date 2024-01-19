@@ -24,6 +24,7 @@ struct window_proxy
     float tx, ty, tw, th;
     CGRect frame;
     int level;
+    int sublevel;
     CFArrayRef image;
 };
 
