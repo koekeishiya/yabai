@@ -2,6 +2,8 @@
 #include <Cocoa/Cocoa.h>
 #include <objc/objc-runtime.h>
 #include <mach/mach_time.h>
+#include <mach-o/dyld.h>
+#include <mach-o/swap.h>
 
 #include <stdio.h>
 #include <stddef.h>
@@ -39,6 +41,7 @@
 #include "misc/notify.h"
 #include "misc/log.h"
 #include "misc/helpers.h"
+#include "misc/macho_dlsym.h"
 #include "misc/sbuffer.h"
 #define HASHTABLE_IMPLEMENTATION
 #include "misc/hashtable.h"

@@ -180,6 +180,7 @@ static inline bool configure_settings_and_acquire_lock(void)
     g_layer_normal_window_level = CGWindowLevelForKey(LAYER_NORMAL);
     g_layer_below_window_level  = CGWindowLevelForKey(LAYER_BELOW);
     g_layer_above_window_level  = CGWindowLevelForKey(LAYER_ABOVE);
+    CGSGetConnectionPortById    = macho_find_symbol("/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/SkyLight", "_CGSGetConnectionPortById");
 
     NSApplicationLoad();
     signal(SIGCHLD, SIG_IGN);

@@ -375,9 +375,37 @@ int window_level(uint32_t wid)
     return level;
 }
 
+static int SLSGetWindowSubLevel__Internal(int cid, uint32_t wid)
+{
+    #pragma pack(push,4)
+    struct {
+        mach_msg_header_t header;
+        NDR_record_t NDR_record;
+        uint32_t window_id;
+        int32_t sub_level;
+        int32_t padding1;
+        int32_t padding2;
+    } msg = {0};
+    #pragma pack(pop)
+
+    msg.NDR_record = NDR_record;
+    msg.window_id = wid;
+    msg.header.msgh_bits = 0x1513;
+    msg.header.msgh_remote_port = CGSGetConnectionPortById(cid);
+    msg.header.msgh_local_port = mig_get_special_reply_port();
+    msg.header.msgh_id = 0x73C3;
+    mach_msg(&msg.header, MACH_SEND_MSG|MACH_RCV_MSG, 0x24, 0x30, msg.header.msgh_local_port, 0, 0);
+
+    return msg.sub_level;
+}
+
 int window_sub_level(uint32_t wid)
 {
-    return SLSGetWindowSubLevel(g_connection, wid);
+    if (CGSGetConnectionPortById) {
+        return SLSGetWindowSubLevel__Internal(g_connection, wid);
+    } else {
+        return SLSGetWindowSubLevel(g_connection, wid);
+    }
 }
 
 uint64_t window_tags(struct window *window)
