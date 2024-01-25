@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.7] - 2024-01-25
 ### Changed
 - Update scripting addition for macOS Sonoma 14.3 Intel (Apple Silicon is already supported in v6.0.6) [#2065](https://github.com/koekeishiya/yabai/issues/2065)
 - Fix regression causing window_destroyed signal to not trigger [#2048](https://github.com/koekeishiya/yabai/issues/2048)
@@ -543,7 +545,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.6...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.7...HEAD
+[6.0.7]: https://github.com/koekeishiya/yabai/compare/v6.0.6...v6.0.7
 [6.0.6]: https://github.com/koekeishiya/yabai/compare/v6.0.5...v6.0.6
 [6.0.5]: https://github.com/koekeishiya/yabai/compare/v6.0.4...v6.0.5
 [6.0.4]: https://github.com/koekeishiya/yabai/compare/v6.0.3...v6.0.4
