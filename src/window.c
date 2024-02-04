@@ -518,6 +518,12 @@ out:
     return standard_win;
 }
 
+bool window_level_is_standard(struct window *window)
+{
+    int level = window_level(window->id);
+    return level == g_layer_normal_window_level;
+}
+
 bool window_is_unknown(struct window *window)
 {
     CFStringRef subrole = window_subrole(window);
@@ -563,4 +569,11 @@ void window_destroy(struct window *window)
     window->id = 0;
     CFRelease(window->ref);
     free(window);
+}
+
+void window_dump_cg_window_levels(void)
+{
+    for (int i = 0; i < CG_WINDOW_LEVEL_KEY_COUNT; ++i) {
+        printf("CGWindowLevelForKey(%s) -> %d\n", cg_window_level_key_str[i], CGWindowLevelForKey(i));
+    }
 }

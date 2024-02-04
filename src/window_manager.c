@@ -125,10 +125,10 @@ void window_manager_apply_manage_rule_to_window(struct space_manager *sm, struct
         if (!rule->subrole_regex_valid && !string_equals(window_subrole, "AXStandardWindow")) return;
 
         window_rule_set_flag(window, WINDOW_RULE_MANAGED);
-        window_manager_make_window_floating(sm, wm, window, false);
+        window_manager_make_window_floating(sm, wm, window, false, true);
     } else if (rule->manage == RULE_PROP_OFF) {
         window_rule_clear_flag(window, WINDOW_RULE_MANAGED);
-        window_manager_make_window_floating(sm, wm, window, true);
+        window_manager_make_window_floating(sm, wm, window, true, true);
     }
 }
 
@@ -277,7 +277,7 @@ bool window_manager_should_manage_window(struct window *window)
     if (window_check_flag(window, WINDOW_MINIMIZE)) return false;
     if (window->application->is_hidden)             return false;
 
-    return (window_is_standard(window) && window_can_move(window)) || window_rule_check_flag(window, WINDOW_RULE_MANAGED);
+    return (window_is_standard(window) && window_level_is_standard(window) && window_can_move(window)) || window_rule_check_flag(window, WINDOW_RULE_MANAGED);
 }
 
 struct view *window_manager_find_managed_window(struct window_manager *wm, struct window *window)
@@ -1381,8 +1381,11 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
                 goto out;
             }
 
-            if ((window_is_sticky(window) || !window_is_standard(window) || !window_can_move(window)) ||
-                (window_is_undersized(window) && !window_can_resize(window))) {
+            if (window_is_sticky(window) ||
+                !window_can_move(window) ||
+                !window_is_standard(window) ||
+                !window_level_is_standard(window) ||
+                (!window_can_resize(window) && window_is_undersized(window))) {
                 window_set_flag(window, WINDOW_FLOAT);
             }
         } else {
@@ -1927,9 +1930,17 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     return WINDOW_OP_ERROR_SUCCESS;
 }
 
-void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float)
+void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float, bool force)
 {
     if (!window_manager_is_window_eligible(window)) return;
+
+    if (!force) {
+        if (!window_is_standard(window) || !window_level_is_standard(window) || !window_can_move(window)) {
+            if (!window_rule_check_flag(window, WINDOW_RULE_MANAGED)) {
+                return;
+            }
+        }
+    }
 
     if (should_float) {
         struct view *view = window_manager_find_managed_window(wm, window);
