@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [6.0.9] - 2024-02-04
+### Changed
+- Fix detection of windows that are minimized before yabai is launched [#1833](https://github.com/koekeishiya/yabai/issues/1833)
+
 ## [6.0.8] - 2024-02-04
 ### Changed
 - All windows that report a non-standard window_level should be treated as floating (permanently), unless otherwise specified through manage=on rules [#2055](https://github.com/koekeishiya/yabai/issues/2055)
@@ -550,7 +554,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.8...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.9...HEAD
+[6.0.9]: https://github.com/koekeishiya/yabai/compare/v6.0.8...v6.0.9
 [6.0.8]: https://github.com/koekeishiya/yabai/compare/v6.0.7...v6.0.8
 [6.0.7]: https://github.com/koekeishiya/yabai/compare/v6.0.6...v6.0.7
 [6.0.6]: https://github.com/koekeishiya/yabai/compare/v6.0.5...v6.0.6
