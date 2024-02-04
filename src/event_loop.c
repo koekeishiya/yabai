@@ -1099,7 +1099,8 @@ static EVENT_HANDLER(MOUSE_MOVED)
         CGRect menu = display_manager_menu_bar_rect(cursor_did);
         if (cgrect_contains_point(menu, point)) goto out;
 
-        display_manager_focus_display_with_point(cursor_did, point, false);
+        int wid = display_manager_focus_display_with_point(cursor_did, point, false);
+        g_mouse_state.ffm_window_id = wid;
     }
 
 out:

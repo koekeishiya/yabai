@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Using caching issue when using focus_follows_mouse to switch focus between monitors with no windows [#2075](https://github.com/koekeishiya/yabai/issues/2075)
 
 ## [6.0.9] - 2024-02-04
 ### Changed

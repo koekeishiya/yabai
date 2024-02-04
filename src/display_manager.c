@@ -293,7 +293,7 @@ static AXUIElementRef display_manager_find_element_at_point(CGPoint point)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-void display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool update_cursor_position)
+int display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool update_cursor_position)
 {
     int element_connection;
     ProcessSerialNumber element_psn;
@@ -308,14 +308,15 @@ void display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool 
     SLSGetConnectionPSN(element_connection, &element_psn);
     window_manager_focus_window_with_raise(&element_psn, element_id, element_ref);
     CFRelease(element_ref);
-    goto out;
+    return element_id;
 
 err_ref:
     CFRelease(element_ref);
 click:
     CGPostMouseEvent(point, update_cursor_position, 1, true);
     CGPostMouseEvent(point, update_cursor_position, 1, false);
-out:;
+
+    return 0;
 }
 #pragma clang diagnostic pop
 
