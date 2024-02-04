@@ -1478,7 +1478,6 @@ void window_manager_add_existing_application_windows(struct space_manager *sm, s
     uint32_t *global_window_list = window_manager_existing_application_window_list(application, &global_window_count);
     if (!global_window_list) return;
 
-
     CFArrayRef window_list_ref = application_window_list(application);
     int window_count = window_list_ref ? CFArrayGetCount(window_list_ref) : 0;
 
