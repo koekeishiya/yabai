@@ -445,6 +445,15 @@ static void window_manager_create_window_proxy(int animation_connection, struct 
     CFRelease(frame_region);
 }
 
+static inline void window_manager_set_window_proxy_connection_property(int animation_connection, uint32_t wid, uint32_t proxy_wid)
+{
+    CFStringRef key_ref = CFSTRINGNUM32(proxy_wid);
+    CFTypeRef value_ref = CFNUM32(wid);
+    SLSSetConnectionProperty(animation_connection, animation_connection, key_ref, value_ref);
+    CFRelease(value_ref);
+    CFRelease(key_ref);
+}
+
 static void window_manager_destroy_window_proxy(int animation_connection, struct window_proxy *proxy)
 {
     if (proxy->image) {
@@ -476,9 +485,10 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
 
     animation->proxy.level = window_level(animation->wid);
     animation->proxy.sub_level = window_sub_level(animation->wid);
-    SLSGetWindowBounds(g_connection, animation->wid, &animation->proxy.frame);
-    animation->proxy.image = SLSHWCaptureWindowList(g_connection, &animation->wid, 1, (1 << 11) | (1 << 8));
-    window_manager_create_window_proxy(g_connection, &animation->proxy);
+    SLSGetWindowBounds(animation->cid, animation->wid, &animation->proxy.frame);
+    animation->proxy.image = SLSHWCaptureWindowList(animation->cid, &animation->wid, 1, (1 << 11) | (1 << 8));
+    window_manager_create_window_proxy(animation->cid, &animation->proxy);
+    window_manager_set_window_proxy_connection_property(animation->cid, animation->wid, animation->proxy.id);
     scripting_addition_swap_window_proxy_in(animation->wid, animation->proxy.id);
     window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
 
@@ -544,6 +554,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             .y      = capture->y,
             .w      = capture->w,
             .h      = capture->h,
+            .cid    = context->animation_connection,
             .proxy  = {0},
             .skip   = false
         };
@@ -577,6 +588,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             __asm__ __volatile__ ("" ::: "memory");
 
             window_manager_create_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
+            window_manager_set_window_proxy_connection_property(context->animation_connection, context->animation_list[i].wid, context->animation_list[i].proxy.id);
 
             CFTypeRef transaction1 = SLSTransactionCreate(context->animation_connection);
             CFTypeRef transaction2 = SLSTransactionCreate(context->animation_connection);
@@ -591,7 +603,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             CFRelease(transaction1);
             CFRelease(transaction2);
 
-            window_manager_destroy_window_proxy(context->animation_connection, &existing_animation->proxy);
+            window_manager_destroy_window_proxy(existing_animation->cid, &existing_animation->proxy);
         } else {
             pthread_t thread;
             if (pthread_create(&thread, NULL, &window_manager_build_window_proxy_thread_proc, &context->animation_list[i]) == 0) {

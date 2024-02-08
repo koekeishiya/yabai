@@ -203,6 +203,13 @@ static inline char *ts_string_escape(char *s)
     return result;
 }
 
+static inline CFStringRef CFSTRINGNUM32(int32_t num)
+{
+    char num_str[255] = {0};
+    snprintf(num_str, sizeof(num_str), "%d", num);
+    return CFStringCreateWithCString(NULL, num_str, kCFStringEncodingMacRoman);
+}
+
 static inline CFNumberRef CFNUM32(int32_t num)
 {
     return CFNumberCreate(NULL, kCFNumberSInt32Type, &num);

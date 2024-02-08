@@ -33,6 +33,7 @@ struct window_animation
     struct window *window;
     uint32_t wid;
     float x, y, w, h;
+    int cid;
     struct window_proxy proxy;
     volatile bool skip;
 };
