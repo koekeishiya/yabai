@@ -805,7 +805,7 @@ static void do_window_swap_proxy_in(char *message)
     SLSTransactionSetWindowSystemAlpha(transaction2, wid, 0);
 
     SLSTransactionCommit(transaction1, 1);
-    usleep(10000);
+    usleep(15000);
     SLSTransactionCommit(transaction2, 1);
 
     CFRelease(transaction1);
@@ -829,7 +829,7 @@ static void do_window_swap_proxy_out(char *message)
     SLSTransactionOrderWindowGroup(transaction2, proxy_wid, 0, wid);
 
     SLSTransactionCommit(transaction1, 1);
-    usleep(10000);
+    usleep(15000);
     SLSTransactionCommit(transaction2, 1);
 
     CFRelease(transaction1);

@@ -597,7 +597,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             SLSTransactionSetWindowSystemAlpha(transaction2, existing_animation->proxy.id, 0);
 
             SLSTransactionCommit(transaction1, 1);
-            usleep(10000);
+            usleep(15000);
             SLSTransactionCommit(transaction2, 1);
 
             CFRelease(transaction1);
