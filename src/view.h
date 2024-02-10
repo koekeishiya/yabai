@@ -42,7 +42,7 @@ struct window_animation_context
 {
     int animation_connection;
     float animation_duration;
-    int animation_frame_rate;
+    uint64_t animation_clock;
     struct window_animation *animation_list;
     int animation_count;
 };

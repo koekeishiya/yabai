@@ -6,9 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
-- Using caching issue when using focus_follows_mouse to switch focus between monitors with no windows [#2075](https://github.com/koekeishiya/yabai/issues/2075)
+- Fixed caching issue when using focus_follows_mouse to switch focus between monitors with no windows [#2075](https://github.com/koekeishiya/yabai/issues/2075)
 - Attempt to resolve issue where some applications do not incorrectly pass along NSRunningApplication isObservable and isFinishedLaunching properties [#1367](https://github.com/koekeishiya/yabai/issues/1367)
 - Add compatibility between window animations and JankyBorders [#2087](https://github.com/koekeishiya/yabai/issues/2087)
+
+### Removed
+- Config option `window_animation_frame_rate` has been removed. Animations use CVDisplayLink to match monitor refresh rate [#2087](https://github.com/koekeishiya/yabai/issues/2087)
 
 ## [6.0.9] - 2024-02-04
 ### Changed

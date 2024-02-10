@@ -1,6 +1,7 @@
 extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;
+extern double g_cv_host_clock_frequency;
 
 static TABLE_HASH_FUNC(hash_wm)
 {
@@ -486,6 +487,10 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     animation->proxy.level = window_level(animation->wid);
     animation->proxy.sub_level = window_sub_level(animation->wid);
     SLSGetWindowBounds(animation->cid, animation->wid, &animation->proxy.frame);
+    animation->proxy.tx = animation->proxy.frame.origin.x;
+    animation->proxy.ty = animation->proxy.frame.origin.y;
+    animation->proxy.tw = animation->proxy.frame.size.width;
+    animation->proxy.th = animation->proxy.frame.size.height;
     animation->proxy.image = SLSHWCaptureWindowList(animation->cid, &animation->wid, 1, (1 << 11) | (1 << 8));
     window_manager_create_window_proxy(animation->cid, &animation->proxy);
     window_manager_set_window_proxy_connection_property(animation->cid, animation->wid, animation->proxy.id);
@@ -495,33 +500,45 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     return NULL;
 }
 
-static void *window_manager_animate_window_list_thread_proc(void *data)
+static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef link, const CVTimeStamp *now, const CVTimeStamp *output_time, CVOptionFlags flags, CVOptionFlags *flags_out, void *data)
 {
     struct window_animation_context *context = data;
     int animation_count = context->animation_count;
 
-    ANIMATE(context->animation_connection, context->animation_frame_rate, context->animation_duration, ease_out_cubic, {
-        for (int i = 0; i < animation_count; ++i) {
-            if (context->animation_list[i].skip) continue;
+    uint64_t current_clock = output_time->hostTime;
+    if (!context->animation_clock) context->animation_clock = now->hostTime;
 
-            context->animation_list[i].proxy.tx = lerp(context->animation_list[i].proxy.frame.origin.x,    mt, context->animation_list[i].x);
-            context->animation_list[i].proxy.ty = lerp(context->animation_list[i].proxy.frame.origin.y,    mt, context->animation_list[i].y);
-            context->animation_list[i].proxy.tw = lerp(context->animation_list[i].proxy.frame.size.width,  mt, context->animation_list[i].w);
-            context->animation_list[i].proxy.th = lerp(context->animation_list[i].proxy.frame.size.height, mt, context->animation_list[i].h);
+    double t = (double)(current_clock - context->animation_clock) / (double)(context->animation_duration * g_cv_host_clock_frequency);
+    if (t <= 0.0) t = 0.0f;
+    if (t >= 1.0) t = 1.0f;
 
-            CGAffineTransform transform = CGAffineTransformMakeTranslation(-context->animation_list[i].proxy.tx, -context->animation_list[i].proxy.ty);
-            CGAffineTransform scale = CGAffineTransformMakeScale(context->animation_list[i].proxy.frame.size.width / context->animation_list[i].proxy.tw, context->animation_list[i].proxy.frame.size.height / context->animation_list[i].proxy.th);
-            SLSTransactionSetWindowTransform(transaction, context->animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
-        }
-    });
+    float mt = ease_out_cubic(t);
+    CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
+
+    for (int i = 0; i < animation_count; ++i) {
+        if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
+
+        context->animation_list[i].proxy.tx = lerp(context->animation_list[i].proxy.frame.origin.x,    mt, context->animation_list[i].x);
+        context->animation_list[i].proxy.ty = lerp(context->animation_list[i].proxy.frame.origin.y,    mt, context->animation_list[i].y);
+        context->animation_list[i].proxy.tw = lerp(context->animation_list[i].proxy.frame.size.width,  mt, context->animation_list[i].w);
+        context->animation_list[i].proxy.th = lerp(context->animation_list[i].proxy.frame.size.height, mt, context->animation_list[i].h);
+
+        CGAffineTransform transform = CGAffineTransformMakeTranslation(-context->animation_list[i].proxy.tx, -context->animation_list[i].proxy.ty);
+        CGAffineTransform scale = CGAffineTransformMakeScale(context->animation_list[i].proxy.frame.size.width / context->animation_list[i].proxy.tw, context->animation_list[i].proxy.frame.size.height / context->animation_list[i].proxy.th);
+        SLSTransactionSetWindowTransform(transaction, context->animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
+    }
+
+    SLSTransactionCommit(transaction, 0);
+    CFRelease(transaction);
+    if (t != 1.0f) goto out;
 
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
     SLSDisableUpdate(context->animation_connection);
     for (int i = 0; i < animation_count; ++i) {
-        if (context->animation_list[i].skip) continue;
+        if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
-        table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         scripting_addition_swap_window_proxy_out(context->animation_list[i].wid, context->animation_list[i].proxy.id);
+        table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
     }
     SLSReenableUpdate(context->animation_connection);
@@ -529,9 +546,13 @@ static void *window_manager_animate_window_list_thread_proc(void *data)
 
     SLSReleaseConnection(context->animation_connection);
     free(context->animation_list);
-
     free(context);
-    return NULL;
+
+    CVDisplayLinkStop(link);
+    CVDisplayLinkRelease(link);
+
+out:
+    return kCVReturnSuccess;
 }
 
 void window_manager_animate_window_list_async(struct window_capture *window_list, int window_count)
@@ -539,10 +560,10 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     struct window_animation_context *context = malloc(sizeof(struct window_animation_context));
 
     SLSNewConnection(0, &context->animation_connection);
+    context->animation_count    = window_count;
+    context->animation_list     = malloc(window_count * sizeof(struct window_animation));
     context->animation_duration = g_window_manager.window_animation_duration;
-    context->animation_frame_rate = g_window_manager.window_animation_frame_rate;
-    context->animation_list = malloc(window_count * sizeof(struct window_animation));
-    context->animation_count = window_count;
+    context->animation_clock    = 0;
 
     for (int i = 0; i < window_count; ++i) {
         struct window_capture *capture = &window_list[i];
@@ -568,6 +589,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     for (int i = 0; i < window_count; ++i) {
         struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         if (existing_animation) {
+            __atomic_store_n(&existing_animation->skip, true, __ATOMIC_RELEASE);
+
             pthread_t thread;
             if (pthread_create(&thread, NULL, &window_manager_set_window_frame_thread_proc, &context->animation_list[i]) == 0) {
                 pthread_detach(thread);
@@ -575,13 +598,14 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
                 window_manager_set_window_frame_thread_proc(&context->animation_list[i]);
             }
 
-            table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
-
-            existing_animation->skip = true;
             context->animation_list[i].proxy.frame.origin.x    = (int)(existing_animation->proxy.tx);
             context->animation_list[i].proxy.frame.origin.y    = (int)(existing_animation->proxy.ty);
             context->animation_list[i].proxy.frame.size.width  = (int)(existing_animation->proxy.tw);
             context->animation_list[i].proxy.frame.size.height = (int)(existing_animation->proxy.th);
+            context->animation_list[i].proxy.tx                = (int)(existing_animation->proxy.tx);
+            context->animation_list[i].proxy.ty                = (int)(existing_animation->proxy.ty);
+            context->animation_list[i].proxy.tw                = (int)(existing_animation->proxy.tw);
+            context->animation_list[i].proxy.th                = (int)(existing_animation->proxy.th);
             context->animation_list[i].proxy.level             = existing_animation->proxy.level;
             context->animation_list[i].proxy.sub_level         = existing_animation->proxy.sub_level;
             context->animation_list[i].proxy.image             = CFRetain(existing_animation->proxy.image);
@@ -603,6 +627,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             CFRelease(transaction1);
             CFRelease(transaction2);
 
+            table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
             window_manager_destroy_window_proxy(existing_animation->cid, &existing_animation->proxy);
         } else {
             pthread_t thread;
@@ -623,9 +648,10 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     SLSReenableUpdate(context->animation_connection);
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
-    pthread_t thread;
-    pthread_create(&thread, NULL, &window_manager_animate_window_list_thread_proc, context);
-    pthread_detach(thread);
+    CVDisplayLinkRef link;
+    CVDisplayLinkCreateWithActiveCGDisplays(&link);
+    CVDisplayLinkSetOutputCallback(link, window_manager_animate_window_list_thread_proc, context);
+    CVDisplayLinkStart(link);
 }
 
 void window_manager_animate_window_list(struct window_capture *window_list, int window_count)
@@ -2308,7 +2334,6 @@ void window_manager_init(struct window_manager *wm)
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.0f;
     wm->window_animation_duration = 0.0f;
-    wm->window_animation_frame_rate = 120;
     wm->insert_feedback_windows = NULL;
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
 
