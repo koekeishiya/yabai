@@ -1,6 +1,4 @@
-#import <Foundation/Foundation.h>
-#import <objc/runtime.h>
-#include <execinfo.h>
+#include <objc/runtime.h>
 
 IMP g_nsobject_autorelease;
 IMP g_nsautoreleasepool_drain;

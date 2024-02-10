@@ -7,17 +7,6 @@ static NSImage *g_notify_img;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@implementation NSBundle(swizzle)
-- (NSString *)fake_bundleIdentifier
-{
-    if (self == [NSBundle mainBundle]) {
-        return @"com.koekeishiya.yabai";
-    } else {
-        return [self fake_bundleIdentifier];
-    }
-}
-@end
-
 @interface NotifyDelegate : NSObject <NSUserNotificationCenterDelegate>
 @end
 
@@ -30,10 +19,6 @@ static NSImage *g_notify_img;
 
 static bool notify_init(void)
 {
-    Class c = objc_getClass("NSBundle");
-    if (!c) return false;
-
-    method_exchangeImplementations(class_getInstanceMethod(c, @selector(bundleIdentifier)), class_getInstanceMethod(c, @selector(fake_bundleIdentifier)));
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:[NotifyDelegate alloc]];
     g_notify_img = [[[NSWorkspace sharedWorkspace] iconForFile:[[[NSBundle mainBundle] executablePath] stringByResolvingSymlinksInPath]] retain];
     g_notify_init = true;
