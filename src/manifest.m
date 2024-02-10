@@ -32,6 +32,7 @@
 #include <pthread.h>
 #include <pwd.h>
 #include <spawn.h>
+#include <libproc.h>
 
 #include "misc/extern.h"
 #include "misc/macros.h"
