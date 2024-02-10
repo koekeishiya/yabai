@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.10] - 2024-02-10
 ### Changed
 - Fixed caching issue when using focus_follows_mouse to switch focus between monitors with no windows [#2075](https://github.com/koekeishiya/yabai/issues/2075)
 - Attempt to resolve issue where some applications do not incorrectly pass along NSRunningApplication isObservable and isFinishedLaunching properties [#1367](https://github.com/koekeishiya/yabai/issues/1367)
@@ -561,7 +563,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.9...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.10...HEAD
+[6.0.10]: https://github.com/koekeishiya/yabai/compare/v6.0.9...v6.0.10
 [6.0.9]: https://github.com/koekeishiya/yabai/compare/v6.0.8...v6.0.9
 [6.0.8]: https://github.com/koekeishiya/yabai/compare/v6.0.7...v6.0.8
 [6.0.7]: https://github.com/koekeishiya/yabai/compare/v6.0.6...v6.0.7
