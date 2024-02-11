@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Adjustments to mission control integration on Ventura and Sonoma due to subtle issues with window operations that cross monitor boundaries [#2088](https://github.com/koekeishiya/yabai/issues/2088)
 
 ## [6.0.10] - 2024-02-10
 ### Changed
