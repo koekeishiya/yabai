@@ -133,6 +133,11 @@ Global Settings
     'all':  Apply the given padding to all spaces regardless of their display. +
     'off':  Do not apply any special padding.
 
+*menubar_opacity* ['<FLOAT_SEL>']::
+    Changes the transarency of the macOS menubar. +
+    If the value is 0.0, the menubar will no longer respond to mouse-events, effectively hiding the menubar permanently. +
+    yabai will automatically set the menubar to 100% visibility upon entering a native-fullscreen space, and adjust it back down afterwards.
+
 *mouse_follows_focus* ['<BOOL_SEL>']::
     When focusing a window, put the mouse at its center.
 

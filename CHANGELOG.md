@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- New config option `menubar_opacity` to make the menubar transparent (or even completely hidden, ignoring mouse-events) [#2091](https://github.com/koekeishiya/yabai/issues/2091)
+
+### Changed
+- Using `--toggle native-fullscreen` to exit native-fullscreen mode could sometimes leave the window unmanaged/untiled [#2090](https://github.com/koekeishiya/yabai/issues/2090)
 
 ## [6.0.11] - 2024-02-11
 ### Changed

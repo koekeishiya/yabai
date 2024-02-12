@@ -737,6 +737,12 @@ void window_manager_set_window_opacity(struct window_manager *wm, struct window 
     window_manager_set_opacity(wm, window, opacity);
 }
 
+void window_manager_set_menubar_opacity(struct window_manager *wm, float opacity)
+{
+    wm->menubar_opacity = opacity;
+    SLSSetMenuBarInsetAndAlpha(g_connection, 0, 1, opacity);
+}
+
 void window_manager_set_active_window_opacity(struct window_manager *wm, float opacity)
 {
     wm->active_window_opacity = opacity;
@@ -2091,11 +2097,15 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
 {
     uint32_t sid = window_space(window);
 
+    //
     // NOTE(koekeishiya): The window must become the focused window
     // before we can change its fullscreen attribute. We focus the
     // window and spin lock until a potential space animation has finished.
+    //
+
     window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
     while (sid != space_manager_active_space()) { usleep(100000); }
+
 
     if (!window_is_fullscreen(window)) {
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanTrue);
@@ -2103,9 +2113,12 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
         AXUIElementSetAttributeValue(window->ref, kAXFullscreenAttribute, kCFBooleanFalse);
     }
 
+    //
     // NOTE(koekeishiya): We toggled the fullscreen attribute and must
     // now spin lock until the post-exit space animation has finished.
-    while (sid == space_manager_active_space()) { usleep(100000); }
+    //
+
+    window_manager_wait_for_native_fullscreen_transition(window);
 }
 
 void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window)
@@ -2347,6 +2360,7 @@ void window_manager_init(struct window_manager *wm)
     wm->window_origin_mode = WINDOW_ORIGIN_DEFAULT;
     wm->enable_mff = false;
     wm->enable_window_opacity = false;
+    wm->menubar_opacity = 1.0f;
     wm->active_window_opacity = 1.0f;
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.0f;

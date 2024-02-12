@@ -720,6 +720,11 @@ static EVENT_HANDLER(SPACE_CHANGED)
     g_space_manager.last_space_id = g_space_manager.current_space_id;
     g_space_manager.current_space_id = space_manager_active_space();
 
+    if (g_window_manager.menubar_opacity != 1.0f) {
+        float alpha = space_is_fullscreen(g_space_manager.current_space_id) ? 1.0f : g_window_manager.menubar_opacity;
+        SLSSetMenuBarInsetAndAlpha(g_connection, 0, 1, alpha);
+    }
+
     debug("%s: %lld\n", __FUNCTION__, g_space_manager.current_space_id);
     struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
 
@@ -759,6 +764,11 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
     if (g_display_manager.current_display_id != expected_display_id) {
         debug("%s: %d %lld did not match %d! ignoring event..\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id, expected_display_id);
         return;
+    }
+
+    if (g_window_manager.menubar_opacity != 1.0f) {
+        float alpha = space_is_fullscreen(g_space_manager.current_space_id) ? 1.0f : g_window_manager.menubar_opacity;
+        SLSSetMenuBarInsetAndAlpha(g_connection, 0, 1, alpha);
     }
 
     debug("%s: %d %lld\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id);

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.18
-.\"      Date: 2024-02-10
+.\" Generator: Asciidoctor 2.0.20
+.\"      Date: 2024-02-12
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-02-10" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-02-12" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -173,6 +173,15 @@ Specify top and bottom padding for a potential custom bar that you may be runnin
 \fIall\fP:  Apply the given padding to all spaces regardless of their display.
 .br
 \fIoff\fP:  Do not apply any special padding.
+.RE
+.sp
+\fBmenubar_opacity\fP [\fI<FLOAT_SEL>\fP]
+.RS 4
+Changes the transarency of the macOS menubar.
+.br
+If the value is 0.0, the menubar will no longer respond to mouse\-events, effectively hiding the menubar permanently.
+.br
+yabai will automatically set the menubar to 100% visibility upon entering a native\-fullscreen space, and adjust it back down afterwards.
 .RE
 .sp
 \fBmouse_follows_focus\fP [\fI<BOOL_SEL>\fP]

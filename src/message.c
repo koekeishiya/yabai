@@ -30,6 +30,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_OPACITY_DURATION      "window_opacity_duration"
 #define COMMAND_CONFIG_ANIMATION_DURATION    "window_animation_duration"
 #define COMMAND_CONFIG_SHADOW                "window_shadow"
+#define COMMAND_CONFIG_MENUBAR_OPACITY       "menubar_opacity"
 #define COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY "active_window_opacity"
 #define COMMAND_CONFIG_NORMAL_WINDOW_OPACITY "normal_window_opacity"
 #define COMMAND_CONFIG_INSERT_FEEDBACK_COLOR "insert_feedback_color"
@@ -1149,6 +1150,15 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 window_manager_set_purify_mode(&g_window_manager, PURIFY_DISABLED);
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_MENUBAR_OPACITY)) {
+            struct token_value value = token_to_value(get_token(&message));
+            if (value.type == TOKEN_TYPE_INVALID) {
+                fprintf(rsp, "%.4f\n", g_window_manager.menubar_opacity);
+            } else if (value.type == TOKEN_TYPE_FLOAT && in_range_ii(value.float_value, 0.0f, 1.0f)) {
+                window_manager_set_menubar_opacity(&g_window_manager, value.float_value);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_CONFIG_ACTIVE_WINDOW_OPACITY)) {
             struct token_value value = token_to_value(get_token(&message));
