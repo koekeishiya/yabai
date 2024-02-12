@@ -1192,6 +1192,11 @@ static EVENT_HANDLER(MISSION_CONTROL_EXIT)
 {
     debug("%s:\n", __FUNCTION__);
 
+    if (g_window_manager.menubar_opacity != 1.0f) {
+        float alpha = space_is_fullscreen(g_space_manager.current_space_id) ? 1.0f : g_window_manager.menubar_opacity;
+        SLSSetMenuBarInsetAndAlpha(g_connection, 0, 1, alpha);
+    }
+
     for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
         uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
         SLSOrderWindow(g_connection, feedback_wid, 1, 0);
