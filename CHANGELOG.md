@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.12] - 2024-02-12
 ### Added
 - New config option `menubar_opacity` to make the menubar transparent (or even completely hidden, ignoring mouse-events) [#2091](https://github.com/koekeishiya/yabai/issues/2091)
 
@@ -572,7 +574,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.11...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.12...HEAD
+[6.0.12]: https://github.com/koekeishiya/yabai/compare/v6.0.11...v6.0.12
 [6.0.11]: https://github.com/koekeishiya/yabai/compare/v6.0.10...v6.0.11
 [6.0.10]: https://github.com/koekeishiya/yabai/compare/v6.0.9...v6.0.10
 [6.0.9]: https://github.com/koekeishiya/yabai/compare/v6.0.8...v6.0.9
