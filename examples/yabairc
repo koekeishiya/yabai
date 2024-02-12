@@ -13,9 +13,10 @@
 
 # global settings
 yabai -m config                                 \
+    external_bar                 off:40:0       \
+    menubar_opacity              1.0            \
     mouse_follows_focus          off            \
     focus_follows_mouse          off            \
-    menubar_opacity              1.0            \
     window_origin_display        default        \
     window_placement             second_child   \
     window_zoom_persist          on             \
