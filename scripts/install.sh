@@ -70,6 +70,8 @@ FILE_HASH=$(shasum -a 256 ./${NAME}-v${VERSION}.tar.gz | cut -d " " -f 1)
 if [ "$FILE_HASH" = "$EXPECTED_HASH" ]; then
     echo "Hash verified. Preparing files.."
     tar -xzvf ${NAME}-v${VERSION}.tar.gz
+    rm ${BIN_DIR}/${NAME}
+    rm ${MAN_DIR}/${NAME}.1
     cp -v ./archive/bin/${NAME} ${BIN_DIR}/${NAME}
     cp -v ./archive/doc/${NAME}.1 ${MAN_DIR}/${NAME}.1
     echo "Finished copying files.."
