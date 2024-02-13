@@ -2,14 +2,13 @@
 
 #
 # This script will install the latest pre-built yabai release from GitHub.
-# Depends on curl, shasum, tar, cp.
+# Depends on curl, shasum, tar, cp, cut.
 #
 # ARG1:   Directory in which to store the yabai binary; must be an absolutepath.
 #         Fallback: /usr/local/bin
 #
 # ARG2:   Directory in which to store the yabai man-page; must be an absolutepath.
 #         Fallback: /usr/local/man/man1
-#
 #
 # Author: Åsmund Vikane
 #   Date: 2024-02-13
@@ -58,7 +57,7 @@ fi
 
 AUTHOR="koekeishiya"
 NAME="yabai"
-VERSION="6.0.12"
+VERSION="6.0.11"
 EXPECTED_HASH="d1824ded7469b1e5d99d55c372cbfff30f297a7d2c139daa4264bec459e2e95d"
 TMP_DIR="./${AUTHOR}-${NAME}-v${VERSION}-installer"
 
@@ -91,7 +90,7 @@ if [ "$FILE_HASH" = "$EXPECTED_HASH" ]; then
 else
     echo "Hash does not match the expected value.. abort."
     echo "Expected hash: $EXPECTED_HASH"
-    echo "  Actual hash  $FILE_HASH"
+    echo "  Actual hash: $FILE_HASH"
 fi
 
 popd
