@@ -72,6 +72,7 @@ struct mouse_state
     struct window *window;
     CGRect window_frame;
     uint32_t ffm_window_id;
+    uint8_t direction;
 };
 
 static char *mouse_mod_str[] =

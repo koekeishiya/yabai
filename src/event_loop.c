@@ -838,8 +838,9 @@ static EVENT_HANDLER(MOUSE_DOWN)
     if (!window || window_is_fullscreen(window)) goto out;
 
     g_mouse_state.window = window;
-    g_mouse_state.down_location = point;
     g_mouse_state.window_frame = g_mouse_state.window->frame;
+    g_mouse_state.down_location = point;
+    g_mouse_state.direction = 0;
 
     int64_t button = CGEventGetIntegerValueField(context, kCGMouseEventButtonNumber);
     uint8_t mod = (uint8_t) param1;
@@ -848,6 +849,14 @@ static EVENT_HANDLER(MOUSE_DOWN)
         g_mouse_state.current_action = g_mouse_state.action1;
     } else if (button == kCGMouseButtonRight && g_mouse_state.modifier == mod) {
         g_mouse_state.current_action = g_mouse_state.action2;
+    }
+
+    if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
+        CGPoint frame_mid = { CGRectGetMidX(g_mouse_state.window_frame), CGRectGetMidY(g_mouse_state.window_frame) };
+        if (point.x < frame_mid.x) g_mouse_state.direction |= HANDLE_LEFT;
+        if (point.y < frame_mid.y) g_mouse_state.direction |= HANDLE_TOP;
+        if (point.x > frame_mid.x) g_mouse_state.direction |= HANDLE_RIGHT;
+        if (point.y > frame_mid.y) g_mouse_state.direction |= HANDLE_BOTTOM;
     }
 
 out:
@@ -966,16 +975,7 @@ static EVENT_HANDLER(MOUSE_DRAGGED)
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
 
-        uint8_t direction = 0;
-        CGRect frame = g_mouse_state.window->frame;
-        CGPoint frame_mid = { CGRectGetMidX(frame), CGRectGetMidY(frame) };
-
-        if (point.x < frame_mid.x) direction |= HANDLE_LEFT;
-        if (point.y < frame_mid.y) direction |= HANDLE_TOP;
-        if (point.x > frame_mid.x) direction |= HANDLE_RIGHT;
-        if (point.y > frame_mid.y) direction |= HANDLE_BOTTOM;
-
-        window_manager_resize_window_relative_internal(g_mouse_state.window, frame, direction, dx, dy, false);
+        window_manager_resize_window_relative_internal(g_mouse_state.window, g_mouse_state.window->frame, g_mouse_state.direction, dx, dy, false);
 
         g_mouse_state.last_moved_time = event_time;
         g_mouse_state.down_location = point;

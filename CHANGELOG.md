@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Lock assigned handle while mouse_action resize is in progress [#2102](https://github.com/koekeishiya/yabai/issues/2102)
 
 ## [6.0.12] - 2024-02-12
 ### Added
