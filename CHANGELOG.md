@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.13] - 2024-02-19
 ### Changed
 - Lock assigned handle while mouse_action resize is in progress [#2102](https://github.com/koekeishiya/yabai/issues/2102)
 - Modify "no click-zone" when using focus_follows_mouse to activate an empty display [#1892](https://github.com/koekeishiya/yabai/issues/1892) [#863](https://github.com/koekeishiya/yabai/issues/863)
@@ -577,7 +579,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.12...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.13...HEAD
+[6.0.13]: https://github.com/koekeishiya/yabai/compare/v6.0.12...v6.0.13
 [6.0.12]: https://github.com/koekeishiya/yabai/compare/v6.0.11...v6.0.12
 [6.0.11]: https://github.com/koekeishiya/yabai/compare/v6.0.10...v6.0.11
 [6.0.10]: https://github.com/koekeishiya/yabai/compare/v6.0.9...v6.0.10
