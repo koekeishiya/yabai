@@ -293,7 +293,7 @@ static AXUIElementRef display_manager_find_element_at_point(CGPoint point)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-int display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool update_cursor_position)
+uint32_t display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool update_cursor_position)
 {
     int element_connection;
     ProcessSerialNumber element_psn;

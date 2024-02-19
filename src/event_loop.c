@@ -1078,10 +1078,10 @@ static EVENT_HANDLER(MOUSE_MOVED)
         uint32_t cursor_did = display_manager_point_display_id(point);
         if (g_display_manager.current_display_id == cursor_did) goto out;
 
-        CGRect menu = display_manager_menu_bar_rect(cursor_did);
-        if (cgrect_contains_point(menu, point)) goto out;
+        CGRect bounds = display_bounds_constrained(cursor_did);
+        if (!cgrect_contains_point(bounds, point)) goto out;
 
-        int wid = display_manager_focus_display_with_point(cursor_did, point, false);
+        uint32_t wid = display_manager_focus_display_with_point(cursor_did, point, false);
         g_mouse_state.ffm_window_id = wid;
     }
 

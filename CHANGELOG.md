@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Lock assigned handle while mouse_action resize is in progress [#2102](https://github.com/koekeishiya/yabai/issues/2102)
+- Modify "no click-zone" when using focus_follows_mouse to activate an empty display [#1892](https://github.com/koekeishiya/yabai/issues/1892) [#863](https://github.com/koekeishiya/yabai/issues/863)
 
 ## [6.0.12] - 2024-02-12
 ### Added

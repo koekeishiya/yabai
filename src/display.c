@@ -86,7 +86,7 @@ uint32_t display_id(CFStringRef uuid)
 
 CGRect display_bounds_constrained(uint32_t did)
 {
-    CGRect frame  = CGDisplayBounds(did);
+    CGRect frame = CGDisplayBounds(did);
     int effective_ext_top_padding = 0;
 
     if ((g_display_manager.mode == EXTERNAL_BAR_MAIN &&
