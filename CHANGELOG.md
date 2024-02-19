@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Mouse actions could stop working if the acting window was destroyed while a mouse action was in progress [#2038](https://github.com/koekeishiya/yabai/issues/2038)
 
 ## [6.0.13] - 2024-02-19
 ### Changed

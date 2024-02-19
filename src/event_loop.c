@@ -866,7 +866,7 @@ out:
 static EVENT_HANDLER(MOUSE_UP)
 {
     if (mission_control_is_active()) goto out;
-    if (!g_mouse_state.window)       goto out;
+    if (!g_mouse_state.window)       goto res;
 
     if (!__sync_bool_compare_and_swap(&g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
@@ -932,8 +932,8 @@ static EVENT_HANDLER(MOUSE_UP)
 
 err:
     g_mouse_state.window = NULL;
+res:
     g_mouse_state.current_action = MOUSE_MODE_NONE;
-
 out:
     CFRelease(context);
 }
