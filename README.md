@@ -63,6 +63,7 @@ Please also take note of the following caveats.
 |System&nbsp;Settings&nbsp;(macOS 13.x, 14.x)|In the Desktop & Dock tab, inside the Mission Control pane, the setting "Automatically rearrange Spaces based on most recent use" should be disabled for commands that rely on the ordering of spaces to work reliably.|
 |System&nbsp;Settings&nbsp;(macOS 14.x)|In the Desktop & Dock tab, inside the Desktop & Stage Manager pane, the setting "Show Items On Desktop" should be enabled for display and space focus commands to work reliably in multi-display configurations.|
 |System&nbsp;Settings&nbsp;(macOS 14.x)|In the Desktop & Dock tab, inside the Desktop & Stage Manager pane, the setting "Click wallpaper to reveal Desktop" should be set to "Only in Stage Manager" for display and space focus commands to work reliably.|
+|NSDocument-based tabs|NSDocument-based windows that use tabs, such as Terminal and Finder, [do not behave correctly when creating or removing tabs](https://github.com/koekeishiya/yabai/issues/68). Avoid creating tabs in these applications, or consider alternatives that do not use NSDocument's provided tab system.|
 
 ## License and Attribution
 
