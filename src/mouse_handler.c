@@ -70,9 +70,9 @@ static MOUSE_HANDLER(mouse_handler)
             if (!mouse_state->drag_detected) {
                 CGEventTapPostEvent(proxy, mouse_state->consumed_event);
                 CGEventTapPostEvent(proxy, event);
-                CFRelease(mouse_state->consumed_event);
             }
 
+            CFRelease(mouse_state->consumed_event);
             mouse_state->drag_detected = false;
             return NULL;
         }
