@@ -45,7 +45,10 @@ static MOUSE_HANDLER(mouse_handler)
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(event), mod);
 
         mouse_state->consume_mouse_click = mod == mouse_state->modifier;
-        if (mouse_state->consume_mouse_click) return NULL;
+        if (mouse_state->consume_mouse_click) {
+            mouse_state->consumed_event = (CGEventRef) CFRetain(event);
+            return NULL;
+        }
     } break;
     case kCGEventLeftMouseUp:
     case kCGEventRightMouseUp: {
@@ -65,18 +68,9 @@ static MOUSE_HANDLER(mouse_handler)
 
         if (mouse_state->consume_mouse_click) {
             if (!mouse_state->drag_detected) {
-                CGPoint point = CGEventGetLocation(event);
-
-                if (type == kCGEventLeftMouseUp) {
-                    CGPostMouseEvent(point, false, 1, true);
-                    CGPostMouseEvent(point, false, 1, false);
-                } else {
-                    CGEventRef mouse_event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseDown, point, kCGMouseButtonRight);
-                    CGEventPost(kCGHIDEventTap, mouse_event);
-                    CGEventSetType(mouse_event, type);
-                    CGEventPost(kCGHIDEventTap, mouse_event);
-                    CFRelease(mouse_event);
-                }
+                CGEventTapPostEvent(proxy, mouse_state->consumed_event);
+                CGEventTapPostEvent(proxy, event);
+                CFRelease(mouse_state->consumed_event);
             }
 
             mouse_state->drag_detected = false;

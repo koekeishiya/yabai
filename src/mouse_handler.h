@@ -63,6 +63,7 @@ struct mouse_state
     CFRunLoopSourceRef runloop_source;
     bool consume_mouse_click;
     bool drag_detected;
+    CGEventRef consumed_event;
     enum mouse_mode action1;
     enum mouse_mode action2;
     volatile uint8_t modifier;
