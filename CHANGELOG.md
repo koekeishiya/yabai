@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.14] - 2024-02-21
 ### Changed
 - Mouse actions could stop working if the acting window was destroyed while a mouse action was in progress [#2038](https://github.com/koekeishiya/yabai/issues/2038)
 - Replicate consumed mouse-click when no mouse-drag action is initiated [#1801](https://github.com/koekeishiya/yabai/issues/1801)
@@ -582,7 +584,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.13...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.14...HEAD
+[6.0.14]: https://github.com/koekeishiya/yabai/compare/v6.0.13...v6.0.14
 [6.0.13]: https://github.com/koekeishiya/yabai/compare/v6.0.12...v6.0.13
 [6.0.12]: https://github.com/koekeishiya/yabai/compare/v6.0.11...v6.0.12
 [6.0.11]: https://github.com/koekeishiya/yabai/compare/v6.0.10...v6.0.11
