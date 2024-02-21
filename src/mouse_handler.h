@@ -62,6 +62,7 @@ struct mouse_state
     CFMachPortRef handle;
     CFRunLoopSourceRef runloop_source;
     bool consume_mouse_click;
+    bool drag_detected;
     enum mouse_mode action1;
     enum mouse_mode action2;
     volatile uint8_t modifier;

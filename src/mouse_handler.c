@@ -16,6 +16,7 @@ static inline uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static MOUSE_HANDLER(mouse_handler)
 {
     struct mouse_state *mouse_state = context;
@@ -61,10 +62,30 @@ static MOUSE_HANDLER(mouse_handler)
         if (source_pid == g_pid) return event;
 
         event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(event), 0);
-        if (mouse_state->consume_mouse_click) return NULL;
+
+        if (mouse_state->consume_mouse_click) {
+            if (!mouse_state->drag_detected) {
+                CGPoint point = CGEventGetLocation(event);
+
+                if (type == kCGEventLeftMouseUp) {
+                    CGPostMouseEvent(point, false, 1, true);
+                    CGPostMouseEvent(point, false, 1, false);
+                } else {
+                    CGEventRef mouse_event = CGEventCreateMouseEvent(NULL, kCGEventRightMouseDown, point, kCGMouseButtonRight);
+                    CGEventPost(kCGHIDEventTap, mouse_event);
+                    CGEventSetType(mouse_event, type);
+                    CGEventPost(kCGHIDEventTap, mouse_event);
+                    CFRelease(mouse_event);
+                }
+            }
+
+            mouse_state->drag_detected = false;
+            return NULL;
+        }
     } break;
     case kCGEventLeftMouseDragged:
     case kCGEventRightMouseDragged: {
+        mouse_state->drag_detected = true;
         event_loop_post(&g_event_loop, MOUSE_DRAGGED, (void *) CFRetain(event), 0);
     } break;
     case kCGEventMouseMoved: {

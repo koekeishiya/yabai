@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Mouse actions could stop working if the acting window was destroyed while a mouse action was in progress [#2038](https://github.com/koekeishiya/yabai/issues/2038)
+- Replicate consumed mouse-click when no mouse-drag action is initiated [#1801](https://github.com/koekeishiya/yabai/issues/1801)
 
 ## [6.0.13] - 2024-02-19
 ### Changed
