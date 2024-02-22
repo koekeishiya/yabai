@@ -44,8 +44,8 @@ static MOUSE_HANDLER(mouse_handler)
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(event), mod);
 
-        mouse_state->consume_mouse_click = mod == mouse_state->modifier;
-        if (mouse_state->consume_mouse_click) {
+        if (mod == mouse_state->modifier) {
+            mouse_state->consume_mouse_click = true;
             mouse_state->consumed_event = (CGEventRef) CFRetain(event);
             return NULL;
         }
@@ -72,8 +72,9 @@ static MOUSE_HANDLER(mouse_handler)
                 CGEventTapPostEvent(proxy, event);
             }
 
-            CFRelease(mouse_state->consumed_event);
             mouse_state->drag_detected = false;
+            mouse_state->consume_mouse_click = false;
+            CFRelease(mouse_state->consumed_event);
             return NULL;
         }
     } break;
