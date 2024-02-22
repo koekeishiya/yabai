@@ -182,7 +182,8 @@ Global Settings
     System Integrity Protection must be partially disabled.
 
 *insert_feedback_color* ['0xAARRGGBB']::
-    Color of the *window --insert* message selection.
+    Color of the *window --insert* message and mouse_drag selection. +
+    The purpose is to provide a visual preview of the new window frame.
 
 *split_ratio* ['<FLOAT_SEL>']::
     Specify the size distribution when a window is split.

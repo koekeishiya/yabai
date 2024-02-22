@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Fix weird segfault with consumed mouse-event [#1801](https://github.com/koekeishiya/yabai/issues/1801)
+- Implement visual feedback to mouse_drag actions, controlled by `insert_feedback_color` [#2109](https://github.com/koekeishiya/yabai/issues/2109)
 
 ## [6.0.14] - 2024-02-21
 ### Changed

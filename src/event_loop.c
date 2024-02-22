@@ -899,6 +899,12 @@ static EVENT_HANDLER(MOUSE_UP)
         struct window_node *b_node = window ? view_find_window_node(dst_view, window->id) : NULL;
 
         if (a_node && b_node && a_node != b_node) {
+            if (g_mouse_state.feedback_node) {
+                g_mouse_state.feedback_node->insert_dir = 0;
+                insert_feedback_destroy(g_mouse_state.feedback_node);
+                g_mouse_state.feedback_node = NULL;
+            }
+
             enum mouse_drop_action drop_action = mouse_determine_drop_action(&g_mouse_state, a_node, window, point);
             switch (drop_action) {
             case MOUSE_DROP_ACTION_STACK: {
@@ -979,6 +985,69 @@ static EVENT_HANDLER(MOUSE_DRAGGED)
 
         g_mouse_state.last_moved_time = event_time;
         g_mouse_state.down_location = point;
+    }
+
+    struct view *src_view = window_manager_find_managed_window(&g_window_manager, g_mouse_state.window);
+    if (!src_view) goto out;
+
+    struct mouse_window_info info;
+    mouse_window_info_populate(&g_mouse_state, &info);
+
+    if (info.changed_position && !info.changed_size) {
+        uint64_t cursor_sid = display_space_id(display_manager_point_display_id(point));
+        struct view *dst_view = space_manager_find_view(&g_space_manager, cursor_sid);
+
+        struct window *window = window_manager_find_window_at_point_filtering_window(&g_window_manager, point, g_mouse_state.window->id);
+        if (!window) window = window_manager_find_window_at_point(&g_window_manager, point);
+        if (window == g_mouse_state.window) window = NULL;
+
+        struct window_node *a_node = view_find_window_node(src_view, g_mouse_state.window->id);
+        struct window_node *b_node = window ? view_find_window_node(dst_view, window->id) : NULL;
+
+        if (a_node && b_node && a_node != b_node) {
+            if (g_mouse_state.feedback_node && g_mouse_state.feedback_node != b_node) {
+                g_mouse_state.feedback_node->insert_dir = 0;
+                insert_feedback_destroy(g_mouse_state.feedback_node);
+            }
+
+            int insert_dir = 0;
+            enum mouse_drop_action drop_action = mouse_determine_drop_action(&g_mouse_state, a_node, window, point);
+            switch (drop_action) {
+            case MOUSE_DROP_ACTION_STACK: {
+                insert_dir = STACK;
+            } break;
+            case MOUSE_DROP_ACTION_SWAP: {
+                insert_dir = STACK;
+            } break;
+            case MOUSE_DROP_ACTION_WARP_TOP: {
+                insert_dir = DIR_NORTH;
+            } break;
+            case MOUSE_DROP_ACTION_WARP_RIGHT: {
+                insert_dir = DIR_EAST;
+            } break;
+            case MOUSE_DROP_ACTION_WARP_BOTTOM: {
+                insert_dir = DIR_SOUTH;
+            } break;
+            case MOUSE_DROP_ACTION_WARP_LEFT: {
+                insert_dir = DIR_WEST;
+            } break;
+            case MOUSE_DROP_ACTION_NONE: {
+                /* silence compiler warning.. */
+            } break;
+            }
+
+            if (b_node->insert_dir != insert_dir) {
+                b_node->insert_dir = insert_dir;
+                insert_feedback_show(b_node);
+                g_mouse_state.feedback_node = b_node;
+            }
+        } else if (!b_node) {
+            if (g_mouse_state.feedback_node) {
+                g_mouse_state.feedback_node->insert_dir = 0;
+                insert_feedback_destroy(g_mouse_state.feedback_node);
+                g_mouse_state.feedback_node = NULL;
+            }
+        }
     }
 
 out:

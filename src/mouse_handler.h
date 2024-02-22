@@ -75,6 +75,7 @@ struct mouse_state
     CGRect window_frame;
     uint32_t ffm_window_id;
     uint8_t direction;
+    struct window_node *feedback_node;
 };
 
 static char *mouse_mod_str[] =
