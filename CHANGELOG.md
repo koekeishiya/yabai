@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.0.15] - 2024-02-22
 ### Changed
 - Fix weird segfault with consumed mouse-event [#1801](https://github.com/koekeishiya/yabai/issues/1801)
-- Implement visual feedback to mouse_drag actions, controlled by `insert_feedback_color` [#2109](https://github.com/koekeishiya/yabai/issues/2109)
+- Implement visual feedback for mouse_drag actions, controlled by `insert_feedback_color` [#2109](https://github.com/koekeishiya/yabai/issues/2109)
 
 ## [6.0.14] - 2024-02-21
 ### Changed
@@ -587,7 +589,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.14...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.15...HEAD
+[6.0.15]: https://github.com/koekeishiya/yabai/compare/v6.0.14...v6.0.15
 [6.0.14]: https://github.com/koekeishiya/yabai/compare/v6.0.13...v6.0.14
 [6.0.13]: https://github.com/koekeishiya/yabai/compare/v6.0.12...v6.0.13
 [6.0.12]: https://github.com/koekeishiya/yabai/compare/v6.0.11...v6.0.12
