@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Make space visible on display without stealing focus (the space must belong to the display) [#2113](https://github.com/koekeishiya/yabai/issues/2113)
 
 ## [6.0.15] - 2024-02-22
 ### Changed

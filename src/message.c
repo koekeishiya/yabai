@@ -81,6 +81,7 @@ extern bool g_verbose;
 
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
 #define COMMAND_DISPLAY_FOCUS "--focus"
+#define COMMAND_DISPLAY_SPACE "--space"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
@@ -1489,6 +1490,20 @@ static void handle_domain_display(FILE *rsp, struct token domain, char *message)
         struct selector selector = parse_display_selector(rsp, &message, acting_did, false);
         if (selector.did_parse && selector.did) {
             display_manager_focus_display(selector.did, display_space_id(selector.did));
+        }
+    } else if (token_equals(command, COMMAND_DISPLAY_SPACE)) {
+        struct selector selector = parse_space_selector(rsp, &message, display_space_id(acting_did), false);
+        if (selector.did_parse && selector.sid) {
+            enum space_op_error result = display_manager_focus_space(acting_did, selector.sid);
+            if (result == SPACE_OP_ERROR_SAME_DISPLAY) {
+                daemon_fail(rsp, "acting display does not contain the given space.\n");
+            } else if (result == SPACE_OP_ERROR_DISPLAY_IS_ANIMATING) {
+                daemon_fail(rsp, "cannot focus space because the display is in the middle of an animation.\n");
+            } else if (result == SPACE_OP_ERROR_IN_MISSION_CONTROL) {
+                daemon_fail(rsp, "cannot focus space because mission-control is active.\n");
+            } else if (result == SPACE_OP_ERROR_SCRIPTING_ADDITION) {
+                daemon_fail(rsp, "cannot focus space due to an error with the scripting-addition.\n");
+            }
         }
     } else {
         daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

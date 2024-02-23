@@ -330,6 +330,20 @@ void display_manager_focus_display(uint32_t did, uint64_t sid)
     }
 }
 
+enum space_op_error display_manager_focus_space(uint32_t did, uint64_t sid)
+{
+    bool is_in_mc = mission_control_is_active();
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
+    bool is_animating = display_manager_display_is_animating(did);
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    uint32_t space_did = space_display_id(sid);
+    if (space_did != did) return SPACE_OP_ERROR_SAME_DISPLAY;
+
+    return scripting_addition_focus_space(sid) ? SPACE_OP_ERROR_SUCCESS : SPACE_OP_ERROR_SCRIPTING_ADDITION;
+}
+
 bool display_manager_begin(struct display_manager *dm)
 {
     dm->current_display_id = display_manager_active_display_id();

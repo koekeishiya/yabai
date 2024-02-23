@@ -244,6 +244,11 @@ COMMAND
 *--focus* '<DISPLAY_SEL>'::
     Focus the given display.
 
+*--space* '<SPACE_SEL>'::
+    The given space will become visible on the selected display, without changing focus. +
+    The given space must belong to the selected display. +
+    System Integrity Protection must be partially disabled.
+
 Space
 ~~~~~
 

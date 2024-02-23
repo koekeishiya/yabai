@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-02-22
+.\"      Date: 2024-02-23
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-02-22" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-02-23" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -346,6 +346,15 @@ yabai \-m display [\fI<DISPLAY_SEL\fP>] \fI<COMMAND>\fP
 \fB\-\-focus\fP \fI<DISPLAY_SEL>\fP
 .RS 4
 Focus the given display.
+.RE
+.sp
+\fB\-\-space\fP \fI<SPACE_SEL>\fP
+.RS 4
+The given space will become visible on the selected display, without changing focus.
+.br
+The given space must belong to the selected display.
+.br
+System Integrity Protection must be partially disabled.
 .RE
 .SS "Space"
 .SS "General Syntax"
