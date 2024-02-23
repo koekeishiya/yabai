@@ -457,9 +457,10 @@ static void do_space_move(char *message)
 {
     if (dock_spaces == nil || dp_desktop_picture_manager == nil || move_space_fp == 0) return;
 
-    uint64_t source_space_id, dest_space_id;
+    uint64_t source_space_id, dest_space_id, source_prev_space_id;
     unpack(message, source_space_id);
     unpack(message, dest_space_id);
+    unpack(message, source_prev_space_id);
 
     bool focus_dest_space;
     unpack(message, focus_dest_space);
@@ -472,6 +473,18 @@ static void do_space_move(char *message)
     id dest_space = space_for_display_with_id(dest_display_uuid, dest_space_id);
     unsigned dest_display_id = ((unsigned (*)(id, SEL, id)) objc_msgSend)(dock_spaces, @selector(displayIDForSpace:), dest_space);
     id dest_display_space = display_space_for_display_uuid(dest_display_uuid);
+
+    if (source_prev_space_id) {
+        NSArray *ns_source_space = @[ @(source_space_id) ];
+        NSArray *ns_dest_space = @[ @(source_prev_space_id) ];
+        id new_source_space = space_for_display_with_id(source_display_uuid, source_prev_space_id);
+        CGSShowSpaces(CGSMainConnectionID(), (__bridge CFArrayRef) ns_dest_space);
+        CGSHideSpaces(CGSMainConnectionID(), (__bridge CFArrayRef) ns_source_space);
+        CGSManagedDisplaySetCurrentSpace(CGSMainConnectionID(), source_display_uuid, source_prev_space_id);
+        set_ivar_value(source_display_space, "_currentSpace", [new_source_space retain]);
+        [ns_dest_space release];
+        [ns_source_space release];
+    }
 
     asm__call_move_space(source_space, dest_space, dest_display_uuid, dock_spaces, move_space_fp);
 

@@ -474,13 +474,30 @@ bool scripting_addition_destroy_space(uint64_t sid)
     return scripting_addition_send_bytes(bytes, length);
 }
 
-bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
+bool scripting_addition_move_space_to_display(uint64_t src_sid, uint64_t dst_sid, uint64_t src_prev_sid, bool focus)
 {
     char bytes[0x100];
 
     char length = 2;
     pack(bytes, src_sid, length);
     pack(bytes, dst_sid, length);
+    pack(bytes, src_prev_sid, length);
+    pack(bytes, focus, length);
+    bytes[1] = SA_OPCODE_SPACE_MOVE;
+    bytes[0] = length-1;
+
+    return scripting_addition_send_bytes(bytes, length);
+}
+
+bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
+{
+    char bytes[0x100];
+
+    char length = 2;
+    uint64_t dummy_sid = 0;
+    pack(bytes, src_sid, length);
+    pack(bytes, dst_sid, length);
+    pack(bytes, dummy_sid, length);
     pack(bytes, focus, length);
     bytes[1] = SA_OPCODE_SPACE_MOVE;
     bytes[0] = length-1;
