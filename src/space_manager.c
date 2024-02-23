@@ -774,7 +774,7 @@ enum space_op_error space_manager_move_space_to_display(struct space_manager *sm
 
     bool focus_space = sid == space_manager_active_space();
 
-    if (scripting_addition_move_space_to_display(sid, d_sid,  focus_space ? space_manager_prev_space(sid) : 0, 1)) {
+    if (scripting_addition_move_space_to_display(sid, d_sid,  focus_space ? space_manager_prev_space(sid) : 0, focus_space ? 1 : 0)) {
         space_manager_mark_view_invalid(sm, sid);
         if (focus_space) {
             space_manager_focus_space(sid);
