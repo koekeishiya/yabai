@@ -624,7 +624,9 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             context->animation_list[i].proxy.th                = (int)(existing_animation->proxy.th);
             context->animation_list[i].proxy.level             = existing_animation->proxy.level;
             context->animation_list[i].proxy.sub_level         = existing_animation->proxy.sub_level;
-            context->animation_list[i].proxy.image             = (CGImageRef) CFRetain(existing_animation->proxy.image);
+            context->animation_list[i].proxy.image             = existing_animation->proxy.image
+                                                               ? (CGImageRef) CFRetain(existing_animation->proxy.image)
+                                                               : NULL;
             __asm__ __volatile__ ("" ::: "memory");
 
             float alpha = 1.0f;
