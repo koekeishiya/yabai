@@ -376,4 +376,55 @@ static inline float clampf_range(float value, float min, float max)
     return value;
 }
 
+static CGImageRef cgimage_restore_alpha(CGImageRef image)
+{
+    int width     = CGImageGetWidth(image);
+    int height    = CGImageGetHeight(image);
+    uint8_t *data = (uint8_t *) calloc(width * height * 4, 1);
+
+    CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(data, width, height, 8, width * 4, color_space, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast);
+    CGColorSpaceRelease(color_space);
+    CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
+
+    for (int y = 0; y < height; ++y) {
+        uint8_t *pixel_row = &data[y * width * 4];
+
+        for (int x = 0; x < width; ++x) {
+            if (pixel_row[3]) {
+
+                //
+                // NOTE(koekeishiya): Reverse premultiplied alpha.
+                //
+
+                int r = pixel_row[0] * 255 / pixel_row[3];
+                int g = pixel_row[1] * 255 / pixel_row[3];
+                int b = pixel_row[2] * 255 / pixel_row[3];
+
+                //
+                // NOTE(koekeishiya): Make fully opaque.
+                //
+
+                pixel_row[3] = 255;
+
+                //
+                // NOTE(koekeishiya): Compute premultiplied alpha.
+                //
+
+                pixel_row[0] = r * pixel_row[3] / 255;
+                pixel_row[1] = g * pixel_row[3] / 255;
+                pixel_row[2] = b * pixel_row[3] / 255;
+            }
+
+            pixel_row += 4;
+        }
+    }
+
+    CGImageRef result = CGBitmapContextCreateImage(context);
+    CGContextRelease(context);
+
+    free(data);
+    return result;
+}
+
 #endif

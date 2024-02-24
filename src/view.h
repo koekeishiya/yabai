@@ -25,7 +25,7 @@ struct window_proxy
     CGRect frame;
     int level;
     int sub_level;
-    CFArrayRef image;
+    CGImageRef image;
 };
 
 struct window_animation
