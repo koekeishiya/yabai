@@ -39,11 +39,13 @@ struct process *process_create(ProcessSerialNumber psn)
 
     if (process_info.processType == 'XPC!') {
         debug("%s: xpc service '%s' detected! ignoring..\n", __FUNCTION__, process_name);
+        free(process_name);
         return NULL;
     }
 
     if (process_info.processMode & modeOnlyBackground) {
         debug("%s: background-only service '%s' detected! ignoring..\n", __FUNCTION__, process_name);
+        free(process_name);
         return NULL;
     }
 
