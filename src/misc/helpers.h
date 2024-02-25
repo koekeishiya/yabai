@@ -380,44 +380,87 @@ static CGImageRef cgimage_restore_alpha(CGImageRef image)
 {
     int width     = CGImageGetWidth(image);
     int height    = CGImageGetHeight(image);
-    uint8_t *data = (uint8_t *) calloc(width * height * 4, 1);
+    int pitch     = width * 4;
+    uint8_t *data = (uint8_t *) calloc(height * pitch, 1);
 
     CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
-    CGContextRef context = CGBitmapContextCreate(data, width, height, 8, width * 4, color_space, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast);
+    CGContextRef context = CGBitmapContextCreate(data, width, height, 8, pitch, color_space, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast);
     CGColorSpaceRelease(color_space);
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
 
+#ifdef __x86_64__
+    __m128      inv255 = _mm_set1_ps(1.0f / 255.0f);
+    __m128      one255 = _mm_set1_ps(255.0f);
+    __m128        zero = _mm_set1_ps(0.0f);
+    __m128i    mask_ff = _mm_set1_epi32(0xff);
+#elif __arm64__
+    float32x4_t inv255 = vdupq_n_f32(1.0f / 255.0f);
+    float32x4_t one255 = vdupq_n_f32(255.0f);
+    float32x4_t   zero = vdupq_n_f32(0.0f);
+    int32x4_t  mask_ff = vdupq_n_s32(0xff);
+#endif
+
+    uint8_t *row = (uint8_t *) data;
     for (int y = 0; y < height; ++y) {
-        uint8_t *pixel_row = &data[y * width * 4];
+        uint32_t *pixel = (uint32_t *) row;
+        for (int x = 0; x < width; x += 4) {
+#ifdef __x86_64__
+            __m128i source = _mm_loadu_si128((__m128i *) pixel);
+            __m128 r = _mm_cvtepi32_ps(_mm_and_si128(source, mask_ff));
+            __m128 g = _mm_cvtepi32_ps(_mm_and_si128(_mm_srli_epi32(source,  8), mask_ff));
+            __m128 b = _mm_cvtepi32_ps(_mm_and_si128(_mm_srli_epi32(source, 16), mask_ff));
+            __m128 a = _mm_cvtepi32_ps(_mm_and_si128(_mm_srli_epi32(source, 24), mask_ff));
+            __m128i mask = _mm_castps_si128(_mm_cmpgt_ps(a, zero));
 
-        for (int x = 0; x < width; ++x) {
-            if (pixel_row[3]) {
+            r = _mm_mul_ps(one255, _mm_div_ps(r, a));
+            g = _mm_mul_ps(one255, _mm_div_ps(g, a));
+            b = _mm_mul_ps(one255, _mm_div_ps(b, a));
 
-                //
-                // NOTE(koekeishiya): Reverse premultiplied alpha.
-                //
+            a = one255;
 
-                int r = pixel_row[0] * 255 / pixel_row[3];
-                int g = pixel_row[1] * 255 / pixel_row[3];
-                int b = pixel_row[2] * 255 / pixel_row[3];
+            r = _mm_mul_ps(inv255, _mm_mul_ps(r, a));
+            g = _mm_mul_ps(inv255, _mm_mul_ps(g, a));
+            b = _mm_mul_ps(inv255, _mm_mul_ps(b, a));
 
-                //
-                // NOTE(koekeishiya): Make fully opaque.
-                //
+            __m128i sr = _mm_cvtps_epi32(r);
+            __m128i sg = _mm_slli_epi32(_mm_cvtps_epi32(g),  8);
+            __m128i sb = _mm_slli_epi32(_mm_cvtps_epi32(b), 16);
+            __m128i sa = _mm_slli_epi32(_mm_cvtps_epi32(a), 24);
 
-                pixel_row[3] = 255;
+            __m128i color = _mm_or_si128(_mm_or_si128(_mm_or_si128(sr, sg), sb), sa);
+            __m128i masked_color = _mm_or_si128(_mm_and_si128(mask, color), _mm_andnot_si128(mask, source));
+            _mm_storeu_si128((__m128i *) pixel, masked_color);
+#elif __arm64__
+            int32x4_t source = vld1q_s32((int32_t *) pixel);
+            float32x4_t r = vcvtq_f32_s32(vandq_s32(source, mask_ff));
+            float32x4_t g = vcvtq_f32_s32(vandq_s32(vshlq_u32(source, vdupq_n_s32(-8)),  mask_ff));
+            float32x4_t b = vcvtq_f32_s32(vandq_s32(vshlq_u32(source, vdupq_n_s32(-16)), mask_ff));
+            float32x4_t a = vcvtq_f32_s32(vandq_s32(vshlq_u32(source, vdupq_n_s32(-24)), mask_ff));
+            int32x4_t mask = vreinterpretq_s32_f32(vcgtq_f32(a, zero));
 
-                //
-                // NOTE(koekeishiya): Compute premultiplied alpha.
-                //
+            r = vmulq_f32(one255, vdivq_f32(r, a));
+            g = vmulq_f32(one255, vdivq_f32(g, a));
+            b = vmulq_f32(one255, vdivq_f32(b, a));
 
-                pixel_row[0] = r * pixel_row[3] / 255;
-                pixel_row[1] = g * pixel_row[3] / 255;
-                pixel_row[2] = b * pixel_row[3] / 255;
-            }
+            a = one255;
 
-            pixel_row += 4;
+            r = vmulq_f32(inv255, vmulq_f32(r, a));
+            g = vmulq_f32(inv255, vmulq_f32(g, a));
+            b = vmulq_f32(inv255, vmulq_f32(b, a));
+
+            int32x4_t sr = vcvtnq_s32_f32(r);
+            int32x4_t sg = vshlq_s32(vcvtnq_s32_f32(g), vdupq_n_s32(8));
+            int32x4_t sb = vshlq_s32(vcvtnq_s32_f32(b), vdupq_n_s32(16));
+            int32x4_t sa = vshlq_s32(vcvtnq_s32_f32(a), vdupq_n_s32(24));
+
+            int32x4_t color = vorrq_s32(vorrq_s32(vorrq_s32(sr, sg), sb), sa);
+            int32x4_t masked_color = vorrq_s32(vandq_s32(color, mask), vbicq_s32(source, mask));
+            vst1q_s32((int32_t *) pixel, masked_color);
+#endif
+            pixel += 4;
         }
+
+        row += pitch;
     }
 
     CGImageRef result = CGBitmapContextCreateImage(context);
