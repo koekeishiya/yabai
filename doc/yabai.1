@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-02-23
+.\"      Date: 2024-02-25
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-02-23" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-02-25" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -703,6 +703,13 @@ Add a new rule.
 \fB\-\-remove \fI<RULE_SEL>\fP\fP
 .RS 4
 Remove an existing rule with the given index or label.
+.RE
+.sp
+\fB\-\-reapply [\fI<RULE_SEL>\fP]\fP
+.RS 4
+Apply an existing rule with the given index or label to all known windows.
+.br
+Will apply all rules if no index or label is specified.
 .RE
 .sp
 \fB\-\-list\fP

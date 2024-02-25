@@ -516,6 +516,10 @@ COMMAND
 *--remove '<RULE_SEL>'*::
     Remove an existing rule with the given index or label.
 
+*--reapply ['<RULE_SEL>']*::
+    Apply an existing rule with the given index or label to all known windows. +
+    Will apply all rules if no index or label is specified.
+
 *--list*::
     Output list of registered rules.
 

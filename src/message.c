@@ -173,9 +173,10 @@ extern bool g_verbose;
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN RULE---------------------------------- */
-#define COMMAND_RULE_ADD "--add"
-#define COMMAND_RULE_REM "--remove"
-#define COMMAND_RULE_LS  "--list"
+#define COMMAND_RULE_ADD     "--add"
+#define COMMAND_RULE_REM     "--remove"
+#define COMMAND_RULE_REAPPLY "--reapply"
+#define COMMAND_RULE_LS      "--list"
 
 #define ARGUMENT_RULE_KEY_APP     "app"
 #define ARGUMENT_RULE_KEY_TITLE   "title"
@@ -2405,6 +2406,21 @@ rnext:
             if (!rule_remove_by_label(value.string_value)) {
                 daemon_fail(rsp, "rule with label '%s' not found.\n", value.string_value);
             }
+        } else {
+            daemon_fail(rsp, "value '%.*s' is not a valid option for RULE_SEL\n", value.token.length, value.token.text);
+        }
+    } else if (token_equals(command, COMMAND_RULE_REAPPLY)) {
+        struct token_value value = token_to_value(get_token(&message));
+        if (value.type == TOKEN_TYPE_INT) {
+            if (!rule_reapply_by_index(value.int_value)) {
+                daemon_fail(rsp, "rule with index '%d' not found.\n", value.int_value);
+            }
+        } else if (value.type == TOKEN_TYPE_STRING) {
+            if (!rule_reapply_by_label(value.string_value)) {
+                daemon_fail(rsp, "rule with label '%s' not found.\n", value.string_value);
+            }
+        } else if (value.type == TOKEN_TYPE_INVALID) {
+            rule_reapply_all();
         } else {
             daemon_fail(rsp, "value '%.*s' is not a valid option for RULE_SEL\n", value.token.length, value.token.text);
         }
