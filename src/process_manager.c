@@ -13,53 +13,10 @@ static TABLE_COMPARE_FUNC(compare_psn)
 
 static const char *process_name_blacklist[] =
 {
-    "loginwindow",
     "ScreenSaverEngine",
-    "callservicesd",
-    "UIKitSystem",
-    "imklaunchagent",
-    "LinkedNotesUIService",
-    "Universal Control",
-    "Dock",
-    "WindowManager",
-    "photolibraryd",
-    "siriactionsd",
-    "chronod",
-    "universalaccessd",
-    "softwareupdated",
-    "familycircled",
-    "Notification Centre",
-    "CoreServicesUIAgent",
-    "SystemUIServer",
-    "Control Centre",
-    "BackgroundTaskManagementAgent",
-    "Wallpaper",
-    "talagent",
-    "CoreLocationAgent",
-    "Single Sign-On",
-    "com.apple.PressAndHold",
-    "Wi-Fi",
-    "Keychain Circle Notification",
-    "TextInputMenuAgent",
-    "TextInputSwitcher",
-    "AirPlayUIAgent",
-    "AppSSODaemon",
-    "SoftwareUpdateNotificationManager",
-    "coreautha",
-    "OSDUIHelper",
-    "PowerChime",
-    "nbagent",
-    "studentd",
-    "Family",
-    "Spotlight",
-    "skhd",
-    "yabai",
-    "sketchybar",
-    "borders",
     "Übersicht",
     "Slack Helper (Plugin)",
     "Google Chrome Helper (Plugin)",
-    "osascript"
 };
 
 #pragma clang diagnostic push
@@ -68,11 +25,6 @@ struct process *process_create(ProcessSerialNumber psn)
 {
     ProcessInfoRec process_info = { .processInfoLength = sizeof(ProcessInfoRec) };
     GetProcessInformation(&psn, &process_info);
-
-    if (process_info.processType == 'XPC!') {
-        debug("%s: xpc service detected! ignoring..\n", __FUNCTION__);
-        return NULL;
-    }
 
     CFStringRef process_name_ref = NULL;
     CopyProcessName(&psn, &process_name_ref);
@@ -84,6 +36,16 @@ struct process *process_create(ProcessSerialNumber psn)
 
     char *process_name = cfstring_copy(process_name_ref);
     CFRelease(process_name_ref);
+
+    if (process_info.processType == 'XPC!') {
+        debug("%s: xpc service '%s' detected! ignoring..\n", __FUNCTION__, process_name);
+        return NULL;
+    }
+
+    if (process_info.processMode & modeOnlyBackground) {
+        debug("%s: background-only service '%s' detected! ignoring..\n", __FUNCTION__, process_name);
+        return NULL;
+    }
 
     for (int i = 0; i < array_count(process_name_blacklist); ++i) {
         if (string_equals(process_name, process_name_blacklist[i])) {
