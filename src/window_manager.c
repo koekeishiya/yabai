@@ -473,21 +473,14 @@ static void window_manager_destroy_window_proxy(int animation_connection, struct
     }
 }
 
-static void *window_manager_set_window_frame_thread_proc(void *data)
-{
-    struct window_animation *animation = data;
-    window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
-    return NULL;
-}
-
 static void *window_manager_build_window_proxy_thread_proc(void *data)
 {
     struct window_animation *animation = data;
 
     float alpha = 1.0f;
+    SLSGetWindowAlpha(animation->cid, animation->wid, &alpha);
     animation->proxy.level = window_level(animation->wid);
     animation->proxy.sub_level = window_sub_level(animation->wid);
-    SLSGetWindowAlpha(animation->cid, animation->wid, &alpha);
     SLSGetWindowBounds(animation->cid, animation->wid, &animation->proxy.frame);
     animation->proxy.tx = animation->proxy.frame.origin.x;
     animation->proxy.ty = animation->proxy.frame.origin.y;
@@ -507,7 +500,9 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     window_manager_create_window_proxy(animation->cid, alpha, &animation->proxy);
     window_manager_set_window_proxy_connection_property(animation->cid, animation->wid, animation->proxy.id);
     scripting_addition_swap_window_proxy_in(animation->wid, animation->proxy.id);
-    window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
+    });
 
     return NULL;
 }
@@ -607,12 +602,9 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
         if (existing_animation) {
             __atomic_store_n(&existing_animation->skip, true, __ATOMIC_RELEASE);
 
-            pthread_t thread;
-            if (pthread_create(&thread, NULL, &window_manager_set_window_frame_thread_proc, &context->animation_list[i]) == 0) {
-                pthread_detach(thread);
-            } else {
-                window_manager_set_window_frame_thread_proc(&context->animation_list[i]);
-            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                window_manager_set_window_frame(context->animation_list[i].window, context->animation_list[i].x, context->animation_list[i].y, context->animation_list[i].w, context->animation_list[i].h);
+            });
 
             context->animation_list[i].proxy.frame.origin.x    = (int)(existing_animation->proxy.tx);
             context->animation_list[i].proxy.frame.origin.y    = (int)(existing_animation->proxy.ty);
