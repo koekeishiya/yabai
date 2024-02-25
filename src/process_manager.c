@@ -13,7 +13,6 @@ static TABLE_COMPARE_FUNC(compare_psn)
 
 static const char *process_name_blacklist[] =
 {
-    "ScreenSaverEngine",
     "Übersicht",
     "Slack Helper (Plugin)",
     "Google Chrome Helper (Plugin)",
