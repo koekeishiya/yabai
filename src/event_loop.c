@@ -567,6 +567,16 @@ static EVENT_HANDLER(WINDOW_MOVED)
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_MOVED, window);
     window->frame.origin = new_origin;
+
+    if (!g_mouse_state.window || g_mouse_state.window != window) {
+        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+        if (view) {
+            struct window_node *node = view_find_window_node(view, window->id);
+            if (node && (node->area.x != new_origin.x || node->area.y != new_origin.y)) {
+                window_node_flush(node);
+            }
+        }
+    }
 }
 
 static EVENT_HANDLER(WINDOW_RESIZED)
@@ -622,6 +632,16 @@ static EVENT_HANDLER(WINDOW_RESIZED)
     } else if (!was_fullscreen == !is_fullscreen) {
         if (g_mouse_state.current_action == MOUSE_MODE_MOVE && g_mouse_state.window == window) {
             g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
+        }
+
+        if (!g_mouse_state.window || g_mouse_state.window != window) {
+            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+            if (view) {
+                struct window_node *node = view_find_window_node(view, window->id);
+                if (node && (node->area.x != new_frame.origin.x || node->area.y != new_frame.origin.y || node->area.w != new_frame.size.width || node->area.h != new_frame.size.height)) {
+                    window_node_flush(node);
+                }
+            }
         }
     }
 }
