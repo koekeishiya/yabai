@@ -2316,7 +2316,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             } else if (string_equals(key, ARGUMENT_RULE_KEY_ALPHA)) {
                 if (exclusion) unsupported_exclusion = key;
 
-                if ((sscanf(value, "%f", &rule.alpha) != 1) || (!in_range_ei(rule.alpha, 0.0f, 1.0f))) {
+                if ((sscanf(value, "%f", &rule.alpha) != 1) || (!in_range_ii(rule.alpha, 0.0f, 1.0f))) {
                     daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                     did_parse = false;
                 }

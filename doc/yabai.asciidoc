@@ -558,10 +558,12 @@ ARGUMENT
     When focusing the window, put the mouse at its center. Overrides the global *mouse_follows_focus* setting.
 
 *layer='<LAYER>'*::
-    Window is ordered within the given stacking layer. The window will no longer be eligible for automatic change in layer when managed/unmanaged.
+    Window is ordered within the given stacking layer. The window will no longer be eligible for automatic change in layer when managed/unmanaged. +
+    Specify the value 'auto' to reset back to normal and make it become automatically managed.
 
 *opacity='<FLOAT_SEL>'*::
-    Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
+    Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change. +
+    Specify the value '0.0' to reset back to full opacity and make it become automatically managed.
 
 *native-fullscreen='<BOOL_SEL>'*::
     Window should enter native macOS fullscreen mode.

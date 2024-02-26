@@ -180,7 +180,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window_manager_set_window_layer(window, rule->layer);
     }
 
-    if (in_range_ei(rule->alpha, 0.0f, 1.0f)) {
+    if (in_range_ii(rule->alpha, 0.0f, 1.0f)) {
         window->opacity = rule->alpha;
         window_manager_set_opacity(wm, window, rule->alpha);
     }

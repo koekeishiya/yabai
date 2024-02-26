@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Managed windows should snap back into place when moved incorrectly using the mouse [#1199](https://github.com/koekeishiya/yabai/issues/1199) [#2066](https://github.com/koekeishiya/yabai/issues/2066)
 - Managed windows should correct their frame when modified by external means [#2117](https://github.com/koekeishiya/yabai/issues/2117)
 - Window frame would sometimes not be set correctly when using window animations [#2120](https://github.com/koekeishiya/yabai/issues/2120)
+- Allow resetting window opacity in window rules [#2127](https://github.com/koekeishiya/yabai/issues/2127)
 
 ## [6.0.15] - 2024-02-22
 ### Changed
