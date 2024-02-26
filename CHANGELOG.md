@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Allow re-applying existing rules to all known windows [#2121](https://github.com/koekeishiya/yabai/issues/2121)
 - Restore application_activated and application_deactivated signals [#2122](https://github.com/koekeishiya/yabai/issues/2122)
 - Rules can now be configured to apply *only once* for all known windows [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+- Restore system_woke signal [#2124](https://github.com/koekeishiya/yabai/issues/2124)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)

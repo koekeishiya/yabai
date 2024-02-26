@@ -1360,6 +1360,8 @@ static EVENT_HANDLER(SYSTEM_WOKE)
         window_manager_set_window_opacity(&g_window_manager, focused_window, g_window_manager.active_window_opacity);
         window_manager_center_mouse(&g_window_manager, focused_window);
     }
+
+    event_signal_push(SIGNAL_SYSTEM_WOKE, NULL);
 }
 
 static EVENT_HANDLER(DAEMON_MESSAGE)

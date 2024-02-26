@@ -35,9 +35,11 @@ enum signal_type
     SIGNAL_MISSION_CONTROL_ENTER,
     SIGNAL_MISSION_CONTROL_EXIT,
 
-    SIGNAL_DOCK_DID_RESTART,
-    SIGNAL_MENU_BAR_HIDDEN_CHANGED,
     SIGNAL_DOCK_DID_CHANGE_PREF,
+    SIGNAL_DOCK_DID_RESTART,
+
+    SIGNAL_MENU_BAR_HIDDEN_CHANGED,
+    SIGNAL_SYSTEM_WOKE,
 
     SIGNAL_TYPE_COUNT
 };
@@ -76,9 +78,11 @@ static const char *signal_type_str[] =
     [SIGNAL_MISSION_CONTROL_ENTER]          = "mission_control_enter",
     [SIGNAL_MISSION_CONTROL_EXIT]           = "mission_control_exit",
 
-    [SIGNAL_DOCK_DID_RESTART]               = "dock_did_restart",
-    [SIGNAL_MENU_BAR_HIDDEN_CHANGED]        = "menu_bar_hidden_changed",
     [SIGNAL_DOCK_DID_CHANGE_PREF]           = "dock_did_change_pref",
+    [SIGNAL_DOCK_DID_RESTART]               = "dock_did_restart",
+
+    [SIGNAL_MENU_BAR_HIDDEN_CHANGED]        = "menu_bar_hidden_changed",
+    [SIGNAL_SYSTEM_WOKE]                    = "system_woke",
 
     [SIGNAL_TYPE_COUNT]                     = "signal_type_count"
 };

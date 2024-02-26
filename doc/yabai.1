@@ -1052,6 +1052,11 @@ Triggered when mission\-control deactivates.
 Passes one argument: $YABAI_MISSION_CONTROL_MODE
 .RE
 .sp
+\fBdock_did_change_pref\fP
+.RS 4
+Triggered when the macOS Dock preferences changes.
+.RE
+.sp
 \fBdock_did_restart\fP
 .RS 4
 Triggered when Dock.app restarts.
@@ -1062,9 +1067,9 @@ Triggered when Dock.app restarts.
 Triggered when the macOS menubar \fIautohide\fP setting changes.
 .RE
 .sp
-\fBdock_did_change_pref\fP
+\fBsystem_woke\fP
 .RS 4
-Triggered when the macOS Dock preferences changes.
+Triggered when macOS wakes from sleep.
 .RE
 .SS "ACTION"
 .sp

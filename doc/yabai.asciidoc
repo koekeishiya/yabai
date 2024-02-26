@@ -737,14 +737,17 @@ EVENT
     Triggered when mission-control deactivates. +
     Passes one argument: $YABAI_MISSION_CONTROL_MODE
 
+*dock_did_change_pref*::
+    Triggered when the macOS Dock preferences changes.
+
 *dock_did_restart*::
     Triggered when Dock.app restarts.
 
 *menu_bar_hidden_changed*::
     Triggered when the macOS menubar 'autohide' setting changes.
 
-*dock_did_change_pref*::
-    Triggered when the macOS Dock preferences changes.
+*system_woke*::
+    Triggered when macOS wakes from sleep.
 
 ACTION
 ^^^^^^

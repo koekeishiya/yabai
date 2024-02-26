@@ -152,14 +152,14 @@ extern struct event_loop g_event_loop;
                 name:NSWorkspaceDidWakeNotification
                 object:nil];
 
-       [[NSNotificationCenter defaultCenter] addObserver:self
-                selector:@selector(didRestartDock:)
-                name:@"NSApplicationDockDidRestartNotification"
-                object:nil];
-
        [[NSDistributedNotificationCenter defaultCenter] addObserver:self
                 selector:@selector(didChangeMenuBarHiding:)
                 name:@"AppleInterfaceMenuBarHidingChangedNotification"
+                object:nil];
+
+       [[NSNotificationCenter defaultCenter] addObserver:self
+                selector:@selector(didRestartDock:)
+                name:@"NSApplicationDockDidRestartNotification"
                 object:nil];
 
        [[NSDistributedNotificationCenter defaultCenter] addObserver:self
@@ -235,14 +235,14 @@ extern struct event_loop g_event_loop;
     event_loop_post(&g_event_loop, SYSTEM_WOKE, NULL, 0);
 }
 
-- (void)didRestartDock:(NSNotification *)notification
-{
-    event_loop_post(&g_event_loop, DOCK_DID_RESTART, NULL, 0);
-}
-
 - (void)didChangeMenuBarHiding:(NSNotification *)notification
 {
     event_loop_post(&g_event_loop, MENU_BAR_HIDDEN_CHANGED, NULL, 0);
+}
+
+- (void)didRestartDock:(NSNotification *)notification
+{
+    event_loop_post(&g_event_loop, DOCK_DID_RESTART, NULL, 0);
 }
 
 - (void)didChangeDockPref:(NSNotification *)notification
