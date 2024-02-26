@@ -178,6 +178,7 @@ extern bool g_verbose;
 #define COMMAND_RULE_REAPPLY "--reapply"
 #define COMMAND_RULE_LS      "--list"
 
+#define ARGUMENT_RULE_ONE_SHOT    "--one-shot"
 #define ARGUMENT_RULE_KEY_APP     "app"
 #define ARGUMENT_RULE_KEY_TITLE   "title"
 #define ARGUMENT_RULE_KEY_ROLE    "role"
@@ -2214,9 +2215,15 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
         char *unsupported_exclusion = NULL;
         bool did_parse = true;
         bool has_filter = false;
+        bool one_shot = false;
         struct rule rule = {};
 
         struct token token = get_token(&message);
+        if (token_equals(token, ARGUMENT_RULE_ONE_SHOT)) {
+            one_shot = true;
+            token = get_token(&message);
+        }
+
         while (token_is_valid(token)) {
             char *key = NULL;
             char *value = NULL;
@@ -2391,8 +2398,11 @@ rnext:
             did_parse = false;
         }
 
-        if (did_parse) {
+        if (did_parse && !one_shot) {
             rule_add(&rule);
+        } else if (did_parse && one_shot) {
+            rule_apply(&rule);
+            rule_destroy(&rule);
         } else {
             rule_destroy(&rule);
         }

@@ -510,8 +510,8 @@ yabai -m rule '<COMMAND>'
 COMMAND
 ^^^^^^^
 
-*--add ['<ARGUMENT>']*::
-    Add a new rule.
+*--add [--one-shot] ['<ARGUMENT>']*::
+    Add a new rule. If '--one-shot' is present, only apply once to all known windows.
 
 *--remove '<RULE_SEL>'*::
     Remove an existing rule with the given index or label.

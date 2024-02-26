@@ -40,9 +40,10 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index);
 void rule_reapply_all(void);
 bool rule_reapply_by_index(int index);
 bool rule_reapply_by_label(char *label);
+void rule_apply(struct rule *rule);
+void rule_add(struct rule *rule);
 bool rule_remove_by_index(int index);
 bool rule_remove_by_label(char *label);
-void rule_add(struct rule *rule);
 void rule_destroy(struct rule *rule);
 
 #endif
