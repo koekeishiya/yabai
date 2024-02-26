@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-02-25
+.\"      Date: 2024-02-26
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-02-25" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-02-26" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -868,6 +868,24 @@ Passes one argument: $YABAI_PROCESS_ID
 Triggered when the front\-most application changes.
 .br
 Passes two arguments: $YABAI_PROCESS_ID, $YABAI_RECENT_PROCESS_ID
+.RE
+.sp
+\fBapplication_activated\fP
+.RS 4
+Triggered when an application is activated.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
+.RE
+.sp
+\fBapplication_deactivated\fP
+.RS 4
+Triggered when an application is deactivated.
+.br
+Eligible for \fBapp\fP filter.
+.br
+Passes one argument: $YABAI_PROCESS_ID
 .RE
 .sp
 \fBapplication_visible\fP

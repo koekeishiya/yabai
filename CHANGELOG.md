@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - Make space visible on display without stealing focus (the space must belong to the display) [#2113](https://github.com/koekeishiya/yabai/issues/2113)
 - Allow re-applying existing rules to all known windows [#2121](https://github.com/koekeishiya/yabai/issues/2121)
+- Restore application_activated and application_deactivated signals [#2122](https://github.com/koekeishiya/yabai/issues/2122)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)

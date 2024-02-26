@@ -291,7 +291,11 @@ static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
         return;
     }
 
+    struct application *deactivated_application = window_manager_find_application(&g_window_manager, g_process_manager.front_pid);
+    if (deactivated_application) event_signal_push(SIGNAL_APPLICATION_DEACTIVATED, deactivated_application);
+
     debug("%s: %s (%d)\n", __FUNCTION__, process->name, process->pid);
+    event_signal_push(SIGNAL_APPLICATION_ACTIVATED, application);
     g_process_manager.switch_event_time = GetCurrentEventTime();
     g_process_manager.last_front_pid = g_process_manager.front_pid;
     g_process_manager.front_pid = process->pid;
