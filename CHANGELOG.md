@@ -9,8 +9,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Make space visible on display without stealing focus (the space must belong to the display) [#2113](https://github.com/koekeishiya/yabai/issues/2113)
 - Allow re-applying existing rules to all known windows [#2121](https://github.com/koekeishiya/yabai/issues/2121)
 - Restore application_activated and application_deactivated signals [#2122](https://github.com/koekeishiya/yabai/issues/2122)
-- Rules can now be configured to apply *only once* for all known windows [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Restore system_woke signal [#2124](https://github.com/koekeishiya/yabai/issues/2124)
+- Added new window rules command `--apply` to apply the effects of (specific or all existing rules), or an ad-hoc rule that should only apply once, to all known windows [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+- Added new argument `--one-shot` to window rules command `--add` to specify that this rule only runs once [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+- Window rules marked as `--one-shot` will be ignored completely by the `--apply` command [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)
@@ -20,6 +22,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Managed windows should correct their frame when modified by external means [#2117](https://github.com/koekeishiya/yabai/issues/2117)
 - Window frame would sometimes not be set correctly when using window animations [#2120](https://github.com/koekeishiya/yabai/issues/2120)
 - Allow resetting window opacity in window rules [#2127](https://github.com/koekeishiya/yabai/issues/2127)
+- When adding new window rules, their effects will only apply to *windows that open after the rule has been added* [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+
+### Removed
+- When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 
 ## [6.0.15] - 2024-02-22
 ### Changed

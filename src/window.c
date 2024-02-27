@@ -113,7 +113,7 @@ static inline const char *window_layer(int level)
     if (level == g_layer_below_window_level)  return layer_str[LAYER_BELOW];
     if (level == g_layer_normal_window_level) return layer_str[LAYER_NORMAL];
     if (level == g_layer_above_window_level)  return layer_str[LAYER_ABOVE];
-    return layer_str[0];
+    return "unknown";
 }
 
 void window_serialize(FILE *rsp, struct window *window)

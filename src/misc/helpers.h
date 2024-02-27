@@ -16,10 +16,10 @@ static const char *bool_str[] = { "off", "on" };
 
 static const char *layer_str[] =
 {
-    [0] = "unknown",
-    [LAYER_BELOW] = "below",
+    [LAYER_AUTO]   = "auto",
+    [LAYER_BELOW]  = "below",
     [LAYER_NORMAL] = "normal",
-    [LAYER_ABOVE] = "above"
+    [LAYER_ABOVE]  = "above"
 };
 
 static inline float ease_out_cubic(float t)

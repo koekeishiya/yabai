@@ -468,8 +468,19 @@ static EVENT_HANDLER(WINDOW_CREATED)
     struct application *application = window_manager_find_application(&g_window_manager, window_pid);
     if (!application) { CFRelease(context); return; }
 
-    struct window *window = window_manager_create_and_add_window(&g_space_manager, &g_window_manager, application, context, window_id);
+    struct window *window = window_manager_create_and_add_window(&g_space_manager, &g_window_manager, application, context, window_id, true);
     if (!window) return;
+
+    int rule_len = buf_len(g_window_manager.rules);
+    for (int i = 0; i < rule_len; ++i) {
+        if (rule_check_flag(&g_window_manager.rules[i], RULE_ONE_SHOT_REMOVE)) {
+            rule_destroy(&g_window_manager.rules[i]);
+            if (buf_del(g_window_manager.rules, i)) {
+                --i;
+                --rule_len;
+            }
+        }
+    }
 
     if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
         uint64_t sid;

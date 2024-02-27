@@ -20,7 +20,9 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"mouse_follows_focus\":%s,\n"
             "\t\"layer\":\"%s\",\n"
             "\t\"native-fullscreen\":%s,\n"
-            "\t\"grid\":\"%d:%d:%d:%d:%d:%d\"\n"
+            "\t\"grid\":\"%d:%d:%d:%d:%d:%d\",\n"
+            "\t\"one-shot\":%s,\n"
+            "\t\"flags\":\"0x%08x\"\n"
             "}",
             index,
             rule->label ? rule->label : "",
@@ -30,22 +32,26 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->subrole ? rule->subrole : "",
             display_arrangement(rule->did),
             space_manager_mission_control_index(rule->sid),
-            json_bool(rule->follow_space),
-            rule->alpha,
+            json_bool(rule_check_flag(rule, RULE_FOLLOW_SPACE)),
+            rule->opacity,
             json_optional_bool(rule->manage),
             json_optional_bool(rule->sticky),
             json_optional_bool(rule->mff),
-            layer_str[rule->layer],
+            rule_check_flag(rule, RULE_LAYER) ? layer_str[rule->layer] : "",
             json_optional_bool(rule->fullscreen),
             rule->grid[0], rule->grid[1],
             rule->grid[2], rule->grid[3],
-            rule->grid[4], rule->grid[5]);
+            rule->grid[4], rule->grid[5],
+            json_bool(rule_check_flag(rule, RULE_ONE_SHOT)),
+            rule->flags);
 }
 
 void rule_reapply_all(void)
 {
     for (int i = 0; i < buf_len(g_window_manager.rules); ++i) {
-        rule_apply(&g_window_manager.rules[i]);
+        if (!rule_check_flag(&g_window_manager.rules[i], RULE_ONE_SHOT)) {
+            rule_apply(&g_window_manager.rules[i]);
+        }
     }
 }
 
@@ -53,7 +59,9 @@ bool rule_reapply_by_index(int index)
 {
     for (int i = 0; i < buf_len(g_window_manager.rules); ++i) {
         if (i == index) {
-            rule_apply(&g_window_manager.rules[i]);
+            if (!rule_check_flag(&g_window_manager.rules[i], RULE_ONE_SHOT)) {
+                rule_apply(&g_window_manager.rules[i]);
+            }
             return true;
         }
     }
@@ -65,7 +73,9 @@ bool rule_reapply_by_label(char *label)
 {
     for (int i = 0; i < buf_len(g_window_manager.rules); ++i) {
         if (string_equals(g_window_manager.rules[i].label, label)) {
-            rule_apply(&g_window_manager.rules[i]);
+            if (!rule_check_flag(&g_window_manager.rules[i], RULE_ONE_SHOT)) {
+                rule_apply(&g_window_manager.rules[i]);
+            }
             return true;
         }
     }
@@ -102,7 +112,6 @@ void rule_add(struct rule *rule)
 {
     if (rule->label) rule_remove_by_label(rule->label);
     buf_push(g_window_manager.rules, *rule);
-    rule_apply(rule);
 }
 
 bool rule_remove_by_index(int index)
@@ -133,10 +142,10 @@ bool rule_remove_by_label(char *label)
 
 void rule_destroy(struct rule *rule)
 {
-    if (rule->app_regex_valid)     regfree(&rule->app_regex);
-    if (rule->title_regex_valid)   regfree(&rule->title_regex);
-    if (rule->role_regex_valid)    regfree(&rule->role_regex);
-    if (rule->subrole_regex_valid) regfree(&rule->subrole_regex);
+    if (rule_check_flag(rule, RULE_APP_VALID))     regfree(&rule->app_regex);
+    if (rule_check_flag(rule, RULE_TITLE_VALID))   regfree(&rule->title_regex);
+    if (rule_check_flag(rule, RULE_ROLE_VALID))    regfree(&rule->role_regex);
+    if (rule_check_flag(rule, RULE_SUBROLE_VALID)) regfree(&rule->subrole_regex);
 
     if (rule->label)   free(rule->label);
     if (rule->app)     free(rule->app);
