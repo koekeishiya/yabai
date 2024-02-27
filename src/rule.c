@@ -18,7 +18,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"manage\":%s,\n"
             "\t\"sticky\":%s,\n"
             "\t\"mouse_follows_focus\":%s,\n"
-            "\t\"layer\":\"%s\",\n"
+            "\t\"sub-layer\":\"%s\",\n"
             "\t\"native-fullscreen\":%s,\n"
             "\t\"grid\":\"%d:%d:%d:%d:%d:%d\",\n"
             "\t\"one-shot\":%s,\n"

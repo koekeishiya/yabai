@@ -356,8 +356,8 @@ COMMAND
     Toggle the given property of the selected window. +
     The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
 
-*--layer* '<LAYER>'::
-    Set the stacking layer of the selected window. The window will no longer be eligible for automatic change in layer when managed/unmanaged. +
+*--sub-layer* '<LAYER>'::
+    Set the stacking sub-layer of the selected window. The window will no longer be eligible for automatic change in sub-layer when managed/unmanaged. +
     Specify the value 'auto' to reset back to normal and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
 
@@ -527,7 +527,7 @@ Rule
 
 All rules that match the given filter will be applied in the order they were registered. +
 If multiple rules specify a value for the same property, the latter rule will end up overriding that value. +
-The following properties require System Integrity Protection to be partially disabled: sticky, layer, opacity.
+The following properties require System Integrity Protection to be partially disabled: sticky, sub-layer, opacity.
 
 General Syntax
 ^^^^^^^^^^^^^^
@@ -588,8 +588,8 @@ ARGUMENT
 *mouse_follows_focus='<BOOL_SEL>'*::
     When focusing the window, put the mouse at its center. Overrides the global *mouse_follows_focus* setting.
 
-*layer='<LAYER>'*::
-    Window is ordered within the given stacking layer. The window will no longer be eligible for automatic change in layer when managed/unmanaged. +
+*sub-layer='<LAYER>'*::
+    Window is ordered within the given stacking sub-layer. The window will no longer be eligible for automatic change in sub-layer when managed/unmanaged. +
     Specify the value 'auto' to reset back to normal and make it become automatically managed.
 
 *opacity='<FLOAT_SEL>'*::
@@ -621,7 +621,7 @@ DATAFORMAT
     "manage": bool (optional),
     "sticky": bool (optional),
     "mouse_follows_focus": bool (optional),
-    "layer": string,
+    "sub-layer": string,
     "native-fullscreen": bool (optional),
     "grid": string,
     "one-shot": bool,

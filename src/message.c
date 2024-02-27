@@ -129,7 +129,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_MINIMIZE   "--minimize"
 #define COMMAND_WINDOW_DEMINIMIZE "--deminimize"
 #define COMMAND_WINDOW_CLOSE      "--close"
-#define COMMAND_WINDOW_LAYER      "--layer"
+#define COMMAND_WINDOW_SUB_LAYER  "--sub-layer"
 #define COMMAND_WINDOW_OPACITY    "--opacity"
 #define COMMAND_WINDOW_TOGGLE     "--toggle"
 #define COMMAND_WINDOW_DISPLAY    "--display"
@@ -178,21 +178,21 @@ extern bool g_verbose;
 #define COMMAND_RULE_APPLY   "--apply"
 #define COMMAND_RULE_LS      "--list"
 
-#define ARGUMENT_RULE_ONE_SHOT    "--one-shot"
-#define ARGUMENT_RULE_KEY_APP     "app"
-#define ARGUMENT_RULE_KEY_TITLE   "title"
-#define ARGUMENT_RULE_KEY_ROLE    "role"
-#define ARGUMENT_RULE_KEY_SUBROLE "subrole"
-#define ARGUMENT_RULE_KEY_DISPLAY "display"
-#define ARGUMENT_RULE_KEY_SPACE   "space"
-#define ARGUMENT_RULE_KEY_OPACITY "opacity"
-#define ARGUMENT_RULE_KEY_MANAGE  "manage"
-#define ARGUMENT_RULE_KEY_STICKY  "sticky"
-#define ARGUMENT_RULE_KEY_MFF     "mouse_follows_focus"
-#define ARGUMENT_RULE_KEY_LAYER   "layer"
-#define ARGUMENT_RULE_KEY_FULLSCR "native-fullscreen"
-#define ARGUMENT_RULE_KEY_GRID    "grid"
-#define ARGUMENT_RULE_KEY_LABEL   "label"
+#define ARGUMENT_RULE_ONE_SHOT      "--one-shot"
+#define ARGUMENT_RULE_KEY_APP       "app"
+#define ARGUMENT_RULE_KEY_TITLE     "title"
+#define ARGUMENT_RULE_KEY_ROLE      "role"
+#define ARGUMENT_RULE_KEY_SUBROLE   "subrole"
+#define ARGUMENT_RULE_KEY_DISPLAY   "display"
+#define ARGUMENT_RULE_KEY_SPACE     "space"
+#define ARGUMENT_RULE_KEY_OPACITY   "opacity"
+#define ARGUMENT_RULE_KEY_MANAGE    "manage"
+#define ARGUMENT_RULE_KEY_STICKY    "sticky"
+#define ARGUMENT_RULE_KEY_MFF       "mouse_follows_focus"
+#define ARGUMENT_RULE_KEY_SUB_LAYER "sub-layer"
+#define ARGUMENT_RULE_KEY_FULLSCR   "native-fullscreen"
+#define ARGUMENT_RULE_KEY_GRID      "grid"
+#define ARGUMENT_RULE_KEY_LABEL     "label"
 
 #define ARGUMENT_RULE_VALUE_SPACE '^'
 #define ARGUMENT_RULE_VALUE_GRID  "%d:%d:%d:%d:%d:%d"
@@ -1960,23 +1960,23 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             if (!window_manager_close_window(acting_window)) {
                 daemon_fail(rsp, "could not close window with id '%d'.\n", acting_window->id);
             }
-        } else if (token_equals(command, COMMAND_WINDOW_LAYER)) {
+        } else if (token_equals(command, COMMAND_WINDOW_SUB_LAYER)) {
             struct token value = get_token(&message);
             if (token_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
                 if (!window_manager_set_window_layer(acting_window, LAYER_BELOW)) {
-                    daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+                    daemon_fail(rsp, "could not change sub-layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_NORMAL)) {
                 if (!window_manager_set_window_layer(acting_window, LAYER_NORMAL)) {
-                    daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+                    daemon_fail(rsp, "could not change sub-layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
                 if (!window_manager_set_window_layer(acting_window, LAYER_ABOVE)) {
-                    daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+                    daemon_fail(rsp, "could not change sub-layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_LAYER_AUTO)) {
                 if (!window_manager_set_window_layer(acting_window, LAYER_AUTO)) {
-                    daemon_fail(rsp, "could not change layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+                    daemon_fail(rsp, "could not change sub-layer of window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
                 }
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
@@ -2349,7 +2349,7 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;
             }
-        } else if (string_equals(key, ARGUMENT_RULE_KEY_LAYER)) {
+        } else if (string_equals(key, ARGUMENT_RULE_KEY_SUB_LAYER)) {
             if (exclusion) unsupported_exclusion = key;
 
             if (string_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {

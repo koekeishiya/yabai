@@ -513,9 +513,9 @@ Toggle the given property of the selected window.
 The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
 .RE
 .sp
-\fB\-\-layer\fP \fI<LAYER>\fP
+\fB\-\-sub\-layer\fP \fI<LAYER>\fP
 .RS 4
-Set the stacking layer of the selected window. The window will no longer be eligible for automatic change in layer when managed/unmanaged.
+Set the stacking sub\-layer of the selected window. The window will no longer be eligible for automatic change in sub\-layer when managed/unmanaged.
 .br
 Specify the value \fIauto\fP to reset back to normal and make it become automatically managed.
 .br
@@ -729,7 +729,7 @@ All rules that match the given filter will be applied in the order they were reg
 .br
 If multiple rules specify a value for the same property, the latter rule will end up overriding that value.
 .br
-The following properties require System Integrity Protection to be partially disabled: sticky, layer, opacity.
+The following properties require System Integrity Protection to be partially disabled: sticky, sub\-layer, opacity.
 .SS "General Syntax"
 .sp
 yabai \-m rule \fI<COMMAND>\fP
@@ -820,9 +820,9 @@ Window appears on all spaces.
 When focusing the window, put the mouse at its center. Overrides the global \fBmouse_follows_focus\fP setting.
 .RE
 .sp
-\fBlayer=\fI<LAYER>\fP\fP
+\fBsub\-layer=\fI<LAYER>\fP\fP
 .RS 4
-Window is ordered within the given stacking layer. The window will no longer be eligible for automatic change in layer when managed/unmanaged.
+Window is ordered within the given stacking sub\-layer. The window will no longer be eligible for automatic change in sub\-layer when managed/unmanaged.
 .br
 Specify the value \fIauto\fP to reset back to normal and make it become automatically managed.
 .RE
@@ -862,7 +862,7 @@ Set window frame based on a self\-defined grid.
     "manage": bool (optional),
     "sticky": bool (optional),
     "mouse_follows_focus": bool (optional),
-    "layer": string,
+    "sub\-layer": string,
     "native\-fullscreen": bool (optional),
     "grid": string,
     "one\-shot": bool,

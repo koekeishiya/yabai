@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Added new argument `--one-shot` to window rules command `--add` to specify that this rule only runs once [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Window rules marked as `--one-shot` will be ignored completely by the `--apply` command [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Window queries include a new property `has-ax-reference` [#2126](https://github.com/koekeishiya/yabai/issues/2126)
+- Window command `--sub-layer` and rule property `sub-layer` has been added to replace `--layer` and `layer` respectively [#2128](https://github.com/koekeishiya/yabai/issues/2128)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)
@@ -27,6 +28,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Removed
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+- Window command `--layer` and rule property `layer` has been renamed to `--sub-layer` and `sub-layer` respectively [#2128](https://github.com/koekeishiya/yabai/issues/2128)
 
 ## [6.0.15] - 2024-02-22
 ### Changed
