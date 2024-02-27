@@ -587,7 +587,6 @@ uint64_t window_tags(uint32_t wid)
     if (SLSWindowIteratorGetCount(iterator) == 1) {
         if (SLSWindowIteratorAdvance(iterator)) {
             tags = SLSWindowIteratorGetTags(iterator);
-            printf("TAGS = 0x%16llx\n", tags);
         }
     }
 
