@@ -11,6 +11,11 @@ static TABLE_COMPARE_FUNC(compare_psn)
     return psn_equals(key_a, key_b);
 }
 
+static const char *process_name_whitelist[] =
+{
+    "System Information",
+};
+
 static const char *process_name_blacklist[] =
 {
     "Übersicht",
@@ -43,9 +48,20 @@ struct process *process_create(ProcessSerialNumber psn)
     }
 
     if (process_info.processMode & modeOnlyBackground) {
-        debug("%s: background-only service '%s' detected! ignoring..\n", __FUNCTION__, process_name);
-        free(process_name);
-        return NULL;
+        bool whitelisted = false;
+
+        for (int i = 0; i < array_count(process_name_whitelist); ++i) {
+            if (string_equals(process_name, process_name_whitelist[i])) {
+                whitelisted = true;
+                break;
+            }
+        }
+
+        if (!whitelisted) {
+            debug("%s: background-only service '%s' detected! ignoring..\n", __FUNCTION__, process_name);
+            free(process_name);
+            return NULL;
+        }
     }
 
     for (int i = 0; i < array_count(process_name_blacklist); ++i) {
