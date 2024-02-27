@@ -514,7 +514,7 @@ The properties that contain incorrect information for windows with `has-ax-refer
     "root-window": bool,
     "can-move": bool,
     "can-resize": bool,
-    "has-shadow": bool,
+    "has-shadow": bool
 }
 ----
 
