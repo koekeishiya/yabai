@@ -180,7 +180,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
         window_rule_clear_flag(window, WINDOW_RULE_MFF_VALUE);
     }
 
-    if (rule->layer) {
+    if (rule_check_flag(rule, RULE_LAYER)) {
         window_manager_set_window_layer(window, rule->layer);
     }
 
