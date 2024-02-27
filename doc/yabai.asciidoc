@@ -512,7 +512,7 @@ The properties that contain incorrect information for windows with `has-ax-refer
     "role": string,
     "subrole": string,
     "can-move": bool,
-    "can-resize": bool,
+    "can-resize": bool
 }
 ----
 
