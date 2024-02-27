@@ -164,7 +164,7 @@ Global Settings
     Enable opacity for windows. +
     System Integrity Protection must be partially disabled.
 
-*window_opacity_duration* ['<floating point number>']::
+*window_opacity_duration* ['<FLOAT_SEL>']::
     Duration of transition between active / normal opacity. +
     System Integrity Protection must be partially disabled.
 
@@ -176,8 +176,9 @@ Global Settings
     Opacity of an unfocused window. +
     System Integrity Protection must be partially disabled.
 
-*window_animation_duration* ['<floating point number>']::
-    Duration of window frame animation. If 0.0, the change in dimension is not animated. +
+*window_animation_duration* ['<FLOAT_SEL>']::
+    Duration of window frame animation. +
+    If 0.0, the change in dimension is not animated. +
     Requires Screen Recording permissions. +
     System Integrity Protection must be partially disabled.
 
@@ -360,7 +361,7 @@ COMMAND
     Specify the value 'auto' to reset back to normal and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
 
-*--opacity* '<floating point number>'::
+*--opacity* '<FLOAT_SEL>'::
     Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change. +
     Specify the value '0.0' to reset back to full opacity and make it become automatically managed. +
     System Integrity Protection must be partially disabled.

@@ -229,7 +229,7 @@ Enable opacity for windows.
 System Integrity Protection must be partially disabled.
 .RE
 .sp
-\fBwindow_opacity_duration\fP [\fI<floating point number>\fP]
+\fBwindow_opacity_duration\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
 Duration of transition between active / normal opacity.
 .br
@@ -250,9 +250,11 @@ Opacity of an unfocused window.
 System Integrity Protection must be partially disabled.
 .RE
 .sp
-\fBwindow_animation_duration\fP [\fI<floating point number>\fP]
+\fBwindow_animation_duration\fP [\fI<FLOAT_SEL>\fP]
 .RS 4
-Duration of window frame animation. If 0.0, the change in dimension is not animated.
+Duration of window frame animation.
+.br
+If 0.0, the change in dimension is not animated.
 .br
 Requires Screen Recording permissions.
 .br
@@ -520,7 +522,7 @@ Specify the value \fIauto\fP to reset back to normal and make it become automati
 System Integrity Protection must be partially disabled.
 .RE
 .sp
-\fB\-\-opacity\fP \fI<floating point number>\fP
+\fB\-\-opacity\fP \fI<FLOAT_SEL>\fP
 .RS 4
 Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change.
 .br
