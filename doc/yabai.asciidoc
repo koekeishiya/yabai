@@ -515,10 +515,6 @@ The properties that contain incorrect information for windows with `has-ax-refer
     "can-move": bool,
     "can-resize": bool,
     "has-shadow": bool,
-    "is-native-fullscreen": bool,
-    "is-minimized": bool,
-    "is-hidden": bool,
-    "is-sticky": bool,
 }
 ----
 

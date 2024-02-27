@@ -86,6 +86,21 @@ err:
     return sid ? sid : window_display_space(wid);
 }
 
+int window_space_count(uint32_t wid)
+{
+    int count = 0;
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+    CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
+    if (!space_list_ref) goto err;
+
+    count = CFArrayGetCount(space_list_ref);
+    CFRelease(space_list_ref);
+
+err:
+    CFRelease(window_list_ref);
+    return count;
+}
+
 uint64_t *window_space_list(uint32_t wid, int *count)
 {
     uint64_t *space_list = NULL;
@@ -139,6 +154,8 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
     char *escaped_title = ts_string_escape(title);
 
     uint64_t sid = window_space(wid);
+    bool is_fullscreen = space_is_fullscreen(sid);
+    bool is_sticky = window_space_count(wid) > 1;
 
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
@@ -208,12 +225,12 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
             json_bool(false),
             json_bool(false),
             json_bool(false),
+            json_bool(is_fullscreen),
             json_bool(false),
             json_bool(false),
             json_bool(false),
             json_bool(false),
-            json_bool(false),
-            json_bool(false),
+            json_bool(is_sticky),
             json_bool(false));
 }
 
