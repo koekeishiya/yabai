@@ -7,7 +7,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Added
 - Make space visible on display without stealing focus (the space must belong to the display) [#2113](https://github.com/koekeishiya/yabai/issues/2113)
-- Allow re-applying existing rules to all known windows [#2121](https://github.com/koekeishiya/yabai/issues/2121)
 - Restore application_activated and application_deactivated signals [#2122](https://github.com/koekeishiya/yabai/issues/2122)
 - Restore system_woke signal [#2124](https://github.com/koekeishiya/yabai/issues/2124)
 - Added new window rules command `--apply` to apply the effects of (specific or all existing rules), or an ad-hoc rule that should only apply once, to all known windows [#2123](https://github.com/koekeishiya/yabai/issues/2123)
