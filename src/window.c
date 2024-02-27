@@ -153,6 +153,7 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
     char *title = window_property_title_ts(wid);
     char *escaped_title = ts_string_escape(title);
 
+    uint32_t parent_wid = window_parent(wid);
     uint64_t sid = window_space(wid);
     bool is_fullscreen = space_is_fullscreen(sid);
     bool is_sticky = window_space_count(wid) > 1;
@@ -207,7 +208,7 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
             frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
             "",
             "",
-            json_bool(false),
+            json_bool(parent_wid == 0),
             display,
             space,
             level,
@@ -477,6 +478,33 @@ float window_opacity(uint32_t wid)
     return alpha;
 }
 
+uint32_t window_parent(uint32_t wid)
+{
+    uint32_t parent_wid = 0;
+
+    CFArrayRef window_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+
+    CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);
+    if (!query) goto err2;
+
+    CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
+    if (!iterator) goto err1;
+
+    if (SLSWindowIteratorGetCount(iterator) == 1) {
+        if (SLSWindowIteratorAdvance(iterator)) {
+            parent_wid = SLSWindowIteratorGetParentID(iterator);
+        }
+    }
+
+    CFRelease(iterator);
+err1:
+    CFRelease(query);
+err2:
+    CFRelease(window_ref);
+
+    return parent_wid;
+}
+
 int window_level(uint32_t wid)
 {
     int level = 0;
@@ -677,7 +705,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->id = window_id;
     window->id_ptr = &window->id;
     window->frame = window_ax_frame(window);
-    window->is_root = window_is_root(window);
+    window->is_root = !window_parent(window->id) || window_is_root(window);
     window_set_flag(window, WINDOW_SHADOW);
 
     if (window_is_minimized(window)) {
