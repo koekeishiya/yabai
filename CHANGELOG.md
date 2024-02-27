@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Added new window rules command `--apply` to apply the effects of (specific or all existing rules), or an ad-hoc rule that should only apply once, to all known windows [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Added new argument `--one-shot` to window rules command `--add` to specify that this rule only runs once [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Window rules marked as `--one-shot` will be ignored completely by the `--apply` command [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+- Window queries include a new property `has-ax-reference` [#2126](https://github.com/koekeishiya/yabai/issues/2126)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)
@@ -22,6 +23,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Window frame would sometimes not be set correctly when using window animations [#2120](https://github.com/koekeishiya/yabai/issues/2120)
 - Allow resetting window opacity in window rules [#2127](https://github.com/koekeishiya/yabai/issues/2127)
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added* [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+- Window queries will now list information about all windows even if yabai does not yet have an AX-reference. Windows that are missing an AX-reference cannot be acted upon until its space has become active [#2126](https://github.com/koekeishiya/yabai/issues/2126)
 
 ### Removed
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)

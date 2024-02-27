@@ -30,45 +30,15 @@ void window_manager_query_window_rules(FILE *rsp)
     fprintf(rsp, "]\n");
 }
 
-static struct window **window_manager_find_windows_for_spaces(uint64_t *space_list, int space_count, int *window_aggregate_count)
+void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count)
 {
     int window_count = 0;
     uint32_t *window_list = space_window_list_for_connection(space_list, space_count, 0, &window_count, true);
 
-    *window_aggregate_count = 0;
-    struct window **window_aggregate_list = ts_alloc_list(struct window *, window_count);
-
-    for (int i = 0; i < window_count; ++i) {
-        struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (window) window_aggregate_list[(*window_aggregate_count)++] = window;
-    }
-
-    return window_aggregate_list;
-}
-
-void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count)
-{
-    int window_count = 0;
-    struct window **window_list = window_manager_find_windows_for_spaces(space_list, space_count, &window_count);
-
     fprintf(rsp, "[");
     for (int i = 0; i < window_count; ++i) {
-        struct window *window = window_list[i];
-
-        if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
-
-            //
-            // NOTE(koekeishiya): The window has been marked invalid by the system.
-            // Invalidation happens on the macOS event receiver thread, but our runloop
-            // is currently processing a user-initiated event so we have yet to remove
-            // our representation of said window. Do not attempt to query macOS for
-            // information about these windows.
-            //
-
-            continue;
-        }
-
-        window_serialize(rsp, window);
+        struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
+        if (window) window_serialize(rsp, window); else window_nonax_serialize(rsp, window_list[i]);
         if (i < window_count - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
@@ -157,7 +127,7 @@ void window_manager_apply_rule_to_window(struct space_manager *sm, struct window
     }
 
     if (rule->sid || rule->did) {
-        if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window))) {
+        if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window->id))) {
             uint64_t sid = rule->did ? display_space_id(rule->did) : rule->sid;
             window_manager_send_window_to_space(sm, wm, window, sid, true);
             if (rule_check_flag(rule, RULE_FOLLOW_SPACE) || rule->fullscreen == RULE_PROP_ON) {
@@ -268,7 +238,7 @@ void window_manager_center_mouse(struct window_manager *wm, struct window *windo
     SLSGetCurrentCursorLocation(g_connection, &cursor);
     if (CGRectContainsPoint(window->frame, cursor)) return;
 
-    uint32_t did = window_display_id(window);
+    uint32_t did = window_display_id(window->id);
     if (!did) return;
 
     CGPoint center = {
@@ -1635,7 +1605,7 @@ void window_manager_add_existing_application_windows(struct space_manager *sm, s
 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
 {
-    uint64_t sid = window_space(window);
+    uint64_t sid = window_space(window->id);
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
@@ -1717,11 +1687,11 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
 {
     if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
 
-    uint64_t a_sid = window_space(a);
+    uint64_t a_sid = window_space(a->id);
     struct view *a_view = space_manager_find_view(sm, a_sid);
     if (a_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
-    uint64_t b_sid = window_space(b);
+    uint64_t b_sid = window_space(b->id);
     struct view *b_view = space_manager_find_view(sm, b_sid);
     if (b_view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_DST_VIEW;
 
@@ -1833,10 +1803,10 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
 {
     if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
 
-    uint64_t a_sid = window_space(a);
+    uint64_t a_sid = window_space(a->id);
     struct view *a_view = space_manager_find_view(sm, a_sid);
 
-    uint64_t b_sid = window_space(b);
+    uint64_t b_sid = window_space(b->id);
     struct view *b_view = space_manager_find_view(sm, b_sid);
 
     struct window_node *a_node = view_find_window_node(a_view, a->id);
@@ -1965,7 +1935,7 @@ bool window_manager_close_window(struct window *window)
 
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid, bool moved_by_rule)
 {
-    uint64_t src_sid = window_space(window);
+    uint64_t src_sid = window_space(window->id);
     if (src_sid == dst_sid) return;
 
     if ((space_is_visible(src_sid) && (moved_by_rule || wm->focused_window_id == window->id))) {
@@ -1997,7 +1967,7 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
-    uint32_t did = window_display_id(window);
+    uint32_t did = window_display_id(window->id);
     if (!did) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
     if (x >= c)    x = c - 1;
@@ -2117,7 +2087,7 @@ void window_manager_wait_for_native_fullscreen_transition(struct window *window)
             usleep(100000);
         }
     } else {
-        uint32_t did = window_display_id(window);
+        uint32_t did = window_display_id(window->id);
 
         do {
 
@@ -2134,7 +2104,7 @@ void window_manager_wait_for_native_fullscreen_transition(struct window *window)
 
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
-    uint32_t sid = window_space(window);
+    uint32_t sid = window_space(window->id);
 
     //
     // NOTE(koekeishiya): The window must become the focused window
@@ -2206,7 +2176,7 @@ void window_manager_toggle_window_expose(struct window_manager *wm, struct windo
 
 void window_manager_toggle_window_pip(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
-    uint32_t did = window_display_id(window);
+    uint32_t did = window_display_id(window->id);
     if (!did) return;
 
     uint64_t sid = display_space_id(did);

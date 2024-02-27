@@ -121,18 +121,20 @@ enum window_rule_flag
 #define window_rule_clear_flag(w, x) ((w)->rule_flags &= ~(x))
 #define window_rule_set_flag(w, x)   ((w)->rule_flags |=  (x))
 
-CFStringRef window_display_uuid(struct window *window);
-uint32_t window_display_id(struct window *window);
-uint64_t window_space(struct window *window);
-uint64_t *window_space_list(struct window *window, int *count);
+CFStringRef window_display_uuid(uint32_t wid);
+uint32_t window_display_id(uint32_t wid);
+uint64_t window_space(uint32_t wid);
+uint64_t *window_space_list(uint32_t wid, int *count);
+void window_unknown_serialize(FILE *rsp, uint32_t wid);
 void window_serialize(FILE *rsp, struct window *window);
+char *window_property_title_ts(uint32_t wid);
 char *window_title_ts(struct window *window);
-CGPoint window_ax_origin(struct window *window);
-CGRect window_ax_frame(struct window *window);
-float window_opacity(struct window *window);
+float window_opacity(uint32_t wid);
 int window_level(uint32_t wid);
 int window_sub_level(uint32_t wid);
-uint64_t window_tags(struct window *window);
+uint64_t window_tags(uint32_t wid);
+CGPoint window_ax_origin(struct window *window);
+CGRect window_ax_frame(struct window *window);
 CFStringRef window_role(struct window *window);
 char *window_role_ts(struct window *window);
 CFStringRef window_subrole(struct window *window);

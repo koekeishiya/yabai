@@ -2088,7 +2088,7 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
             }
 
             if (acting_window) {
-                display_serialize(rsp, window_display_id(acting_window));
+                display_serialize(rsp, window_display_id(acting_window->id));
                 fprintf(rsp, "\n");
             } else {
                 daemon_fail(rsp, "could not find window to retrieve display details.\n");

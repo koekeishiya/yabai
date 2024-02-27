@@ -28,18 +28,20 @@ void window_unobserve(struct window *window)
     }
 }
 
-CFStringRef window_display_uuid(struct window *window)
+CFStringRef window_display_uuid(uint32_t wid)
 {
-    CFStringRef uuid = SLSCopyManagedDisplayForWindow(g_connection, window->id);
+    CFStringRef uuid = SLSCopyManagedDisplayForWindow(g_connection, wid);
     if (!uuid) {
-        uuid = SLSCopyBestManagedDisplayForRect(g_connection, window->frame);
+        CGRect frame;
+        SLSGetWindowBounds(g_connection, wid, &frame);
+        uuid = SLSCopyBestManagedDisplayForRect(g_connection, frame);
     }
     return uuid;
 }
 
-uint32_t window_display_id(struct window *window)
+uint32_t window_display_id(uint32_t wid)
 {
-    CFStringRef uuid_string = window_display_uuid(window);
+    CFStringRef uuid_string = window_display_uuid(wid);
     if (!uuid_string) return 0;
 
     CFUUIDRef uuid = CFUUIDCreateFromString(NULL, uuid_string);
@@ -51,9 +53,9 @@ uint32_t window_display_id(struct window *window)
     return id;
 }
 
-static uint64_t window_display_space(struct window *window)
+static uint64_t window_display_space(uint32_t wid)
 {
-    CFStringRef uuid = window_display_uuid(window);
+    CFStringRef uuid = window_display_uuid(wid);
     if (!uuid) return 0;
 
     uint64_t sid = SLSManagedDisplayGetCurrentSpace(g_connection, uuid);
@@ -62,11 +64,11 @@ static uint64_t window_display_space(struct window *window)
     return sid;
 }
 
-uint64_t window_space(struct window *window)
+uint64_t window_space(uint32_t wid)
 {
     uint64_t sid = 0;
 
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
     if (!space_list_ref) goto err;
 
@@ -81,13 +83,13 @@ free:
 err:
     CFRelease(window_list_ref);
 
-    return sid ? sid : window_display_space(window);
+    return sid ? sid : window_display_space(wid);
 }
 
-uint64_t *window_space_list(struct window *window, int *count)
+uint64_t *window_space_list(uint32_t wid, int *count)
 {
     uint64_t *space_list = NULL;
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
     if (!space_list_ref) goto err;
 
@@ -116,6 +118,105 @@ static inline const char *window_layer(int level)
     return "unknown";
 }
 
+void window_nonax_serialize(FILE *rsp, uint32_t wid)
+{
+    int connection;
+    SLSGetWindowOwner(g_connection, wid, &connection);
+
+    pid_t pid;
+    SLSConnectionGetPID(connection, &pid);
+
+    CGRect frame;
+    SLSGetWindowBounds(g_connection, wid, &frame);
+
+    static char process_name[PROC_PIDPATHINFO_MAXSIZE];
+    proc_name(pid, process_name, sizeof(process_name));
+
+    char *app = process_name;
+    char *escaped_app = ts_string_escape(app);
+
+    char *title = window_property_title_ts(wid);
+    char *escaped_title = ts_string_escape(title);
+
+    uint64_t sid = window_space(wid);
+
+    int space = space_manager_mission_control_index(sid);
+    int display = display_arrangement(space_display_id(sid));
+    int level = window_level(wid);
+    int sub_level = window_sub_level(wid);
+    const char *layer = window_layer(level);
+    const char *sub_layer = window_layer(sub_level);
+    float opacity = window_opacity(wid);
+
+    fprintf(rsp,
+            "{\n"
+            "\t\"id\":%d,\n"
+            "\t\"pid\":%d,\n"
+            "\t\"app\":\"%s\",\n"
+            "\t\"title\":\"%s\",\n"
+            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
+            "\t\"role\":\"%s\",\n"
+            "\t\"subrole\":\"%s\",\n"
+            "\t\"root-window\":%s,\n"
+            "\t\"display\":%d,\n"
+            "\t\"space\":%d,\n"
+            "\t\"level\":%d,\n"
+            "\t\"sub-level\":%d,\n"
+            "\t\"layer\":\"%s\",\n"
+            "\t\"sub-layer\":\"%s\",\n"
+            "\t\"opacity\":%.4f,\n"
+            "\t\"split-type\":\"%s\",\n"
+            "\t\"split-child\":\"%s\",\n"
+            "\t\"stack-index\":%d,\n"
+            "\t\"can-move\":%s,\n"
+            "\t\"can-resize\":%s,\n"
+            "\t\"has-focus\":%s,\n"
+            "\t\"has-shadow\":%s,\n"
+            "\t\"has-parent-zoom\":%s,\n"
+            "\t\"has-fullscreen-zoom\":%s,\n"
+            "\t\"has-ax-reference\":%s,\n"
+            "\t\"is-native-fullscreen\":%s,\n"
+            "\t\"is-visible\":%s,\n"
+            "\t\"is-minimized\":%s,\n"
+            "\t\"is-hidden\":%s,\n"
+            "\t\"is-floating\":%s,\n"
+            "\t\"is-sticky\":%s,\n"
+            "\t\"is-grabbed\":%s\n"
+            "}",
+            wid,
+            pid,
+            escaped_app ? escaped_app : app,
+            escaped_title ? escaped_title : title,
+            frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
+            "",
+            "",
+            json_bool(false),
+            display,
+            space,
+            level,
+            sub_level,
+            layer,
+            sub_layer,
+            opacity,
+            window_node_split_str[0],
+            window_node_child_str[CHILD_NONE],
+            0,
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false),
+            json_bool(false));
+}
+
 void window_serialize(FILE *rsp, struct window *window)
 {
     char *role = window_role_ts(window);
@@ -124,7 +225,7 @@ void window_serialize(FILE *rsp, struct window *window)
     char *escaped_app = ts_string_escape(app);
     char *title = window_title_ts(window);
     char *escaped_title = ts_string_escape(title);
-    uint64_t sid = window_space(window);
+    uint64_t sid = window_space(window->id);
     int space = space_manager_mission_control_index(sid);
     int display = display_arrangement(space_display_id(sid));
     int level = window_level(window->id);
@@ -133,7 +234,7 @@ void window_serialize(FILE *rsp, struct window *window)
     const char *sub_layer = window_layer(sub_level);
     bool is_minimized = window_is_minimized(window);
     bool visible = !is_minimized && !window->application->is_hidden && (window_check_flag(window, WINDOW_STICKY) || space_is_visible(sid));
-    float opacity = window_opacity(window);
+    float opacity = window_opacity(window->id);
     bool grabbed = window == g_mouse_state.window;
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
@@ -175,6 +276,7 @@ void window_serialize(FILE *rsp, struct window *window)
             "\t\"has-shadow\":%s,\n"
             "\t\"has-parent-zoom\":%s,\n"
             "\t\"has-fullscreen-zoom\":%s,\n"
+            "\t\"has-ax-reference\":%s,\n"
             "\t\"is-native-fullscreen\":%s,\n"
             "\t\"is-visible\":%s,\n"
             "\t\"is-minimized\":%s,\n"
@@ -207,6 +309,7 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(window_check_flag(window, WINDOW_SHADOW)),
             json_bool(zoom_parent),
             json_bool(zoom_fullscreen),
+            json_bool(true),
             json_bool(window_is_fullscreen(window)),
             json_bool(visible),
             json_bool(is_minimized),
@@ -214,6 +317,17 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(window_check_flag(window, WINDOW_FLOAT)),
             json_bool(window_check_flag(window, WINDOW_STICKY)),
             json_bool(grabbed));
+}
+
+char *window_property_title_ts(uint32_t wid)
+{
+    CFTypeRef value = NULL;
+    SLSCopyWindowProperty(g_connection, wid, CFSTR("kCGSWindowTitle"), &value);
+    if (!value) return ts_string_copy("");
+
+    char *result = ts_cfstring_copy(value);
+    CFRelease(value);
+    return result;
 }
 
 char *window_title_ts(struct window *window)
@@ -339,10 +453,10 @@ err:
     return result;
 }
 
-float window_opacity(struct window *window)
+float window_opacity(uint32_t wid)
 {
     float alpha = 0.0f;
-    SLSGetWindowAlpha(g_connection, window->id, &alpha);
+    SLSGetWindowAlpha(g_connection, wid, &alpha);
     return alpha;
 }
 
@@ -408,10 +522,10 @@ int window_sub_level(uint32_t wid)
     }
 }
 
-uint64_t window_tags(struct window *window)
+uint64_t window_tags(uint32_t wid)
 {
     uint64_t tags = 0;
-    CFArrayRef window_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+    CFArrayRef window_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
 
     CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);
     if (!query) goto err2;
@@ -428,6 +542,7 @@ err1:
     CFRelease(query);
 err2:
     CFRelease(window_ref);
+
     return tags;
 }
 
@@ -553,7 +668,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     }
 
     if ((window_is_fullscreen(window)) ||
-        (space_is_fullscreen(window_space(window)))) {
+        (space_is_fullscreen(window_space(window->id)))) {
         window_set_flag(window, WINDOW_FULLSCREEN);
     }
 

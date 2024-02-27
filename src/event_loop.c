@@ -12,7 +12,7 @@ extern int g_layer_below_window_level;
 static void window_did_receive_focus(struct window_manager *wm, struct mouse_state *ms, struct window *window)
 {
     struct window *focused_window = window_manager_find_window(wm, wm->focused_window_id);
-    if (focused_window && focused_window != window && window_space(focused_window) == window_space(window)) {
+    if (focused_window && focused_window != window && window_space(focused_window->id) == window_space(window->id)) {
         window_manager_set_window_opacity(wm, focused_window, g_window_manager.normal_window_opacity);
     }
 
@@ -151,7 +151,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
         struct window *window = window_list[i];
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
-            if (default_origin) sid = window_space(window);
+            if (default_origin) sid = window_space(window->id);
 
             struct view *view = space_manager_find_view(&g_space_manager, sid);
             if (view->layout == VIEW_FLOAT) goto next;
@@ -350,7 +350,7 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
         struct window *window = window_list[i];
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
-            struct view *view = space_manager_find_view(&g_space_manager, window_space(window));
+            struct view *view = space_manager_find_view(&g_space_manager, window_space(window->id));
             if (view->layout == VIEW_FLOAT) continue;
 
             //
@@ -486,7 +486,7 @@ static EVENT_HANDLER(WINDOW_CREATED)
         uint64_t sid;
 
         if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_DEFAULT) {
-            sid = window_space(window);
+            sid = window_space(window->id);
         } else if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_FOCUSED) {
             sid = g_space_manager.current_space_id;
         } else /* if (g_window_manager.window_origin_mode == WINDOW_ORIGIN_CURSOR) */ {
@@ -641,7 +641,7 @@ static EVENT_HANDLER(WINDOW_RESIZED)
         window_manager_wait_for_native_fullscreen_transition(window);
 
         if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
-            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window));
+            struct view *view = space_manager_tile_window_on_space(&g_space_manager, window, window_space(window->id));
             window_manager_add_managed_window(&g_window_manager, window, view);
         }
     } else if (!was_fullscreen == !is_fullscreen) {

@@ -24,7 +24,7 @@ bool space_manager_query_space(FILE *rsp, uint64_t sid)
 bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
 {
     int space_count;
-    uint64_t *space_list = window_space_list(window, &space_count);
+    uint64_t *space_list = window_space_list(window->id, &space_count);
     if (!space_list) return false;
 
     fprintf(rsp, "[");
@@ -405,7 +405,7 @@ struct view *space_manager_tile_window_on_space(struct space_manager *sm, struct
 
 void space_manager_toggle_window_split(struct space_manager *sm, struct window *window)
 {
-    struct view *view = space_manager_find_view(sm, window_space(window));
+    struct view *view = space_manager_find_view(sm, window_space(window->id));
     if (view->layout != VIEW_BSP) return;
 
     struct window_node *node = view_find_window_node(view, window->id);
@@ -583,7 +583,7 @@ uint64_t space_manager_active_space(void)
     uint32_t did = 0;
     struct window *window = window_manager_focused_window(&g_window_manager);
 
-    if (window) did = window_display_id(window);
+    if (window) did = window_display_id(window->id);
     if (!did)   did = display_manager_active_display_id();
     if (!did)   return 0;
 
@@ -842,7 +842,7 @@ bool space_manager_is_window_on_active_space(struct window *window)
 bool space_manager_is_window_on_space(uint64_t sid, struct window *window)
 {
     int space_count;
-    uint64_t *space_list = window_space_list(window, &space_count);
+    uint64_t *space_list = window_space_list(window->id, &space_count);
     if (!space_list) return false;
 
     for (int i = 0; i < space_count; ++i) {
