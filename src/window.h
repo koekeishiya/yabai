@@ -130,6 +130,7 @@ void window_unknown_serialize(FILE *rsp, uint32_t wid);
 void window_serialize(FILE *rsp, struct window *window);
 char *window_property_title_ts(uint32_t wid);
 char *window_title_ts(struct window *window);
+bool window_shadow(uint32_t wid);
 float window_opacity(uint32_t wid);
 uint32_t window_parent(uint32_t wid);
 int window_level(uint32_t wid);

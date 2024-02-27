@@ -222,7 +222,7 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
             json_bool(false),
             json_bool(false),
             json_bool(false),
-            json_bool(false),
+            json_bool(window_shadow(wid)),
             json_bool(false),
             json_bool(false),
             json_bool(false),
@@ -324,7 +324,7 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(window_can_move(window)),
             json_bool(window_can_resize(window)),
             json_bool(window->id == g_window_manager.focused_window_id),
-            json_bool(window_check_flag(window, WINDOW_SHADOW)),
+            json_bool(window_shadow(window->id)),
             json_bool(zoom_parent),
             json_bool(zoom_fullscreen),
             json_bool(true),
@@ -471,6 +471,12 @@ err:
     return result;
 }
 
+bool window_shadow(uint32_t wid)
+{
+    uint64_t tags = window_tags(wid);
+    return !(tags & (1 << 3));
+}
+
 float window_opacity(uint32_t wid)
 {
     float alpha = 0.0f;
@@ -578,8 +584,11 @@ uint64_t window_tags(uint32_t wid)
     CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
     if (!iterator) goto err1;
 
-    if (SLSWindowIteratorAdvance(iterator)) {
-        tags = SLSWindowIteratorGetTags(iterator);
+    if (SLSWindowIteratorGetCount(iterator) == 1) {
+        if (SLSWindowIteratorAdvance(iterator)) {
+            tags = SLSWindowIteratorGetTags(iterator);
+            printf("TAGS = 0x%16llx\n", tags);
+        }
     }
 
     CFRelease(iterator);
@@ -706,7 +715,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->id_ptr = &window->id;
     window->frame = window_ax_frame(window);
     window->is_root = !window_parent(window->id) || window_is_root(window);
-    window_set_flag(window, WINDOW_SHADOW);
+    if (window_shadow(window->id)) window_set_flag(window, WINDOW_SHADOW);
 
     if (window_is_minimized(window)) {
         window_set_flag(window, WINDOW_MINIMIZE);
