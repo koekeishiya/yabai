@@ -518,7 +518,8 @@ COMMAND
     Apply a rule to currently known windows. +
     If no argument is given, all existing rules will apply. +
     If an index or label is given, that particular rule will apply. +
-    Arguments can also be provided directly, just like in the *--add* command.
+    Arguments can also be provided directly, just like in the *--add* command. +
+    Existing `--one-shot` rules that have yet to apply will be ignored by this command.
 
 *--remove '<RULE_SEL>'*::
     Remove an existing rule with the given index or label.
