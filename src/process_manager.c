@@ -21,6 +21,7 @@ static const char *process_name_blacklist[] =
     "Übersicht",
     "Slack Helper (Plugin)",
     "Google Chrome Helper (Plugin)",
+    "qlmanage",
 };
 
 #pragma clang diagnostic push
