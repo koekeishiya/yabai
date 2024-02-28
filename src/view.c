@@ -7,14 +7,17 @@ extern struct window_manager g_window_manager;
 #define INSERT_FEEDBACK_RADIUS 9
 void insert_feedback_show(struct window_node *node)
 {
+    bool created = false;
     CFTypeRef frame_region;
     CGRect frame = {{node->area.x, node->area.y},{node->area.w, node->area.h}};
     CGSNewRegionWithRect(&frame, &frame_region);
 
     if (!node->feedback_window.id) {
-        uint64_t tag = 1ULL << 46;
+        uint64_t set_tags = (1ULL << 1) | (1ULL << 9);
+        uint64_t clear_tags = 0;
         SLSNewWindow(g_connection, 2, 0, 0, frame_region, &node->feedback_window.id);
-        SLSSetWindowTags(g_connection, node->feedback_window.id, &tag, 64);
+        SLSSetWindowTags(g_connection, node->feedback_window.id, &set_tags, 64);
+        SLSClearWindowTags(g_connection, node->feedback_window.id, &clear_tags, 64);
         sls_window_disable_shadow(node->feedback_window.id);
         SLSSetWindowResolution(g_connection, node->feedback_window.id, 2.0f);
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
@@ -33,6 +36,7 @@ void insert_feedback_show(struct window_node *node)
                                    g_window_manager.insert_feedback_color.b,
                                    g_window_manager.insert_feedback_color.a);
         buf_push(g_window_manager.insert_feedback_windows, node->feedback_window.id);
+        created = true;
     }
 
     frame.origin.x = 0; frame.origin.y = 0;
@@ -79,7 +83,6 @@ void insert_feedback_show(struct window_node *node)
     CGPathRef path = CGPathCreateWithRoundedRect(rect, cgrect_clamp_x_radius(rect, INSERT_FEEDBACK_RADIUS), cgrect_clamp_y_radius(rect, INSERT_FEEDBACK_RADIUS), NULL);
 
     SLSDisableUpdate(g_connection);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 0, node->window_order[0]);
     SLSSetWindowShape(g_connection, node->feedback_window.id, 0.0f, 0.0f, frame_region);
     CGContextClearRect(node->feedback_window.context, frame);
     CGContextClipToRect(node->feedback_window.context, clip);
@@ -88,10 +91,11 @@ void insert_feedback_show(struct window_node *node)
     CGContextStrokePath(node->feedback_window.context);
     CGContextResetClip(node->feedback_window.context);
     CGContextFlush(node->feedback_window.context);
-    SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
     SLSReenableUpdate(g_connection);
     CGPathRelease(path);
     CFRelease(frame_region);
+
+    if (created) SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
 }
 
 void insert_feedback_destroy(struct window_node *node)
@@ -104,6 +108,7 @@ void insert_feedback_destroy(struct window_node *node)
             }
         }
 
+        SLSOrderWindow(g_connection, node->feedback_window.id, 0, 0);
         CGContextRelease(node->feedback_window.context);
         SLSReleaseWindow(g_connection, node->feedback_window.id);
         memset(&node->feedback_window, 0, sizeof(struct feedback_window));

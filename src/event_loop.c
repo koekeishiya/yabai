@@ -1197,12 +1197,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_ALL_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_mode = MISSION_CONTROL_MODE_SHOW_ALL_WINDOWS;
-
-    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
-        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
-        SLSOrderWindow(g_connection, feedback_wid, 0, 0);
-    }
-
     event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, (void*)(uintptr_t)g_mission_control_mode);
 }
 
@@ -1210,12 +1204,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_FRONT_WINDOWS)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_mode = MISSION_CONTROL_MODE_SHOW_FRONT_WINDOWS;
-
-    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
-        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
-        SLSOrderWindow(g_connection, feedback_wid, 0, 0);
-    }
-
     event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, (void*)(uintptr_t)g_mission_control_mode);
 }
 
@@ -1223,12 +1211,6 @@ static EVENT_HANDLER(MISSION_CONTROL_SHOW_DESKTOP)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_mode = MISSION_CONTROL_MODE_SHOW_DESKTOP;
-
-    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
-        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
-        SLSOrderWindow(g_connection, feedback_wid, 0, 0);
-    }
-
     event_signal_push(SIGNAL_MISSION_CONTROL_ENTER, (void*)(uintptr_t)g_mission_control_mode);
 }
 
@@ -1236,11 +1218,6 @@ static EVENT_HANDLER(MISSION_CONTROL_ENTER)
 {
     debug("%s:\n", __FUNCTION__);
     g_mission_control_mode = MISSION_CONTROL_MODE_SHOW;
-
-    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
-        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
-        SLSOrderWindow(g_connection, feedback_wid, 0, 0);
-    }
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         event_loop_post(&g_event_loop, MISSION_CONTROL_CHECK_FOR_EXIT, NULL, 0);
@@ -1299,11 +1276,6 @@ static EVENT_HANDLER(MISSION_CONTROL_EXIT)
     if (g_window_manager.menubar_opacity != 1.0f) {
         float alpha = space_is_fullscreen(g_space_manager.current_space_id) ? 1.0f : g_window_manager.menubar_opacity;
         SLSSetMenuBarInsetAndAlpha(g_connection, 0, 1, alpha);
-    }
-
-    for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
-        uint32_t feedback_wid = g_window_manager.insert_feedback_windows[i];
-        SLSOrderWindow(g_connection, feedback_wid, 1, 0);
     }
 
     if (g_mission_control_mode == MISSION_CONTROL_MODE_SHOW || g_mission_control_mode == MISSION_CONTROL_MODE_SHOW_ALL_WINDOWS) {
