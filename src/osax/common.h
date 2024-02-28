@@ -1,7 +1,7 @@
 #ifndef SA_COMMON_H
 #define SA_COMMON_H
 
-#define OSAX_VERSION                "2.1.0"
+#define OSAX_VERSION                "2.1.1"
 
 #define OSAX_ATTRIB_DOCK_SPACES     0x01
 #define OSAX_ATTRIB_DPPM            0x02
@@ -9,13 +9,15 @@
 #define OSAX_ATTRIB_REM_SPACE       0x08
 #define OSAX_ATTRIB_MOV_SPACE       0x10
 #define OSAX_ATTRIB_SET_WINDOW      0x20
+#define OSAX_ATTRIB_ANIM_TIME       0x40
 
 #define OSAX_ATTRIB_ALL             (OSAX_ATTRIB_DOCK_SPACES | \
                                      OSAX_ATTRIB_DPPM | \
                                      OSAX_ATTRIB_ADD_SPACE | \
                                      OSAX_ATTRIB_REM_SPACE | \
                                      OSAX_ATTRIB_MOV_SPACE | \
-                                     OSAX_ATTRIB_SET_WINDOW)
+                                     OSAX_ATTRIB_SET_WINDOW | \
+                                     OSAX_ATTRIB_ANIM_TIME)
 
 enum sa_opcode
 {
