@@ -30,20 +30,61 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->title ? rule->title : "",
             rule->role ? rule->role : "",
             rule->subrole ? rule->subrole : "",
-            display_arrangement(rule->did),
-            space_manager_mission_control_index(rule->sid),
-            json_bool(rule_check_flag(rule, RULE_FOLLOW_SPACE)),
-            rule->opacity,
-            json_optional_bool(rule->manage),
-            json_optional_bool(rule->sticky),
-            json_optional_bool(rule->mff),
-            rule_check_flag(rule, RULE_LAYER) ? layer_str[rule->layer] : "",
-            json_optional_bool(rule->fullscreen),
-            rule->grid[0], rule->grid[1],
-            rule->grid[2], rule->grid[3],
-            rule->grid[4], rule->grid[5],
+            display_arrangement(rule->effects.did),
+            space_manager_mission_control_index(rule->effects.sid),
+            json_bool(rule_effects_check_flag(&rule->effects, RULE_FOLLOW_SPACE)),
+            rule->effects.opacity,
+            json_optional_bool(rule->effects.manage),
+            json_optional_bool(rule->effects.sticky),
+            json_optional_bool(rule->effects.mff),
+            rule_effects_check_flag(&rule->effects, RULE_LAYER) ? layer_str[rule->effects.layer] : "",
+            json_optional_bool(rule->effects.fullscreen),
+            rule->effects.grid[0], rule->effects.grid[1],
+            rule->effects.grid[2], rule->effects.grid[3],
+            rule->effects.grid[4], rule->effects.grid[5],
             json_bool(rule_check_flag(rule, RULE_ONE_SHOT)),
-            rule->flags);
+            (uint32_t)(rule->effects.flags << 16) | (uint32_t)rule->flags);
+}
+
+void rule_combine_effects(struct rule_effects *effects, struct rule_effects *result)
+{
+    if (effects->did) {
+        result->did = effects->did;
+        if (rule_effects_check_flag(effects, RULE_FOLLOW_SPACE)) {
+            rule_effects_set_flag(result, RULE_FOLLOW_SPACE);
+        }
+    }
+
+    if (effects->sid) {
+        result->sid = effects->sid;
+        if (rule_effects_check_flag(effects, RULE_FOLLOW_SPACE)) {
+            rule_effects_set_flag(result, RULE_FOLLOW_SPACE);
+        }
+    }
+
+    if (rule_effects_check_flag(effects, RULE_OPACITY) && in_range_ii(effects->opacity, 0.0f, 1.0f)) {
+        result->opacity = effects->opacity;
+        rule_effects_set_flag(result, RULE_OPACITY);
+    }
+
+    if (rule_effects_check_flag(effects, RULE_LAYER)) {
+        result->layer = effects->layer;
+        rule_effects_set_flag(result, RULE_LAYER);
+    }
+
+    if (effects->manage     != RULE_PROP_UD) result->manage     = effects->manage;
+    if (effects->sticky     != RULE_PROP_UD) result->sticky     = effects->sticky;
+    if (effects->mff        != RULE_PROP_UD) result->mff        = effects->mff;
+    if (effects->fullscreen != RULE_PROP_UD) result->fullscreen = effects->fullscreen;
+
+    if (effects->grid[0] != 0 && effects->grid[1] != 0) {
+        result->grid[0] = effects->grid[0];
+        result->grid[1] = effects->grid[1];
+        result->grid[2] = effects->grid[2];
+        result->grid[3] = effects->grid[3];
+        result->grid[4] = effects->grid[4];
+        result->grid[5] = effects->grid[5];
+    }
 }
 
 void rule_reapply_all(void)
@@ -94,11 +135,14 @@ void rule_apply(struct rule *rule)
                     char *window_title = window_title_ts(window);
                     char *window_role = window_role_ts(window);
                     char *window_subrole = window_subrole_ts(window);
-                    window_manager_apply_manage_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
 
-                    if (window_manager_is_window_eligible(window)) {
-                        window->is_eligible = true;
-                        window_manager_apply_rule_to_window(&g_space_manager, &g_window_manager, window, rule, window_title, window_role, window_subrole);
+                    if (window_manager_rule_matches_window(rule, window, window_title, window_role, window_subrole)) {
+                        window_manager_apply_manage_rule_effects_to_window(&g_space_manager, &g_window_manager, window, &rule->effects, window_title, window_role, window_subrole);
+
+                        if (window_manager_is_window_eligible(window)) {
+                            window->is_eligible = true;
+                            window_manager_apply_rule_effects_to_window(&g_space_manager, &g_window_manager, window, &rule->effects, window_title, window_role, window_subrole);
+                        }
                     }
                 }
             }

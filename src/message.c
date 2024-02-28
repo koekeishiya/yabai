@@ -2290,12 +2290,12 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
 
             if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
                 ++value;
-                rule_set_flag(rule, RULE_FOLLOW_SPACE);
+                rule_effects_set_flag(&rule->effects, RULE_FOLLOW_SPACE);
             }
 
             struct selector selector = parse_display_selector(rsp, &value, display_manager_active_display_id(), false);
             if (selector.did_parse && selector.did) {
-                rule->did = selector.did;
+                rule->effects.did = selector.did;
             } else {
                 did_parse = false;
             }
@@ -2304,12 +2304,12 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
 
             if (value[0] == ARGUMENT_RULE_VALUE_SPACE) {
                 ++value;
-                rule_set_flag(rule, RULE_FOLLOW_SPACE);
+                rule_effects_set_flag(&rule->effects, RULE_FOLLOW_SPACE);
             }
 
             struct selector selector = parse_space_selector(rsp, &value, space_manager_active_space(), false);
             if (selector.did_parse && selector.sid) {
-                rule->sid = selector.sid;
+                rule->effects.sid = selector.sid;
             } else {
                 did_parse = false;
             }
@@ -2317,17 +2317,17 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             if (exclusion) unsupported_exclusion = key;
 
             if ((sscanf(value, ARGUMENT_RULE_VALUE_GRID,
-                        &rule->grid[0], &rule->grid[1],
-                        &rule->grid[2], &rule->grid[3],
-                        &rule->grid[4], &rule->grid[5]) != 6)) {
+                        &rule->effects.grid[0], &rule->effects.grid[1],
+                        &rule->effects.grid[2], &rule->effects.grid[3],
+                        &rule->effects.grid[4], &rule->effects.grid[5]) != 6)) {
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;
             }
         } else if (string_equals(key, ARGUMENT_RULE_KEY_OPACITY)) {
             if (exclusion) unsupported_exclusion = key;
 
-            if ((sscanf(value, "%f", &rule->opacity) == 1) && (in_range_ii(rule->opacity, 0.0f, 1.0f))) {
-                rule_set_flag(rule, RULE_OPACITY);
+            if ((sscanf(value, "%f", &rule->effects.opacity) == 1) && (in_range_ii(rule->effects.opacity, 0.0f, 1.0f))) {
+                rule_effects_set_flag(&rule->effects, RULE_OPACITY);
             } else {
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;
@@ -2336,9 +2336,9 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             if (exclusion) unsupported_exclusion = key;
 
             if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                rule->manage = RULE_PROP_ON;
+                rule->effects.manage = RULE_PROP_ON;
             } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                rule->manage = RULE_PROP_OFF;
+                rule->effects.manage = RULE_PROP_OFF;
             } else {
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;
@@ -2347,9 +2347,9 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             if (exclusion) unsupported_exclusion = key;
 
             if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                rule->sticky = RULE_PROP_ON;
+                rule->effects.sticky = RULE_PROP_ON;
             } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                rule->sticky = RULE_PROP_OFF;
+                rule->effects.sticky = RULE_PROP_OFF;
             } else {
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;
@@ -2358,9 +2358,9 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             if (exclusion) unsupported_exclusion = key;
 
             if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                rule->mff = RULE_PROP_ON;
+                rule->effects.mff = RULE_PROP_ON;
             } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                rule->mff = RULE_PROP_OFF;
+                rule->effects.mff = RULE_PROP_OFF;
             } else {
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;
@@ -2369,17 +2369,17 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             if (exclusion) unsupported_exclusion = key;
 
             if (string_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
-                rule->layer = LAYER_BELOW;
-                rule_set_flag(rule, RULE_LAYER);
+                rule->effects.layer = LAYER_BELOW;
+                rule_effects_set_flag(&rule->effects, RULE_LAYER);
             } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_NORMAL)) {
-                rule->layer = LAYER_NORMAL;
-                rule_set_flag(rule, RULE_LAYER);
+                rule->effects.layer = LAYER_NORMAL;
+                rule_effects_set_flag(&rule->effects, RULE_LAYER);
             } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_ABOVE)) {
-                rule->layer = LAYER_ABOVE;
-                rule_set_flag(rule, RULE_LAYER);
+                rule->effects.layer = LAYER_ABOVE;
+                rule_effects_set_flag(&rule->effects, RULE_LAYER);
             } else if (string_equals(value, ARGUMENT_WINDOW_LAYER_AUTO)) {
-                rule->layer = LAYER_AUTO;
-                rule_set_flag(rule, RULE_LAYER);
+                rule->effects.layer = LAYER_AUTO;
+                rule_effects_set_flag(&rule->effects, RULE_LAYER);
             } else {
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;
@@ -2388,9 +2388,9 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             if (exclusion) unsupported_exclusion = key;
 
             if (string_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                rule->fullscreen = RULE_PROP_ON;
+                rule->effects.fullscreen = RULE_PROP_ON;
             } else if (string_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                rule->fullscreen = RULE_PROP_OFF;
+                rule->effects.fullscreen = RULE_PROP_OFF;
             } else {
                 daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
                 did_parse = false;

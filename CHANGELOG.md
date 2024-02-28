@@ -28,6 +28,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Window queries will now list information about all windows even if yabai does not yet have an AX-reference. Windows that are missing an AX-reference cannot be acted upon until its space has become active [#2126](https://github.com/koekeishiya/yabai/issues/2126)
 - Fixed window animation flickering [#2129](https://github.com/koekeishiya/yabai/issues/2129)
 - Fixed weird issue with memory ownership when synthesizing events for autofocus [#2130](https://github.com/koekeishiya/yabai/issues/2130)
+- Combine effects of all matching window rules before applying rule effects [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 
 ### Removed
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)
