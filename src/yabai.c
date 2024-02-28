@@ -178,7 +178,9 @@ static inline bool configure_settings_and_acquire_lock(void)
     snprintf(g_socket_file, sizeof(g_socket_file), SOCKET_PATH_FMT, user);
     snprintf(g_lock_file, sizeof(g_lock_file), LCFILE_PATH_FMT, user);
 
+    NSApplicationLoad();
     g_pid = getpid();
+    g_event_bytes = malloc(0xf8);
     g_connection = SLSMainConnectionID();
     g_cv_host_clock_frequency   = CVGetHostClockFrequency();
     g_layer_normal_window_level = CGWindowLevelForKey(LAYER_NORMAL);
@@ -188,14 +190,12 @@ static inline bool configure_settings_and_acquire_lock(void)
     CGSGetConnectionPortById             = macho_find_symbol("/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/SkyLight", "_CGSGetConnectionPortById");
     SLSWindowManagementBridgeSetDelegate = macho_find_symbol("/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/SkyLight", "_SLSWindowManagementBridgeSetDelegate");
 
-    NSApplicationLoad();
     signal(SIGCHLD, SIG_IGN);
     signal(SIGPIPE, SIG_IGN);
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
     mouse_state_init(&g_mouse_state);
     task_get_special_port(mach_task_self(), TASK_BOOTSTRAP_PORT, &g_bs_port);
-    g_event_bytes = malloc(0xf8);
 
     if (SLSWindowManagementBridgeSetDelegate) {
         SLSWindowManagementBridgeSetDelegate(NULL);
