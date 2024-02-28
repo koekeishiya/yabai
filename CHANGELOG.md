@@ -29,6 +29,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fixed window animation flickering [#2129](https://github.com/koekeishiya/yabai/issues/2129)
 - Fixed weird issue with memory ownership when synthesizing events for autofocus [#2130](https://github.com/koekeishiya/yabai/issues/2130)
 - Combine effects of all matching window rules before applying rule effects [#2123](https://github.com/koekeishiya/yabai/issues/2123)
+- Window insert feedback visual should use same layer as parent window [#2132](https://github.com/koekeishiya/yabai/issues/2132)
 
 ### Removed
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)
