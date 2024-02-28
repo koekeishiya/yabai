@@ -189,6 +189,7 @@ static inline bool configure_settings_and_acquire_lock(void)
 
     CGSGetConnectionPortById             = macho_find_symbol("/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/SkyLight", "_CGSGetConnectionPortById");
     SLSWindowManagementBridgeSetDelegate = macho_find_symbol("/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/SkyLight", "_SLSWindowManagementBridgeSetDelegate");
+    if (SLSWindowManagementBridgeSetDelegate) SLSWindowManagementBridgeSetDelegate(NULL);
 
     signal(SIGCHLD, SIG_IGN);
     signal(SIGPIPE, SIG_IGN);
@@ -196,10 +197,6 @@ static inline bool configure_settings_and_acquire_lock(void)
     CGEnableEventStateCombining(false);
     mouse_state_init(&g_mouse_state);
     task_get_special_port(mach_task_self(), TASK_BOOTSTRAP_PORT, &g_bs_port);
-
-    if (SLSWindowManagementBridgeSetDelegate) {
-        SLSWindowManagementBridgeSetDelegate(NULL);
-    }
 
 #if 0
     hook_nsobject_autorelease();
