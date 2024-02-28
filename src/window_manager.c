@@ -483,7 +483,9 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     window_manager_set_window_proxy_connection_property(animation->cid, animation->wid, animation->proxy.id);
     scripting_addition_swap_window_proxy_in(animation->wid, animation->proxy.id);
     dispatch_async(dispatch_get_main_queue(), ^{
-        window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
+        if (animation->window && animation->window->id != 0 && __sync_bool_compare_and_swap(&animation->window->id_ptr, &animation->window->id, &animation->window->id)) {
+            window_manager_set_window_frame(animation->window, animation->x, animation->y, animation->w, animation->h);
+        }
     });
 
     return NULL;
@@ -585,7 +587,9 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             __atomic_store_n(&existing_animation->skip, true, __ATOMIC_RELEASE);
 
             dispatch_async(dispatch_get_main_queue(), ^{
-                window_manager_set_window_frame(context->animation_list[i].window, context->animation_list[i].x, context->animation_list[i].y, context->animation_list[i].w, context->animation_list[i].h);
+                if (context->animation_list[i].window && context->animation_list[i].window->id != 0 && __sync_bool_compare_and_swap(&context->animation_list[i].window->id_ptr, &context->animation_list[i].window->id, &context->animation_list[i].window->id)) {
+                    window_manager_set_window_frame(context->animation_list[i].window, context->animation_list[i].x, context->animation_list[i].y, context->animation_list[i].w, context->animation_list[i].h);
+                }
             });
 
             context->animation_list[i].proxy.frame.origin.x    = (int)(existing_animation->proxy.tx);
