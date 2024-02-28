@@ -104,6 +104,11 @@ WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest 
 DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1-based)>
 
 SPACE_SEL   := prev | next | first | last | recent | mouse | <mission-control index (1-based)> | LABEL
+
+EASING      := ease_in_sine  | ease_out_sine  | ease_in_out_sine  | ease_in_quad  | ease_out_quad  | ease_in_out_quad  |
+               ease_in_cubic | ease_out_cubic | ease_in_out_cubic | ease_in_quart | ease_out_quart | ease_in_out_quart |
+               ease_in_quint | ease_out_quint | ease_in_out_quint | ease_in_expo  | ease_out_expo  | ease_in_out_expo  |
+               ease_in_circ  | ease_out_circ  | ease_in_out_circ
 ----
 
 Domains
@@ -181,6 +186,10 @@ Global Settings
     If 0.0, the change in dimension is not animated. +
     Requires Screen Recording permissions. +
     System Integrity Protection must be partially disabled.
+
+*window_animation_easing* ['<EASING>']::
+    Easing function to use for window animations. +
+    See https://easings.net for details.
 
 *insert_feedback_color* ['0xAARRGGBB']::
     Color of the *window --insert* message and mouse_drag selection. +

@@ -41,6 +41,7 @@ struct window_animation
 struct window_animation_context
 {
     int animation_connection;
+    int animation_easing;
     float animation_duration;
     uint64_t animation_clock;
     struct window_animation *animation_list;

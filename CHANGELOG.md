@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Window rules marked as `--one-shot` will be ignored completely by the `--apply` command [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Window queries include a new property `has-ax-reference` [#2126](https://github.com/koekeishiya/yabai/issues/2126)
 - Window command `--sub-layer` and rule property `sub-layer` has been added to replace `--layer` and `layer` respectively [#2128](https://github.com/koekeishiya/yabai/issues/2128)
+- Added new command `config window_animation_easing ..` to select easing function [#2131](https://github.com/koekeishiya/yabai/issues/2131)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)

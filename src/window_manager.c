@@ -511,7 +511,13 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
     if (t <= 0.0) t = 0.0f;
     if (t >= 1.0) t = 1.0f;
 
-    float mt = ease_out_cubic(t);
+    float mt;
+    switch (context->animation_easing) {
+#define ANIMATION_EASING_TYPE_ENTRY(value) case value##_type: mt = value(t); break;
+        ANIMATION_EASING_TYPE_LIST
+#undef ANIMATION_EASING_TYPE_ENTRY
+    }
+
     CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
 
     for (int i = 0; i < animation_count; ++i) {
@@ -566,6 +572,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     context->animation_count    = window_count;
     context->animation_list     = malloc(window_count * sizeof(struct window_animation));
     context->animation_duration = g_window_manager.window_animation_duration;
+    context->animation_easing   = g_window_manager.window_animation_easing;
     context->animation_clock    = 0;
 
     for (int i = 0; i < window_count; ++i) {
@@ -2377,6 +2384,7 @@ void window_manager_init(struct window_manager *wm)
     wm->normal_window_opacity = 1.0f;
     wm->window_opacity_duration = 0.0f;
     wm->window_animation_duration = 0.0f;
+    wm->window_animation_easing = ease_out_circ_type;
     wm->insert_feedback_windows = NULL;
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
 
