@@ -107,6 +107,8 @@ void rule_reapply_all(void)
                     }
                 }
             }
+
+            bucket = bucket->next;
         }
     }
 }

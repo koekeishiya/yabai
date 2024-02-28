@@ -340,7 +340,7 @@ int main(int argc, char **argv)
         require("yabai: 'display has separate spaces' is disabled! abort..\n");
     }
 
-    if (!ts_init(MEGABYTES(4))) {
+    if (!ts_init(MEGABYTES(8))) {
         error("yabai: could not allocate temporary storage! abort..\n");
     }
 
