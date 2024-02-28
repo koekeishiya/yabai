@@ -48,6 +48,27 @@ static inline void socket_close(int sockfd)
     close(sockfd);
 }
 
+static inline void mach_send(mach_port_t port, void *data, uint32_t size)
+{
+    struct {
+        mach_msg_header_t header;
+        mach_msg_size_t descriptor_count;
+        mach_msg_ool_descriptor_t descriptor;
+    } msg = {0};
+
+    msg.header.msgh_bits        = MACH_MSGH_BITS_SET(MACH_MSG_TYPE_COPY_SEND & MACH_MSGH_BITS_REMOTE_MASK, 0, 0, MACH_MSGH_BITS_COMPLEX);
+    msg.header.msgh_size        = sizeof(msg);
+    msg.header.msgh_remote_port = port;
+    msg.descriptor_count        = 1;
+    msg.descriptor.address      = data;
+    msg.descriptor.size         = size;
+    msg.descriptor.copy         = MACH_MSG_VIRTUAL_COPY;
+    msg.descriptor.deallocate   = false;
+    msg.descriptor.type         = MACH_MSG_OOL_DESCRIPTOR;
+
+    mach_msg(&msg.header, MACH_SEND_MSG, sizeof(msg), 0, 0, 0, 0);
+}
+
 static inline char *json_optional_bool(int value)
 {
     if (value == 0) return "null";

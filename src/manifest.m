@@ -3,6 +3,7 @@
 #include <CoreVideo/CoreVideo.h>
 #include <mach-o/dyld.h>
 #include <mach-o/swap.h>
+#include <bootstrap.h>
 
 #ifdef __x86_64__
 #include <emmintrin.h>

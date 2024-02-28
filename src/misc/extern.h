@@ -6,7 +6,6 @@ static CGError (* SLSWindowManagementBridgeSetDelegate)(void *);
 extern mach_port_t mig_get_special_reply_port(void);
 extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 extern int SLSMainConnectionID(void);
-extern CGError SLSSetConnectionProperty(int cid, int target_cid, CFStringRef key, CFTypeRef value);
 extern CGError SLSNewConnection(int zero, int *cid);
 extern CGError SLSReleaseConnection(int cid);
 extern CGError SLSRegisterConnectionNotifyProc(int cid, connection_callback *handler, uint32_t event, void *context);

@@ -35,6 +35,7 @@ double g_cv_host_clock_frequency;
 int g_layer_normal_window_level;
 int g_layer_below_window_level;
 int g_layer_above_window_level;
+mach_port_t g_bs_port;
 int g_connection;
 pid_t g_pid;
 
@@ -192,6 +193,7 @@ static inline bool configure_settings_and_acquire_lock(void)
     CGSetLocalEventsSuppressionInterval(0.0f);
     CGEnableEventStateCombining(false);
     mouse_state_init(&g_mouse_state);
+    task_get_special_port(mach_task_self(), TASK_BOOTSTRAP_PORT, &g_bs_port);
 
     if (SLSWindowManagementBridgeSetDelegate) {
         SLSWindowManagementBridgeSetDelegate(NULL);
