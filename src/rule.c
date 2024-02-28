@@ -52,6 +52,8 @@ void rule_combine_effects(struct rule_effects *effects, struct rule_effects *res
         result->did = effects->did;
         if (rule_effects_check_flag(effects, RULE_FOLLOW_SPACE)) {
             rule_effects_set_flag(result, RULE_FOLLOW_SPACE);
+        } else {
+            rule_effects_clear_flag(result, RULE_FOLLOW_SPACE);
         }
     }
 
@@ -59,6 +61,8 @@ void rule_combine_effects(struct rule_effects *effects, struct rule_effects *res
         result->sid = effects->sid;
         if (rule_effects_check_flag(effects, RULE_FOLLOW_SPACE)) {
             rule_effects_set_flag(result, RULE_FOLLOW_SPACE);
+        } else {
+            rule_effects_clear_flag(result, RULE_FOLLOW_SPACE);
         }
     }
 
