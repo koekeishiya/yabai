@@ -1,4 +1,5 @@
 extern mach_port_t g_bs_port;
+extern uint8_t *g_event_bytes;
 extern struct event_loop g_event_loop;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;
@@ -1217,31 +1218,29 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     // annotated to flow to an application.
     //
 
-    static uint8_t bytes[0xf8];
+    memset(g_event_bytes, 0, 0xf8);
+    g_event_bytes[0x04] = 0xf8;
+    g_event_bytes[0x3a] = 0x10;
+    memcpy(g_event_bytes + 0x3c, &window_id, sizeof(uint32_t));
+    memset(g_event_bytes + 0x20, 0xff, 0x10);
 
-    bytes[0x04] = 0xf8;
-    bytes[0x3a] = 0x10;
-    memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-    memset(bytes + 0x20, 0xff, 0x10);
+    g_event_bytes[0x08] = 0x01;
+    SLPSPostEventRecordTo(window_psn, g_event_bytes);
 
-    bytes[0x08] = 0x01;
-    SLPSPostEventRecordTo(window_psn, bytes);
-
-    bytes[0x08] = 0x02;
-    SLPSPostEventRecordTo(window_psn, bytes);
+    g_event_bytes[0x08] = 0x02;
+    SLPSPostEventRecordTo(window_psn, g_event_bytes);
 }
 
 void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
-        static uint8_t bytes[0xf8];
+        memset(g_event_bytes, 0, 0xf8);
+        g_event_bytes[0x04] = 0xf8;
+        g_event_bytes[0x08] = 0x0d;
 
-        bytes[0x04] = 0xf8;
-        bytes[0x08] = 0x0d;
-
-        bytes[0x8a] = 0x02;
-        memcpy(bytes + 0x3c, &g_window_manager.focused_window_id, sizeof(uint32_t));
-        SLPSPostEventRecordTo(&g_window_manager.focused_window_psn, bytes);
+        g_event_bytes[0x8a] = 0x02;
+        memcpy(g_event_bytes + 0x3c, &g_window_manager.focused_window_id, sizeof(uint32_t));
+        SLPSPostEventRecordTo(&g_window_manager.focused_window_psn, g_event_bytes);
 
         //
         // @hack
@@ -1252,9 +1251,9 @@ void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, 
 
         usleep(10000);
 
-        bytes[0x8a] = 0x01;
-        memcpy(bytes + 0x3c, &window_id, sizeof(uint32_t));
-        SLPSPostEventRecordTo(window_psn, bytes);
+        g_event_bytes[0x8a] = 0x01;
+        memcpy(g_event_bytes + 0x3c, &window_id, sizeof(uint32_t));
+        SLPSPostEventRecordTo(window_psn, g_event_bytes);
     }
 
     _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
