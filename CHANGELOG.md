@@ -25,6 +25,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Allow resetting window opacity in window rules [#2127](https://github.com/koekeishiya/yabai/issues/2127)
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added* [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Window queries will now list information about all windows even if yabai does not yet have an AX-reference. Windows that are missing an AX-reference cannot be acted upon until its space has become active [#2126](https://github.com/koekeishiya/yabai/issues/2126)
+- Fixed window animation flickering [#2129](https://github.com/koekeishiya/yabai/issues/2129)
 
 ### Removed
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)

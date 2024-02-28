@@ -805,18 +805,11 @@ static void do_window_swap_proxy_in(char *message)
     unpack(message, proxy_wid);
     if (!proxy_wid) return;
 
-    CFTypeRef transaction1 = SLSTransactionCreate(SLSMainConnectionID());
-    CFTypeRef transaction2 = SLSTransactionCreate(SLSMainConnectionID());
-
-    SLSTransactionOrderWindowGroup(transaction1, proxy_wid, 1, wid);
-    SLSTransactionSetWindowSystemAlpha(transaction2, wid, 0);
-
-    SLSTransactionCommit(transaction1, 1);
-    usleep(15000);
-    SLSTransactionCommit(transaction2, 1);
-
-    CFRelease(transaction1);
-    CFRelease(transaction2);
+    CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
+    SLSTransactionOrderWindowGroup(transaction, proxy_wid, 1, wid);
+    SLSTransactionSetWindowSystemAlpha(transaction, wid, 0);
+    SLSTransactionCommit(transaction, 1);
+    CFRelease(transaction);
 }
 
 static void do_window_swap_proxy_out(char *message)
@@ -829,18 +822,11 @@ static void do_window_swap_proxy_out(char *message)
     unpack(message, proxy_wid);
     if (!proxy_wid) return;
 
-    CFTypeRef transaction1 = SLSTransactionCreate(SLSMainConnectionID());
-    CFTypeRef transaction2 = SLSTransactionCreate(SLSMainConnectionID());
-
-    SLSTransactionSetWindowSystemAlpha(transaction1, wid, 1);
-    SLSTransactionOrderWindowGroup(transaction2, proxy_wid, 0, wid);
-
-    SLSTransactionCommit(transaction1, 1);
-    usleep(15000);
-    SLSTransactionCommit(transaction2, 1);
-
-    CFRelease(transaction1);
-    CFRelease(transaction2);
+    CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
+    SLSTransactionSetWindowSystemAlpha(transaction, wid, 1);
+    SLSTransactionOrderWindowGroup(transaction, proxy_wid, 0, wid);
+    SLSTransactionCommit(transaction, 1);
+    CFRelease(transaction);
 }
 
 static void do_window_order(char *message)
