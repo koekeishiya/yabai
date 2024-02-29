@@ -86,20 +86,21 @@ extern bool g_verbose;
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
-#define COMMAND_SPACE_FOCUS   "--focus"
-#define COMMAND_SPACE_CREATE  "--create"
-#define COMMAND_SPACE_DESTROY "--destroy"
-#define COMMAND_SPACE_MOVE    "--move"
-#define COMMAND_SPACE_SWAP    "--swap"
-#define COMMAND_SPACE_DISPLAY "--display"
-#define COMMAND_SPACE_BALANCE "--balance"
-#define COMMAND_SPACE_MIRROR  "--mirror"
-#define COMMAND_SPACE_ROTATE  "--rotate"
-#define COMMAND_SPACE_PADDING "--padding"
-#define COMMAND_SPACE_GAP     "--gap"
-#define COMMAND_SPACE_TOGGLE  "--toggle"
-#define COMMAND_SPACE_LAYOUT  "--layout"
-#define COMMAND_SPACE_LABEL   "--label"
+#define COMMAND_SPACE_FOCUS    "--focus"
+#define COMMAND_SPACE_CREATE   "--create"
+#define COMMAND_SPACE_DESTROY  "--destroy"
+#define COMMAND_SPACE_MOVE     "--move"
+#define COMMAND_SPACE_SWAP     "--swap"
+#define COMMAND_SPACE_DISPLAY  "--display"
+#define COMMAND_SPACE_EQUALIZE "--equalize"
+#define COMMAND_SPACE_BALANCE  "--balance"
+#define COMMAND_SPACE_MIRROR   "--mirror"
+#define COMMAND_SPACE_ROTATE   "--rotate"
+#define COMMAND_SPACE_PADDING  "--padding"
+#define COMMAND_SPACE_GAP      "--gap"
+#define COMMAND_SPACE_TOGGLE   "--toggle"
+#define COMMAND_SPACE_LAYOUT   "--layout"
+#define COMMAND_SPACE_LABEL    "--label"
 
 #define ARGUMENT_SPACE_AXIS_X       "x-axis"
 #define ARGUMENT_SPACE_AXIS_Y       "y-axis"
@@ -1658,6 +1659,23 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "cannot destroy space because mission-control is active.\n");
             } else if (result == SPACE_OP_ERROR_SCRIPTING_ADDITION) {
                 daemon_fail(rsp, "cannot destroy space due to an error with the scripting-addition.\n");
+            }
+        } else if (token_equals(command, COMMAND_SPACE_EQUALIZE)) {
+            struct token value = get_token(&message);
+            if (!token_is_valid(value)) {
+                if (!space_manager_equalize_space(&g_space_manager, acting_sid, SPLIT_X | SPLIT_Y)) {
+                    daemon_fail(rsp, "cannot equalize a non-managed space.\n");
+                }
+            } else if (token_equals(value, ARGUMENT_SPACE_AXIS_X)) {
+                if (!space_manager_equalize_space(&g_space_manager, acting_sid, SPLIT_X)) {
+                    daemon_fail(rsp, "cannot equalize a non-managed space.\n");
+                }
+            } else if (token_equals(value, ARGUMENT_SPACE_AXIS_Y)) {
+                if (!space_manager_equalize_space(&g_space_manager, acting_sid, SPLIT_Y)) {
+                    daemon_fail(rsp, "cannot equalize a non-managed space.\n");
+                }
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_SPACE_BALANCE)) {
             struct token value = get_token(&message);

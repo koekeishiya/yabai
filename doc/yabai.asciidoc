@@ -299,6 +299,9 @@ COMMAND
     Send the selected space to the given display. +
     System Integrity Protection must be partially disabled.
 
+*--equalize* ['x-axis|y-axis']::
+    Reset the split ratios on the selected space to the default value along the given axis. If no axis is specified, use both.
+
 *--balance* ['x-axis|y-axis']::
     Adjust the split ratios on the selected space so that all windows along the given axis occupy the same area. If no axis is specified, use both.
 

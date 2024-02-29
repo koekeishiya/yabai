@@ -198,23 +198,37 @@ static inline bool window_node_is_right_child(struct window_node *node)
     return node->parent && node->parent->right == node;
 }
 
-static inline struct equalize_node equalize_node_add(struct equalize_node a, struct equalize_node b)
+static void window_node_equalize(struct window_node *node, uint32_t axis_flag)
 {
-    return (struct equalize_node) { a.y_count + b.y_count, a.x_count + b.x_count, };
+    if (node->left)  window_node_equalize(node->left, axis_flag);
+    if (node->right) window_node_equalize(node->right, axis_flag);
+
+    if ((axis_flag & SPLIT_Y) && node->split == SPLIT_Y) {
+        node->ratio = g_space_manager.split_ratio;
+    }
+
+    if ((axis_flag & SPLIT_X) && node->split == SPLIT_X) {
+        node->ratio = g_space_manager.split_ratio;
+    }
 }
 
-static struct equalize_node window_node_equalize(struct window_node *node, uint32_t axis_flag)
+static inline struct balance_node balance_node_add(struct balance_node a, struct balance_node b)
+{
+    return (struct balance_node) { a.y_count + b.y_count, a.x_count + b.x_count, };
+}
+
+static struct balance_node window_node_balance(struct window_node *node, uint32_t axis_flag)
 {
     if (window_node_is_leaf(node)) {
-        return (struct equalize_node) {
+        return (struct balance_node) {
             node->parent ? node->parent->split == SPLIT_Y : 0,
             node->parent ? node->parent->split == SPLIT_X : 0
         };
     }
 
-    struct equalize_node left_leafs  = window_node_equalize(node->left, axis_flag);
-    struct equalize_node right_leafs = window_node_equalize(node->right, axis_flag);
-    struct equalize_node total_leafs = equalize_node_add(left_leafs, right_leafs);
+    struct balance_node left_leafs  = window_node_balance(node->left, axis_flag);
+    struct balance_node right_leafs = window_node_balance(node->right, axis_flag);
+    struct balance_node total_leafs = balance_node_add(left_leafs, right_leafs);
 
     if (axis_flag & SPLIT_Y) {
         if (node->split == SPLIT_Y) {
@@ -700,7 +714,7 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
     free(node);
 
     if (g_space_manager.auto_balance) {
-        window_node_equalize(view->root, SPLIT_X | SPLIT_Y);
+        window_node_balance(view->root, SPLIT_X | SPLIT_Y);
         view_update(view);
         return view->root;
     }
@@ -756,7 +770,7 @@ struct window_node *view_add_window_node_with_insertion_point(struct view *view,
         window_node_split(view, leaf, window);
 
         if (g_space_manager.auto_balance) {
-            window_node_equalize(view->root, SPLIT_X | SPLIT_Y);
+            window_node_balance(view->root, SPLIT_X | SPLIT_Y);
             view_update(view);
             return view->root;
         }

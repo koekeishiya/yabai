@@ -368,12 +368,24 @@ bool space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum win
     return true;
 }
 
-bool space_manager_balance_space(struct space_manager *sm, uint64_t sid, uint32_t axis_flag)
+bool space_manager_equalize_space(struct space_manager *sm, uint64_t sid, uint32_t axis_flag)
 {
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout != VIEW_BSP) return false;
 
     window_node_equalize(view->root, axis_flag);
+    view_update(view);
+    view_flush(view);
+
+    return true;
+}
+
+bool space_manager_balance_space(struct space_manager *sm, uint64_t sid, uint32_t axis_flag)
+{
+    struct view *view = space_manager_find_view(sm, sid);
+    if (view->layout != VIEW_BSP) return false;
+
+    window_node_balance(view->root, axis_flag);
     view_update(view);
     view_flush(view);
 
@@ -413,7 +425,7 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct window *
         node->parent->split = node->parent->split == SPLIT_Y ? SPLIT_X : SPLIT_Y;
 
         if (sm->auto_balance) {
-            window_node_equalize(view->root, SPLIT_X | SPLIT_Y);
+            window_node_balance(view->root, SPLIT_X | SPLIT_Y);
             view_update(view);
             view_flush(view);
         } else {

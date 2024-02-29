@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Window queries include a new property `has-ax-reference` [#2126](https://github.com/koekeishiya/yabai/issues/2126)
 - Window command `--sub-layer` and rule property `sub-layer` has been added to replace `--layer` and `layer` respectively [#2128](https://github.com/koekeishiya/yabai/issues/2128)
 - Added new command `config window_animation_easing ..` to select easing function [#2131](https://github.com/koekeishiya/yabai/issues/2131)
+- Added new command `space --equalize .. ` to reset split ratios of all nodes within a space to default value [#2133](https://github.com/koekeishiya/yabai/issues/2133)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)

@@ -48,7 +48,7 @@ struct window_animation_context
     int animation_count;
 };
 
-struct equalize_node
+struct balance_node
 {
     int y_count;
     int x_count;
