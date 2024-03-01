@@ -637,7 +637,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
             SLSTransactionOrderWindowGroup(transaction, context->animation_list[i].proxy.id, 1, context->animation_list[i].wid);
             SLSTransactionSetWindowSystemAlpha(transaction, existing_animation->proxy.id, 0);
-            SLSTransactionCommit(transaction, 1);
+            SLSTransactionCommit(transaction, 0);
             CFRelease(transaction);
 
             table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
