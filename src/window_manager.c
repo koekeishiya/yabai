@@ -431,11 +431,10 @@ static void window_manager_create_window_proxy(int animation_connection, float a
 
     CFTypeRef frame_region;
     CGSNewRegionWithRect(&proxy->frame, &frame_region);
-    SLSNewWindow(animation_connection, 2, 0, 0, frame_region, &proxy->id);
+    CFTypeRef empty_region = CGRegionCreateEmptyRegion();
 
-    uint64_t tag = 1ULL << 46;
-    SLSSetWindowTags(animation_connection, proxy->id, &tag, 64);
-
+    uint64_t tags = 1ULL << 46;
+    SLSNewWindowWithOpaqueShapeAndContext(animation_connection, 2, frame_region, empty_region, 13|(1 << 18), &tags, 0, 0, 64, &proxy->id, NULL);
     sls_window_disable_shadow(proxy->id);
     SLSSetWindowOpacity(animation_connection, proxy->id, 0);
     SLSSetWindowResolution(animation_connection, proxy->id, 2.0f);
@@ -449,6 +448,7 @@ static void window_manager_create_window_proxy(int animation_connection, float a
     CGContextDrawImage(proxy->context, frame, proxy->image);
     CGContextFlush(proxy->context);
     CFRelease(frame_region);
+    CFRelease(empty_region);
 }
 
 static void window_manager_destroy_window_proxy(int animation_connection, struct window_proxy *proxy, uint32_t real_wid)

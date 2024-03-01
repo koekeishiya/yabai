@@ -13,11 +13,11 @@ void insert_feedback_show(struct window_node *node)
     CGSNewRegionWithRect(&frame, &frame_region);
 
     if (!node->feedback_window.id) {
-        uint64_t set_tags = (1ULL << 1) | (1ULL << 9);
-        uint64_t clear_tags = 0;
-        SLSNewWindow(g_connection, 2, 0, 0, frame_region, &node->feedback_window.id);
-        SLSSetWindowTags(g_connection, node->feedback_window.id, &set_tags, 64);
-        SLSClearWindowTags(g_connection, node->feedback_window.id, &clear_tags, 64);
+        uint64_t tags = (1ULL << 1) | (1ULL << 9);
+        CFTypeRef empty_region = CGRegionCreateEmptyRegion();
+        SLSNewWindowWithOpaqueShapeAndContext(g_connection, 2, frame_region, empty_region, 13, &tags, 0, 0, 64, &node->feedback_window.id, NULL);
+        CFRelease(empty_region);
+
         sls_window_disable_shadow(node->feedback_window.id);
         SLSSetWindowResolution(g_connection, node->feedback_window.id, 2.0f);
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);

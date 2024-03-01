@@ -2,7 +2,6 @@
 typedef CONNECTION_CALLBACK(connection_callback);
 
 static mach_port_t (* CGSGetConnectionPortById)(int);
-static CGError (* SLSWindowManagementBridgeSetDelegate)(void *);
 extern mach_port_t mig_get_special_reply_port(void);
 extern AXError _AXUIElementGetWindow(AXUIElementRef ref, uint32_t *wid);
 extern int SLSMainConnectionID(void);
@@ -22,6 +21,7 @@ extern CFArrayRef SLSCopySpacesForWindows(int cid, int selector, CFArrayRef wind
 extern CGError SLSDisableUpdate(int cid);
 extern CGError SLSReenableUpdate(int cid);
 extern CGError SLSNewWindow(int cid, int type, float x, float y, CFTypeRef region, uint32_t *wid);
+extern CGError SLSNewWindowWithOpaqueShapeAndContext(int cid, int type, CFTypeRef region, CFTypeRef opaque_shape, int options, uint64_t *tags, float x, float y, int tag_size, uint32_t *wid, void *context);
 extern CGError SLSReleaseWindow(int cid, uint32_t wid);
 extern CGError SLSSetWindowTags(int cid, uint32_t wid, uint64_t *tags, int tag_size);
 extern CGError SLSClearWindowTags(int cid, uint32_t wid, uint64_t *tags, int tag_size);
@@ -33,6 +33,7 @@ extern CGError SLSWindowIsOrderedIn(int cid, uint32_t wid, uint8_t *value);
 extern CGError SLSSetWindowLevel(int cid, uint32_t wid, int level);
 extern CGError SLSSetWindowSubLevel(int cid, uint32_t wid, int sub_level);
 extern CGContextRef SLWindowContextCreate(int cid, uint32_t wid, CFDictionaryRef options);
+extern CFTypeRef CGRegionCreateEmptyRegion(void);
 extern CGError CGSNewRegionWithRect(CGRect *rect, CFTypeRef *region);
 extern CFUUIDRef CGDisplayCreateUUIDFromDisplayID(uint32_t did);
 extern CFArrayRef SLSCopyManagedDisplays(int cid);
