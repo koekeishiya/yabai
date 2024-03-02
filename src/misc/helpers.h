@@ -559,6 +559,7 @@ static CGImageRef cgimage_restore_alpha(CGImageRef image)
     int32x4_t  mask_ff = vdupq_n_s32(0xff);
 #endif
 
+    TIME_BLOCK(simd_pixel_loop, {
     uint32_t *pixel = (uint32_t *) data;
     for (int i = 0; i < height*width; i += 4) {
 #ifdef __x86_64__
@@ -616,6 +617,7 @@ static CGImageRef cgimage_restore_alpha(CGImageRef image)
 #endif
         pixel += 4;
     }
+    });
 
     CGImageRef result = CGBitmapContextCreateImage(context);
     CGContextRelease(context);

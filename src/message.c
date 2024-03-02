@@ -2610,6 +2610,7 @@ snext:
 
 void handle_message(FILE *rsp, char *message)
 {
+    TIME_FUNCTION;
     struct token domain = get_token(&message);
     if (token_equals(domain, DOMAIN_CONFIG)) {
         handle_domain_config(rsp, domain, message);
