@@ -299,6 +299,8 @@ void window_manager_add_managed_window(struct window_manager *wm, struct window 
 
 enum window_op_error window_manager_adjust_window_ratio(struct window_manager *wm, struct window *window, int type, float ratio)
 {
+    TIME_FUNCTION;
+
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
@@ -322,6 +324,8 @@ enum window_op_error window_manager_adjust_window_ratio(struct window_manager *w
 
 enum window_op_error window_manager_move_window_relative(struct window_manager *wm, struct window *window, int type, float dx, float dy)
 {
+    TIME_FUNCTION;
+
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
@@ -336,6 +340,8 @@ enum window_op_error window_manager_move_window_relative(struct window_manager *
 
 void window_manager_resize_window_relative_internal(struct window *window, CGRect frame, int direction, float dx, float dy, bool animate)
 {
+    TIME_FUNCTION;
+
     int x_mod = (direction & HANDLE_LEFT) ? -1 : (direction & HANDLE_RIGHT)  ? 1 : 0;
     int y_mod = (direction & HANDLE_TOP)  ? -1 : (direction & HANDLE_BOTTOM) ? 1 : 0;
 
@@ -356,6 +362,8 @@ void window_manager_resize_window_relative_internal(struct window *window, CGRec
 
 enum window_op_error window_manager_resize_window_relative(struct window_manager *wm, struct window *window, int direction, float dx, float dy, bool animate)
 {
+    TIME_FUNCTION;
+
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
         if (direction == HANDLE_ABS) return WINDOW_OP_ERROR_INVALID_OPERATION;
@@ -581,8 +589,6 @@ out:
 
 void window_manager_animate_window_list_async(struct window_capture *window_list, int window_count)
 {
-    TIME_FUNCTION;
-
     struct window_animation_context *context = malloc(sizeof(struct window_animation_context));
 
     SLSNewConnection(0, &context->animation_connection);
@@ -679,6 +685,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
 void window_manager_animate_window_list(struct window_capture *window_list, int window_count)
 {
+    TIME_FUNCTION;
+
     if (g_window_manager.window_animation_duration) {
         window_manager_animate_window_list_async(window_list, window_count);
     } else {
@@ -690,6 +698,8 @@ void window_manager_animate_window_list(struct window_capture *window_list, int 
 
 void window_manager_animate_window(struct window_capture capture)
 {
+    TIME_FUNCTION;
+
     if (g_window_manager.window_animation_duration) {
         window_manager_animate_window_list_async(&capture, 1);
     } else {
@@ -1257,6 +1267,8 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
 
 void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, uint32_t window_id)
 {
+    TIME_FUNCTION;
+
     if (psn_equals(window_psn, &g_window_manager.focused_window_psn)) {
         memset(g_event_bytes, 0, 0xf8);
         g_event_bytes[0x04] = 0xf8;
@@ -1286,6 +1298,8 @@ void window_manager_focus_window_without_raise(ProcessSerialNumber *window_psn, 
 
 void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uint32_t window_id, AXUIElementRef window_ref)
 {
+    TIME_FUNCTION;
+
 #if 1
     _SLPSSetFrontProcessWithOptions(window_psn, window_id, kCPSUserGenerated);
     window_manager_make_key_window(window_psn, window_id);
@@ -1299,6 +1313,8 @@ void window_manager_focus_window_with_raise(ProcessSerialNumber *window_psn, uin
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 struct application *window_manager_focused_application(struct window_manager *wm)
 {
+    TIME_FUNCTION;
+
     ProcessSerialNumber psn = {};
     _SLPSGetFrontProcess(&psn);
 
@@ -1310,6 +1326,8 @@ struct application *window_manager_focused_application(struct window_manager *wm
 
 struct window *window_manager_focused_window(struct window_manager *wm)
 {
+    TIME_FUNCTION;
+
     struct application *application = window_manager_focused_application(wm);
     if (!application) return NULL;
 
@@ -1632,6 +1650,8 @@ void window_manager_add_existing_application_windows(struct space_manager *sm, s
 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
 {
+    TIME_FUNCTION;
+
     uint64_t sid = window_space(window->id);
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout != VIEW_BSP) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
@@ -1681,6 +1701,8 @@ enum window_op_error window_manager_set_window_insertion(struct space_manager *s
 
 enum window_op_error window_manager_stack_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
+    TIME_FUNCTION;
+
     if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
 
     struct view *a_view = window_manager_find_managed_window(wm, a);
@@ -1712,6 +1734,8 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
 
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
+    TIME_FUNCTION;
+
     if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
 
     uint64_t a_sid = window_space(a->id);
@@ -1828,6 +1852,8 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
 
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b)
 {
+    TIME_FUNCTION;
+
     if (a->id == b->id) return WINDOW_OP_ERROR_SAME_WINDOW;
 
     uint64_t a_sid = window_space(a->id);
@@ -1933,6 +1959,8 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
 
 enum window_op_error window_manager_minimize_window(struct window *window)
 {
+    TIME_FUNCTION;
+
     if (!window_can_minimize(window)) return WINDOW_OP_ERROR_CANT_MINIMIZE;
     if (window_check_flag(window, WINDOW_MINIMIZE)) return WINDOW_OP_ERROR_ALREADY_MINIMIZED;
 
@@ -1942,6 +1970,8 @@ enum window_op_error window_manager_minimize_window(struct window *window)
 
 enum window_op_error window_manager_deminimize_window(struct window *window)
 {
+    TIME_FUNCTION;
+
     if (!window_check_flag(window, WINDOW_MINIMIZE)) return WINDOW_OP_ERROR_NOT_MINIMIZED;
 
     AXError result = AXUIElementSetAttributeValue(window->ref, kAXMinimizedAttribute, kCFBooleanFalse);
@@ -1950,6 +1980,8 @@ enum window_op_error window_manager_deminimize_window(struct window *window)
 
 bool window_manager_close_window(struct window *window)
 {
+    TIME_FUNCTION;
+
     CFTypeRef button = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXCloseButtonAttribute, &button);
     if (!button) return false;
@@ -1962,6 +1994,8 @@ bool window_manager_close_window(struct window *window)
 
 void window_manager_send_window_to_space(struct space_manager *sm, struct window_manager *wm, struct window *window, uint64_t dst_sid, bool moved_by_rule)
 {
+    TIME_FUNCTION;
+
     uint64_t src_sid = window_space(window->id);
     if (src_sid == dst_sid) return;
 
@@ -1991,6 +2025,8 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
 enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct window_manager *wm, struct window *window, unsigned r, unsigned c, unsigned x, unsigned y, unsigned w, unsigned h)
 {
+    TIME_FUNCTION;
+
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
@@ -2028,6 +2064,8 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
 
 void window_manager_make_window_floating(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_float, bool force)
 {
+    TIME_FUNCTION;
+
     if (!window_manager_is_window_eligible(window)) return;
 
     if (!force) {
@@ -2060,6 +2098,8 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
 
 void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky)
 {
+    TIME_FUNCTION;
+
     if (!window_manager_is_window_eligible(window)) return;
 
     if (should_sticky) {
@@ -2088,6 +2128,8 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
 
 void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
+    TIME_FUNCTION;
+
     bool shadow = !window_check_flag(window, WINDOW_SHADOW);
     if (scripting_addition_set_shadow(window->id, shadow)) {
         if (shadow) {
@@ -2100,6 +2142,8 @@ void window_manager_toggle_window_shadow(struct space_manager *sm, struct window
 
 void window_manager_wait_for_native_fullscreen_transition(struct window *window)
 {
+    TIME_FUNCTION;
+
     if (workspace_is_macos_monterey() || workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
         while (!space_is_user(space_manager_active_space())) {
 
@@ -2131,6 +2175,8 @@ void window_manager_wait_for_native_fullscreen_transition(struct window *window)
 
 void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
+    TIME_FUNCTION;
+
     uint32_t sid = window_space(window->id);
 
     //
@@ -2159,6 +2205,8 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
 
 void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
+    TIME_FUNCTION;
+
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view || view->layout != VIEW_BSP) return;
 
@@ -2178,6 +2226,8 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
 
 void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
+    TIME_FUNCTION;
+
     struct view *view = window_manager_find_managed_window(wm, window);
     if (!view || view->layout != VIEW_BSP) return;
 
@@ -2197,12 +2247,16 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
 
 void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window)
 {
+    TIME_FUNCTION;
+
     window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
     CoreDockSendNotification(CFSTR("com.apple.expose.front.awake"), 0);
 }
 
 void window_manager_toggle_window_pip(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
+    TIME_FUNCTION;
+
     uint32_t did = window_display_id(window->id);
     if (!did) return;
 
