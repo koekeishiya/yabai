@@ -427,7 +427,7 @@ void window_manager_resize_window(struct window *window, float width, float heig
     CFRelease(size_ref);
 }
 
-static inline void window_manager_notify_jankyborders(uint32_t proxy_wid, uint32_t real_wid, uint32_t proxy_event)
+static inline void window_manager_notify_jankyborders(uint32_t proxy_wid, uint32_t real_wid, uint32_t proxy_event, bool wait)
 {
     mach_port_t port;
     if (g_bs_port && bootstrap_look_up(g_bs_port, "git.felix.jbevent", &port) == KERN_SUCCESS) {
@@ -436,8 +436,9 @@ static inline void window_manager_notify_jankyborders(uint32_t proxy_wid, uint32
             uint32_t proxy_wid;
             uint64_t proxy_sid;
             uint32_t real_wid;
-        } data = { proxy_event, proxy_wid, window_space(proxy_wid), real_wid };
+        } data = { proxy_event, proxy_wid, 0, real_wid };
         mach_send(port, &data, sizeof(data));
+        if (wait) usleep(20000);
     }
 }
 
@@ -467,7 +468,7 @@ static void window_manager_create_window_proxy(int animation_connection, float a
     CFRelease(empty_region);
 }
 
-static void window_manager_destroy_window_proxy(int animation_connection, struct window_proxy *proxy, uint32_t real_wid)
+static void window_manager_destroy_window_proxy(int animation_connection, struct window_proxy *proxy)
 {
     if (proxy->image) {
         CFRelease(proxy->image);
@@ -480,7 +481,6 @@ static void window_manager_destroy_window_proxy(int animation_connection, struct
     }
 
     if (proxy->id) {
-        window_manager_notify_jankyborders(proxy->id, real_wid, 1326);
         SLSReleaseWindow(animation_connection, proxy->id);
         proxy->id = 0;
     }
@@ -511,7 +511,7 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     }
 
     window_manager_create_window_proxy(animation->cid, alpha, &animation->proxy);
-    window_manager_notify_jankyborders(animation->proxy.id, animation->wid, 1325);
+    window_manager_notify_jankyborders(animation->proxy.id, animation->wid, 1325, false);
     scripting_addition_swap_window_proxy_in(animation->wid, animation->proxy.id);
     dispatch_async(dispatch_get_main_queue(), ^{
         if (animation->window && animation->window->id != 0 && __sync_bool_compare_and_swap(&animation->window->id_ptr, &animation->window->id, &animation->window->id)) {
@@ -569,9 +569,10 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
     for (int i = 0; i < animation_count; ++i) {
         if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
+        window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1326, true);
         scripting_addition_swap_window_proxy_out(context->animation_list[i].wid, context->animation_list[i].proxy.id);
         table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
-        window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy, context->animation_list[i].wid);
+        window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
     }
     SLSReenableUpdate(context->animation_connection);
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
@@ -648,7 +649,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             float alpha = 1.0f;
             SLSGetWindowAlpha(context->animation_connection, context->animation_list[i].wid, &alpha);
             window_manager_create_window_proxy(context->animation_connection, alpha, &context->animation_list[i].proxy);
-            window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1325);
+            window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1325, false);
+            window_manager_notify_jankyborders(existing_animation->proxy.id, existing_animation->wid, 1326, false);
 
             CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
             SLSTransactionOrderWindowGroup(transaction, context->animation_list[i].proxy.id, 1, context->animation_list[i].wid);
@@ -657,7 +659,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             CFRelease(transaction);
 
             table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
-            window_manager_destroy_window_proxy(existing_animation->cid, &existing_animation->proxy, existing_animation->wid);
+            window_manager_destroy_window_proxy(existing_animation->cid, &existing_animation->proxy);
         } else {
             pthread_t thread;
             if (pthread_create(&thread, NULL, &window_manager_build_window_proxy_thread_proc, &context->animation_list[i]) == 0) {
