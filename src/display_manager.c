@@ -4,6 +4,8 @@ extern int g_connection;
 
 bool display_manager_query_displays(FILE *rsp)
 {
+    TIME_FUNCTION;
+
     int count;
     uint32_t *display_list = display_manager_active_display_list(&count);
     if (!display_list) return false;

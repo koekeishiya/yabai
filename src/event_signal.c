@@ -358,6 +358,8 @@ static void event_signal_serialize(FILE *rsp, struct signal *signal, enum signal
 
 void event_signal_list(FILE *rsp)
 {
+    TIME_FUNCTION;
+
     fprintf(rsp, "[");
     int signal_index = 0;
     bool event_did_output = false;

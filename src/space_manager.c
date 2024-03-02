@@ -13,6 +13,8 @@ static TABLE_COMPARE_FUNC(compare_view)
 
 bool space_manager_query_space(FILE *rsp, uint64_t sid)
 {
+    TIME_FUNCTION;
+
     struct view *view = space_manager_query_view(&g_space_manager, sid);
     if (!view) return false;
 
@@ -23,6 +25,8 @@ bool space_manager_query_space(FILE *rsp, uint64_t sid)
 
 bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
 {
+    TIME_FUNCTION;
+
     int space_count;
     uint64_t *space_list = window_space_list(window->id, &space_count);
     if (!space_list) return false;
@@ -42,6 +46,8 @@ bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
 
 bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
 {
+    TIME_FUNCTION;
+
     int space_count;
     uint64_t *space_list = display_space_list(did, &space_count);
     if (!space_list) return false;
@@ -61,6 +67,8 @@ bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
 
 bool space_manager_query_spaces_for_displays(FILE *rsp)
 {
+    TIME_FUNCTION;
+
     int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return false;

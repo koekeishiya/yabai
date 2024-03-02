@@ -2078,6 +2078,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
 
 static void handle_domain_query(FILE *rsp, struct token domain, char *message)
 {
+    TIME_FUNCTION;
+
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_QUERY_DISPLAYS)) {
         struct token option = get_token(&message);
