@@ -546,6 +546,8 @@ static uint8_t parse_resize_handle(char *handle)
 
 static struct selector parse_display_selector(FILE *rsp, char **message, uint32_t acting_did, bool optional)
 {
+    TIME_FUNCTION;
+
     struct selector result = { .token = get_token(message), .did_parse = true };
 
     struct token_value value = token_to_value(result.token);
@@ -663,6 +665,8 @@ static struct selector parse_display_selector(FILE *rsp, char **message, uint32_
 
 static struct selector parse_space_selector(FILE *rsp, char **message, uint64_t acting_sid, bool optional)
 {
+    TIME_FUNCTION;
+
     struct selector result = { .token = get_token(message), .did_parse = true };
 
     struct token_value value = token_to_value(result.token);
@@ -742,6 +746,8 @@ static struct selector parse_space_selector(FILE *rsp, char **message, uint64_t 
 
 static struct selector parse_window_selector(FILE *rsp, char **message, struct window *acting_window, bool optional)
 {
+    TIME_FUNCTION;
+
     struct selector result = { .token = get_token(message), .did_parse = true };
 
     struct token_value value = token_to_value(result.token);
@@ -1021,6 +1027,8 @@ static struct selector parse_insert_selector(FILE *rsp, char **message)
 
 static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 {
+    TIME_FUNCTION;
+
     uint64_t sel_sid = 0;
     struct token selector = get_token(&message);
     struct token command  = selector;
@@ -1489,6 +1497,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
 
 static void handle_domain_display(FILE *rsp, struct token domain, char *message)
 {
+    TIME_FUNCTION;
+
     struct token command;
     uint32_t acting_did = display_manager_active_display_id();
     struct selector selector = parse_display_selector(NULL, &message, acting_did, true);
@@ -1531,6 +1541,8 @@ static void handle_domain_display(FILE *rsp, struct token domain, char *message)
 
 static void handle_domain_space(FILE *rsp, struct token domain, char *message)
 {
+    TIME_FUNCTION;
+
     struct token command;
     uint64_t acting_sid = space_manager_active_space();
     struct selector selector = parse_space_selector(NULL, &message, acting_sid, true);
@@ -1807,6 +1819,8 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
 
 static void handle_domain_window(FILE *rsp, struct token domain, char *message)
 {
+    TIME_FUNCTION;
+
     struct token command;
     struct window *acting_window = window_manager_focused_window(&g_window_manager);
     struct selector selector = parse_window_selector(NULL, &message, acting_window, true);
@@ -2246,6 +2260,8 @@ static void handle_domain_query(FILE *rsp, struct token domain, char *message)
 
 static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct token token)
 {
+    TIME_FUNCTION;
+
     char *unsupported_exclusion = NULL;
     bool did_parse = true;
     bool has_filter = false;
@@ -2439,6 +2455,8 @@ rnext:
 
 static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 {
+    TIME_FUNCTION;
+
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_RULE_ADD)) {
         struct rule rule = {};
@@ -2495,6 +2513,8 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
 static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
 {
+    TIME_FUNCTION;
+
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_SIGNAL_ADD)) {
         char *unsupported_exclusion = NULL;
@@ -2612,6 +2632,8 @@ snext:
 
 void handle_message(FILE *rsp, char *message)
 {
+    TIME_FUNCTION;
+
     struct token domain = get_token(&message);
     if (token_equals(domain, DOMAIN_CONFIG)) {
         handle_domain_config(rsp, domain, message);
