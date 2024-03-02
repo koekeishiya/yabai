@@ -1418,8 +1418,6 @@ empty:
 
 void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1)
 {
-    TIME_FUNCTION;
-
     bool success;
     struct event *tail, *new_tail;
 
