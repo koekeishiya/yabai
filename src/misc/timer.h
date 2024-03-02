@@ -131,13 +131,13 @@ static void profile_end_and_print(void)
     uint64_t timer_freq = read_cpu_freq();
 
     uint64_t total_tsc_elapsed = g_profiler.end_tsc - g_profiler.begin_tsc;
-    printf("\nTotal time: %0.4fms (timer freq %llu)\n", 1000.0 * (double)total_tsc_elapsed / (double)timer_freq, timer_freq);
+    printf("Total time: %0.4fms (timer freq %llu)\n", 1000.0 * (double)total_tsc_elapsed / (double)timer_freq, timer_freq);
 
     for (int i = 0; i < array_count(g_profiler.anchors); ++i) {
         struct profile_anchor *anchor = g_profiler.anchors + i;
         if (anchor->tsc_elapsed_inclusive) {
             double percent = 100.0 * ((double)anchor->tsc_elapsed_exclusive / (double)total_tsc_elapsed);
-            printf("  %s[%llu]: %llu (%.2f%%", anchor->label, anchor->hit_count, anchor->tsc_elapsed_exclusive, percent);
+            printf("    %s[%llu]: %llu (%.2f%%", anchor->label, anchor->hit_count, anchor->tsc_elapsed_exclusive, percent);
             if (anchor->tsc_elapsed_inclusive != anchor->tsc_elapsed_exclusive) {
                 double percent_with_children = 100.0 * ((double)anchor->tsc_elapsed_inclusive / (double)total_tsc_elapsed);
                 printf(", %.2f%% w/children", percent_with_children);
