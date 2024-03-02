@@ -335,6 +335,8 @@ bool event_signal_remove(char *label)
 
 static void event_signal_serialize(FILE *rsp, struct signal *signal, enum signal_type type, int index)
 {
+    TIME_FUNCTION;
+
     char *escaped_action = ts_string_escape(signal->command);
 
     fprintf(rsp,

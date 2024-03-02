@@ -831,6 +831,8 @@ void view_flush(struct view *view)
 
 void view_serialize(FILE *rsp, struct view *view)
 {
+    TIME_FUNCTION;
+
     char *uuid = ts_cfstring_copy(view->suuid);
     int buffer_size = MAXLEN;
     size_t bytes_written = 0;

@@ -135,6 +135,8 @@ static inline const char *window_layer(int level)
 
 void window_nonax_serialize(FILE *rsp, uint32_t wid)
 {
+    TIME_FUNCTION;
+
     int connection;
     SLSGetWindowOwner(g_connection, wid, &connection);
 
@@ -237,6 +239,8 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
 
 void window_serialize(FILE *rsp, struct window *window)
 {
+    TIME_FUNCTION;
+
     char *role = window_role_ts(window);
     char *subrole = window_subrole_ts(window);
     char *app = window->application->name;

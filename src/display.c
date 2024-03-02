@@ -16,6 +16,8 @@ static DISPLAY_EVENT_HANDLER(display_handler)
 
 void display_serialize(FILE *rsp, uint32_t did)
 {
+    TIME_FUNCTION;
+
     CGRect frame = CGDisplayBounds(did);
 
     char *uuid = NULL;
