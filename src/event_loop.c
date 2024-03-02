@@ -1349,6 +1349,8 @@ static EVENT_HANDLER(SYSTEM_WOKE)
 
 static EVENT_HANDLER(DAEMON_MESSAGE)
 {
+    TIME_FUNCTION;
+
     FILE *rsp         = NULL;
     int bytes_read    = 0;
     int bytes_to_read = 0;

@@ -76,15 +76,19 @@ void END_TIME_BLOCK(void *context)
     __attribute((cleanup(END_TIME_BLOCK))) struct time_block tb_##__FUNCTION__;\
     tb_##__FUNCTION__ = (struct time_block) {__FUNCTION__, read_cpu_timer()}
 
-#define TIME_BLOCK(label, c) \
-do {\
+#define TIME_BLOCK(label) \
     __attribute((cleanup(END_TIME_BLOCK))) struct time_block tb_##label;\
-    tb_##label = (struct time_block) {#label, read_cpu_timer()};\
+    tb_##label = (struct time_block) {#label, read_cpu_timer()}
+
+#define TIME_BODY(label, c) \
+do {\
+    TIME_BLOCK(label);\
     c \
 } while (0)
 #else
 #define TIME_FUNCTION
-#define TIME_BLOCK(label, c) c
+#define TIME_BLOCK(label)
+#define TIME_BODY(label, c) c
 #endif
 
 #endif
