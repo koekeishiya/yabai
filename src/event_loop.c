@@ -1388,6 +1388,8 @@ static void *event_loop_run(void *context)
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
         for (;;) {
+            profile_begin();
+
             do {
                 head = __atomic_load_n(&event_loop->head, __ATOMIC_RELAXED);
                 next = __atomic_load_n(&head->next, __ATOMIC_RELAXED);
@@ -1402,6 +1404,8 @@ static void *event_loop_run(void *context)
 
             event_signal_flush();
             ts_reset();
+
+            profile_end_and_print();
         }
 
 empty:
@@ -1414,6 +1418,8 @@ empty:
 
 void event_loop_post(struct event_loop *event_loop, enum event_type type, void *context, int param1)
 {
+    TIME_FUNCTION;
+
     bool success;
     struct event *tail, *new_tail;
 

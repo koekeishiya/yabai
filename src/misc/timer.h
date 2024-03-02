@@ -2,9 +2,11 @@
 #define TIMER_H
 
 #ifdef PROFILE
-#include <mach/mach_time.h>
 #include <stdint.h>
 #include <stdio.h>
+
+#ifdef __x86_64__
+#include <mach/mach_time.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -20,6 +22,7 @@ static inline uint64_t read_os_freq(void)
 {
     return 1000000000;
 }
+#endif
 
 static inline uint64_t read_cpu_timer(void)
 {
@@ -59,36 +62,112 @@ static inline uint64_t read_cpu_freq(void)
 #endif
 }
 
-struct time_block
+struct profile_anchor
 {
-    const char *label;
-    uint64_t begin_tb;
+    uint64_t tsc_elapsed_exclusive;
+    uint64_t tsc_elapsed_inclusive;
+    uint64_t hit_count;
+    char const *label;
 };
 
-void END_TIME_BLOCK(void *context)
+struct time_block
+{
+    char const *label;
+    uint64_t old_tsc_elapsed_inclusive;
+    uint64_t begin_tsc;
+    uint32_t parent_index;
+    uint32_t anchor_index;
+};
+
+static struct
+{
+    uint64_t begin_tsc;
+    uint64_t end_tsc;
+    struct profile_anchor anchors[4096];
+    uint32_t parent;
+} g_profiler;
+
+static void BEGIN_TIME_BLOCK(struct time_block *tb, const char *label, uint32_t anchor_index)
+{
+    tb->parent_index = g_profiler.parent;
+
+    tb->anchor_index = anchor_index;
+    tb->label = label;
+
+    struct profile_anchor *anchor = g_profiler.anchors + anchor_index;
+    tb->old_tsc_elapsed_inclusive = anchor->tsc_elapsed_inclusive;
+
+    g_profiler.parent = anchor_index;
+    tb->begin_tsc = read_cpu_timer();
+}
+
+static void END_TIME_BLOCK(void *context)
 {
     struct time_block *tb = context;
-    uint64_t dt_tb = read_cpu_timer() - tb->begin_tb;\
-    printf("%s: %0.4fms\n", tb->label, 1000.0 * (double)dt_tb / (double)read_cpu_freq());\
+
+    uint64_t elapsed = read_cpu_timer() - tb->begin_tsc;
+    g_profiler.parent = tb->parent_index;
+
+    struct profile_anchor *parent = g_profiler.anchors + tb->parent_index;
+    struct profile_anchor *anchor = g_profiler.anchors + tb->anchor_index;
+
+    parent->tsc_elapsed_exclusive -= elapsed;
+    anchor->tsc_elapsed_exclusive += elapsed;
+    anchor->tsc_elapsed_inclusive = tb->old_tsc_elapsed_inclusive + elapsed;
+    ++anchor->hit_count;
+
+    anchor->label = tb->label;
+}
+
+static void profile_begin(void)
+{
+    memset(&g_profiler, 0, sizeof(g_profiler));
+    g_profiler.begin_tsc = read_cpu_timer();
+}
+
+static void profile_end_and_print(void)
+{
+    g_profiler.end_tsc = read_cpu_timer();
+    uint64_t timer_freq = read_cpu_freq();
+
+    uint64_t total_tsc_elapsed = g_profiler.end_tsc - g_profiler.begin_tsc;
+    printf("\nTotal time: %0.4fms (timer freq %llu)\n", 1000.0 * (double)total_tsc_elapsed / (double)timer_freq, timer_freq);
+
+    for (int i = 0; i < array_count(g_profiler.anchors); ++i) {
+        struct profile_anchor *anchor = g_profiler.anchors + i;
+        if (anchor->tsc_elapsed_inclusive) {
+            double percent = 100.0 * ((double)anchor->tsc_elapsed_exclusive / (double)total_tsc_elapsed);
+            printf("  %s[%llu]: %llu (%.2f%%", anchor->label, anchor->hit_count, anchor->tsc_elapsed_exclusive, percent);
+            if (anchor->tsc_elapsed_inclusive != anchor->tsc_elapsed_exclusive) {
+                double percent_with_children = 100.0 * ((double)anchor->tsc_elapsed_inclusive / (double)total_tsc_elapsed);
+                printf(", %.2f%% w/children", percent_with_children);
+            }
+            printf(")\n");
+        }
+    }
 }
 
 #define TIME_FUNCTION \
     __attribute((cleanup(END_TIME_BLOCK))) struct time_block tb_##__FUNCTION__;\
-    tb_##__FUNCTION__ = (struct time_block) {__FUNCTION__, read_cpu_timer()}
+    BEGIN_TIME_BLOCK(&tb_##__FUNCTION__, __FUNCTION__, __COUNTER__ + 1)
 
 #define TIME_BLOCK(label) \
     __attribute((cleanup(END_TIME_BLOCK))) struct time_block tb_##label;\
-    tb_##label = (struct time_block) {#label, read_cpu_timer()}
+    BEGIN_TIME_BLOCK(&tb_##label, #label, __COUNTER__ + 1)
 
 #define TIME_BODY(label, c) \
 do {\
     TIME_BLOCK(label);\
     c \
 } while (0)
+#define PROFILER_END_TRANSLATION_UNIT _Static_assert(__COUNTER__ < array_count(g_profiler.anchors), "Number of profile points exceeds size of profiler::anchors array!")
 #else
+#define profile_begin();
+#define profile_end_and_print();
 #define TIME_FUNCTION
 #define TIME_BLOCK(label)
 #define TIME_BODY(label, c) c
+#define PROFILER_END_TRANSLATION_UNIT
 #endif
 
 #endif

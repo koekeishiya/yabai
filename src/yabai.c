@@ -400,3 +400,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+PROFILER_END_TRANSLATION_UNIT;
