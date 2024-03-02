@@ -617,8 +617,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     int thread_count = 0;
     pthread_t *threads = ts_alloc_list(pthread_t, window_count);
 
-    pthread_mutex_lock(&g_window_manager.window_animations_lock);
     SLSDisableUpdate(context->animation_connection);
+    pthread_mutex_lock(&g_window_manager.window_animations_lock);
     for (int i = 0; i < window_count; ++i) {
         struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         if (existing_animation) {
@@ -669,13 +669,14 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
     }
+    pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
+    TIME_BODY(window_manager_animate_window_list_async___wait_for_threads, {
     for (int i = 0; i < thread_count; ++i) {
         pthread_join(threads[i], NULL);
     }
-
+    });
     SLSReenableUpdate(context->animation_connection);
-    pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
     CVDisplayLinkRef link;
     CVDisplayLinkCreateWithActiveCGDisplays(&link);
