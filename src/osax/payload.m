@@ -66,6 +66,7 @@ extern CGError SLSTransactionCommit(CFTypeRef transaction, int synchronous);
 extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
 extern CGError SLSTransactionOrderWindowGroup(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
 extern CGError SLSTransactionSetWindowAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
+extern CGError SLSTransactionSetWindowTransform(CFTypeRef transaction, uint32_t wid, int unknown, int unknown2, CGAffineTransform t);
 extern CGError SLSTransactionSetWindowSystemAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
 extern CGError SLSSetWindowSubLevel(int cid, uint32_t wid, int level);
 
@@ -828,6 +829,27 @@ static void do_window_swap_proxy_out(char *message)
     CFRelease(transaction);
 }
 
+static void do_window_blend(char *message)
+{
+    uint32_t a_wid;
+    unpack(message, a_wid);
+    if (!a_wid) return;
+
+    uint32_t b_wid;
+    unpack(message, b_wid);
+    if (!b_wid) return;
+
+    float a_alpha, b_alpha;
+    unpack(message, a_alpha);
+    unpack(message, b_alpha);
+
+    CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
+    SLSTransactionSetWindowAlpha(transaction, a_wid, a_alpha);
+    SLSTransactionSetWindowAlpha(transaction, b_wid, b_alpha);
+    SLSTransactionCommit(transaction, 0);
+    CFRelease(transaction);
+}
+
 static void do_window_order(char *message)
 {
     uint32_t a_wid;
@@ -920,6 +942,9 @@ static void handle_message(int sockfd, char *message)
     } break;
     case SA_OPCODE_WINDOW_ORDER: {
         do_window_order(message);
+    } break;
+    case SA_OPCODE_WINDOW_BLEND: {
+        do_window_blend(message);
     } break;
     }
 }

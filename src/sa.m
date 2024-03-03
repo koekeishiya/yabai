@@ -639,3 +639,18 @@ bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
 
     return scripting_addition_send_bytes(bytes, length);
 }
+
+bool scripting_addition_blend_alpha(uint32_t a_wid, float a_alpha, uint32_t b_wid, float b_alpha)
+{
+    char bytes[0x100];
+
+    char length = 2;
+    pack(bytes, a_wid, length);
+    pack(bytes, b_wid, length);
+    pack(bytes, a_alpha, length);
+    pack(bytes, b_alpha, length);
+    bytes[1] = SA_OPCODE_WINDOW_BLEND;
+    bytes[0] = length-1;
+
+    return scripting_addition_send_bytes(bytes, length);
+}

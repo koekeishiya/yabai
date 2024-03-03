@@ -37,6 +37,7 @@ enum sa_opcode
     SA_OPCODE_WINDOW_SWAP_PROXY_IN  = 0x0E,
     SA_OPCODE_WINDOW_SWAP_PROXY_OUT = 0x0F,
     SA_OPCODE_WINDOW_ORDER          = 0x10,
+    SA_OPCODE_WINDOW_BLEND          = 0x11,
 };
 
 #endif

@@ -534,16 +534,15 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
     if (t <= 0.0) t = 0.0f;
     if (t >= 1.0) t = 1.0f;
 
-    float mt;
-    switch (context->animation_easing) {
-#define ANIMATION_EASING_TYPE_ENTRY(value) case value##_type: mt = value(t); break;
-        ANIMATION_EASING_TYPE_LIST
-#undef ANIMATION_EASING_TYPE_ENTRY
-    }
-
     if (!context->done) {
-        CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
+        float mt;
+        switch (context->animation_easing) {
+#define ANIMATION_EASING_TYPE_ENTRY(value) case value##_type: mt = value(t); break;
+            ANIMATION_EASING_TYPE_LIST
+#undef ANIMATION_EASING_TYPE_ENTRY
+        }
 
+        CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
         for (int i = 0; i < animation_count; ++i) {
             if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
@@ -560,7 +559,6 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
             SLSGetWindowAlpha(context->animation_connection, context->animation_list[i].wid, &alpha);
             if (alpha != 0.0f) SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
         }
-
         SLSTransactionCommit(transaction, 0);
         CFRelease(transaction);
         if (t != 1.0f) goto out;
@@ -578,7 +576,6 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
         }
         SLSReenableUpdate(context->animation_connection);
         pthread_mutex_unlock(&g_window_manager.window_animations_lock);
-
         context->done = true;
     }
 
@@ -586,33 +583,35 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
         double ft = ((double)(current_clock - context->animation_clock) / (double)(0.25f * g_cv_host_clock_frequency)) - context->animation_duration*4.0f;
         if (ft <= 1.0f) {
             CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
-
             for (int i = 0; i < animation_count; ++i) {
                 if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
-                float high = context->animation_list[i].proxy.tx;
-                if (high != 1.0f) high *= 0.5f;
-
-                float alpha = lerp(high, ft, 0.0f);
-                SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
+                float source_alpha = context->animation_list[i].proxy.tx;
+                if (source_alpha != 1.0f) {
+                    float alpha_a = lerp(0.0f, ft, source_alpha);
+                    float alpha_b = (source_alpha - alpha_a) / (1.0f - alpha_a);
+                    scripting_addition_blend_alpha(context->animation_list[i].wid, alpha_a, context->animation_list[i].proxy.id, alpha_b);
+                } else {
+                    float alpha = lerp(source_alpha, ft, 0.0f);
+                    SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
+                }
             }
-
             SLSTransactionCommit(transaction, 0);
             CFRelease(transaction);
             goto out;
         }
+
+        for (int i = 0; i < animation_count; ++i) {
+            window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
+        }
+
+        SLSReleaseConnection(context->animation_connection);
+        free(context->animation_list);
+        free(context);
+
+        CVDisplayLinkStop(link);
+        CVDisplayLinkRelease(link);
     }
-
-    for (int i = 0; i < animation_count; ++i) {
-        window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
-    }
-
-    SLSReleaseConnection(context->animation_connection);
-    free(context->animation_list);
-    free(context);
-
-    CVDisplayLinkStop(link);
-    CVDisplayLinkRelease(link);
 
 out:
     return kCVReturnSuccess;
