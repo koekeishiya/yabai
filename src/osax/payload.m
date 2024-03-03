@@ -823,8 +823,7 @@ static void do_window_swap_proxy_out(char *message)
     if (!proxy_wid) return;
 
     CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
-    SLSTransactionSetWindowSystemAlpha(transaction, wid, 1);
-    SLSTransactionOrderWindowGroup(transaction, proxy_wid, 0, wid);
+    SLSTransactionSetWindowSystemAlpha(transaction, wid, 1.0f);
     SLSTransactionCommit(transaction, 1);
     CFRelease(transaction);
 }

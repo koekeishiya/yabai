@@ -541,41 +541,68 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
 #undef ANIMATION_EASING_TYPE_ENTRY
     }
 
-    CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
+    if (!context->done) {
+        CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
 
-    for (int i = 0; i < animation_count; ++i) {
-        if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
+        for (int i = 0; i < animation_count; ++i) {
+            if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
-        context->animation_list[i].proxy.tx = lerp(context->animation_list[i].proxy.frame.origin.x,    mt, context->animation_list[i].x);
-        context->animation_list[i].proxy.ty = lerp(context->animation_list[i].proxy.frame.origin.y,    mt, context->animation_list[i].y);
-        context->animation_list[i].proxy.tw = lerp(context->animation_list[i].proxy.frame.size.width,  mt, context->animation_list[i].w);
-        context->animation_list[i].proxy.th = lerp(context->animation_list[i].proxy.frame.size.height, mt, context->animation_list[i].h);
+            context->animation_list[i].proxy.tx = lerp(context->animation_list[i].proxy.frame.origin.x,    mt, context->animation_list[i].x);
+            context->animation_list[i].proxy.ty = lerp(context->animation_list[i].proxy.frame.origin.y,    mt, context->animation_list[i].y);
+            context->animation_list[i].proxy.tw = lerp(context->animation_list[i].proxy.frame.size.width,  mt, context->animation_list[i].w);
+            context->animation_list[i].proxy.th = lerp(context->animation_list[i].proxy.frame.size.height, mt, context->animation_list[i].h);
 
-        CGAffineTransform transform = CGAffineTransformMakeTranslation(-context->animation_list[i].proxy.tx, -context->animation_list[i].proxy.ty);
-        CGAffineTransform scale = CGAffineTransformMakeScale(context->animation_list[i].proxy.frame.size.width / context->animation_list[i].proxy.tw, context->animation_list[i].proxy.frame.size.height / context->animation_list[i].proxy.th);
-        SLSTransactionSetWindowTransform(transaction, context->animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
+            CGAffineTransform transform = CGAffineTransformMakeTranslation(-context->animation_list[i].proxy.tx, -context->animation_list[i].proxy.ty);
+            CGAffineTransform scale = CGAffineTransformMakeScale(context->animation_list[i].proxy.frame.size.width / context->animation_list[i].proxy.tw, context->animation_list[i].proxy.frame.size.height / context->animation_list[i].proxy.th);
+            SLSTransactionSetWindowTransform(transaction, context->animation_list[i].proxy.id, 0, 0, CGAffineTransformConcat(transform, scale));
 
-        float alpha = 0.0f;
-        SLSGetWindowAlpha(context->animation_connection, context->animation_list[i].wid, &alpha);
-        if (alpha != 0.0f) SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
+            float alpha = 0.0f;
+            SLSGetWindowAlpha(context->animation_connection, context->animation_list[i].wid, &alpha);
+            if (alpha != 0.0f) SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
+        }
+
+        SLSTransactionCommit(transaction, 0);
+        CFRelease(transaction);
+        if (t != 1.0f) goto out;
+
+        pthread_mutex_lock(&g_window_manager.window_animations_lock);
+        SLSDisableUpdate(context->animation_connection);
+        for (int i = 0; i < animation_count; ++i) {
+            if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
+
+            SLSGetWindowAlpha(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.tx);
+            window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1326, true);
+            scripting_addition_swap_window_proxy_out(context->animation_list[i].wid, context->animation_list[i].proxy.id);
+            table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
+
+        }
+        SLSReenableUpdate(context->animation_connection);
+        pthread_mutex_unlock(&g_window_manager.window_animations_lock);
+
+        context->done = true;
     }
 
-    SLSTransactionCommit(transaction, 0);
-    CFRelease(transaction);
-    if (t != 1.0f) goto out;
+    if (context->done) {
+        double ft = ((double)(current_clock - context->animation_clock) / (double)(0.5f * g_cv_host_clock_frequency)) - context->animation_duration*2.0f;
+        if (ft <= 1.0f) {
+            CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
 
-    pthread_mutex_lock(&g_window_manager.window_animations_lock);
-    SLSDisableUpdate(context->animation_connection);
+            for (int i = 0; i < animation_count; ++i) {
+                if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
+
+                float alpha = lerp(context->animation_list[i].proxy.tx/2.0f, ft, 0.0f);
+                SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
+            }
+
+            SLSTransactionCommit(transaction, 0);
+            CFRelease(transaction);
+            goto out;
+        }
+    }
+
     for (int i = 0; i < animation_count; ++i) {
-        if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
-
-        window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1326, true);
-        scripting_addition_swap_window_proxy_out(context->animation_list[i].wid, context->animation_list[i].proxy.id);
-        table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
     }
-    SLSReenableUpdate(context->animation_connection);
-    pthread_mutex_unlock(&g_window_manager.window_animations_lock);
 
     SLSReleaseConnection(context->animation_connection);
     free(context->animation_list);
@@ -598,6 +625,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     context->animation_duration = g_window_manager.window_animation_duration;
     context->animation_easing   = g_window_manager.window_animation_easing;
     context->animation_clock    = 0;
+    context->done               = false;
 
     for (int i = 0; i < window_count; ++i) {
         struct window_capture *capture = &window_list[i];
