@@ -613,13 +613,14 @@ bool scripting_addition_swap_window_proxy_in(uint32_t wid, uint32_t proxy_wid)
     return scripting_addition_send_bytes(bytes, length);
 }
 
-bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid)
+bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid, float wid_alpha)
 {
     char bytes[0x100];
 
     char length = 2;
     pack(bytes, wid, length);
     pack(bytes, proxy_wid, length);
+    pack(bytes, wid_alpha, length);
     bytes[1] = SA_OPCODE_WINDOW_SWAP_PROXY_OUT;
     bytes[0] = length-1;
 

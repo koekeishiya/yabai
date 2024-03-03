@@ -22,7 +22,7 @@ bool scripting_addition_set_shadow(uint32_t wid, bool shadow);
 bool scripting_addition_focus_window(uint32_t wid);
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h);
 bool scripting_addition_swap_window_proxy_in(uint32_t wid, uint32_t proxy_wid);
-bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid);
+bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid, float wid_alpha);
 bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid);
 bool scripting_addition_blend_alpha(uint32_t a_wid, float a_alpha, uint32_t b_wid, float b_alpha);
 

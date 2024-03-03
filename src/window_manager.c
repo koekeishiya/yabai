@@ -570,7 +570,7 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
 
             SLSGetWindowAlpha(context->animation_connection, context->animation_list[i].wid, &context->animation_list[i].proxy.tx);
             window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1326, true);
-            scripting_addition_swap_window_proxy_out(context->animation_list[i].wid, context->animation_list[i].proxy.id);
+            scripting_addition_swap_window_proxy_out(context->animation_list[i].wid, context->animation_list[i].proxy.id, context->animation_list[i].proxy.tx);
             table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
 
         }
