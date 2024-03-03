@@ -583,14 +583,14 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
     }
 
     if (context->done) {
-        double ft = ((double)(current_clock - context->animation_clock) / (double)(0.5f * g_cv_host_clock_frequency)) - context->animation_duration*2.0f;
+        double ft = ((double)(current_clock - context->animation_clock) / (double)(0.25f * g_cv_host_clock_frequency)) - context->animation_duration*4.0f;
         if (ft <= 1.0f) {
             CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
 
             for (int i = 0; i < animation_count; ++i) {
                 if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
-                float alpha = lerp(context->animation_list[i].proxy.tx/2.0f, ft, 0.0f);
+                float alpha = lerp(context->animation_list[i].proxy.tx, ft, 0.0f);
                 SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
             }
 
