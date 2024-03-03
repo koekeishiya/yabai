@@ -590,7 +590,10 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
             for (int i = 0; i < animation_count; ++i) {
                 if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
-                float alpha = lerp(context->animation_list[i].proxy.tx, ft, 0.0f);
+                float high = context->animation_list[i].proxy.tx;
+                if (high != 1.0f) high *= 0.5f;
+
+                float alpha = lerp(high, ft, 0.0f);
                 SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
             }
 
