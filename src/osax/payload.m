@@ -849,6 +849,16 @@ static void do_window_blend(char *message)
     unpack(message, a_alpha);
     unpack(message, b_alpha);
 
+    pthread_mutex_lock(&window_fade_lock);
+    struct window_fade_context *context = table_find(&window_fade_table, &a_wid);
+    if (context) {
+        context->alpha = a_alpha;
+        context->duration = 0.0f;
+        __asm__ __volatile__ ("" ::: "memory");
+        context->skip = true;
+    }
+    pthread_mutex_unlock(&window_fade_lock);
+
     CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
     SLSTransactionSetWindowAlpha(transaction, a_wid, a_alpha);
     SLSTransactionSetWindowAlpha(transaction, b_wid, b_alpha);

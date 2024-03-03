@@ -584,7 +584,6 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
         if (ft <= 0.0) ft = 0.0f;
         if (ft >= 1.0) ft = 1.0f;
 
-        CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
         for (int i = 0; i < animation_count; ++i) {
             if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
@@ -595,11 +594,9 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
                 scripting_addition_blend_alpha(context->animation_list[i].wid, alpha_a, context->animation_list[i].proxy.id, alpha_b);
             } else {
                 float alpha = lerp(source_alpha, ft, 0.0f);
-                SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
+                scripting_addition_set_opacity(context->animation_list[i].proxy.id, alpha, 0.0f);
             }
         }
-        SLSTransactionCommit(transaction, 0);
-        CFRelease(transaction);
         if (ft != 1.0f) goto out;
 
         for (int i = 0; i < animation_count; ++i) {
