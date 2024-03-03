@@ -581,25 +581,27 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
 
     if (context->done) {
         double ft = ((double)(current_clock - context->animation_clock) / (double)(0.25f * g_cv_host_clock_frequency)) - context->animation_duration*4.0f;
-        if (ft <= 1.0f) {
-            CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
-            for (int i = 0; i < animation_count; ++i) {
-                if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
+        if (ft <= 0.0) ft = 0.0f;
+        if (ft >= 1.0) ft = 1.0f;
 
-                float source_alpha = context->animation_list[i].proxy.tx;
-                if (source_alpha != 1.0f) {
-                    float alpha_a = lerp(0.0f, ft, source_alpha);
-                    float alpha_b = (source_alpha - alpha_a) / (1.0f - alpha_a);
-                    scripting_addition_blend_alpha(context->animation_list[i].wid, alpha_a, context->animation_list[i].proxy.id, alpha_b);
-                } else {
-                    float alpha = lerp(source_alpha, ft, 0.0f);
-                    SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
-                }
+        CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
+        for (int i = 0; i < animation_count; ++i) {
+            if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
+
+            float source_alpha = context->animation_list[i].proxy.tx;
+            if (source_alpha != 1.0f) {
+                float alpha_a = lerp(0.0f, ft, source_alpha);
+                float alpha_b = (source_alpha - alpha_a) / (1.0f - alpha_a);
+                scripting_addition_blend_alpha(context->animation_list[i].wid, alpha_a, context->animation_list[i].proxy.id, alpha_b);
+                printf("source_alpha = %f, alpha_a = %f, alpha_b = %f\n", source_alpha, alpha_a, alpha_b);
+            } else {
+                float alpha = lerp(source_alpha, ft, 0.0f);
+                SLSTransactionSetWindowAlpha(transaction, context->animation_list[i].proxy.id, alpha);
             }
-            SLSTransactionCommit(transaction, 0);
-            CFRelease(transaction);
-            goto out;
         }
+        SLSTransactionCommit(transaction, 0);
+        CFRelease(transaction);
+        if (ft != 1.0f) goto out;
 
         for (int i = 0; i < animation_count; ++i) {
             window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
