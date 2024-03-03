@@ -587,7 +587,11 @@ static EVENT_HANDLER(WINDOW_MOVED)
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
             struct window_node *node = view_find_window_node(view, window->id);
-            if (node && (node->area.x != new_origin.x || node->area.y != new_origin.y)) {
+            if (node && (node->area.x != new_origin.x ||
+                         node->area.y != new_origin.y)
+                     &&
+               (!node->zoom || node->zoom->area.x != new_origin.x ||
+                               node->zoom->area.y != new_origin.y)) {
                 window_node_flush(node);
             }
         }
@@ -653,7 +657,15 @@ static EVENT_HANDLER(WINDOW_RESIZED)
             struct view *view = window_manager_find_managed_window(&g_window_manager, window);
             if (view) {
                 struct window_node *node = view_find_window_node(view, window->id);
-                if (node && (node->area.x != new_frame.origin.x || node->area.y != new_frame.origin.y || node->area.w != new_frame.size.width || node->area.h != new_frame.size.height)) {
+                if (node && (node->area.x != new_frame.origin.x   ||
+                             node->area.y != new_frame.origin.y   ||
+                             node->area.w != new_frame.size.width ||
+                             node->area.h != new_frame.size.height)
+                         &&
+                   (!node->zoom || node->zoom->area.x != new_frame.origin.x   ||
+                                   node->zoom->area.y != new_frame.origin.y   ||
+                                   node->zoom->area.w != new_frame.size.width ||
+                                   node->zoom->area.h != new_frame.size.height)) {
                     window_node_flush(node);
                 }
             }
