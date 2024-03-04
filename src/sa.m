@@ -418,8 +418,7 @@ out:
 
 #define sa_payload_init() char bytes[0x1000]; int16_t length = 1+sizeof(length)
 #define pack(v) memcpy(bytes+length, &v, sizeof(v)); length += sizeof(v)
-#define pack_header(op) *(int16_t*)bytes = length-sizeof(length); bytes[sizeof(length)] = op
-#define sa_payload_send() scripting_addition_send_bytes(bytes, length)
+#define sa_payload_send(op) *(int16_t*)bytes = length-sizeof(length), bytes[sizeof(length)] = op, scripting_addition_send_bytes(bytes, length)
 
 static bool scripting_addition_send_bytes(char *bytes, int length)
 {
@@ -445,24 +444,21 @@ bool scripting_addition_focus_space(uint64_t sid)
 {
     sa_payload_init();
     pack(sid);
-    pack_header(SA_OPCODE_SPACE_FOCUS);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_SPACE_FOCUS);
 }
 
 bool scripting_addition_create_space(uint64_t sid)
 {
     sa_payload_init();
     pack(sid);
-    pack_header(SA_OPCODE_SPACE_CREATE);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_SPACE_CREATE);
 }
 
 bool scripting_addition_destroy_space(uint64_t sid)
 {
     sa_payload_init();
     pack(sid);
-    pack_header(SA_OPCODE_SPACE_DESTROY);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_SPACE_DESTROY);
 }
 
 bool scripting_addition_move_space_to_display(uint64_t src_sid, uint64_t dst_sid, uint64_t src_prev_sid, bool focus)
@@ -472,8 +468,7 @@ bool scripting_addition_move_space_to_display(uint64_t src_sid, uint64_t dst_sid
     pack(dst_sid);
     pack(src_prev_sid);
     pack(focus);
-    pack_header(SA_OPCODE_SPACE_MOVE);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_SPACE_MOVE);
 }
 
 bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
@@ -484,8 +479,7 @@ bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_si
     pack(dst_sid);
     pack(dummy_sid);
     pack(focus);
-    pack_header(SA_OPCODE_SPACE_MOVE);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_SPACE_MOVE);
 }
 
 bool scripting_addition_move_window(uint32_t wid, int x, int y)
@@ -494,8 +488,7 @@ bool scripting_addition_move_window(uint32_t wid, int x, int y)
     pack(wid);
     pack(x);
     pack(y);
-    pack_header(SA_OPCODE_WINDOW_MOVE);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_MOVE);
 }
 
 bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
@@ -504,8 +497,7 @@ bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
     pack(wid);
     pack(opacity);
     pack(duration);
-    pack_header(duration > 0.0f ? SA_OPCODE_WINDOW_OPACITY_FADE : SA_OPCODE_WINDOW_OPACITY);
-    return sa_payload_send();
+    return sa_payload_send(duration > 0.0f ? SA_OPCODE_WINDOW_OPACITY_FADE : SA_OPCODE_WINDOW_OPACITY);
 }
 
 bool scripting_addition_set_layer(uint32_t wid, int layer)
@@ -513,8 +505,7 @@ bool scripting_addition_set_layer(uint32_t wid, int layer)
     sa_payload_init();
     pack(wid);
     pack(layer);
-    pack_header(SA_OPCODE_WINDOW_LAYER);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_LAYER);
 }
 
 bool scripting_addition_set_sticky(uint32_t wid, bool sticky)
@@ -522,8 +513,7 @@ bool scripting_addition_set_sticky(uint32_t wid, bool sticky)
     sa_payload_init();
     pack(wid);
     pack(sticky);
-    pack_header(SA_OPCODE_WINDOW_STICKY);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_STICKY);
 }
 
 bool scripting_addition_set_shadow(uint32_t wid, bool shadow)
@@ -531,16 +521,14 @@ bool scripting_addition_set_shadow(uint32_t wid, bool shadow)
     sa_payload_init();
     pack(wid);
     pack(shadow);
-    pack_header(SA_OPCODE_WINDOW_SHADOW);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_SHADOW);
 }
 
 bool scripting_addition_focus_window(uint32_t wid)
 {
     sa_payload_init();
     pack(wid);
-    pack_header(SA_OPCODE_WINDOW_FOCUS);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_FOCUS);
 }
 
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h)
@@ -551,8 +539,7 @@ bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, fl
     pack(y);
     pack(w);
     pack(h);
-    pack_header(SA_OPCODE_WINDOW_SCALE);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_SCALE);
 }
 
 bool scripting_addition_swap_window_proxy_in(uint32_t wid, uint32_t proxy_wid)
@@ -560,8 +547,7 @@ bool scripting_addition_swap_window_proxy_in(uint32_t wid, uint32_t proxy_wid)
     sa_payload_init();
     pack(wid);
     pack(proxy_wid);
-    pack_header(SA_OPCODE_WINDOW_SWAP_PROXY_IN);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_SWAP_PROXY_IN);
 }
 
 bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid, float wid_alpha)
@@ -570,8 +556,7 @@ bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid, 
     pack(wid);
     pack(proxy_wid);
     pack(wid_alpha);
-    pack_header(SA_OPCODE_WINDOW_SWAP_PROXY_OUT);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_SWAP_PROXY_OUT);
 }
 
 bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
@@ -580,8 +565,7 @@ bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
     pack(a_wid);
     pack(order);
     pack(b_wid);
-    pack_header(SA_OPCODE_WINDOW_ORDER);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_ORDER);
 }
 
 bool scripting_addition_blend_alpha(uint32_t *wid, float *alpha, int count)
@@ -592,11 +576,9 @@ bool scripting_addition_blend_alpha(uint32_t *wid, float *alpha, int count)
         pack(wid[i]);
         pack(alpha[i]);
     }
-    pack_header(SA_OPCODE_WINDOW_BLEND);
-    return sa_payload_send();
+    return sa_payload_send(SA_OPCODE_WINDOW_BLEND);
 }
 
 #undef sa_payload_init
 #undef pack
-#undef pack_header
 #undef sa_payload_send
