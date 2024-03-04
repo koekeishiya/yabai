@@ -584,19 +584,35 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
         if (ft <= 0.0) ft = 0.0f;
         if (ft >= 1.0) ft = 1.0f;
 
+        int list_count = 0;
+        uint32_t wid_list[animation_count*2];
+        float  alpha_list[animation_count*2];
+
         for (int i = 0; i < animation_count; ++i) {
             if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
             float source_alpha = context->animation_list[i].proxy.tx;
             if (source_alpha <= 0.98f) {
-                float alpha_a = lerp(0.0f, ft, source_alpha);
-                float alpha_b = (source_alpha - alpha_a) / (1.0f - alpha_a);
-                scripting_addition_blend_alpha(context->animation_list[i].wid, alpha_a, context->animation_list[i].proxy.id, alpha_b);
+                float alpha_a            = lerp(0.0f, ft, source_alpha);
+                float alpha_b            = (source_alpha - alpha_a) / (1.0f - alpha_a);
+
+                wid_list[list_count]     = context->animation_list[i].wid;
+                alpha_list[list_count]   = alpha_a;
+
+                wid_list[list_count+1]   = context->animation_list[i].proxy.id;
+                alpha_list[list_count+1] = alpha_b;
+
+                list_count += 2;
             } else {
-                float alpha = lerp(source_alpha, ft, 0.0f);
-                scripting_addition_set_opacity(context->animation_list[i].proxy.id, alpha, 0.0f);
+                float alpha            = lerp(source_alpha, ft, 0.0f);
+
+                wid_list[list_count]   = context->animation_list[i].proxy.id;
+                alpha_list[list_count] = alpha;
+
+                ++list_count;
             }
         }
+        if (list_count) scripting_addition_blend_alpha(wid_list, alpha_list, list_count);
         if (ft != 1.0f) goto out;
 
         for (int i = 0; i < animation_count; ++i) {

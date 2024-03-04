@@ -242,11 +242,11 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
     int sockfd;
     bool result = false;
     char rsp[BUFSIZ] = {};
-    char bytes[0x100] = { 0x01, SA_OPCODE_HANDSHAKE };
+    char bytes[0x1000] = { 0x01, 0x00, 0x00, 0x00, SA_OPCODE_HANDSHAKE };
 
     if (socket_open(&sockfd)) {
         if (socket_connect(sockfd, g_sa_socket_file)) {
-            if (send(sockfd, bytes, 2, 0) != -1) {
+            if (send(sockfd, bytes, 5, 0) != -1) {
                 int length = recv(sockfd, rsp, sizeof(rsp)-1, 0);
                 if (length <= 0) goto out;
 
@@ -271,7 +271,7 @@ out:
 static int scripting_addition_perform_validation(void)
 {
     uint32_t attrib = 0;
-    char version[0x100] = {};
+    char version[0x1000] = {};
     bool is_latest_version_installed = scripting_addition_check() == 0;
 
     if (!scripting_addition_request_handshake(version, &attrib)) {
@@ -416,7 +416,10 @@ out:
     return result;
 }
 
-#define pack(b,v,l) memcpy(b+l, &v, sizeof(v)); l += sizeof(v)
+#define sa_payload_init() char bytes[0x1000]; int length = 1+sizeof(length)
+#define pack(v) memcpy(bytes+length, &v, sizeof(v)); length += sizeof(v)
+#define pack_header(op) *(int*)bytes = length-sizeof(length); bytes[sizeof(length)] = op
+#define sa_payload_send() scripting_addition_send_bytes(bytes, length)
 
 static bool scripting_addition_send_bytes(char *bytes, int length)
 {
@@ -440,218 +443,160 @@ static bool scripting_addition_send_bytes(char *bytes, int length)
 
 bool scripting_addition_focus_space(uint64_t sid)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, sid, length);
-    bytes[1] = SA_OPCODE_SPACE_FOCUS;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(sid);
+    pack_header(SA_OPCODE_SPACE_FOCUS);
+    return sa_payload_send();
 }
 
 bool scripting_addition_create_space(uint64_t sid)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, sid, length);
-    bytes[1] = SA_OPCODE_SPACE_CREATE;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(sid);
+    pack_header(SA_OPCODE_SPACE_CREATE);
+    return sa_payload_send();
 }
 
 bool scripting_addition_destroy_space(uint64_t sid)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, sid, length);
-    bytes[1] = SA_OPCODE_SPACE_DESTROY;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(sid);
+    pack_header(SA_OPCODE_SPACE_DESTROY);
+    return sa_payload_send();
 }
 
 bool scripting_addition_move_space_to_display(uint64_t src_sid, uint64_t dst_sid, uint64_t src_prev_sid, bool focus)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, src_sid, length);
-    pack(bytes, dst_sid, length);
-    pack(bytes, src_prev_sid, length);
-    pack(bytes, focus, length);
-    bytes[1] = SA_OPCODE_SPACE_MOVE;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(src_sid);
+    pack(dst_sid);
+    pack(src_prev_sid);
+    pack(focus);
+    pack_header(SA_OPCODE_SPACE_MOVE);
+    return sa_payload_send();
 }
 
 bool scripting_addition_move_space_after_space(uint64_t src_sid, uint64_t dst_sid, bool focus)
 {
-    char bytes[0x100];
-
-    char length = 2;
     uint64_t dummy_sid = 0;
-    pack(bytes, src_sid, length);
-    pack(bytes, dst_sid, length);
-    pack(bytes, dummy_sid, length);
-    pack(bytes, focus, length);
-    bytes[1] = SA_OPCODE_SPACE_MOVE;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(src_sid);
+    pack(dst_sid);
+    pack(dummy_sid);
+    pack(focus);
+    pack_header(SA_OPCODE_SPACE_MOVE);
+    return sa_payload_send();
 }
 
 bool scripting_addition_move_window(uint32_t wid, int x, int y)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, x, length);
-    pack(bytes, y, length);
-    bytes[1] = SA_OPCODE_WINDOW_MOVE;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(x);
+    pack(y);
+    pack_header(SA_OPCODE_WINDOW_MOVE);
+    return sa_payload_send();
 }
 
 bool scripting_addition_set_opacity(uint32_t wid, float opacity, float duration)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, opacity, length);
-    pack(bytes, duration, length);
-    bytes[1] = duration > 0 ? SA_OPCODE_WINDOW_OPACITY_FADE : SA_OPCODE_WINDOW_OPACITY;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(opacity);
+    pack(duration);
+    pack_header(duration > 0.0f ? SA_OPCODE_WINDOW_OPACITY_FADE : SA_OPCODE_WINDOW_OPACITY);
+    return sa_payload_send();
 }
 
 bool scripting_addition_set_layer(uint32_t wid, int layer)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, layer, length);
-    bytes[1] = SA_OPCODE_WINDOW_LAYER;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(layer);
+    pack_header(SA_OPCODE_WINDOW_LAYER);
+    return sa_payload_send();
 }
 
 bool scripting_addition_set_sticky(uint32_t wid, bool sticky)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, sticky, length);
-    bytes[1] = SA_OPCODE_WINDOW_STICKY;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(sticky);
+    pack_header(SA_OPCODE_WINDOW_STICKY);
+    return sa_payload_send();
 }
 
 bool scripting_addition_set_shadow(uint32_t wid, bool shadow)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, shadow, length);
-    bytes[1] = SA_OPCODE_WINDOW_SHADOW;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(shadow);
+    pack_header(SA_OPCODE_WINDOW_SHADOW);
+    return sa_payload_send();
 }
 
 bool scripting_addition_focus_window(uint32_t wid)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    bytes[1] = SA_OPCODE_WINDOW_FOCUS;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack_header(SA_OPCODE_WINDOW_FOCUS);
+    return sa_payload_send();
 }
 
 bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, float h)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, x, length);
-    pack(bytes, y, length);
-    pack(bytes, w, length);
-    pack(bytes, h, length);
-    bytes[1] = SA_OPCODE_WINDOW_SCALE;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(x);
+    pack(y);
+    pack(w);
+    pack(h);
+    pack_header(SA_OPCODE_WINDOW_SCALE);
+    return sa_payload_send();
 }
 
 bool scripting_addition_swap_window_proxy_in(uint32_t wid, uint32_t proxy_wid)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, proxy_wid, length);
-    bytes[1] = SA_OPCODE_WINDOW_SWAP_PROXY_IN;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(proxy_wid);
+    pack_header(SA_OPCODE_WINDOW_SWAP_PROXY_IN);
+    return sa_payload_send();
 }
 
 bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid, float wid_alpha)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, wid, length);
-    pack(bytes, proxy_wid, length);
-    pack(bytes, wid_alpha, length);
-    bytes[1] = SA_OPCODE_WINDOW_SWAP_PROXY_OUT;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(wid);
+    pack(proxy_wid);
+    pack(wid_alpha);
+    pack_header(SA_OPCODE_WINDOW_SWAP_PROXY_OUT);
+    return sa_payload_send();
 }
 
 bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, a_wid, length);
-    pack(bytes, order, length);
-    pack(bytes, b_wid, length);
-    bytes[1] = SA_OPCODE_WINDOW_ORDER;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(a_wid);
+    pack(order);
+    pack(b_wid);
+    pack_header(SA_OPCODE_WINDOW_ORDER);
+    return sa_payload_send();
 }
 
-bool scripting_addition_blend_alpha(uint32_t a_wid, float a_alpha, uint32_t b_wid, float b_alpha)
+bool scripting_addition_blend_alpha(uint32_t *wid, float *alpha, int count)
 {
-    char bytes[0x100];
-
-    char length = 2;
-    pack(bytes, a_wid, length);
-    pack(bytes, b_wid, length);
-    pack(bytes, a_alpha, length);
-    pack(bytes, b_alpha, length);
-    bytes[1] = SA_OPCODE_WINDOW_BLEND;
-    bytes[0] = length-1;
-
-    return scripting_addition_send_bytes(bytes, length);
+    sa_payload_init();
+    pack(count);
+    for (int i = 0; i < count; ++i) {
+        pack(wid[i]);
+        pack(alpha[i]);
+    }
+    pack_header(SA_OPCODE_WINDOW_BLEND);
+    return sa_payload_send();
 }
+
+#undef sa_payload_init
+#undef pack
+#undef pack_header
+#undef sa_payload_send

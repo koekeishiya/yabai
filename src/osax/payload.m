@@ -837,31 +837,32 @@ static void do_window_swap_proxy_out(char *message)
 
 static void do_window_blend(char *message)
 {
-    uint32_t a_wid;
-    unpack(message, a_wid);
-    if (!a_wid) return;
-
-    uint32_t b_wid;
-    unpack(message, b_wid);
-    if (!b_wid) return;
-
-    float a_alpha, b_alpha;
-    unpack(message, a_alpha);
-    unpack(message, b_alpha);
-
-    pthread_mutex_lock(&window_fade_lock);
-    struct window_fade_context *context = table_find(&window_fade_table, &a_wid);
-    if (context) {
-        context->alpha = a_alpha;
-        context->duration = 0.0f;
-        __asm__ __volatile__ ("" ::: "memory");
-        context->skip = true;
-    }
-    pthread_mutex_unlock(&window_fade_lock);
+    int count = 0;
+    unpack(message, count);
+    if (!count) return;
 
     CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
-    SLSTransactionSetWindowAlpha(transaction, a_wid, a_alpha);
-    SLSTransactionSetWindowAlpha(transaction, b_wid, b_alpha);
+    pthread_mutex_lock(&window_fade_lock);
+
+    for (int i = 0; i < count; ++i) {
+        uint32_t wid;
+        unpack(message, wid);
+
+        float alpha;
+        unpack(message, alpha);
+
+        struct window_fade_context *context = table_find(&window_fade_table, &wid);
+        if (context) {
+            context->alpha = alpha;
+            context->duration = 0.0f;
+            __asm__ __volatile__ ("" ::: "memory");
+            context->skip = true;
+        }
+
+        SLSTransactionSetWindowAlpha(transaction, wid, alpha);
+    }
+
+    pthread_mutex_unlock(&window_fade_lock);
     SLSTransactionCommit(transaction, 0);
     CFRelease(transaction);
 }
@@ -970,7 +971,7 @@ static inline bool read_message(int sockfd, char *message)
     int bytes_read    = 0;
     int bytes_to_read = 0;
 
-    if (read(sockfd, &bytes_to_read, sizeof(char)) == sizeof(char)) {
+    if (read(sockfd, &bytes_to_read, sizeof(int)) == sizeof(int)) {
         do {
             int cur_read = read(sockfd, message+bytes_read, bytes_to_read-bytes_read);
             if (cur_read <= 0) break;
@@ -989,7 +990,7 @@ static void *handle_connection(void *unused)
         int sockfd = accept(daemon_sockfd, NULL, 0);
         if (sockfd == -1) continue;
 
-        char message[0x100];
+        char message[0x1000];
         if (read_message(sockfd, message)) {
             handle_message(sockfd, message);
         }
