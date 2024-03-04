@@ -588,7 +588,7 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
             if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
             float source_alpha = context->animation_list[i].proxy.tx;
-            if (source_alpha != 1.0f) {
+            if (source_alpha <= 0.98f) {
                 float alpha_a = lerp(0.0f, ft, source_alpha);
                 float alpha_b = (source_alpha - alpha_a) / (1.0f - alpha_a);
                 scripting_addition_blend_alpha(context->animation_list[i].wid, alpha_a, context->animation_list[i].proxy.id, alpha_b);

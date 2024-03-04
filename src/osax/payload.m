@@ -828,7 +828,7 @@ static void do_window_swap_proxy_out(char *message)
 
     CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
     SLSTransactionSetWindowSystemAlpha(transaction, wid, 1.0f);
-    if (wid_alpha != 1.0f) {
+    if (wid_alpha <= 0.98f) {
         SLSTransactionSetWindowAlpha(transaction, wid, 0.0f);
     }
     SLSTransactionCommit(transaction, 1);
