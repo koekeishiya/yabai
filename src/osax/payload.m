@@ -971,7 +971,7 @@ static inline bool read_message(int sockfd, char *message)
     int bytes_read    = 0;
     int bytes_to_read = 0;
 
-    if (read(sockfd, &bytes_to_read, sizeof(int)) == sizeof(int)) {
+    if (read(sockfd, &bytes_to_read, sizeof(int16_t)) == sizeof(int16_t)) {
         do {
             int cur_read = read(sockfd, message+bytes_read, bytes_to_read-bytes_read);
             if (cur_read <= 0) break;

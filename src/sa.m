@@ -242,11 +242,11 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
     int sockfd;
     bool result = false;
     char rsp[BUFSIZ] = {};
-    char bytes[0x1000] = { 0x01, 0x00, 0x00, 0x00, SA_OPCODE_HANDSHAKE };
+    char bytes[0x1000] = { 0x01, 0x00, SA_OPCODE_HANDSHAKE };
 
     if (socket_open(&sockfd)) {
         if (socket_connect(sockfd, g_sa_socket_file)) {
-            if (send(sockfd, bytes, 5, 0) != -1) {
+            if (send(sockfd, bytes, 3, 0) != -1) {
                 int length = recv(sockfd, rsp, sizeof(rsp)-1, 0);
                 if (length <= 0) goto out;
 
@@ -416,9 +416,9 @@ out:
     return result;
 }
 
-#define sa_payload_init() char bytes[0x1000]; int length = 1+sizeof(length)
+#define sa_payload_init() char bytes[0x1000]; int16_t length = 1+sizeof(length)
 #define pack(v) memcpy(bytes+length, &v, sizeof(v)); length += sizeof(v)
-#define pack_header(op) *(int*)bytes = length-sizeof(length); bytes[sizeof(length)] = op
+#define pack_header(op) *(int16_t*)bytes = length-sizeof(length); bytes[sizeof(length)] = op
 #define sa_payload_send() scripting_addition_send_bytes(bytes, length)
 
 static bool scripting_addition_send_bytes(char *bytes, int length)
