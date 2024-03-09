@@ -210,18 +210,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    struct arm_unified_thread_state thread_state = {};
-    struct arm_unified_thread_state machine_thread_state = {};
+    arm_thread_state64_t thread_state = {}, machine_thread_state = {};
+    thread_state_flavor_t thread_flavor = ARM_THREAD_STATE64;
+    mach_msg_type_number_t thread_flavor_count = ARM_THREAD_STATE64_COUNT, machine_thread_flavor_count = ARM_THREAD_STATE64_COUNT;
 
-    thread_state_flavor_t thread_flavor = ARM_UNIFIED_THREAD_STATE;
-    mach_msg_type_number_t thread_flavor_count = ARM_UNIFIED_THREAD_STATE_COUNT;
-    mach_msg_type_number_t machine_thread_flavor_count = ARM_UNIFIED_THREAD_STATE_COUNT;
-
-    thread_state.ash.flavor = ARM_THREAD_STATE64;
-    thread_state.ash.count = ARM_THREAD_STATE64_COUNT;
-
-    __darwin_arm_thread_state64_set_pc_fptr(thread_state.ts_64, ptrauth_sign_unauthenticated((void *) code, ptrauth_key_asia, 0));
-    __darwin_arm_thread_state64_set_sp(thread_state.ts_64, stack + (stack_size / 2));
+    __darwin_arm_thread_state64_set_pc_fptr(thread_state, ptrauth_sign_unauthenticated((void *) code, ptrauth_key_asia, 0));
+    __darwin_arm_thread_state64_set_sp(thread_state, stack + (stack_size / 2));
 
     kern_return_t error = thread_create(task, &thread);
     if (error != KERN_SUCCESS) {
@@ -235,16 +229,26 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    error = thread_set_state(thread, thread_flavor, (thread_state_t)&machine_thread_state, machine_thread_flavor_count);
-    if (error != KERN_SUCCESS) {
-        fprintf(stderr, "could not set thread state: %s\n", mach_error_string(error));
-        return 1;
-    }
+    NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    if (os_version.majorVersion == 14 && os_version.minorVersion >= 4) {
+        thread_terminate(thread);
+        error = thread_create_running(task, thread_flavor, (thread_state_t)&machine_thread_state, machine_thread_flavor_count, &thread);
+        if (error != KERN_SUCCESS) {
+            fprintf(stderr, "could not spawn remote thread: %s\n", mach_error_string(error));
+            return 1;
+        }
+    } else {
+        error = thread_set_state(thread, thread_flavor, (thread_state_t)&machine_thread_state, machine_thread_flavor_count);
+        if (error != KERN_SUCCESS) {
+            fprintf(stderr, "could not set thread state: %s\n", mach_error_string(error));
+            return 1;
+        }
 
-    error = thread_resume(thread);
-    if (error != KERN_SUCCESS) {
-        fprintf(stderr, "could not resume remote thread: %s\n", mach_error_string(error));
-        return 1;
+        error = thread_resume(thread);
+        if (error != KERN_SUCCESS) {
+            fprintf(stderr, "could not resume remote thread: %s\n", mach_error_string(error));
+            return 1;
+        }
     }
 #endif
 
@@ -261,7 +265,7 @@ int main(int argc, char **argv)
 #ifdef __x86_64__
         if (thread_state.__rax == 0x79616265) {
 #elif __arm64__
-        if (thread_state.ts_64.__x[0] == 0x79616265) {
+        if (thread_state.__x[0] == 0x79616265) {
 #endif
             result = 0;
             goto terminate;
