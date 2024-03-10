@@ -335,7 +335,7 @@ static void window_node_clear_zoom(struct window_node *node)
 
 void window_node_capture_windows(struct window_node *node, struct window_capture **window_list)
 {
-    if (window_node_is_occupied(node)) {
+    if (window_node_is_leaf(node)) {
         for (int i = 0; i < node->window_count; ++i) {
             struct window *window = window_manager_find_window(&g_window_manager, node->window_list[i]);
             if (window) {
@@ -343,9 +343,7 @@ void window_node_capture_windows(struct window_node *node, struct window_capture
                 ts_buf_push(*window_list, ((struct window_capture) { .window = window, .x = area.x, .y = area.y, .w = area.w, .h = area.h }));
             }
         }
-    }
-
-    if (!window_node_is_leaf(node)) {
+    } else {
         window_node_capture_windows(node->left, window_list);
         window_node_capture_windows(node->right, window_list);
     }
