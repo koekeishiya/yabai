@@ -1,6 +1,9 @@
 #ifndef VIEW_H
 #define VIEW_H
 
+#define AX_ABS(a, b) (((a) - (b) < 0) ? (((a) - (b)) * -1) : ((a) - (b)))
+#define AX_DIFF(a, b) (AX_ABS(a, b) >= 1.5f)
+
 struct window;
 
 struct area
