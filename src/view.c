@@ -301,13 +301,10 @@ static void window_node_split(struct view *view, struct window_node *node, struc
 
 void window_node_update(struct view *view, struct window_node *node)
 {
-    if (window_node_is_intermediate(node)) {
-        area_make_pair_for_node(view, node->parent);
-    }
-
     if (window_node_is_leaf(node)) {
         if (node->insert_dir) insert_feedback_show(node);
     } else {
+        area_make_pair_for_node(view, node);
         window_node_update(view, node->left);
         window_node_update(view, node->right);
     }
