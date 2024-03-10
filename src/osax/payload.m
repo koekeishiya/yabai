@@ -39,14 +39,13 @@
 
 #define SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
 #define page_align(addr) (vm_address_t)((uintptr_t)(addr) & (~(vm_page_size - 1)))
-#define unpack(b,v) memcpy(&v, b, sizeof(v)); b += sizeof(v)
+#define unpack(v) memcpy(&v, message, sizeof(v)); message += sizeof(v)
 #define lerp(a, t, b) (((1.0-t)*a) + (t*b))
 
 extern int SLSMainConnectionID(void);
 extern CGError SLSGetConnectionPSN(int cid, ProcessSerialNumber *psn);
 extern CGError SLSGetWindowAlpha(int cid, uint32_t wid, float *alpha);
 extern CGError SLSSetWindowAlpha(int cid, uint32_t wid, float alpha);
-extern CGError SLSSetWindowLevelForGroup(int cid, uint32_t wid, int level);
 extern OSStatus SLSMoveWindowWithGroup(int cid, uint32_t wid, CGPoint *point);
 extern CGError SLSReassociateWindowsSpacesByGeometry(int cid, CFArrayRef window_list);
 extern CGError SLSGetWindowOwner(int cid, uint32_t wid, int *window_cid);
@@ -63,10 +62,7 @@ extern void SLSShowSpaces(int cid, CFArrayRef space_list);
 extern void SLSHideSpaces(int cid, CFArrayRef space_list);
 extern CFTypeRef SLSTransactionCreate(int cid);
 extern CGError SLSTransactionCommit(CFTypeRef transaction, int synchronous);
-extern CGError SLSTransactionOrderWindow(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
 extern CGError SLSTransactionOrderWindowGroup(CFTypeRef transaction, uint32_t wid, int order, uint32_t rel_wid);
-extern CGError SLSTransactionSetWindowAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
-extern CGError SLSTransactionSetWindowTransform(CFTypeRef transaction, uint32_t wid, int unknown, int unknown2, CGAffineTransform t);
 extern CGError SLSTransactionSetWindowSystemAlpha(CFTypeRef transaction, uint32_t wid, float alpha);
 extern CGError SLSSetWindowSubLevel(int cid, uint32_t wid, int level);
 
@@ -453,12 +449,12 @@ static void do_space_move(char *message)
     if (dock_spaces == nil || dp_desktop_picture_manager == nil || move_space_fp == 0) return;
 
     uint64_t source_space_id, dest_space_id, source_prev_space_id;
-    unpack(message, source_space_id);
-    unpack(message, dest_space_id);
-    unpack(message, source_prev_space_id);
+    unpack(source_space_id);
+    unpack(dest_space_id);
+    unpack(source_prev_space_id);
 
     bool focus_dest_space;
-    unpack(message, focus_dest_space);
+    unpack(focus_dest_space);
 
     CFStringRef source_display_uuid = SLSCopyManagedDisplayForSpace(SLSMainConnectionID(), source_space_id);
     id source_space = space_for_display_with_id(source_display_uuid, source_space_id);
@@ -509,7 +505,7 @@ static void do_space_destroy(char *message)
     if (dock_spaces == nil || remove_space_fp == 0) return;
 
     uint64_t space_id;
-    unpack(message, space_id);
+    unpack(space_id);
 
     CFStringRef display_uuid = SLSCopyManagedDisplayForSpace(SLSMainConnectionID(), space_id);
     uint64_t active_space_id = SLSManagedDisplayGetCurrentSpace(SLSMainConnectionID(), display_uuid);
@@ -535,7 +531,7 @@ static void do_space_create(char *message)
     if (dock_spaces == nil || add_space_fp == 0) return;
 
     uint64_t space_id;
-    unpack(message, space_id);
+    unpack(space_id);
 
     CFStringRef __block display_uuid = SLSCopyManagedDisplayForSpace(SLSMainConnectionID(), space_id);
     dispatch_sync(dispatch_get_main_queue(), ^{
@@ -551,7 +547,7 @@ static void do_space_focus(char *message)
     if (dock_spaces == nil) return;
 
     uint64_t dest_space_id;
-    unpack(message, dest_space_id);
+    unpack(dest_space_id);
 
     if (dest_space_id) {
         CFStringRef dest_display = SLSCopyManagedDisplayForSpace(SLSMainConnectionID(), dest_space_id);
@@ -582,7 +578,7 @@ static void do_space_focus(char *message)
 static void do_window_scale(char *message)
 {
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
     if (!wid) return;
 
     CGRect frame = {};
@@ -594,10 +590,10 @@ static void do_window_scale(char *message)
 
     if (CGAffineTransformEqualToTransform(current_transform, original_transform)) {
         float dx, dy, dw, dh;
-        unpack(message, dx);
-        unpack(message, dy);
-        unpack(message, dw);
-        unpack(message, dh);
+        unpack(dx);
+        unpack(dy);
+        unpack(dw);
+        unpack(dh);
 
         int target_width  = dw / 4;
         int target_height = target_width / (frame.size.width/frame.size.height);
@@ -619,12 +615,12 @@ static void do_window_scale(char *message)
 static void do_window_move(char *message)
 {
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
     if (!wid) return;
 
     int x, y;
-    unpack(message, x);
-    unpack(message, y);
+    unpack(x);
+    unpack(y);
 
     CGPoint point = CGPointMake(x, y);
     SLSMoveWindowWithGroup(SLSMainConnectionID(), wid, &point);
@@ -637,11 +633,11 @@ static void do_window_move(char *message)
 static void do_window_opacity(char *message)
 {
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
     if (!wid) return;
 
     float alpha;
-    unpack(message, alpha);
+    unpack(alpha);
 
     pthread_mutex_lock(&window_fade_lock);
     struct window_fade_context *context = table_find(&window_fade_table, &wid);
@@ -701,12 +697,12 @@ entry:;
 static void do_window_opacity_fade(char *message)
 {
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
     if (!wid) return;
 
     float alpha, duration;
-    unpack(message, alpha);
-    unpack(message, duration);
+    unpack(alpha);
+    unpack(duration);
 
     pthread_mutex_lock(&window_fade_lock);
     struct window_fade_context *context = table_find(&window_fade_table, &wid);
@@ -736,11 +732,11 @@ static void do_window_opacity_fade(char *message)
 static void do_window_layer(char *message)
 {
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
     if (!wid) return;
 
     int layer;
-    unpack(message, layer);
+    unpack(layer);
 
     SLSSetWindowSubLevel(SLSMainConnectionID(), wid, CGWindowLevelForKey(layer));
 }
@@ -748,11 +744,11 @@ static void do_window_layer(char *message)
 static void do_window_sticky(char *message)
 {
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
     if (!wid) return;
 
     bool value;
-    unpack(message, value);
+    unpack(value);
 
     uint64_t tags = (1 << 11);
     if (value == 1) {
@@ -771,7 +767,7 @@ static void do_window_focus(char *message)
     ProcessSerialNumber window_psn;
 
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
 
     SLSGetWindowOwner(SLSMainConnectionID(), wid, &window_connection);
     SLSGetConnectionPSN(SLSMainConnectionID(), &window_psn);
@@ -782,11 +778,11 @@ static void do_window_focus(char *message)
 static void do_window_shadow(char *message)
 {
     uint32_t wid;
-    unpack(message, wid);
+    unpack(wid);
     if (!wid) return;
 
     bool value;
-    unpack(message, value);
+    unpack(value);
 
     uint64_t tags = (1 << 3);
     if (value == 1) {
@@ -798,71 +794,44 @@ static void do_window_shadow(char *message)
 
 static void do_window_swap_proxy_in(char *message)
 {
-    uint32_t wid;
-    unpack(message, wid);
-    if (!wid) return;
-
-    uint32_t proxy_wid;
-    unpack(message, proxy_wid);
-    if (!proxy_wid) return;
+    int count = 0;
+    unpack(count);
+    if (!count) return;
 
     CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
-    SLSTransactionOrderWindowGroup(transaction, proxy_wid, 1, wid);
-    SLSTransactionSetWindowSystemAlpha(transaction, wid, 0);
-    SLSTransactionCommit(transaction, 1);
+    for (int i = 0; i < count; ++i) {
+        uint32_t wid;
+        unpack(wid);
+        if (!wid) continue;
+
+        uint32_t proxy_wid;
+        unpack(proxy_wid);
+
+        SLSTransactionOrderWindowGroup(transaction, proxy_wid, 1, wid);
+        SLSTransactionSetWindowSystemAlpha(transaction, wid, 0);
+    }
+    SLSTransactionCommit(transaction, 0);
     CFRelease(transaction);
 }
 
 static void do_window_swap_proxy_out(char *message)
 {
-    uint32_t wid;
-    unpack(message, wid);
-    if (!wid) return;
-
-    uint32_t proxy_wid;
-    unpack(message, proxy_wid);
-    if (!proxy_wid) return;
-
-    float wid_alpha;
-    unpack(message, wid_alpha);
-
-    CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
-    SLSTransactionSetWindowSystemAlpha(transaction, wid, 1.0f);
-    if (wid_alpha <= 0.98f) {
-        SLSTransactionSetWindowAlpha(transaction, wid, 0.0f);
-    }
-    SLSTransactionCommit(transaction, 1);
-    CFRelease(transaction);
-}
-
-static void do_window_blend(char *message)
-{
     int count = 0;
-    unpack(message, count);
+    unpack(count);
     if (!count) return;
 
     CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
-    pthread_mutex_lock(&window_fade_lock);
-
     for (int i = 0; i < count; ++i) {
         uint32_t wid;
-        unpack(message, wid);
+        unpack(wid);
+        if (!wid) continue;
 
-        float alpha;
-        unpack(message, alpha);
+        uint32_t proxy_wid;
+        unpack(proxy_wid);
 
-        struct window_fade_context *context = table_find(&window_fade_table, &wid);
-        if (context) {
-            context->alpha = alpha;
-            context->duration = 0.0f;
-            __asm__ __volatile__ ("" ::: "memory");
-            context->skip = true;
-        }
-
-        SLSTransactionSetWindowAlpha(transaction, wid, alpha);
+        SLSTransactionSetWindowSystemAlpha(transaction, wid, 1.0f);
+        SLSTransactionOrderWindowGroup(transaction, proxy_wid, 0, wid);
     }
-
-    pthread_mutex_unlock(&window_fade_lock);
     SLSTransactionCommit(transaction, 0);
     CFRelease(transaction);
 }
@@ -870,14 +839,14 @@ static void do_window_blend(char *message)
 static void do_window_order(char *message)
 {
     uint32_t a_wid;
-    unpack(message, a_wid);
+    unpack(a_wid);
     if (!a_wid) return;
 
     int order;
-    unpack(message, order);
+    unpack(order);
 
     uint32_t b_wid;
-    unpack(message, b_wid);
+    unpack(b_wid);
     if (!b_wid) return;
 
     SLSOrderWindow(SLSMainConnectionID(), a_wid, order, b_wid);
@@ -959,9 +928,6 @@ static void handle_message(int sockfd, char *message)
     } break;
     case SA_OPCODE_WINDOW_ORDER: {
         do_window_order(message);
-    } break;
-    case SA_OPCODE_WINDOW_BLEND: {
-        do_window_blend(message);
     } break;
     }
 }

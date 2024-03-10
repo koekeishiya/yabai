@@ -46,7 +46,6 @@ struct window_animation_context
     uint64_t animation_clock;
     struct window_animation *animation_list;
     int animation_count;
-    bool done;
 };
 
 struct balance_node

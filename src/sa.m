@@ -542,20 +542,35 @@ bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, fl
     return sa_payload_send(SA_OPCODE_WINDOW_SCALE);
 }
 
-bool scripting_addition_swap_window_proxy_in(uint32_t wid, uint32_t proxy_wid)
+bool scripting_addition_swap_window_proxy_in(struct window_animation *animation_list, int animation_count)
 {
+    uint32_t dummy_wid = 0;
     sa_payload_init();
-    pack(wid);
-    pack(proxy_wid);
+    pack(animation_count);
+    for (int i = 0; i < animation_count; ++i) {
+        if (__atomic_load_n(&animation_list[i].skip, __ATOMIC_RELAXED)) {
+            pack(dummy_wid);
+        } else {
+            pack(animation_list[i].wid);
+            pack(animation_list[i].proxy.id);
+        }
+    }
     return sa_payload_send(SA_OPCODE_WINDOW_SWAP_PROXY_IN);
 }
 
-bool scripting_addition_swap_window_proxy_out(uint32_t wid, uint32_t proxy_wid, float wid_alpha)
+bool scripting_addition_swap_window_proxy_out(struct window_animation *animation_list, int animation_count)
 {
+    uint32_t dummy_wid = 0;
     sa_payload_init();
-    pack(wid);
-    pack(proxy_wid);
-    pack(wid_alpha);
+    pack(animation_count);
+    for (int i = 0; i < animation_count; ++i) {
+        if (__atomic_load_n(&animation_list[i].skip, __ATOMIC_RELAXED)) {
+            pack(dummy_wid);
+        } else {
+            pack(animation_list[i].wid);
+            pack(animation_list[i].proxy.id);
+        }
+    }
     return sa_payload_send(SA_OPCODE_WINDOW_SWAP_PROXY_OUT);
 }
 
@@ -566,17 +581,6 @@ bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
     pack(order);
     pack(b_wid);
     return sa_payload_send(SA_OPCODE_WINDOW_ORDER);
-}
-
-bool scripting_addition_blend_alpha(uint32_t *wid, float *alpha, int count)
-{
-    sa_payload_init();
-    pack(count);
-    for (int i = 0; i < count; ++i) {
-        pack(wid[i]);
-        pack(alpha[i]);
-    }
-    return sa_payload_send(SA_OPCODE_WINDOW_BLEND);
 }
 
 #undef sa_payload_init
