@@ -31,7 +31,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fixed weird issue with memory ownership when synthesizing events for autofocus [#2130](https://github.com/koekeishiya/yabai/issues/2130)
 - Combine effects of all matching window rules before applying rule effects [#2123](https://github.com/koekeishiya/yabai/issues/2123)
 - Window insert feedback visual should use same layer as parent window [#2132](https://github.com/koekeishiya/yabai/issues/2132)
-- Window animations will perform an alpha fade upon end-transition [#2137](https://github.com/koekeishiya/yabai/issues/2137)
 - Updated scripting-addition mach loader/injection and payload to work for macOS Sonoma 14.4 [#2146](https://github.com/koekeishiya/yabai/issues/2146) [#2150](https://github.com/koekeishiya/yabai/issues/2150)
 
 ### Removed
