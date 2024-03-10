@@ -58,6 +58,7 @@
 
 #include "osax/common.h"
 
+#include "view.h"
 #include "sa.h"
 #include "event_loop.h"
 #include "event_signal.h"
@@ -66,7 +67,6 @@
 #include "message.h"
 #include "display.h"
 #include "space.h"
-#include "view.h"
 #include "window.h"
 #include "process_manager.h"
 #include "application.h"
