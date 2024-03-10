@@ -701,12 +701,10 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
             window_node_clear_zoom(parent);
         }
 
-        window_node_update(view, parent->left);
-        window_node_update(view, parent->right);
+        window_node_update(view, parent);
     }
 
     insert_feedback_destroy(node);
-
     free(child);
     free(node);
 
