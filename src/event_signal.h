@@ -94,8 +94,8 @@ static const char *signal_type_str[] =
 struct event_signal
 {
     enum signal_type type;
-    char *arg_name[2];
-    char *arg_value[2];
+    char *arg_name[4];
+    char *arg_value[4];
     char *app;
     char *title;
     int active;

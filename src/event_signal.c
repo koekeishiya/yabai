@@ -85,6 +85,8 @@ void event_signal_flush(void)
 
             if (es->arg_name[0]) setenv(es->arg_name[0], es->arg_value[0], 1);
             if (es->arg_name[1]) setenv(es->arg_name[1], es->arg_value[1], 1);
+            if (es->arg_name[2]) setenv(es->arg_name[2], es->arg_value[2], 1);
+            if (es->arg_name[3]) setenv(es->arg_name[3], es->arg_value[3], 1);
 
             char *exec[] = { "/usr/bin/env", "sh", "-c", signal->command, NULL};
             exit(execvp(exec[0], exec));
@@ -108,8 +110,12 @@ void event_signal_push(enum signal_type type, void *context)
     es->type         = type;
     es->arg_name[0]  = NULL;
     es->arg_name[1]  = NULL;
+    es->arg_name[2]  = NULL;
+    es->arg_name[3]  = NULL;
     es->arg_value[0] = NULL;
     es->arg_value[1] = NULL;
+    es->arg_value[2] = NULL;
+    es->arg_value[3] = NULL;
 
     switch (type) {
     default: break;
@@ -219,7 +225,20 @@ void event_signal_push(enum signal_type type, void *context)
         es->title = window_title_ts(window);
         es->active = g_window_manager.focused_window_id == window->id;
     } break;
-    case SIGNAL_SPACE_CREATED:
+    case SIGNAL_SPACE_CREATED: {
+        uint64_t sid = (uint64_t)(uintptr_t) context;
+        int index    = space_manager_mission_control_index(sid);
+
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
+        es->arg_name[1]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[1] = ts_alloc_unaligned(arg_size);
+
+        snprintf(es->arg_name[0],  arg_size, "%s",   "YABAI_SPACE_ID");
+        snprintf(es->arg_value[0], arg_size, "%lld", sid);
+        snprintf(es->arg_name[1],  arg_size, "%s",   "YABAI_SPACE_INDEX");
+        snprintf(es->arg_value[1], arg_size, "%d",   index);
+    } break;
     case SIGNAL_SPACE_DESTROYED: {
         uint64_t sid = (uint64_t)(uintptr_t) context;
 
@@ -230,20 +249,49 @@ void event_signal_push(enum signal_type type, void *context)
         snprintf(es->arg_value[0], arg_size, "%lld", sid);
     } break;
     case SIGNAL_SPACE_CHANGED: {
+        uint64_t sid        = g_space_manager.current_space_id;
+        uint64_t recent_sid = g_space_manager.last_space_id;
+
+        int index        = space_manager_mission_control_index(sid);
+        int recent_index = space_manager_mission_control_index(recent_sid);
+
         es->arg_name[0]  = ts_alloc_unaligned(arg_size);
         es->arg_value[0] = ts_alloc_unaligned(arg_size);
         es->arg_name[1]  = ts_alloc_unaligned(arg_size);
         es->arg_value[1] = ts_alloc_unaligned(arg_size);
 
+        es->arg_name[2]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[2] = ts_alloc_unaligned(arg_size);
+        es->arg_name[3]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[3] = ts_alloc_unaligned(arg_size);
+
         snprintf(es->arg_name[0],  arg_size, "%s",   "YABAI_SPACE_ID");
-        snprintf(es->arg_value[0], arg_size, "%lld", g_space_manager.current_space_id);
+        snprintf(es->arg_value[0], arg_size, "%lld", sid);
         snprintf(es->arg_name[1],  arg_size, "%s",   "YABAI_RECENT_SPACE_ID");
-        snprintf(es->arg_value[1], arg_size, "%lld", g_space_manager.last_space_id);
+        snprintf(es->arg_value[1], arg_size, "%lld", recent_sid);
+
+        snprintf(es->arg_name[2],  arg_size, "%s", "YABAI_SPACE_INDEX");
+        snprintf(es->arg_value[2], arg_size, "%d", index);
+        snprintf(es->arg_name[3],  arg_size, "%s", "YABAI_RECENT_SPACE_INDEX");
+        snprintf(es->arg_value[3], arg_size, "%d", recent_index);
     } break;
     case SIGNAL_DISPLAY_ADDED:
-    case SIGNAL_DISPLAY_REMOVED:
     case SIGNAL_DISPLAY_MOVED:
     case SIGNAL_DISPLAY_RESIZED: {
+        uint32_t did = (uint32_t)(uintptr_t) context;
+        int index    = display_arrangement(did);
+
+        es->arg_name[0]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[0] = ts_alloc_unaligned(arg_size);
+        es->arg_name[1]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[1] = ts_alloc_unaligned(arg_size);
+
+        snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_DISPLAY_ID");
+        snprintf(es->arg_value[0], arg_size, "%d", did);
+        snprintf(es->arg_name[1],  arg_size, "%s", "YABAI_DISPLAY_INDEX");
+        snprintf(es->arg_value[1], arg_size, "%d", index);
+    } break;
+    case SIGNAL_DISPLAY_REMOVED: {
         uint32_t did = (uint32_t)(uintptr_t) context;
 
         es->arg_name[0]  = ts_alloc_unaligned(arg_size);
@@ -253,15 +301,31 @@ void event_signal_push(enum signal_type type, void *context)
         snprintf(es->arg_value[0], arg_size, "%d", did);
     } break;
     case SIGNAL_DISPLAY_CHANGED: {
+        uint32_t did        = g_display_manager.current_display_id;
+        uint32_t recent_did = g_display_manager.last_display_id;
+
+        int index        = display_arrangement(did);
+        int recent_index = display_arrangement(recent_did);
+
         es->arg_name[0]  = ts_alloc_unaligned(arg_size);
         es->arg_value[0] = ts_alloc_unaligned(arg_size);
         es->arg_name[1]  = ts_alloc_unaligned(arg_size);
         es->arg_value[1] = ts_alloc_unaligned(arg_size);
 
+        es->arg_name[2]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[2] = ts_alloc_unaligned(arg_size);
+        es->arg_name[3]  = ts_alloc_unaligned(arg_size);
+        es->arg_value[3] = ts_alloc_unaligned(arg_size);
+
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_DISPLAY_ID");
-        snprintf(es->arg_value[0], arg_size, "%d", g_display_manager.current_display_id);
+        snprintf(es->arg_value[0], arg_size, "%d", did);
         snprintf(es->arg_name[1],  arg_size, "%s", "YABAI_RECENT_DISPLAY_ID");
-        snprintf(es->arg_value[1], arg_size, "%d", g_display_manager.last_display_id);
+        snprintf(es->arg_value[1], arg_size, "%d", recent_did);
+
+        snprintf(es->arg_name[2],  arg_size, "%s", "YABAI_DISPLAY_INDEX");
+        snprintf(es->arg_value[2], arg_size, "%d", index);
+        snprintf(es->arg_name[3],  arg_size, "%s", "YABAI_RECENT_DISPLAY_INDEX");
+        snprintf(es->arg_value[3], arg_size, "%d", recent_index);
     } break;
     case SIGNAL_MISSION_CONTROL_ENTER:
     case SIGNAL_MISSION_CONTROL_EXIT: {

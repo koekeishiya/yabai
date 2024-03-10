@@ -743,7 +743,7 @@ EVENT
 
 *space_created*::
     Triggered when a space is created. +
-    Passes one argument: $YABAI_SPACE_ID
+    Passes two arguments: $YABAI_SPACE_ID, $YABAI_SPACE_INDEX
 
 *space_destroyed*::
     Triggered when a space is destroyed. +
@@ -751,11 +751,11 @@ EVENT
 
 *space_changed*::
     Triggered when the active space has changed. +
-    Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID
+    Passes four arguments: $YABAI_SPACE_ID, $YABAI_SPACE_INDEX, $YABAI_RECENT_SPACE_ID, $YABAI_RECENT_SPACE_INDEX
 
 *display_added*::
     Triggered when a new display has been added. +
-    Passes one argument: $YABAI_DISPLAY_ID
+    Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX
 
 *display_removed*::
     Triggered when a display has been removed. +
@@ -763,15 +763,15 @@ EVENT
 
 *display_moved*::
     Triggered when a change has been made to display arrangement. +
-    Passes one argument: $YABAI_DISPLAY_ID
+    Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX
 
 *display_resized*::
     Triggered when a display has changed resolution. +
-    Passes one argument: $YABAI_DISPLAY_ID
+    Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX
 
 *display_changed*::
     Triggered when the active display has changed. +
-    Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
+    Passes four arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX, $YABAI_RECENT_DISPLAY_ID, $YABAI_RECENT_DISPLAY_INDEX
 
 *mission_control_enter*::
     Triggered when mission-control activates. +

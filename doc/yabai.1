@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-02-29
+.\"      Date: 2024-03-10
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-02-29" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-03-10" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -1056,7 +1056,7 @@ Passes one argument: $YABAI_WINDOW_ID
 .RS 4
 Triggered when a space is created.
 .br
-Passes one argument: $YABAI_SPACE_ID
+Passes two arguments: $YABAI_SPACE_ID, $YABAI_SPACE_INDEX
 .RE
 .sp
 \fBspace_destroyed\fP
@@ -1070,14 +1070,14 @@ Passes one argument: $YABAI_SPACE_ID
 .RS 4
 Triggered when the active space has changed.
 .br
-Passes two arguments: $YABAI_SPACE_ID, $YABAI_RECENT_SPACE_ID
+Passes four arguments: $YABAI_SPACE_ID, $YABAI_SPACE_INDEX, $YABAI_RECENT_SPACE_ID, $YABAI_RECENT_SPACE_INDEX
 .RE
 .sp
 \fBdisplay_added\fP
 .RS 4
 Triggered when a new display has been added.
 .br
-Passes one argument: $YABAI_DISPLAY_ID
+Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX
 .RE
 .sp
 \fBdisplay_removed\fP
@@ -1091,21 +1091,21 @@ Passes one argument: $YABAI_DISPLAY_ID
 .RS 4
 Triggered when a change has been made to display arrangement.
 .br
-Passes one argument: $YABAI_DISPLAY_ID
+Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX
 .RE
 .sp
 \fBdisplay_resized\fP
 .RS 4
 Triggered when a display has changed resolution.
 .br
-Passes one argument: $YABAI_DISPLAY_ID
+Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX
 .RE
 .sp
 \fBdisplay_changed\fP
 .RS 4
 Triggered when the active display has changed.
 .br
-Passes two arguments: $YABAI_DISPLAY_ID, $YABAI_RECENT_DISPLAY_ID
+Passes four arguments: $YABAI_DISPLAY_ID, $YABAI_DISPLAY_INDEX, $YABAI_RECENT_DISPLAY_ID, $YABAI_RECENT_DISPLAY_INDEX
 .RE
 .sp
 \fBmission_control_enter\fP
