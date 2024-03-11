@@ -144,7 +144,7 @@ Global Settings
 *menubar_opacity* ['<FLOAT_SEL>']::
     Changes the transparency of the macOS menubar. +
     If the value is 0.0, the menubar will no longer respond to mouse-events, effectively hiding the menubar permanently. +
-    yabai will automatically set the menubar to 100% visibility upon entering a native-fullscreen space, and adjust it back down afterwards.
+    The menubar will automatically become fully opaque upon entering a native-fullscreen space, and adjusted down afterwards.
 
 *mouse_follows_focus* ['<BOOL_SEL>']::
     When focusing a window, put the mouse at its center.
@@ -278,11 +278,13 @@ COMMAND
     System Integrity Protection must be partially disabled.
 
 *--create*  ['<DISPLAY_SEL>']::
-    Create a new space on the given display. If none specified, use the display of the active space instead. +
+    Create a new space on the given display. +
+    If none specified, use the display of the active space instead. +
     System Integrity Protection must be partially disabled.
 
 *--destroy* ['<SPACE_SEL>']::
-    Remove the given space. If none specified, use the selected space instead. +
+    Remove the given space. +
+    If none specified, use the selected space instead. +
     System Integrity Protection must be partially disabled.
 
 *--move* '<SPACE_SEL>'::
@@ -300,10 +302,12 @@ COMMAND
     System Integrity Protection must be partially disabled.
 
 *--equalize* ['x-axis|y-axis']::
-    Reset the split ratios on the selected space to the default value along the given axis. If no axis is specified, use both.
+    Reset the split ratios on the selected space to the default value along the given axis. +
+    If no axis is specified, use both.
 
 *--balance* ['x-axis|y-axis']::
-    Adjust the split ratios on the selected space so that all windows along the given axis occupy the same area. If no axis is specified, use both.
+    Adjust the split ratios on the selected space so that all windows along the given axis occupy the same area. +
+    If no axis is specified, use both.
 
 *--mirror* 'x-axis|y-axis'::
     Flip the tree of the selected space along the given axis.
@@ -339,18 +343,22 @@ COMMAND
 ^^^^^^^
 
 *--focus* ['<WINDOW_SEL>']::
-    Focus the given window. If none specified, focus the selected window instead.
+    Focus the given window. +
+    If none specified, focus the selected window instead.
 
 *--close* ['<WINDOW_SEL>']::
-    Close the given window. If none specified, close the selected window instead. +
+    Close the given window. +
+    If none specified, close the selected window instead. +
     Only works on windows that provide a close button in its titlebar.
 
 *--minimize* ['<WINDOW_SEL>']::
-    Minimize the given window. If none specified, minimize the selected window instead. +
+    Minimize the given window. +
+    If none specified, minimize the selected window instead. +
     Only works on windows that provide a minimize button in its titlebar.
 
 *--deminimize* '<WINDOW_SEL>'::
-    Restore the given window if it is minimized. The window will only get focus if the owning application has focus. +
+    Restore the given window if it is minimized. +
+    The window will only get focus if the owning application has focus. +
     Note that you can also '--focus' a minimized window to restore it as the focused window.
 
 *--swap* '<WINDOW_SEL>'::
@@ -371,25 +379,30 @@ COMMAND
     Set the frame of the selected window based on a self-defined grid.
 
 *--move* 'abs|rel:<dx>:<dy>'::
-    If type is 'rel' the selected window is moved by 'dx' pixels horizontally and 'dy' pixels vertically, otherwise 'dx' and 'dy' will become its new position.
+    If type is 'rel' the selected window is moved by 'dx' pixels horizontally and 'dy' pixels vertically. +
+    If type is 'abs' 'dx' and 'dy' will become the new position.
 
 *--resize* 'top|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>'::
-    Resize the selected window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. If handle is 'abs' the new size will be 'dx' width and 'dy' height and cannot be used on managed windows.
+    Resize the selected window by moving the given handle 'dx' pixels horizontally and 'dy' pixels vertically. +
+    If handle is 'abs' the new size will be 'dx' width and 'dy' height and cannot be used on managed windows.
 
 *--ratio* 'rel|abs:<dr>'::
-    If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. A positive/negative delta will increase/decrease the size of the left-child.
+    If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. +
+    A positive/negative delta will increase/decrease the size of the left-child.
 
 *--toggle* 'float|sticky|pip|shadow|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
     Toggle the given property of the selected window. +
     The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
 
 *--sub-layer* '<LAYER>'::
-    Set the stacking sub-layer of the selected window. The window will no longer be eligible for automatic change in sub-layer when managed/unmanaged. +
+    Set the stacking sub-layer of the selected window. +
+    The window will no longer be eligible for automatic change in sub-layer when managed/unmanaged. +
     Specify the value 'auto' to reset back to normal and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
 
 *--opacity* '<FLOAT_SEL>'::
-    Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change. +
+    Set the opacity of the selected window. +
+    The window will no longer be eligible for automatic change in opacity upon focus change. +
     Specify the value '0.0' to reset back to full opacity and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
 
@@ -600,11 +613,13 @@ ARGUMENT
     When focusing the window, put the mouse at its center. Overrides the global *mouse_follows_focus* setting.
 
 *sub-layer='<LAYER>'*::
-    Window is ordered within the given stacking sub-layer. The window will no longer be eligible for automatic change in sub-layer when managed/unmanaged. +
+    Window is ordered within the given stacking sub-layer. +
+    The window will no longer be eligible for automatic change in sub-layer when managed/unmanaged. +
     Specify the value 'auto' to reset back to normal and make it become automatically managed.
 
 *opacity='<FLOAT_SEL>'*::
-    Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change. +
+    Set window opacity. +
+    The window will no longer be eligible for automatic change in opacity upon focus change. +
     Specify the value '0.0' to reset back to full opacity and make it become automatically managed.
 
 *native-fullscreen='<BOOL_SEL>'*::

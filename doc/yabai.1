@@ -189,7 +189,7 @@ Changes the transparency of the macOS menubar.
 .br
 If the value is 0.0, the menubar will no longer respond to mouse\-events, effectively hiding the menubar permanently.
 .br
-yabai will automatically set the menubar to 100% visibility upon entering a native\-fullscreen space, and adjust it back down afterwards.
+The menubar will automatically become fully opaque upon entering a native\-fullscreen space, and adjusted down afterwards.
 .RE
 .sp
 \fBmouse_follows_focus\fP [\fI<BOOL_SEL>\fP]
@@ -390,14 +390,18 @@ System Integrity Protection must be partially disabled.
 .sp
 \fB\-\-create\fP  [\fI<DISPLAY_SEL>\fP]
 .RS 4
-Create a new space on the given display. If none specified, use the display of the active space instead.
+Create a new space on the given display.
+.br
+If none specified, use the display of the active space instead.
 .br
 System Integrity Protection must be partially disabled.
 .RE
 .sp
 \fB\-\-destroy\fP [\fI<SPACE_SEL>\fP]
 .RS 4
-Remove the given space. If none specified, use the selected space instead.
+Remove the given space.
+.br
+If none specified, use the selected space instead.
 .br
 System Integrity Protection must be partially disabled.
 .RE
@@ -429,12 +433,16 @@ System Integrity Protection must be partially disabled.
 .sp
 \fB\-\-equalize\fP [\fIx\-axis|y\-axis\fP]
 .RS 4
-Reset the split ratios on the selected space to the default value along the given axis. If no axis is specified, use both.
+Reset the split ratios on the selected space to the default value along the given axis.
+.br
+If no axis is specified, use both.
 .RE
 .sp
 \fB\-\-balance\fP [\fIx\-axis|y\-axis\fP]
 .RS 4
-Adjust the split ratios on the selected space so that all windows along the given axis occupy the same area. If no axis is specified, use both.
+Adjust the split ratios on the selected space so that all windows along the given axis occupy the same area.
+.br
+If no axis is specified, use both.
 .RE
 .sp
 \fB\-\-mirror\fP \fIx\-axis|y\-axis\fP
@@ -481,26 +489,34 @@ yabai \-m window [\fI<WINDOW_SEL>\fP] \fI<COMMAND>\fP
 .sp
 \fB\-\-focus\fP [\fI<WINDOW_SEL>\fP]
 .RS 4
-Focus the given window. If none specified, focus the selected window instead.
+Focus the given window.
+.br
+If none specified, focus the selected window instead.
 .RE
 .sp
 \fB\-\-close\fP [\fI<WINDOW_SEL>\fP]
 .RS 4
-Close the given window. If none specified, close the selected window instead.
+Close the given window.
+.br
+If none specified, close the selected window instead.
 .br
 Only works on windows that provide a close button in its titlebar.
 .RE
 .sp
 \fB\-\-minimize\fP [\fI<WINDOW_SEL>\fP]
 .RS 4
-Minimize the given window. If none specified, minimize the selected window instead.
+Minimize the given window.
+.br
+If none specified, minimize the selected window instead.
 .br
 Only works on windows that provide a minimize button in its titlebar.
 .RE
 .sp
 \fB\-\-deminimize\fP \fI<WINDOW_SEL>\fP
 .RS 4
-Restore the given window if it is minimized. The window will only get focus if the owning application has focus.
+Restore the given window if it is minimized.
+.br
+The window will only get focus if the owning application has focus.
 .br
 Note that you can also \fI\-\-focus\fP a minimized window to restore it as the focused window.
 .RE
@@ -536,17 +552,23 @@ Set the frame of the selected window based on a self\-defined grid.
 .sp
 \fB\-\-move\fP \fIabs|rel:<dx>:<dy>\fP
 .RS 4
-If type is \fIrel\fP the selected window is moved by \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically, otherwise \fIdx\fP and \fIdy\fP will become its new position.
+If type is \fIrel\fP the selected window is moved by \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically.
+.br
+If type is \fIabs\fP \fIdx\fP and \fIdy\fP will become the new position.
 .RE
 .sp
 \fB\-\-resize\fP \fItop|left|bottom|right|top_left|top_right|bottom_right|bottom_left|abs:<dx>:<dy>\fP
 .RS 4
-Resize the selected window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically. If handle is \fIabs\fP the new size will be \fIdx\fP width and \fIdy\fP height and cannot be used on managed windows.
+Resize the selected window by moving the given handle \fIdx\fP pixels horizontally and \fIdy\fP pixels vertically.
+.br
+If handle is \fIabs\fP the new size will be \fIdx\fP width and \fIdy\fP height and cannot be used on managed windows.
 .RE
 .sp
 \fB\-\-ratio\fP \fIrel|abs:<dr>\fP
 .RS 4
-If type is \fIrel\fP the split ratio of the selected window is changed by \fIdr\fP, otherwise \fIdr\fP will become the new split ratio. A positive/negative delta will increase/decrease the size of the left\-child.
+If type is \fIrel\fP the split ratio of the selected window is changed by \fIdr\fP, otherwise \fIdr\fP will become the new split ratio.
+.br
+A positive/negative delta will increase/decrease the size of the left\-child.
 .RE
 .sp
 \fB\-\-toggle\fP \fIfloat|sticky|pip|shadow|split|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose\fP
@@ -558,7 +580,9 @@ The following properties require System Integrity Protection to be partially dis
 .sp
 \fB\-\-sub\-layer\fP \fI<LAYER>\fP
 .RS 4
-Set the stacking sub\-layer of the selected window. The window will no longer be eligible for automatic change in sub\-layer when managed/unmanaged.
+Set the stacking sub\-layer of the selected window.
+.br
+The window will no longer be eligible for automatic change in sub\-layer when managed/unmanaged.
 .br
 Specify the value \fIauto\fP to reset back to normal and make it become automatically managed.
 .br
@@ -567,7 +591,9 @@ System Integrity Protection must be partially disabled.
 .sp
 \fB\-\-opacity\fP \fI<FLOAT_SEL>\fP
 .RS 4
-Set the opacity of the selected window. The window will no longer be eligible for automatic change in opacity upon focus change.
+Set the opacity of the selected window.
+.br
+The window will no longer be eligible for automatic change in opacity upon focus change.
 .br
 Specify the value \fI0.0\fP to reset back to full opacity and make it become automatically managed.
 .br
@@ -842,14 +868,18 @@ When focusing the window, put the mouse at its center. Overrides the global \fBm
 .sp
 \fBsub\-layer=\fI<LAYER>\fP\fP
 .RS 4
-Window is ordered within the given stacking sub\-layer. The window will no longer be eligible for automatic change in sub\-layer when managed/unmanaged.
+Window is ordered within the given stacking sub\-layer.
+.br
+The window will no longer be eligible for automatic change in sub\-layer when managed/unmanaged.
 .br
 Specify the value \fIauto\fP to reset back to normal and make it become automatically managed.
 .RE
 .sp
 \fBopacity=\fI<FLOAT_SEL>\fP\fP
 .RS 4
-Set window opacity. The window will no longer be eligible for automatic change in opacity upon focus change.
+Set window opacity.
+.br
+The window will no longer be eligible for automatic change in opacity upon focus change.
 .br
 Specify the value \fI0.0\fP to reset back to full opacity and make it become automatically managed.
 .RE
