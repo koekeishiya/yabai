@@ -279,7 +279,7 @@ COMMAND
 
 *--switch* '<SPACE_SEL>'::
     The selected space will always be the currently focused space. +
-    The given space becomes the active space of the focused display regardless of which display it belongs to. +
+    The given space substitutes the selected space, gaining focus. +
     If the selected space and the given space belong to different displays, this behaves like '--swap'. +
     If the selected space and the given space belong to the same display, this behaves like '--focus'. +
     System Integrity Protection must be partially disabled.
