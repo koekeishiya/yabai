@@ -427,16 +427,26 @@ void window_manager_resize_window(struct window *window, float width, float heig
     CFRelease(size_ref);
 }
 
-static inline void window_manager_notify_jankyborders(uint32_t proxy_wid, uint32_t real_wid, uint32_t proxy_event, bool wait)
+static inline void window_manager_notify_jankyborders(struct window_animation *animation_list, int animation_count, uint32_t event, bool skip, bool wait)
 {
     mach_port_t port;
     if (g_bs_port && bootstrap_look_up(g_bs_port, "git.felix.jbevent", &port) == KERN_SUCCESS) {
         struct {
             uint32_t event;
-            uint32_t proxy_wid;
-            uint64_t proxy_sid;
-            uint32_t real_wid;
-        } data = { proxy_event, proxy_wid, 0, real_wid };
+            uint32_t count;
+            uint32_t proxy_wid[512];
+            uint32_t real_wid[512];
+        } data = { event, 0 };
+
+        for (int i = 0; i < animation_count; ++i) {
+            if (skip && __atomic_load_n(&animation_list[i].skip, __ATOMIC_RELAXED)) continue;
+
+            data.proxy_wid[data.count] = animation_list[i].proxy.id;
+            data.real_wid[data.count]  = animation_list[i].wid;
+
+            ++data.count;
+        }
+
         mach_send(port, &data, sizeof(data));
         if (wait) usleep(20000);
     }
@@ -511,8 +521,6 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     }
 
     window_manager_create_window_proxy(animation->cid, alpha, &animation->proxy);
-    window_manager_notify_jankyborders(animation->proxy.id, animation->wid, 1325, false);
-
     return NULL;
 }
 
@@ -558,11 +566,11 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
 
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
     SLSDisableUpdate(context->animation_connection);
+    window_manager_notify_jankyborders(context->animation_list, context->animation_count, 1326, true, true);
     scripting_addition_swap_window_proxy_out(context->animation_list, context->animation_count);
     for (int i = 0; i < animation_count; ++i) {
         if (__atomic_load_n(&context->animation_list[i].skip, __ATOMIC_RELAXED)) continue;
 
-        window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1326, true);
         table_remove(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         window_manager_destroy_window_proxy(context->animation_connection, &context->animation_list[i].proxy);
 
@@ -592,28 +600,23 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
     context->animation_easing   = g_window_manager.window_animation_easing;
     context->animation_clock    = 0;
 
-    for (int i = 0; i < window_count; ++i) {
-        struct window_capture *capture = &window_list[i];
-
-        context->animation_list[i] = (struct window_animation) {
-            .window = capture->window,
-            .wid    = capture->window->id,
-            .x      = capture->x,
-            .y      = capture->y,
-            .w      = capture->w,
-            .h      = capture->h,
-            .cid    = context->animation_connection,
-            .proxy  = {0},
-            .skip   = false
-        };
-    }
-
     int thread_count = 0;
     pthread_t *threads = ts_alloc_list(pthread_t, window_count);
 
+    TIME_BODY(window_manager_animate_window_list_async___prep_proxies, {
     SLSDisableUpdate(context->animation_connection);
     pthread_mutex_lock(&g_window_manager.window_animations_lock);
     for (int i = 0; i < window_count; ++i) {
+        context->animation_list[i].window = window_list[i].window;
+        context->animation_list[i].wid    = window_list[i].window->id;
+        context->animation_list[i].x      = window_list[i].x;
+        context->animation_list[i].y      = window_list[i].y;
+        context->animation_list[i].w      = window_list[i].w;
+        context->animation_list[i].h      = window_list[i].h;
+        context->animation_list[i].cid    = context->animation_connection;
+        context->animation_list[i].skip   = false;
+        memset(&context->animation_list[i].proxy, 0, sizeof(struct window_proxy));
+
         struct window_animation *existing_animation = table_find(&g_window_manager.window_animations_table, &context->animation_list[i].wid);
         if (existing_animation) {
             __atomic_store_n(&existing_animation->skip, true, __ATOMIC_RELEASE);
@@ -636,8 +639,8 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
             float alpha = 1.0f;
             SLSGetWindowAlpha(context->animation_connection, context->animation_list[i].wid, &alpha);
             window_manager_create_window_proxy(context->animation_connection, alpha, &context->animation_list[i].proxy);
-            window_manager_notify_jankyborders(context->animation_list[i].proxy.id, context->animation_list[i].wid, 1325, false);
-            window_manager_notify_jankyborders(existing_animation->proxy.id, existing_animation->wid, 1326, false);
+            window_manager_notify_jankyborders(&context->animation_list[i], 1, 1325, true, false);
+            window_manager_notify_jankyborders(existing_animation, 1, 1326, false, false);
 
             CFTypeRef transaction = SLSTransactionCreate(context->animation_connection);
             SLSTransactionOrderWindowGroup(transaction, context->animation_list[i].proxy.id, 1, context->animation_list[i].wid);
@@ -659,6 +662,7 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
         table_add(&g_window_manager.window_animations_table, &context->animation_list[i].wid, &context->animation_list[i]);
     }
     pthread_mutex_unlock(&g_window_manager.window_animations_lock);
+    });
 
     TIME_BODY(window_manager_animate_window_list_async___wait_for_threads, {
     for (int i = 0; i < thread_count; ++i) {
@@ -668,6 +672,10 @@ void window_manager_animate_window_list_async(struct window_capture *window_list
 
     TIME_BODY(window_manager_animate_window_list_async___swap_proxy_in, {
     scripting_addition_swap_window_proxy_in(context->animation_list, context->animation_count);
+    });
+
+    TIME_BODY(window_manager_animate_window_list_async___notify_jb, {
+    window_manager_notify_jankyborders(context->animation_list, context->animation_count, 1325, true, false);
     });
 
     TIME_BODY(window_manager_animate_window_list_async___set_frame, {
