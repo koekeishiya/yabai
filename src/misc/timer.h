@@ -21,7 +21,6 @@ static struct
     uint32_t parent;
 } g_profiler;
 
-
 #ifdef __x86_64__
 #include <mach/mach_time.h>
 
