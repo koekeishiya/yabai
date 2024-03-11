@@ -87,6 +87,7 @@ extern bool g_verbose;
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
 #define COMMAND_SPACE_FOCUS    "--focus"
+#define COMMAND_SPACE_SWITCH   "--switch"
 #define COMMAND_SPACE_CREATE   "--create"
 #define COMMAND_SPACE_DESTROY  "--destroy"
 #define COMMAND_SPACE_MOVE     "--move"
@@ -1574,6 +1575,20 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "cannot focus space due to an error with the scripting-addition.\n");
                 }
             }
+        } else if (token_equals(command, COMMAND_SPACE_SWITCH)) {
+            struct selector selector = parse_space_selector(rsp, &message, acting_sid, false);
+            if (selector.did_parse && selector.sid) {
+                enum space_op_error result = space_manager_switch_space(selector.sid);
+                if (result == SPACE_OP_ERROR_SAME_SPACE) {
+                    daemon_fail(rsp, "cannot focus an already focused space.\n");
+                } else if (result == SPACE_OP_ERROR_DISPLAY_IS_ANIMATING) {
+                    daemon_fail(rsp, "cannot focus space because the display is in the middle of an animation.\n");
+                } else if (result == SPACE_OP_ERROR_IN_MISSION_CONTROL) {
+                    daemon_fail(rsp, "cannot focus space because mission-control is active.\n");
+                } else if (result == SPACE_OP_ERROR_SCRIPTING_ADDITION) {
+                    daemon_fail(rsp, "cannot focus space due to an error with the scripting-addition.\n");
+                }
+            }
         } else if (token_equals(command, COMMAND_SPACE_MOVE)) {
             struct selector selector = parse_space_selector(rsp, &message, acting_sid, false);
             if (selector.did_parse && selector.sid) {
@@ -1596,8 +1611,6 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 enum space_op_error result = space_manager_swap_space_with_space(acting_sid, selector.sid);
                 if (result == SPACE_OP_ERROR_SAME_SPACE) {
                     daemon_fail(rsp, "cannot swap space with itself.\n");
-                } else if (result == SPACE_OP_ERROR_SAME_DISPLAY) {
-                    daemon_fail(rsp, "cannot swap space across display boundaries. use --display instead.\n");
                 } else if (result == SPACE_OP_ERROR_DISPLAY_IS_ANIMATING) {
                     daemon_fail(rsp, "cannot swap space because the display is in the middle of an animation.\n");
                 } else if (result == SPACE_OP_ERROR_IN_MISSION_CONTROL) {

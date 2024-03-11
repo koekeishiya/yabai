@@ -818,8 +818,12 @@ bool view_is_dirty(struct view *view)
 
 void view_flush(struct view *view)
 {
-    window_node_flush(view->root);
-    view->is_dirty = false;
+    if (space_is_visible(view->sid)) {
+        window_node_flush(view->root);
+        view->is_dirty = false;
+    } else {
+        view->is_dirty = true;
+    }
 }
 
 void view_serialize(FILE *rsp, struct view *view)

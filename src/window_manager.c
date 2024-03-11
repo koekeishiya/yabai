@@ -317,7 +317,12 @@ enum window_op_error window_manager_adjust_window_ratio(struct window_manager *w
     }
 
     window_node_update(view, node->parent);
-    window_node_flush(node->parent);
+
+    if (space_is_visible(view->sid)) {
+        window_node_flush(node->parent);
+    } else {
+        view->is_dirty = true;
+    }
 
     return WINDOW_OP_ERROR_SUCCESS;
 }
@@ -2243,10 +2248,18 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
 
     if (node->zoom == node->parent) {
         node->zoom = NULL;
-        window_node_flush(node);
+        if (space_is_visible(view->sid)) {
+            window_node_flush(node);
+        } else {
+            view->is_dirty = true;
+        }
     } else {
         node->zoom = node->parent;
-        window_node_flush(node);
+        if (space_is_visible(view->sid)) {
+            window_node_flush(node);
+        } else {
+            view->is_dirty = true;
+        }
     }
 }
 
@@ -2264,10 +2277,18 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
 
     if (node->zoom == view->root) {
         node->zoom = NULL;
-        window_node_flush(node);
+        if (space_is_visible(view->sid)) {
+            window_node_flush(node);
+        } else {
+            view->is_dirty = true;
+        }
     } else {
         node->zoom = view->root;
-        window_node_flush(node);
+        if (space_is_visible(view->sid)) {
+            window_node_flush(node);
+        } else {
+            view->is_dirty = true;
+        }
     }
 }
 

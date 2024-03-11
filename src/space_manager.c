@@ -438,7 +438,11 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct window *
             view_flush(view);
         } else {
             window_node_update(view, node->parent);
-            window_node_flush(node->parent);
+            if (space_is_visible(view->sid)) {
+                window_node_flush(node->parent);
+            } else {
+                view->is_dirty = true;
+            }
         }
     }
 }
@@ -617,32 +621,6 @@ void space_manager_move_window_to_space(uint64_t sid, struct window *window)
     CFRelease(window_list_ref);
 }
 
-enum space_op_error space_manager_focus_space(uint64_t sid)
-{
-    bool is_in_mc = mission_control_is_active();
-    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
-
-    uint64_t cur_sid = space_manager_active_space();
-    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
-
-    uint32_t cur_did = space_display_id(cur_sid);
-    uint32_t new_did = space_display_id(sid);
-    bool focus_display = cur_did != new_did;
-
-    bool is_animating = display_manager_display_is_animating(new_did);
-    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
-
-    if (scripting_addition_focus_space(sid)) {
-        if (focus_display) {
-            display_manager_focus_display(new_did, sid);
-        }
-    } else {
-        return SPACE_OP_ERROR_SCRIPTING_ADDITION;
-    }
-
-    return SPACE_OP_ERROR_SUCCESS;
-}
-
 static inline uint64_t space_manager_find_first_user_space_for_display(uint32_t did)
 {
     int count;
@@ -681,6 +659,66 @@ static inline bool space_manager_is_space_last_user_space(uint64_t sid)
     return result;
 }
 
+static enum space_op_error space_manager_swap_space_with_space_on_display(uint32_t a_did, uint64_t a_sid, uint32_t b_did, uint64_t b_sid)
+{
+    if (display_manager_display_is_animating(a_did)) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+    if (display_manager_display_is_animating(b_did)) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    float window_animation_duration = g_window_manager.window_animation_duration;
+    g_window_manager.window_animation_duration = 0.0f;
+    __asm__ __volatile__ ("" ::: "memory");
+
+    int a_window_list_count = 0;
+    uint32_t *a_window_list = space_window_list(a_sid, &a_window_list_count, true);
+
+    int b_window_list_count = 0;
+    uint32_t *b_window_list = space_window_list(b_sid, &b_window_list_count, true);
+
+    struct view *a_view = table_find(&g_space_manager.view, &a_sid);
+    struct view *b_view = table_find(&g_space_manager.view, &b_sid);
+
+    table_remove(&g_space_manager.view, &a_sid);
+    table_remove(&g_space_manager.view, &b_sid);
+
+    a_view->sid = b_sid;
+    b_view->sid = a_sid;
+
+    CFStringRef tmp = a_view->suuid;
+    a_view->suuid   = b_view->suuid;
+    b_view->suuid   = tmp;
+
+    table_add(&g_space_manager.view, &a_sid, b_view);
+    table_add(&g_space_manager.view, &b_sid, a_view);
+
+    if (a_window_list_count) {
+        CFArrayRef window_list_ref = cfarray_of_cfnumbers(a_window_list, sizeof(uint32_t), a_window_list_count, kCFNumberSInt32Type);
+        SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, b_sid);
+        CFRelease(window_list_ref);
+    }
+
+    if (b_window_list_count) {
+        CFArrayRef window_list_ref = cfarray_of_cfnumbers(b_window_list, sizeof(uint32_t), b_window_list_count, kCFNumberSInt32Type);
+        SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, a_sid);
+        CFRelease(window_list_ref);
+    }
+
+    for (int i = 0; i < buf_len(g_space_manager.labels); ++i) {
+        struct space_label *label = &g_space_manager.labels[i];
+        if      (label->sid == a_sid) label->sid = b_sid;
+        else if (label->sid == b_sid) label->sid = a_sid;
+    }
+
+    view_update(a_view);
+    view_update(b_view);
+
+    view_flush(a_view);
+    view_flush(b_view);
+
+    __asm__ __volatile__ ("" ::: "memory");
+    g_window_manager.window_animation_duration = window_animation_duration;
+    return SPACE_OP_ERROR_SUCCESS;
+}
+
 enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uint64_t selector_sid)
 {
     bool is_in_mc = mission_control_is_active();
@@ -690,7 +728,7 @@ enum space_op_error space_manager_swap_space_with_space(uint64_t acting_sid, uin
     uint32_t selector_did = space_display_id(selector_sid);
 
     if (acting_sid == selector_sid) return SPACE_OP_ERROR_SAME_SPACE;
-    if (acting_did != selector_did) return SPACE_OP_ERROR_SAME_DISPLAY;
+    if (acting_did != selector_did) return space_manager_swap_space_with_space_on_display(acting_did, acting_sid, selector_did, selector_sid);
 
     bool is_animating = display_manager_display_is_animating(acting_did);
     if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
@@ -803,6 +841,58 @@ enum space_op_error space_manager_move_space_to_display(struct space_manager *sm
     }
 
     return SPACE_OP_ERROR_SCRIPTING_ADDITION;
+}
+
+enum space_op_error space_manager_focus_space(uint64_t sid)
+{
+    bool is_in_mc = mission_control_is_active();
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
+    uint64_t cur_sid = space_manager_active_space();
+    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
+
+    uint32_t cur_did = space_display_id(cur_sid);
+    uint32_t new_did = space_display_id(sid);
+    bool focus_display = cur_did != new_did;
+
+    bool is_animating = display_manager_display_is_animating(new_did);
+    if (is_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    if (scripting_addition_focus_space(sid)) {
+        if (focus_display) {
+            display_manager_focus_display(new_did, sid);
+        }
+    } else {
+        return SPACE_OP_ERROR_SCRIPTING_ADDITION;
+    }
+
+    return SPACE_OP_ERROR_SUCCESS;
+}
+
+enum space_op_error space_manager_switch_space(uint64_t sid)
+{
+    bool is_in_mc = mission_control_is_active();
+    if (is_in_mc) return SPACE_OP_ERROR_IN_MISSION_CONTROL;
+
+    uint64_t cur_sid = space_manager_active_space();
+    if (cur_sid == sid) return SPACE_OP_ERROR_SAME_SPACE;
+
+    uint32_t cur_did = space_display_id(cur_sid);
+    uint32_t did     = space_display_id(sid);
+
+    bool is_src_animating = display_manager_display_is_animating(cur_did);
+    if (is_src_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    bool is_dst_animating = display_manager_display_is_animating(did);
+    if (is_dst_animating) return SPACE_OP_ERROR_DISPLAY_IS_ANIMATING;
+
+    if (cur_did != did) {
+        space_manager_swap_space_with_space_on_display(cur_did, cur_sid, did, sid);
+        display_manager_focus_display(cur_did, cur_sid);
+        return SPACE_OP_ERROR_SUCCESS;
+    }
+
+    return scripting_addition_focus_space(sid) ? SPACE_OP_ERROR_SUCCESS : SPACE_OP_ERROR_SCRIPTING_ADDITION;
 }
 
 enum space_op_error space_manager_destroy_space(uint64_t sid)

@@ -196,7 +196,8 @@ next:
         if (!space_is_visible(view->sid)) continue;
         if (!view_is_dirty(view))         continue;
 
-        view_flush(view);
+        window_node_flush(view->root);
+        view->is_dirty = false;
     }
 }
 
@@ -272,7 +273,8 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
         if (!space_is_visible(view->sid)) continue;
         if (!view_is_dirty(view))         continue;
 
-        view_flush(view);
+        window_node_flush(view->root);
+        view->is_dirty = false;
     }
 
 out:
@@ -388,7 +390,8 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
         if (!space_is_visible(view->sid)) continue;
         if (!view_is_dirty(view))         continue;
 
-        view_flush(view);
+        window_node_flush(view->root);
+        view->is_dirty = false;
     }
 
     event_signal_push(SIGNAL_APPLICATION_VISIBLE, application);
@@ -448,7 +451,8 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
         if (!space_is_visible(view->sid)) continue;
         if (!view_is_dirty(view))         continue;
 
-        view_flush(view);
+        window_node_flush(view->root);
+        view->is_dirty = false;
     }
 
     event_signal_push(SIGNAL_APPLICATION_HIDDEN, application);
@@ -592,7 +596,11 @@ static EVENT_HANDLER(WINDOW_MOVED)
                      &&
                (!node->zoom || AX_DIFF(node->zoom->area.x, new_origin.x) ||
                                AX_DIFF(node->zoom->area.y, new_origin.y))) {
-                window_node_flush(node);
+                if (space_is_visible(view->sid)) {
+                    window_node_flush(node);
+                } else {
+                    view->is_dirty = true;
+                }
             }
         }
     }
@@ -666,7 +674,11 @@ static EVENT_HANDLER(WINDOW_RESIZED)
                                    AX_DIFF(node->zoom->area.y, new_frame.origin.y)   ||
                                    AX_DIFF(node->zoom->area.w, new_frame.size.width) ||
                                    AX_DIFF(node->zoom->area.h, new_frame.size.height))) {
-                    window_node_flush(node);
+                    if (space_is_visible(view->sid)) {
+                        window_node_flush(node);
+                    } else {
+                        view->is_dirty = true;
+                    }
                 }
             }
         }

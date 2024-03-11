@@ -388,6 +388,19 @@ Focus the given space.
 System Integrity Protection must be partially disabled.
 .RE
 .sp
+\fB\-\-switch\fP \fI<SPACE_SEL>\fP
+.RS 4
+The selected space will always be the currently focused space.
+.br
+The given space becomes the active space of the focused display regardless of which display it belongs to.
+.br
+If the selected space and the given space belong to different displays, this behaves like \fI\-\-swap\fP.
+.br
+If the selected space and the given space belong to the same display, this behaves like \fI\-\-focus\fP.
+.br
+System Integrity Protection must be partially disabled.
+.RE
+.sp
 \fB\-\-create\fP  [\fI<DISPLAY_SEL>\fP]
 .RS 4
 Create a new space on the given display.
@@ -419,7 +432,9 @@ System Integrity Protection must be partially disabled.
 .RS 4
 Swap the selected space with the given space.
 .br
-The selected space and given space must both belong to the same display.
+If the selected space and given space belong to different displays, all the windows will swap.
+.br
+If the selected space and given space belong to the same display, the actual spaces will swap.
 .br
 System Integrity Protection must be partially disabled.
 .RE
