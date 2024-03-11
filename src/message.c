@@ -120,6 +120,9 @@ extern bool g_verbose;
 
 /* --------------------------------DOMAIN WINDOW-------------------------------- */
 #define COMMAND_WINDOW_FOCUS      "--focus"
+#define COMMAND_WINDOW_CLOSE      "--close"
+#define COMMAND_WINDOW_MINIMIZE   "--minimize"
+#define COMMAND_WINDOW_DEMINIMIZE "--deminimize"
 #define COMMAND_WINDOW_SWAP       "--swap"
 #define COMMAND_WINDOW_WARP       "--warp"
 #define COMMAND_WINDOW_STACK      "--stack"
@@ -128,9 +131,6 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_MOVE       "--move"
 #define COMMAND_WINDOW_RESIZE     "--resize"
 #define COMMAND_WINDOW_RATIO      "--ratio"
-#define COMMAND_WINDOW_MINIMIZE   "--minimize"
-#define COMMAND_WINDOW_DEMINIMIZE "--deminimize"
-#define COMMAND_WINDOW_CLOSE      "--close"
 #define COMMAND_WINDOW_SUB_LAYER  "--sub-layer"
 #define COMMAND_WINDOW_OPACITY    "--opacity"
 #define COMMAND_WINDOW_TOGGLE     "--toggle"
@@ -1832,7 +1832,11 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         command = selector.token;
     }
 
-    if (!acting_window && !token_equals(command, COMMAND_WINDOW_FOCUS)) {
+    if (!acting_window &&
+        !token_equals(command, COMMAND_WINDOW_FOCUS) &&
+        !token_equals(command, COMMAND_WINDOW_CLOSE) &&
+        !token_equals(command, COMMAND_WINDOW_MINIMIZE) &&
+        !token_equals(command, COMMAND_WINDOW_DEMINIMIZE)) {
         daemon_fail(rsp, "could not locate the window to act on!\n");
         return;
     }
@@ -1853,6 +1857,57 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 window_manager_focus_window_with_raise(&acting_window->application->psn, acting_window->id, acting_window->ref);
             } else {
                 daemon_fail(rsp, "could not locate the window to act on!\n");
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_CLOSE)) {
+            struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
+
+            if (token_is_valid(selector.token)) {
+                if (selector.did_parse && selector.window) {
+                    acting_window = selector.window;
+                } else {
+                    return;
+                }
+            }
+
+            if (acting_window) {
+                if (!window_manager_close_window(acting_window)) {
+                    daemon_fail(rsp, "could not close window with id '%d'.\n", acting_window->id);
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the window to act on!\n");
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_MINIMIZE)) {
+            struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
+
+            if (token_is_valid(selector.token)) {
+                if (selector.did_parse && selector.window) {
+                    acting_window = selector.window;
+                } else {
+                    return;
+                }
+            }
+
+            if (acting_window) {
+                enum window_op_error result = window_manager_minimize_window(acting_window);
+                if (result == WINDOW_OP_ERROR_CANT_MINIMIZE) {
+                    daemon_fail(rsp, "window with id '%d' does not support the minimize operation.\n", acting_window->id);
+                } else if (result == WINDOW_OP_ERROR_ALREADY_MINIMIZED) {
+                    daemon_fail(rsp, "window with id '%d' is already minimized.\n", acting_window->id);
+                } else if (result == WINDOW_OP_ERROR_MINIMIZE_FAILED) {
+                    daemon_fail(rsp, "could not minimize window with id '%d'.\n", acting_window->id);
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the window to act on!\n");
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_DEMINIMIZE)) {
+            struct selector selector = parse_window_selector(rsp, &message, acting_window, false);
+            if (selector.did_parse && selector.window) {
+                enum window_op_error result = window_manager_deminimize_window(selector.window);
+                if (result == WINDOW_OP_ERROR_NOT_MINIMIZED) {
+                    daemon_fail(rsp, "window with id '%d' is not minimized.\n", selector.window->id);
+                } else if (result == WINDOW_OP_ERROR_DEMINIMIZE_FAILED) {
+                    daemon_fail(rsp, "could not deminimize window with id '%d'.\n", selector.window->id);
+                }
             }
         } else if (token_equals(command, COMMAND_WINDOW_SWAP)) {
             struct selector selector = parse_window_selector(rsp, &message, acting_window, false);
@@ -1964,49 +2019,6 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 }
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_WINDOW_MINIMIZE)) {
-            struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
-
-            if (token_is_valid(selector.token)) {
-                if (selector.did_parse && selector.window) {
-                    acting_window = selector.window;
-                } else {
-                    return;
-                }
-            }
-
-            enum window_op_error result = window_manager_minimize_window(acting_window);
-            if (result == WINDOW_OP_ERROR_CANT_MINIMIZE) {
-                daemon_fail(rsp, "window with id '%d' does not support the minimize operation.\n", acting_window->id);
-            } else if (result == WINDOW_OP_ERROR_ALREADY_MINIMIZED) {
-                daemon_fail(rsp, "window with id '%d' is already minimized.\n", acting_window->id);
-            } else if (result == WINDOW_OP_ERROR_MINIMIZE_FAILED) {
-                daemon_fail(rsp, "could not minimize window with id '%d'.\n", acting_window->id);
-            }
-        } else if (token_equals(command, COMMAND_WINDOW_DEMINIMIZE)) {
-            struct selector selector = parse_window_selector(rsp, &message, acting_window, false);
-            if (selector.did_parse && selector.window) {
-                enum window_op_error result = window_manager_deminimize_window(selector.window);
-                if (result == WINDOW_OP_ERROR_NOT_MINIMIZED) {
-                    daemon_fail(rsp, "window with id '%d' is not minimized.\n", selector.window->id);
-                } else if (result == WINDOW_OP_ERROR_DEMINIMIZE_FAILED) {
-                    daemon_fail(rsp, "could not deminimize window with id '%d'.\n", selector.window->id);
-                }
-            }
-        } else if (token_equals(command, COMMAND_WINDOW_CLOSE)) {
-            struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
-
-            if (token_is_valid(selector.token)) {
-                if (selector.did_parse && selector.window) {
-                    acting_window = selector.window;
-                } else {
-                    return;
-                }
-            }
-
-            if (!window_manager_close_window(acting_window)) {
-                daemon_fail(rsp, "could not close window with id '%d'.\n", acting_window->id);
             }
         } else if (token_equals(command, COMMAND_WINDOW_SUB_LAYER)) {
             struct token value = get_token(&message);

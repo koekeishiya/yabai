@@ -33,6 +33,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Window insert feedback visual should use same layer as parent window [#2132](https://github.com/koekeishiya/yabai/issues/2132)
 - Updated scripting-addition mach loader/injection and payload to work for macOS Sonoma 14.4 [#2146](https://github.com/koekeishiya/yabai/issues/2146) [#2150](https://github.com/koekeishiya/yabai/issues/2150)
 - Some space and display signals (where possible) now pass additional env.vars. containing the user-facing index that can be used with yabai commands [#2152](https://github.com/koekeishiya/yabai/issues/2152)
+- Fixed some window commands that would incorrectly require a focused window to exist in order to operate on an arbitrary window through its id [#2153](https://github.com/koekeishiya/yabai/issues/2153)
 
 ### Removed
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)

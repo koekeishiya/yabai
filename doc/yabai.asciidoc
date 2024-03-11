@@ -341,6 +341,16 @@ COMMAND
 *--focus* ['<WINDOW_SEL>']::
     Focus the given window. If none specified, focus the selected window instead.
 
+*--close* ['<WINDOW_SEL>']::
+    Close the given window. If none specified, close the selected window instead. Only works on windows that provide a close button in its titlebar.
+
+*--minimize* ['<WINDOW_SEL>']::
+    Minimize the given window. If none specified, minimize the selected window instead. Only works on windows that provide a minimize button in its titlebar.
+
+*--deminimize* '<WINDOW_SEL>'::
+    Restore the given window if it is minimized. The window will only get focus if the owning application has focus. +
+    Note that you can also '--focus' a minimized window to restore it as the focused window.
+
 *--swap* '<WINDOW_SEL>'::
     Swap position of the selected window and the given window.
 
@@ -386,16 +396,6 @@ COMMAND
 
 *--space* '<SPACE_SEL>'::
     Send the selected window to the given space.
-
-*--minimize* ['<WINDOW_SEL>']::
-    Minimizes the given window. If none specified, minimize the selected window instead. Only works on windows that provide a minimize button in its titlebar.
-
-*--deminimize* '<WINDOW_SEL>'::
-    Restores the given window, if it is minimized. The window will only get focus if the owning application has focus. +
-    Note that you can also '--focus' a minimized window to restore it as the focused window.
-
-*--close* ['<WINDOW_SEL>']::
-    Closes the given window. If none specified, close the selected window instead. Only works on windows that provide a close button in its titlebar.
 
 Query
 ~~~~~~
