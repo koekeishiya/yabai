@@ -123,50 +123,6 @@ static int client_send_message(int argc, char **argv)
     return result;
 }
 
-static bool get_config_file(char *restrict filename, char *restrict buffer, int buffer_size)
-{
-    char *xdg_home = getenv("XDG_CONFIG_HOME");
-    if (xdg_home && *xdg_home) {
-        snprintf(buffer, buffer_size, "%s/yabai/%s", xdg_home, filename);
-        if (file_exists(buffer)) return true;
-    }
-
-    char *home = getenv("HOME");
-    if (!home) return false;
-
-    snprintf(buffer, buffer_size, "%s/.config/yabai/%s", home, filename);
-    if (file_exists(buffer)) return true;
-
-    snprintf(buffer, buffer_size, "%s/.%s", home, filename);
-    return file_exists(buffer);
-}
-
-static void exec_config_file(void)
-{
-    if (!*g_config_file && !get_config_file("yabairc", g_config_file, sizeof(g_config_file))) {
-        notify("configuration", "could not locate config file..");
-        return;
-    }
-
-    if (!file_exists(g_config_file)) {
-        notify("configuration", "file '%s' does not exist..", g_config_file);
-        return;
-    }
-
-    if (!ensure_executable_permission(g_config_file)) {
-        notify("configuration", "could not set the executable permission bit for '%s'", g_config_file);
-        return;
-    }
-
-    int pid = fork();
-    if (pid == 0) {
-        char *exec[] = { "/usr/bin/env", "sh", "-c", g_config_file, NULL};
-        exit(execvp(exec[0], exec));
-    } else if (pid == -1) {
-        notify("configuration", "failed to execute file '%s'", g_config_file);
-    }
-}
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 static inline bool configure_settings_and_acquire_lock(void)
@@ -220,25 +176,6 @@ static inline bool configure_settings_and_acquire_lock(void)
     return fcntl(handle, F_SETLK, &lockfd) != -1;
 }
 #pragma clang diagnostic pop
-
-__attribute__((no_sanitize("undefined")))
-static CONNECTION_CALLBACK(connection_handler)
-{
-    //
-    // NOTE(koekeishiya): Disable undefined sanitizer for this particular function.
-    // It will sometimes report load of misaligned address when reading from the
-    // data buffer, but there is nothing for us to do here because said memory is
-    // allocated and managed by macOS.
-    //
-
-    if (type == 1204) {
-        event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0);
-    } else if (type == 1327) {
-        event_loop_post(&g_event_loop, SLS_SPACE_CREATED, (void *) (intptr_t) (* (uint64_t *) data), 0);
-    } else if (type == 1328) {
-        event_loop_post(&g_event_loop, SLS_SPACE_DESTROYED, (void *) (intptr_t) (* (uint64_t *) data), 0);
-    }
-}
 
 static void parse_arguments(int argc, char **argv)
 {
@@ -388,7 +325,7 @@ int main(int argc, char **argv)
         error("yabai: could not start message loop! abort..\n");
     }
 
-    exec_config_file();
+    exec_config_file(g_config_file, sizeof(g_config_file));
 
     for (;;) {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

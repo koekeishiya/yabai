@@ -394,6 +394,17 @@ static inline char *string_copy(char *s)
     return result;
 }
 
+static inline bool directory_exists(char *filename)
+{
+    struct stat buffer;
+
+    if (stat(filename, &buffer) != 0) {
+        return false;
+    }
+
+    return S_ISDIR(buffer.st_mode);
+}
+
 static inline bool file_exists(char *filename)
 {
     struct stat buffer;
@@ -409,31 +420,45 @@ static inline bool file_exists(char *filename)
     return true;
 }
 
-static inline bool directory_exists(char *filename)
+static bool get_config_file(char *restrict filename, char *restrict buffer, int buffer_size)
 {
-    struct stat buffer;
-
-    if (stat(filename, &buffer) != 0) {
-        return false;
+    char *xdg_home = getenv("XDG_CONFIG_HOME");
+    if (xdg_home && *xdg_home) {
+        snprintf(buffer, buffer_size, "%s/yabai/%s", xdg_home, filename);
+        if (file_exists(buffer)) return true;
     }
 
-    return S_ISDIR(buffer.st_mode);
+    char *home = getenv("HOME");
+    if (!home) return false;
+
+    snprintf(buffer, buffer_size, "%s/.config/yabai/%s", home, filename);
+    if (file_exists(buffer)) return true;
+
+    snprintf(buffer, buffer_size, "%s/.%s", home, filename);
+    return file_exists(buffer);
 }
 
-static inline bool ensure_executable_permission(char *filename)
+static void exec_config_file(char *config_file, int config_file_size)
 {
-    struct stat buffer;
-
-    if (stat(filename, &buffer) != 0) {
-        return false;
+    if (config_file[0] == '\0' && !get_config_file("yabairc", config_file, config_file_size)) {
+        warn("yabai: could not locate config file..\n");
+        notify("configuration", "could not locate config file..");
+        return;
     }
 
-    bool is_executable = buffer.st_mode & S_IXUSR;
-    if (!is_executable && chmod(filename, S_IXUSR | buffer.st_mode) != 0) {
-        return false;
+    if (!file_exists(config_file)) {
+        warn("yabai: configuration file '%s' does not exist..\n", config_file);
+        notify("configuration", "file '%s' does not exist..", config_file);
+        return;
     }
 
-    return true;
+    int pid = fork();
+    if (pid == 0) {
+        char *exec[] = { "/usr/bin/env", "sh", config_file, NULL};
+        exit(execvp(exec[0], exec));
+    } else if (pid == -1) {
+        notify("configuration", "failed to execute file '%s'", config_file);
+    }
 }
 
 static inline bool ax_privilege(void)
