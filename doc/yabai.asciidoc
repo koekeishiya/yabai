@@ -342,10 +342,12 @@ COMMAND
     Focus the given window. If none specified, focus the selected window instead.
 
 *--close* ['<WINDOW_SEL>']::
-    Close the given window. If none specified, close the selected window instead. Only works on windows that provide a close button in its titlebar.
+    Close the given window. If none specified, close the selected window instead. +
+    Only works on windows that provide a close button in its titlebar.
 
 *--minimize* ['<WINDOW_SEL>']::
-    Minimize the given window. If none specified, minimize the selected window instead. Only works on windows that provide a minimize button in its titlebar.
+    Minimize the given window. If none specified, minimize the selected window instead. +
+    Only works on windows that provide a minimize button in its titlebar.
 
 *--deminimize* '<WINDOW_SEL>'::
     Restore the given window if it is minimized. The window will only get focus if the owning application has focus. +
