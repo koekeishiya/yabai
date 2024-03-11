@@ -361,6 +361,12 @@ COMMAND
     The window will only get focus if the owning application has focus. +
     Note that you can also '--focus' a minimized window to restore it as the focused window.
 
+*--display* '<DISPLAY_SEL>'::
+    Send the selected window to the given display.
+
+*--space* '<SPACE_SEL>'::
+    Send the selected window to the given space.
+
 *--swap* '<WINDOW_SEL>'::
     Swap position of the selected window and the given window.
 
@@ -405,12 +411,6 @@ COMMAND
     The window will no longer be eligible for automatic change in opacity upon focus change. +
     Specify the value '0.0' to reset back to full opacity and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
-
-*--display* '<DISPLAY_SEL>'::
-    Send the selected window to the given display.
-
-*--space* '<SPACE_SEL>'::
-    Send the selected window to the given space.
 
 Query
 ~~~~~~

@@ -123,6 +123,8 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_CLOSE      "--close"
 #define COMMAND_WINDOW_MINIMIZE   "--minimize"
 #define COMMAND_WINDOW_DEMINIMIZE "--deminimize"
+#define COMMAND_WINDOW_DISPLAY    "--display"
+#define COMMAND_WINDOW_SPACE      "--space"
 #define COMMAND_WINDOW_SWAP       "--swap"
 #define COMMAND_WINDOW_WARP       "--warp"
 #define COMMAND_WINDOW_STACK      "--stack"
@@ -134,8 +136,6 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_SUB_LAYER  "--sub-layer"
 #define COMMAND_WINDOW_OPACITY    "--opacity"
 #define COMMAND_WINDOW_TOGGLE     "--toggle"
-#define COMMAND_WINDOW_DISPLAY    "--display"
-#define COMMAND_WINDOW_SPACE      "--space"
 
 #define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
 #define ARGUMENT_WINDOW_SEL_SMALLEST  "smallest"
@@ -1909,6 +1909,25 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                     daemon_fail(rsp, "could not deminimize window with id '%d'.\n", selector.window->id);
                 }
             }
+        } else if (token_equals(command, COMMAND_WINDOW_DISPLAY)) {
+            struct selector selector = parse_display_selector(rsp, &message, display_manager_active_display_id(), false);
+            if (selector.did_parse && selector.did) {
+                uint64_t sid = display_space_id(selector.did);
+                if (space_is_fullscreen(sid)) {
+                    daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
+                } else {
+                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, sid, false);
+                }
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_SPACE)) {
+            struct selector selector = parse_space_selector(rsp, &message, space_manager_active_space(), false);
+            if (selector.did_parse && selector.sid) {
+                if (space_is_fullscreen(selector.sid)) {
+                    daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
+                } else {
+                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid, false);
+                }
+            }
         } else if (token_equals(command, COMMAND_WINDOW_SWAP)) {
             struct selector selector = parse_window_selector(rsp, &message, acting_window, false);
             if (selector.did_parse && selector.window) {
@@ -2020,6 +2039,29 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
+        } else if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
+            struct token value = get_token(&message);
+            if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
+                window_manager_make_window_floating(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_FLOAT), false);
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
+                window_manager_make_window_sticky(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_STICKY));
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SHADOW)) {
+                window_manager_toggle_window_shadow(&g_space_manager, &g_window_manager, acting_window);
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SPLIT)) {
+                space_manager_toggle_window_split(&g_space_manager, acting_window);
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {
+                window_manager_toggle_window_parent(&g_space_manager, &g_window_manager, acting_window);
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
+                window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_NATIVE)) {
+                window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_EXPOSE)) {
+                window_manager_toggle_window_expose(&g_window_manager, acting_window);
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PIP)) {
+                window_manager_toggle_window_pip(&g_space_manager, &g_window_manager, acting_window);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
         } else if (token_equals(command, COMMAND_WINDOW_SUB_LAYER)) {
             struct token value = get_token(&message);
             if (token_equals(value, ARGUMENT_WINDOW_LAYER_BELOW)) {
@@ -2051,48 +2093,6 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 }
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
-            struct token value = get_token(&message);
-            if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
-                window_manager_make_window_floating(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_FLOAT), false);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
-                window_manager_make_window_sticky(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_STICKY));
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SHADOW)) {
-                window_manager_toggle_window_shadow(&g_space_manager, &g_window_manager, acting_window);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SPLIT)) {
-                space_manager_toggle_window_split(&g_space_manager, acting_window);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {
-                window_manager_toggle_window_parent(&g_space_manager, &g_window_manager, acting_window);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
-                window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, acting_window);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_NATIVE)) {
-                window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, acting_window);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_EXPOSE)) {
-                window_manager_toggle_window_expose(&g_window_manager, acting_window);
-            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PIP)) {
-                window_manager_toggle_window_pip(&g_space_manager, &g_window_manager, acting_window);
-            } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
-            }
-        } else if (token_equals(command, COMMAND_WINDOW_DISPLAY)) {
-            struct selector selector = parse_display_selector(rsp, &message, display_manager_active_display_id(), false);
-            if (selector.did_parse && selector.did) {
-                uint64_t sid = display_space_id(selector.did);
-                if (space_is_fullscreen(sid)) {
-                    daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
-                } else {
-                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, sid, false);
-                }
-            }
-        } else if (token_equals(command, COMMAND_WINDOW_SPACE)) {
-            struct selector selector = parse_space_selector(rsp, &message, space_manager_active_space(), false);
-            if (selector.did_parse && selector.sid) {
-                if (space_is_fullscreen(selector.sid)) {
-                    daemon_fail(rsp, "can not move window to a macOS fullscreen space!\n");
-                } else {
-                    window_manager_send_window_to_space(&g_space_manager, &g_window_manager, acting_window, selector.sid, false);
-                }
             }
         } else {
             daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
