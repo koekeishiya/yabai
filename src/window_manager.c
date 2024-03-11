@@ -2041,22 +2041,40 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     uint32_t did = window_display_id(window->id);
     if (!did) return WINDOW_OP_ERROR_INVALID_SRC_VIEW;
 
-    if (x >= c)    x = c - 1;
-    if (y >= r)    y = r - 1;
-    if (w <= 0)    w = 1;
-    if (h <= 0)    h = 1;
-    if (w > c - x) w = c - x;
-    if (h > r - y) h = r - y;
-
-    uint64_t sid = display_space_id(did);
-    struct view *dview = space_manager_find_view(sm, sid);
+    if (x >=   c) x = c - 1;
+    if (y >=   r) y = r - 1;
+    if (w <=   0) w = 1;
+    if (h <=   0) h = 1;
+    if (w >  c-x) w = c - x;
+    if (h >  r-y) h = r - y;
 
     CGRect bounds = display_bounds_constrained(did);
-    if (dview && dview->enable_padding) {
-        bounds.origin.x    += dview->left_padding;
-        bounds.size.width  -= (dview->left_padding + dview->right_padding);
-        bounds.origin.y    += dview->top_padding;
-        bounds.size.height -= (dview->top_padding + dview->bottom_padding);
+    struct view *dview = space_manager_find_view(sm, display_space_id(did));
+
+    if (dview) {
+        if (dview->enable_padding) {
+            bounds.origin.x    += dview->left_padding;
+            bounds.size.width  -= (dview->left_padding + dview->right_padding);
+            bounds.origin.y    += dview->top_padding;
+            bounds.size.height -= (dview->top_padding + dview->bottom_padding);
+        }
+
+        if (dview->enable_gap) {
+            int gap = window_node_get_gap(dview);
+
+            if (x > 0) {
+                bounds.origin.x   += gap;
+                bounds.size.width -= gap;
+            }
+
+            if (y > 0) {
+                bounds.origin.y    += gap;
+                bounds.size.height -= gap;
+            }
+
+            if (c > x+w) bounds.size.width  -= gap;
+            if (r > y+h) bounds.size.height -= gap;
+        }
     }
 
     float cw = bounds.size.width / c;
