@@ -83,7 +83,6 @@ uint32_t display_manager_point_display_id(CGPoint point)
 static CFComparisonResult display_manager_coordinate_comparator(CFTypeRef a, CFTypeRef b, void *context)
 {
     enum display_arrangement_order axis = (enum display_arrangement_order)(uintptr_t) context;
-    if (axis == DISPLAY_ARRANGEMENT_ORDER_DEFAULT) goto out;
 
     uint32_t a_did = display_id(a);
     uint32_t b_did = display_id(b);
@@ -103,7 +102,6 @@ static CFComparisonResult display_manager_coordinate_comparator(CFTypeRef a, CFT
     if (a_coord < b_coord) return kCFCompareLessThan;
     if (a_coord > b_coord) return kCFCompareGreaterThan;
 
-out:
     return kCFCompareEqualTo;
 }
 
