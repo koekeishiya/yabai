@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Added new command `config window_animation_easing ..` to select easing function [#2131](https://github.com/koekeishiya/yabai/issues/2131)
 - Added new command `space --equalize .. ` to reset split ratios of all nodes within a space to default value [#2133](https://github.com/koekeishiya/yabai/issues/2133)
 - Added new command `space --switch ..` to focus a space (substitute with current focus) regardless of its display [#549](https://github.com/koekeishiya/yabai/issues/549)
-- Added new command `config display_arrangement_order ..` to change yabai interprets arrangement indexes used to select displays [#550](https://github.com/koekeishiya/yabai/issues/550)
+- Added new command `config display_arrangement_order ..` to change how yabai interprets arrangement indices used to select displays [#550](https://github.com/koekeishiya/yabai/issues/550)
 
 ### Changed
 - Preserve relative space ordering when moving spaces to other displays [#2114](https://github.com/koekeishiya/yabai/issues/2114)
