@@ -49,17 +49,21 @@ void display_serialize(FILE *rsp, uint32_t did)
         }
     }
 
+    struct display_label *display_label = display_manager_get_label_for_display(&g_display_manager, did);
+
     fprintf(rsp,
             "{\n"
             "\t\"id\":%d,\n"
             "\t\"uuid\":\"%s\",\n"
             "\t\"index\":%d,\n"
+            "\t\"label\":\"%s\",\n"
             "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
             "\t\"spaces\":[%s]\n"
             "}",
             did,
             uuid ? uuid : "<unknown>",
             display_manager_display_id_arrangement(did),
+            display_label ? display_label->label : "",
             frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
             buffer);
 }

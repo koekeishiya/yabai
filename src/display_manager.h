@@ -33,6 +33,12 @@ static const char *external_bar_mode_str[] =
     "all"
 };
 
+struct display_label
+{
+    uint32_t did;
+    char *label;
+};
+
 struct display_manager
 {
     uint32_t current_display_id;
@@ -43,8 +49,14 @@ struct display_manager
 
     enum display_arrangement_order order;
     enum external_bar_mode mode;
+
+    struct display_label *labels;
 };
 
+struct display_label *display_manager_get_label_for_display(struct display_manager *dm, uint32_t did);
+struct display_label *display_manager_get_display_for_label(struct display_manager *dm, char *label);
+bool display_manager_remove_label_for_display(struct display_manager *dm, uint32_t did);
+void display_manager_set_label_for_display(struct display_manager *dm, uint32_t did, char *label);
 bool display_manager_query_displays(FILE *rsp);
 CFStringRef display_manager_main_display_uuid(void);
 uint32_t display_manager_main_display_id(void);

@@ -101,7 +101,7 @@ STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent
 
 WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | sibling | first_nephew | second_nephew | uncle | first_cousin | second_cousin | STACK_SEL | DIR_SEL | <window id>
 
-DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1-based)>
+DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1-based)> | LABEL
 
 SPACE_SEL   := prev | next | first | last | recent | mouse | <mission-control index (1-based)> | LABEL
 
@@ -267,6 +267,10 @@ COMMAND
     The given space will become visible on the selected display, without changing focus. +
     The given space must belong to the selected display. +
     System Integrity Protection must be partially disabled.
+
+*--label* ['<LABEL>']::
+    Label the selected display, allowing that label to be used as an alias in commands that take a `DISPLAY_SEL` parameter. +
+    If the command is called without an argument it will try to remove a previously assigned label.
 
 Space
 ~~~~~
@@ -468,6 +472,7 @@ DISPLAY
     "id": number,
     "uuid": string,
     "index": number,
+    "label": string,
     "frame": object {
         "x": number,
         "y": number,

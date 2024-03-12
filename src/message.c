@@ -87,6 +87,7 @@ extern bool g_verbose;
 /* --------------------------------DOMAIN DISPLAY------------------------------- */
 #define COMMAND_DISPLAY_FOCUS "--focus"
 #define COMMAND_DISPLAY_SPACE "--space"
+#define COMMAND_DISPLAY_LABEL "--label"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN SPACE--------------------------------- */
@@ -465,7 +466,22 @@ struct selector
 
 enum label_type
 {
+    LABEL_DISPLAY,
     LABEL_SPACE,
+};
+
+static char *reserved_display_identifiers[] =
+{
+    ARGUMENT_COMMON_SEL_NORTH,
+    ARGUMENT_COMMON_SEL_EAST,
+    ARGUMENT_COMMON_SEL_SOUTH,
+    ARGUMENT_COMMON_SEL_WEST,
+    ARGUMENT_COMMON_SEL_PREV,
+    ARGUMENT_COMMON_SEL_NEXT,
+    ARGUMENT_COMMON_SEL_FIRST,
+    ARGUMENT_COMMON_SEL_LAST,
+    ARGUMENT_COMMON_SEL_RECENT,
+    ARGUMENT_COMMON_SEL_MOUSE
 };
 
 static char *reserved_space_identifiers[] =
@@ -474,7 +490,8 @@ static char *reserved_space_identifiers[] =
     ARGUMENT_COMMON_SEL_NEXT,
     ARGUMENT_COMMON_SEL_FIRST,
     ARGUMENT_COMMON_SEL_LAST,
-    ARGUMENT_COMMON_SEL_RECENT
+    ARGUMENT_COMMON_SEL_RECENT,
+    ARGUMENT_COMMON_SEL_MOUSE
 };
 
 static bool parse_label(FILE *rsp, char **message, enum label_type type, char **label)
@@ -494,6 +511,14 @@ static bool parse_label(FILE *rsp, char **message, enum label_type type, char **
 
     switch (type) {
     default: break;
+    case LABEL_DISPLAY: {
+        for (int i = 0; i < array_count(reserved_display_identifiers); ++i) {
+            if (token_equals(token, reserved_display_identifiers[i])) {
+                daemon_fail(rsp, "'%.*s' is a reserved keyword and cannot be used as a label.\n", token.length, token.text);
+                return false;
+            }
+        }
+    } break;
     case LABEL_SPACE: {
         for (int i = 0; i < array_count(reserved_space_identifiers); ++i) {
             if (token_equals(token, reserved_space_identifiers[i])) {
@@ -654,8 +679,14 @@ static struct selector parse_display_selector(FILE *rsp, char **message, uint32_
                 daemon_fail(rsp, "could not locate display containing cursor.\n");
             }
         } else {
-            result.did_parse = false;
-            daemon_fail(rsp, "value '%.*s' is not a valid option for DISPLAY_SEL\n", result.token.length, result.token.text);
+            struct display_label *display_label = display_manager_get_display_for_label(&g_display_manager, value.string_value);
+            if (display_label) {
+                result.did_parse = true;
+                result.did = display_label->did;
+            } else {
+                result.did_parse = false;
+                daemon_fail(rsp, "value '%.*s' is not a valid option for DISPLAY_SEL\n", result.token.length, result.token.text);
+            }
         }
     } else if (value.type == TOKEN_TYPE_INVALID) {
         result.did_parse = false;
@@ -1550,6 +1581,17 @@ static void handle_domain_display(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "cannot focus space because mission-control is active.\n");
             } else if (result == SPACE_OP_ERROR_SCRIPTING_ADDITION) {
                 daemon_fail(rsp, "cannot focus space due to an error with the scripting-addition.\n");
+            }
+        }
+    } else if (token_equals(command, COMMAND_DISPLAY_LABEL)) {
+        char *label;
+        if (parse_label(rsp, &message, LABEL_DISPLAY, &label)) {
+            if (label) {
+                display_manager_set_label_for_display(&g_display_manager, acting_did, label);
+            } else {
+                if (!display_manager_remove_label_for_display(&g_display_manager, acting_did)) {
+                    daemon_fail(rsp, "the selected display was not associated with a label!\n");
+                }
             }
         }
     } else {

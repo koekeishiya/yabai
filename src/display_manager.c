@@ -20,6 +20,63 @@ bool display_manager_query_displays(FILE *rsp)
     return true;
 }
 
+struct display_label *display_manager_get_label_for_display(struct display_manager *dm, uint32_t did)
+{
+    for (int i = 0; i < buf_len(dm->labels); ++i) {
+        struct display_label *display_label = &dm->labels[i];
+        if (display_label->did == did) {
+            return display_label;
+        }
+    }
+
+    return NULL;
+}
+
+struct display_label *display_manager_get_display_for_label(struct display_manager *dm, char *label)
+{
+    for (int i = 0; i < buf_len(dm->labels); ++i) {
+        struct display_label *display_label = &dm->labels[i];
+        if (string_equals(label, display_label->label)) {
+            return display_label;
+        }
+    }
+
+    return NULL;
+}
+
+bool display_manager_remove_label_for_display(struct display_manager *dm, uint32_t did)
+{
+    for (int i = 0; i < buf_len(dm->labels); ++i) {
+        struct display_label *display_label = &dm->labels[i];
+        if (display_label->did == did) {
+            free(display_label->label);
+            buf_del(dm->labels, i);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void display_manager_set_label_for_display(struct display_manager *dm, uint32_t did, char *label)
+{
+    display_manager_remove_label_for_display(dm, did);
+
+    for (int i = 0; i < buf_len(dm->labels); ++i) {
+        struct display_label *display_label = &dm->labels[i];
+        if (string_equals(display_label->label, label)) {
+            free(display_label->label);
+            buf_del(dm->labels, i);
+            break;
+        }
+    }
+
+    buf_push(dm->labels, ((struct display_label) {
+        .did   = did,
+        .label = label
+    }));
+}
+
 CFStringRef display_manager_main_display_uuid(void)
 {
     uint32_t did = display_manager_main_display_id();

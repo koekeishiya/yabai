@@ -138,7 +138,7 @@ STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent
 
 WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | sibling | first_nephew | second_nephew | uncle | first_cousin | second_cousin | STACK_SEL | DIR_SEL | <window id>
 
-DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1\-based)>
+DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1\-based)> | LABEL
 
 SPACE_SEL   := prev | next | first | last | recent | mouse | <mission\-control index (1\-based)> | LABEL
 
@@ -385,6 +385,13 @@ The given space will become visible on the selected display, without changing fo
 The given space must belong to the selected display.
 .br
 System Integrity Protection must be partially disabled.
+.RE
+.sp
+\fB\-\-label\fP [\fI<LABEL>\fP]
+.RS 4
+Label the selected display, allowing that label to be used as an alias in commands that take a \f(CRDISPLAY_SEL\fP parameter.
+.br
+If the command is called without an argument it will try to remove a previously assigned label.
 .RE
 .SS "Space"
 .SS "General Syntax"
@@ -682,6 +689,7 @@ DISPLAY
     "id": number,
     "uuid": string,
     "index": number,
+    "label": string,
     "frame": object {
         "x": number,
         "y": number,

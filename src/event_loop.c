@@ -862,9 +862,10 @@ static EVENT_HANDLER(DISPLAY_ADDED)
 
 static EVENT_HANDLER(DISPLAY_REMOVED)
 {
-    uint32_t did = display_manager_main_display_id();
+    uint32_t did = (uint32_t)(intptr_t) context;
     debug("%s: %d\n", __FUNCTION__, did);
-    window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, did);
+    display_manager_remove_label_for_display(&g_display_manager, did);
+    window_manager_handle_display_add_and_remove(&g_space_manager, &g_window_manager, display_manager_main_display_id());
     event_signal_push(SIGNAL_DISPLAY_REMOVED, context);
 }
 
