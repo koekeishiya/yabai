@@ -875,7 +875,7 @@ void view_serialize(FILE *rsp, struct view *view)
             space_manager_mission_control_index(view->sid),
             space_label ? space_label->label : "",
             view_type_str[view->layout],
-            display_arrangement(space_display_id(view->sid)),
+            display_manager_display_id_arrangement(space_display_id(view->sid)),
             buffer,
             first_leaf ? first_leaf->window_order[0] : 0,
             last_leaf ? last_leaf->window_order[0] : 0,

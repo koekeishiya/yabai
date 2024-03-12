@@ -32,7 +32,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->title ? rule->title : "",
             rule->role ? rule->role : "",
             rule->subrole ? rule->subrole : "",
-            display_arrangement(rule->effects.did),
+            display_manager_display_id_arrangement(rule->effects.did),
             space_manager_mission_control_index(rule->effects.sid),
             json_bool(rule_effects_check_flag(&rule->effects, RULE_FOLLOW_SPACE)),
             rule->effects.opacity,

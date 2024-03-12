@@ -23,6 +23,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_DEBUG_OUTPUT          "debug_output"
 #define COMMAND_CONFIG_MFF                   "mouse_follows_focus"
 #define COMMAND_CONFIG_FFM                   "focus_follows_mouse"
+#define COMMAND_CONFIG_DISPLAY_ORDER         "display_arrangement_order"
 #define COMMAND_CONFIG_WINDOW_ORIGIN         "window_origin_display"
 #define COMMAND_CONFIG_WINDOW_PLACEMENT      "window_placement"
 #define COMMAND_CONFIG_WINDOW_ZOOM_PERSIST   "window_zoom_persist"
@@ -54,6 +55,9 @@ extern bool g_verbose;
 
 #define ARGUMENT_CONFIG_FFM_AUTOFOCUS         "autofocus"
 #define ARGUMENT_CONFIG_FFM_AUTORAISE         "autoraise"
+#define ARGUMENT_CONFIG_DISPLAY_ORDER_DEFAULT "default"
+#define ARGUMENT_CONFIG_DISPLAY_ORDER_X       "horizontal"
+#define ARGUMENT_CONFIG_DISPLAY_ORDER_Y       "vertical"
 #define ARGUMENT_CONFIG_WINDOW_ORIGIN_DEFAULT "default"
 #define ARGUMENT_CONFIG_WINDOW_ORIGIN_FOCUSED "focused"
 #define ARGUMENT_CONFIG_WINDOW_ORIGIN_CURSOR  "cursor"
@@ -1076,6 +1080,19 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 window_manager_set_focus_follows_mouse(&g_window_manager, FFM_AUTOFOCUS);
             } else if (token_equals(value, ARGUMENT_CONFIG_FFM_AUTORAISE)) {
                 window_manager_set_focus_follows_mouse(&g_window_manager, FFM_AUTORAISE);
+            } else {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_DISPLAY_ORDER)) {
+            struct token value = get_token(&message);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%s\n", display_arrangement_order_str[g_display_manager.order]);
+            } else if (token_equals(value, ARGUMENT_CONFIG_DISPLAY_ORDER_DEFAULT)) {
+                g_display_manager.order = DISPLAY_ARRANGEMENT_ORDER_DEFAULT;
+            } else if (token_equals(value, ARGUMENT_CONFIG_DISPLAY_ORDER_X)) {
+                g_display_manager.order = DISPLAY_ARRANGEMENT_ORDER_X;
+            } else if (token_equals(value, ARGUMENT_CONFIG_DISPLAY_ORDER_Y)) {
+                g_display_manager.order = DISPLAY_ARRANGEMENT_ORDER_Y;
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }

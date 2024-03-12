@@ -59,7 +59,7 @@ void display_serialize(FILE *rsp, uint32_t did)
             "}",
             did,
             uuid ? uuid : "<unknown>",
-            display_arrangement(did),
+            display_manager_display_id_arrangement(did),
             frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
             buffer);
 }
@@ -213,29 +213,4 @@ err:
     CFRelease(uuid);
 out:
     return space_list;
-}
-
-int display_arrangement(uint32_t did)
-{
-    int result = 0;
-
-    CFStringRef uuid = display_uuid(did);
-    if (!uuid) goto out;
-
-    CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
-    if (!displays) goto err;
-
-    int displays_count = CFArrayGetCount(displays);
-    for (int i = 0; i < displays_count; ++i) {
-        if (CFEqual(CFArrayGetValueAtIndex(displays, i), uuid)) {
-            result = i + 1;
-            break;
-        }
-    }
-
-    CFRelease(displays);
-err:
-    CFRelease(uuid);
-out:
-    return result;
 }

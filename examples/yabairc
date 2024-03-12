@@ -17,6 +17,7 @@ yabai -m config                                 \
     menubar_opacity              1.0            \
     mouse_follows_focus          off            \
     focus_follows_mouse          off            \
+    display_arrangement_order    default        \
     window_origin_display        default        \
     window_placement             second_child   \
     window_zoom_persist          on             \

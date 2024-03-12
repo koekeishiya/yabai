@@ -279,7 +279,7 @@ void event_signal_push(enum signal_type type, void *context)
     case SIGNAL_DISPLAY_MOVED:
     case SIGNAL_DISPLAY_RESIZED: {
         uint32_t did = (uint32_t)(uintptr_t) context;
-        int index    = display_arrangement(did);
+        int index    = display_manager_display_id_arrangement(did);
 
         es->arg_name[0]  = ts_alloc_unaligned(arg_size);
         es->arg_value[0] = ts_alloc_unaligned(arg_size);
@@ -304,8 +304,8 @@ void event_signal_push(enum signal_type type, void *context)
         uint32_t did        = g_display_manager.current_display_id;
         uint32_t recent_did = g_display_manager.last_display_id;
 
-        int index        = display_arrangement(did);
-        int recent_index = display_arrangement(recent_did);
+        int index        = display_manager_display_id_arrangement(did);
+        int recent_index = display_manager_display_id_arrangement(recent_did);
 
         es->arg_name[0]  = ts_alloc_unaligned(arg_size);
         es->arg_value[0] = ts_alloc_unaligned(arg_size);

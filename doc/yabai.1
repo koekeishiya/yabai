@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-03-11
+.\"      Date: 2024-03-12
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-03-11" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-03-12" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -200,6 +200,17 @@ When focusing a window, put the mouse at its center.
 \fBfocus_follows_mouse\fP [\fIautofocus|autoraise|off\fP]
 .RS 4
 Automatically focus the window under the mouse.
+.RE
+.sp
+\fBdisplay_arrangement_order\fP [\fIdefault|vertical|horizontal\fP]
+.RS 4
+Specify how displays are ordered (determined by center point).
+.br
+\fIdefault\fP: Native macOS ordering.
+.br
+\fIvertical\fP: Order by y\-coordinate (followed by x\-coordinate when equal).
+.br
+\fIhorizontal\fP: Order by x\-coordinate (followed by y\-coordinate when equal).
 .RE
 .sp
 \fBwindow_origin_display\fP [\fIdefault|focused|cursor\fP]

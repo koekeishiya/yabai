@@ -5,6 +5,20 @@
 #define DOCK_ORIENTATION_LEFT   3
 #define DOCK_ORIENTATION_RIGHT  4
 
+enum display_arrangement_order
+{
+    DISPLAY_ARRANGEMENT_ORDER_DEFAULT,
+    DISPLAY_ARRANGEMENT_ORDER_X,
+    DISPLAY_ARRANGEMENT_ORDER_Y
+};
+
+static const char *display_arrangement_order_str[] =
+{
+    "default",
+    "horizontal",
+    "vertical"
+};
+
 enum external_bar_mode
 {
     EXTERNAL_BAR_OFF,
@@ -26,6 +40,8 @@ struct display_manager
 
     int top_padding;
     int bottom_padding;
+
+    enum display_arrangement_order order;
     enum external_bar_mode mode;
 };
 
@@ -39,6 +55,7 @@ uint32_t display_manager_dock_display_id(void);
 CFStringRef display_manager_point_display_uuid(CGPoint point);
 uint32_t display_manager_point_display_id(CGPoint point);
 uint32_t display_manager_cursor_display_id(void);
+int display_manager_display_id_arrangement(uint32_t did);
 CFStringRef display_manager_arrangement_display_uuid(int arrangement);
 uint32_t display_manager_arrangement_display_id(int arrangement);
 uint32_t display_manager_prev_display_id(uint32_t did);

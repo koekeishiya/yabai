@@ -161,7 +161,7 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
     bool is_sticky = window_space_count(wid) > 1;
 
     int space = space_manager_mission_control_index(sid);
-    int display = display_arrangement(space_display_id(sid));
+    int display = display_manager_display_id_arrangement(space_display_id(sid));
     int level = window_level(wid);
     int sub_level = window_sub_level(wid);
     const char *layer = window_layer(level);
@@ -249,7 +249,7 @@ void window_serialize(FILE *rsp, struct window *window)
     char *escaped_title = ts_string_escape(title);
     uint64_t sid = window_space(window->id);
     int space = space_manager_mission_control_index(sid);
-    int display = display_arrangement(space_display_id(sid));
+    int display = display_manager_display_id_arrangement(space_display_id(sid));
     int level = window_level(window->id);
     int sub_level = window_sub_level(window->id);
     const char *layer = window_layer(level);

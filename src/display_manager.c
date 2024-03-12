@@ -80,6 +80,67 @@ uint32_t display_manager_point_display_id(CGPoint point)
     return result;
 }
 
+static CFComparisonResult display_manager_coordinate_comparator(CFTypeRef a, CFTypeRef b, void *context)
+{
+    enum display_arrangement_order axis = (enum display_arrangement_order)(uintptr_t) context;
+    if (axis == DISPLAY_ARRANGEMENT_ORDER_DEFAULT) goto out;
+
+    uint32_t a_did = display_id(a);
+    uint32_t b_did = display_id(b);
+
+    CGPoint a_center = display_center(a_did);
+    CGPoint b_center = display_center(b_did);
+
+    float a_coord = axis == DISPLAY_ARRANGEMENT_ORDER_Y ? a_center.y : a_center.x;
+    float b_coord = axis == DISPLAY_ARRANGEMENT_ORDER_Y ? b_center.y : b_center.x;
+
+    if (a_coord < b_coord) return kCFCompareLessThan;
+    if (a_coord > b_coord) return kCFCompareGreaterThan;
+
+    a_coord = axis == DISPLAY_ARRANGEMENT_ORDER_Y ? a_center.x : a_center.y;
+    b_coord = axis == DISPLAY_ARRANGEMENT_ORDER_Y ? b_center.x : b_center.y;
+
+    if (a_coord < b_coord) return kCFCompareLessThan;
+    if (a_coord > b_coord) return kCFCompareGreaterThan;
+
+out:
+    return kCFCompareEqualTo;
+}
+
+int display_manager_display_id_arrangement(uint32_t did)
+{
+    int result = 0;
+
+    CFStringRef uuid = display_uuid(did);
+    if (!uuid) goto out;
+
+    CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
+    if (!displays) goto err;
+
+    int count = CFArrayGetCount(displays);
+    if (!count) goto empty;
+
+    if (g_display_manager.order != DISPLAY_ARRANGEMENT_ORDER_DEFAULT) {
+        CFMutableArrayRef mut_displays = CFArrayCreateMutableCopy(NULL, count, displays);
+        CFArraySortValues(mut_displays, CFRangeMake(0, count), &display_manager_coordinate_comparator, (void *)(uintptr_t) g_display_manager.order);
+        CFRelease(displays); displays = mut_displays;
+    }
+
+    for (int i = 0; i < count; ++i) {
+        if (CFEqual(CFArrayGetValueAtIndex(displays, i), uuid)) {
+            result = i + 1;
+            break;
+        }
+    }
+
+empty:
+    CFRelease(displays);
+err:
+    CFRelease(uuid);
+out:
+    return result;
+}
+
 CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 {
     CFStringRef result = NULL;
@@ -89,6 +150,12 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement)
     int index = arrangement - 1;
 
     if (in_range_ie(index, 0, count)) {
+        if (g_display_manager.order != DISPLAY_ARRANGEMENT_ORDER_DEFAULT) {
+            CFMutableArrayRef mut_displays = CFArrayCreateMutableCopy(NULL, count, displays);
+            CFArraySortValues(mut_displays, CFRangeMake(0, count), &display_manager_coordinate_comparator, (void *)(uintptr_t) g_display_manager.order);
+            CFRelease(displays); displays = mut_displays;
+        }
+
         result = CFRetain(CFArrayGetValueAtIndex(displays, index));
     }
 
@@ -98,17 +165,12 @@ CFStringRef display_manager_arrangement_display_uuid(int arrangement)
 
 uint32_t display_manager_arrangement_display_id(int arrangement)
 {
-    uint32_t result = 0;
-    CFArrayRef displays = SLSCopyManagedDisplays(g_connection);
+    CFStringRef uuid = display_manager_arrangement_display_uuid(arrangement);
+    if (!uuid) return 0;
 
-    int count = CFArrayGetCount(displays);
-    int index = arrangement - 1;
+    uint32_t result = display_id(uuid);
+    CFRelease(uuid);
 
-    if (in_range_ie(index, 0, count)) {
-        result = display_id(CFArrayGetValueAtIndex(displays, index));
-    }
-
-    CFRelease(displays);
     return result;
 }
 
@@ -121,7 +183,7 @@ uint32_t display_manager_cursor_display_id(void)
 
 uint32_t display_manager_prev_display_id(uint32_t did)
 {
-    int arrangement = display_arrangement(did);
+    int arrangement = display_manager_display_id_arrangement(did);
     if (arrangement <= 1) return 0;
 
     return display_manager_arrangement_display_id(arrangement - 1);
@@ -129,7 +191,7 @@ uint32_t display_manager_prev_display_id(uint32_t did)
 
 uint32_t display_manager_next_display_id(uint32_t did)
 {
-    int arrangement = display_arrangement(did);
+    int arrangement = display_manager_display_id_arrangement(did);
     if (arrangement >= display_manager_active_display_count()) return 0;
 
     return display_manager_arrangement_display_id(arrangement + 1);
@@ -350,6 +412,7 @@ bool display_manager_begin(struct display_manager *dm)
 {
     dm->current_display_id = display_manager_active_display_id();
     dm->last_display_id = dm->current_display_id;
+    dm->order = DISPLAY_ARRANGEMENT_ORDER_DEFAULT;
     dm->mode = EXTERNAL_BAR_OFF;
     dm->top_padding = 0;
     dm->bottom_padding = 0;

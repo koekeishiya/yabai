@@ -152,6 +152,12 @@ Global Settings
 *focus_follows_mouse* ['autofocus|autoraise|off']::
     Automatically focus the window under the mouse.
 
+*display_arrangement_order* ['default|vertical|horizontal']::
+    Specify how displays are ordered (determined by center point). +
+    'default': Native macOS ordering. +
+    'vertical': Order by y-coordinate (followed by x-coordinate when equal). +
+    'horizontal': Order by x-coordinate (followed by y-coordinate when equal).
+
 *window_origin_display* ['default|focused|cursor']::
     Specify which display a newly created window should be managed in. +
     'default': The display in which the window is created (standard macOS behaviour). +
