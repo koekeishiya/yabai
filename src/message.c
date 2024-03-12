@@ -50,6 +50,7 @@ extern bool g_verbose;
 #define COMMAND_CONFIG_MOUSE_ACTION2         "mouse_action2"
 #define COMMAND_CONFIG_MOUSE_DROP_ACTION     "mouse_drop_action"
 #define COMMAND_CONFIG_EXTERNAL_BAR          "external_bar"
+#define COMMAND_CONFIG_NOTCH                 "notch"
 
 #define SELECTOR_CONFIG_SPACE                "--space"
 
@@ -1504,6 +1505,23 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             } else {
                 fprintf(rsp, "%s:%d:%d\n", external_bar_mode_str[g_display_manager.mode], g_display_manager.top_padding, g_display_manager.bottom_padding);
+            }
+        } else if (token_equals(command, COMMAND_CONFIG_NOTCH)) {
+            struct token value = get_token(&message);
+            if (!token_is_valid(value)) {
+                fprintf(rsp, "%s\n", bool_str[g_display_manager.notch]);
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                g_display_manager.notch = false;
+                space_manager_mark_spaces_invalid(&g_space_manager);
+            }
+            else if (token_equals(value, ARGUMENT_COMMON_VAL_ON))
+            {
+                g_display_manager.notch = true;
+                space_manager_mark_spaces_invalid(&g_space_manager);
+            }
+            else
+            {
+                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else {
             daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

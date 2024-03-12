@@ -43,6 +43,7 @@ struct display_manager
 
     enum display_arrangement_order order;
     enum external_bar_mode mode;
+    bool notch;
 };
 
 bool display_manager_query_displays(FILE *rsp);
