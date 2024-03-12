@@ -38,6 +38,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fixed some window commands that would incorrectly require a focused window to exist in order to operate on an arbitrary window through its id [#2153](https://github.com/koekeishiya/yabai/issues/2153)
 - Window grid command will now apply the configured space window gap [#932](https://github.com/koekeishiya/yabai/issues/932)
 - Config file no longer requires the exec-permission-bit to be set [#1993](https://github.com/koekeishiya/yabai/issues/1993)
+- Allow `space --swap ..` command to swap spaces between displays. This works by swapping all windows (and interior state) rather than macOS spaces [#549](https://github.com/koekeishiya/yabai/issues/549)
 
 ### Removed
 - When adding new window rules, their effects will only apply to *windows that open after the rule has been added*. To restore old behavior, run `yabai -m rule --apply` after adding all rules [#2123](https://github.com/koekeishiya/yabai/issues/2123)
