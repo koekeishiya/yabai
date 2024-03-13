@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.0.0] - 2024-03-13
 ### Added
 - Make space visible on display without stealing focus (the space must belong to the display) [#2113](https://github.com/koekeishiya/yabai/issues/2113)
 - Restore application_activated and application_deactivated signals [#2122](https://github.com/koekeishiya/yabai/issues/2122)
@@ -634,7 +636,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v6.0.15...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/koekeishiya/yabai/compare/v6.0.15...v7.0.0
 [6.0.15]: https://github.com/koekeishiya/yabai/compare/v6.0.14...v6.0.15
 [6.0.14]: https://github.com/koekeishiya/yabai/compare/v6.0.13...v6.0.14
 [6.0.13]: https://github.com/koekeishiya/yabai/compare/v6.0.12...v6.0.13
