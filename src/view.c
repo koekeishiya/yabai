@@ -39,7 +39,7 @@ void insert_feedback_show(struct window_node *node)
         CFRelease(empty_region);
 
         sls_window_disable_shadow(node->feedback_window.id);
-        SLSSetWindowResolution(g_connection, node->feedback_window.id, 2.0f);
+        SLSSetWindowResolution(g_connection, node->feedback_window.id, 1.0f);
         SLSSetWindowOpacity(g_connection, node->feedback_window.id, 0);
         SLSSetWindowLevel(g_connection, node->feedback_window.id, window_level(node->window_order[0]));
         SLSSetWindowSubLevel(g_connection, node->feedback_window.id, window_sub_level(node->window_order[0]));
