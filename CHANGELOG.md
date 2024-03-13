@@ -43,6 +43,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Allow `space --swap ..` command to swap spaces between displays. This works by swapping all windows (and interior state) rather than macOS spaces [#549](https://github.com/koekeishiya/yabai/issues/549)
 - Focus-follows-mouse should now be a lot more responsive [#1958](https://github.com/koekeishiya/yabai/issues/1958)
 - Fixed issue causing Dock to not hide if the cursor is moved before animation finishes [#1552](https://github.com/koekeishiya/yabai/issues/1552)
+- Fixed issue causing Dock to not respect autohide-delay preference [#1951](https://github.com/koekeishiya/yabai/issues/1951)
 - Fixed issue where using alt as mouse_modifier would trigger macOS functionality that hides all windows [#2154](https://github.com/koekeishiya/yabai/issues/2154) [#1809](https://github.com/koekeishiya/yabai/issues/1809)
 - Fixed absurd issue where subscribing to mouse_events would cause delayed input in some cases when magic mouse is connected [#1877](https://github.com/koekeishiya/yabai/issues/1877)
 
