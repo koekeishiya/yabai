@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.0.2] - 2024-03-13
 ### Changed
 - Decouple/normalize timer used for mouse_action resize throttling because event timestep varies between macOS versions [#2160](https://github.com/koekeishiya/yabai/issues/2160)
 
@@ -642,7 +644,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.2...HEAD
+[7.0.2]: https://github.com/koekeishiya/yabai/compare/v7.0.1...v7.0.2
 [7.0.1]: https://github.com/koekeishiya/yabai/compare/v7.0.0...v7.0.1
 [7.0.0]: https://github.com/koekeishiya/yabai/compare/v6.0.15...v7.0.0
 [6.0.15]: https://github.com/koekeishiya/yabai/compare/v6.0.14...v6.0.15
