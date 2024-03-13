@@ -29,18 +29,6 @@ static MOUSE_HANDLER(mouse_handler)
     } break;
     case kCGEventLeftMouseDown:
     case kCGEventRightMouseDown: {
-
-        //
-        // :SynthesizedEvent
-        //
-        // NOTE(koekeishiya): This event-tap is placed at the "Annotated Session" location, which
-        // causes yabai to also intercept events that we post (notably, the way in which window
-        // focusing between separate applications have been implemented). Skip these events...
-        //
-
-        pid_t source_pid = CGEventGetIntegerValueField(event, kCGEventSourceUnixProcessID);
-        if (source_pid == g_pid) return event;
-
         uint8_t mod = mouse_mod_from_cgflags(CGEventGetFlags(event));
         event_loop_post(&g_event_loop, MOUSE_DOWN, (void *) CFRetain(event), mod);
 
@@ -52,18 +40,6 @@ static MOUSE_HANDLER(mouse_handler)
     } break;
     case kCGEventLeftMouseUp:
     case kCGEventRightMouseUp: {
-
-        //
-        // :SynthesizedEvent
-        //
-        // NOTE(koekeishiya): This event-tap is placed at the "Annotated Session" location, which
-        // causes yabai to also intercept events that we post (notably, the way in which window
-        // focusing between separate applications have been implemented). Skip these events...
-        //
-
-        pid_t source_pid = CGEventGetIntegerValueField(event, kCGEventSourceUnixProcessID);
-        if (source_pid == g_pid) return event;
-
         event_loop_post(&g_event_loop, MOUSE_UP, (void *) CFRetain(event), 0);
 
         if (mouse_state->consume_mouse_click) {
@@ -283,7 +259,7 @@ bool mouse_handler_begin(struct mouse_state *mouse_state, uint32_t mask)
 {
     if (mouse_state->handle) return true;
 
-    mouse_state->handle = CGEventTapCreate(kCGAnnotatedSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, mouse_handler, mouse_state);
+    mouse_state->handle = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, mouse_handler, mouse_state);
     if (!mouse_state->handle) return false;
 
     if (!CGEventTapIsEnabled(mouse_state->handle)) {
