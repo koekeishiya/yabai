@@ -1,5 +1,4 @@
 extern struct event_loop g_event_loop;
-extern pid_t g_pid;
 
 static inline uint8_t mouse_mod_from_cgflags(uint32_t cgflags)
 {
