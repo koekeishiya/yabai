@@ -1,6 +1,7 @@
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 #include <CoreVideo/CoreVideo.h>
+#include <mach/mach_time.h>
 #include <mach-o/dyld.h>
 #include <mach-o/swap.h>
 #include <bootstrap.h>

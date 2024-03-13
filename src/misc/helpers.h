@@ -144,6 +144,21 @@ static inline float ease_in_out_circ(float t)
     return t < 0.5f ? (1.0f - sqrtf(1.0f - powf(2.0f * t, 2.0f))) / 2.0f : (sqrtf(1.0f - powf(-2.0f * t + 2.0f, 2.0f)) + 1.0f) / 2.0f;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static inline uint64_t read_os_timer(void)
+{
+    uint64_t result = mach_absolute_time();
+    Nanoseconds nano = AbsoluteToNanoseconds(*(AbsoluteTime *) &result);
+    return *(uint64_t *) &nano;
+}
+#pragma clang diagnostic pop
+
+static inline uint64_t read_os_freq(void)
+{
+    return 1000000000;
+}
+
 struct rgba_color
 {
     uint32_t p;

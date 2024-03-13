@@ -21,25 +21,6 @@ static struct
     uint32_t parent;
 } g_profiler;
 
-#ifdef __x86_64__
-#include <mach/mach_time.h>
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-static inline uint64_t read_os_timer(void)
-{
-    uint64_t result = mach_absolute_time();
-    Nanoseconds nano = AbsoluteToNanoseconds(*(AbsoluteTime *) &result);
-    return *(uint64_t *) &nano;
-}
-#pragma clang diagnostic pop
-
-static inline uint64_t read_os_freq(void)
-{
-    return 1000000000;
-}
-#endif
-
 static inline uint64_t read_cpu_timer(void)
 {
 #ifdef __x86_64__
