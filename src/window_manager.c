@@ -2503,7 +2503,6 @@ void window_manager_init(struct window_manager *wm)
     wm->window_opacity_duration = 0.0f;
     wm->window_animation_duration = 0.0f;
     wm->window_animation_easing = ease_out_circ_type;
-    wm->insert_feedback_windows = NULL;
     wm->insert_feedback_color = rgba_color_from_hex(0xffd75f5f);
 
     table_init(&wm->application, 150, hash_wm, compare_wm);
@@ -2512,6 +2511,7 @@ void window_manager_init(struct window_manager *wm)
     table_init(&wm->window_lost_focused_event, 150, hash_wm, compare_wm);
     table_init(&wm->application_lost_front_switched_event, 150, hash_wm, compare_wm);
     table_init(&wm->window_animations_table, 150, hash_wm, compare_wm);
+    table_init(&wm->insert_feedback, 150, hash_wm, compare_wm);
     pthread_mutex_init(&wm->window_animations_lock, NULL);
 }
 

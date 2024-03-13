@@ -759,6 +759,14 @@ static EVENT_HANDLER(WINDOW_TITLE_CHANGED)
     event_signal_push(SIGNAL_WINDOW_TITLE_CHANGED, window);
 }
 
+static EVENT_HANDLER(SLS_WINDOW_ORDERED)
+{
+    uint32_t wid = (uint64_t)(intptr_t) context;
+    debug("%s: %d\n", __FUNCTION__, wid);
+    struct window_node *node = table_find(&g_window_manager.insert_feedback, &wid);
+    if (node) SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
+}
+
 static EVENT_HANDLER(SLS_SPACE_CREATED)
 {
     uint64_t sid = (uint64_t)(intptr_t) context;

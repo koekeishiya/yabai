@@ -74,6 +74,7 @@ struct window_manager
     struct table window_lost_focused_event;
     struct table application_lost_front_switched_event;
     struct table window_animations_table;
+    struct table insert_feedback;
     pthread_mutex_t window_animations_lock;
     struct rule *rules;
     struct application **applications_to_refresh;
@@ -91,7 +92,6 @@ struct window_manager
     float window_opacity_duration;
     float window_animation_duration;
     int window_animation_easing;
-    uint32_t *insert_feedback_windows;
     struct rgba_color insert_feedback_color;
 };
 

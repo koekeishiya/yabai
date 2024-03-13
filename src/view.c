@@ -3,6 +3,26 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 
+void insert_feedback_update_notifications(void)
+{
+    int window_count = 0;
+    uint32_t window_list[1024] = {0};
+
+    for (int i = 0; i < g_window_manager.insert_feedback.capacity; ++i) {
+        struct bucket *bucket = g_window_manager.insert_feedback.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct window_node *node = bucket->value;
+                window_list[window_count++] = node->window_order[0];
+            }
+
+            bucket = bucket->next;
+        }
+    }
+
+    SLSRequestNotificationsForWindows(g_connection, window_list, window_count);
+}
+
 #define INSERT_FEEDBACK_WIDTH 2
 #define INSERT_FEEDBACK_RADIUS 9
 void insert_feedback_show(struct window_node *node)
@@ -35,7 +55,8 @@ void insert_feedback_show(struct window_node *node)
                                    g_window_manager.insert_feedback_color.g,
                                    g_window_manager.insert_feedback_color.b,
                                    g_window_manager.insert_feedback_color.a);
-        buf_push(g_window_manager.insert_feedback_windows, node->feedback_window.id);
+        table_add(&g_window_manager.insert_feedback, &node->window_order[0], node);
+        insert_feedback_update_notifications();
         created = true;
     }
 
@@ -101,12 +122,8 @@ void insert_feedback_show(struct window_node *node)
 void insert_feedback_destroy(struct window_node *node)
 {
     if (node->feedback_window.id) {
-        for (int i = 0; i < buf_len(g_window_manager.insert_feedback_windows); ++i) {
-            if (g_window_manager.insert_feedback_windows[i] == node->feedback_window.id) {
-                buf_del(g_window_manager.insert_feedback_windows, i);
-                break;
-            }
-        }
+        table_remove(&g_window_manager.insert_feedback, &node->window_order[0]);
+        insert_feedback_update_notifications();
 
         SLSOrderWindow(g_connection, node->feedback_window.id, 0, 0);
         CGContextRelease(node->feedback_window.context);

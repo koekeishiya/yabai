@@ -317,6 +317,8 @@ int main(int argc, char **argv)
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     }
 
+    SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 808, NULL);
+
     window_manager_init(&g_window_manager);
     space_manager_begin(&g_space_manager);
     window_manager_begin(&g_space_manager, &g_window_manager);
