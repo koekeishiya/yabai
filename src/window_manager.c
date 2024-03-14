@@ -2425,7 +2425,10 @@ void window_manager_validate_and_check_for_windows_on_space(struct space_manager
     // This is necessary to make sure that we do not call the AX API for each modification to the tree.
     //
 
-    if (space_is_visible(view->sid) && view_is_dirty(view)) view_flush(view);
+    if (space_is_visible(view->sid) && view_is_dirty(view)) {
+        window_node_flush(view->root);
+        view->is_dirty = false;
+    }
 }
 
 void window_manager_correct_for_mission_control_changes(struct space_manager *sm, struct window_manager *wm)

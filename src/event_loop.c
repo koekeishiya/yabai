@@ -806,8 +806,14 @@ static EVENT_HANDLER(SPACE_CHANGED)
     if (!mission_control_is_active() && space_is_user(g_space_manager.current_space_id)) {
         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 
-        if (view_is_invalid(view)) view_update(view);
-        if (view_is_dirty(view))   view_flush(view);
+        if (view_is_invalid(view)) {
+            view_update(view);
+        }
+
+        if (view_is_dirty(view)) {
+            window_node_flush(view->root);
+            view->is_dirty = false;
+        }
     }
 
     event_signal_push(SIGNAL_SPACE_CHANGED, NULL);
@@ -852,8 +858,14 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
     if (!mission_control_is_active() && space_is_user(g_space_manager.current_space_id)) {
         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 
-        if (view_is_invalid(view)) view_update(view);
-        if (view_is_dirty(view))   view_flush(view);
+        if (view_is_invalid(view)) {
+            view_update(view);
+        }
+
+        if (view_is_dirty(view)) {
+            window_node_flush(view->root);
+            view->is_dirty = false;
+        }
     }
 
     event_signal_push(SIGNAL_DISPLAY_CHANGED, NULL);
