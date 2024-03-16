@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Whitelist zathura process for management because it incorrectly identifies as a background-only process [#2168](https://github.com/koekeishiya/yabai/issues/2168)
 
 ## [7.0.2] - 2024-03-13
 ### Changed

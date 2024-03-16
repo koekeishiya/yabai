@@ -14,6 +14,7 @@ static TABLE_COMPARE_FUNC(compare_psn)
 static const char *process_name_whitelist[] =
 {
     "System Information",
+    "zathura"
 };
 
 static const char *process_name_blacklist[] =
