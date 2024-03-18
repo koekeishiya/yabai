@@ -485,7 +485,8 @@ static void exec_config_file(char *config_file, int config_file_size)
                     : (char*[]){ "/usr/bin/env", "sh", config_file, NULL};
         exit(execvp(exec[0], exec));
     } else if (pid == -1) {
-        notify("configuration", "failed to execute file '%s'", config_file);
+        warn("yabai: failed to load config file '%s'\n", config_file);
+        notify("configuration", "failed to load file '%s'", config_file);
     }
 }
 
