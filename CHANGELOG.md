@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Whitelist zathura process for management because it incorrectly identifies as a background-only process [#2168](https://github.com/koekeishiya/yabai/issues/2168)
+- Config should be executed if the exec-bit it set, but interpreted if it is not [#2169](https://github.com/koekeishiya/yabai/issues/2169)
 
 ## [7.0.2] - 2024-03-13
 ### Changed

@@ -65,7 +65,9 @@ Options
     Send message to a running instance of yabai.
 
 *--config*, *-c* '<config_file>'::
-    Use the specified configuration file.
+    Use the specified configuration file. +
+    Executes using `/usr/bin/env sh -c <config_file>` if the exec-bit is set. +
+    Interpreted using `/usr/bin/env sh <config_file>` if the exec-bit is unset.
 
 *--verbose*, *-V*::
     Output debug information to stdout.

@@ -435,6 +435,17 @@ static inline bool file_exists(char *filename)
     return true;
 }
 
+static inline bool file_can_execute(char *filename)
+{
+    struct stat buffer;
+
+    if (stat(filename, &buffer) != 0) {
+        return false;
+    }
+
+    return (buffer.st_mode & S_IXUSR);
+}
+
 static bool get_config_file(char *restrict filename, char *restrict buffer, int buffer_size)
 {
     char *xdg_home = getenv("XDG_CONFIG_HOME");
@@ -469,7 +480,9 @@ static void exec_config_file(char *config_file, int config_file_size)
 
     int pid = fork();
     if (pid == 0) {
-        char *exec[] = { "/usr/bin/env", "sh", config_file, NULL};
+        char **exec = file_can_execute(config_file)
+                    ? (char*[]){ "/usr/bin/env", "sh", "-c", config_file, NULL}
+                    : (char*[]){ "/usr/bin/env", "sh", config_file, NULL};
         exit(execvp(exec[0], exec));
     } else if (pid == -1) {
         notify("configuration", "failed to execute file '%s'", config_file);

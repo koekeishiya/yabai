@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-03-12
+.\"      Date: 2024-03-18
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-03-12" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-03-18" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -96,6 +96,10 @@ Send message to a running instance of yabai.
 \fB\-\-config\fP, \fB\-c\fP \fI<config_file>\fP
 .RS 4
 Use the specified configuration file.
+.br
+Executes using \f(CR/usr/bin/env sh \-c <config_file>\fP if the exec\-bit is set.
+.br
+Interpreted using \f(CR/usr/bin/env sh <config_file>\fP if the exec\-bit is unset.
 .RE
 .sp
 \fB\-\-verbose\fP, \fB\-V\fP
