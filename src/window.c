@@ -86,21 +86,6 @@ err:
     return sid ? sid : window_display_space(wid);
 }
 
-int window_space_count(uint32_t wid)
-{
-    int count = 0;
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
-    CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
-    if (!space_list_ref) goto err;
-
-    count = CFArrayGetCount(space_list_ref);
-    CFRelease(space_list_ref);
-
-err:
-    CFRelease(window_list_ref);
-    return count;
-}
-
 uint64_t *window_space_list(uint32_t wid, int *count)
 {
     uint64_t *space_list = NULL;
@@ -158,7 +143,7 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid)
     uint32_t parent_wid = window_parent(wid);
     uint64_t sid = window_space(wid);
     bool is_fullscreen = space_is_fullscreen(sid);
-    bool is_sticky = window_space_count(wid) > 1;
+    bool is_sticky = window_is_sticky(wid);
 
     int space = space_manager_mission_control_index(sid);
     int display = display_manager_display_id_arrangement(space_display_id(sid));
@@ -248,6 +233,7 @@ void window_serialize(FILE *rsp, struct window *window)
     char *title = window_title_ts(window);
     char *escaped_title = ts_string_escape(title);
     uint64_t sid = window_space(window->id);
+    bool is_sticky = window_check_flag(window, WINDOW_STICKY) || window_is_sticky(window->id);
     int space = space_manager_mission_control_index(sid);
     int display = display_manager_display_id_arrangement(space_display_id(sid));
     int level = window_level(window->id);
@@ -337,7 +323,7 @@ void window_serialize(FILE *rsp, struct window *window)
             json_bool(is_minimized),
             json_bool(window->application->is_hidden),
             json_bool(window_check_flag(window, WINDOW_FLOAT)),
-            json_bool(window_check_flag(window, WINDOW_STICKY)),
+            json_bool(is_sticky),
             json_bool(grabbed));
 }
 
@@ -460,16 +446,17 @@ bool window_is_fullscreen(struct window *window)
     return result;
 }
 
-bool window_is_sticky(struct window *window)
+bool window_is_sticky(uint32_t wid)
 {
     bool result = false;
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+
+    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
     CFArrayRef space_list_ref = SLSCopySpacesForWindows(g_connection, 0x7, window_list_ref);
     if (!space_list_ref) goto err;
 
     result = CFArrayGetCount(space_list_ref) > 1;
-
     CFRelease(space_list_ref);
+
 err:
     CFRelease(window_list_ref);
     return result;
@@ -729,7 +716,7 @@ struct window *window_create(struct application *application, AXUIElementRef win
         window_set_flag(window, WINDOW_FULLSCREEN);
     }
 
-    if (window_is_sticky(window)) {
+    if (window_is_sticky(window->id)) {
         window_set_flag(window, WINDOW_STICKY);
     }
 

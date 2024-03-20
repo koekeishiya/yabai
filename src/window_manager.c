@@ -273,7 +273,7 @@ bool window_manager_should_manage_window(struct window *window)
 {
     if (!window->is_root)                           return false;
     if (window_check_flag(window, WINDOW_FLOAT))    return false;
-    if (window_is_sticky(window))                   return false;
+    if (window_is_sticky(window->id))               return false;
     if (window_check_flag(window, WINDOW_MINIMIZE)) return false;
     if (window->application->is_hidden)             return false;
 
@@ -1498,7 +1498,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
                 goto out;
             }
 
-            if (window_is_sticky(window) ||
+            if (window_is_sticky(window->id) ||
                 !window_can_move(window) ||
                 !window_is_standard(window) ||
                 !window_level_is_standard(window) ||
