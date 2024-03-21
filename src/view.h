@@ -4,7 +4,53 @@
 #define AX_ABS(a, b) (((a) - (b) < 0) ? (((a) - (b)) * -1) : ((a) - (b)))
 #define AX_DIFF(a, b) (AX_ABS(a, b) >= 1.5f)
 
-struct window;
+enum space_property
+{
+    SPACE_PROPERTY_ID            = 0x001,
+    SPACE_PROPERTY_UUID          = 0x002,
+    SPACE_PROPERTY_INDEX         = 0x004,
+    SPACE_PROPERTY_LABEL         = 0x008,
+    SPACE_PROPERTY_TYPE          = 0x010,
+    SPACE_PROPERTY_DISPLAY       = 0x020,
+    SPACE_PROPERTY_WINDOWS       = 0x040,
+    SPACE_PROPERTY_FIRST_WINDOW  = 0x080,
+    SPACE_PROPERTY_LAST_WINDOW   = 0x100,
+    SPACE_PROPERTY_HAS_FOCUS     = 0x200,
+    SPACE_PROPERTY_IS_VISIBLE    = 0x400,
+    SPACE_PROPERTY_IS_FULLSCREEN = 0x800
+};
+
+static int space_property_val[] =
+{
+    [0x0] = SPACE_PROPERTY_ID,
+    [0x1] = SPACE_PROPERTY_UUID,
+    [0x2] = SPACE_PROPERTY_INDEX,
+    [0x3] = SPACE_PROPERTY_LABEL,
+    [0x4] = SPACE_PROPERTY_TYPE,
+    [0x5] = SPACE_PROPERTY_DISPLAY,
+    [0x6] = SPACE_PROPERTY_WINDOWS,
+    [0x7] = SPACE_PROPERTY_FIRST_WINDOW,
+    [0x8] = SPACE_PROPERTY_LAST_WINDOW,
+    [0x9] = SPACE_PROPERTY_HAS_FOCUS,
+    [0xA] = SPACE_PROPERTY_IS_VISIBLE,
+    [0xB] = SPACE_PROPERTY_IS_FULLSCREEN
+};
+
+static char *space_property_str[] =
+{
+    "id",
+    "uuid",
+    "index",
+    "label",
+    "type",
+    "display",
+    "windows",
+    "first-window",
+    "last-window",
+    "has-focus",
+    "is-visible",
+    "is-native-fullscreen"
+};
 
 struct area
 {
@@ -14,6 +60,7 @@ struct area
     float h;
 };
 
+struct window;
 struct window_capture
 {
     struct window *window;
@@ -173,7 +220,7 @@ struct window_node *view_add_window_node(struct view *view, struct window *windo
 struct window_node *view_remove_window_node(struct view *view, struct window *window);
 uint32_t *view_find_window_list(struct view *view, int *window_count);
 
-void view_serialize(FILE *rsp, struct view *view);
+void view_serialize(FILE *rsp, struct view *view, uint64_t flags);
 bool view_is_invalid(struct view *view);
 bool view_is_dirty(struct view *view);
 void view_flush(struct view *view);

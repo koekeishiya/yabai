@@ -438,7 +438,7 @@ Query
 General Syntax
 ^^^^^^^^^^^^^^
 
-yabai -m query '<COMMAND>' ['<ARGUMENT>']
+yabai -m query '<COMMAND>' ['<PROPERTIES>'] ['<ARGUMENT>']
 
 COMMAND
 ^^^^^^^
@@ -463,6 +463,12 @@ ARGUMENT
 
 *--window* ['<WINDOW_SEL>']::
     Constrain matches to the selected window.
+
+PROPERTIES
+^^^^^^^^^^
+
+A comma-separated string containing the name of fields to include in the output. +
+The name of the provided fields must be present in the dataformat of the corresponding entity.
 
 DATAFORMAT
 ^^^^^^^^^^

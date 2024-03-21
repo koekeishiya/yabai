@@ -34,7 +34,7 @@ void window_manager_query_window_rules(FILE *rsp)
     fprintf(rsp, "]\n");
 }
 
-void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count)
+void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count, uint64_t flags)
 {
     TIME_FUNCTION;
 
@@ -44,22 +44,22 @@ void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, in
     fprintf(rsp, "[");
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (window) window_serialize(rsp, window); else window_nonax_serialize(rsp, window_list[i]);
+        if (window) window_serialize(rsp, window, flags); else window_nonax_serialize(rsp, window_list[i], flags);
         if (i < window_count - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
 }
 
-void window_manager_query_windows_for_display(FILE *rsp, uint32_t did)
+void window_manager_query_windows_for_display(FILE *rsp, uint32_t did, uint64_t flags)
 {
     TIME_FUNCTION;
 
     int space_count = 0;
     uint64_t *space_list = display_space_list(did, &space_count);
-    window_manager_query_windows_for_spaces(rsp, space_list, space_count);
+    window_manager_query_windows_for_spaces(rsp, space_list, space_count, flags);
 }
 
-void window_manager_query_windows_for_displays(FILE *rsp)
+void window_manager_query_windows_for_displays(FILE *rsp, uint64_t flags)
 {
     TIME_FUNCTION;
 
@@ -84,7 +84,7 @@ void window_manager_query_windows_for_displays(FILE *rsp)
         space_count += count;
     }
 
-    window_manager_query_windows_for_spaces(rsp, space_list, space_count);
+    window_manager_query_windows_for_spaces(rsp, space_list, space_count, flags);
 }
 
 bool window_manager_rule_matches_window(struct rule *rule, struct window *window, char *window_title, char *window_role, char *window_subrole)
@@ -1516,7 +1516,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
             if (g_verbose) {
                 fprintf(stdout, "window info: \n");
-                window_serialize(stdout, window);
+                window_serialize(stdout, window, 0);
                 fprintf(stdout, "\n");
             }
         }
@@ -1530,7 +1530,7 @@ struct window *window_manager_create_and_add_window(struct space_manager *sm, st
 
         if (g_verbose) {
             fprintf(stdout, "window info: \n");
-            window_serialize(stdout, window);
+            window_serialize(stdout, window, 0);
             fprintf(stdout, "\n");
         }
     }

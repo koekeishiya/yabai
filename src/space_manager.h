@@ -42,10 +42,10 @@ enum space_op_error
     SPACE_OP_ERROR_SCRIPTING_ADDITION   = 10,
 };
 
-bool space_manager_query_space(FILE *rsp, uint64_t sid);
-bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window);
-bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did);
-bool space_manager_query_spaces_for_displays(FILE *rsp);
+bool space_manager_query_space(FILE *rsp, uint64_t sid, uint64_t flags);
+bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window, uint64_t flags);
+bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did, uint64_t flags);
+bool space_manager_query_spaces_for_displays(FILE *rsp, uint64_t flags);
 struct view *space_manager_query_view(struct space_manager *sm, uint64_t sid);
 struct view *space_manager_find_view(struct space_manager *sm, uint64_t sid);
 void space_manager_refresh_view(struct space_manager *sm, uint64_t sid);

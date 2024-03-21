@@ -96,9 +96,9 @@ struct window_manager
 };
 
 void window_manager_query_window_rules(FILE *rsp);
-void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count);
-void window_manager_query_windows_for_display(FILE *rsp, uint32_t did);
-void window_manager_query_windows_for_displays(FILE *rsp);
+void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, int space_count, uint64_t flags);
+void window_manager_query_windows_for_display(FILE *rsp, uint32_t did, uint64_t flags);
+void window_manager_query_windows_for_displays(FILE *rsp, uint64_t flags);
 bool window_manager_rule_matches_window(struct rule *rule, struct window *window, char *window_title, char *window_role, char *window_subrole);
 void window_manager_apply_manage_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects, char *window_title, char *window_role, char *window_subrole);
 void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects, char *window_title, char *window_role, char *window_subrole);

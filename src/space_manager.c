@@ -11,19 +11,19 @@ static TABLE_COMPARE_FUNC(compare_view)
     return *(uint64_t *) key_a == *(uint64_t *) key_b;
 }
 
-bool space_manager_query_space(FILE *rsp, uint64_t sid)
+bool space_manager_query_space(FILE *rsp, uint64_t sid, uint64_t flags)
 {
     TIME_FUNCTION;
 
     struct view *view = space_manager_query_view(&g_space_manager, sid);
     if (!view) return false;
 
-    view_serialize(rsp, view);
+    view_serialize(rsp, view, flags);
     fprintf(rsp, "\n");
     return true;
 }
 
-bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
+bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window, uint64_t flags)
 {
     TIME_FUNCTION;
 
@@ -36,7 +36,7 @@ bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
         struct view *view = space_manager_query_view(&g_space_manager, space_list[i]);
         if (!view) continue;
 
-        view_serialize(rsp, view);
+        view_serialize(rsp, view, flags);
         fprintf(rsp, "%c", i < space_count - 1 ? ',' : ']');
     }
     fprintf(rsp, "\n");
@@ -44,7 +44,7 @@ bool space_manager_query_spaces_for_window(FILE *rsp, struct window *window)
     return true;
 }
 
-bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
+bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did, uint64_t flags)
 {
     TIME_FUNCTION;
 
@@ -57,7 +57,7 @@ bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
         struct view *view = space_manager_query_view(&g_space_manager, space_list[i]);
         if (!view) continue;
 
-        view_serialize(rsp, view);
+        view_serialize(rsp, view, flags);
         fprintf(rsp, "%c", i < space_count - 1 ? ',' : ']');
     }
     fprintf(rsp, "\n");
@@ -65,7 +65,7 @@ bool space_manager_query_spaces_for_display(FILE *rsp, uint32_t did)
     return true;
 }
 
-bool space_manager_query_spaces_for_displays(FILE *rsp)
+bool space_manager_query_spaces_for_displays(FILE *rsp, uint64_t flags)
 {
     TIME_FUNCTION;
 
@@ -83,7 +83,7 @@ bool space_manager_query_spaces_for_displays(FILE *rsp)
             struct view *view = space_manager_query_view(&g_space_manager, space_list[j]);
             if (!view) continue;
 
-            view_serialize(rsp, view);
+            view_serialize(rsp, view, flags);
             if (j < space_count - 1) fprintf(rsp, ",");
         }
 

@@ -843,62 +843,112 @@ void view_flush(struct view *view)
     }
 }
 
-void view_serialize(FILE *rsp, struct view *view)
+void view_serialize(FILE *rsp, struct view *view, uint64_t flags)
 {
     TIME_FUNCTION;
 
-    char *uuid = ts_cfstring_copy(view->suuid);
-    int buffer_size = MAXLEN;
-    size_t bytes_written = 0;
-    char buffer[MAXLEN] = {};
-    char *cursor = buffer;
+    if (flags == 0x0) flags |= ~flags;
 
-    int window_count = 0;
-    uint32_t *window_list = space_window_list(view->sid, &window_count, true);
+    bool did_output = false;
+    fprintf(rsp, "{\n");
 
-    for (int i = 0; i < window_count; ++i) {
-        if (i < window_count - 1) {
-            bytes_written = snprintf(cursor, buffer_size, "%d, ", window_list[i]);
-        } else {
-            bytes_written = snprintf(cursor, buffer_size, "%d", window_list[i]);
-        }
-
-        cursor += bytes_written;
-        buffer_size -= bytes_written;
-        if (buffer_size <= 0) break;
+    if (flags & SPACE_PROPERTY_ID) {
+        fprintf(rsp, "\t\"id\":%lld", view->sid);
+        did_output = true;
     }
 
-    struct space_label *space_label = space_manager_get_label_for_space(&g_space_manager, view->sid);
-    struct window_node *first_leaf = window_node_find_first_leaf(view->root);
-    struct window_node *last_leaf = window_node_find_last_leaf(view->root);
+    if (flags & SPACE_PROPERTY_UUID) {
+        if (did_output) fprintf(rsp, ",\n");
 
-    fprintf(rsp,
-            "{\n"
-            "\t\"id\":%lld,\n"
-            "\t\"uuid\":\"%s\",\n"
-            "\t\"index\":%d,\n"
-            "\t\"label\":\"%s\",\n"
-            "\t\"type\":\"%s\",\n"
-            "\t\"display\":%d,\n"
-            "\t\"windows\":[%s],\n"
-            "\t\"first-window\":%d,\n"
-            "\t\"last-window\":%d,\n"
-            "\t\"has-focus\":%s,\n"
-            "\t\"is-visible\":%s,\n"
-            "\t\"is-native-fullscreen\":%s\n"
-            "}",
-            view->sid,
-            uuid ? uuid : "<unknown>",
-            space_manager_mission_control_index(view->sid),
-            space_label ? space_label->label : "",
-            view_type_str[view->layout],
-            display_manager_display_id_arrangement(space_display_id(view->sid)),
-            buffer,
-            first_leaf ? first_leaf->window_order[0] : 0,
-            last_leaf ? last_leaf->window_order[0] : 0,
-            json_bool(view->sid == g_space_manager.current_space_id),
-            json_bool(space_is_visible(view->sid)),
-            json_bool(space_is_fullscreen(view->sid)));
+        char *uuid = ts_cfstring_copy(view->suuid);
+        fprintf(rsp, "\t\"uuid\":\"%s\"", uuid ? uuid : "<unknown>");
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_INDEX) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"index\":%d", space_manager_mission_control_index(view->sid));
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_LABEL) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        struct space_label *space_label = space_manager_get_label_for_space(&g_space_manager, view->sid);
+        fprintf(rsp, "\t\"label\":\"%s\"", space_label ? space_label->label : "");
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_TYPE) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"type\":\"%s\"", view_type_str[view->layout]);
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_DISPLAY) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"display\":%d", display_manager_display_id_arrangement(space_display_id(view->sid)));
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_WINDOWS) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        int window_count = 0;
+        uint32_t *window_list = space_window_list(view->sid, &window_count, true);
+
+        fprintf(rsp, "\t\"windows\":[");
+        for (int i = 0; i < window_count; ++i) {
+            if (i < window_count - 1) {
+                fprintf(rsp, "%d, ", window_list[i]);
+            } else {
+                fprintf(rsp, "%d", window_list[i]);
+            }
+        }
+        fprintf(rsp, "]");
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_FIRST_WINDOW) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        struct window_node *first_leaf = window_node_find_first_leaf(view->root);
+        fprintf(rsp, "\t\"first-window\":%d", first_leaf ? first_leaf->window_order[0] : 0);
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_LAST_WINDOW) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        struct window_node *last_leaf = window_node_find_last_leaf(view->root);
+        fprintf(rsp, "\t\"last-window\":%d", last_leaf ? last_leaf->window_order[0] : 0);
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_HAS_FOCUS) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"has-focus\":%s", json_bool(view->sid == g_space_manager.current_space_id));
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_IS_VISIBLE) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"is-visible\":%s", json_bool(space_is_visible(view->sid)));
+        did_output = true;
+    }
+
+    if (flags & SPACE_PROPERTY_IS_FULLSCREEN) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"is-native-fullscreen\":%s", json_bool(space_is_fullscreen(view->sid)));
+    }
+
+    fprintf(rsp, "\n}");
 }
 
 void view_update(struct view *view)

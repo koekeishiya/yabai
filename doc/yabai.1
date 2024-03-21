@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-03-18
+.\"      Date: 2024-03-22
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-03-18" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-03-22" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -649,7 +649,7 @@ System Integrity Protection must be partially disabled.
 .SS "Query"
 .SS "General Syntax"
 .sp
-yabai \-m query \fI<COMMAND>\fP [\fI<ARGUMENT>\fP]
+yabai \-m query \fI<COMMAND>\fP [\fI<PROPERTIES>\fP] [\fI<ARGUMENT>\fP]
 .SS "COMMAND"
 .sp
 \fB\-\-displays\fP
@@ -682,6 +682,11 @@ Constrain matches to the selected space.
 .RS 4
 Constrain matches to the selected window.
 .RE
+.SS "PROPERTIES"
+.sp
+A comma\-separated string containing the name of fields to include in the output.
+.br
+The name of the provided fields must be present in the dataformat of the corresponding entity.
 .SS "DATAFORMAT"
 .sp
 DISPLAY

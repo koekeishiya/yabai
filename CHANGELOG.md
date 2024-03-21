@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Whitelist zathura process for management because it incorrectly identifies as a background-only process [#2168](https://github.com/koekeishiya/yabai/issues/2168)
 - Config should be executed if the exec-bit is set, but interpreted if it is not [#2169](https://github.com/koekeishiya/yabai/issues/2169)
 - Window query property is-sticky would sometimes show the wrong value [#2175](https://github.com/koekeishiya/yabai/issues/2175)
+- Query commands now take an optional list of properties to select which fields should be included in the output [#2180](https://github.com/koekeishiya/yabai/issues/2180)
 
 ## [7.0.2] - 2024-03-13
 ### Changed

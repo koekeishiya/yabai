@@ -14,60 +14,85 @@ static DISPLAY_EVENT_HANDLER(display_handler)
     }
 }
 
-void display_serialize(FILE *rsp, uint32_t did)
+void display_serialize(FILE *rsp, uint32_t did, uint64_t flags)
 {
     TIME_FUNCTION;
 
-    CGRect frame = CGDisplayBounds(did);
+    if (flags == 0x0) flags |= ~flags;
 
-    char *uuid = NULL;
-    CFStringRef uuid_ref = display_uuid(did);
-    if (uuid_ref) {
-        uuid = ts_cfstring_copy(uuid_ref);
-        CFRelease(uuid_ref);
+    bool did_output = false;
+    fprintf(rsp, "{\n");
+
+    if (flags & DISPLAY_PROPERTY_ID) {
+        fprintf(rsp, "\t\"id\":%d", did);
+        did_output = true;
     }
 
-    int buffer_size = MAXLEN;
-    size_t bytes_written = 0;
-    char buffer[MAXLEN] = {};
-    char *cursor = buffer;
+    if (flags & DISPLAY_PROPERTY_UUID) {
+        if (did_output) fprintf(rsp, ",\n");
 
-    int count;
-    uint64_t *space_list = display_space_list(did, &count);
-    if (space_list) {
-        int first_mci = space_manager_mission_control_index(space_list[0]);
-        for (int i = 0; i < count; ++i) {
-            if (i < count - 1) {
-                bytes_written = snprintf(cursor, buffer_size, "%d, ", first_mci + i);
-            } else {
-                bytes_written = snprintf(cursor, buffer_size, "%d", first_mci + i);
-            }
-
-            cursor += bytes_written;
-            buffer_size -= bytes_written;
-            if (buffer_size <= 0) break;
+        char *uuid = NULL;
+        CFStringRef uuid_ref = display_uuid(did);
+        if (uuid_ref) {
+            uuid = ts_cfstring_copy(uuid_ref);
+            CFRelease(uuid_ref);
         }
+
+        fprintf(rsp, "\t\"uuid\":\"%s\"", uuid ? uuid : "<unknown>");
+        did_output = true;
     }
 
-    struct display_label *display_label = display_manager_get_label_for_display(&g_display_manager, did);
+    if (flags & DISPLAY_PROPERTY_INDEX) {
+        if (did_output) fprintf(rsp, ",\n");
 
-    fprintf(rsp,
-            "{\n"
-            "\t\"id\":%d,\n"
-            "\t\"uuid\":\"%s\",\n"
-            "\t\"index\":%d,\n"
-            "\t\"label\":\"%s\",\n"
-            "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t},\n"
-            "\t\"spaces\":[%s],\n"
-            "\t\"has-focus\":%s\n"
-            "}",
-            did,
-            uuid ? uuid : "<unknown>",
-            display_manager_display_id_arrangement(did),
-            display_label ? display_label->label : "",
-            frame.origin.x, frame.origin.y, frame.size.width, frame.size.height,
-            buffer,
-            json_bool(did == g_display_manager.current_display_id));
+        fprintf(rsp, "\t\"index\":%d", display_manager_display_id_arrangement(did));
+        did_output = true;
+    }
+
+    if (flags & DISPLAY_PROPERTY_LABEL) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        struct display_label *display_label = display_manager_get_label_for_display(&g_display_manager, did);
+        fprintf(rsp, "\t\"label\":\"%s\"", display_label ? display_label->label : "");
+        did_output = true;
+    }
+
+    if (flags & DISPLAY_PROPERTY_FRAME) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        CGRect frame = CGDisplayBounds(did);
+        fprintf(rsp, "\t\"frame\":{\n\t\t\"x\":%.4f,\n\t\t\"y\":%.4f,\n\t\t\"w\":%.4f,\n\t\t\"h\":%.4f\n\t}", frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
+        did_output = true;
+    }
+
+    if (flags & DISPLAY_PROPERTY_SPACES) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        int count;
+        uint64_t *space_list = display_space_list(did, &count);
+
+        fprintf(rsp, "\t\"spaces\":[");
+        if (space_list) {
+            int first_mci = space_manager_mission_control_index(space_list[0]);
+            for (int i = 0; i < count; ++i) {
+                if (i < count - 1) {
+                    fprintf(rsp, "%d, ", first_mci + i);
+                } else {
+                    fprintf(rsp, "%d", first_mci + i);
+                }
+            }
+        }
+        fprintf(rsp, "]");
+        did_output = true;
+    }
+
+    if (flags & DISPLAY_PROPERTY_HAS_FOCUS) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"has-focus\":%s", json_bool(did == g_display_manager.current_display_id));
+    }
+
+    fprintf(rsp, "\n}");
 }
 
 CFStringRef display_uuid(uint32_t did)
