@@ -1055,7 +1055,7 @@ static EVENT_HANDLER(MOUSE_DRAGGED)
     } else if (g_mouse_state.current_action == MOUSE_MODE_RESIZE) {
         uint64_t event_time = read_os_timer();
         float dt = ((float) event_time - g_mouse_state.last_moved_time) * (1000.0f / (float)read_os_freq());
-        if (dt < 16.67f) goto out;
+        if (dt < 67.67f) goto out;
 
         int dx = point.x - g_mouse_state.down_location.x;
         int dy = point.y - g_mouse_state.down_location.y;
