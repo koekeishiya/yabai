@@ -22,7 +22,7 @@
 
 #define MAJOR  7
 #define MINOR  0
-#define PATCH  2
+#define PATCH  3
 
 struct signal *g_signal_event[SIGNAL_TYPE_COUNT];
 struct process_manager g_process_manager;

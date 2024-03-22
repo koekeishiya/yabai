@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.0.3] - 2024-03-22
 ### Changed
 - Whitelist zathura process for management because it incorrectly identifies as a background-only process [#2168](https://github.com/koekeishiya/yabai/issues/2168)
 - Config should be executed if the exec-bit is set, but interpreted if it is not [#2169](https://github.com/koekeishiya/yabai/issues/2169)
@@ -649,7 +651,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.3...HEAD
+[7.0.3]: https://github.com/koekeishiya/yabai/compare/v7.0.2...v7.0.3
 [7.0.2]: https://github.com/koekeishiya/yabai/compare/v7.0.1...v7.0.2
 [7.0.1]: https://github.com/koekeishiya/yabai/compare/v7.0.0...v7.0.1
 [7.0.0]: https://github.com/koekeishiya/yabai/compare/v6.0.15...v7.0.0
