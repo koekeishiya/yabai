@@ -405,7 +405,7 @@ enum window_op_error window_manager_resize_window_relative(struct window_manager
                 AX_ENHANCED_UI_WORKAROUND(window->application->ref, { window_manager_resize_window(window, dx, dy); });
             }
         } else {
-            window_manager_resize_window_relative_internal(window, window->frame, direction, dx, dy, animate);
+            window_manager_resize_window_relative_internal(window, window_ax_frame(window), direction, dx, dy, animate);
         }
     }
 

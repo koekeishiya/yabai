@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Consecutive window resize operations would not work correctly because it used a cached value for the window frame [#2182](https://github.com/koekeishiya/yabai/issues/2182)
 
 ## [7.0.3] - 2024-03-22
 ### Changed
