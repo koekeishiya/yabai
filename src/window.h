@@ -176,7 +176,7 @@ static char *window_property_str[] =
     "can-resize",
     "has-focus",
     "has-shadow",
-    "has-parent_zoom",
+    "has-parent-zoom",
     "has-fullscreen-zoom",
     "has-ax-reference",
     "is-native-fullscreen",
