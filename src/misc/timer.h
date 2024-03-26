@@ -35,23 +35,27 @@ static inline uint64_t read_cpu_timer(void)
 static inline uint64_t read_cpu_freq(void)
 {
 #ifdef __x86_64__
-    uint64_t ms_to_wait   = 100;
-    uint64_t os_freq      = read_os_freq();
-    uint64_t cpu_start    = read_cpu_timer();
-    uint64_t os_start     = read_os_timer();
-    uint64_t os_end       = 0;
-    uint64_t os_elapsed   = 0;
-    uint64_t os_wait_time = os_freq * ms_to_wait / 1000;
+    static uint64_t cpu_freq;
+    if (cpu_freq == 0) {
+        uint64_t ms_to_wait   = 100;
+        uint64_t os_freq      = read_os_freq();
+        uint64_t cpu_start    = read_cpu_timer();
+        uint64_t os_start     = read_os_timer();
+        uint64_t os_end       = 0;
+        uint64_t os_elapsed   = 0;
+        uint64_t os_wait_time = os_freq * ms_to_wait / 1000;
 
-    while (os_elapsed < os_wait_time) {
-        os_end     = read_os_timer();
-        os_elapsed = os_end - os_start;
+        while (os_elapsed < os_wait_time) {
+            os_end     = read_os_timer();
+            os_elapsed = os_end - os_start;
+        }
+
+        uint64_t cpu_end     = read_cpu_timer();
+        uint64_t cpu_elapsed = cpu_end - cpu_start;
+
+        cpu_freq = os_freq * cpu_elapsed / os_elapsed;
     }
-
-    uint64_t cpu_end     = read_cpu_timer();
-    uint64_t cpu_elapsed = cpu_end - cpu_start;
-
-    return os_freq * cpu_elapsed / os_elapsed;
+    return cpu_freq;
 #elif __arm64__
     uint64_t value;
     __asm__ __volatile__ ("mrs %0, cntfrq_el0" : "=r" (value));
