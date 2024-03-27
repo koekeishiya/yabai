@@ -30,6 +30,7 @@ void insert_feedback_show(struct window_node *node)
     CFTypeRef frame_region;
     CGRect frame = {{node->area.x, node->area.y},{node->area.w, node->area.h}};
     CGSNewRegionWithRect(&frame, &frame_region);
+    frame.origin.x = 0; frame.origin.y = 0;
 
     if (!node->feedback_window.id) {
         uint64_t tags = (1ULL << 1) | (1ULL << 9);
@@ -54,12 +55,15 @@ void insert_feedback_show(struct window_node *node)
                                    g_window_manager.insert_feedback_color.g,
                                    g_window_manager.insert_feedback_color.b,
                                    g_window_manager.insert_feedback_color.a);
+        SLSDisableUpdate(g_connection);
+        CGContextClearRect(node->feedback_window.context, frame);
+        CGContextFlush(node->feedback_window.context);
+        SLSReenableUpdate(g_connection);
         SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
         table_add(&g_window_manager.insert_feedback, &node->window_order[0], node);
         insert_feedback_update_notifications();
     }
 
-    frame.origin.x = 0; frame.origin.y = 0;
     CGFloat clip_x, clip_y, clip_w, clip_h;
     CGFloat midx = CGRectGetMidX(frame);
     CGFloat midy = CGRectGetMidY(frame);
