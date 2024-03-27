@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Consecutive window resize operations would not work correctly because it used a cached value for the window frame [#2182](https://github.com/koekeishiya/yabai/issues/2182)
-- Fix weird delay caused by interaction between macOS System APIs on Sonoma when using `--insert` in combination with other commands in rapid succession [#](https://github.com/koekeishiya/yabai/issues/2188)
+- Fix weird delay caused by interaction between macOS System APIs on Sonoma when using `--insert` in combination with other commands in rapid succession [#2188](https://github.com/koekeishiya/yabai/issues/2188)
 
 ## [7.0.3] - 2024-03-22
 ### Changed
