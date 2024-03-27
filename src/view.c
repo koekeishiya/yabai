@@ -27,7 +27,6 @@ void insert_feedback_update_notifications(void)
 #define INSERT_FEEDBACK_RADIUS 9
 void insert_feedback_show(struct window_node *node)
 {
-    bool created = false;
     CFTypeRef frame_region;
     CGRect frame = {{node->area.x, node->area.y},{node->area.w, node->area.h}};
     CGSNewRegionWithRect(&frame, &frame_region);
@@ -57,7 +56,7 @@ void insert_feedback_show(struct window_node *node)
                                    g_window_manager.insert_feedback_color.a);
         table_add(&g_window_manager.insert_feedback, &node->window_order[0], node);
         insert_feedback_update_notifications();
-        created = true;
+        SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
     }
 
     frame.origin.x = 0; frame.origin.y = 0;
@@ -115,8 +114,6 @@ void insert_feedback_show(struct window_node *node)
     SLSReenableUpdate(g_connection);
     CGPathRelease(path);
     CFRelease(frame_region);
-
-    if (created) SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
 }
 
 void insert_feedback_destroy(struct window_node *node)
