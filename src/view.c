@@ -54,9 +54,9 @@ void insert_feedback_show(struct window_node *node)
                                    g_window_manager.insert_feedback_color.g,
                                    g_window_manager.insert_feedback_color.b,
                                    g_window_manager.insert_feedback_color.a);
+        SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
         table_add(&g_window_manager.insert_feedback, &node->window_order[0], node);
         insert_feedback_update_notifications();
-        SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
     }
 
     frame.origin.x = 0; frame.origin.y = 0;
