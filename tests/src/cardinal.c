@@ -48,9 +48,9 @@ static inline int test_display_in_direction(struct test_display *display_list, i
     for (int i = 0; i < display_count; ++i) {
         if (i == source) continue;
 
-        bool direction = area_is_in_direction(&display_list[source].area, display_list[source].area_max, &display_list[i].area, display_list[i].area_max, DIR_WEST);
-        if (direction) {
-            int distance = area_distance_in_direction(&display_list[source].area, display_list[source].area_max, &display_list[i].area, display_list[i].area_max, DIR_WEST);
+        bool in_direction = area_is_in_direction(&display_list[source].area, display_list[source].area_max, &display_list[i].area, display_list[i].area_max, direction);
+        if (in_direction) {
+            int distance = area_distance_in_direction(&display_list[source].area, display_list[source].area_max, &display_list[i].area, display_list[i].area_max, direction);
             if (distance < best_distance) {
                 best_index = i;
                 best_distance = distance;
