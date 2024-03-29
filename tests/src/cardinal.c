@@ -75,4 +75,13 @@ TEST_FUNC(display_area_distance_in_direction,
 
     best_index = test_display_in_direction(display_list, array_count(display_list), 2, DIR_WEST);
     TEST_CHECK(best_index, 0);
+
+    best_index = test_display_in_direction(display_list, array_count(display_list), 0, DIR_EAST);
+    TEST_CHECK(best_index, 2);
+
+    best_index = test_display_in_direction(display_list, array_count(display_list), 1, DIR_EAST);
+    TEST_CHECK(best_index, 0);
+
+    best_index = test_display_in_direction(display_list, array_count(display_list), 2, DIR_EAST);
+    TEST_CHECK(best_index, -1);
 });
