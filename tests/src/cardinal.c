@@ -1,121 +1,78 @@
-TEST_FUNC(display_area_is_in_direction, {
-    struct {
-        struct area area;
-        CGPoint area_max;
-    } displays[3];
+struct test_display
+{
+    struct area area;
+    CGPoint area_max;
+};
 
-    displays[0].area.x     = 0;
-    displays[0].area.y     = 0;
-    displays[0].area.w     = 2560;
-    displays[0].area.h     = 1440;
-    displays[0].area_max.x = displays[0].area.x + displays[0].area.w - 1;
-    displays[0].area_max.y = displays[0].area.y + displays[0].area.h - 1;
+static inline void init_test_display_list(struct test_display display_list[3])
+{
+    display_list[0].area.x     = 0;
+    display_list[0].area.y     = 0;
+    display_list[0].area.w     = 2560;
+    display_list[0].area.h     = 1440;
+    display_list[0].area_max.x = display_list[0].area.x + display_list[0].area.w - 1;
+    display_list[0].area_max.y = display_list[0].area.y + display_list[0].area.h - 1;
 
-    displays[1].area.x     = -1728;
-    displays[1].area.y     = 0;
-    displays[1].area.w     = 1728;
-    displays[1].area.h     = 1117;
-    displays[1].area_max.x = displays[1].area.x + displays[1].area.w - 1;
-    displays[1].area_max.y = displays[1].area.y + displays[1].area.h - 1;
+    display_list[1].area.x     = -1728;
+    display_list[1].area.y     = 0;
+    display_list[1].area.w     = 1728;
+    display_list[1].area.h     = 1117;
+    display_list[1].area_max.x = display_list[1].area.x + display_list[1].area.w - 1;
+    display_list[1].area_max.y = display_list[1].area.y + display_list[1].area.h - 1;
 
-    displays[2].area.x     = 2560;
-    displays[2].area.y     = 0;
-    displays[2].area.w     = 1920;
-    displays[2].area.h     = 1080;
-    displays[2].area_max.x = displays[2].area.x + displays[2].area.w - 1;
-    displays[2].area_max.y = displays[2].area.y + displays[2].area.h - 1;
+    display_list[2].area.x     = 2560;
+    display_list[2].area.y     = 0;
+    display_list[2].area.w     = 1920;
+    display_list[2].area.h     = 1080;
+    display_list[2].area_max.x = display_list[2].area.x + display_list[2].area.w - 1;
+    display_list[2].area_max.y = display_list[2].area.y + display_list[2].area.h - 1;
+}
 
-    bool t1 = area_is_in_direction(&displays[0].area, displays[0].area_max, &displays[1].area, displays[1].area_max, DIR_WEST);
+TEST_FUNC(display_area_is_in_direction,
+{
+    struct test_display display_list[3];
+    init_test_display_list(display_list);
+
+    bool t1 = area_is_in_direction(&display_list[0].area, display_list[0].area_max, &display_list[1].area, display_list[1].area_max, DIR_WEST);
     TEST_CHECK(t1, true);
 
-    bool t2 = area_is_in_direction(&displays[0].area, displays[0].area_max, &displays[2].area, displays[2].area_max, DIR_WEST);
+    bool t2 = area_is_in_direction(&display_list[0].area, display_list[0].area_max, &display_list[2].area, display_list[2].area_max, DIR_WEST);
     TEST_CHECK(t2, false);
 });
 
-TEST_FUNC(display_area_distance_in_direction, {
-    struct {
-        struct area area;
-        CGPoint area_max;
-    } displays[3];
+static inline int test_display_in_direction(struct test_display *display_list, int display_count, int source, int direction)
+{
+    int best_index    = -1;
+    int best_distance = INT_MAX;
 
-    displays[0].area.x     = 0;
-    displays[0].area.y     = 0;
-    displays[0].area.w     = 2560;
-    displays[0].area.h     = 1440;
-    displays[0].area_max.x = displays[0].area.x + displays[0].area.w - 1;
-    displays[0].area_max.y = displays[0].area.y + displays[0].area.h - 1;
+    for (int i = 0; i < display_count; ++i) {
+        if (i == source) continue;
 
-    displays[1].area.x     = -1728;
-    displays[1].area.y     = 0;
-    displays[1].area.w     = 1728;
-    displays[1].area.h     = 1117;
-    displays[1].area_max.x = displays[1].area.x + displays[1].area.w - 1;
-    displays[1].area_max.y = displays[1].area.y + displays[1].area.h - 1;
-
-    displays[2].area.x     = 2560;
-    displays[2].area.y     = 0;
-    displays[2].area.w     = 1920;
-    displays[2].area.h     = 1080;
-    displays[2].area_max.x = displays[2].area.x + displays[2].area.w - 1;
-    displays[2].area_max.y = displays[2].area.y + displays[2].area.h - 1;
-
-    {
-        int best_index = -1;
-        int best_distance = INT_MAX;
-
-        for (int i = 0; i < array_count(displays); ++i) {
-            if (i == 0) continue;
-
-            bool direction = area_is_in_direction(&displays[0].area, displays[0].area_max, &displays[i].area, displays[i].area_max, DIR_WEST);
-            if (direction) {
-                int distance = area_distance_in_direction(&displays[0].area, displays[0].area_max, &displays[i].area, displays[i].area_max, DIR_WEST);
-                if (distance < best_distance) {
-                    best_index = i;
-                    best_distance = distance;
-                }
+        bool direction = area_is_in_direction(&display_list[source].area, display_list[source].area_max, &display_list[i].area, display_list[i].area_max, DIR_WEST);
+        if (direction) {
+            int distance = area_distance_in_direction(&display_list[source].area, display_list[source].area_max, &display_list[i].area, display_list[i].area_max, DIR_WEST);
+            if (distance < best_distance) {
+                best_index = i;
+                best_distance = distance;
             }
         }
-
-        TEST_CHECK(best_index, 1);
     }
 
-    {
-        int best_index = -1;
-        int best_distance = INT_MAX;
+    return best_index;
+}
 
-        for (int i = 0; i < array_count(displays); ++i) {
-            if (i == 1) continue;
+TEST_FUNC(display_area_distance_in_direction,
+{
+    int best_index;
+    struct test_display display_list[3];
+    init_test_display_list(display_list);
 
-            bool direction = area_is_in_direction(&displays[1].area, displays[1].area_max, &displays[i].area, displays[i].area_max, DIR_WEST);
-            if (direction) {
-                int distance = area_distance_in_direction(&displays[1].area, displays[1].area_max, &displays[i].area, displays[i].area_max, DIR_WEST);
-                if (distance < best_distance) {
-                    best_index = i;
-                    best_distance = distance;
-                }
-            }
-        }
+    best_index = test_display_in_direction(display_list, array_count(display_list), 0, DIR_WEST);
+    TEST_CHECK(best_index, 1);
 
-        TEST_CHECK(best_index, -1);
-    }
+    best_index = test_display_in_direction(display_list, array_count(display_list), 1, DIR_WEST);
+    TEST_CHECK(best_index, -1);
 
-    {
-        int best_index = -1;
-        int best_distance = INT_MAX;
-
-        for (int i = 0; i < array_count(displays); ++i) {
-            if (i == 2) continue;
-
-            bool direction = area_is_in_direction(&displays[2].area, displays[2].area_max, &displays[i].area, displays[i].area_max, DIR_WEST);
-            if (direction) {
-                int distance = area_distance_in_direction(&displays[2].area, displays[2].area_max, &displays[i].area, displays[i].area_max, DIR_WEST);
-                if (distance < best_distance) {
-                    best_index = i;
-                    best_distance = distance;
-                }
-            }
-        }
-
-        TEST_CHECK(best_index, 0);
-    }
+    best_index = test_display_in_direction(display_list, array_count(display_list), 2, DIR_WEST);
+    TEST_CHECK(best_index, 0);
 });
