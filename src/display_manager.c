@@ -273,14 +273,14 @@ uint32_t display_manager_find_closest_display_in_direction(uint32_t source_did, 
     int best_distance = INT_MAX;
 
     struct area source_area = area_from_cgrect(CGDisplayBounds(source_did));
-    CGPoint source_area_max = { source_area.x + source_area.w - 1, source_area.y + source_area.h - 1};
+    CGPoint source_area_max = area_max_point(source_area);
 
     for (int i = 0; i < display_count; ++i) {
         uint32_t did = display_list[i];
         if (did == source_did) continue;
 
         struct area target_area = area_from_cgrect(CGDisplayBounds(did));
-        CGPoint target_area_max = { target_area.x + target_area.w - 1, target_area.y + target_area.h - 1};
+        CGPoint target_area_max = area_max_point(target_area);
 
         if (area_is_in_direction(&source_area, source_area_max, &target_area, target_area_max, direction)) {
             int distance = area_distance_in_direction(&source_area, source_area_max, &target_area, target_area_max, direction);
