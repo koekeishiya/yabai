@@ -9,7 +9,7 @@ unsigned int __src_osax_loader_len;
 typedef TEST_SIG(function);
 
 #define TEST_FUNC(name, code) static TEST_SIG(name) { char *test_name = #name; bool result = true; {code} return result; }
-#define TEST_CHECK(r, e) ((r) != (e) ? printf("        \e[1;33m%s\e[m \e[1;31m%s == %s\e[m \e[1;31m(%d == %d)\e[m\n", test_name, #r, #e, r, e), false : true)
+#define TEST_CHECK(r, e) ((r) != (e) ? printf("                   \e[1;33m%s\e[m \e[1;31m%s == %s\e[m \e[1;31m(%d == %d)\e[m\n", test_name, #r, #e, r, e), false : true)
 
 #include "cardinal.c"
 
