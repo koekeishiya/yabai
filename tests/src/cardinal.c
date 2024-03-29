@@ -26,10 +26,10 @@ TEST_FUNC(display_area_is_in_direction, {
     displays[2].area_max.y = displays[2].area.y + displays[2].area.h - 1;
 
     bool t1 = area_is_in_direction(&displays[0].area, displays[0].area_max, &displays[1].area, displays[1].area_max, DIR_WEST);
-    result &= TEST_CHECK(t1, true);
+    TEST_CHECK(t1, true);
 
     bool t2 = area_is_in_direction(&displays[0].area, displays[0].area_max, &displays[2].area, displays[2].area_max, DIR_WEST);
-    result &= TEST_CHECK(t2, false);
+    TEST_CHECK(t2, false);
 });
 
 TEST_FUNC(display_area_distance_in_direction, {
@@ -76,7 +76,7 @@ TEST_FUNC(display_area_distance_in_direction, {
             }
         }
 
-        result &= TEST_CHECK(best_index, 1);
+        TEST_CHECK(best_index, 1);
     }
 
     {
@@ -96,7 +96,7 @@ TEST_FUNC(display_area_distance_in_direction, {
             }
         }
 
-        result &= TEST_CHECK(best_index, -1);
+        TEST_CHECK(best_index, -1);
     }
 
     {
@@ -116,6 +116,6 @@ TEST_FUNC(display_area_distance_in_direction, {
             }
         }
 
-        result &= TEST_CHECK(best_index, 0);
+        TEST_CHECK(best_index, 0);
     }
 });
