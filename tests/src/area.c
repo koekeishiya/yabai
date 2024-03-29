@@ -43,7 +43,7 @@ TEST_FUNC(display_area_is_in_direction,
     TEST_CHECK(t4, true);
 });
 
-static inline int test_display_in_direction(struct test_area *display_list, int display_count, int source, int direction)
+static inline int closest_display_in_direction(struct test_area *display_list, int display_count, int source, int direction)
 {
     int best_index    = -1;
     int best_distance = INT_MAX;
@@ -63,27 +63,27 @@ static inline int test_display_in_direction(struct test_area *display_list, int 
     return best_index;
 }
 
-TEST_FUNC(display_area_distance_in_direction,
+TEST_FUNC(closest_display_in_direction,
 {
     int best_index;
     struct test_area display_list[3];
     init_test_display_list(display_list);
 
-    best_index = test_display_in_direction(display_list, array_count(display_list), 0, DIR_WEST);
+    best_index = closest_display_in_direction(display_list, array_count(display_list), 0, DIR_WEST);
     TEST_CHECK(best_index, 1);
 
-    best_index = test_display_in_direction(display_list, array_count(display_list), 1, DIR_WEST);
+    best_index = closest_display_in_direction(display_list, array_count(display_list), 1, DIR_WEST);
     TEST_CHECK(best_index, -1);
 
-    best_index = test_display_in_direction(display_list, array_count(display_list), 2, DIR_WEST);
+    best_index = closest_display_in_direction(display_list, array_count(display_list), 2, DIR_WEST);
     TEST_CHECK(best_index, 0);
 
-    best_index = test_display_in_direction(display_list, array_count(display_list), 0, DIR_EAST);
+    best_index = closest_display_in_direction(display_list, array_count(display_list), 0, DIR_EAST);
     TEST_CHECK(best_index, 2);
 
-    best_index = test_display_in_direction(display_list, array_count(display_list), 1, DIR_EAST);
+    best_index = closest_display_in_direction(display_list, array_count(display_list), 1, DIR_EAST);
     TEST_CHECK(best_index, 0);
 
-    best_index = test_display_in_direction(display_list, array_count(display_list), 2, DIR_EAST);
+    best_index = closest_display_in_direction(display_list, array_count(display_list), 2, DIR_EAST);
     TEST_CHECK(best_index, -1);
 });

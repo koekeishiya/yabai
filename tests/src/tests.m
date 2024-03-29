@@ -16,7 +16,7 @@ typedef TEST_SIG(function);
 #define TEST_ENTRY(name) { #name, test_##name },
 #define TEST_LIST                                              \
     TEST_ENTRY(display_area_is_in_direction)                   \
-    TEST_ENTRY(display_area_distance_in_direction)
+    TEST_ENTRY(closest_display_in_direction)
 
 static struct {
     char *name;
