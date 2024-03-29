@@ -18,7 +18,7 @@ typedef TEST_SIG(function);
     TEST_ENTRY(display_area_is_in_direction)                   \
     TEST_ENTRY(display_area_distance_in_direction)
 
-static struct test {
+static struct {
     char *name;
     test_function *func;
 } tests[] = {

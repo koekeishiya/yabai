@@ -1,5 +1,5 @@
 TEST_FUNC(display_area_is_in_direction, {
-    struct test_display {
+    struct {
         struct area area;
         CGPoint area_max;
     } displays[3];
@@ -33,7 +33,7 @@ TEST_FUNC(display_area_is_in_direction, {
 });
 
 TEST_FUNC(display_area_distance_in_direction, {
-    struct test_display {
+    struct {
         struct area area;
         CGPoint area_max;
     } displays[3];
