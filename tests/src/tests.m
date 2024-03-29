@@ -30,15 +30,22 @@ int main(int argc, char **argv)
     int succeeded = 0;
     int failed = 0;
     int total = array_count(tests);
-    printf("\e[1;34mRunning %d tests..\e[m\n\n", total);
+    printf("\e[1;34m -- Running %d tests --\e[m\n\n", total);
+
+    uint64_t cpu_freq  = read_cpu_freq();
+    uint64_t begin_tsc = read_cpu_timer();
 
     for (int i = 0; i < total; ++i) {
+        uint64_t tsc = read_cpu_timer();
         bool result = tests[i].func();
-        printf("%s \e[1;33m%s\e[m\n", result ? "\e[1;32msuccess\e[m" : " \e[1;31mfailed\e[m", tests[i].name);
+        double ms_elapsed = 1000.0 * (double)(read_cpu_timer() - tsc) / (double)cpu_freq;
+
+        printf("(%0.4fms) %s \e[1;33m%s\e[m\n", ms_elapsed, result ? "\e[1;32msuccess\e[m" : " \e[1;31mfailed\e[m", tests[i].name);
         if (result) ++succeeded; else ++failed;
     }
 
-    printf("\n\e[1;34mCompleted..\e[m\n");
+    double ms_elapsed = 1000.0 * (double)(read_cpu_timer() - begin_tsc) / (double)cpu_freq;
+    printf("\n\e[1;34m -- Completed (%0.4fms) --\e[m\n", ms_elapsed);
     printf("\t%d \e[1;32msucceeded\e[m\n", succeeded);
     printf("\t%d \e[1;31mfailed\e[m\n", failed);
     printf("\t%d \e[1;33mtotal\e[m\n", total);
