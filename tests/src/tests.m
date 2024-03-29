@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     int succeeded = 0;
     int failed = 0;
     int total = array_count(tests);
-    printf("Running %d tests..\n\n", total);
+    printf("\e[1;34mRunning %d tests..\e[m\n\n", total);
 
     for (int i = 0; i < total; ++i) {
         bool result = tests[i].func();
@@ -38,9 +38,10 @@ int main(int argc, char **argv)
         if (result) ++succeeded; else ++failed;
     }
 
-    printf("\nCompleted:\n");
-    printf("\t%d succeeded\n", succeeded);
-    printf("\t%d failed\n", failed);
-    printf("\t%d total\n", total);
-    return 0;
+    printf("\n\e[1;34mCompleted..\e[m\n");
+    printf("\t%d \e[1;32msucceeded\e[m\n", succeeded);
+    printf("\t%d \e[1;31mfailed\e[m\n", failed);
+    printf("\t%d \e[1;33mtotal\e[m\n", total);
+
+    return total == succeeded ? EXIT_SUCCESS : EXIT_FAILURE;
 }
