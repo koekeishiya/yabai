@@ -56,25 +56,6 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
         return;
     }
 
-    if (!workspace_application_is_observable(process)) {
-        debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
-        workspace_application_observe_activation_policy(g_workspace_context, process);
-
-        //
-        // NOTE(koekeishiya): Do this again in case of race-conditions between the previous check and key-value observation subscription.
-        // Not actually sure if this can happen in practice..
-        //
-
-        if (workspace_application_is_observable(process)) {
-            @try {
-                NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
-                if (application && [application observationInfo]) {
-                    [application removeObserver:g_workspace_context forKeyPath:@"activationPolicy" context:process];
-                }
-            } @catch (NSException * __unused exception) {}
-        } else { return; }
-    }
-
     if (!workspace_application_is_finished_launching(process)) {
         debug("%s: %s (%d) is not finished launching, subscribing to finishedLaunching changes\n", __FUNCTION__, process->name, process->pid);
         workspace_application_observe_finished_launching(g_workspace_context, process);
@@ -89,6 +70,25 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
                 NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
                 if (application && [application observationInfo]) {
                     [application removeObserver:g_workspace_context forKeyPath:@"finishedLaunching" context:process];
+                }
+            } @catch (NSException * __unused exception) {}
+        } else { return; }
+    }
+
+    if (!workspace_application_is_observable(process)) {
+        debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
+        workspace_application_observe_activation_policy(g_workspace_context, process);
+
+        //
+        // NOTE(koekeishiya): Do this again in case of race-conditions between the previous check and key-value observation subscription.
+        // Not actually sure if this can happen in practice..
+        //
+
+        if (workspace_application_is_observable(process)) {
+            @try {
+                NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
+                if (application && [application observationInfo]) {
+                    [application removeObserver:g_workspace_context forKeyPath:@"activationPolicy" context:process];
                 }
             } @catch (NSException * __unused exception) {}
         } else { return; }

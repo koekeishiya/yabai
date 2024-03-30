@@ -1,6 +1,7 @@
 extern mach_port_t g_bs_port;
 extern uint8_t *g_event_bytes;
 extern struct event_loop g_event_loop;
+extern void *g_workspace_context;
 extern struct process_manager g_process_manager;
 extern struct mouse_state g_mouse_state;
 extern double g_cv_host_clock_frequency;
@@ -2526,14 +2527,19 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
         while (bucket) {
             if (bucket->value) {
                 struct process *process = bucket->value;
-                struct application *application = application_create(process);
+                if (workspace_application_is_observable(process)) {
+                    struct application *application = application_create(process);
 
-                if (application_observe(application)) {
-                    window_manager_add_application(wm, application);
-                    window_manager_add_existing_application_windows(sm, wm, application, -1);
+                    if (application_observe(application)) {
+                        window_manager_add_application(wm, application);
+                        window_manager_add_existing_application_windows(sm, wm, application, -1);
+                    } else {
+                        application_unobserve(application);
+                        application_destroy(application);
+                    }
                 } else {
-                    application_unobserve(application);
-                    application_destroy(application);
+                    debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
+                    workspace_application_observe_activation_policy(g_workspace_context, process);
                 }
             }
 

@@ -79,8 +79,10 @@ bool workspace_application_is_observable(struct process *process)
 {
     NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
     if (application) {
-        return [application activationPolicy] != NSApplicationActivationPolicyProhibited;
+        process->policy = [application activationPolicy];
+        return process->policy == NSApplicationActivationPolicyRegular;
     } else {
+        process->policy = NSApplicationActivationPolicyProhibited;
         return false;
     }
 }
@@ -182,14 +184,11 @@ extern struct event_loop g_event_loop;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ([keyPath isEqualToString:@"activationPolicy"]) {
+        struct process *process = context;
+        assert(!process->terminated);
+
         id result = [change objectForKey:NSKeyValueChangeNewKey];
-        if ([result intValue] != NSApplicationActivationPolicyProhibited) {
-            struct process *process = context;
-            assert(!process->terminated);
-
-            debug("%s: activation policy changed for %s (%d)\n", __FUNCTION__, process->name, process->pid);
-            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
-
+        if ([result intValue] != process->policy) {
             //
             // :WorstApiEverMade
             //
@@ -202,18 +201,19 @@ extern struct event_loop g_event_loop;
             @try {
                 [object removeObserver:self forKeyPath:@"activationPolicy" context:process];
             } @catch (NSException * __unused exception) {}
+
+            process->policy = [result intValue];
+            debug("%s: activation policy changed for %s (%d)\n", __FUNCTION__, process->name, process->pid);
+            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
         }
     }
 
     if ([keyPath isEqualToString:@"finishedLaunching"]) {
+        struct process *process = context;
+        assert(!process->terminated);
+
         id result = [change objectForKey:NSKeyValueChangeNewKey];
         if ([result intValue] == 1) {
-            struct process *process = context;
-            assert(!process->terminated);
-
-            debug("%s: %s (%d) finished launching\n", __FUNCTION__, process->name, process->pid);
-            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
-
             //
             // :WorstApiEverMade
             //
@@ -226,6 +226,9 @@ extern struct event_loop g_event_loop;
             @try {
                 [object removeObserver:self forKeyPath:@"finishedLaunching" context:process];
             } @catch (NSException * __unused exception) {}
+
+            debug("%s: %s (%d) finished launching\n", __FUNCTION__, process->name, process->pid);
+            event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
         }
     }
 }

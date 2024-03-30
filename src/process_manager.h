@@ -9,8 +9,9 @@ struct process
     ProcessSerialNumber psn;
     pid_t pid;
     char *name;
-    bool volatile terminated;
     void *ns_application;
+    uint32_t policy;
+    bool volatile terminated;
 };
 
 struct process_manager
