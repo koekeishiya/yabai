@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.0.4] - 2024-03-30
 ### Changed
 - Consecutive window resize operations would not work correctly because it used a cached value for the window frame [#2182](https://github.com/koekeishiya/yabai/issues/2182)
 - Fix weird delay caused by interaction between macOS System APIs on Sonoma when using `--insert` in combination with other commands in rapid succession [#2188](https://github.com/koekeishiya/yabai/issues/2188)
@@ -655,7 +657,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.3...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.4...HEAD
+[7.0.4]: https://github.com/koekeishiya/yabai/compare/v7.0.3...v7.0.4
 [7.0.3]: https://github.com/koekeishiya/yabai/compare/v7.0.2...v7.0.3
 [7.0.2]: https://github.com/koekeishiya/yabai/compare/v7.0.1...v7.0.2
 [7.0.1]: https://github.com/koekeishiya/yabai/compare/v7.0.0...v7.0.1
