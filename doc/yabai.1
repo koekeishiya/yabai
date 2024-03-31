@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-03-22
+.\"      Date: 2024-03-31
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-03-22" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-03-31" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -643,6 +643,20 @@ Set the opacity of the selected window.
 The window will no longer be eligible for automatic change in opacity upon focus change.
 .br
 Specify the value \fI0.0\fP to reset back to full opacity and make it become automatically managed.
+.br
+System Integrity Protection must be partially disabled.
+.RE
+.sp
+\fB\-\-raise\fP [\fI<WINDOW_SEL>\fP]
+.RS 4
+Orders the selected window above the given window, or to the front within its layer.
+.br
+System Integrity Protection must be partially disabled.
+.RE
+.sp
+\fB\-\-lower\fP [\fI<WINDOW_SEL>\fP]
+.RS 4
+Orders the selected window below the given window, or to the back within its layer.
 .br
 System Integrity Protection must be partially disabled.
 .RE

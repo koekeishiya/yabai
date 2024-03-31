@@ -141,6 +141,8 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_RATIO      "--ratio"
 #define COMMAND_WINDOW_SUB_LAYER  "--sub-layer"
 #define COMMAND_WINDOW_OPACITY    "--opacity"
+#define COMMAND_WINDOW_RAISE      "--raise"
+#define COMMAND_WINDOW_LOWER      "--lower"
 #define COMMAND_WINDOW_TOGGLE     "--toggle"
 
 #define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
@@ -2224,6 +2226,36 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 }
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_RAISE)) {
+            struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
+            uint32_t selector_wid = 0;
+
+            if (token_is_valid(selector.token)) {
+                if (selector.did_parse && selector.window) {
+                    selector_wid = selector.window->id;
+                } else {
+                    return;
+                }
+            }
+
+            if (!scripting_addition_order_window(acting_window->id, 1, selector_wid)) {
+                daemon_fail(rsp, "could not raise window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_LOWER)) {
+            struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
+            uint32_t selector_wid = 0;
+
+            if (token_is_valid(selector.token)) {
+                if (selector.did_parse && selector.window) {
+                    selector_wid = selector.window->id;
+                } else {
+                    return;
+                }
+            }
+
+            if (!scripting_addition_order_window(acting_window->id, -1, selector_wid)) {
+                daemon_fail(rsp, "could not lower window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
             }
         } else {
             daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);

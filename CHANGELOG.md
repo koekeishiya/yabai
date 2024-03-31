@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Added window commands `--raise ['<WINDOW_SEL>']` and `--lower ['<WINDOW_SEL>']` [#2198](https://github.com/koekeishiya/yabai/issues/2198)
 
 ## [7.0.4] - 2024-03-30
 ### Changed

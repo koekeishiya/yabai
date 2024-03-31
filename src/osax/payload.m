@@ -847,7 +847,6 @@ static void do_window_order(char *message)
 
     uint32_t b_wid;
     unpack(b_wid);
-    if (!b_wid) return;
 
     SLSOrderWindow(SLSMainConnectionID(), a_wid, order, b_wid);
 }

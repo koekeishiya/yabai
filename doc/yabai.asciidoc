@@ -432,6 +432,14 @@ COMMAND
     Specify the value '0.0' to reset back to full opacity and make it become automatically managed. +
     System Integrity Protection must be partially disabled.
 
+*--raise* ['<WINDOW_SEL>']::
+    Orders the selected window above the given window, or to the front within its layer. +
+    System Integrity Protection must be partially disabled.
+
+*--lower* ['<WINDOW_SEL>']::
+    Orders the selected window below the given window, or to the back within its layer. +
+    System Integrity Protection must be partially disabled.
+
 Query
 ~~~~~~
 

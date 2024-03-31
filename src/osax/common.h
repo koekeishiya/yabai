@@ -1,7 +1,7 @@
 #ifndef SA_COMMON_H
 #define SA_COMMON_H
 
-#define OSAX_VERSION                "2.1.5"
+#define OSAX_VERSION                "2.1.6"
 
 #define OSAX_ATTRIB_DOCK_SPACES     0x01
 #define OSAX_ATTRIB_DPPM            0x02
