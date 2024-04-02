@@ -206,28 +206,28 @@ struct window
 
 enum window_flag
 {
-    WINDOW_SHADOW     = 1 << 0,
-    WINDOW_FULLSCREEN = 1 << 1,
-    WINDOW_MINIMIZE   = 1 << 2,
-    WINDOW_FLOAT      = 1 << 3,
-    WINDOW_STICKY     = 1 << 4,
+    WINDOW_SHADOW     = 0x01,
+    WINDOW_FULLSCREEN = 0x02,
+    WINDOW_MINIMIZE   = 0x04,
+    WINDOW_FLOAT      = 0x08,
+    WINDOW_STICKY     = 0x10
 };
-
-#define window_check_flag(w, x) ((w)->flags  &  (x))
-#define window_clear_flag(w, x) ((w)->flags &= ~(x))
-#define window_set_flag(w, x)   ((w)->flags |=  (x))
 
 enum window_rule_flag
 {
-    WINDOW_RULE_MANAGED    = 1 << 0,
-    WINDOW_RULE_FULLSCREEN = 1 << 1,
-    WINDOW_RULE_MFF        = 1 << 2,
-    WINDOW_RULE_MFF_VALUE  = 1 << 3,
+    WINDOW_RULE_MANAGED    = 0x01,
+    WINDOW_RULE_FULLSCREEN = 0x02,
+    WINDOW_RULE_MFF        = 0x04,
+    WINDOW_RULE_MFF_VALUE  = 0x08
 };
 
-#define window_rule_check_flag(w, x) ((w)->rule_flags  &  (x))
-#define window_rule_clear_flag(w, x) ((w)->rule_flags &= ~(x))
-#define window_rule_set_flag(w, x)   ((w)->rule_flags |=  (x))
+static inline bool window_check_flag(struct window *w, enum window_flag x) { return w->flags & x; }
+static inline void window_clear_flag(struct window *w, enum window_flag x) { w->flags &= ~x; }
+static inline void window_set_flag(struct window *w, enum window_flag x) { w->flags |= x; }
+
+static inline bool window_check_rule_flag(struct window *w, enum window_rule_flag x) { return w->rule_flags & x; }
+static inline void window_clear_rule_flag(struct window *w, enum window_rule_flag x) { w->rule_flags &= ~x; }
+static inline void window_set_rule_flag(struct window *w, enum window_rule_flag x) { w->rule_flags |= x; }
 
 CFStringRef window_display_uuid(uint32_t wid);
 uint32_t window_display_id(uint32_t wid);

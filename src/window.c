@@ -831,7 +831,7 @@ err:
 bool window_shadow(uint32_t wid)
 {
     uint64_t tags = window_tags(wid);
-    return !(tags & (1 << 3));
+    return !(tags & 0x8);
 }
 
 float window_opacity(uint32_t wid)

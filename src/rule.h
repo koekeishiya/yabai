@@ -5,33 +5,25 @@
 #define RULE_PROP_ON  1
 #define RULE_PROP_OFF 2
 
-#define rule_check_flag(r, x) ((r)->flags  &  (x))
-#define rule_clear_flag(r, x) ((r)->flags &= ~(x))
-#define rule_set_flag(r, x)   ((r)->flags |=  (x))
-
-#define rule_effects_check_flag(e, x) ((e)->flags  &  (x))
-#define rule_effects_clear_flag(e, x) ((e)->flags &= ~(x))
-#define rule_effects_set_flag(e, x)   ((e)->flags |=  (x))
-
-enum rule_flags
+enum rule_flag
 {
-    RULE_APP_VALID       = 1 << 0,
-    RULE_TITLE_VALID     = 1 << 1,
-    RULE_ROLE_VALID      = 1 << 2,
-    RULE_SUBROLE_VALID   = 1 << 3,
-    RULE_APP_EXCLUDE     = 1 << 4,
-    RULE_TITLE_EXCLUDE   = 1 << 5,
-    RULE_ROLE_EXCLUDE    = 1 << 6,
-    RULE_SUBROLE_EXCLUDE = 1 << 7,
-    RULE_ONE_SHOT        = 1 << 8,
-    RULE_ONE_SHOT_REMOVE = 1 << 9
+    RULE_APP_VALID       = 0x001,
+    RULE_TITLE_VALID     = 0x002,
+    RULE_ROLE_VALID      = 0x004,
+    RULE_SUBROLE_VALID   = 0x008,
+    RULE_APP_EXCLUDE     = 0x010,
+    RULE_TITLE_EXCLUDE   = 0x020,
+    RULE_ROLE_EXCLUDE    = 0x040,
+    RULE_SUBROLE_EXCLUDE = 0x080,
+    RULE_ONE_SHOT        = 0x100,
+    RULE_ONE_SHOT_REMOVE = 0x200
 };
 
 enum rule_effects_flag
 {
-    RULE_FOLLOW_SPACE = 1 << 0,
-    RULE_OPACITY      = 1 << 1,
-    RULE_LAYER        = 1 << 2,
+    RULE_FOLLOW_SPACE = 0x01,
+    RULE_OPACITY      = 0x02,
+    RULE_LAYER        = 0x04
 };
 
 struct rule_effects
@@ -62,6 +54,14 @@ struct rule
     struct rule_effects effects;
     uint16_t flags;
 };
+
+static inline bool rule_check_flag(struct rule *r, enum rule_flag x) { return r->flags & x; }
+static inline void rule_clear_flag(struct rule *r, enum rule_flag x) { r->flags &= ~x; }
+static inline void rule_set_flag(struct rule *r, enum rule_flag x) { r->flags |= x; }
+
+static inline bool rule_effects_check_flag(struct rule_effects *e, enum rule_effects_flag x) { return e->flags & x; }
+static inline void rule_effects_clear_flag(struct rule_effects *e, enum rule_effects_flag x) { e->flags &= ~x; }
+static inline void rule_effects_set_flag(struct rule_effects *e, enum rule_effects_flag x) { e->flags |= x; }
 
 void rule_serialize(FILE *rsp, struct rule *rule, int index);
 void rule_combine_effects(struct rule_effects *rule_effects, struct rule_effects *result);
