@@ -174,29 +174,40 @@ static const char *view_type_str[] =
     "float"
 };
 
+enum view_flag
+{
+    VIEW_LAYOUT         = 0x001,
+    VIEW_TOP_PADDING    = 0x002,
+    VIEW_BOTTOM_PADDING = 0x004,
+    VIEW_LEFT_PADDING   = 0x008,
+    VIEW_RIGHT_PADDING  = 0x010,
+    VIEW_WINDOW_GAP     = 0x020,
+    VIEW_AUTO_BALANCE   = 0x040,
+    VIEW_ENABLE_PADDING = 0x080,
+    VIEW_ENABLE_GAP     = 0x100,
+    VIEW_IS_VALID       = 0x200,
+    VIEW_IS_DIRTY       = 0x400,
+};
+
 struct view
 {
-    CFStringRef suuid;
+    CFStringRef uuid;
     uint64_t sid;
     struct window_node *root;
-    enum view_type layout;
     uint32_t insertion_point;
+    enum view_type layout;
     int top_padding;
     int bottom_padding;
     int left_padding;
     int right_padding;
     int window_gap;
-    bool custom_layout;
-    bool custom_top_padding;
-    bool custom_bottom_padding;
-    bool custom_left_padding;
-    bool custom_right_padding;
-    bool custom_window_gap;
-    bool enable_padding;
-    bool enable_gap;
-    bool is_valid;
-    bool is_dirty;
+    bool auto_balance;
+    uint64_t flags;
 };
+
+#define view_check_flag(v, x) ((v)->flags  &  (x))
+#define view_clear_flag(v, x) ((v)->flags &= ~(x))
+#define view_set_flag(v, x)   ((v)->flags |=  (x))
 
 void insert_feedback_show(struct window_node *node);
 void insert_feedback_destroy(struct window_node *node);

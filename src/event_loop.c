@@ -170,7 +170,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
             view_add_window_node_with_insertion_point(view, window, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
 
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
             view_list[view_count++] = view;
 
             prev_window_id = window->id;
@@ -197,7 +197,7 @@ next:
         if (!view_is_dirty(view))         continue;
 
         window_node_flush(view->root);
-        view->is_dirty = false;
+        view_clear_flag(view, VIEW_IS_DIRTY);
     }
 }
 
@@ -241,7 +241,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
             view_remove_window_node(view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
 
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
             view_list[view_count++] = view;
         }
 
@@ -274,7 +274,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
         if (!view_is_dirty(view))         continue;
 
         window_node_flush(view->root);
-        view->is_dirty = false;
+        view_clear_flag(view, VIEW_IS_DIRTY);
     }
 
 out:
@@ -369,7 +369,7 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
             view_add_window_node_with_insertion_point(view, window, prev_window_id);
             window_manager_add_managed_window(&g_window_manager, window, view);
 
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
             view_list[view_count++] = view;
 
             prev_window_id = window->id;
@@ -391,7 +391,7 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
         if (!view_is_dirty(view))         continue;
 
         window_node_flush(view->root);
-        view->is_dirty = false;
+        view_clear_flag(view, VIEW_IS_DIRTY);
     }
 
     event_signal_push(SIGNAL_APPLICATION_VISIBLE, application);
@@ -432,7 +432,7 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
             window_manager_remove_managed_window(&g_window_manager, window->id);
             window_manager_purify_window(&g_window_manager, window);
 
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
             view_list[view_count++] = view;
         }
     }
@@ -452,7 +452,7 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
         if (!view_is_dirty(view))         continue;
 
         window_node_flush(view->root);
-        view->is_dirty = false;
+        view_clear_flag(view, VIEW_IS_DIRTY);
     }
 
     event_signal_push(SIGNAL_APPLICATION_HIDDEN, application);
@@ -599,7 +599,7 @@ static EVENT_HANDLER(WINDOW_MOVED)
                 if (space_is_visible(view->sid)) {
                     window_node_flush(node);
                 } else {
-                    view->is_dirty = true;
+                    view_set_flag(view, VIEW_IS_DIRTY);
                 }
             }
         }
@@ -677,7 +677,7 @@ static EVENT_HANDLER(WINDOW_RESIZED)
                     if (space_is_visible(view->sid)) {
                         window_node_flush(node);
                     } else {
-                        view->is_dirty = true;
+                        view_set_flag(view, VIEW_IS_DIRTY);
                     }
                 }
             }
@@ -812,7 +812,7 @@ static EVENT_HANDLER(SPACE_CHANGED)
 
         if (view_is_dirty(view)) {
             window_node_flush(view->root);
-            view->is_dirty = false;
+            view_clear_flag(view, VIEW_IS_DIRTY);
         }
     }
 
@@ -864,7 +864,7 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
 
         if (view_is_dirty(view)) {
             window_node_flush(view->root);
-            view->is_dirty = false;
+            view_clear_flag(view, VIEW_IS_DIRTY);
         }
     }
 

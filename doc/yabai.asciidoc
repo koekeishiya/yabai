@@ -215,9 +215,6 @@ Global Settings
     'horizontal': The window is split along the x-axis. +
     'auto': The axis is determined based on width/height ratio.
 
-*auto_balance* ['<BOOL_SEL>']::
-    Balance the window tree upon change, so that all windows occupy the same area.
-
 *mouse_modifier* ['cmd|alt|shift|ctrl|fn']::
     Keyboard modifier used for moving and resizing windows.
 
@@ -250,6 +247,9 @@ Space Settings
 
 *window_gap* ['<integer number>']::
     Size of the gap that separates windows for the selected space.
+
+*auto_balance* ['<BOOL_SEL>']::
+    Balance the window tree upon change, so that all windows occupy the same area.
 
 Display
 ~~~~~~~

@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 - Added window commands `--raise ['<WINDOW_SEL>']` and `--lower ['<WINDOW_SEL>']` [#2198](https://github.com/koekeishiya/yabai/issues/2198)
 
+### Changed
+- Config *global setting* `auto_balance` is now categorized as a *space setting* instead [#2200](https://github.com/koekeishiya/yabai/issues/2200)
+
 ## [7.0.4] - 2024-03-30
 ### Changed
 - Consecutive window resize operations would not work correctly because it used a cached value for the window frame [#2182](https://github.com/koekeishiya/yabai/issues/2182)

@@ -1332,7 +1332,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 if (value.type == TOKEN_TYPE_INVALID) {
                     fprintf(rsp, "%d\n", view->top_padding);
                 } else if (value.type == TOKEN_TYPE_INT) {
-                    view->custom_top_padding = true;
+                    view_set_flag(view, VIEW_TOP_PADDING);
                     view->top_padding = value.int_value;
                     view_update(view);
                     view_flush(view);
@@ -1355,7 +1355,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 if (value.type == TOKEN_TYPE_INVALID) {
                     fprintf(rsp, "%d\n", view->bottom_padding);
                 } else if (value.type == TOKEN_TYPE_INT) {
-                    view->custom_bottom_padding = true;
+                    view_set_flag(view, VIEW_BOTTOM_PADDING);
                     view->bottom_padding = value.int_value;
                     view_update(view);
                     view_flush(view);
@@ -1378,7 +1378,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 if (value.type == TOKEN_TYPE_INVALID) {
                     fprintf(rsp, "%d\n", view->left_padding);
                 } else if (value.type == TOKEN_TYPE_INT) {
-                    view->custom_left_padding = true;
+                    view_set_flag(view, VIEW_LEFT_PADDING);
                     view->left_padding = value.int_value;
                     view_update(view);
                     view_flush(view);
@@ -1401,7 +1401,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 if (value.type == TOKEN_TYPE_INVALID) {
                     fprintf(rsp, "%d\n", view->right_padding);
                 } else if (value.type == TOKEN_TYPE_INT) {
-                    view->custom_right_padding = true;
+                    view_set_flag(view, VIEW_RIGHT_PADDING);
                     view->right_padding = value.int_value;
                     view_update(view);
                     view_flush(view);
@@ -1424,7 +1424,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 if (value.type == TOKEN_TYPE_INVALID) {
                     fprintf(rsp, "%d\n", view->window_gap);
                 } else if (value.type == TOKEN_TYPE_INT) {
-                    view->custom_window_gap = true;
+                    view_set_flag(view, VIEW_WINDOW_GAP);
                     view->window_gap = value.int_value;
                     view_update(view);
                     view_flush(view);
@@ -1448,8 +1448,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                     fprintf(rsp, "%s\n", view_type_str[view->layout]);
                 } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_BSP)) {
                     if (space_is_user(sel_sid)) {
+                        view_set_flag(view, VIEW_LAYOUT);
                         view->layout = VIEW_BSP;
-                        view->custom_layout = true;
                         view_clear(view);
                         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
                     } else {
@@ -1457,8 +1457,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                     }
                 } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_STACK)) {
                     if (space_is_user(sel_sid)) {
+                        view_set_flag(view, VIEW_LAYOUT);
                         view->layout = VIEW_STACK;
-                        view->custom_layout = true;
                         view_clear(view);
                         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, sel_sid);
                     } else {
@@ -1466,8 +1466,8 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                     }
                 } else if (token_equals(value, ARGUMENT_CONFIG_LAYOUT_FLOAT)) {
                     if (space_is_user(sel_sid)) {
+                        view_set_flag(view, VIEW_LAYOUT);
                         view->layout = VIEW_FLOAT;
-                        view->custom_layout = true;
                         view_clear(view);
                     } else {
                         daemon_fail(rsp, "cannot set layout for a macOS fullscreen space!\n");
@@ -1512,14 +1512,29 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(command, COMMAND_CONFIG_AUTO_BALANCE)) {
             struct token value = get_token(&message);
-            if (!token_is_valid(value)) {
-                fprintf(rsp, "%s\n", bool_str[g_space_manager.auto_balance]);
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                g_space_manager.auto_balance = false;
-            } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                g_space_manager.auto_balance = true;
+            if (sel_sid) {
+                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+                if (!token_is_valid(value)) {
+                    fprintf(rsp, "%s\n", bool_str[view->auto_balance]);
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    view_set_flag(view, VIEW_AUTO_BALANCE);
+                    view->auto_balance = false;
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    view_set_flag(view, VIEW_AUTO_BALANCE);
+                    view->auto_balance = true;
+                } else {
+                    daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                }
             } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                if (!token_is_valid(value)) {
+                    fprintf(rsp, "%s\n", bool_str[g_space_manager.auto_balance]);
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
+                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, false);
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
+                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, true);
+                } else {
+                    daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                }
             }
         } else if (token_equals(command, COMMAND_CONFIG_MOUSE_MOD)) {
             struct token value = get_token(&message);

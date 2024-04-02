@@ -162,7 +162,7 @@ static inline float window_node_get_ratio(struct window_node *node)
 
 static inline int window_node_get_gap(struct view *view)
 {
-    return view->enable_gap ? view->window_gap : 0;
+    return view_check_flag(view, VIEW_ENABLE_GAP) ? view->window_gap : 0;
 }
 
 static void area_make_pair(enum window_node_split split, int gap, float ratio, struct area *parent_area, struct area *left_area, struct area *right_area)
@@ -728,7 +728,7 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
     free(child);
     free(node);
 
-    if (g_space_manager.auto_balance) {
+    if (view->auto_balance) {
         window_node_balance(view->root, SPLIT_X | SPLIT_Y);
         view_update(view);
         return view->root;
@@ -784,7 +784,7 @@ struct window_node *view_add_window_node_with_insertion_point(struct view *view,
 
         window_node_split(view, leaf, window);
 
-        if (g_space_manager.auto_balance) {
+        if (view->auto_balance) {
             window_node_balance(view->root, SPLIT_X | SPLIT_Y);
             view_update(view);
             return view->root;
@@ -830,21 +830,21 @@ uint32_t *view_find_window_list(struct view *view, int *window_count)
 
 bool view_is_invalid(struct view *view)
 {
-    return !view->is_valid;
+    return !view_check_flag(view, VIEW_IS_VALID);
 }
 
 bool view_is_dirty(struct view *view)
 {
-    return view->is_dirty;
+    return view_check_flag(view, VIEW_IS_DIRTY);
 }
 
 void view_flush(struct view *view)
 {
     if (space_is_visible(view->sid)) {
         window_node_flush(view->root);
-        view->is_dirty = false;
+        view_clear_flag(view, VIEW_IS_DIRTY);
     } else {
-        view->is_dirty = true;
+        view_set_flag(view, VIEW_IS_DIRTY);
     }
 }
 
@@ -865,7 +865,7 @@ void view_serialize(FILE *rsp, struct view *view, uint64_t flags)
     if (flags & SPACE_PROPERTY_UUID) {
         if (did_output) fprintf(rsp, ",\n");
 
-        char *uuid = ts_cfstring_copy(view->suuid);
+        char *uuid = ts_cfstring_copy(view->uuid);
         fprintf(rsp, "\t\"uuid\":\"%s\"", uuid ? uuid : "<unknown>");
         did_output = true;
     }
@@ -962,7 +962,7 @@ void view_update(struct view *view)
     CGRect frame = display_bounds_constrained(did);
     view->root->area = area_from_cgrect(frame);
 
-    if (view->enable_padding) {
+    if (view_check_flag(view, VIEW_ENABLE_PADDING)) {
         view->root->area.x += view->left_padding;
         view->root->area.w -= (view->left_padding + view->right_padding);
         view->root->area.y += view->top_padding;
@@ -970,8 +970,8 @@ void view_update(struct view *view)
     }
 
     window_node_update(view, view->root);
-    view->is_valid = true;
-    view->is_dirty = true;
+    view_set_flag(view, VIEW_IS_VALID);
+    view_set_flag(view, VIEW_IS_DIRTY);
 }
 
 struct view *view_create(uint64_t sid)
@@ -982,18 +982,20 @@ struct view *view_create(uint64_t sid)
     view->root = malloc(sizeof(struct window_node));
     memset(view->root, 0, sizeof(struct window_node));
 
-    view->enable_padding = true;
-    view->enable_gap = true;
     view->sid = sid;
-    view->suuid = SLSSpaceCopyName(g_connection, sid);
+    view->uuid = SLSSpaceCopyName(g_connection, sid);
+
+    view_set_flag(view, VIEW_ENABLE_PADDING);
+    view_set_flag(view, VIEW_ENABLE_GAP);
 
     if (space_is_user(view->sid)) {
-        if (!view->custom_layout)         view->layout         = g_space_manager.layout;
-        if (!view->custom_top_padding)    view->top_padding    = g_space_manager.top_padding;
-        if (!view->custom_bottom_padding) view->bottom_padding = g_space_manager.bottom_padding;
-        if (!view->custom_left_padding)   view->left_padding   = g_space_manager.left_padding;
-        if (!view->custom_right_padding)  view->right_padding  = g_space_manager.right_padding;
-        if (!view->custom_window_gap)     view->window_gap     = g_space_manager.window_gap;
+        if (!view_check_flag(view, VIEW_LAYOUT))         view->layout         = g_space_manager.layout;
+        if (!view_check_flag(view, VIEW_TOP_PADDING))    view->top_padding    = g_space_manager.top_padding;
+        if (!view_check_flag(view, VIEW_BOTTOM_PADDING)) view->bottom_padding = g_space_manager.bottom_padding;
+        if (!view_check_flag(view, VIEW_LEFT_PADDING))   view->left_padding   = g_space_manager.left_padding;
+        if (!view_check_flag(view, VIEW_RIGHT_PADDING))  view->right_padding  = g_space_manager.right_padding;
+        if (!view_check_flag(view, VIEW_WINDOW_GAP))     view->window_gap     = g_space_manager.window_gap;
+        if (!view_check_flag(view, VIEW_AUTO_BALANCE))   view->auto_balance   = g_space_manager.auto_balance;
         view_update(view);
     } else {
         view->layout = VIEW_FLOAT;

@@ -80,6 +80,7 @@ void space_manager_set_top_padding_for_all_spaces(struct space_manager *sm, int 
 void space_manager_set_bottom_padding_for_all_spaces(struct space_manager *sm, int bottom_padding);
 void space_manager_set_left_padding_for_all_spaces(struct space_manager *sm, int left_padding);
 void space_manager_set_right_padding_for_all_spaces(struct space_manager *sm, int right_padding);
+void space_manager_set_auto_balance_for_all_spaces(struct space_manager *sm, bool auto_balance);
 bool space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, int type, int top, int bottom, int left, int right);
 bool space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t sid);
 bool space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees);

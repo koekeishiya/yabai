@@ -124,7 +124,7 @@ void space_manager_mark_view_invalid(struct space_manager *sm,  uint64_t sid)
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout == VIEW_FLOAT) return;
 
-    view->is_valid = false;
+    view_clear_flag(view, VIEW_IS_VALID);
 }
 
 void space_manager_untile_window(struct space_manager *sm, struct view *view, struct window *window)
@@ -138,7 +138,7 @@ void space_manager_untile_window(struct space_manager *sm, struct view *view, st
     if (space_is_visible(view->sid)) {
         window_node_flush(node);
     } else {
-        view->is_dirty = true;
+        view_set_flag(view, VIEW_IS_DIRTY);
     }
 }
 
@@ -232,7 +232,12 @@ bool space_manager_toggle_gap_for_space(struct space_manager *sm, uint64_t sid)
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout == VIEW_FLOAT) return false;
 
-    view->enable_gap = !view->enable_gap;
+    if (view_check_flag(view, VIEW_ENABLE_GAP)) {
+        view_clear_flag(view, VIEW_ENABLE_GAP);
+    } else {
+        view_set_flag(view, VIEW_ENABLE_GAP);
+    }
+
     view_update(view);
     view_flush(view);
 
@@ -259,7 +264,7 @@ void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view
         while (bucket) {
             if (bucket->value) {
                 struct view *view = bucket->value;
-                if (!view->custom_layout) {
+                if (!view_check_flag(view, VIEW_LAYOUT)) {
                     if (space_is_user(view->sid)) {
                         view->layout = layout;
                         view_clear(view);
@@ -275,47 +280,117 @@ void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view
     }
 }
 
-#define VIEW_SET_PROPERTY(p) \
-    sm->p = p; \
-    for (int i = 0; i < sm->view.capacity; ++i) { \
-        struct bucket *bucket = sm->view.buckets[i]; \
-        while (bucket) { \
-            if (bucket->value) { \
-                struct view *view = bucket->value; \
-                if (!view->custom_##p) view->p = p; \
-                view_update(view); \
-                view_flush(view); \
-            } \
-            bucket = bucket->next; \
-        } \
-    }
-
 void space_manager_set_window_gap_for_all_spaces(struct space_manager *sm, int window_gap)
 {
-    VIEW_SET_PROPERTY(window_gap);
+    sm->window_gap = window_gap;
+    for (int i = 0; i < sm->view.capacity; ++i) {
+        struct bucket *bucket = sm->view.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct view *view = bucket->value;
+                if (!view_check_flag(view, VIEW_WINDOW_GAP)) {
+                    view->window_gap = window_gap;
+                    view_update(view);
+                    view_flush(view);
+                }
+            }
+            bucket = bucket->next;
+        }
+    }
 }
 
 void space_manager_set_top_padding_for_all_spaces(struct space_manager *sm, int top_padding)
 {
-    VIEW_SET_PROPERTY(top_padding);
+    sm->top_padding = top_padding;
+    for (int i = 0; i < sm->view.capacity; ++i) {
+        struct bucket *bucket = sm->view.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct view *view = bucket->value;
+                if (!view_check_flag(view, VIEW_TOP_PADDING)) {
+                    view->top_padding = top_padding;
+                    view_update(view);
+                    view_flush(view);
+                }
+            }
+            bucket = bucket->next;
+        }
+    }
 }
 
 void space_manager_set_bottom_padding_for_all_spaces(struct space_manager *sm, int bottom_padding)
 {
-    VIEW_SET_PROPERTY(bottom_padding);
+    sm->bottom_padding = bottom_padding;
+    for (int i = 0; i < sm->view.capacity; ++i) {
+        struct bucket *bucket = sm->view.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct view *view = bucket->value;
+                if (!view_check_flag(view, VIEW_BOTTOM_PADDING)) {
+                    view->bottom_padding = bottom_padding;
+                    view_update(view);
+                    view_flush(view);
+                }
+            }
+            bucket = bucket->next;
+        }
+    }
 }
 
 void space_manager_set_left_padding_for_all_spaces(struct space_manager *sm, int left_padding)
 {
-    VIEW_SET_PROPERTY(left_padding);
+    sm->left_padding = left_padding;
+    for (int i = 0; i < sm->view.capacity; ++i) {
+        struct bucket *bucket = sm->view.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct view *view = bucket->value;
+                if (!view_check_flag(view, VIEW_LEFT_PADDING)) {
+                    view->left_padding = left_padding;
+                    view_update(view);
+                    view_flush(view);
+                }
+            }
+            bucket = bucket->next;
+        }
+    }
 }
 
 void space_manager_set_right_padding_for_all_spaces(struct space_manager *sm, int right_padding)
 {
-    VIEW_SET_PROPERTY(right_padding);
+    sm->right_padding = right_padding;
+    for (int i = 0; i < sm->view.capacity; ++i) {
+        struct bucket *bucket = sm->view.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct view *view = bucket->value;
+                if (!view_check_flag(view, VIEW_RIGHT_PADDING)) {
+                    view->right_padding = right_padding;
+                    view_update(view);
+                    view_flush(view);
+                }
+            }
+            bucket = bucket->next;
+        }
+    }
 }
 
-#undef VIEW_SET_PROPERTY
+void space_manager_set_auto_balance_for_all_spaces(struct space_manager *sm, bool auto_balance)
+{
+    sm->auto_balance = auto_balance;
+    for (int i = 0; i < sm->view.capacity; ++i) {
+        struct bucket *bucket = sm->view.buckets[i];
+        while (bucket) {
+            if (bucket->value) {
+                struct view *view = bucket->value;
+                if (!view_check_flag(view, VIEW_AUTO_BALANCE)) {
+                    view->auto_balance = auto_balance;
+                }
+            }
+            bucket = bucket->next;
+        }
+    }
+}
 
 bool space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, int type, int top, int bottom, int left, int right)
 {
@@ -345,7 +420,12 @@ bool space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t s
     struct view *view = space_manager_find_view(sm, sid);
     if (view->layout == VIEW_FLOAT) return false;
 
-    view->enable_padding = !view->enable_padding;
+    if (view_check_flag(view, VIEW_ENABLE_PADDING)) {
+        view_clear_flag(view, VIEW_ENABLE_PADDING);
+    } else {
+        view_set_flag(view, VIEW_ENABLE_PADDING);
+    }
+
     view_update(view);
     view_flush(view);
 
@@ -412,7 +492,7 @@ struct view *space_manager_tile_window_on_space_with_insertion_point(struct spac
     if (space_is_visible(view->sid)) {
         window_node_flush(node);
     } else {
-        view->is_dirty = true;
+        view_set_flag(view, VIEW_IS_DIRTY);
     }
 
     return view;
@@ -432,7 +512,7 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct window *
     if (node && window_node_is_intermediate(node)) {
         node->parent->split = node->parent->split == SPLIT_Y ? SPLIT_X : SPLIT_Y;
 
-        if (sm->auto_balance) {
+        if (view->auto_balance) {
             window_node_balance(view->root, SPLIT_X | SPLIT_Y);
             view_update(view);
             view_flush(view);
@@ -441,7 +521,7 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct window *
             if (space_is_visible(view->sid)) {
                 window_node_flush(node->parent);
             } else {
-                view->is_dirty = true;
+                view_set_flag(view, VIEW_IS_DIRTY);
             }
         }
     }
@@ -683,9 +763,9 @@ static enum space_op_error space_manager_swap_space_with_space_on_display(uint32
     a_view->sid = b_sid;
     b_view->sid = a_sid;
 
-    CFStringRef tmp = a_view->suuid;
-    a_view->suuid   = b_view->suuid;
-    b_view->suuid   = tmp;
+    CFStringRef tmp = a_view->uuid;
+    a_view->uuid    = b_view->uuid;
+    b_view->uuid    = tmp;
 
     table_add(&g_space_manager.view, &a_sid, b_view);
     table_add(&g_space_manager.view, &b_sid, a_view);
@@ -1022,7 +1102,7 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
             if (bucket->value) {
                 struct view *view = bucket->value;
                 view_list[list_count] = view;
-                uuid_list[list_count] = view->suuid;
+                uuid_list[list_count] = view->uuid;
                 ++list_count;
             }
             bucket = bucket->next;
@@ -1045,13 +1125,13 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
                 view_list[j] = NULL;
 
                 table_remove(&sm->view, &view->sid);
-                CFRelease(view->suuid);
+                CFRelease(view->uuid);
 
                 struct space_label *label = space_manager_get_label_for_space(sm, view->sid);
                 if (label) label->sid = sid;
 
                 view->sid = sid;
-                view->suuid = CFRetain(uuid);
+                view->uuid = CFRetain(uuid);
 
                 table_add(&sm->view, &sid, view);
                 break;

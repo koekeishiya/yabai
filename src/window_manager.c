@@ -322,7 +322,7 @@ enum window_op_error window_manager_adjust_window_ratio(struct window_manager *w
     if (space_is_visible(view->sid)) {
         window_node_flush(node->parent);
     } else {
-        view->is_dirty = true;
+        view_set_flag(view, VIEW_IS_DIRTY);
     }
 
     return WINDOW_OP_ERROR_SUCCESS;
@@ -1958,13 +1958,13 @@ enum window_op_error window_manager_swap_window(struct space_manager *sm, struct
     if (a_visible) {
         window_node_capture_windows(a_node, &window_list);
     } else {
-        a_view->is_dirty = true;
+        view_set_flag(a_view, VIEW_IS_DIRTY);
     }
 
     if (b_visible) {
         window_node_capture_windows(b_node, &window_list);
     } else {
-        b_view->is_dirty = true;
+        view_set_flag(b_view, VIEW_IS_DIRTY);
     }
 
     window_manager_animate_window_list(window_list, ts_buf_len(window_list));
@@ -2058,14 +2058,14 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     struct view *dview = space_manager_find_view(sm, display_space_id(did));
 
     if (dview) {
-        if (dview->enable_padding) {
+        if (view_check_flag(dview, VIEW_ENABLE_PADDING)) {
             bounds.origin.x    += dview->left_padding;
             bounds.size.width  -= (dview->left_padding + dview->right_padding);
             bounds.origin.y    += dview->top_padding;
             bounds.size.height -= (dview->top_padding + dview->bottom_padding);
         }
 
-        if (dview->enable_gap) {
+        if (view_check_flag(dview, VIEW_ENABLE_GAP)) {
             int gap = window_node_get_gap(dview);
 
             if (x > 0) {
@@ -2252,14 +2252,14 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
         if (space_is_visible(view->sid)) {
             window_node_flush(node);
         } else {
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
         }
     } else {
         node->zoom = node->parent;
         if (space_is_visible(view->sid)) {
             window_node_flush(node);
         } else {
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
         }
     }
 }
@@ -2281,14 +2281,14 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
         if (space_is_visible(view->sid)) {
             window_node_flush(node);
         } else {
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
         }
     } else {
         node->zoom = view->root;
         if (space_is_visible(view->sid)) {
             window_node_flush(node);
         } else {
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
         }
     }
 }
@@ -2312,7 +2312,7 @@ void window_manager_toggle_window_pip(struct space_manager *sm, struct window_ma
     struct view *dview = space_manager_find_view(sm, sid);
 
     CGRect bounds = display_bounds_constrained(did);
-    if (dview && dview->enable_padding) {
+    if (dview && view_check_flag(dview, VIEW_ENABLE_PADDING)) {
         bounds.origin.x    += dview->left_padding;
         bounds.size.width  -= (dview->left_padding + dview->right_padding);
         bounds.origin.y    += dview->top_padding;
@@ -2356,7 +2356,7 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
 
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
         }
     }
 }
@@ -2384,7 +2384,7 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
             window_manager_adjust_layer(window, LAYER_NORMAL);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
-            existing_view->is_dirty = true;
+            view_set_flag(existing_view, VIEW_IS_DIRTY);
         }
 
         if (!existing_view || (existing_view->layout != VIEW_FLOAT && existing_view != view)) {
@@ -2402,7 +2402,7 @@ static void window_manager_check_for_windows_on_space(struct space_manager *sm, 
             view_add_window_node(view, window);
             window_manager_adjust_layer(window, LAYER_BELOW);
             window_manager_add_managed_window(wm, window, view);
-            view->is_dirty = true;
+            view_set_flag(view, VIEW_IS_DIRTY);
         }
     }
 }
@@ -2428,7 +2428,7 @@ void window_manager_validate_and_check_for_windows_on_space(struct space_manager
 
     if (space_is_visible(view->sid) && view_is_dirty(view)) {
         window_node_flush(view->root);
-        view->is_dirty = false;
+        view_clear_flag(view, VIEW_IS_DIRTY);
     }
 }
 

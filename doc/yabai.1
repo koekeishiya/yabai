@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-03-31
+.\"      Date: 2024-04-02
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-03-31" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-04-02" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -316,11 +316,6 @@ Specify how a window should be split.
 \fIauto\fP: The axis is determined based on width/height ratio.
 .RE
 .sp
-\fBauto_balance\fP [\fI<BOOL_SEL>\fP]
-.RS 4
-Balance the window tree upon change, so that all windows occupy the same area.
-.RE
-.sp
 \fBmouse_modifier\fP [\fIcmd|alt|shift|ctrl|fn\fP]
 .RS 4
 Keyboard modifier used for moving and resizing windows.
@@ -370,6 +365,11 @@ Padding added at the right side of the selected space.
 \fBwindow_gap\fP [\fI<integer number>\fP]
 .RS 4
 Size of the gap that separates windows for the selected space.
+.RE
+.sp
+\fBauto_balance\fP [\fI<BOOL_SEL>\fP]
+.RS 4
+Balance the window tree upon change, so that all windows occupy the same area.
 .RE
 .SS "Display"
 .SS "General Syntax"
