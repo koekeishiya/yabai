@@ -5,6 +5,12 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
 {
     TIME_FUNCTION;
 
+    char *app   = rule->app;
+    char *title = rule->title;
+
+    char *escaped_app   = app   ? ts_string_escape(app)   : NULL;
+    char *escaped_title = title ? ts_string_escape(title) : NULL;
+
     fprintf(rsp,
             "{\n"
             "\t\"index\":%d,\n"
@@ -28,8 +34,8 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "}",
             index,
             rule->label ? rule->label : "",
-            rule->app ? rule->app : "",
-            rule->title ? rule->title : "",
+            escaped_app ? escaped_app : app ? app : "",
+            escaped_title ? escaped_title : title ? title : "",
             rule->role ? rule->role : "",
             rule->subrole ? rule->subrole : "",
             display_manager_display_id_arrangement(rule->effects.did),
