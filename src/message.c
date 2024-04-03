@@ -2560,8 +2560,13 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             rule->label = string_copy(value);
         } else if (string_equals(key, ARGUMENT_RULE_KEY_SCRATCHPAD)) {
             if (exclusion) unsupported_exclusion = key;
-            rule->effects.scratchpad = string_copy(value);
-            rule->effects.manage = RULE_PROP_OFF;
+            if (!string_equals(value, ARGUMENT_WINDOW_SCRATCHPAD_RECOVER)) {
+                rule->effects.scratchpad = string_copy(value);
+                rule->effects.manage = RULE_PROP_OFF;
+            } else {
+                daemon_fail(rsp, "invalid value '%s' for key '%s'\n", value, key);
+                did_parse = false;
+            }
         } else if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
             has_filter = true;
             rule->app = string_copy(value);
