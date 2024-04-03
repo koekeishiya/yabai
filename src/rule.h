@@ -37,6 +37,7 @@ struct rule_effects
     int layer;
     int fullscreen;
     unsigned grid[6];
+    char *scratchpad;
     uint16_t flags;
 };
 

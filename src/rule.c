@@ -88,6 +88,11 @@ void rule_combine_effects(struct rule_effects *effects, struct rule_effects *res
         rule_effects_set_flag(result, RULE_LAYER);
     }
 
+    if (effects->scratchpad) {
+        if (result->scratchpad) free(result->scratchpad);
+        result->scratchpad = string_copy(effects->scratchpad);
+    }
+
     if (effects->manage     != RULE_PROP_UD) result->manage     = effects->manage;
     if (effects->sticky     != RULE_PROP_UD) result->sticky     = effects->sticky;
     if (effects->mff        != RULE_PROP_UD) result->mff        = effects->mff;
@@ -229,4 +234,6 @@ void rule_destroy(struct rule *rule)
     if (rule->title)   free(rule->title);
     if (rule->role)    free(rule->role);
     if (rule->subrole) free(rule->subrole);
+
+    if (rule->effects.scratchpad) free(rule->effects.scratchpad);
 }

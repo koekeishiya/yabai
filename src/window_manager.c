@@ -156,6 +156,15 @@ void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struc
         window_set_rule_flag(window, WINDOW_RULE_FULLSCREEN);
     }
 
+    if (effects->scratchpad) {
+        char *scratchpad = string_copy(effects->scratchpad);
+        if (window_manager_set_scratchpad_for_window(wm, window, scratchpad)) {
+            window_manager_toggle_scratchpad_window(wm, window, 1);
+        } else {
+            free(scratchpad);
+        }
+    }
+
     if (effects->grid[0] != 0 && effects->grid[1] != 0) {
         window_manager_apply_grid(sm, wm, window, effects->grid[0], effects->grid[1], effects->grid[2], effects->grid[3], effects->grid[4], effects->grid[5]);
     }
@@ -2320,6 +2329,99 @@ void window_manager_toggle_window_pip(struct space_manager *sm, struct window_ma
     }
 
     scripting_addition_scale_window(window->id, bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
+}
+
+static inline struct window *window_manager_find_scratchpad_window(struct window_manager *wm, char *label)
+{
+    for (int i = 0; i < buf_len(wm->scratchpad_window); ++i) {
+        if (string_equals(wm->scratchpad_window[i].label, label)) {
+            return wm->scratchpad_window[i].window;
+        }
+    }
+
+    return NULL;
+}
+
+bool window_manager_toggle_scratchpad_window_by_label(struct window_manager *wm, char *label)
+{
+    struct window *window = window_manager_find_scratchpad_window(wm, label);
+    return window ? window_manager_toggle_scratchpad_window(wm, window, 0) : false;
+}
+
+bool window_manager_toggle_scratchpad_window(struct window_manager *wm, struct window *window, int forced_mode)
+{
+    TIME_FUNCTION;
+
+    uint64_t sid = space_manager_active_space();
+    if (!sid) return false;
+
+    uint8_t visible = 0;
+    uint64_t wid_sid = window_space(window->id);
+    SLSWindowIsOrderedIn(g_connection, window->id, &visible);
+
+    switch (forced_mode) {
+    case 0: goto mode_0;
+    case 1: goto mode_1;
+    case 2: goto mode_2;
+    case 3: goto mode_3;
+    }
+
+mode_0:;
+    if (sid == wid_sid && visible) {
+mode_1:;
+        struct window *next = window_manager_find_window_on_space_by_rank_filtering_window(wm, sid, 1, window->id);
+        if (next) {
+            window_manager_focus_window_with_raise(&next->application->psn, next->id, next->ref);
+        } else {
+            _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
+        }
+        scripting_addition_order_window(window->id, 0, 0);
+    } else if (sid == wid_sid && !visible) {
+mode_2:;
+        scripting_addition_order_window(window->id, 1, 0);
+        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+    } else {
+mode_3:;
+        space_manager_move_window_to_space(sid, window);
+        scripting_addition_order_window(window->id, 1, 0);
+        window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+    }
+
+    return true;
+}
+
+bool window_manager_set_scratchpad_for_window(struct window_manager *wm, struct window *window, char *label)
+{
+    struct window *existing_window = window_manager_find_scratchpad_window(wm, label);
+    if (existing_window) return false;
+
+    window_manager_remove_scratchpad_for_window(wm, window, false);
+    buf_push(wm->scratchpad_window, ((struct scratchpad) {
+        .label = label,
+        .window = window
+    }));
+    window_manager_make_window_floating(&g_space_manager, wm, window, true, false);
+
+    return true;
+}
+
+bool window_manager_remove_scratchpad_for_window(struct window_manager *wm, struct window *window, bool unfloat)
+{
+    for (int i = 0; i < buf_len(wm->scratchpad_window); ++i) {
+        if (wm->scratchpad_window[i].window == window) {
+            free(wm->scratchpad_window[i].label);
+            buf_del(wm->scratchpad_window, i);
+
+            if (unfloat) {
+                window_manager_toggle_scratchpad_window(wm, window, 3);
+                window_manager_make_window_floating(&g_space_manager, wm, window, false, false);
+            }
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)

@@ -223,7 +223,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        __atomic_store_n(&window->id_ptr, NULL, __ATOMIC_RELEASE);
+        if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, NULL)) continue;
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -251,6 +251,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
             event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
         }
 
+        window_manager_remove_scratchpad_for_window(&g_window_manager, window, false);
         window_manager_remove_window(&g_window_manager, window->id);
         window_unobserve(window);
         window_destroy(window);
@@ -528,6 +529,7 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
         event_signal_push(SIGNAL_WINDOW_DESTROYED, window);
     }
 
+    window_manager_remove_scratchpad_for_window(&g_window_manager, window, false);
     window_manager_remove_window(&g_window_manager, window->id);
     window_destroy(window);
 }
@@ -1342,8 +1344,9 @@ static int is_menu_open = 0;
 static EVENT_HANDLER(MENU_OPENED)
 {
     debug("%s\n", __FUNCTION__);
+    ++is_menu_open;
 
-    if (++is_menu_open == 1) {
+    if (is_menu_open == 1) {
         ffm_value = g_window_manager.ffm_mode;
         g_window_manager.ffm_mode = FFM_DISABLED;
     }
@@ -1352,8 +1355,13 @@ static EVENT_HANDLER(MENU_OPENED)
 static EVENT_HANDLER(MENU_CLOSED)
 {
     debug("%s\n", __FUNCTION__);
+    --is_menu_open;
 
-    if (--is_menu_open == 0) {
+    if (is_menu_open < 0) {
+        is_menu_open = 0;
+    }
+
+    if (is_menu_open == 0) {
         g_window_manager.ffm_mode = ffm_value;
     }
 }

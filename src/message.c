@@ -144,6 +144,7 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_RAISE      "--raise"
 #define COMMAND_WINDOW_LOWER      "--lower"
 #define COMMAND_WINDOW_TOGGLE     "--toggle"
+#define COMMAND_WINDOW_SCRATCHPAD "--scratchpad"
 
 #define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
 #define ARGUMENT_WINDOW_SEL_SMALLEST  "smallest"
@@ -188,21 +189,22 @@ extern bool g_verbose;
 #define COMMAND_RULE_APPLY   "--apply"
 #define COMMAND_RULE_LS      "--list"
 
-#define ARGUMENT_RULE_ONE_SHOT      "--one-shot"
-#define ARGUMENT_RULE_KEY_APP       "app"
-#define ARGUMENT_RULE_KEY_TITLE     "title"
-#define ARGUMENT_RULE_KEY_ROLE      "role"
-#define ARGUMENT_RULE_KEY_SUBROLE   "subrole"
-#define ARGUMENT_RULE_KEY_DISPLAY   "display"
-#define ARGUMENT_RULE_KEY_SPACE     "space"
-#define ARGUMENT_RULE_KEY_OPACITY   "opacity"
-#define ARGUMENT_RULE_KEY_MANAGE    "manage"
-#define ARGUMENT_RULE_KEY_STICKY    "sticky"
-#define ARGUMENT_RULE_KEY_MFF       "mouse_follows_focus"
-#define ARGUMENT_RULE_KEY_SUB_LAYER "sub-layer"
-#define ARGUMENT_RULE_KEY_FULLSCR   "native-fullscreen"
-#define ARGUMENT_RULE_KEY_GRID      "grid"
-#define ARGUMENT_RULE_KEY_LABEL     "label"
+#define ARGUMENT_RULE_ONE_SHOT       "--one-shot"
+#define ARGUMENT_RULE_KEY_APP        "app"
+#define ARGUMENT_RULE_KEY_TITLE      "title"
+#define ARGUMENT_RULE_KEY_ROLE       "role"
+#define ARGUMENT_RULE_KEY_SUBROLE    "subrole"
+#define ARGUMENT_RULE_KEY_DISPLAY    "display"
+#define ARGUMENT_RULE_KEY_SPACE      "space"
+#define ARGUMENT_RULE_KEY_OPACITY    "opacity"
+#define ARGUMENT_RULE_KEY_MANAGE     "manage"
+#define ARGUMENT_RULE_KEY_STICKY     "sticky"
+#define ARGUMENT_RULE_KEY_MFF        "mouse_follows_focus"
+#define ARGUMENT_RULE_KEY_SUB_LAYER  "sub-layer"
+#define ARGUMENT_RULE_KEY_FULLSCR    "native-fullscreen"
+#define ARGUMENT_RULE_KEY_GRID       "grid"
+#define ARGUMENT_RULE_KEY_LABEL      "label"
+#define ARGUMENT_RULE_KEY_SCRATCHPAD "scratchpad"
 
 #define ARGUMENT_RULE_VALUE_SPACE '^'
 #define ARGUMENT_RULE_VALUE_GRID  "%d:%d:%d:%d:%d:%d"
@@ -503,6 +505,7 @@ enum label_type
 {
     LABEL_DISPLAY,
     LABEL_SPACE,
+    LABEL_WINDOW
 };
 
 static char *reserved_display_identifiers[] =
@@ -527,6 +530,19 @@ static char *reserved_space_identifiers[] =
     ARGUMENT_COMMON_SEL_LAST,
     ARGUMENT_COMMON_SEL_RECENT,
     ARGUMENT_COMMON_SEL_MOUSE
+};
+
+static char *reserved_window_identifiers[] =
+{
+    ARGUMENT_WINDOW_TOGGLE_FLOAT,
+    ARGUMENT_WINDOW_TOGGLE_STICKY,
+    ARGUMENT_WINDOW_TOGGLE_SHADOW,
+    ARGUMENT_WINDOW_TOGGLE_SPLIT,
+    ARGUMENT_WINDOW_TOGGLE_PARENT,
+    ARGUMENT_WINDOW_TOGGLE_FULLSC,
+    ARGUMENT_WINDOW_TOGGLE_NATIVE,
+    ARGUMENT_WINDOW_TOGGLE_EXPOSE,
+    ARGUMENT_WINDOW_TOGGLE_PIP
 };
 
 static bool parse_label(FILE *rsp, char **message, enum label_type type, char **label)
@@ -558,6 +574,14 @@ static bool parse_label(FILE *rsp, char **message, enum label_type type, char **
         for (int i = 0; i < array_count(reserved_space_identifiers); ++i) {
             if (token_equals(token, reserved_space_identifiers[i])) {
                 daemon_fail(rsp, "'%.*s' is a reserved keyword and cannot be used as a label.\n", token.length, token.text);
+                return false;
+            }
+        }
+    } break;
+    case LABEL_WINDOW: {
+        for (int i = 0; i < array_count(reserved_window_identifiers); ++i) {
+            if (token_equals(token, reserved_window_identifiers[i])) {
+                daemon_fail(rsp, "'%.*s' is a reserved keyword and cannot be used as a scratchpad.\n", token.length, token.text);
                 return false;
             }
         }
@@ -1984,7 +2008,8 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         !token_equals(command, COMMAND_WINDOW_FOCUS) &&
         !token_equals(command, COMMAND_WINDOW_CLOSE) &&
         !token_equals(command, COMMAND_WINDOW_MINIMIZE) &&
-        !token_equals(command, COMMAND_WINDOW_DEMINIMIZE)) {
+        !token_equals(command, COMMAND_WINDOW_DEMINIMIZE) &&
+        !token_equals(command, COMMAND_WINDOW_TOGGLE)) {
         daemon_fail(rsp, "could not locate the window to act on!\n");
         return;
     }
@@ -2190,24 +2215,60 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(command, COMMAND_WINDOW_TOGGLE)) {
             struct token value = get_token(&message);
             if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FLOAT)) {
-                window_manager_make_window_floating(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_FLOAT), false);
+                if (acting_window) {
+                    window_manager_make_window_floating(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_FLOAT), false);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_STICKY)) {
-                window_manager_make_window_sticky(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_STICKY));
+                if (acting_window) {
+                    window_manager_make_window_sticky(&g_space_manager, &g_window_manager, acting_window, !window_check_flag(acting_window, WINDOW_STICKY));
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SHADOW)) {
-                window_manager_toggle_window_shadow(&g_space_manager, &g_window_manager, acting_window);
+                if (acting_window) {
+                    window_manager_toggle_window_shadow(&g_space_manager, &g_window_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SPLIT)) {
-                space_manager_toggle_window_split(&g_space_manager, acting_window);
+                if (acting_window) {
+                    space_manager_toggle_window_split(&g_space_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {
-                window_manager_toggle_window_parent(&g_space_manager, &g_window_manager, acting_window);
+                if (acting_window) {
+                    window_manager_toggle_window_parent(&g_space_manager, &g_window_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
-                window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+                if (acting_window) {
+                    window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_NATIVE)) {
-                window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+                if (acting_window) {
+                    window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_EXPOSE)) {
-                window_manager_toggle_window_expose(&g_window_manager, acting_window);
+                if (acting_window) {
+                    window_manager_toggle_window_expose(&g_window_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PIP)) {
-                window_manager_toggle_window_pip(&g_space_manager, &g_window_manager, acting_window);
-            } else {
+                if (acting_window) {
+                    window_manager_toggle_window_pip(&g_space_manager, &g_window_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
+            } else if (!window_manager_toggle_scratchpad_window_by_label(&g_window_manager, value.text)) {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
             }
         } else if (token_equals(command, COMMAND_WINDOW_SUB_LAYER)) {
@@ -2271,6 +2332,19 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
 
             if (!scripting_addition_order_window(acting_window->id, -1, selector_wid)) {
                 daemon_fail(rsp, "could not lower window with id '%d' due to an error with the scripting-addition.\n", acting_window->id);
+            }
+        } else if (token_equals(command, COMMAND_WINDOW_SCRATCHPAD)) {
+            char *label;
+            if (parse_label(rsp, &message, LABEL_WINDOW, &label)) {
+                if (label) {
+                    if (!window_manager_set_scratchpad_for_window(&g_window_manager, acting_window, label)) {
+                        daemon_fail(rsp, "the given scratchpad is already assigned to a different window!\n");
+                    }
+                } else {
+                    if (!window_manager_remove_scratchpad_for_window(&g_window_manager, acting_window, true)) {
+                        daemon_fail(rsp, "the selected window was not assigned to a scratchpad!\n");
+                    }
+                }
             }
         } else {
             daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
@@ -2480,6 +2554,10 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
         if (string_equals(key, ARGUMENT_RULE_KEY_LABEL)) {
             if (exclusion) unsupported_exclusion = key;
             rule->label = string_copy(value);
+        } else if (string_equals(key, ARGUMENT_RULE_KEY_SCRATCHPAD)) {
+            if (exclusion) unsupported_exclusion = key;
+            rule->effects.scratchpad = string_copy(value);
+            rule->effects.manage = RULE_PROP_OFF;
         } else if (string_equals(key, ARGUMENT_RULE_KEY_APP)) {
             has_filter = true;
             rule->app = string_copy(value);

@@ -416,9 +416,9 @@ COMMAND
     If type is 'rel' the split ratio of the selected window is changed by 'dr', otherwise 'dr' will become the new split ratio. +
     A positive/negative delta will increase/decrease the size of the left-child.
 
-*--toggle* 'float|sticky|pip|shadow|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose'::
+*--toggle* 'float|sticky|pip|shadow|split|zoom-parent|zoom-fullscreen|native-fullscreen|expose|<LABEL>'::
     Toggle the given property of the selected window. +
-    The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow.
+    The following properties require System Integrity Protection to be partially disabled: sticky, pip, shadow, LABEL (scratchpad identifier) .
 
 *--sub-layer* '<LAYER>'::
     Set the stacking sub-layer of the selected window. +
@@ -438,6 +438,15 @@ COMMAND
 
 *--lower* ['<WINDOW_SEL>']::
     Orders the selected window below the given window, or to the back within its layer. +
+    System Integrity Protection must be partially disabled.
+
+*--scratchpad* ['<LABEL>']::
+    Unique identifier used to identify a window scratchpad. +
+    An identifier may only be assigned to a single window at any given time. +
+    A scratchpad window will automatically be treated as a (manage=off) floating window. +
+    If the scratchpad is already taken by another window, this assignment will fail. +
+    If the scratchpad is re-assigned, the previous identifier will become available. +
+    If no value is given, the window will seize to be a scratchpad window. +
     System Integrity Protection must be partially disabled.
 
 Query
@@ -588,7 +597,7 @@ Rule
 All rules that match the given filter will be applied in the order they were registered. +
 If multiple rules specify a value for the same property, the latter rule will end up overriding that value. +
 If the display and space properties are both set, the space property will take precedence. +
-The following properties require System Integrity Protection to be partially disabled: sticky, sub-layer, opacity.
+The following properties require System Integrity Protection to be partially disabled: sticky, sub-layer, opacity, scratchpad.
 
 General Syntax
 ^^^^^^^^^^^^^^
@@ -644,7 +653,8 @@ ARGUMENT
     Most windows will be managed automatically, so this should mainly be used to make a window float.
 
 *sticky='<BOOL_SEL>'*::
-    Window appears on all spaces.
+    Window appears on all spaces. +
+    System Integrity Protection must be partially disabled.
 
 *mouse_follows_focus='<BOOL_SEL>'*::
     When focusing the window, put the mouse at its center. Overrides the global *mouse_follows_focus* setting.
@@ -652,18 +662,27 @@ ARGUMENT
 *sub-layer='<LAYER>'*::
     Window is ordered within the given stacking sub-layer. +
     The window will no longer be eligible for automatic change in sub-layer when managed/unmanaged. +
-    Specify the value 'auto' to reset back to normal and make it become automatically managed.
+    Specify the value 'auto' to reset back to normal and make it become automatically managed. +
+    System Integrity Protection must be partially disabled.
 
 *opacity='<FLOAT_SEL>'*::
     Set window opacity. +
     The window will no longer be eligible for automatic change in opacity upon focus change. +
-    Specify the value '0.0' to reset back to full opacity and make it become automatically managed.
+    Specify the value '0.0' to reset back to full opacity and make it become automatically managed. +
+    System Integrity Protection must be partially disabled.
 
 *native-fullscreen='<BOOL_SEL>'*::
     Window should enter native macOS fullscreen mode.
 
 *grid='<rows>:<cols>:<start-x>:<start-y>:<width>:<height>'*::
     Set window frame based on a self-defined grid.
+
+*scratchpad='<LABEL>'*::
+    Unique identifier used to identify a window scratchpad. +
+    An identifier may only be assigned to a single window at any given time. +
+    A scratchpad window will automatically be treated as a (manage=off) floating window. +
+    If this rule matches multiple windows, only the first window that matched will be assigned this scratchpad identifier. +
+    System Integrity Protection must be partially disabled.
 
 DATAFORMAT
 ^^^^^^^^^^
