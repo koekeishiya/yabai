@@ -47,7 +47,7 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
             } else if (parent_wid == 0) {
                 if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
                     window_list[window_count++] = wid;
-                } else if (((attributes == 0x0 || attributes == 0x1) && (tags & 0x1000000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+                } else if ((attributes == 0x0 || attributes == 0x1) && ((tags & 0x1000000000000000) || (tags & 0x300000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
                     window_list[window_count++] = wid;
                 }
             }
