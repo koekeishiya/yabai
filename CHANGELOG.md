@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Config *global setting* `auto_balance` is now categorized as a *space setting* instead [#2200](https://github.com/koekeishiya/yabai/issues/2200)
 - Rule property space should have higher precedence than display [#2206](https://github.com/koekeishiya/yabai/issues/2206)
 - Properly escape app and title regex when listing rules [#2205](https://github.com/koekeishiya/yabai/issues/2205)
+- Properly escape app and title regex when listing signals [#2207](https://github.com/koekeishiya/yabai/issues/2207)
 
 ## [7.0.4] - 2024-03-30
 ### Changed

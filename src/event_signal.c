@@ -401,7 +401,13 @@ static void event_signal_serialize(FILE *rsp, struct signal *signal, enum signal
 {
     TIME_FUNCTION;
 
-    char *escaped_action = ts_string_escape(signal->command);
+    char *app   = signal->app;
+    char *title = signal->title;
+    char *cmd   = signal->command;
+
+    char *escaped_app   = app   ? ts_string_escape(app)   : NULL;
+    char *escaped_title = title ? ts_string_escape(title) : NULL;
+    char *escaped_cmd   = cmd   ? ts_string_escape(cmd)   : NULL;
 
     fprintf(rsp,
             "{\n"
@@ -415,11 +421,11 @@ static void event_signal_serialize(FILE *rsp, struct signal *signal, enum signal
             "}",
             index,
             signal->label ? signal->label : "",
-            signal->app ? signal->app : "",
-            signal->title ? signal->title : "",
+            escaped_app ? escaped_app : app ? app : "",
+            escaped_title ? escaped_title : title ? title : "",
             json_optional_bool(signal->active),
             signal_type_str[type],
-            escaped_action ? escaped_action : signal->command ? signal->command : "");
+            escaped_cmd ? escaped_cmd : cmd ? cmd : "");
 }
 
 void event_signal_list(FILE *rsp)
