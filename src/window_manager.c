@@ -2406,6 +2406,7 @@ bool window_manager_set_scratchpad_for_window(struct window_manager *wm, struct 
         .label = label,
         .window = window
     }));
+    window->scratchpad = label;
     window_manager_make_window_floating(&g_space_manager, wm, window, true, false);
 
     return true;
@@ -2415,6 +2416,8 @@ bool window_manager_remove_scratchpad_for_window(struct window_manager *wm, stru
 {
     for (int i = 0; i < buf_len(wm->scratchpad_window); ++i) {
         if (wm->scratchpad_window[i].window == window) {
+            window->scratchpad = NULL;
+
             free(wm->scratchpad_window[i].label);
             buf_del(wm->scratchpad_window, i);
 

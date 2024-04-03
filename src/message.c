@@ -605,7 +605,7 @@ struct properties
     uint64_t flags;
 };
 
-static inline bool parse_property(struct properties *properties, char *property, int *property_val, char **property_str, int property_count)
+static inline bool parse_property(struct properties *properties, char *property, uint64_t *property_val, char **property_str, int property_count)
 {
     for (int i = 0; i < property_count; ++i) {
         if (string_equals(property, property_str[i])) {
@@ -617,7 +617,7 @@ static inline bool parse_property(struct properties *properties, char *property,
     return false;
 }
 
-static struct properties parse_properties(FILE *rsp, struct token token, int *property_val, char **property_str, int property_count)
+static struct properties parse_properties(FILE *rsp, struct token token, uint64_t *property_val, char **property_str, int property_count)
 {
     struct properties result = { .token = token, .did_parse = true, .did_error = false };
 

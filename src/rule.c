@@ -33,6 +33,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             "\t\"sub-layer\":\"%s\",\n"
             "\t\"native-fullscreen\":%s,\n"
             "\t\"grid\":\"%d:%d:%d:%d:%d:%d\",\n"
+            "\t\"scratchpad\":\"%s\",\n"
             "\t\"one-shot\":%s,\n"
             "\t\"flags\":\"0x%08x\"\n"
             "}",
@@ -54,6 +55,7 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->effects.grid[0], rule->effects.grid[1],
             rule->effects.grid[2], rule->effects.grid[3],
             rule->effects.grid[4], rule->effects.grid[5],
+            rule->effects.scratchpad ? rule->effects.scratchpad : "",
             json_bool(rule_check_flag(rule, RULE_ONE_SHOT)),
             (uint32_t)(rule->effects.flags << 16) | (uint32_t)rule->flags);
 }

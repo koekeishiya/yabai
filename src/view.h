@@ -20,7 +20,7 @@ enum space_property
     SPACE_PROPERTY_IS_FULLSCREEN = 0x800
 };
 
-static int space_property_val[] =
+static uint64_t space_property_val[] =
 {
     [0x0] = SPACE_PROPERTY_ID,
     [0x1] = SPACE_PROPERTY_UUID,

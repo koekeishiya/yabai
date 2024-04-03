@@ -15,7 +15,7 @@ enum display_property
     DISPLAY_PROPERTY_HAS_FOCUS = 0x40
 };
 
-static int display_property_val[] =
+static uint64_t display_property_val[] =
 {
     [0] = DISPLAY_PROPERTY_ID,
     [1] = DISPLAY_PROPERTY_UUID,

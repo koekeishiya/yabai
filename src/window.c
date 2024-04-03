@@ -190,6 +190,13 @@ void window_nonax_serialize(FILE *rsp, uint32_t wid, uint64_t flags)
         did_output = true;
     }
 
+    if (flags & WINDOW_PROPERTY_SCRATCHPAD) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"scratchpad\":\"%s\"", "");
+        did_output = true;
+    }
+
     if (flags & WINDOW_PROPERTY_FRAME) {
         if (did_output) fprintf(rsp, ",\n");
 
@@ -483,6 +490,13 @@ void window_serialize(FILE *rsp, struct window *window, uint64_t flags)
         did_output = true;
     }
 
+    if (flags & WINDOW_PROPERTY_SCRATCHPAD) {
+        if (did_output) fprintf(rsp, ",\n");
+
+        fprintf(rsp, "\t\"scratchpad\":\"%s\"", window->scratchpad ? window->scratchpad : "");
+        did_output = true;
+    }
+
     if (flags & WINDOW_PROPERTY_FRAME) {
         if (did_output) fprintf(rsp, ",\n");
 
@@ -650,7 +664,10 @@ void window_serialize(FILE *rsp, struct window *window, uint64_t flags)
     if (flags & WINDOW_PROPERTY_IS_VISIBLE) {
         if (did_output) fprintf(rsp, ",\n");
 
-        bool visible = !is_minimized && !window->application->is_hidden && (is_sticky || space_is_visible(sid));
+        uint8_t ordered_in = 0;
+        SLSWindowIsOrderedIn(g_connection, window->id, &ordered_in);
+
+        bool visible = ordered_in && !is_minimized && !window->application->is_hidden && (is_sticky || space_is_visible(sid));
         fprintf(rsp, "\t\"is-visible\":%s", json_bool(visible));
         did_output = true;
     }
