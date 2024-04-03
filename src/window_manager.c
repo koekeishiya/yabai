@@ -1610,11 +1610,13 @@ static uint32_t *window_manager_existing_application_window_list(struct applicat
     return space_list ? space_window_list_for_connection(space_list, space_count, application->connection, window_count, true) : NULL;
 }
 
-void window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
+bool window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
 {
+    bool result = false;
+
     int global_window_count;
     uint32_t *global_window_list = window_manager_existing_application_window_list(application, &global_window_count);
-    if (!global_window_list) return;
+    if (!global_window_list) return result;
 
     CFArrayRef window_list_ref = application_window_list(application);
     int window_count = window_list_ref ? CFArrayGetCount(window_list_ref) : 0;
@@ -1648,6 +1650,7 @@ void window_manager_add_existing_application_windows(struct space_manager *sm, s
         if (refresh_index != -1) {
             debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
             buf_del(wm->applications_to_refresh, refresh_index);
+            result = true;
         }
     } else {
         bool missing_window = false;
@@ -1665,10 +1668,13 @@ void window_manager_add_existing_application_windows(struct space_manager *sm, s
         } else if (refresh_index != -1 && !missing_window) {
             debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
             buf_del(wm->applications_to_refresh, refresh_index);
+            result = true;
         }
     }
 
     if (window_list_ref) CFRelease(window_list_ref);
+
+    return result;
 }
 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)

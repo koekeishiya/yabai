@@ -1080,7 +1080,11 @@ bool space_manager_refresh_application_windows(struct space_manager *sm)
     for (int i = 0; i < refresh_count; ++i) {
         struct application *application = g_window_manager.applications_to_refresh[i];
         debug("%s: %s has windows that are not yet resolved\n", __FUNCTION__, application->name);
-        window_manager_add_existing_application_windows(sm, &g_window_manager, application, i);
+        bool result = window_manager_add_existing_application_windows(sm, &g_window_manager, application, i);
+        if (result) {
+            --refresh_count;
+            --i;
+        }
     }
 
     return window_count != g_window_manager.window.count;

@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Rule property space should have higher precedence than display [#2206](https://github.com/koekeishiya/yabai/issues/2206)
 - Properly escape app and title, role and subrole, regex when listing rules [#2205](https://github.com/koekeishiya/yabai/issues/2205)
 - Properly escape app and title regex when listing signals [#2207](https://github.com/koekeishiya/yabai/issues/2207)
+- Fixed issue that could cause a crash when trying to detect windows opened before yabai launch [#2208](https://github.com/koekeishiya/yabai/issues/2208)
 
 ## [7.0.4] - 2024-03-30
 ### Changed
