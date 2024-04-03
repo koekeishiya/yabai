@@ -7,9 +7,13 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
 
     char *app   = rule->app;
     char *title = rule->title;
+    char *role  = rule->role;
+    char *srole = rule->subrole;
 
     char *escaped_app   = app   ? ts_string_escape(app)   : NULL;
     char *escaped_title = title ? ts_string_escape(title) : NULL;
+    char *escaped_role  = role  ? ts_string_escape(role)  : NULL;
+    char *escaped_srole = srole ? ts_string_escape(srole) : NULL;
 
     fprintf(rsp,
             "{\n"
@@ -36,8 +40,8 @@ void rule_serialize(FILE *rsp, struct rule *rule, int index)
             rule->label ? rule->label : "",
             escaped_app ? escaped_app : app ? app : "",
             escaped_title ? escaped_title : title ? title : "",
-            rule->role ? rule->role : "",
-            rule->subrole ? rule->subrole : "",
+            escaped_role ? escaped_role : role ? role : "",
+            escaped_srole ? escaped_srole : srole ? srole : "",
             rule->effects.did ? display_manager_display_id_arrangement(rule->effects.did) : 0,
             rule->effects.sid ? space_manager_mission_control_index(rule->effects.sid) : 0,
             json_bool(rule_effects_check_flag(&rule->effects, RULE_FOLLOW_SPACE)),
