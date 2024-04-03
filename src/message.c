@@ -2338,7 +2338,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             char *label;
             struct token token = get_token(&message);
             if (token_is_valid(token) && token_equals(token, ARGUMENT_WINDOW_SCRATCHPAD_RECOVER)) {
-                window_manager_recover_scratchpad_windows();
+                window_manager_scratchpad_recover_windows();
             } else if (parse_label(rsp, token, LABEL_WINDOW, &label)) {
                 if (label) {
                     if (!window_manager_set_scratchpad_for_window(&g_window_manager, acting_window, label)) {

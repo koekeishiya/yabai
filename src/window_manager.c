@@ -2433,13 +2433,15 @@ bool window_manager_remove_scratchpad_for_window(struct window_manager *wm, stru
     return false;
 }
 
-void window_manager_recover_scratchpad_windows(void)
+void window_manager_scratchpad_recover_windows(void)
 {
     int window_count;
     uint32_t *window_list = window_manager_existing_application_window_list(NULL, &window_count);
     if (!window_list) return;
 
-    scripting_addition_order_window_in(window_list, window_count);
+    if (scripting_addition_order_window_in(window_list, window_count)) {
+        space_manager_refresh_application_windows(&g_space_manager);
+    }
 }
 
 static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
