@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 - Config *global setting* `auto_balance` is now categorized as a *space setting* instead [#2200](https://github.com/koekeishiya/yabai/issues/2200)
+- Rule property space should have higher precedence than display [#2206](https://github.com/koekeishiya/yabai/issues/2206)
 
 ## [7.0.4] - 2024-03-30
 ### Changed

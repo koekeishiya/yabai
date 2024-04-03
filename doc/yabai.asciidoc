@@ -587,6 +587,7 @@ Rule
 
 All rules that match the given filter will be applied in the order they were registered. +
 If multiple rules specify a value for the same property, the latter rule will end up overriding that value. +
+If the display and space properties are both set, the space property will take precedence. +
 The following properties require System Integrity Protection to be partially disabled: sticky, sub-layer, opacity.
 
 General Syntax
