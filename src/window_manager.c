@@ -1607,7 +1607,7 @@ static uint32_t *window_manager_existing_application_window_list(struct applicat
         space_count += count;
     }
 
-    return space_list ? space_window_list_for_connection(space_list, space_count, application->connection, window_count, true) : NULL;
+    return space_list ? space_window_list_for_connection(space_list, space_count, application ? application->connection : 0, window_count, true) : NULL;
 }
 
 bool window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
@@ -2431,6 +2431,15 @@ bool window_manager_remove_scratchpad_for_window(struct window_manager *wm, stru
     }
 
     return false;
+}
+
+void window_manager_recover_scratchpad_windows(void)
+{
+    int window_count;
+    uint32_t *window_list = window_manager_existing_application_window_list(NULL, &window_count);
+    if (!window_list) return;
+
+    scripting_addition_order_window_in(window_list, window_count);
 }
 
 static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)

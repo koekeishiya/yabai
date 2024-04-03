@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Added
 - Added window commands `--raise ['<WINDOW_SEL>']` and `--lower ['<WINDOW_SEL>']` [#2198](https://github.com/koekeishiya/yabai/issues/2198)
-- Added window commands `--scratchpad ['<LABEL>']` and `--toggle <LABEL>` [#2203](https://github.com/koekeishiya/yabai/issues/2203)
+- Added window commands `--scratchpad ['<LABEL>|recover']` and `--toggle <LABEL>` [#2203](https://github.com/koekeishiya/yabai/issues/2203)
 - Added rule property `scratchpad='<LABEL>'` to automatically assign a window to a scratchpad [#2203](https://github.com/koekeishiya/yabai/issues/2203)
 - Added window and rule query property `scratchpad` [#2203](https://github.com/koekeishiya/yabai/issues/2203)
 

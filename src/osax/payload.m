@@ -851,6 +851,24 @@ static void do_window_order(char *message)
     SLSOrderWindow(SLSMainConnectionID(), a_wid, order, b_wid);
 }
 
+static void do_window_order_in(char *message)
+{
+    int count = 0;
+    unpack(count);
+    if (!count) return;
+
+    CFTypeRef transaction = SLSTransactionCreate(SLSMainConnectionID());
+    for (int i = 0; i < count; ++i) {
+        uint32_t wid;
+        unpack(wid);
+        if (!wid) continue;
+
+        SLSTransactionOrderWindowGroup(transaction, wid, 1, 0);
+    }
+    SLSTransactionCommit(transaction, 0);
+    CFRelease(transaction);
+}
+
 static void do_handshake(int sockfd)
 {
     uint32_t attrib = 0;
@@ -927,6 +945,9 @@ static void handle_message(int sockfd, char *message)
     } break;
     case SA_OPCODE_WINDOW_ORDER: {
         do_window_order(message);
+    } break;
+    case SA_OPCODE_WINDOW_ORDER_IN: {
+        do_window_order_in(message);
     } break;
     }
 }

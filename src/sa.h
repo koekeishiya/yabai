@@ -24,5 +24,6 @@ bool scripting_addition_scale_window(uint32_t wid, float x, float y, float w, fl
 bool scripting_addition_swap_window_proxy_in(struct window_animation *animation_list, int animation_count);
 bool scripting_addition_swap_window_proxy_out(struct window_animation *animation_list, int animation_count);
 bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid);
+bool scripting_addition_order_window_in(uint32_t *window_list, int window_count);
 
 #endif

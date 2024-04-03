@@ -171,6 +171,8 @@ extern bool g_verbose;
 #define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
 #define ARGUMENT_WINDOW_TOGGLE_EXPOSE "expose"
 #define ARGUMENT_WINDOW_TOGGLE_PIP    "pip"
+
+#define ARGUMENT_WINDOW_SCRATCHPAD_RECOVER "recover"
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------DOMAIN QUERY--------------------------------- */
@@ -545,9 +547,8 @@ static char *reserved_window_identifiers[] =
     ARGUMENT_WINDOW_TOGGLE_PIP
 };
 
-static bool parse_label(FILE *rsp, char **message, enum label_type type, char **label)
+static bool parse_label(FILE *rsp, struct token token, enum label_type type, char **label)
 {
-    struct token token = get_token(message);
     struct token_value value = token_to_value(token);
 
     if (value.type == TOKEN_TYPE_INVALID) {
@@ -1685,7 +1686,7 @@ static void handle_domain_display(FILE *rsp, struct token domain, char *message)
         }
     } else if (token_equals(command, COMMAND_DISPLAY_LABEL)) {
         char *label;
-        if (parse_label(rsp, &message, LABEL_DISPLAY, &label)) {
+        if (parse_label(rsp, get_token(&message), LABEL_DISPLAY, &label)) {
             if (label) {
                 display_manager_set_label_for_display(&g_display_manager, acting_did, label);
             } else {
@@ -1972,7 +1973,7 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(command, COMMAND_SPACE_LABEL)) {
             char *label;
-            if (parse_label(rsp, &message, LABEL_SPACE, &label)) {
+            if (parse_label(rsp, get_token(&message), LABEL_SPACE, &label)) {
                 if (label) {
                     space_manager_set_label_for_space(&g_space_manager, acting_sid, label);
                 } else {
@@ -2335,7 +2336,10 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(command, COMMAND_WINDOW_SCRATCHPAD)) {
             char *label;
-            if (parse_label(rsp, &message, LABEL_WINDOW, &label)) {
+            struct token token = get_token(&message);
+            if (token_is_valid(token) && token_equals(token, ARGUMENT_WINDOW_SCRATCHPAD_RECOVER)) {
+                window_manager_recover_scratchpad_windows();
+            } else if (parse_label(rsp, token, LABEL_WINDOW, &label)) {
                 if (label) {
                     if (!window_manager_set_scratchpad_for_window(&g_window_manager, acting_window, label)) {
                         daemon_fail(rsp, "the given scratchpad is already assigned to a different window!\n");

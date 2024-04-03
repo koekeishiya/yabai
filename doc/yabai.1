@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-04-03
+.\"      Date: 2024-04-04
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-04-03" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-04-04" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -661,7 +661,7 @@ Orders the selected window below the given window, or to the back within its lay
 System Integrity Protection must be partially disabled.
 .RE
 .sp
-\fB\-\-scratchpad\fP [\fI<LABEL>\fP]
+\fB\-\-scratchpad\fP [\fI<LABEL>|recover\fP]
 .RS 4
 Unique identifier used to identify a window scratchpad.
 .br
@@ -674,6 +674,10 @@ If the scratchpad is already taken by another window, this assignment will fail.
 If the scratchpad is re\-assigned, the previous identifier will become available.
 .br
 If no value is given, the window will seize to be a scratchpad window.
+.br
+The special value \fIrecover\fP can be used to forcefully bring all scratchpad windows to the front.
+.br
+This can be useful if windows become inaccessible due to a restart or crash.
 .br
 System Integrity Protection must be partially disabled.
 .RE

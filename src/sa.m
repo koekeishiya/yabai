@@ -583,6 +583,25 @@ bool scripting_addition_order_window(uint32_t a_wid, int order, uint32_t b_wid)
     return sa_payload_send(SA_OPCODE_WINDOW_ORDER);
 }
 
+extern int g_connection;
+bool scripting_addition_order_window_in(uint32_t *window_list, int window_count)
+{
+    uint32_t dummy_wid = 0;
+    uint8_t ordered_in = 0;
+
+    sa_payload_init();
+    pack(window_count);
+    for (int i = 0; i < window_count; ++i) {
+        SLSWindowIsOrderedIn(g_connection, window_list[i], &ordered_in);
+        if (ordered_in) {
+            pack(dummy_wid);
+        } else {
+            pack(window_list[i]);
+        }
+    }
+    return sa_payload_send(SA_OPCODE_WINDOW_ORDER_IN);
+}
+
 #undef sa_payload_init
 #undef pack
 #undef sa_payload_send
