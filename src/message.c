@@ -544,7 +544,8 @@ static char *reserved_window_identifiers[] =
     ARGUMENT_WINDOW_TOGGLE_FULLSC,
     ARGUMENT_WINDOW_TOGGLE_NATIVE,
     ARGUMENT_WINDOW_TOGGLE_EXPOSE,
-    ARGUMENT_WINDOW_TOGGLE_PIP
+    ARGUMENT_WINDOW_TOGGLE_PIP,
+    ARGUMENT_WINDOW_SCRATCHPAD_RECOVER
 };
 
 static bool parse_label(FILE *rsp, struct token token, enum label_type type, char **label)
@@ -2560,7 +2561,16 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             rule->label = string_copy(value);
         } else if (string_equals(key, ARGUMENT_RULE_KEY_SCRATCHPAD)) {
             if (exclusion) unsupported_exclusion = key;
-            if (!string_equals(value, ARGUMENT_WINDOW_SCRATCHPAD_RECOVER)) {
+
+            bool valid = true;
+            for (int i = 0; i < array_count(reserved_window_identifiers); ++i) {
+                if (string_equals(value, reserved_window_identifiers[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if (valid) {
                 rule->effects.scratchpad = string_copy(value);
                 rule->effects.manage = RULE_PROP_OFF;
             } else {
