@@ -10,12 +10,20 @@
 # ARG2:   Directory in which to store the yabai man-page; must be an absolutepath.
 #         Fallback: /usr/local/man/man1
 #
+# ARG3:   Whether to update the sudoers file; must be "true" or "false".
+#         Fallback: "false"
+#
+# ARG4:   Path to the sudoers file; must be an absolute path.
+#         Fallback: /private/etc/sudoers.d/yabai
+#
 # Author: Åsmund Vikane
 #   Date: 2024-02-13
 #
 
 BIN_DIR="$1"
 MAN_DIR="$2"
+UPDATE_SUDOERS="$3"
+SUDOERS_FILE="$4"
 
 if [ -z "$BIN_DIR" ]; then
     BIN_DIR="/usr/local/bin"
@@ -55,6 +63,10 @@ if [ ! -w "$MAN_DIR" ]; then
     exit 1
 fi
 
+if [ -z "$SUDOERS_FILE" ]; then
+    SUDOERS_FILE="/private/etc/sudoers.d/yabai"
+fi
+
 AUTHOR="koekeishiya"
 NAME="yabai"
 VERSION="7.1.0"
@@ -74,6 +86,24 @@ if [ "$FILE_HASH" = "$EXPECTED_HASH" ]; then
     rm ${MAN_DIR}/${NAME}.1
     cp -v ./archive/bin/${NAME} ${BIN_DIR}/${NAME}
     cp -v ./archive/doc/${NAME}.1 ${MAN_DIR}/${NAME}.1
+
+    if [ "$UPDATE_SUDOERS" = "true" ]; then
+        TMP_SUDOERS_FILE="./tmp_sudoers"
+        SUDOERS_ROW="$(whoami) ALL=(root) NOPASSWD: sha256:$(shasum -a 256 ${BIN_DIR}/yabai | cut -d " " -f 1) ${BIN_DIR}/yabai --load-sa"
+
+        echo "$SUDOERS_ROW" > $TMP_SUDOERS_FILE
+
+        if visudo -c -f $TMP_SUDOERS_FILE; then
+            echo "Sudoers file syntax is OK. Updating sudoers file.."
+            # Please note that this will prompt for the user's password unless they have passwordless sudo set up.
+            sudo cp $TMP_SUDOERS_FILE $SUDOERS_FILE
+        else
+            echo "Sudoers file syntax is not OK. Not updating sudoers file."
+        fi
+
+        rm $TMP_SUDOERS_FILE
+    fi
+
     echo "Finished copying files.."
     echo ""
     echo "If you want yabai to be managed by launchd (start automatically upon login):"
