@@ -230,7 +230,11 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_list[i];
-        if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, NULL)) continue;
+
+        if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, NULL)) {
+            window->application = NULL;
+            continue;
+        }
 
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
@@ -530,7 +534,7 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
         return;
     }
 
-    debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+    debug("%s: %s %d\n", __FUNCTION__, window->application ? window->application->name : "<unknown>", window->id);
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {

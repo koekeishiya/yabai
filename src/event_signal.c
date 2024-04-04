@@ -206,7 +206,7 @@ void event_signal_push(enum signal_type type, void *context)
         snprintf(es->arg_name[0],  arg_size, "%s", "YABAI_WINDOW_ID");
         snprintf(es->arg_value[0], arg_size, "%d", window->id);
 
-        es->app = ts_string_copy(window->application->name);
+        es->app = window->application ? ts_string_copy(window->application->name) : "<unknown>";
         es->active = g_window_manager.focused_window_id == window->id;
     } break;
     case SIGNAL_WINDOW_MOVED:

@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Properly escape app and title, role and subrole, regex when listing rules [#2205](https://github.com/koekeishiya/yabai/issues/2205)
 - Properly escape app and title regex when listing signals [#2207](https://github.com/koekeishiya/yabai/issues/2207)
 - Fixed issue that could cause a crash when trying to detect windows opened before yabai launch [#2208](https://github.com/koekeishiya/yabai/issues/2208)
+- Fixed issue that could cause a crash when terminating an application in rare cases where there is a large backlog of events [#2210](https://github.com/koekeishiya/yabai/issues/2210)
 
 ## [7.0.4] - 2024-03-30
 ### Changed
