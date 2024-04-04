@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.0] - 2024-04-04
 ### Added
 - Added window commands `--raise ['<WINDOW_SEL>']` and `--lower ['<WINDOW_SEL>']` [#2198](https://github.com/koekeishiya/yabai/issues/2198)
 - Added window commands `--scratchpad ['<LABEL>|recover']` and `--toggle <LABEL>` [#2203](https://github.com/koekeishiya/yabai/issues/2203)
@@ -670,7 +672,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.0.4...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.0...HEAD
+[7.1.0]: https://github.com/koekeishiya/yabai/compare/v7.0.4...v7.1.0
 [7.0.4]: https://github.com/koekeishiya/yabai/compare/v7.0.3...v7.0.4
 [7.0.3]: https://github.com/koekeishiya/yabai/compare/v7.0.2...v7.0.3
 [7.0.2]: https://github.com/koekeishiya/yabai/compare/v7.0.1...v7.0.2
