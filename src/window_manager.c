@@ -158,9 +158,7 @@ void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struc
 
     if (effects->scratchpad) {
         char *scratchpad = string_copy(effects->scratchpad);
-        if (window_manager_set_scratchpad_for_window(wm, window, scratchpad)) {
-            window_manager_toggle_scratchpad_window(wm, window, 1);
-        } else {
+        if (!window_manager_set_scratchpad_for_window(wm, window, scratchpad)) {
             free(scratchpad);
         }
     }
