@@ -696,9 +696,13 @@ uint64_t space_manager_active_space(void)
 
 void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 {
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
-    SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
-    CFRelease(window_list_ref);
+    if (workspace_is_macos_sonoma14_5_or_newer()) {
+        scripting_addition_move_window_to_space(window->id, sid);
+    } else {
+        CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
+        SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
+        CFRelease(window_list_ref);
+    }
 }
 
 static inline uint64_t space_manager_find_first_user_space_for_display(uint32_t did)

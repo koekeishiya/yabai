@@ -602,6 +602,14 @@ bool scripting_addition_order_window_in(uint32_t *window_list, int window_count)
     return sa_payload_send(SA_OPCODE_WINDOW_ORDER_IN);
 }
 
+bool scripting_addition_move_window_to_space(uint32_t wid, uint64_t sid)
+{
+    sa_payload_init();
+    pack(wid);
+    pack(sid);
+    return sa_payload_send(SA_OPCODE_WINDOW_MOVE_SPACE);
+}
+
 #undef sa_payload_init
 #undef pack
 #undef sa_payload_send

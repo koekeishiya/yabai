@@ -31,5 +31,6 @@ void workspace_application_observe_activation_policy(void *context, struct proce
 int workspace_display_notch_height(uint32_t did);
 pid_t workspace_get_dock_pid(void);
 bool workspace_event_handler_begin(void **context);
+bool workspace_is_macos_sonoma14_5_or_newer(void);
 
 #endif
