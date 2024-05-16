@@ -697,7 +697,9 @@ uint64_t space_manager_active_space(void)
 void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 {
     if (workspace_is_macos_sonoma14_5_or_newer()) {
-        scripting_addition_move_window_to_space(window->id, sid);
+        SLSSpaceSetCompatID(g_connection, sid, 0x79616265);
+        SLSSetWindowListWorkspace(g_connection, &window->id, 1, 0x79616265);
+        SLSSpaceSetCompatID(g_connection, sid, 0x0);
     } else {
         CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
         SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);

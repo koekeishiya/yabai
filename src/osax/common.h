@@ -1,7 +1,7 @@
 #ifndef SA_COMMON_H
 #define SA_COMMON_H
 
-#define OSAX_VERSION                "2.1.8"
+#define OSAX_VERSION                "2.1.9"
 
 #define OSAX_ATTRIB_DOCK_SPACES     0x01
 #define OSAX_ATTRIB_DPPM            0x02
@@ -38,7 +38,6 @@ enum sa_opcode
     SA_OPCODE_WINDOW_SWAP_PROXY_OUT = 0x0F,
     SA_OPCODE_WINDOW_ORDER          = 0x10,
     SA_OPCODE_WINDOW_ORDER_IN       = 0x11,
-    SA_OPCODE_WINDOW_MOVE_SPACE     = 0x12,
 };
 
 #endif

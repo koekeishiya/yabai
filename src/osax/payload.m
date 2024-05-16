@@ -55,7 +55,6 @@ extern CGError SLSGetWindowBounds(int cid, uint32_t wid, CGRect *frame);
 extern CGError SLSGetWindowTransform(int cid, uint32_t wid, CGAffineTransform *t);
 extern CGError SLSSetWindowTransform(int cid, uint32_t wid, CGAffineTransform t);
 extern CGError SLSOrderWindow(int cid, uint32_t wid, int order, uint32_t rel_wid);
-extern void SLSMoveWindowsToManagedSpace(int cid, CFArrayRef window_list, uint64_t sid);
 extern void SLSManagedDisplaySetCurrentSpace(int cid, CFStringRef display_ref, uint64_t sid);
 extern uint64_t SLSManagedDisplayGetCurrentSpace(int cid, CFStringRef display_ref);
 extern CFStringRef SLSCopyManagedDisplayForSpace(int cid, uint64_t sid);
@@ -870,38 +869,6 @@ static void do_window_order_in(char *message)
     CFRelease(transaction);
 }
 
-
-static inline CFArrayRef cfarray_of_cfnumbers(void *values, size_t size, int count, CFNumberType type)
-{
-    CFNumberRef temp[count];
-
-    for (int i = 0; i < count; ++i) {
-        temp[i] = CFNumberCreate(NULL, type, ((char *)values) + (size * i));
-    }
-
-    CFArrayRef result = CFArrayCreate(NULL, (const void **)temp, count, &kCFTypeArrayCallBacks);
-
-    for (int i = 0; i < count; ++i) {
-        CFRelease(temp[i]);
-    }
-
-    return result;
-}
-
-static void do_window_move_space(char *message)
-{
-    uint32_t wid;
-    unpack(wid);
-    if (!wid) return;
-
-    uint64_t sid;
-    unpack(sid);
-
-    CFArrayRef window_list_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
-    SLSMoveWindowsToManagedSpace(SLSMainConnectionID(), window_list_ref, sid);
-    CFRelease(window_list_ref);
-}
-
 static void do_handshake(int sockfd)
 {
     uint32_t attrib = 0;
@@ -981,9 +948,6 @@ static void handle_message(int sockfd, char *message)
     } break;
     case SA_OPCODE_WINDOW_ORDER_IN: {
         do_window_order_in(message);
-    } break;
-    case SA_OPCODE_WINDOW_MOVE_SPACE: {
-        do_window_move_space(message);
     } break;
     }
 }
