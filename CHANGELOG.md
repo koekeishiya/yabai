@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.1] - 2024-05-18
 ### Changed
 - Assigning a window to scratchpad using rules would incorrectly hide that window immediately [#2203](https://github.com/koekeishiya/yabai/issues/2203)
 - Moving windows to other spaces should once again work on macOS Sonoma 14.5 (and newer) [#2240](https://github.com/koekeishiya/yabai/issues/2240)
@@ -676,7 +678,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.0...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.1...HEAD
+[7.1.1]: https://github.com/koekeishiya/yabai/compare/v7.1.0...v7.1.1
 [7.1.0]: https://github.com/koekeishiya/yabai/compare/v7.0.4...v7.1.0
 [7.0.4]: https://github.com/koekeishiya/yabai/compare/v7.0.3...v7.0.4
 [7.0.3]: https://github.com/koekeishiya/yabai/compare/v7.0.2...v7.0.3
