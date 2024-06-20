@@ -230,7 +230,8 @@ int main(int argc, char **argv)
     }
 
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if (os_version.majorVersion == 14 && os_version.minorVersion >= 4) {
+    if ((os_version.majorVersion == 14 && os_version.minorVersion >= 4) ||
+        (os_version.majorVersion == 15)) {
         thread_terminate(thread);
         error = thread_create_running(task, thread_flavor, (thread_state_t)&machine_thread_state, machine_thread_flavor_count, &thread);
         if (error != KERN_SUCCESS) {
