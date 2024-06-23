@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Updated scripting-addition mach loader/injection and payload to work for macOS Sequoia Beta 1 [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
 
 ## [7.1.1] - 2024-05-18
 ### Changed
