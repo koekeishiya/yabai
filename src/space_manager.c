@@ -694,12 +694,29 @@ uint64_t space_manager_active_space(void)
     return display_space_id(did);
 }
 
+void space_manager_move_window_list_to_space(uint64_t sid, uint32_t *window_list, int window_count)
+{
+    if (workspace_is_macos_sonoma14_5_or_newer()) {
+        if (!scripting_addition_move_window_list_to_space(sid, window_list, window_count)) {
+            SLSSpaceSetCompatID(g_connection, sid, 0x79616265);
+            SLSSetWindowListWorkspace(g_connection, window_list, window_count, 0x79616265);
+            SLSSpaceSetCompatID(g_connection, sid, 0x0);
+        }
+    } else {
+        CFArrayRef window_list_ref = cfarray_of_cfnumbers(window_list, sizeof(uint32_t), window_count, kCFNumberSInt32Type);
+        SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
+        CFRelease(window_list_ref);
+    }
+}
+
 void space_manager_move_window_to_space(uint64_t sid, struct window *window)
 {
     if (workspace_is_macos_sonoma14_5_or_newer()) {
-        SLSSpaceSetCompatID(g_connection, sid, 0x79616265);
-        SLSSetWindowListWorkspace(g_connection, &window->id, 1, 0x79616265);
-        SLSSpaceSetCompatID(g_connection, sid, 0x0);
+        if (!scripting_addition_move_window_to_space(sid, window->id)) {
+            SLSSpaceSetCompatID(g_connection, sid, 0x79616265);
+            SLSSetWindowListWorkspace(g_connection, &window->id, 1, 0x79616265);
+            SLSSpaceSetCompatID(g_connection, sid, 0x0);
+        }
     } else {
         CFArrayRef window_list_ref = cfarray_of_cfnumbers(&window->id, sizeof(uint32_t), 1, kCFNumberSInt32Type);
         SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, sid);
@@ -777,15 +794,11 @@ static enum space_op_error space_manager_swap_space_with_space_on_display(uint32
     table_add(&g_space_manager.view, &b_sid, a_view);
 
     if (a_window_list_count) {
-        CFArrayRef window_list_ref = cfarray_of_cfnumbers(a_window_list, sizeof(uint32_t), a_window_list_count, kCFNumberSInt32Type);
-        SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, b_sid);
-        CFRelease(window_list_ref);
+        space_manager_move_window_list_to_space(b_sid, a_window_list, a_window_list_count);
     }
 
     if (b_window_list_count) {
-        CFArrayRef window_list_ref = cfarray_of_cfnumbers(b_window_list, sizeof(uint32_t), b_window_list_count, kCFNumberSInt32Type);
-        SLSMoveWindowsToManagedSpace(g_connection, window_list_ref, a_sid);
-        CFRelease(window_list_ref);
+        space_manager_move_window_list_to_space(a_sid, b_window_list, b_window_list_count);
     }
 
     for (int i = 0; i < buf_len(g_space_manager.labels); ++i) {

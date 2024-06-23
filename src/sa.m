@@ -602,6 +602,25 @@ bool scripting_addition_order_window_in(uint32_t *window_list, int window_count)
     return sa_payload_send(SA_OPCODE_WINDOW_ORDER_IN);
 }
 
+bool scripting_addition_move_window_list_to_space(uint64_t sid, uint32_t *window_list, int window_count)
+{
+    sa_payload_init();
+    pack(sid);
+    pack(window_count);
+    for (int i = 0; i < window_count; ++i) {
+        pack(window_list[i]);
+    }
+    return sa_payload_send(SA_OPCODE_WINDOW_LIST_TO_SPACE);
+}
+
+bool scripting_addition_move_window_to_space(uint64_t sid, uint32_t wid)
+{
+    sa_payload_init();
+    pack(sid);
+    pack(wid);
+    return sa_payload_send(SA_OPCODE_WINDOW_TO_SPACE);
+}
+
 #undef sa_payload_init
 #undef pack
 #undef sa_payload_send

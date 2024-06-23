@@ -85,6 +85,7 @@ bool space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid,
 bool space_manager_toggle_padding_for_space(struct space_manager *sm, uint64_t sid);
 bool space_manager_rotate_space(struct space_manager *sm, uint64_t sid, int degrees);
 bool space_manager_mirror_space(struct space_manager *sm, uint64_t sid, enum window_node_split axis);
+void space_manager_move_window_list_to_space(uint64_t sid, uint32_t *window_list, int window_count);
 void space_manager_move_window_to_space(uint64_t sid, struct window *window);
 enum space_op_error space_manager_focus_space(uint64_t sid);
 enum space_op_error space_manager_switch_space(uint64_t sid);
