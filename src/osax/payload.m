@@ -86,6 +86,7 @@ static uint64_t remove_space_fp;
 static uint64_t move_space_fp;
 static uint64_t set_front_window_fp;
 static uint64_t animation_time_addr;
+static bool macOSSequoia;
 
 static pthread_t daemon_thread;
 static int daemon_sockfd;
@@ -231,10 +232,11 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
     } else if (os_version.majorVersion == 14) {
         return true; // Sonoma 14.0
     } else if (os_version.majorVersion == 15) {
+        macOSSequoia = true;
         return true; // Sequoia 15.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0.0+, Monterey 12.0.0+, Ventura 13.0.0+, and Sonoma 14.0.0+");
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Big Sur 11.0.0+, Monterey 12.0.0+, Ventura 13.0.0+, Sonoma 14.0.0+, and Sequoia 15.0");
 #elif __arm64__
     if (os_version.majorVersion == 12) {
         return true; // Monterey 12.0
@@ -243,10 +245,11 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
     } else if (os_version.majorVersion == 14) {
         return true; // Sonoma 14.0
     } else if (os_version.majorVersion == 15) {
+        macOSSequoia = true;
         return true; // Sequoia 15.0
     }
 
-    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+, and Ventura 13.0.0+, and Sonoma 14.0.0+");
+    NSLog(@"[yabai-sa] spaces functionality is only supported on macOS Monterey 12.0.0+, and Ventura 13.0.0+, Sonoma 14.0.0+, and Sequoia 15.0");
 #endif
 
     return false;
@@ -540,7 +543,9 @@ static void do_space_create(char *message)
 
     CFStringRef __block display_uuid = SLSCopyManagedDisplayForSpace(SLSMainConnectionID(), space_id);
     dispatch_sync(dispatch_get_main_queue(), ^{
-        id new_space = [[objc_getClass("Dock.ManagedSpace") alloc] init];
+        id new_space = macOSSequoia
+                     ? [[objc_getClass("ManagedSpace") alloc] init]
+                     : [[objc_getClass("Dock.ManagedSpace") alloc] init];
         id display_space = display_space_for_display_uuid(display_uuid);
         asm__call_add_space(new_space, display_space, add_space_fp);
         CFRelease(display_uuid);
@@ -556,7 +561,9 @@ static void do_space_focus(char *message)
 
     if (dest_space_id) {
         CFStringRef dest_display = SLSCopyManagedDisplayForSpace(SLSMainConnectionID(), dest_space_id);
-        id source_space = ((id (*)(id, SEL, CFStringRef)) objc_msgSend)(dock_spaces, @selector(currentSpaceforDisplayUUID:), dest_display);
+        id source_space = macOSSequoia
+                        ? ((id (*)(id, SEL, CFStringRef)) objc_msgSend)(dock_spaces, @selector(currentSpaceForDisplayUUID:), dest_display)
+                        : ((id (*)(id, SEL, CFStringRef)) objc_msgSend)(dock_spaces, @selector(currentSpaceforDisplayUUID:), dest_display);
         uint64_t source_space_id = get_space_id(source_space);
 
         if (source_space_id != dest_space_id) {
