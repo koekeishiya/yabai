@@ -135,6 +135,7 @@ struct window *window_manager_find_recent_managed_window(struct space_manager *s
 struct window *window_manager_find_prev_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_next_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_first_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
+struct window *window_manager_find_nth_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window, int index);
 struct window *window_manager_find_last_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_recent_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_largest_managed_window(struct space_manager *sm, struct window_manager *wm);

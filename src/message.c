@@ -229,24 +229,32 @@ extern bool g_verbose;
 /* ----------------------------------------------------------------------------- */
 
 /* --------------------------------COMMON ARGUMENTS----------------------------- */
-#define ARGUMENT_COMMON_VAL_ON           "on"
-#define ARGUMENT_COMMON_VAL_OFF          "off"
-#define ARGUMENT_COMMON_SEL_PREV         "prev"
-#define ARGUMENT_COMMON_SEL_NEXT         "next"
-#define ARGUMENT_COMMON_SEL_FIRST        "first"
-#define ARGUMENT_COMMON_SEL_LAST         "last"
-#define ARGUMENT_COMMON_SEL_RECENT       "recent"
-#define ARGUMENT_COMMON_SEL_NORTH        "north"
-#define ARGUMENT_COMMON_SEL_EAST         "east"
-#define ARGUMENT_COMMON_SEL_SOUTH        "south"
-#define ARGUMENT_COMMON_SEL_WEST         "west"
-#define ARGUMENT_COMMON_SEL_MOUSE        "mouse"
-#define ARGUMENT_COMMON_SEL_STACK        "stack"
-#define ARGUMENT_COMMON_SEL_STACK_PREV   "stack.prev"
-#define ARGUMENT_COMMON_SEL_STACK_NEXT   "stack.next"
-#define ARGUMENT_COMMON_SEL_STACK_FIRST  "stack.first"
-#define ARGUMENT_COMMON_SEL_STACK_LAST   "stack.last"
-#define ARGUMENT_COMMON_SEL_STACK_RECENT "stack.recent"
+#define ARGUMENT_COMMON_VAL_ON              "on"
+#define ARGUMENT_COMMON_VAL_OFF             "off"
+#define ARGUMENT_COMMON_SEL_PREV            "prev"
+#define ARGUMENT_COMMON_SEL_NEXT            "next"
+#define ARGUMENT_COMMON_SEL_FIRST           "first"
+#define ARGUMENT_COMMON_SEL_LAST            "last"
+#define ARGUMENT_COMMON_SEL_RECENT          "recent"
+#define ARGUMENT_COMMON_SEL_NORTH           "north"
+#define ARGUMENT_COMMON_SEL_EAST            "east"
+#define ARGUMENT_COMMON_SEL_SOUTH           "south"
+#define ARGUMENT_COMMON_SEL_WEST            "west"
+#define ARGUMENT_COMMON_SEL_MOUSE           "mouse"
+#define ARGUMENT_COMMON_SEL_STACK           "stack"
+#define ARGUMENT_COMMON_SEL_STACK_PREV      "stack.prev"
+#define ARGUMENT_COMMON_SEL_STACK_NEXT      "stack.next"
+#define ARGUMENT_COMMON_SEL_STACK_FIRST     "stack.first"
+#define ARGUMENT_COMMON_SEL_STACK_SECOND    "stack.second"
+#define ARGUMENT_COMMON_SEL_STACK_THIRD     "stack.third"
+#define ARGUMENT_COMMON_SEL_STACK_FOURTH    "stack.fourth"
+#define ARGUMENT_COMMON_SEL_STACK_FIFTH     "stack.fifth"
+#define ARGUMENT_COMMON_SEL_STACK_SIXTH     "stack.sixth"
+#define ARGUMENT_COMMON_SEL_STACK_SEVENTH   "stack.seventh"
+#define ARGUMENT_COMMON_SEL_STACK_EIGHTH    "stack.eighth"
+#define ARGUMENT_COMMON_SEL_STACK_NINTH     "stack.ninth"
+#define ARGUMENT_COMMON_SEL_STACK_LAST      "stack.last"
+#define ARGUMENT_COMMON_SEL_STACK_RECENT    "stack.recent"
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -1083,6 +1091,94 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
                 struct window *first_window = window_manager_find_first_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
                 if (first_window) {
                     result.window = first_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_SECOND)) {
+            if (acting_window) {
+                struct window *second_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 1);
+                if (second_window) {
+                    result.window = second_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_THIRD)) {
+            if (acting_window) {
+                struct window *third_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 2);
+                if (third_window) {
+                    result.window = third_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_FOURTH)) {
+            if (acting_window) {
+                struct window *fourth_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 3);
+                if (fourth_window) {
+                    result.window = fourth_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_FIFTH)) {
+            if (acting_window) {
+                struct window *fifth_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 4);
+                if (fifth_window) {
+                    result.window = fifth_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_SIXTH)) {
+            if (acting_window) {
+                struct window *sixth_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 5);
+                if (sixth_window) {
+                    result.window = sixth_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_SEVENTH)) {
+            if (acting_window) {
+                struct window *seventh_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 6);
+                if (seventh_window) {
+                    result.window = seventh_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_EIGHTH)) {
+            if (acting_window) {
+                struct window *eighth_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 7);
+                if (eighth_window) {
+                    result.window = eighth_window;
+                } else {
+                    daemon_fail(rsp, "could not locate the first stacked window.\n");
+                }
+            } else {
+                daemon_fail(rsp, "could not locate the selected window.\n");
+            }
+        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_NINTH)) {
+            if (acting_window) {
+                struct window *ninth_window = window_manager_find_nth_window_in_stack(&g_space_manager, &g_window_manager, acting_window, 8);
+                if (ninth_window) {
+                    result.window = ninth_window;
                 } else {
                     daemon_fail(rsp, "could not locate the first stacked window.\n");
                 }

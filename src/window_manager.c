@@ -1109,6 +1109,17 @@ struct window *window_manager_find_first_window_in_stack(struct space_manager *s
     return node->window_count > 1 ? window_manager_find_window(wm, node->window_list[0]) : NULL;
 }
 
+struct window *window_manager_find_nth_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window, int index)
+{
+    struct view *view = space_manager_find_view(sm, space_manager_active_space());
+    if (!view) return NULL;
+
+    struct window_node *node = view_find_window_node(view, window->id);
+    if (!node) return NULL;
+
+    return node->window_count > index ? window_manager_find_window(wm, node->window_list[index]) : NULL;
+}
+
 struct window *window_manager_find_last_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window)
 {
     struct view *view = space_manager_find_view(sm, space_manager_active_space());
