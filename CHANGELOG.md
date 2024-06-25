@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Moving windows to other spaces requires SIP to be disabled on macOS Sequoia [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
-- Updated scripting-addition mach loader/injection and payload to work for macOS Sequoia Beta 1 [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
+- Updated scripting-addition mach loader/injection and payload to work for macOS Sequoia Beta 1 and 2 [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
 
 ## [7.1.1] - 2024-05-18
 ### Changed
