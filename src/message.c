@@ -242,11 +242,7 @@ extern bool g_verbose;
 #define ARGUMENT_COMMON_SEL_WEST         "west"
 #define ARGUMENT_COMMON_SEL_MOUSE        "mouse"
 #define ARGUMENT_COMMON_SEL_STACK        "stack"
-#define ARGUMENT_COMMON_SEL_STACK_PREV   "stack.prev"
-#define ARGUMENT_COMMON_SEL_STACK_NEXT   "stack.next"
-#define ARGUMENT_COMMON_SEL_STACK_FIRST  "stack.first"
-#define ARGUMENT_COMMON_SEL_STACK_LAST   "stack.last"
-#define ARGUMENT_COMMON_SEL_STACK_RECENT "stack.recent"
+#define ARGUMENT_COMMON_SEL_STACK_PREFIX "stack."
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -1056,57 +1052,57 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
             } else {
                 daemon_fail(rsp, "could not locate the most recently focused window.\n");
             }
-        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_PREV)) {
+        } else if (token_prefix(result.token, ARGUMENT_COMMON_SEL_STACK_PREFIX)) {
             if (acting_window) {
-                struct window *prev_window = window_manager_find_prev_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
-                if (prev_window) {
-                    result.window = prev_window;
+                int index;
+                result.token.text   += strlen(ARGUMENT_COMMON_SEL_STACK_PREFIX);
+                result.token.length -= strlen(ARGUMENT_COMMON_SEL_STACK_PREFIX);
+
+                if (token_equals(result.token, ARGUMENT_COMMON_SEL_PREV)) {
+                    struct window *prev_window = window_manager_find_prev_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+                    if (prev_window) {
+                        result.window = prev_window;
+                    } else {
+                        daemon_fail(rsp, "could not locate the prev stacked window.\n");
+                    }
+                } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_NEXT)) {
+                    struct window *next_window = window_manager_find_next_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+                    if (next_window) {
+                        result.window = next_window;
+                    } else {
+                        daemon_fail(rsp, "could not locate the next stacked window.\n");
+                    }
+                } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_FIRST)) {
+                    struct window *first_window = window_manager_find_first_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+                    if (first_window) {
+                        result.window = first_window;
+                    } else {
+                        daemon_fail(rsp, "could not locate the first stacked window.\n");
+                    }
+                } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_LAST)) {
+                    struct window *last_window = window_manager_find_last_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+                    if (last_window) {
+                        result.window = last_window;
+                    } else {
+                        daemon_fail(rsp, "could not locate the last stacked window.\n");
+                    }
+                } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_RECENT)) {
+                    struct window *recent_window = window_manager_find_recent_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
+                    if (recent_window) {
+                        result.window = recent_window;
+                    } else {
+                        daemon_fail(rsp, "could not locate the recent stacked window.\n");
+                    }
+                } else if (token_is_valid(result.token) && token_is_positive_integer(result.token, &index) && index > 0) {
+                    struct window *index_window = window_manager_find_window_in_stack(&g_space_manager, &g_window_manager, acting_window, index);
+                    if (index_window) {
+                        result.window = index_window;
+                    } else {
+                        daemon_fail(rsp, "could not locate the stacked window in position %d.\n", index);
+                    }
                 } else {
-                    daemon_fail(rsp, "could not locate the prev stacked window.\n");
-                }
-            } else {
-                daemon_fail(rsp, "could not locate the selected window.\n");
-            }
-        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_NEXT)) {
-            if (acting_window) {
-                struct window *next_window = window_manager_find_next_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
-                if (next_window) {
-                    result.window = next_window;
-                } else {
-                    daemon_fail(rsp, "could not locate the next stacked window.\n");
-                }
-            } else {
-                daemon_fail(rsp, "could not locate the selected window.\n");
-            }
-        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_FIRST)) {
-            if (acting_window) {
-                struct window *first_window = window_manager_find_first_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
-                if (first_window) {
-                    result.window = first_window;
-                } else {
-                    daemon_fail(rsp, "could not locate the first stacked window.\n");
-                }
-            } else {
-                daemon_fail(rsp, "could not locate the selected window.\n");
-            }
-        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_LAST)) {
-            if (acting_window) {
-                struct window *last_window = window_manager_find_last_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
-                if (last_window) {
-                    result.window = last_window;
-                } else {
-                    daemon_fail(rsp, "could not locate the last stacked window.\n");
-                }
-            } else {
-                daemon_fail(rsp, "could not locate the selected window.\n");
-            }
-        } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_STACK_RECENT)) {
-            if (acting_window) {
-                struct window *recent_window = window_manager_find_recent_window_in_stack(&g_space_manager, &g_window_manager, acting_window);
-                if (recent_window) {
-                    result.window = recent_window;
-                } else {
-                    daemon_fail(rsp, "could not locate the recent stacked window.\n");
+                    result.did_parse = false;
+                    daemon_fail(rsp, "value '%s%.*s' is not a valid option for WINDOW_SEL\n", ARGUMENT_COMMON_SEL_STACK_PREFIX, result.token.length, result.token.text);
                 }
             } else {
                 daemon_fail(rsp, "could not locate the selected window.\n");

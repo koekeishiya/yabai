@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Moving windows to other spaces requires SIP to be disabled on macOS Sequoia [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
 - Updated scripting-addition mach loader/injection and payload to work for macOS Sequoia Beta 1 and 2 [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
+- Extend *stack window selector* to allow numeric indices: `yabai -m window --focus stack.3` [#2342](https://github.com/koekeishiya/yabai/issues/2342)
 
 ## [7.1.1] - 2024-05-18
 ### Changed
@@ -672,7 +673,7 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 - Hide power indicator from the status-bar if a battery could not be found [#60](https://github.com/koekeishiya/yabai/issues/60)
 - Disable focus follows mouse while the *mouse_modifier* key is held down [#62](https://github.com/koekeishiya/yabai/issues/62)
 - Silence meaningless warning reported by the scripting-bridge framework [#55](https://github.com/koekeishiya/yabai/issues/55)
-- Extend definition of *WINDOW_SEL* to include *mouse*, targetting the window below the cursor [#66](https://github.com/koekeishiya/yabai/issues/66)
+- Extend definition of *WINDOW_SEL* to include *mouse*, targeting the window below the cursor [#66](https://github.com/koekeishiya/yabai/issues/66)
 - Allow all *config* (except *status_bar*) settings to be edited at runtime [#69](https://github.com/koekeishiya/yabai/issues/69)
 - Window should not be added to the window-tree twice when deminimized on an inactive display [#70](https://github.com/koekeishiya/yabai/issues/70)
 - Expose *window_placement* as a config setting to specify if windows become the first or second child [#65](https://github.com/koekeishiya/yabai/issues/65)
