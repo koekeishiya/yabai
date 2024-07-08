@@ -617,9 +617,9 @@ static inline bool parse_property(struct properties *properties, char *property,
 
 static struct properties parse_properties(FILE *rsp, struct token token, uint64_t *property_val, char **property_str, int property_count)
 {
-    struct properties result = { .token = token, .did_parse = true, .did_error = false };
+    struct properties result = { .token = token, .did_error = false };
 
-    if (token_is_valid(token) && !token_prefix(token, "--")) {
+    if ((result.did_parse = token_is_valid(token) && !token_prefix(token, "--"))) {
         for (int i = 0, cursor = 0; i < token.length; ++i) {
             if (i+1 == token.length) {
                 if (!parse_property(&result, token.text+cursor, property_val, property_str, property_count)) {
@@ -637,8 +637,6 @@ static struct properties parse_properties(FILE *rsp, struct token token, uint64_
                 cursor = i+1;
             }
         }
-    } else {
-        result.did_parse = false;
     }
 
     return result;
@@ -1161,7 +1159,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         command = get_token(&message);
     }
 
-    while (token_is_valid(command)) {
+    for (; token_is_valid(command); command = get_token(&message)) {
         if (token_equals(command, COMMAND_CONFIG_DEBUG_OUTPUT)) {
             struct token value = get_token(&message);
             if (!token_is_valid(value)) {
@@ -1637,8 +1635,6 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
         }
-
-        command = get_token(&message);
     }
 }
 
@@ -1717,7 +1713,7 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         return;
     }
 
-    while(token_is_valid(command)) {
+    for (; token_is_valid(command); command = get_token(&message)) {
         if (token_equals(command, COMMAND_SPACE_FOCUS)) {
             struct selector selector = parse_space_selector(rsp, &message, acting_sid, false);
             if (selector.did_parse && selector.sid) {
@@ -1982,8 +1978,6 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
         }
-
-        command = get_token(&message);
     }
 }
 
@@ -2012,7 +2006,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         return;
     }
 
-    while(token_is_valid(command)) {
+    for (; token_is_valid(command); command = get_token(&message)) {
         if (token_equals(command, COMMAND_WINDOW_FOCUS)) {
             struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
 
@@ -2350,8 +2344,6 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else {
             daemon_fail(rsp, "unknown command '%.*s' for domain '%.*s'\n", command.length, command.text, domain.length, domain.text);
         }
-
-        command = get_token(&message);
     }
 }
 
@@ -2540,7 +2532,7 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
     bool did_parse = true;
     bool has_filter = false;
 
-    while (token_is_valid(token)) {
+    for (; token_is_valid(token); token = get_token(message)) {
         char *key = NULL;
         char *value = NULL;
         bool exclusion = false;
@@ -2549,7 +2541,7 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
         if (!key || !value) {
             daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
             did_parse = false;
-            goto rnext;
+            continue;
         }
 
         if (string_equals(key, ARGUMENT_RULE_KEY_LABEL)) {
@@ -2727,9 +2719,6 @@ static bool parse_rule(FILE *rsp, char **message, struct rule *rule, struct toke
             daemon_fail(rsp, "unknown key '%s'\n", key);
             did_parse = false;
         }
-
-rnext:
-        token = get_token(message);
     }
 
     if (!has_filter) {
@@ -2816,8 +2805,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
         enum signal_type signal_type = SIGNAL_TYPE_UNKNOWN;
         struct signal signal = {};
 
-        struct token token = get_token(&message);
-        while (token_is_valid(token)) {
+        for (struct token token = get_token(&message); token_is_valid(token); token = get_token(&message)) {
             char *key = NULL;
             char *value = NULL;
             bool exclusion = false;
@@ -2826,7 +2814,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
             if (!key || !value) {
                 daemon_fail(rsp, "invalid key-value pair '%s'\n", token.text);
                 did_parse = false;
-                goto snext;
+                continue;
             }
 
             if (string_equals(key, ARGUMENT_SIGNAL_KEY_LABEL)) {
@@ -2877,9 +2865,6 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
                 daemon_fail(rsp, "unknown key '%s'\n", key);
                 did_parse = false;
             }
-
-snext:
-            token = get_token(&message);
         }
 
         if (!has_signal_type) {

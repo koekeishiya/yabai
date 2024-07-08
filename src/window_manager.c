@@ -233,17 +233,11 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
 {
     wm->enable_window_opacity = enabled;
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if (window_manager_is_window_eligible(window)) {
-                    window_manager_set_opacity(wm, window, enabled ? window->opacity : 1.0f);
-                }
+        table_for (struct window *window, wm->window.buckets[window_index], {
+            if (window_manager_is_window_eligible(window)) {
+                window_manager_set_opacity(wm, window, enabled ? window->opacity : 1.0f);
             }
-
-            bucket = bucket->next;
-        }
+        })
     }
 }
 
@@ -755,17 +749,11 @@ void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode 
 {
     wm->purify_mode = mode;
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if (window_manager_is_window_eligible(window)) {
-                    window_manager_purify_window(wm, window);
-                }
+        table_for (struct window *window, wm->window.buckets[window_index], {
+            if (window_manager_is_window_eligible(window)) {
+                window_manager_purify_window(wm, window);
             }
-
-            bucket = bucket->next;
-        }
+        })
     }
 }
 
@@ -808,19 +796,12 @@ void window_manager_set_normal_window_opacity(struct window_manager *wm, float o
 {
     wm->normal_window_opacity = opacity;
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if (window->id == wm->focused_window_id) goto next;
-                if (window_manager_is_window_eligible(window)) {
-                    window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
-                }
+        table_for (struct window *window, wm->window.buckets[window_index], {
+            if (window->id == wm->focused_window_id) continue;
+            if (window_manager_is_window_eligible(window)) {
+                window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
             }
-
-next:
-            bucket = bucket->next;
-        }
+        })
     }
 }
 
@@ -1434,17 +1415,11 @@ struct window **window_manager_find_application_windows(struct window_manager *w
     struct window **window_list = ts_alloc_list(struct window *, wm->window.count);
 
     for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        struct bucket *bucket = wm->window.buckets[window_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct window *window = bucket->value;
-                if (window->application == application) {
-                    window_list[(*window_count)++] = window;
-                }
+        table_for (struct window *window, wm->window.buckets[window_index], {
+            if (window->application == application) {
+                window_list[(*window_count)++] = window;
             }
-
-            bucket = bucket->next;
-        }
+        })
     }
 
     return window_list;
@@ -2654,28 +2629,22 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     for (int process_index = 0; process_index < g_process_manager.process.capacity; ++process_index) {
-        struct bucket *bucket = g_process_manager.process.buckets[process_index];
-        while (bucket) {
-            if (bucket->value) {
-                struct process *process = bucket->value;
-                if (workspace_application_is_observable(process)) {
-                    struct application *application = application_create(process);
+        table_for (struct process *process, g_process_manager.process.buckets[process_index], {
+            if (workspace_application_is_observable(process)) {
+                struct application *application = application_create(process);
 
-                    if (application_observe(application)) {
-                        window_manager_add_application(wm, application);
-                        window_manager_add_existing_application_windows(sm, wm, application, -1);
-                    } else {
-                        application_unobserve(application);
-                        application_destroy(application);
-                    }
+                if (application_observe(application)) {
+                    window_manager_add_application(wm, application);
+                    window_manager_add_existing_application_windows(sm, wm, application, -1);
                 } else {
-                    debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
-                    workspace_application_observe_activation_policy(g_workspace_context, process);
+                    application_unobserve(application);
+                    application_destroy(application);
                 }
+            } else {
+                debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
+                workspace_application_observe_activation_policy(g_workspace_context, process);
             }
-
-            bucket = bucket->next;
-        }
+        })
     }
     [pool drain];
 

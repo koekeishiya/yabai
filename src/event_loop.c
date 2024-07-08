@@ -154,29 +154,28 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
             if (default_origin) sid = window_space(window->id);
 
             struct view *view = space_manager_find_view(&g_space_manager, sid);
-            if (view->layout == VIEW_FLOAT) goto next;
+            if (view->layout != VIEW_FLOAT) {
+                //
+                // @cleanup
+                //
+                // :AXBatching
+                //
+                // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+                // making sure that each window is only moved and resized a single time, when the final layout has been computed.
+                // This is necessary to make sure that we do not call the AX API for each modification to the tree.
+                //
 
-            //
-            // @cleanup
-            //
-            // :AXBatching
-            //
-            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
-            // making sure that each window is only moved and resized a single time, when the final layout has been computed.
-            // This is necessary to make sure that we do not call the AX API for each modification to the tree.
-            //
+                window_manager_adjust_layer(window, LAYER_BELOW);
+                view_add_window_node_with_insertion_point(view, window, prev_window_id);
+                window_manager_add_managed_window(&g_window_manager, window, view);
 
-            window_manager_adjust_layer(window, LAYER_BELOW);
-            view_add_window_node_with_insertion_point(view, window, prev_window_id);
-            window_manager_add_managed_window(&g_window_manager, window, view);
+                view_set_flag(view, VIEW_IS_DIRTY);
+                view_list[view_count++] = view;
 
-            view_set_flag(view, VIEW_IS_DIRTY);
-            view_list[view_count++] = view;
-
-            prev_window_id = window->id;
+                prev_window_id = window->id;
+            }
         }
 
-next:
         if (window_manager_is_window_eligible(window)) {
             event_signal_push(SIGNAL_WINDOW_CREATED, window);
         }

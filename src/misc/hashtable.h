@@ -31,6 +31,8 @@ void _table_add(struct table *table, void *key, int key_size, void *value);
 void table_remove(struct table *table, void *key);
 void *table_find(struct table *table, void *key);
 
+#define table_for(it, table_entry, code) for (struct bucket *bucket = table_entry; bucket; bucket = bucket->next) { if (!bucket->value) continue; it = bucket->value; code; }
+
 #endif
 
 #ifdef HASHTABLE_IMPLEMENTATION

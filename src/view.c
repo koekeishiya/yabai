@@ -9,15 +9,9 @@ void insert_feedback_update_notifications(void)
     uint32_t window_list[1024] = {0};
 
     for (int i = 0; i < g_window_manager.insert_feedback.capacity; ++i) {
-        struct bucket *bucket = g_window_manager.insert_feedback.buckets[i];
-        while (bucket) {
-            if (bucket->value) {
-                struct window_node *node = bucket->value;
-                window_list[window_count++] = node->window_order[0];
-            }
-
-            bucket = bucket->next;
-        }
+        table_for (struct window_node *node, g_window_manager.insert_feedback.buckets[i], {
+            window_list[window_count++] = node->window_order[0];
+        })
     }
 
     SLSRequestNotificationsForWindows(g_connection, window_list, window_count);
@@ -511,16 +505,13 @@ struct window_node *window_node_fence(struct window_node *node, int dir)
 {
     if (!node) return NULL;
 
-    struct window_node *parent = node->parent;
-    while (parent) {
-    if ((dir == DIR_NORTH && parent->split == SPLIT_X && parent->area.y < node->area.y) ||
-        (dir == DIR_WEST  && parent->split == SPLIT_Y && parent->area.x < node->area.x) ||
-        (dir == DIR_SOUTH && parent->split == SPLIT_X && (parent->area.y + parent->area.h) > (node->area.y + node->area.h)) ||
-        (dir == DIR_EAST  && parent->split == SPLIT_Y && (parent->area.x + parent->area.w) > (node->area.x + node->area.w))) {
-            return parent;
+    for (struct window_node *parent = node->parent; parent; parent = parent->parent) {
+        if ((dir == DIR_NORTH && parent->split == SPLIT_X && parent->area.y < node->area.y) ||
+            (dir == DIR_WEST  && parent->split == SPLIT_Y && parent->area.x < node->area.x) ||
+            (dir == DIR_SOUTH && parent->split == SPLIT_X && (parent->area.y + parent->area.h) > (node->area.y + node->area.h)) ||
+            (dir == DIR_EAST  && parent->split == SPLIT_Y && (parent->area.x + parent->area.w) > (node->area.x + node->area.w))) {
+                return parent;
         }
-
-        parent = parent->parent;
     }
 
     return NULL;
@@ -595,9 +586,8 @@ struct window_node *view_find_window_node_in_direction(struct view *view, struct
     struct window_node *best_node = NULL;
     CGPoint source_area_max = area_max_point(source->area);
 
-    struct window_node *target = window_node_find_first_leaf(view->root);
-    while (target) {
-        if (source == target) goto next;
+    for (struct window_node *target = window_node_find_first_leaf(view->root); target; target = window_node_find_next_leaf(target)) {
+        if (source == target) continue;
 
         CGPoint target_area_max = area_max_point(target->area);
         if (area_is_in_direction(&source->area, source_area_max, &target->area, target_area_max, direction)) {
@@ -609,9 +599,6 @@ struct window_node *view_find_window_node_in_direction(struct view *view, struct
                 best_rank = rank;
             }
         }
-
-next:
-        target = window_node_find_next_leaf(target);
     }
 
     return best_node;
@@ -619,10 +606,8 @@ next:
 
 struct window_node *view_find_window_node(struct view *view, uint32_t window_id)
 {
-    struct window_node *node = window_node_find_first_leaf(view->root);
-    while (node) {
+    for (struct window_node *node = window_node_find_first_leaf(view->root); node; node = window_node_find_next_leaf(node)) {
         if (window_node_contains_window(node, window_id)) return node;
-        node = window_node_find_next_leaf(node);
     }
 
     return NULL;
@@ -811,8 +796,7 @@ uint32_t *view_find_window_list(struct view *view, int *window_count)
     int capacity = 13;
     uint32_t *window_list = ts_alloc_list(uint32_t, capacity);
 
-    struct window_node *node = window_node_find_first_leaf(view->root);
-    while (node) {
+    for (struct window_node *node = window_node_find_first_leaf(view->root); node; node = window_node_find_next_leaf(node)) {
         if (*window_count + node->window_count >= capacity) {
             ts_expand(window_list, sizeof(uint32_t) * capacity, sizeof(uint32_t) * capacity);
             capacity *= 2;
@@ -821,8 +805,6 @@ uint32_t *view_find_window_list(struct view *view, int *window_count)
         for (int i = 0; i < node->window_count; ++i) {
             window_list[(*window_count)++] = node->window_list[i];
         }
-
-        node = window_node_find_next_leaf(node);
     }
 
     return window_list;
