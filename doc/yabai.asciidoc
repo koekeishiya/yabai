@@ -99,7 +99,7 @@ SIGNAL_SEL  := <index> | LABEL
 
 DIR_SEL     := north | east | south | west
 
-STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent
+STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent | stack.<index (1-based)>
 
 WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | sibling | first_nephew | second_nephew | uncle | first_cousin | second_cousin | STACK_SEL | DIR_SEL | <window id>
 
