@@ -70,6 +70,8 @@ static inline void *ts_alloc_unaligned(uint64_t size)
     return g_temp_storage.memory + used;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static inline void *ts_expand(void *ptr, uint64_t old_size, uint64_t increment)
 {
     if (ptr) {
@@ -82,6 +84,7 @@ static inline void *ts_expand(void *ptr, uint64_t old_size, uint64_t increment)
 
     return ptr;
 }
+#pragma clang diagnostic pop
 
 static inline void *ts_resize(void *ptr, uint64_t old_size, uint64_t new_size)
 {

@@ -46,6 +46,8 @@ static void window_did_receive_focus(struct window_manager *wm, struct mouse_sta
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static EVENT_HANDLER(APPLICATION_LAUNCHED)
 {
     struct process *process = context;
@@ -537,7 +539,7 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
-        space_manager_untile_window(&g_space_manager, view, window);
+        space_manager_untile_window(view, window);
         window_manager_remove_managed_window(&g_window_manager, window->id);
     }
 
@@ -665,7 +667,7 @@ static EVENT_HANDLER(WINDOW_RESIZED)
     if (!was_fullscreen && is_fullscreen) {
         struct view *view = window_manager_find_managed_window(&g_window_manager, window);
         if (view) {
-            space_manager_untile_window(&g_space_manager, view, window);
+            space_manager_untile_window(view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
             window_manager_purify_window(&g_window_manager, window);
         }
@@ -723,7 +725,7 @@ static EVENT_HANDLER(WINDOW_MINIMIZED)
 
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
-        space_manager_untile_window(&g_space_manager, view, window);
+        space_manager_untile_window(view, window);
         window_manager_remove_managed_window(&g_window_manager, window->id);
         window_manager_purify_window(&g_window_manager, window);
     }
@@ -1007,22 +1009,22 @@ static EVENT_HANDLER(MOUSE_UP)
             enum mouse_drop_action drop_action = mouse_determine_drop_action(&g_mouse_state, a_node, window, point);
             switch (drop_action) {
             case MOUSE_DROP_ACTION_STACK: {
-                mouse_drop_action_stack(&g_space_manager, &g_window_manager, src_view, g_mouse_state.window, dst_view, window);
+                mouse_drop_action_stack(&g_window_manager, src_view, g_mouse_state.window, dst_view, window);
             } break;
             case MOUSE_DROP_ACTION_SWAP: {
                 mouse_drop_action_swap(&g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window);
             } break;
             case MOUSE_DROP_ACTION_WARP_TOP: {
-                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_X, CHILD_FIRST);
+                mouse_drop_action_warp(&g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_X, CHILD_FIRST);
             } break;
             case MOUSE_DROP_ACTION_WARP_RIGHT: {
-                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_Y, CHILD_SECOND);
+                mouse_drop_action_warp(&g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_Y, CHILD_SECOND);
             } break;
             case MOUSE_DROP_ACTION_WARP_BOTTOM: {
-                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_X, CHILD_SECOND);
+                mouse_drop_action_warp(&g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_X, CHILD_SECOND);
             } break;
             case MOUSE_DROP_ACTION_WARP_LEFT: {
-                mouse_drop_action_warp(&g_space_manager, &g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_Y, CHILD_FIRST);
+                mouse_drop_action_warp(&g_window_manager, src_view, a_node, g_mouse_state.window, dst_view, b_node, window, SPLIT_Y, CHILD_FIRST);
             } break;
             case MOUSE_DROP_ACTION_NONE: {
                 /* silence compiler warning.. */
@@ -1243,7 +1245,7 @@ static EVENT_HANDLER(MOUSE_MOVED)
         CGRect bounds = display_bounds_constrained(cursor_did);
         if (!cgrect_contains_point(bounds, point)) goto out;
 
-        uint32_t wid = display_manager_focus_display_with_point(cursor_did, point, false);
+        uint32_t wid = display_manager_focus_display_with_point(point, false);
         g_mouse_state.ffm_window_id = wid;
     }
 
@@ -1442,6 +1444,7 @@ static EVENT_HANDLER(DAEMON_MESSAGE)
 
     socket_close(param1);
 }
+#pragma clang diagnostic pop
 
 static void *event_loop_run(void *context)
 {

@@ -1,5 +1,7 @@
 extern struct event_loop g_event_loop;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static OBSERVER_CALLBACK(application_notification_handler)
 {
     if (CFEqual(notification, kAXCreatedNotification)) {
@@ -42,6 +44,7 @@ static OBSERVER_CALLBACK(application_notification_handler)
         event_loop_post(&g_event_loop, WINDOW_DESTROYED, window, 0);
     }
 }
+#pragma clang diagnostic pop
 
 bool application_observe(struct application *application)
 {
@@ -105,7 +108,7 @@ uint32_t application_focused_window(struct application *application)
 
 bool application_is_frontmost(struct application *application)
 {
-    ProcessSerialNumber psn = {};
+    ProcessSerialNumber psn = {0};
     _SLPSGetFrontProcess(&psn);
     return psn_equals(&psn, &application->psn);
 }

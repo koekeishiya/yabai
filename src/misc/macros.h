@@ -5,7 +5,7 @@
 #define MEGABYTES(value) (KILOBYTES(value) * 1024ULL)
 #define GIGABYTES(value) (MEGABYTES(value) * 1024ULL)
 
-#define array_count(a) (sizeof((a)) / sizeof(*(a)))
+#define array_count(a) (int)(sizeof((a)) / sizeof(*(a)))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define add_and_clamp_to_zero(a, b) (((a) + (b) <= 0) ? 0 : (a) + (b))

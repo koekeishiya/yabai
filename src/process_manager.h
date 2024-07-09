@@ -10,7 +10,7 @@ struct process
     pid_t pid;
     char *name;
     void *ns_application;
-    uint32_t policy;
+    int policy;
     bool volatile terminated;
 };
 

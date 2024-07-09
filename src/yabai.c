@@ -342,4 +342,4 @@ int main(int argc, char **argv)
 }
 #endif
 
-PROFILER_END_TRANSLATION_UNIT;
+PROFILER_END_TRANSLATION_UNIT

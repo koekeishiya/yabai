@@ -146,7 +146,7 @@ do {\
     TIME_BLOCK(label);\
     c \
 } while (0)
-#define PROFILER_END_TRANSLATION_UNIT _Static_assert(__COUNTER__ < array_count(g_profiler.anchors), "Number of profile points exceeds size of profiler::anchors array!")
+#define PROFILER_END_TRANSLATION_UNIT _Static_assert(__COUNTER__ < array_count(g_profiler.anchors), "Number of profile points exceeds size of profiler::anchors array!");
 #else
 #define TIME_FUNCTION
 #define TIME_BLOCK(label)

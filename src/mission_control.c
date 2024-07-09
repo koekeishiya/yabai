@@ -1,6 +1,8 @@
 extern struct event_loop g_event_loop;
 extern enum mission_control_mode g_mission_control_mode;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 __attribute__((no_sanitize("undefined")))
 static CONNECTION_CALLBACK(connection_handler)
 {
@@ -21,6 +23,7 @@ static CONNECTION_CALLBACK(connection_handler)
         event_loop_post(&g_event_loop, SLS_WINDOW_ORDERED, (void *) (intptr_t) (* (uint32_t *) data), 0);
     }
 }
+#pragma clang diagnostic pop
 
 enum mission_control_mode
 {
@@ -50,6 +53,8 @@ static CFStringRef kAXExposeShowFrontWindows = CFSTR("AXExposeShowFrontWindows")
 static CFStringRef kAXExposeShowDesktop      = CFSTR("AXExposeShowDesktop");
 static CFStringRef kAXExposeExit             = CFSTR("AXExposeExit");
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static OBSERVER_CALLBACK(mission_control_notification_handler)
 {
     if (CFEqual(notification, kAXExposeShowAllWindows)) {
@@ -62,6 +67,7 @@ static OBSERVER_CALLBACK(mission_control_notification_handler)
         event_loop_post(&g_event_loop, MISSION_CONTROL_EXIT, NULL, 0);
     }
 }
+#pragma clang diagnostic pop
 
 void mission_control_observe(void)
 {

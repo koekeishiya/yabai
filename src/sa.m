@@ -241,7 +241,7 @@ static bool scripting_addition_request_handshake(char *version, uint32_t *attrib
 {
     int sockfd;
     bool result = false;
-    char rsp[BUFSIZ] = {};
+    char rsp[BUFSIZ] = {0};
     char bytes[0x1000] = { 0x01, 0x00, SA_OPCODE_HANDSHAKE };
 
     if (socket_open(&sockfd)) {
@@ -271,7 +271,7 @@ out:
 static int scripting_addition_perform_validation(void)
 {
     uint32_t attrib = 0;
-    char version[0x1000] = {};
+    char version[0x1000] = {0};
     bool is_latest_version_installed = scripting_addition_check() == 0;
 
     if (!scripting_addition_request_handshake(version, &attrib)) {

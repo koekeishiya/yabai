@@ -256,7 +256,7 @@ static inline bool string_equals(const char *a, const char *b)
     return a && b && strcmp(a, b) == 0;
 }
 
-static inline char *_string_escape_pre(char *s, int *size_in_bytes)
+static inline char *ts_string_escape(char *s)
 {
     char *cursor = s;
     int num_replacements = 0;
@@ -275,12 +275,12 @@ static inline char *_string_escape_pre(char *s, int *size_in_bytes)
         ++cursor;
     }
 
-    *size_in_bytes = (int)(cursor - s) + num_replacements;
-    return num_replacements > 0 ? cursor : NULL;
-}
+    if (num_replacements == 0) return NULL;
 
-static inline void _string_escape_post(char *s, char *cursor, char *result)
-{
+    int size_in_bytes = (int)(cursor - s) + num_replacements;
+    char *result = ts_alloc_unaligned(sizeof(char) * (size_in_bytes+1));
+    result[size_in_bytes] = '\0';
+
     for (char *dst = result, *cursor = s; *cursor; ++cursor) {
         if (*cursor == '"') {
             *dst++ = '\\';
@@ -307,17 +307,6 @@ static inline void _string_escape_post(char *s, char *cursor, char *result)
             *dst++ = *cursor;
         }
     }
-}
-
-static inline char *ts_string_escape(char *s)
-{
-    int size_in_bytes;
-    char *cursor = _string_escape_pre(s, &size_in_bytes);
-    if (!cursor) return NULL;
-
-    char *result = ts_alloc_unaligned(sizeof(char) * (size_in_bytes+1));
-    result[size_in_bytes] = '\0';
-    _string_escape_post(s, cursor, result);
 
     return result;
 }

@@ -3,8 +3,8 @@
 
 struct buf_hdr
 {
-    size_t len;
-    size_t cap;
+    int len;
+    int cap;
     char buf[0];
 };
 
@@ -19,10 +19,10 @@ struct buf_hdr
 #define buf_del(b, x) ((b) ? (b)[x] = (b)[buf_len(b)-1], buf__hdr(b)->len-- : 0)
 #define buf_free(b) ((b) ? free(buf__hdr(b)) : 0)
 
-static void *buf__grow_f(const void *buf, size_t new_len, size_t elem_size)
+static void *buf__grow_f(const void *buf, int new_len, int elem_size)
 {
-    size_t new_cap = max(1 + 2*buf_cap(buf), new_len);
-    size_t new_size = offsetof(struct buf_hdr, buf) + new_cap*elem_size;
+    int new_cap = max(1 + 2*buf_cap(buf), new_len);
+    int new_size = offsetof(struct buf_hdr, buf) + new_cap*elem_size;
     struct buf_hdr *new_hdr = realloc(buf ? buf__hdr(buf) : 0, new_size);
     new_hdr->cap = new_cap;
     if (!buf) {
@@ -33,8 +33,8 @@ static void *buf__grow_f(const void *buf, size_t new_len, size_t elem_size)
 
 struct ts_buf_hdr
 {
-    size_t len;
-    size_t cap;
+    int len;
+    int cap;
     char buf[0];
 };
 
@@ -48,11 +48,11 @@ struct ts_buf_hdr
 #define ts_buf_push(b, x) (ts_buf__fit(b, 1), (b)[ts_buf_len(b)] = (x), ts_buf__hdr(b)->len++)
 #define ts_buf_del(b, x) ((b) ? (b)[x] = (b)[ts_buf_len(b)-1], ts_buf__hdr(b)->len-- : 0)
 
-static void *ts_buf__grow_f(const void *buf, size_t new_len, size_t elem_size)
+static void *ts_buf__grow_f(const void *buf, int new_len, int elem_size)
 {
     struct ts_buf_hdr *new_hdr;
-    size_t new_cap = max(1 + 2*ts_buf_cap(buf), new_len);
-    size_t new_size = offsetof(struct ts_buf_hdr, buf) + new_cap*elem_size;
+    int new_cap = max(1 + 2*ts_buf_cap(buf), new_len);
+    int new_size = offsetof(struct ts_buf_hdr, buf) + new_cap*elem_size;
 
     if (buf) {
         __sync_fetch_and_add(&g_temp_storage.used, new_size);

@@ -127,7 +127,7 @@ void space_manager_mark_view_invalid(struct space_manager *sm,  uint64_t sid)
     view_clear_flag(view, VIEW_IS_VALID);
 }
 
-void space_manager_untile_window(struct space_manager *sm, struct view *view, struct window *window)
+void space_manager_untile_window(struct view *view, struct window *window)
 {
     if (view->layout == VIEW_FLOAT) return;
 
@@ -259,102 +259,88 @@ void space_manager_toggle_show_desktop(uint64_t sid)
 void space_manager_set_layout_for_all_spaces(struct space_manager *sm, enum view_type layout)
 {
     sm->layout = layout;
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            if (!view_check_flag(view, VIEW_LAYOUT)) {
-                if (space_is_user(view->sid)) {
-                    view->layout = layout;
-                    view_clear(view);
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_LAYOUT)) {
+            if (space_is_user(view->sid)) {
+                view->layout = layout;
+                view_clear(view);
 
-                    if (view->layout != VIEW_FLOAT) {
-                        window_manager_validate_and_check_for_windows_on_space(sm, &g_window_manager, view->sid);
-                    }
+                if (view->layout != VIEW_FLOAT) {
+                    window_manager_validate_and_check_for_windows_on_space(sm, &g_window_manager, view->sid);
                 }
             }
-        })
-    }
+        }
+    })
 }
 
 void space_manager_set_window_gap_for_all_spaces(struct space_manager *sm, int window_gap)
 {
     sm->window_gap = window_gap;
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            if (!view_check_flag(view, VIEW_WINDOW_GAP)) {
-                view->window_gap = window_gap;
-                view_update(view);
-                view_flush(view);
-            }
-        })
-    }
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_WINDOW_GAP)) {
+            view->window_gap = window_gap;
+            view_update(view);
+            view_flush(view);
+        }
+    })
 }
 
 void space_manager_set_top_padding_for_all_spaces(struct space_manager *sm, int top_padding)
 {
     sm->top_padding = top_padding;
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            if (!view_check_flag(view, VIEW_TOP_PADDING)) {
-                view->top_padding = top_padding;
-                view_update(view);
-                view_flush(view);
-            }
-        })
-    }
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_TOP_PADDING)) {
+            view->top_padding = top_padding;
+            view_update(view);
+            view_flush(view);
+        }
+    })
 }
 
 void space_manager_set_bottom_padding_for_all_spaces(struct space_manager *sm, int bottom_padding)
 {
     sm->bottom_padding = bottom_padding;
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            if (!view_check_flag(view, VIEW_BOTTOM_PADDING)) {
-                view->bottom_padding = bottom_padding;
-                view_update(view);
-                view_flush(view);
-            }
-        })
-    }
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_BOTTOM_PADDING)) {
+            view->bottom_padding = bottom_padding;
+            view_update(view);
+            view_flush(view);
+        }
+    })
 }
 
 void space_manager_set_left_padding_for_all_spaces(struct space_manager *sm, int left_padding)
 {
     sm->left_padding = left_padding;
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            if (!view_check_flag(view, VIEW_LEFT_PADDING)) {
-                view->left_padding = left_padding;
-                view_update(view);
-                view_flush(view);
-            }
-        })
-    }
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_LEFT_PADDING)) {
+            view->left_padding = left_padding;
+            view_update(view);
+            view_flush(view);
+        }
+    })
 }
 
 void space_manager_set_right_padding_for_all_spaces(struct space_manager *sm, int right_padding)
 {
     sm->right_padding = right_padding;
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            if (!view_check_flag(view, VIEW_RIGHT_PADDING)) {
-                view->right_padding = right_padding;
-                view_update(view);
-                view_flush(view);
-            }
-        })
-    }
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_RIGHT_PADDING)) {
+            view->right_padding = right_padding;
+            view_update(view);
+            view_flush(view);
+        }
+    })
 }
 
 void space_manager_set_auto_balance_for_all_spaces(struct space_manager *sm, bool auto_balance)
 {
     sm->auto_balance = auto_balance;
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            if (!view_check_flag(view, VIEW_AUTO_BALANCE)) {
-                view->auto_balance = auto_balance;
-            }
-        })
-    }
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_AUTO_BALANCE)) {
+            view->auto_balance = auto_balance;
+        }
+    })
 }
 
 bool space_manager_set_padding_for_space(struct space_manager *sm, uint64_t sid, int type, int top, int bottom, int left, int right)
@@ -1084,13 +1070,11 @@ void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
     struct view *view_list[sm->view.count];
     CFStringRef uuid_list[sm->view.count];
 
-    for (int i = 0; i < sm->view.capacity; ++i) {
-        table_for (struct view *view, sm->view.buckets[i], {
-            view_list[list_count] = view;
-            uuid_list[list_count] = view->uuid;
-            ++list_count;
-        })
-    }
+    table_for (struct view *view, sm->view, {
+        view_list[list_count] = view;
+        uuid_list[list_count] = view->uuid;
+        ++list_count;
+    })
 
     for (int i = 0; i < space_count; ++i) {
         uint64_t sid = space_list[i];

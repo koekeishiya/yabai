@@ -67,8 +67,8 @@ void event_signal_flush(void)
         return;
     }
 
-    uint64_t size  = sizeof(struct event_signal);
-    uint64_t count = g_signal_storage.used / size;
+    int size  = sizeof(struct event_signal);
+    int count = g_signal_storage.used / size;
 
     for (int i = 0; i < count; ++i) {
         struct event_signal *es = g_signal_storage.memory + (i * size);

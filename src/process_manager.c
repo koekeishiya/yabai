@@ -67,6 +67,8 @@ void process_destroy(struct process *process)
     free(process);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static PROCESS_EVENT_HANDLER(process_handler)
 {
     struct process_manager *pm = context;
@@ -115,6 +117,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
 
     return noErr;
 }
+#pragma clang diagnostic pop
 
 static void
 process_manager_add_running_processes(struct process_manager *pm)

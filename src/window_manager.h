@@ -107,8 +107,8 @@ void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, in
 void window_manager_query_windows_for_display(FILE *rsp, uint32_t did, uint64_t flags);
 void window_manager_query_windows_for_displays(FILE *rsp, uint64_t flags);
 bool window_manager_rule_matches_window(struct rule *rule, struct window *window, char *window_title, char *window_role, char *window_subrole);
-void window_manager_apply_manage_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects, char *window_title, char *window_role, char *window_subrole);
-void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects, char *window_title, char *window_role, char *window_subrole);
+void window_manager_apply_manage_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects);
+void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects);
 void window_manager_apply_manage_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole, bool one_shot_rules);
 void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole, bool one_shot_rules);
 void window_manager_center_mouse(struct window_manager *wm, struct window *window);
@@ -131,7 +131,7 @@ struct window *window_manager_find_prev_managed_window(struct space_manager *sm,
 struct window *window_manager_find_next_managed_window(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_first_managed_window(struct space_manager *sm, struct window_manager *wm);
 struct window *window_manager_find_last_managed_window(struct space_manager *sm, struct window_manager *wm);
-struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm);
+struct window *window_manager_find_recent_managed_window(struct window_manager *wm);
 struct window *window_manager_find_prev_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_next_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
 struct window *window_manager_find_first_window_in_stack(struct space_manager *sm, struct window_manager *wm, struct window *window);
@@ -177,7 +177,7 @@ void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool e
 bool window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_window_opacity(struct window_manager *wm, struct window *window, float opacity);
 void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode);
-enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction);
+enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window *window, int direction);
 enum window_op_error window_manager_stack_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_warp_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
 enum window_op_error window_manager_swap_window(struct space_manager *sm, struct window_manager *wm, struct window *a, struct window *b);
@@ -194,12 +194,12 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
 void window_manager_make_window_sticky(struct space_manager *sm, struct window_manager *wm, struct window *window, bool should_sticky);
 void window_manager_adjust_layer(struct window *window, int layer);
 bool window_manager_set_window_layer(struct window *window, int layer);
-void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window);
-void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window);
-void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window);
-void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window);
-void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window);
-void window_manager_toggle_window_pip(struct space_manager *sm, struct window_manager *wm, struct window *window);
+void window_manager_toggle_window_shadow(struct window *window);
+void window_manager_toggle_window_parent(struct window_manager *wm, struct window *window);
+void window_manager_toggle_window_fullscreen(struct window_manager *wm, struct window *window);
+void window_manager_toggle_window_native_fullscreen(struct window *window);
+void window_manager_toggle_window_expose(struct window *window);
+void window_manager_toggle_window_pip(struct space_manager *sm, struct window *window);
 bool window_manager_toggle_scratchpad_window_by_label(struct window_manager *wm, char *label);
 bool window_manager_toggle_scratchpad_window(struct window_manager *wm, struct window *window, int forced_mode);
 bool window_manager_set_scratchpad_for_window(struct window_manager *wm, struct window *window, char *label);

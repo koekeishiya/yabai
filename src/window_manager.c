@@ -105,7 +105,7 @@ bool window_manager_rule_matches_window(struct rule *rule, struct window *window
     return true;
 }
 
-void window_manager_apply_manage_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects, char *window_title, char *window_role, char *window_subrole)
+void window_manager_apply_manage_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects)
 {
     if (effects->manage == RULE_PROP_ON) {
         window_set_rule_flag(window, WINDOW_RULE_MANAGED);
@@ -116,7 +116,7 @@ void window_manager_apply_manage_rule_effects_to_window(struct space_manager *sm
     }
 }
 
-void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects, char *window_title, char *window_role, char *window_subrole)
+void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, struct rule_effects *effects)
 {
     if (effects->sid || effects->did) {
         if (!window_is_fullscreen(window) && !space_is_fullscreen(window_space(window->id))) {
@@ -171,7 +171,7 @@ void window_manager_apply_rule_effects_to_window(struct space_manager *sm, struc
 void window_manager_apply_manage_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole, bool one_shot_rules)
 {
     bool match = false;
-    struct rule_effects effects = {};
+    struct rule_effects effects = {0};
 
     for (int i = 0; i < buf_len(wm->rules); ++i) {
         if (one_shot_rules || !rule_check_flag(&wm->rules[i], RULE_ONE_SHOT)) {
@@ -189,13 +189,13 @@ void window_manager_apply_manage_rules_to_window(struct space_manager *sm, struc
         }
     }
 
-    if (match) window_manager_apply_manage_rule_effects_to_window(sm, wm, window, &effects, window_title, window_role, window_subrole);
+    if (match) window_manager_apply_manage_rule_effects_to_window(sm, wm, window, &effects);
 }
 
 void window_manager_apply_rules_to_window(struct space_manager *sm, struct window_manager *wm, struct window *window, char *window_title, char *window_role, char *window_subrole, bool one_shot_rules)
 {
     bool match = false;
-    struct rule_effects effects = {};
+    struct rule_effects effects = {0};
 
     for (int i = 0; i < buf_len(wm->rules); ++i) {
         if (one_shot_rules || !rule_check_flag(&wm->rules[i], RULE_ONE_SHOT)) {
@@ -213,7 +213,7 @@ void window_manager_apply_rules_to_window(struct space_manager *sm, struct windo
         }
     }
 
-    if (match) window_manager_apply_rule_effects_to_window(sm, wm, window, &effects, window_title, window_role, window_subrole);
+    if (match) window_manager_apply_rule_effects_to_window(sm, wm, window, &effects);
 }
 
 void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_mode mode)
@@ -232,13 +232,11 @@ void window_manager_set_focus_follows_mouse(struct window_manager *wm, enum ffm_
 void window_manager_set_window_opacity_enabled(struct window_manager *wm, bool enabled)
 {
     wm->enable_window_opacity = enabled;
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        table_for (struct window *window, wm->window.buckets[window_index], {
-            if (window_manager_is_window_eligible(window)) {
-                window_manager_set_opacity(wm, window, enabled ? window->opacity : 1.0f);
-            }
-        })
-    }
+    table_for (struct window *window, wm->window, {
+        if (window_manager_is_window_eligible(window)) {
+            window_manager_set_opacity(wm, window, enabled ? window->opacity : 1.0f);
+        }
+    })
 }
 
 void window_manager_center_mouse(struct window_manager *wm, struct window *window)
@@ -434,6 +432,8 @@ void window_manager_resize_window(struct window *window, float width, float heig
     CFRelease(size_ref);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
 static inline void window_manager_notify_jankyborders(struct window_animation *animation_list, int animation_count, uint32_t event, bool skip, bool wait)
 {
     mach_port_t port;
@@ -458,6 +458,7 @@ static inline void window_manager_notify_jankyborders(struct window_animation *a
         if (wait) usleep(20000);
     }
 }
+#pragma clang diagnostic pop
 
 static void window_manager_create_window_proxy(int animation_connection, float alpha, struct window_proxy *proxy)
 {
@@ -531,6 +532,8 @@ static void *window_manager_build_window_proxy_thread_proc(void *data)
     return NULL;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef link, const CVTimeStamp *now, const CVTimeStamp *output_time, CVOptionFlags flags, CVOptionFlags *flags_out, void *data)
 {
     struct window_animation_context *context = data;
@@ -595,6 +598,7 @@ static CVReturn window_manager_animate_window_list_thread_proc(CVDisplayLinkRef 
 out:
     return kCVReturnSuccess;
 }
+#pragma clang diagnostic pop
 
 void window_manager_animate_window_list_async(struct window_capture *window_list, int window_count)
 {
@@ -748,13 +752,11 @@ void window_manager_set_window_frame(struct window *window, float x, float y, fl
 void window_manager_set_purify_mode(struct window_manager *wm, enum purify_mode mode)
 {
     wm->purify_mode = mode;
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        table_for (struct window *window, wm->window.buckets[window_index], {
-            if (window_manager_is_window_eligible(window)) {
-                window_manager_purify_window(wm, window);
-            }
-        })
-    }
+    table_for (struct window *window, wm->window, {
+        if (window_manager_is_window_eligible(window)) {
+            window_manager_purify_window(wm, window);
+        }
+    })
 }
 
 bool window_manager_set_opacity(struct window_manager *wm, struct window *window, float opacity)
@@ -795,14 +797,12 @@ void window_manager_set_active_window_opacity(struct window_manager *wm, float o
 void window_manager_set_normal_window_opacity(struct window_manager *wm, float opacity)
 {
     wm->normal_window_opacity = opacity;
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        table_for (struct window *window, wm->window.buckets[window_index], {
-            if (window->id == wm->focused_window_id) continue;
-            if (window_manager_is_window_eligible(window)) {
-                window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
-            }
-        })
-    }
+    table_for (struct window *window, wm->window, {
+        if (window->id == wm->focused_window_id) continue;
+        if (window_manager_is_window_eligible(window)) {
+            window_manager_set_window_opacity(wm, window, wm->normal_window_opacity);
+        }
+    })
 }
 
 void window_manager_adjust_layer(struct window *window, int layer)
@@ -1034,7 +1034,7 @@ struct window *window_manager_find_last_managed_window(struct space_manager *sm,
     return window_manager_find_window(wm, last->window_order[0]);
 }
 
-struct window *window_manager_find_recent_managed_window(struct space_manager *sm, struct window_manager *wm)
+struct window *window_manager_find_recent_managed_window(struct window_manager *wm)
 {
     struct window *window = window_manager_find_window(wm, wm->last_window_id);
     if (!window) return NULL;
@@ -1328,7 +1328,7 @@ struct application *window_manager_focused_application(struct window_manager *wm
 {
     TIME_FUNCTION;
 
-    ProcessSerialNumber psn = {};
+    ProcessSerialNumber psn = {0};
     _SLPSGetFrontProcess(&psn);
 
     pid_t pid;
@@ -1414,13 +1414,11 @@ struct window **window_manager_find_application_windows(struct window_manager *w
     *window_count = 0;
     struct window **window_list = ts_alloc_list(struct window *, wm->window.count);
 
-    for (int window_index = 0; window_index < wm->window.capacity; ++window_index) {
-        table_for (struct window *window, wm->window.buckets[window_index], {
-            if (window->application == application) {
-                window_list[(*window_count)++] = window;
-            }
-        })
-    }
+    table_for (struct window *window, wm->window, {
+        if (window->application == application) {
+            window_list[(*window_count)++] = window;
+        }
+    })
 
     return window_list;
 }
@@ -1661,7 +1659,7 @@ bool window_manager_add_existing_application_windows(struct space_manager *sm, s
     return result;
 }
 
-enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window_manager *wm, struct window *window, int direction)
+enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window *window, int direction)
 {
     TIME_FUNCTION;
 
@@ -1723,7 +1721,7 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
 
     struct view *b_view = window_manager_find_managed_window(wm, b);
     if (b_view) {
-        space_manager_untile_window(sm, b_view, b);
+        space_manager_untile_window(b_view, b);
         window_manager_remove_managed_window(wm, b->id);
         window_manager_purify_window(wm, b);
     } else if (window_check_flag(b, WINDOW_FLOAT)) {
@@ -1735,7 +1733,7 @@ enum window_op_error window_manager_stack_window(struct space_manager *sm, struc
     struct window_node *a_node = view_find_window_node(a_view, a->id);
     if (a_node->window_count+1 >= NODE_MAX_WINDOW_COUNT) return WINDOW_OP_ERROR_MAX_STACK;
 
-    view_stack_window_node(a_view, a_node, b);
+    view_stack_window_node(a_node, b);
     window_manager_add_managed_window(wm, b, a_view);
     window_manager_adjust_layer(b, LAYER_BELOW);
     scripting_addition_order_window(b->id, 1, a_node->window_order[1]);
@@ -1852,7 +1850,7 @@ enum window_op_error window_manager_warp_window(struct space_manager *sm, struct
             // warping between spaces that belong to the same monitor as well??
             //
 
-            space_manager_untile_window(sm, a_view, a);
+            space_manager_untile_window(a_view, a);
             window_manager_remove_managed_window(wm, a->id);
             window_manager_add_managed_window(wm, a, b_view);
             space_manager_move_window_to_space(b_view->sid, a);
@@ -2023,7 +2021,7 @@ void window_manager_send_window_to_space(struct space_manager *sm, struct window
 
     struct view *view = window_manager_find_managed_window(wm, window);
     if (view) {
-        space_manager_untile_window(sm, view, window);
+        space_manager_untile_window(view, window);
         window_manager_remove_managed_window(wm, window->id);
         window_manager_purify_window(wm, window);
     }
@@ -2110,7 +2108,7 @@ void window_manager_make_window_floating(struct space_manager *sm, struct window
     if (should_float) {
         struct view *view = window_manager_find_managed_window(wm, window);
         if (view) {
-            space_manager_untile_window(sm, view, window);
+            space_manager_untile_window(view, window);
             window_manager_remove_managed_window(wm, window->id);
             window_manager_purify_window(wm, window);
         }
@@ -2137,7 +2135,7 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
         if (scripting_addition_set_sticky(window->id, true)) {
             struct view *view = window_manager_find_managed_window(wm, window);
             if (view) {
-                space_manager_untile_window(sm, view, window);
+                space_manager_untile_window(view, window);
                 window_manager_remove_managed_window(wm, window->id);
                 window_manager_purify_window(wm, window);
             }
@@ -2157,7 +2155,7 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
     }
 }
 
-void window_manager_toggle_window_shadow(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_shadow(struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2204,7 +2202,7 @@ void window_manager_wait_for_native_fullscreen_transition(struct window *window)
     }
 }
 
-void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_native_fullscreen(struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2234,7 +2232,7 @@ void window_manager_toggle_window_native_fullscreen(struct space_manager *sm, st
     window_manager_wait_for_native_fullscreen_transition(window);
 }
 
-void window_manager_toggle_window_parent(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_parent(struct window_manager *wm, struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2263,7 +2261,7 @@ void window_manager_toggle_window_parent(struct space_manager *sm, struct window
     }
 }
 
-void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_fullscreen(struct window_manager *wm, struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2292,7 +2290,7 @@ void window_manager_toggle_window_fullscreen(struct space_manager *sm, struct wi
     }
 }
 
-void window_manager_toggle_window_expose(struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_expose(struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2300,7 +2298,7 @@ void window_manager_toggle_window_expose(struct window_manager *wm, struct windo
     CoreDockSendNotification(CFSTR("com.apple.expose.front.awake"), 0);
 }
 
-void window_manager_toggle_window_pip(struct space_manager *sm, struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_pip(struct space_manager *sm, struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2428,7 +2426,7 @@ void window_manager_scratchpad_recover_windows(void)
     }
 }
 
-static void window_manager_validate_windows_on_space(struct space_manager *sm, struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
+static void window_manager_validate_windows_on_space(struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
 {
     int view_window_count;
     uint32_t *view_window_list = view_find_window_list(view, &view_window_count);
@@ -2467,7 +2465,7 @@ static void window_manager_validate_windows_on_space(struct space_manager *sm, s
     }
 }
 
-static void window_manager_check_for_windows_on_space(struct space_manager *sm, struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
+static void window_manager_check_for_windows_on_space(struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
 {
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(wm, window_list[i]);
@@ -2520,8 +2518,8 @@ void window_manager_validate_and_check_for_windows_on_space(struct space_manager
 
     int window_count = 0;
     uint32_t *window_list = space_window_list(sid, &window_count, false);
-    window_manager_validate_windows_on_space(sm, wm, view, window_list, window_count);
-    window_manager_check_for_windows_on_space(sm, wm, view, window_list, window_count);
+    window_manager_validate_windows_on_space(wm, view, window_list, window_count);
+    window_manager_check_for_windows_on_space(wm, view, window_list, window_count);
 
     //
     // @cleanup
@@ -2580,7 +2578,7 @@ void window_manager_handle_display_add_and_remove(struct space_manager *sm, stru
             if (window_list) {
                 struct view *view = space_manager_find_view(sm, space_list[i]);
                 if (view->layout != VIEW_FLOAT) {
-                    window_manager_check_for_windows_on_space(sm, wm, view, window_list, window_count);
+                    window_manager_check_for_windows_on_space(wm, view, window_list, window_count);
                 }
             }
             break;
@@ -2628,24 +2626,22 @@ void window_manager_init(struct window_manager *wm)
 void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    for (int process_index = 0; process_index < g_process_manager.process.capacity; ++process_index) {
-        table_for (struct process *process, g_process_manager.process.buckets[process_index], {
-            if (workspace_application_is_observable(process)) {
-                struct application *application = application_create(process);
+    table_for (struct process *process, g_process_manager.process, {
+        if (workspace_application_is_observable(process)) {
+            struct application *application = application_create(process);
 
-                if (application_observe(application)) {
-                    window_manager_add_application(wm, application);
-                    window_manager_add_existing_application_windows(sm, wm, application, -1);
-                } else {
-                    application_unobserve(application);
-                    application_destroy(application);
-                }
+            if (application_observe(application)) {
+                window_manager_add_application(wm, application);
+                window_manager_add_existing_application_windows(sm, wm, application, -1);
             } else {
-                debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
-                workspace_application_observe_activation_policy(g_workspace_context, process);
+                application_unobserve(application);
+                application_destroy(application);
             }
-        })
-    }
+        } else {
+            debug("%s: %s (%d) is not observable, subscribing to activationPolicy changes\n", __FUNCTION__, process->name, process->pid);
+            workspace_application_observe_activation_policy(g_workspace_context, process);
+        }
+    })
     [pool drain];
 
     struct window *window = window_manager_focused_window(wm);

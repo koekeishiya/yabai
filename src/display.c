@@ -1,6 +1,8 @@
 extern struct event_loop g_event_loop;
 extern int g_connection;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static DISPLAY_EVENT_HANDLER(display_handler)
 {
     if (flags & kCGDisplayAddFlag) {
@@ -13,6 +15,7 @@ static DISPLAY_EVENT_HANDLER(display_handler)
         event_loop_post(&g_event_loop, DISPLAY_RESIZED, (void *)(intptr_t) did, 0);
     }
 }
+#pragma clang diagnostic pop
 
 void display_serialize(FILE *rsp, uint32_t did, uint64_t flags)
 {

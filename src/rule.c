@@ -112,22 +112,20 @@ void rule_combine_effects(struct rule_effects *effects, struct rule_effects *res
 
 void rule_reapply_all(void)
 {
-    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
-        table_for (struct window *window, g_window_manager.window.buckets[window_index], {
-            if (window->is_root) {
-                char *window_title = window_title_ts(window);
-                char *window_role = window_role_ts(window);
-                char *window_subrole = window_subrole_ts(window);
+    table_for (struct window *window, g_window_manager.window, {
+        if (window->is_root) {
+            char *window_title = window_title_ts(window);
+            char *window_role = window_role_ts(window);
+            char *window_subrole = window_subrole_ts(window);
 
-                window_manager_apply_manage_rules_to_window(&g_space_manager, &g_window_manager, window, window_title, window_role, window_subrole, false);
+            window_manager_apply_manage_rules_to_window(&g_space_manager, &g_window_manager, window, window_title, window_role, window_subrole, false);
 
-                if (window_manager_is_window_eligible(window)) {
-                    window->is_eligible = true;
-                    window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window, window_title, window_role, window_subrole, false);
-                }
+            if (window_manager_is_window_eligible(window)) {
+                window->is_eligible = true;
+                window_manager_apply_rules_to_window(&g_space_manager, &g_window_manager, window, window_title, window_role, window_subrole, false);
             }
-        })
-    }
+        }
+    })
 }
 
 bool rule_reapply_by_index(int index)
@@ -160,24 +158,18 @@ bool rule_reapply_by_label(char *label)
 
 void rule_apply(struct rule *rule)
 {
-    for (int window_index = 0; window_index < g_window_manager.window.capacity; ++window_index) {
-        table_for (struct window *window, g_window_manager.window.buckets[window_index], {
-            if (window->is_root) {
-                char *window_title = window_title_ts(window);
-                char *window_role = window_role_ts(window);
-                char *window_subrole = window_subrole_ts(window);
+    table_for (struct window *window, g_window_manager.window, {
+        if (window->is_root) {
+            if (window_manager_rule_matches_window(rule, window, window_title_ts(window), window_role_ts(window), window_subrole_ts(window))) {
+                window_manager_apply_manage_rule_effects_to_window(&g_space_manager, &g_window_manager, window, &rule->effects);
 
-                if (window_manager_rule_matches_window(rule, window, window_title, window_role, window_subrole)) {
-                    window_manager_apply_manage_rule_effects_to_window(&g_space_manager, &g_window_manager, window, &rule->effects, window_title, window_role, window_subrole);
-
-                    if (window_manager_is_window_eligible(window)) {
-                        window->is_eligible = true;
-                        window_manager_apply_rule_effects_to_window(&g_space_manager, &g_window_manager, window, &rule->effects, window_title, window_role, window_subrole);
-                    }
+                if (window_manager_is_window_eligible(window)) {
+                    window->is_eligible = true;
+                    window_manager_apply_rule_effects_to_window(&g_space_manager, &g_window_manager, window, &rule->effects);
                 }
             }
-        })
-    }
+        }
+    })
 }
 
 void rule_add(struct rule *rule)

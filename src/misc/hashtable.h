@@ -31,7 +31,14 @@ void _table_add(struct table *table, void *key, int key_size, void *value);
 void table_remove(struct table *table, void *key);
 void *table_find(struct table *table, void *key);
 
-#define table_for(it, table_entry, code) for (struct bucket *bucket = table_entry; bucket; bucket = bucket->next) { if (!bucket->value) continue; it = bucket->value; code; }
+#define table_for(it, table, code) \
+    for (int i = 0; i < table.capacity; ++i) { \
+        for (struct bucket *bucket = table.buckets[i]; bucket; bucket = bucket->next) { \
+            if (!bucket->value) continue; \
+            it = bucket->value; \
+            code; \
+        } \
+    }
 
 #endif
 

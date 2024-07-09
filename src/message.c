@@ -248,7 +248,7 @@ extern bool g_verbose;
 struct token
 {
     char *text;
-    unsigned int length;
+    int length;
 };
 
 enum token_type
@@ -1044,7 +1044,7 @@ static struct selector parse_window_selector(FILE *rsp, char **message, struct w
                 daemon_fail(rsp, "could not locate the last managed window.\n");
             }
         } else if (token_equals(result.token, ARGUMENT_COMMON_SEL_RECENT)) {
-            struct window *recent_window = window_manager_find_recent_managed_window(&g_space_manager, &g_window_manager);
+            struct window *recent_window = window_manager_find_recent_managed_window(&g_window_manager);
             if (recent_window) {
                 result.window = recent_window;
             } else {
@@ -2144,7 +2144,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         } else if (token_equals(command, COMMAND_WINDOW_INSERT)) {
             struct selector selector = parse_insert_selector(rsp, &message);
             if (selector.did_parse && selector.dir) {
-                enum window_op_error result = window_manager_set_window_insertion(&g_space_manager, &g_window_manager, acting_window, selector.dir);
+                enum window_op_error result = window_manager_set_window_insertion(&g_space_manager, acting_window, selector.dir);
                 if (result == WINDOW_OP_ERROR_INVALID_SRC_VIEW) {
                     daemon_fail(rsp, "the acting window is not within a bsp space.\n");
                 } else if (result == WINDOW_OP_ERROR_INVALID_SRC_NODE) {
@@ -2220,7 +2220,7 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_SHADOW)) {
                 if (acting_window) {
-                    window_manager_toggle_window_shadow(&g_space_manager, &g_window_manager, acting_window);
+                    window_manager_toggle_window_shadow(acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }
@@ -2232,31 +2232,31 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {
                 if (acting_window) {
-                    window_manager_toggle_window_parent(&g_space_manager, &g_window_manager, acting_window);
+                    window_manager_toggle_window_parent(&g_window_manager, acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
                 if (acting_window) {
-                    window_manager_toggle_window_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+                    window_manager_toggle_window_fullscreen(&g_window_manager, acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_NATIVE)) {
                 if (acting_window) {
-                    window_manager_toggle_window_native_fullscreen(&g_space_manager, &g_window_manager, acting_window);
+                    window_manager_toggle_window_native_fullscreen(acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_EXPOSE)) {
                 if (acting_window) {
-                    window_manager_toggle_window_expose(&g_window_manager, acting_window);
+                    window_manager_toggle_window_expose(acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PIP)) {
                 if (acting_window) {
-                    window_manager_toggle_window_pip(&g_space_manager, &g_window_manager, acting_window);
+                    window_manager_toggle_window_pip(&g_space_manager, acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }
@@ -2740,7 +2740,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
 
     struct token command = get_token(&message);
     if (token_equals(command, COMMAND_RULE_ADD)) {
-        struct rule rule = {};
+        struct rule rule = {0};
 
         struct token token = get_token(&message);
         if (token_equals(token, ARGUMENT_RULE_ONE_SHOT)) {
@@ -2761,7 +2761,7 @@ static void handle_domain_rule(FILE *rsp, struct token domain, char *message)
             }
         } else if (value.type == TOKEN_TYPE_STRING) {
             if (!rule_reapply_by_label(value.string_value)) {
-                struct rule rule = {};
+                struct rule rule = {0};
                 if (parse_rule(rsp, &message, &rule, value.token)) {
                     rule_apply(&rule);
                 }
@@ -2803,7 +2803,7 @@ static void handle_domain_signal(FILE *rsp, struct token domain, char *message)
         bool has_command = false;
         bool has_signal_type = false;
         enum signal_type signal_type = SIGNAL_TYPE_UNKNOWN;
-        struct signal signal = {};
+        struct signal signal = {0};
 
         for (struct token token = get_token(&message); token_is_valid(token); token = get_token(&message)) {
             char *key = NULL;
@@ -2929,6 +2929,8 @@ void handle_message(FILE *rsp, char *message)
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 static void *message_loop_run(void *context)
 {
     while (g_message_loop.is_running) {
@@ -2940,6 +2942,7 @@ static void *message_loop_run(void *context)
 
     return NULL;
 }
+#pragma clang diagnostic pop
 
 bool message_loop_begin(char *socket_path)
 {

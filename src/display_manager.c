@@ -303,7 +303,7 @@ bool display_manager_menu_bar_hidden(void)
 
 CGRect display_manager_menu_bar_rect(uint32_t did)
 {
-    CGRect bounds = {};
+    CGRect bounds = {0};
 
 #ifdef __x86_64__
     SLSGetRevealedMenuBarBounds(&bounds, g_connection, display_space_id(did));
@@ -347,7 +347,7 @@ int display_manager_dock_orientation(void)
 CGRect display_manager_dock_rect(void)
 {
     int reason = 0;
-    CGRect bounds = {};
+    CGRect bounds = {0};
     SLSGetDockRectWithReason(g_connection, &bounds, &reason);
     return bounds;
 }
@@ -412,7 +412,7 @@ static AXUIElementRef display_manager_find_element_at_point(CGPoint point)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-uint32_t display_manager_focus_display_with_point(uint32_t did, CGPoint point, bool update_cursor_position)
+uint32_t display_manager_focus_display_with_point(CGPoint point, bool update_cursor_position)
 {
     int element_connection;
     ProcessSerialNumber element_psn;
@@ -445,7 +445,7 @@ void display_manager_focus_display(uint32_t did, uint64_t sid)
     if (window) {
         window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
     } else {
-        display_manager_focus_display_with_point(did, display_center(did), true);
+        display_manager_focus_display_with_point(display_center(did), true);
     }
 }
 

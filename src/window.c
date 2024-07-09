@@ -734,7 +734,7 @@ char *window_title_ts(struct window *window)
 
 CGPoint window_ax_origin(struct window *window)
 {
-    CGPoint origin = {};
+    CGPoint origin = {0};
     CFTypeRef position_ref = NULL;
 
     AXUIElementCopyAttributeValue(window->ref, kAXPositionAttribute, &position_ref);
@@ -749,7 +749,7 @@ CGPoint window_ax_origin(struct window *window)
 
 CGRect window_ax_frame(struct window *window)
 {
-    CGRect frame = {};
+    CGRect frame = {0};
     CFTypeRef position_ref = NULL;
     CFTypeRef size_ref = NULL;
 

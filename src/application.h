@@ -70,7 +70,7 @@ struct application
     AXUIElementRef ref;
     int connection;
     ProcessSerialNumber psn;
-    uint32_t pid;
+    pid_t pid;
     char *name;
     AXObserverRef observer_ref;
     uint8_t notification;

@@ -19,7 +19,7 @@ static struct segment_command_64 *macho_find_linkedit_segment(struct mach_header
 {
     uint64_t offset = sizeof(struct mach_header_64);
 
-    for (int i = 0; i < header->ncmds; ++i) {
+    for (int i = 0; i < (int)header->ncmds; ++i) {
         struct load_command *cmd = (struct load_command *)(((uint8_t *) header) + offset);
 
         if (cmd->cmd == LC_SEGMENT_64) {
@@ -39,7 +39,7 @@ static struct symtab_command *macho_find_symtab_command(struct mach_header_64 *h
 {
     uint64_t offset = sizeof(struct mach_header_64);
 
-    for (int i = 0; i < header->ncmds; ++i) {
+    for (int i = 0; i < (int)header->ncmds; ++i) {
         struct load_command *cmd = (struct load_command *)(((uint8_t *) header) + offset);
 
         if (cmd->cmd == LC_SYMTAB) {

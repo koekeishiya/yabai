@@ -8,11 +8,9 @@ void insert_feedback_update_notifications(void)
     int window_count = 0;
     uint32_t window_list[1024] = {0};
 
-    for (int i = 0; i < g_window_manager.insert_feedback.capacity; ++i) {
-        table_for (struct window_node *node, g_window_manager.insert_feedback.buckets[i], {
-            window_list[window_count++] = node->window_order[0];
-        })
-    }
+    table_for (struct window_node *node, g_window_manager.insert_feedback, {
+        window_list[window_count++] = node->window_order[0];
+    })
 
     SLSRequestNotificationsForWindows(g_connection, window_list, window_count);
 }
@@ -722,7 +720,7 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
     return parent;
 }
 
-void view_stack_window_node(struct view *view, struct window_node *node, struct window *window)
+void view_stack_window_node(struct window_node *node, struct window *window)
 {
     node->window_list[node->window_count]  = window->id;
     memmove(node->window_order + 1, node->window_order, sizeof(uint32_t) * node->window_count);
@@ -758,7 +756,7 @@ struct window_node *view_add_window_node_with_insertion_point(struct view *view,
                 insert_feedback_destroy(leaf);
 
                 if (do_stack) {
-                    view_stack_window_node(view, leaf, window);
+                    view_stack_window_node(leaf, window);
                     return leaf;
                 }
             }
@@ -777,7 +775,7 @@ struct window_node *view_add_window_node_with_insertion_point(struct view *view,
 
         return leaf;
     } else if (view->layout == VIEW_STACK) {
-        view_stack_window_node(view, view->root, window);
+        view_stack_window_node(view->root, window);
         return view->root;
     }
 
