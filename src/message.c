@@ -1270,15 +1270,17 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             if (value.type == TOKEN_TYPE_INVALID) {
                 fprintf(rsp, "%f\n", g_window_manager.window_animation_duration);
             } else if (value.type == TOKEN_TYPE_FLOAT) {
-                if (CGPreflightScreenCaptureAccess()) {
-                    if (scripting_addition_is_sip_friendly()) {
-                        g_window_manager.window_animation_duration = value.float_value;
+                if (value.float_value) {
+                    if (CGPreflightScreenCaptureAccess()) {
+                        if (scripting_addition_is_sip_friendly()) {
+                            g_window_manager.window_animation_duration = value.float_value;
+                        } else {
+                            daemon_fail(rsp, "command '%.*s' for domain '%.*s' requires System Integrity Protection to be partially disabled! ignoring request..\n", command.length, command.text, domain.length, domain.text);
+                        }
                     } else {
-                        daemon_fail(rsp, "command '%.*s' for domain '%.*s' requires System Integrity Protection to be partially disabled! ignoring request..\n", command.length, command.text, domain.length, domain.text);
+                        daemon_fail(rsp, "command '%.*s' for domain '%.*s' requires Screen Recording permissions! ignoring request..\n", command.length, command.text, domain.length, domain.text);
+                        CGRequestScreenCaptureAccess();
                     }
-                } else {
-                    daemon_fail(rsp, "command '%.*s' for domain '%.*s' requires Screen Recording permissions! ignoring request..\n", command.length, command.text, domain.length, domain.text);
-                    CGRequestScreenCaptureAccess();
                 }
             } else {
                 daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.token.length, value.token.text, command.length, command.text, domain.length, domain.text);
