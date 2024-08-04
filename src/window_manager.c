@@ -2051,7 +2051,7 @@ enum window_op_error window_manager_apply_grid(struct space_manager *sm, struct 
     if (w >  c-x) w = c - x;
     if (h >  r-y) h = r - y;
 
-    CGRect bounds = display_bounds_constrained(did);
+    CGRect bounds = display_bounds_constrained(did, false);
     struct view *dview = space_manager_find_view(sm, display_space_id(did));
 
     if (dview) {
@@ -2232,7 +2232,7 @@ void window_manager_toggle_window_native_fullscreen(struct window *window)
     window_manager_wait_for_native_fullscreen_transition(window);
 }
 
-void window_manager_toggle_window_parent(struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_zoom_parent(struct window_manager *wm, struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2261,7 +2261,7 @@ void window_manager_toggle_window_parent(struct window_manager *wm, struct windo
     }
 }
 
-void window_manager_toggle_window_fullscreen(struct window_manager *wm, struct window *window)
+void window_manager_toggle_window_zoom_fullscreen(struct window_manager *wm, struct window *window)
 {
     TIME_FUNCTION;
 
@@ -2290,6 +2290,24 @@ void window_manager_toggle_window_fullscreen(struct window_manager *wm, struct w
     }
 }
 
+void window_manager_toggle_window_windowed_fullscreen(struct window *window)
+{
+    TIME_FUNCTION;
+
+    uint32_t did = window_display_id(window->id);
+    if (!did) return;
+
+    if (window_check_flag(window, WINDOW_WINDOWED)) {
+        window_clear_flag(window, WINDOW_WINDOWED);
+        window_manager_animate_window((struct window_capture) { .window = window, .x = window->windowed_frame.origin.x , .y = window->windowed_frame.origin.y, .w = window->windowed_frame.size.width, .h = window->windowed_frame.size.height });
+    } else {
+        window_set_flag(window, WINDOW_WINDOWED);
+        window->windowed_frame = window->frame;
+        CGRect bounds = display_bounds_constrained(did, true);
+        window_manager_animate_window((struct window_capture) { .window = window, .x = bounds.origin.x, .y = bounds.origin.y, .w = bounds.size.width, .h = bounds.size.height });
+    }
+}
+
 void window_manager_toggle_window_expose(struct window *window)
 {
     TIME_FUNCTION;
@@ -2308,7 +2326,7 @@ void window_manager_toggle_window_pip(struct space_manager *sm, struct window *w
     uint64_t sid = display_space_id(did);
     struct view *dview = space_manager_find_view(sm, sid);
 
-    CGRect bounds = display_bounds_constrained(did);
+    CGRect bounds = display_bounds_constrained(did, false);
     if (dview && view_check_flag(dview, VIEW_ENABLE_PADDING)) {
         bounds.origin.x    += dview->left_padding;
         bounds.size.width  -= (dview->left_padding + dview->right_padding);

@@ -120,19 +120,21 @@ uint32_t display_id(CFStringRef uuid)
     return did;
 }
 
-CGRect display_bounds_constrained(uint32_t did)
+CGRect display_bounds_constrained(uint32_t did, bool ignore_external_bar)
 {
     CGRect frame = CGDisplayBounds(did);
     int effective_ext_top_padding = 0;
 
-    if ((g_display_manager.mode == EXTERNAL_BAR_MAIN &&
-         did == display_manager_main_display_id()) ||
-        (g_display_manager.mode == EXTERNAL_BAR_ALL)) {
-        effective_ext_top_padding = g_display_manager.top_padding;
+    if (!ignore_external_bar) {
+        if ((g_display_manager.mode == EXTERNAL_BAR_MAIN &&
+             did == display_manager_main_display_id()) ||
+            (g_display_manager.mode == EXTERNAL_BAR_ALL)) {
+            effective_ext_top_padding = g_display_manager.top_padding;
 
-        frame.origin.y    += effective_ext_top_padding;
-        frame.size.height -= effective_ext_top_padding;
-        frame.size.height -= g_display_manager.bottom_padding;
+            frame.origin.y    += effective_ext_top_padding;
+            frame.size.height -= effective_ext_top_padding;
+            frame.size.height -= g_display_manager.bottom_padding;
+        }
     }
 
     if (display_manager_menu_bar_hidden()) {

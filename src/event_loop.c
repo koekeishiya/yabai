@@ -607,21 +607,26 @@ static EVENT_HANDLER(WINDOW_MOVED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     event_signal_push(SIGNAL_WINDOW_MOVED, window);
+    bool windowed_fullscreen = CGRectEqualToRect(window->windowed_frame, window->frame);
     window->frame.origin = new_origin;
 
-    if (!g_mouse_state.window || g_mouse_state.window != window) {
-        struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-        if (view) {
-            struct window_node *node = view_find_window_node(view, window->id);
-            if (node && (AX_DIFF(node->area.x, new_origin.x) ||
-                         AX_DIFF(node->area.y, new_origin.y))
-                     &&
-               (!node->zoom || AX_DIFF(node->zoom->area.x, new_origin.x) ||
-                               AX_DIFF(node->zoom->area.y, new_origin.y))) {
-                if (space_is_visible(view->sid)) {
-                    window_node_flush(node);
-                } else {
-                    view_set_flag(view, VIEW_IS_DIRTY);
+    if (!windowed_fullscreen) {
+        window_clear_flag(window, WINDOW_WINDOWED);
+
+        if (!g_mouse_state.window || g_mouse_state.window != window) {
+            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+            if (view) {
+                struct window_node *node = view_find_window_node(view, window->id);
+                if (node && (AX_DIFF(node->area.x, new_origin.x) ||
+                             AX_DIFF(node->area.y, new_origin.y))
+                         &&
+                   (!node->zoom || AX_DIFF(node->zoom->area.x, new_origin.x) ||
+                                   AX_DIFF(node->zoom->area.y, new_origin.y))) {
+                    if (space_is_visible(view->sid)) {
+                        window_node_flush(node);
+                    } else {
+                        view_set_flag(view, VIEW_IS_DIRTY);
+                    }
                 }
             }
         }
@@ -662,6 +667,7 @@ static EVENT_HANDLER(WINDOW_RESIZED)
         window_clear_flag(window, WINDOW_FULLSCREEN);
     }
 
+    bool windowed_fullscreen = CGRectEqualToRect(window->windowed_frame, window->frame);
     window->frame = new_frame;
 
     if (!was_fullscreen && is_fullscreen) {
@@ -683,23 +689,27 @@ static EVENT_HANDLER(WINDOW_RESIZED)
             g_mouse_state.window_frame.size = g_mouse_state.window->frame.size;
         }
 
-        if (!g_mouse_state.window || g_mouse_state.window != window) {
-            struct view *view = window_manager_find_managed_window(&g_window_manager, window);
-            if (view) {
-                struct window_node *node = view_find_window_node(view, window->id);
-                if (node && (AX_DIFF(node->area.x, new_frame.origin.x)   ||
-                             AX_DIFF(node->area.y, new_frame.origin.y)   ||
-                             AX_DIFF(node->area.w, new_frame.size.width) ||
-                             AX_DIFF(node->area.h, new_frame.size.height))
-                         &&
-                   (!node->zoom || AX_DIFF(node->zoom->area.x, new_frame.origin.x)   ||
-                                   AX_DIFF(node->zoom->area.y, new_frame.origin.y)   ||
-                                   AX_DIFF(node->zoom->area.w, new_frame.size.width) ||
-                                   AX_DIFF(node->zoom->area.h, new_frame.size.height))) {
-                    if (space_is_visible(view->sid)) {
-                        window_node_flush(node);
-                    } else {
-                        view_set_flag(view, VIEW_IS_DIRTY);
+        if (!windowed_fullscreen) {
+            window_clear_flag(window, WINDOW_WINDOWED);
+
+            if (!g_mouse_state.window || g_mouse_state.window != window) {
+                struct view *view = window_manager_find_managed_window(&g_window_manager, window);
+                if (view) {
+                    struct window_node *node = view_find_window_node(view, window->id);
+                    if (node && (AX_DIFF(node->area.x, new_frame.origin.x)   ||
+                                 AX_DIFF(node->area.y, new_frame.origin.y)   ||
+                                 AX_DIFF(node->area.w, new_frame.size.width) ||
+                                 AX_DIFF(node->area.h, new_frame.size.height))
+                             &&
+                       (!node->zoom || AX_DIFF(node->zoom->area.x, new_frame.origin.x)   ||
+                                       AX_DIFF(node->zoom->area.y, new_frame.origin.y)   ||
+                                       AX_DIFF(node->zoom->area.w, new_frame.size.width) ||
+                                       AX_DIFF(node->zoom->area.h, new_frame.size.height))) {
+                        if (space_is_visible(view->sid)) {
+                            window_node_flush(node);
+                        } else {
+                            view_set_flag(view, VIEW_IS_DIRTY);
+                        }
                     }
                 }
             }
@@ -1067,7 +1077,7 @@ static EVENT_HANDLER(MOUSE_DRAGGED)
 
         uint32_t did = display_manager_point_display_id(new_point);
         if (did) {
-            CGRect bounds = display_bounds_constrained(did);
+            CGRect bounds = display_bounds_constrained(did, false);
             if (new_point.y < bounds.origin.y) new_point.y = bounds.origin.y;
         }
 
@@ -1242,7 +1252,7 @@ static EVENT_HANDLER(MOUSE_MOVED)
         uint32_t cursor_did = display_manager_point_display_id(point);
         if (g_display_manager.current_display_id == cursor_did) goto out;
 
-        CGRect bounds = display_bounds_constrained(cursor_did);
+        CGRect bounds = display_bounds_constrained(cursor_did, false);
         if (!cgrect_contains_point(bounds, point)) goto out;
 
         uint32_t wid = display_manager_focus_display_with_point(point, false);

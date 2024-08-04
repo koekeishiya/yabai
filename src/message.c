@@ -146,31 +146,32 @@ extern bool g_verbose;
 #define COMMAND_WINDOW_TOGGLE     "--toggle"
 #define COMMAND_WINDOW_SCRATCHPAD "--scratchpad"
 
-#define ARGUMENT_WINDOW_SEL_LARGEST   "largest"
-#define ARGUMENT_WINDOW_SEL_SMALLEST  "smallest"
-#define ARGUMENT_WINDOW_SEL_SIBLING   "sibling"
-#define ARGUMENT_WINDOW_SEL_FNEPHEW   "first_nephew"
-#define ARGUMENT_WINDOW_SEL_SNEPHEW   "second_nephew"
-#define ARGUMENT_WINDOW_SEL_UNCLE     "uncle"
-#define ARGUMENT_WINDOW_SEL_FCOUSIN   "first_cousin"
-#define ARGUMENT_WINDOW_SEL_SCOUSIN   "second_cousin"
-#define ARGUMENT_WINDOW_GRID          "%d:%d:%d:%d:%d:%d"
-#define ARGUMENT_WINDOW_MOVE          "%255[^:]:%f:%f"
-#define ARGUMENT_WINDOW_RESIZE        "%255[^:]:%f:%f"
-#define ARGUMENT_WINDOW_RATIO         "%255[^:]:%f"
-#define ARGUMENT_WINDOW_LAYER_BELOW   "below"
-#define ARGUMENT_WINDOW_LAYER_NORMAL  "normal"
-#define ARGUMENT_WINDOW_LAYER_ABOVE   "above"
-#define ARGUMENT_WINDOW_LAYER_AUTO    "auto"
-#define ARGUMENT_WINDOW_TOGGLE_FLOAT  "float"
-#define ARGUMENT_WINDOW_TOGGLE_STICKY "sticky"
-#define ARGUMENT_WINDOW_TOGGLE_SHADOW "shadow"
-#define ARGUMENT_WINDOW_TOGGLE_SPLIT  "split"
-#define ARGUMENT_WINDOW_TOGGLE_PARENT "zoom-parent"
-#define ARGUMENT_WINDOW_TOGGLE_FULLSC "zoom-fullscreen"
-#define ARGUMENT_WINDOW_TOGGLE_NATIVE "native-fullscreen"
-#define ARGUMENT_WINDOW_TOGGLE_EXPOSE "expose"
-#define ARGUMENT_WINDOW_TOGGLE_PIP    "pip"
+#define ARGUMENT_WINDOW_SEL_LARGEST     "largest"
+#define ARGUMENT_WINDOW_SEL_SMALLEST    "smallest"
+#define ARGUMENT_WINDOW_SEL_SIBLING     "sibling"
+#define ARGUMENT_WINDOW_SEL_FNEPHEW     "first_nephew"
+#define ARGUMENT_WINDOW_SEL_SNEPHEW     "second_nephew"
+#define ARGUMENT_WINDOW_SEL_UNCLE       "uncle"
+#define ARGUMENT_WINDOW_SEL_FCOUSIN     "first_cousin"
+#define ARGUMENT_WINDOW_SEL_SCOUSIN     "second_cousin"
+#define ARGUMENT_WINDOW_GRID            "%d:%d:%d:%d:%d:%d"
+#define ARGUMENT_WINDOW_MOVE            "%255[^:]:%f:%f"
+#define ARGUMENT_WINDOW_RESIZE          "%255[^:]:%f:%f"
+#define ARGUMENT_WINDOW_RATIO           "%255[^:]:%f"
+#define ARGUMENT_WINDOW_LAYER_BELOW     "below"
+#define ARGUMENT_WINDOW_LAYER_NORMAL    "normal"
+#define ARGUMENT_WINDOW_LAYER_ABOVE     "above"
+#define ARGUMENT_WINDOW_LAYER_AUTO      "auto"
+#define ARGUMENT_WINDOW_TOGGLE_FLOAT    "float"
+#define ARGUMENT_WINDOW_TOGGLE_STICKY   "sticky"
+#define ARGUMENT_WINDOW_TOGGLE_SHADOW   "shadow"
+#define ARGUMENT_WINDOW_TOGGLE_SPLIT    "split"
+#define ARGUMENT_WINDOW_TOGGLE_PARENT   "zoom-parent"
+#define ARGUMENT_WINDOW_TOGGLE_FULLSC   "zoom-fullscreen"
+#define ARGUMENT_WINDOW_TOGGLE_WINDOWED "windowed-fullscreen"
+#define ARGUMENT_WINDOW_TOGGLE_NATIVE   "native-fullscreen"
+#define ARGUMENT_WINDOW_TOGGLE_EXPOSE   "expose"
+#define ARGUMENT_WINDOW_TOGGLE_PIP      "pip"
 
 #define ARGUMENT_WINDOW_SCRATCHPAD_RECOVER "recover"
 /* ----------------------------------------------------------------------------- */
@@ -538,6 +539,7 @@ static char *reserved_window_identifiers[] =
     ARGUMENT_WINDOW_TOGGLE_SPLIT,
     ARGUMENT_WINDOW_TOGGLE_PARENT,
     ARGUMENT_WINDOW_TOGGLE_FULLSC,
+    ARGUMENT_WINDOW_TOGGLE_WINDOWED,
     ARGUMENT_WINDOW_TOGGLE_NATIVE,
     ARGUMENT_WINDOW_TOGGLE_EXPOSE,
     ARGUMENT_WINDOW_TOGGLE_PIP,
@@ -2232,13 +2234,19 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_PARENT)) {
                 if (acting_window) {
-                    window_manager_toggle_window_parent(&g_window_manager, acting_window);
+                    window_manager_toggle_window_zoom_parent(&g_window_manager, acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }
             } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_FULLSC)) {
                 if (acting_window) {
-                    window_manager_toggle_window_fullscreen(&g_window_manager, acting_window);
+                    window_manager_toggle_window_zoom_fullscreen(&g_window_manager, acting_window);
+                } else {
+                    daemon_fail(rsp, "could not locate the window to act on!\n");
+                }
+            } else if (token_equals(value, ARGUMENT_WINDOW_TOGGLE_WINDOWED)) {
+                if (acting_window) {
+                    window_manager_toggle_window_windowed_fullscreen(acting_window);
                 } else {
                     daemon_fail(rsp, "could not locate the window to act on!\n");
                 }

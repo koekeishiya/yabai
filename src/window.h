@@ -198,6 +198,7 @@ struct window
     uint32_t id;
     uint32_t *volatile id_ptr;
     CGRect frame;
+    CGRect windowed_frame;
     bool is_root;
     bool is_eligible;
     uint8_t notification;
@@ -214,7 +215,8 @@ enum window_flag
     WINDOW_FULLSCREEN = 0x02,
     WINDOW_MINIMIZE   = 0x04,
     WINDOW_FLOAT      = 0x08,
-    WINDOW_STICKY     = 0x10
+    WINDOW_STICKY     = 0x10,
+    WINDOW_WINDOWED   = 0x20
 };
 
 enum window_rule_flag

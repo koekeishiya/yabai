@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
-.\"      Date: 2024-07-08
+.\" Generator: Asciidoctor 2.0.23
+.\"      Date: 2024-08-04
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2024-07-08" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2024-08-04" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -121,38 +121,38 @@ Print options to stdout and exit.
 .if n .RS 4
 .nf
 .fam C
-REGEX       := \c
+REGEX\&       := \c
 .URL "https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended\-regular\-expression\-syntax.html" "POSIX extended regular expression syntax" ""
 
-LABEL       := arbitrary string/text used as an identifier
+LABEL\&       := arbitrary string/text used as an identifier
 
-LAYER       := below | normal | above | auto
+LAYER\&       := below | normal | above | auto
 
-BOOL_SEL    := on | off
+BOOL_SEL\&    := on | off
 
-FLOAT_SEL   := 0 < <value> <= 1.0
+FLOAT_SEL\&   := 0 < <value> <= 1.0
 
-RULE_SEL    := <index> | LABEL
+RULE_SEL\&    := <index> | LABEL
 
-SIGNAL_SEL  := <index> | LABEL
+SIGNAL_SEL\&  := <index> | LABEL
 
-DIR_SEL     := north | east | south | west
+DIR_SEL\&     := north | east | south | west
 
-STACK_SEL   := stack.prev | stack.next | stack.first | stack.last | stack.recent | stack.<index (1\-based)>
+STACK_SEL\&   := stack.prev | stack.next | stack.first | stack.last | stack.recent | stack.<index (1\-based)>
 
-WINDOW_SEL  := prev | next | first | last | recent | mouse | largest | smallest | sibling | first_nephew | second_nephew | uncle | first_cousin | second_cousin | STACK_SEL | DIR_SEL | <window id>
+WINDOW_SEL\&  := prev | next | first | last | recent | mouse | largest | smallest | sibling | first_nephew | second_nephew | uncle | first_cousin | second_cousin | STACK_SEL | DIR_SEL | <window id>
 
 DISPLAY_SEL := prev | next | first | last | recent | mouse | DIR_SEL | <arrangement index (1\-based)> | LABEL
 
-SPACE_SEL   := prev | next | first | last | recent | mouse | <mission\-control index (1\-based)> | LABEL
+SPACE_SEL\&   := prev | next | first | last | recent | mouse | <mission\-control index (1\-based)> | LABEL
 
-EASING      := ease_in_sine  | ease_out_sine  | ease_in_out_sine  |
-               ease_in_quad  | ease_out_quad  | ease_in_out_quad  |
+EASING\&      := ease_in_sine\&  | ease_out_sine\&  | ease_in_out_sine\&  |
+               ease_in_quad\&  | ease_out_quad\&  | ease_in_out_quad\&  |
                ease_in_cubic | ease_out_cubic | ease_in_out_cubic |
                ease_in_quart | ease_out_quart | ease_in_out_quart |
                ease_in_quint | ease_out_quint | ease_in_out_quint |
-               ease_in_expo  | ease_out_expo  | ease_in_out_expo  |
-               ease_in_circ  | ease_out_circ  | ease_in_out_circ
+               ease_in_expo\&  | ease_out_expo\&  | ease_in_out_expo\&  |
+               ease_in_circ\&  | ease_out_circ\&  | ease_in_out_circ
 .fam
 .fi
 .if n .RE
@@ -618,7 +618,7 @@ If type is \fIrel\fP the split ratio of the selected window is changed by \fIdr\
 A positive/negative delta will increase/decrease the size of the left\-child.
 .RE
 .sp
-\fB\-\-toggle\fP \fIfloat|sticky|pip|shadow|split|zoom\-parent|zoom\-fullscreen|native\-fullscreen|expose|<LABEL>\fP
+\fB\-\-toggle\fP \fIfloat|sticky|pip|shadow|split|zoom\-parent|zoom\-fullscreen|windowed\-fullscreen|native\-fullscreen|expose|<LABEL>\fP
 .RS 4
 Toggle the given property of the selected window.
 .br
@@ -807,6 +807,7 @@ WINDOW
     "has\-parent\-zoom": bool,
     "has\-fullscreen\-zoom": bool,
     "has\-ax\-reference": bool,
+    "is\-windowed\-fullscreen": bool,
     "is\-native\-fullscreen": bool,
     "is\-visible": bool,
     "is\-minimized": bool,

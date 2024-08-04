@@ -939,7 +939,7 @@ void view_serialize(FILE *rsp, struct view *view, uint64_t flags)
 void view_update(struct view *view)
 {
     uint32_t did = space_display_id(view->sid);
-    CGRect frame = display_bounds_constrained(did);
+    CGRect frame = display_bounds_constrained(did, false);
     view->root->area = area_from_cgrect(frame);
 
     if (view_check_flag(view, VIEW_ENABLE_PADDING)) {

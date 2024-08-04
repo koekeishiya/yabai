@@ -195,8 +195,9 @@ void window_manager_make_window_sticky(struct space_manager *sm, struct window_m
 void window_manager_adjust_layer(struct window *window, int layer);
 bool window_manager_set_window_layer(struct window *window, int layer);
 void window_manager_toggle_window_shadow(struct window *window);
-void window_manager_toggle_window_parent(struct window_manager *wm, struct window *window);
-void window_manager_toggle_window_fullscreen(struct window_manager *wm, struct window *window);
+void window_manager_toggle_window_zoom_parent(struct window_manager *wm, struct window *window);
+void window_manager_toggle_window_zoom_fullscreen(struct window_manager *wm, struct window *window);
+void window_manager_toggle_window_windowed_fullscreen(struct window *window);
 void window_manager_toggle_window_native_fullscreen(struct window *window);
 void window_manager_toggle_window_expose(struct window *window);
 void window_manager_toggle_window_pip(struct space_manager *sm, struct window *window);
