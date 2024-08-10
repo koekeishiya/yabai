@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.2] - 2024-08-10
 ### Changed
 - Allow *window_animation_duration* to be set to `0.0` without requesting *Screen Capture* permissions [#2378](https://github.com/koekeishiya/yabai/issues/2378)
 - Add new *window --toggle* option `windowed-fullscreen` to fullscreen a window, ignoring all configured padding for both managed and unmanaged windows [#2221](https://github.com/koekeishiya/yabai/issues/2221)
@@ -684,7 +686,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.1...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.2...HEAD
+[7.1.2]: https://github.com/koekeishiya/yabai/compare/v7.1.1...v7.1.2
 [7.1.1]: https://github.com/koekeishiya/yabai/compare/v7.1.0...v7.1.1
 [7.1.0]: https://github.com/koekeishiya/yabai/compare/v7.0.4...v7.1.0
 [7.0.4]: https://github.com/koekeishiya/yabai/compare/v7.0.3...v7.0.4
