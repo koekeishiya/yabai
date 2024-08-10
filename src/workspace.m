@@ -14,15 +14,14 @@ bool workspace_event_handler_begin(void **context)
     return true;
 }
 
-bool workspace_is_macos_sonoma14_5_or_newer(void)
+bool workspace_use_macos_space_workaround(void)
 {
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
 
-    if (os_version.majorVersion > 14) return true;
-
+    if (os_version.majorVersion == 13 && os_version.minorVersion >= 6) return true;
     if (os_version.majorVersion == 14 && os_version.minorVersion >= 5) return true;
 
-    return false;
+    return os_version.majorVersion >= 15;
 }
 
 void *workspace_application_create_running_ns_application(struct process *process)

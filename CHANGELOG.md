@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Allow *window_animation_duration* to be set to `0.0` without requesting *Screen Capture* permissions [#2378](https://github.com/koekeishiya/yabai/issues/2378)
 - Add new *window --toggle* option `windowed-fullscreen` to fullscreen a window, ignoring all configured padding for both managed and unmanaged windows [#2221](https://github.com/koekeishiya/yabai/issues/2221)
 - Moving windows to other spaces requires SIP to be disabled on macOS Sequoia [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
-- Updated scripting-addition mach loader/injection and payload to work for macOS Sequoia Beta 1, 2, 3, and 4 [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
+- Updated scripting-addition mach loader/injection and payload to work for macOS Sequoia Beta 1, 2, 3, 4, and 5 [#2324](https://github.com/koekeishiya/yabai/issues/2324) [#2331](https://github.com/koekeishiya/yabai/issues/2331)
 - Extend *stack window selector* to allow numeric indices: `yabai -m window --focus stack.3` [#2342](https://github.com/koekeishiya/yabai/issues/2342)
 
 ## [7.1.1] - 2024-05-18

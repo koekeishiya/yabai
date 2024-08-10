@@ -1360,7 +1360,10 @@ static EVENT_HANDLER(DOCK_DID_RESTART)
 {
     debug("%s:\n", __FUNCTION__);
 
-    if (workspace_is_macos_monterey() || workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
+    if (workspace_is_macos_monterey() ||
+        workspace_is_macos_ventura() ||
+        workspace_is_macos_sonoma() ||
+        workspace_is_macos_sequoia()) {
         mission_control_unobserve();
         mission_control_observe();
     }

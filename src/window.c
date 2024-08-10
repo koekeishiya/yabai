@@ -889,7 +889,7 @@ int window_level(uint32_t wid)
 {
     int level = 0;
 
-    if (workspace_is_macos_ventura() || workspace_is_macos_sonoma()) {
+    if (workspace_is_macos_ventura() || workspace_is_macos_sonoma() || workspace_is_macos_sequoia()) {
         CFArrayRef window_ref = cfarray_of_cfnumbers(&wid, sizeof(uint32_t), 1, kCFNumberSInt32Type);
 
         CFTypeRef query = SLSWindowQueryWindows(g_connection, window_ref, 1);

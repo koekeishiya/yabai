@@ -2,6 +2,7 @@
 #define WORKSPACE_H
 
 #define SUPPORTED_MACOS_VERSION_LIST    \
+    SUPPORT_MACOS_VERSION(sequoia,  15) \
     SUPPORT_MACOS_VERSION(sonoma,   14) \
     SUPPORT_MACOS_VERSION(ventura,  13) \
     SUPPORT_MACOS_VERSION(monterey, 12) \
@@ -31,6 +32,6 @@ void workspace_application_observe_activation_policy(void *context, struct proce
 int workspace_display_notch_height(uint32_t did);
 pid_t workspace_get_dock_pid(void);
 bool workspace_event_handler_begin(void **context);
-bool workspace_is_macos_sonoma14_5_or_newer(void);
+bool workspace_use_macos_space_workaround(void);
 
 #endif
