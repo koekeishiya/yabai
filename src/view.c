@@ -722,7 +722,20 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
 
 void view_stack_window_node(struct window_node *node, struct window *window)
 {
-    node->window_list[node->window_count]  = window->id;
+    int insert_index = node->window_count;
+
+    for (int i = 0; i < node->window_count; ++i) {
+        if (node->window_list[i] == node->window_order[0]) {
+            insert_index = i+1;
+            break;
+        }
+    }
+
+    if (insert_index < node->window_count) {
+        memmove(node->window_list + insert_index + 1, node->window_list + insert_index, sizeof(uint32_t) * (node->window_count - insert_index));
+    }
+
+    node->window_list[insert_index] = window->id;
     memmove(node->window_order + 1, node->window_order, sizeof(uint32_t) * node->window_count);
     node->window_order[0] = window->id;
     ++node->window_count;
