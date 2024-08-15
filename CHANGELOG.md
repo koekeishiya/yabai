@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Fix window query scratchpad property flag [#2391](https://github.com/koekeishiya/yabai/issues/2391)
 - When a new window is added to a stack it is placed after the currently focused window (instead of the end) [#2387](https://github.com/koekeishiya/yabai/issues/2387)
 
 ## [7.1.2] - 2024-08-10
