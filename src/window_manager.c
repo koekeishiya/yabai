@@ -2364,9 +2364,11 @@ bool window_manager_toggle_scratchpad_window(struct window_manager *wm, struct w
     uint64_t sid = space_manager_active_space();
     if (!sid) return false;
 
-    uint8_t visible = 0;
-    uint64_t wid_sid = window_space(window->id);
-    SLSWindowIsOrderedIn(g_connection, window->id, &visible);
+    // TODO(koekeishiya): Both functions use the same underlying API and could be combined in a single function to reduce redundant work.
+    bool visible_space = window_space(window->id) == sid || window_is_sticky(window->id);
+
+    uint8_t ordered_in = 0;
+    SLSWindowIsOrderedIn(g_connection, window->id, &ordered_in);
 
     switch (forced_mode) {
     case 0: goto mode_0;
@@ -2376,7 +2378,7 @@ bool window_manager_toggle_scratchpad_window(struct window_manager *wm, struct w
     }
 
 mode_0:;
-    if (sid == wid_sid && visible) {
+    if (visible_space && ordered_in) {
 mode_1:;
         struct window *next = window_manager_find_window_on_space_by_rank_filtering_window(wm, sid, 1, window->id);
         if (next) {
@@ -2385,7 +2387,7 @@ mode_1:;
             _SLPSSetFrontProcessWithOptions(&g_process_manager.finder_psn, 0, kCPSNoWindows);
         }
         scripting_addition_order_window(window->id, 0, 0);
-    } else if (sid == wid_sid && !visible) {
+    } else if (visible_space && !ordered_in) {
 mode_2:;
         scripting_addition_order_window(window->id, 1, 0);
         window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
