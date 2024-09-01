@@ -18,6 +18,7 @@ bool workspace_use_macos_space_workaround(void)
 {
     NSOperatingSystemVersion os_version = [[NSProcessInfo processInfo] operatingSystemVersion];
 
+    if (os_version.majorVersion == 12 && os_version.minorVersion >= 7) return true;
     if (os_version.majorVersion == 13 && os_version.minorVersion >= 6) return true;
     if (os_version.majorVersion == 14 && os_version.minorVersion >= 5) return true;
 

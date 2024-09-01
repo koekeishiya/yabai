@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Fix issue causing sticky scratchpad windows to not work as expected [#2394](https://github.com/koekeishiya/yabai/issues/2394)
 - Fix window query scratchpad property flag [#2391](https://github.com/koekeishiya/yabai/issues/2391)
 - When a new window is added to a stack it is placed after the currently focused window (instead of the end) [#2387](https://github.com/koekeishiya/yabai/issues/2387)
+- Moving windows to other spaces requires SIP to be partially disabled for macOS Monterey 12.7.x [#2408](https://github.com/koekeishiya/yabai/issues/2408)
 
 ## [7.1.2] - 2024-08-10
 ### Changed
