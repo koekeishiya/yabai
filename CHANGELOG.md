@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.3] - 2024-09-17
 ### Changed
 - Fix issue causing sticky scratchpad windows to not work as expected [#2394](https://github.com/koekeishiya/yabai/issues/2394)
 - Fix window query scratchpad property flag [#2391](https://github.com/koekeishiya/yabai/issues/2391)
@@ -691,7 +693,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.2...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.3...HEAD
+[7.1.3]: https://github.com/koekeishiya/yabai/compare/v7.1.2...v7.1.3
 [7.1.2]: https://github.com/koekeishiya/yabai/compare/v7.1.1...v7.1.2
 [7.1.1]: https://github.com/koekeishiya/yabai/compare/v7.1.0...v7.1.1
 [7.1.0]: https://github.com/koekeishiya/yabai/compare/v7.0.4...v7.1.0
