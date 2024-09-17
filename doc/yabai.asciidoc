@@ -386,6 +386,7 @@ COMMAND
 
 *--space* '<SPACE_SEL>'::
     Send the selected window to the given space.
+    System Integrity Protection must be partially disabled on macOS Monterey 12.7+, Ventura 13.6+, Sonoma 14.5+, and macOS Sequoia.
 
 *--swap* '<WINDOW_SEL>'::
     Swap position of the selected window and the given window.
