@@ -325,9 +325,17 @@ int main(int argc, char **argv)
 
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 808, NULL);
 
+    if (workspace_is_macos_sequoia()) {
+        SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 804, NULL);
+    }
+
     window_manager_init(&g_window_manager);
     space_manager_begin(&g_space_manager);
     window_manager_begin(&g_space_manager, &g_window_manager);
+
+    if (workspace_is_macos_sequoia()) {
+        update_window_notifications();
+    }
 
     if (!message_loop_begin(g_socket_file)) {
         error("yabai: could not start message loop! abort..\n");

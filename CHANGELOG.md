@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Implement fallback method for macOS Sequoia to detect when a window is destroyed, because of weird system problems when other third-party software is in use [#2431](https://github.com/koekeishiya/yabai/issues/2431)
 
 ## [7.1.3] - 2024-09-17
 ### Changed

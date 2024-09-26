@@ -9,6 +9,26 @@ extern int g_connection;
 extern void *g_workspace_context;
 extern int g_layer_below_window_level;
 
+static void update_window_notifications(void)
+{
+    int window_count = 0;
+    uint32_t window_list[1024] = {0};
+
+    if (workspace_is_macos_sequoia()) {
+        // NOTE(koekeishiya): Subscribe to all windows because of window_destroyed (and ordered) notifications
+        table_for (struct window *window, g_window_manager.window, {
+            window_list[window_count++] = window->id;
+        })
+    } else {
+        // NOTE(koekeishiya): Subscribe to windows that have a feedback_border because of window_ordered notifications
+        table_for (struct window_node *node, g_window_manager.insert_feedback, {
+            window_list[window_count++] = node->window_order[0];
+        })
+    }
+
+    SLSRequestNotificationsForWindows(g_connection, window_list, window_count);
+}
+
 static void window_did_receive_focus(struct window_manager *wm, struct mouse_state *ms, struct window *window)
 {
     struct window *focused_window = window_manager_find_window(wm, wm->focused_window_id);
@@ -200,6 +220,10 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
         window_node_flush(view->root);
         view_clear_flag(view, VIEW_IS_DIRTY);
     }
+
+    if (workspace_is_macos_sequoia()) {
+        update_window_notifications();
+    }
 }
 
 static EVENT_HANDLER(APPLICATION_TERMINATED)
@@ -288,6 +312,10 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
 
         window_node_flush(view->root);
         view_clear_flag(view, VIEW_IS_DIRTY);
+    }
+
+    if (workspace_is_macos_sequoia()) {
+        update_window_notifications();
     }
 
 out:
@@ -525,6 +553,10 @@ static EVENT_HANDLER(WINDOW_CREATED)
     if (window_manager_is_window_eligible(window)) {
         event_signal_push(SIGNAL_WINDOW_CREATED, window);
     }
+
+    if (workspace_is_macos_sequoia()) {
+        update_window_notifications();
+    }
 }
 
 static EVENT_HANDLER(WINDOW_DESTROYED)
@@ -552,6 +584,10 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
     window_manager_remove_scratchpad_for_window(&g_window_manager, window, false);
     window_manager_remove_window(&g_window_manager, window->id);
     window_destroy(window);
+
+    if (workspace_is_macos_sequoia()) {
+        update_window_notifications();
+    }
 }
 
 static EVENT_HANDLER(WINDOW_FOCUSED)
@@ -797,6 +833,22 @@ static EVENT_HANDLER(SLS_WINDOW_ORDERED)
     debug("%s: %d\n", __FUNCTION__, wid);
     struct window_node *node = table_find(&g_window_manager.insert_feedback, &wid);
     if (node) SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
+}
+
+static EVENT_HANDLER(SLS_WINDOW_DESTROYED)
+{
+    uint32_t wid = (uint64_t)(intptr_t) context;
+    debug("%s: %d\n", __FUNCTION__, wid);
+
+    struct window *window = window_manager_find_window(&g_window_manager, wid);
+    if (!window) return;
+
+    if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, &window->id)) {
+        debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, wid);
+        return;
+    }
+
+    EVENT_HANDLER_WINDOW_DESTROYED(window, 0);
 }
 
 static EVENT_HANDLER(SLS_SPACE_CREATED)

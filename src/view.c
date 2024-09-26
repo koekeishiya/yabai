@@ -3,18 +3,6 @@ extern struct display_manager g_display_manager;
 extern struct space_manager g_space_manager;
 extern struct window_manager g_window_manager;
 
-void insert_feedback_update_notifications(void)
-{
-    int window_count = 0;
-    uint32_t window_list[1024] = {0};
-
-    table_for (struct window_node *node, g_window_manager.insert_feedback, {
-        window_list[window_count++] = node->window_order[0];
-    })
-
-    SLSRequestNotificationsForWindows(g_connection, window_list, window_count);
-}
-
 #define INSERT_FEEDBACK_WIDTH 2
 #define INSERT_FEEDBACK_RADIUS 9
 void insert_feedback_show(struct window_node *node)
@@ -53,7 +41,9 @@ void insert_feedback_show(struct window_node *node)
         SLSReenableUpdate(g_connection);
         SLSOrderWindow(g_connection, node->feedback_window.id, 1, node->window_order[0]);
         table_add(&g_window_manager.insert_feedback, &node->window_order[0], node);
-        insert_feedback_update_notifications();
+        if (!workspace_is_macos_sequoia()) {
+            update_window_notifications();
+        }
     }
 
     CGFloat clip_x, clip_y, clip_w, clip_h;
@@ -116,7 +106,10 @@ void insert_feedback_destroy(struct window_node *node)
 {
     if (node->feedback_window.id) {
         table_remove(&g_window_manager.insert_feedback, &node->window_order[0]);
-        insert_feedback_update_notifications();
+
+        if (!workspace_is_macos_sequoia()) {
+            update_window_notifications();
+        }
 
         SLSOrderWindow(g_connection, node->feedback_window.id, 0, 0);
         CGContextRelease(node->feedback_window.context);

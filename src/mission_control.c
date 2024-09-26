@@ -21,6 +21,8 @@ static CONNECTION_CALLBACK(connection_handler)
         event_loop_post(&g_event_loop, SLS_SPACE_DESTROYED, (void *) (intptr_t) (* (uint64_t *) data), 0);
     } else if (type == 808) {
         event_loop_post(&g_event_loop, SLS_WINDOW_ORDERED, (void *) (intptr_t) (* (uint32_t *) data), 0);
+    } else if (type == 804) {
+        event_loop_post(&g_event_loop, SLS_WINDOW_DESTROYED, (void *) (intptr_t) (* (uint32_t *) data), 0);
     }
 }
 #pragma clang diagnostic pop
