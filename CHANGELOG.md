@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Update scripting addition for macOS Sequoia 15.1 Beta 6 [#2441](https://github.com/koekeishiya/yabai/issues/2441)
 
 ## [7.1.4] - 2024-09-26
 ### Changed

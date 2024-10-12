@@ -137,7 +137,7 @@ const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return "?? ?? ?? 00 31 FF 5D E9 ?? ?? 1F 00";
+        return "?? ?? ?? 00 31 FF 5D E9 ?? ??";
     } else if (os_version.majorVersion == 14) {
         if (os_version.minorVersion > 0) {
             return "?? ?? ?? 00 31 FF 5D E9 ?? ?? 1C 00";
@@ -173,7 +173,7 @@ const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_add_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 28 48 BA 01 00 00 00 00 00 00 40 48 B9 F8 FF FF FF FF FF FF 00 49 8D 45 28 49 8B 5D 28 41 80 7D 38 01 48 89 7D C0 4C 89 6D B0 75 49 49 89 FC 48 85 D3 0F 84 22 01 00 00 49 89 DE 49 21 CE F6 C3 01";
+        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 28 48 BA 01 00 00 00 00"
     } else if (os_version.majorVersion == 14) {
         if (os_version.minorVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 28 48 89 7D C8 49 BE 01 00 00 00 00 00 00 40 49 BC F8 FF FF FF FF FF FF 00 49 8D 45 28 48 89 45 D0 4D 8B 7D 28 4C 89 6D B8 41 80 7D 38 01 75 15 4D 85 F7 0F 85 4D 03 00 00 4D 21 E7 49 8B 5F 10 E9 96 01 00 00 4D 85 F7 0F 85 68 03 00 00 4C 89 F8 4C 21 E0 48 8B 58 10 4C 89 FF E8 ?? ?? 10 00 48 85 DB 0F 84 24 01 00 00 49 89 DC 49 FF CC 0F 80 67 03 00 00 49 BE 03 00 00 00 00 00";
@@ -217,7 +217,7 @@ const char *get_remove_space_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_move_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 38 4C 89 E9 41 89 D5 49 89 F7 49 89 FC 48 8B 05 ?? ?? 25 00 4C 8B 34 07 4C 89 F7 48 89 4D A0 48 89 CE E8 65 BE FF FF 48 89 55 D0 48 85 C0 74 4C 48 89 C3 48 8D 05 ?? ?? 26 00 48 8B 38 48 8B 35 ?? ?? 23 00 E8 ?? ?? 14 00 84 C0 74 37 4C 8B 65";
+        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 38 4C 89 E9 41 89 D5 49 89 F7 49 89 FC 48 8B 05 ?? ?? 25";
     } else if (os_version.majorVersion == 14) {
         return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 48 4C 89 E9 41 89 D5 49 89 ?? 49 89 FF ?? 8D ?? ?? ?? ?? 00 ?? 8B ?? ?? 8B ?? 07 ?? 89 ?? 48 89 4D A0 48 89 CE E8 ?? ?? 00 00 48 89 55 D0 48 89 45 C8 48 85 C0 74 3F 48 8D 05 ?? ?? ?? 00 80 38 01 75 ?? ?? 8B ?? D0 ?? 89 ?? 49 83 C5 28 4C 8B 7D C8 4C 89 FF E8 ?? ?? ?? FF 48 89 C7 FF 15 ?? ?? 0C 00";
     } else if (os_version.majorVersion == 13) {
