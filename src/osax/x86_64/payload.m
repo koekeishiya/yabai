@@ -173,7 +173,7 @@ const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_add_space_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 28 48 BA 01 00 00 00 00"
+        return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 28 48 BA 01 00 00 00 00";
     } else if (os_version.majorVersion == 14) {
         if (os_version.minorVersion >= 4) {
             return "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC 28 48 89 7D C8 49 BE 01 00 00 00 00 00 00 40 49 BC F8 FF FF FF FF FF FF 00 49 8D 45 28 48 89 45 D0 4D 8B 7D 28 4C 89 6D B8 41 80 7D 38 01 75 15 4D 85 F7 0F 85 4D 03 00 00 4D 21 E7 49 8B 5F 10 E9 96 01 00 00 4D 85 F7 0F 85 68 03 00 00 4C 89 F8 4C 21 E0 48 8B 58 10 4C 89 FF E8 ?? ?? 10 00 48 85 DB 0F 84 24 01 00 00 49 89 DC 49 FF CC 0F 80 67 03 00 00 49 BE 03 00 00 00 00 00";
