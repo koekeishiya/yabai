@@ -42,7 +42,7 @@ Additional features of yabai include focus-follows-mouse, disabling animations f
 ## Requirements and Caveats
 
 Please read the below requirements carefully.
-Make sure you fulfil all of them before filing an issue.
+Make sure you fulfill all of them before filing an issue.
 
 |Requirement|Note|
 |-:|:-|
