@@ -256,7 +256,7 @@ static bool verify_os_version(NSOperatingSystemVersion os_version)
 }
 
 #ifdef __x86_64__
-static double animation_time = 0.0001;
+static double *animation_time;
 #endif
 
 static void init_instances()
@@ -377,7 +377,13 @@ static void init_instances()
         NSLog(@"[yabai-sa] (0x%llx) animation_time_addr found at address 0x%llX (0x%llx)", baseaddr, animation_time_addr, animation_time_addr - baseaddr);
         if (vm_protect(mach_task_self(), page_align(animation_time_addr), vm_page_size, 0, VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY) == KERN_SUCCESS) {
 #ifdef __x86_64__
-            *(uint32_t *)(animation_time_addr + 4) = (uint32_t)((uint64_t)&animation_time - (animation_time_addr + 8));
+            animation_time = malloc(sizeof(double));
+            if (animation_time) {
+                *animation_time = 0.0001;
+                *(uint32_t *)(animation_time_addr + 4) = (uint32_t)((uint64_t)animation_time - (animation_time_addr + 8));
+            } else {
+                NSLog(@"[yabai-sa] unable to allocate memory for animation_time; unable to patch instruction!");
+            }
 #elif __arm64__
             *(uint32_t *) animation_time_addr = 0x2f00e400;
 #endif

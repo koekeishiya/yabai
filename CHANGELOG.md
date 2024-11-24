@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Maybe fix issue with patching macOS space switching animation on macOS 14.7 Intel x86-64 [#2440](https://github.com/koekeishiya/yabai/issues/2440)
 
 ## [7.1.5] - 2024-11-01
 ### Changed
