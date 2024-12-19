@@ -75,6 +75,27 @@ Thanks to [@fools-mate][gh-fools-mate] for creating a logo and banner for this p
 
 Thanks to [@dominiklohmann][gh-dominiklohmann] for contributing great documentation, support, and more, for free.
 
+## Cheatsheet
+
+Here's a quick guide to make yabai behave more like i3... :) 
+
+| Action                               | i3wm (bindsym $mod+...)            | Yabai                           | Yabai's caveat                                              |
+|--------------------------------------|------------------------------------|--------------------------------|-------------------------------------------------------------|
+| Switch to workspace <ID>             | workspace 3                        | yabai -m space --focus 3        | need to manually add spaces (desktops) at first. I added 10 spaces, as standard i3. |
+| Switch to last workspace             | workspace back_and_forth           | yabai -m space --focus recent   |                                                             |
+| Move container to workspace <ID>     | move container to workspace 3      | yabai -m window --space 3       |                                                             |
+| Move container to last workspace     | move container to workspace back_and_forth | yabai -m window --space recent  |                                                             |
+| Stack                                | layout stacking                    |                                | not supported                                               |
+| Tab                                  | layout tabbed                      |                                | not supported                                               |
+| Toggle split                         | layout toggle split                | yabai -m window --toggle split  |                                                             |
+| Prepare to split vertical            | split v                            | yabai -m window --insert east   |                                                             |
+| Prepare to split horizontal          | split h                            | yabai -m window --insert south  |                                                             |
+| Fullscreen                           | fullscreen                         | yabai -m window --toggle zoom-fullscreen |                                                     |
+| Float and center                     | floating toggle                    | yabai -m window --toggle float; yabai -m window --grid 4:4:1:1:2:2 |                           |
+| Close                                | kill                               | yabai -m window --close         |                                                             |
+
+You can map these to whatever key bindings you like using skhd 
+
 ## Disclaimer
 
 Use at your own discretion.
