@@ -27,9 +27,9 @@
 #include "common.h"
 
 #ifdef __x86_64__
-#include "x86_64/payload.m"
+#include "x64_payload.m"
 #elif __arm64__
-#include "arm64/payload.m"
+#include "arm64_payload.m"
 #include <ptrauth.h>
 #endif
 

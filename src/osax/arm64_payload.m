@@ -107,7 +107,7 @@ const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
         return "?? 12 00 ?? 73 ?? ?? 91 ?? 02 40 F9 ?? ?? 00 B4 97 3A 40 B9";
     } else if (os_version.majorVersion == 14) {
         if (os_version.minorVersion > 0) {
-            return "36 16 00 ?? D6 C2 ?? 91 ?? 02 40 F9 ?? ?? 00 B4 ?? 03 14 AA";
+            return "36 16 00 ?? D6 ?? ?? 91 ?? 02 40 F9 ?? ?? 00 B4 ?? 03 14 AA";
         }
         return "97 18 00 B0 F7 02 0F 91 E0 02 40 F9 E2 03 14 AA 1A 09 08 94 FD 03 1D AA 3C EF 07 94 F6 03 00 AA 00 01 00 B5 E0 02 40 F9 E2 03 14 AA 3B 0F 08 94 FD 03 1D AA 35 EF 07 94 F6 03 00 AA E0 00 00 B4 E0 03 15 AA E2 03 13 AA E3 03 16 AA F3 F3 07 94 E0 03 16 AA 1D EF 07 94 E0 03 14 AA";
     } else if (os_version.majorVersion == 13) {
@@ -124,7 +124,7 @@ const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
         return "?? 0F 00 ?? ?? ?? ?? 91 ?? 0E 00 ?? ?? ?? ?? F8 ?? 03 40 F9 ?? ?? ??";
     } else if (os_version.majorVersion == 14) {
         if (os_version.minorVersion > 0) {
-        return "?? 10 00 ?? ?? E3 ?? 91 ?? 0F 00 D0 ?? ?? ?? F8 ?? 03 40 F9 ?? ?? ??";
+            return "?? 10 00 ?? ?? ?? ?? 91 ?? 0F 00 D0 ?? ?? ?? F8 ?? 03 40 F9 ?? ?? ??";
         }
         return "E0 20 00 90 00 ?? ?? 91 E1 03 13 AA ?? ?? 0C 94 73 2D 00 B4 E1 20 00 90 21 ?? ?? 91 00 00 80 D2 D9 13 0C 94 A8 1F 00 F0 00 79 43 F9 A2 38 0C 94 FD 03 1D AA 1C 1E 0C 94 F4 03 00 AA BF 7F 37 A9";
     } else if (os_version.majorVersion == 13) {
