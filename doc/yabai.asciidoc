@@ -169,6 +169,9 @@ Global Settings
 *window_placement* ['first_child|second_child']::
     Specify whether managed windows should become the first or second leaf-node.
 
+*window_insertion_point* ['focused|first|last']::
+    Specify where new managed windows will be inserted.
+
 *window_zoom_persist* ['<BOOL_SEL>']::
     Windows will keep their zoom-state through layout changes.
 

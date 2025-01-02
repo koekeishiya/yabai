@@ -1115,6 +1115,7 @@ void space_manager_begin(struct space_manager *sm)
     sm->auto_balance = false;
     sm->split_type = SPLIT_AUTO;
     sm->window_placement = CHILD_SECOND;
+    sm->window_insertion_point = INSERT_FOCUSED;
     sm->window_zoom_persist = true;
     sm->labels = NULL;
     table_init(&sm->view, 23, hash_view, compare_view);

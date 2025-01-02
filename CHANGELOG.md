@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- New config option `window_insertion_point` to specify where new windows are inserted [#2510](https://github.com/koekeishiya/yabai/issues/2510)
+
+### Changed
 - Update scripting addition for macOS Sonoma 14.7.2 [#2497](https://github.com/koekeishiya/yabai/issues/2497)
 - Maybe fix issue with patching macOS space switching animation on macOS 14.7 Intel x86-64 [#2440](https://github.com/koekeishiya/yabai/issues/2440)
 

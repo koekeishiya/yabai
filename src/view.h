@@ -104,6 +104,20 @@ struct balance_node
     int x_count;
 };
 
+enum window_insertion_point
+{
+    INSERT_FOCUSED,
+    INSERT_FIRST,
+    INSERT_LAST
+};
+
+static const char *window_insertion_point_str[] =
+{
+    "focused",
+    "first",
+    "last"
+};
+
 enum window_node_child
 {
     CHILD_NONE,

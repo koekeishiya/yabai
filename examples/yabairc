@@ -20,6 +20,7 @@ yabai -m config                                 \
     display_arrangement_order    default        \
     window_origin_display        default        \
     window_placement             second_child   \
+    window_insertion_point       focused        \
     window_zoom_persist          on             \
     window_shadow                on             \
     window_animation_duration    0.0            \

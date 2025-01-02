@@ -768,8 +768,17 @@ struct window_node *view_add_window_node_with_insertion_point(struct view *view,
             }
         }
 
-        if (!leaf) leaf = view_find_window_node(view, g_window_manager.focused_window_id);
-        if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
+        if (!leaf) {
+            if (g_space_manager.window_insertion_point == INSERT_FOCUSED) {
+                leaf = view_find_window_node(view, g_window_manager.focused_window_id);
+            } else if (g_space_manager.window_insertion_point == INSERT_FIRST) {
+                leaf = window_node_find_first_leaf(view->root);
+            } else if (g_space_manager.window_insertion_point == INSERT_LAST) {
+                leaf = window_node_find_last_leaf(view->root);
+            }
+
+            if (!leaf) leaf = view_find_min_depth_leaf_node(view->root);
+        }
 
         window_node_split(view, leaf, window);
 
