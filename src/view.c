@@ -137,8 +137,10 @@ static inline enum window_node_split window_node_get_split(struct view *view, st
 {
     if (node->split != SPLIT_NONE) return node->split;
 
-    if (view->split_type != SPLIT_NONE && view->split_type != SPLIT_AUTO) {
-        return view->split_type;
+    if (view->split_type != SPLIT_NONE) {
+        if (view->split_type != SPLIT_AUTO) {
+            return view->split_type;
+        }
     } else if (g_space_manager.split_type != SPLIT_AUTO) {
         return g_space_manager.split_type;
     }
