@@ -133,10 +133,16 @@ static inline enum window_node_child window_node_get_child(struct window_node *n
     return node->child != CHILD_NONE ? node->child : g_space_manager.window_placement;
 }
 
-static inline enum window_node_split window_node_get_split(struct window_node *node)
+static inline enum window_node_split window_node_get_split(struct view *view, struct window_node *node)
 {
-    if (node->split                != SPLIT_NONE) return node->split;
-    if (g_space_manager.split_type != SPLIT_AUTO) return g_space_manager.split_type;
+    if (node->split != SPLIT_NONE) return node->split;
+
+    if (view->split_type != SPLIT_NONE && view->split_type != SPLIT_AUTO) {
+        return view->split_type;
+    } else if (g_space_manager.split_type != SPLIT_AUTO) {
+        return g_space_manager.split_type;
+    }
+
     return node->area.w >= node->area.h ? SPLIT_Y : SPLIT_X;
 }
 
@@ -171,7 +177,7 @@ static void area_make_pair(enum window_node_split split, int gap, float ratio, s
 
 static void area_make_pair_for_node(struct view *view, struct window_node *node)
 {
-    enum window_node_split split = window_node_get_split(node);
+    enum window_node_split split = window_node_get_split(view, node);
     float ratio = window_node_get_ratio(node);
     int gap     = window_node_get_gap(view);
 
@@ -991,6 +997,7 @@ struct view *view_create(uint64_t sid)
         if (!view_check_flag(view, VIEW_RIGHT_PADDING))  view->right_padding  = g_space_manager.right_padding;
         if (!view_check_flag(view, VIEW_WINDOW_GAP))     view->window_gap     = g_space_manager.window_gap;
         if (!view_check_flag(view, VIEW_AUTO_BALANCE))   view->auto_balance   = g_space_manager.auto_balance;
+        if (!view_check_flag(view, VIEW_SPLIT_TYPE))     view->split_type     = g_space_manager.split_type;
         view_update(view);
     } else {
         view->layout = VIEW_FLOAT;

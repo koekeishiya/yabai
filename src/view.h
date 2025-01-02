@@ -201,6 +201,7 @@ enum view_flag
     VIEW_ENABLE_GAP     = 0x100,
     VIEW_IS_VALID       = 0x200,
     VIEW_IS_DIRTY       = 0x400,
+    VIEW_SPLIT_TYPE     = 0x800,
 };
 
 struct view
@@ -210,6 +211,7 @@ struct view
     struct window_node *root;
     uint32_t insertion_point;
     enum view_type layout;
+    enum window_node_split split_type;
     int top_padding;
     int bottom_padding;
     int left_padding;

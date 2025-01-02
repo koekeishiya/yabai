@@ -333,6 +333,16 @@ void space_manager_set_right_padding_for_all_spaces(struct space_manager *sm, in
     })
 }
 
+void space_manager_set_split_type_for_all_spaces(struct space_manager *sm, enum window_node_split split_type)
+{
+    sm->split_type = split_type;
+    table_for (struct view *view, sm->view, {
+        if (!view_check_flag(view, VIEW_SPLIT_TYPE)) {
+            view->split_type = split_type;
+        }
+    })
+}
+
 void space_manager_set_auto_balance_for_all_spaces(struct space_manager *sm, bool auto_balance)
 {
     sm->auto_balance = auto_balance;

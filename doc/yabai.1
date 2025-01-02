@@ -310,17 +310,6 @@ The purpose is to provide a visual preview of the new window frame.
 Specify the size distribution when a window is split.
 .RE
 .sp
-\fBsplit_type\fP [\fIvertical|horizontal|auto\fP]
-.RS 4
-Specify how a window should be split.
-.br
-\fIvertical\fP: The window is split along the y\-axis.
-.br
-\fIhorizontal\fP: The window is split along the x\-axis.
-.br
-\fIauto\fP: The axis is determined based on width/height ratio.
-.RE
-.sp
 \fBmouse_modifier\fP [\fIcmd|alt|shift|ctrl|fn\fP]
 .RS 4
 Keyboard modifier used for moving and resizing windows.
@@ -345,6 +334,17 @@ Action performed when a bsp\-managed window is dropped in the center of some oth
 \fBlayout\fP [\fIbsp|stack|float\fP]
 .RS 4
 Set the layout of the selected space.
+.RE
+.sp
+\fBsplit_type\fP [\fIvertical|horizontal|auto\fP]
+.RS 4
+Specify how a window should be split.
+.br
+\fIvertical\fP: The window is split along the y\-axis.
+.br
+\fIhorizontal\fP: The window is split along the x\-axis.
+.br
+\fIauto\fP: The axis is determined based on width/height ratio.
 .RE
 .sp
 \fBtop_padding\fP [\fI<integer number>\fP]

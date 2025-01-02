@@ -212,12 +212,6 @@ Global Settings
 *split_ratio* ['<FLOAT_SEL>']::
     Specify the size distribution when a window is split.
 
-*split_type* ['vertical|horizontal|auto']::
-    Specify how a window should be split. +
-    'vertical': The window is split along the y-axis. +
-    'horizontal': The window is split along the x-axis. +
-    'auto': The axis is determined based on width/height ratio.
-
 *mouse_modifier* ['cmd|alt|shift|ctrl|fn']::
     Keyboard modifier used for moving and resizing windows.
 
@@ -235,6 +229,12 @@ Space Settings
 
 *layout* ['bsp|stack|float']::
     Set the layout of the selected space.
+
+*split_type* ['vertical|horizontal|auto']::
+    Specify how a window should be split. +
+    'vertical': The window is split along the y-axis. +
+    'horizontal': The window is split along the x-axis. +
+    'auto': The axis is determined based on width/height ratio.
 
 *top_padding* ['<integer number>']::
     Padding added at the upper side of the selected space.

@@ -1538,16 +1538,34 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(command, COMMAND_CONFIG_SPLIT_TYPE)) {
             struct token value = get_token(&message);
-            if (!token_is_valid(value)) {
-                fprintf(rsp, "%s\n", window_node_split_str[g_space_manager.split_type]);
-            } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_Y)) {
-                g_space_manager.split_type = SPLIT_Y;
-            } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_X)) {
-                g_space_manager.split_type = SPLIT_X;
-            } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_AUTO)) {
-                g_space_manager.split_type = SPLIT_AUTO;
+            if (sel_sid) {
+                struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
+                if (!token_is_valid(value)) {
+                    fprintf(rsp, "%s\n", window_node_split_str[view->split_type]);
+                } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_Y)) {
+                    view_set_flag(view, VIEW_SPLIT_TYPE);
+                    view->split_type = SPLIT_Y;
+                } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_X)) {
+                    view_set_flag(view, VIEW_SPLIT_TYPE);
+                    view->split_type = SPLIT_X;
+                } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_AUTO)) {
+                    view_set_flag(view, VIEW_SPLIT_TYPE);
+                    view->split_type = SPLIT_AUTO;
+                } else {
+                    daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                }
             } else {
-                daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                if (!token_is_valid(value)) {
+                    fprintf(rsp, "%s\n", window_node_split_str[g_space_manager.split_type]);
+                } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_Y)) {
+                    space_manager_set_split_type_for_all_spaces(&g_space_manager, SPLIT_Y);
+                } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_X)) {
+                    space_manager_set_split_type_for_all_spaces(&g_space_manager, SPLIT_X);
+                } else if (token_equals(value, ARGUMENT_CONFIG_SPLIT_TYPE_AUTO)) {
+                    space_manager_set_split_type_for_all_spaces(&g_space_manager, SPLIT_AUTO);
+                } else {
+                    daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
+                }
             }
         } else if (token_equals(command, COMMAND_CONFIG_AUTO_BALANCE)) {
             struct token value = get_token(&message);
