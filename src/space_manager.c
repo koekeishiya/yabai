@@ -343,7 +343,7 @@ void space_manager_set_split_type_for_all_spaces(struct space_manager *sm, enum 
     })
 }
 
-void space_manager_set_auto_balance_for_all_spaces(struct space_manager *sm, bool auto_balance)
+void space_manager_set_auto_balance_for_all_spaces(struct space_manager *sm, uint32_t auto_balance)
 {
     sm->auto_balance = auto_balance;
     table_for (struct view *view, sm->view, {
@@ -473,8 +473,8 @@ void space_manager_toggle_window_split(struct space_manager *sm, struct window *
     if (node && window_node_is_intermediate(node)) {
         node->parent->split = node->parent->split == SPLIT_Y ? SPLIT_X : SPLIT_Y;
 
-        if (view->auto_balance) {
-            window_node_balance(view->root, SPLIT_X | SPLIT_Y);
+        if (view->auto_balance != SPLIT_NONE) {
+            window_node_balance(view->root, view->auto_balance);
             view_update(view);
             view_flush(view);
         } else {
@@ -1122,7 +1122,7 @@ void space_manager_begin(struct space_manager *sm)
 {
     sm->layout = VIEW_FLOAT;
     sm->split_ratio = 0.5f;
-    sm->auto_balance = false;
+    sm->auto_balance = SPLIT_NONE;
     sm->split_type = SPLIT_AUTO;
     sm->window_placement = CHILD_SECOND;
     sm->window_insertion_point = INSERT_FOCUSED;

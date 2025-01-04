@@ -251,8 +251,8 @@ Space Settings
 *window_gap* ['<integer number>']::
     Size of the gap that separates windows for the selected space.
 
-*auto_balance* ['<BOOL_SEL>']::
-    Balance the window tree upon change, so that all windows occupy the same area.
+*auto_balance* ['<BOOL_SEL>|x-axis|y-axis']::
+    Balance the window tree upon change, so that all windows occupy an equally sized area.
 
 Display
 ~~~~~~~

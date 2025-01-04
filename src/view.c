@@ -712,8 +712,8 @@ struct window_node *view_remove_window_node(struct view *view, struct window *wi
     free(child);
     free(node);
 
-    if (view->auto_balance) {
-        window_node_balance(view->root, SPLIT_X | SPLIT_Y);
+    if (view->auto_balance != SPLIT_NONE) {
+        window_node_balance(view->root, view->auto_balance);
         view_update(view);
         return view->root;
     }
@@ -790,8 +790,8 @@ struct window_node *view_add_window_node_with_insertion_point(struct view *view,
 
         window_node_split(view, leaf, window);
 
-        if (view->auto_balance) {
-            window_node_balance(view->root, SPLIT_X | SPLIT_Y);
+        if (view->auto_balance != SPLIT_NONE) {
+            window_node_balance(view->root, view->auto_balance);
             view_update(view);
             return view->root;
         }

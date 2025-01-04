@@ -112,8 +112,6 @@ extern bool g_verbose;
 #define COMMAND_SPACE_LAYOUT   "--layout"
 #define COMMAND_SPACE_LABEL    "--label"
 
-#define ARGUMENT_SPACE_AXIS_X       "x-axis"
-#define ARGUMENT_SPACE_AXIS_Y       "y-axis"
 #define ARGUMENT_SPACE_ROTATE_90    "90"
 #define ARGUMENT_SPACE_ROTATE_180   "180"
 #define ARGUMENT_SPACE_ROTATE_270   "270"
@@ -248,6 +246,8 @@ extern bool g_verbose;
 #define ARGUMENT_COMMON_SEL_MOUSE        "mouse"
 #define ARGUMENT_COMMON_SEL_STACK        "stack"
 #define ARGUMENT_COMMON_SEL_STACK_PREFIX "stack."
+#define ARGUMENT_COMMON_VAL_AXIS_X       "x-axis"
+#define ARGUMENT_COMMON_VAL_AXIS_Y       "y-axis"
 /* ----------------------------------------------------------------------------- */
 
 struct token
@@ -1575,10 +1575,16 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                     fprintf(rsp, "%s\n", bool_str[view->auto_balance]);
                 } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     view_set_flag(view, VIEW_AUTO_BALANCE);
-                    view->auto_balance = false;
+                    view->auto_balance = SPLIT_NONE;
                 } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
                     view_set_flag(view, VIEW_AUTO_BALANCE);
-                    view->auto_balance = true;
+                    view->auto_balance = SPLIT_X | SPLIT_Y;
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_X)) {
+                    view_set_flag(view, VIEW_AUTO_BALANCE);
+                    view->auto_balance = SPLIT_X;
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_Y)) {
+                    view_set_flag(view, VIEW_AUTO_BALANCE);
+                    view->auto_balance = SPLIT_Y;
                 } else {
                     daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
                 }
@@ -1586,9 +1592,13 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 if (!token_is_valid(value)) {
                     fprintf(rsp, "%s\n", bool_str[g_space_manager.auto_balance]);
                 } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
-                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, false);
+                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, SPLIT_NONE);
                 } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {
-                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, true);
+                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, SPLIT_X | SPLIT_Y);
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_X)) {
+                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, SPLIT_X);
+                } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_Y)) {
+                    space_manager_set_auto_balance_for_all_spaces(&g_space_manager, SPLIT_Y);
                 } else {
                     daemon_fail(rsp, "unknown value '%.*s' given to command '%.*s' for domain '%.*s'\n", value.length, value.text, command.length, command.text, domain.length, domain.text);
                 }
@@ -1881,11 +1891,11 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 if (!space_manager_equalize_space(&g_space_manager, acting_sid, SPLIT_X | SPLIT_Y)) {
                     daemon_fail(rsp, "cannot equalize a non-managed space.\n");
                 }
-            } else if (token_equals(value, ARGUMENT_SPACE_AXIS_X)) {
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_X)) {
                 if (!space_manager_equalize_space(&g_space_manager, acting_sid, SPLIT_X)) {
                     daemon_fail(rsp, "cannot equalize a non-managed space.\n");
                 }
-            } else if (token_equals(value, ARGUMENT_SPACE_AXIS_Y)) {
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_Y)) {
                 if (!space_manager_equalize_space(&g_space_manager, acting_sid, SPLIT_Y)) {
                     daemon_fail(rsp, "cannot equalize a non-managed space.\n");
                 }
@@ -1898,11 +1908,11 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
                 if (!space_manager_balance_space(&g_space_manager, acting_sid, SPLIT_X | SPLIT_Y)) {
                     daemon_fail(rsp, "cannot balance a non-managed space.\n");
                 }
-            } else if (token_equals(value, ARGUMENT_SPACE_AXIS_X)) {
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_X)) {
                 if (!space_manager_balance_space(&g_space_manager, acting_sid, SPLIT_X)) {
                     daemon_fail(rsp, "cannot balance a non-managed space.\n");
                 }
-            } else if (token_equals(value, ARGUMENT_SPACE_AXIS_Y)) {
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_Y)) {
                 if (!space_manager_balance_space(&g_space_manager, acting_sid, SPLIT_Y)) {
                     daemon_fail(rsp, "cannot balance a non-managed space.\n");
                 }
@@ -1911,11 +1921,11 @@ static void handle_domain_space(FILE *rsp, struct token domain, char *message)
             }
         } else if (token_equals(command, COMMAND_SPACE_MIRROR)) {
             struct token value = get_token(&message);
-            if (token_equals(value, ARGUMENT_SPACE_AXIS_X)) {
+            if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_X)) {
                 if (!space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_X)) {
                     daemon_fail(rsp, "cannot mirror a non-managed space.\n");
                 }
-            } else if (token_equals(value, ARGUMENT_SPACE_AXIS_Y)) {
+            } else if (token_equals(value, ARGUMENT_COMMON_VAL_AXIS_Y)) {
                 if (!space_manager_mirror_space(&g_space_manager, acting_sid, SPLIT_Y)) {
                     daemon_fail(rsp, "cannot mirror a non-managed space.\n");
                 }
