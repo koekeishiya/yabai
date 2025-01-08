@@ -161,19 +161,25 @@ static inline int window_node_get_gap(struct view *view)
 static void area_make_pair(enum window_node_split split, int gap, float ratio, struct area *parent_area, struct area *left_area, struct area *right_area)
 {
     if (split == SPLIT_Y) {
-        *left_area = *parent_area;
-        left_area->w = (int)((parent_area->w - gap) * ratio);
-
+        *left_area  = *parent_area;
         *right_area = *parent_area;
-        right_area->x += (left_area->w + gap);
-        right_area->w = (int)((parent_area->w - gap) * (1 - ratio));
+
+        float left_width  = (parent_area->w - gap) * ratio;
+        float right_width = (parent_area->w - gap) * (1 - ratio);
+
+        left_area->w   = (int)left_width;
+        right_area->w  = (int)right_width;
+        right_area->x += (int)(left_width + 0.5f) + gap;
     } else {
-        *left_area = *parent_area;
-        left_area->h = (int)((parent_area->h - gap) * ratio);
-
+        *left_area  = *parent_area;
         *right_area = *parent_area;
-        right_area->y += (left_area->h + gap);
-        right_area->h = (int)((parent_area->h - gap) * (1 - ratio));
+
+        float left_width  = (parent_area->h - gap) * ratio;
+        float right_width = (parent_area->h - gap) * (1 - ratio);
+
+        left_area->h   = (int)left_width;
+        right_area->h  = (int)right_width;
+        right_area->y += (int)(left_width + 0.5f) + gap;
     }
 }
 

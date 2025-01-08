@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Maybe fix issue with patching macOS space switching animation on macOS 14.7 Intel x86-64 [#2440](https://github.com/koekeishiya/yabai/issues/2440)
 - Config *global setting* `split_type` is now categorized as a *space setting* instead [#2479](https://github.com/koekeishiya/yabai/issues/2479)
 - Additional options `x-axis` and `y-axis` can now be used with `config auto_balance` command [#190](https://github.com/koekeishiya/yabai/issues/190)
+- Minor adjustment to screen-padding and window-gap [#2502](https://github.com/koekeishiya/yabai/issues/2502)
 
 ## [7.1.5] - 2024-11-01
 ### Changed
