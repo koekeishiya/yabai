@@ -103,6 +103,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
 
         __atomic_store_n(&process->terminated, true, __ATOMIC_RELEASE);
         process_manager_remove_process(pm, &psn);
+        workspace_application_unobserve(g_workspace_context, process);
         __asm__ __volatile__ ("" ::: "memory");
 
         event_loop_post(&g_event_loop, APPLICATION_TERMINATED, process, 0);

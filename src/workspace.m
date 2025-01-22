@@ -86,6 +86,20 @@ void workspace_application_observe_activation_policy(void *context, struct proce
     }
 }
 
+void workspace_application_unobserve(void *ws_context, struct process *process)
+{
+    NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
+    if (application) {
+        @try {
+            [application removeObserver:ws_context forKeyPath:@"activationPolicy" context:process];
+        } @catch (NSException * __unused exception) {}
+
+        @try {
+            [application removeObserver:ws_context forKeyPath:@"finishedLaunching" context:process];
+        } @catch (NSException * __unused exception) {}
+    }
+}
+
 bool workspace_application_is_observable(struct process *process)
 {
     NSRunningApplication *application = __atomic_load_n(&process->ns_application, __ATOMIC_RELAXED);
@@ -196,7 +210,7 @@ extern struct event_loop g_event_loop;
 {
     if ([keyPath isEqualToString:@"activationPolicy"]) {
         struct process *process = context;
-        assert(!process->terminated);
+        if (process->terminated) return;
 
         id result = [change objectForKey:NSKeyValueChangeNewKey];
         if ([result intValue] != process->policy) {
@@ -221,7 +235,7 @@ extern struct event_loop g_event_loop;
 
     if ([keyPath isEqualToString:@"finishedLaunching"]) {
         struct process *process = context;
-        assert(!process->terminated);
+        if (process->terminated) return;
 
         id result = [change objectForKey:NSKeyValueChangeNewKey];
         if ([result intValue] == 1) {

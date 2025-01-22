@@ -25,6 +25,7 @@ static inline bool workspace_is_macos_##name(void) \
 struct process;
 void *workspace_application_create_running_ns_application(struct process *process);
 void workspace_application_destroy_running_ns_application(void *context, struct process *process);
+void workspace_application_unobserve(void *context, struct process *process);
 bool workspace_application_is_observable(struct process *process);
 bool workspace_application_is_finished_launching(struct process *process);
 void workspace_application_observe_finished_launching(void *context, struct process *process);
