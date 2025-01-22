@@ -5,12 +5,14 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.6] - 2025-01-22
 ### Added
 - New config option `window_insertion_point` to specify where new windows are inserted [#2510](https://github.com/koekeishiya/yabai/issues/2510)
 
 ### Changed
-- Update scripting addition for macOS Sonoma 14.7.2 [#2497](https://github.com/koekeishiya/yabai/issues/2497)
-- Maybe fix issue with patching macOS space switching animation on macOS 14.7 Intel x86-64 [#2440](https://github.com/koekeishiya/yabai/issues/2440)
+- Update scripting addition for macOS Sonoma 14.7.2 and Sequoia 15.3 [#2497](https://github.com/koekeishiya/yabai/issues/2497)
+- Fix issue with patching macOS space switching animation on macOS 14.7 Intel x86-64 [#2440](https://github.com/koekeishiya/yabai/issues/2440)
 - Config *global setting* `split_type` is now categorized as a *space setting* instead [#2479](https://github.com/koekeishiya/yabai/issues/2479)
 - Additional options `x-axis` and `y-axis` can now be used with `config auto_balance` command [#190](https://github.com/koekeishiya/yabai/issues/190)
 - Minor adjustment to screen-padding and window-gap [#2502](https://github.com/koekeishiya/yabai/issues/2502)
@@ -711,7 +713,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.5...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.6...HEAD
+[7.1.6]: https://github.com/koekeishiya/yabai/compare/v7.1.5...v7.1.6
 [7.1.5]: https://github.com/koekeishiya/yabai/compare/v7.1.4...v7.1.5
 [7.1.4]: https://github.com/koekeishiya/yabai/compare/v7.1.3...v7.1.4
 [7.1.3]: https://github.com/koekeishiya/yabai/compare/v7.1.2...v7.1.3
