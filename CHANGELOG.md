@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Resolved window query flag serialization issue introduced in v7.1.7.... [#2532](https://github.com/koekeishiya/yabai/issues/2532)
 
 ## [7.1.7] - 2025-02-09
 ### Changed

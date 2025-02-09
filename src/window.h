@@ -80,112 +80,59 @@ static const char *cg_window_level_key_str[] =
     [CG_WINDOW_LEVEL_KEY_COUNT]               = "CG_WINDOW_LEVEL_KEY_COUNT"
 };
 
+#define WINDOW_PROPERTY_LIST \
+    WINDOW_PROPERTY_ENTRY("id",                   WINDOW_PROPERTY_ID,                  0x000000001) \
+    WINDOW_PROPERTY_ENTRY("pid",                  WINDOW_PROPERTY_PID,                 0x000000002) \
+    WINDOW_PROPERTY_ENTRY("app",                  WINDOW_PROPERTY_APP,                 0x000000004) \
+    WINDOW_PROPERTY_ENTRY("title",                WINDOW_PROPERTY_TITLE,               0x000000008) \
+    WINDOW_PROPERTY_ENTRY("scratchpad",           WINDOW_PROPERTY_SCRATCHPAD,          0x000000010) \
+    WINDOW_PROPERTY_ENTRY("frame",                WINDOW_PROPERTY_FRAME,               0x000000020) \
+    WINDOW_PROPERTY_ENTRY("role",                 WINDOW_PROPERTY_ROLE,                0x000000040) \
+    WINDOW_PROPERTY_ENTRY("subrole",              WINDOW_PROPERTY_SUBROLE,             0x000000080) \
+    WINDOW_PROPERTY_ENTRY("root-window",          WINDOW_PROPERTY_ROOT_WINDOW,         0x000000100) \
+    WINDOW_PROPERTY_ENTRY("display",              WINDOW_PROPERTY_DISPLAY,             0x000000200) \
+    WINDOW_PROPERTY_ENTRY("space",                WINDOW_PROPERTY_SPACE,               0x000000400) \
+    WINDOW_PROPERTY_ENTRY("level",                WINDOW_PROPERTY_LEVEL,               0x000000800) \
+    WINDOW_PROPERTY_ENTRY("sub-level",            WINDOW_PROPERTY_SUB_LEVEL,           0x000001000) \
+    WINDOW_PROPERTY_ENTRY("layer",                WINDOW_PROPERTY_LAYER,               0x000002000) \
+    WINDOW_PROPERTY_ENTRY("sub-layer",            WINDOW_PROPERTY_SUB_LAYER,           0x000004000) \
+    WINDOW_PROPERTY_ENTRY("opacity",              WINDOW_PROPERTY_OPACITY,             0x000008000) \
+    WINDOW_PROPERTY_ENTRY("split-type",           WINDOW_PROPERTY_SPLIT_TYPE,          0x000010000) \
+    WINDOW_PROPERTY_ENTRY("split-child",          WINDOW_PROPERTY_SPLIT_CHILD,         0x000020000) \
+    WINDOW_PROPERTY_ENTRY("stack-index",          WINDOW_PROPERTY_STACK_INDEX,         0x000040000) \
+    WINDOW_PROPERTY_ENTRY("can-move",             WINDOW_PROPERTY_CAN_MOVE,            0x000080000) \
+    WINDOW_PROPERTY_ENTRY("can-resize",           WINDOW_PROPERTY_CAN_RESIZE,          0x000100000) \
+    WINDOW_PROPERTY_ENTRY("has-focus",            WINDOW_PROPERTY_HAS_FOCUS,           0x000200000) \
+    WINDOW_PROPERTY_ENTRY("has-shadow",           WINDOW_PROPERTY_HAS_SHADOW,          0x000400000) \
+    WINDOW_PROPERTY_ENTRY("has-parent-zoom",      WINDOW_PROPERTY_HAS_PARENT_ZOOM,     0x000800000) \
+    WINDOW_PROPERTY_ENTRY("has-fullscreen-zoom",  WINDOW_PROPERTY_HAS_FULLSCREEN_ZOOM, 0x001000000) \
+    WINDOW_PROPERTY_ENTRY("is-native-fullscreen", WINDOW_PROPERTY_IS_FULLSCREEN,       0x002000000) \
+    WINDOW_PROPERTY_ENTRY("is-visible",           WINDOW_PROPERTY_IS_VISIBLE,          0x004000000) \
+    WINDOW_PROPERTY_ENTRY("is-minimized",         WINDOW_PROPERTY_IS_MINIMIZED,        0x008000000) \
+    WINDOW_PROPERTY_ENTRY("is-hidden",            WINDOW_PROPERTY_IS_HIDDEN,           0x010000000) \
+    WINDOW_PROPERTY_ENTRY("is-floating",          WINDOW_PROPERTY_IS_FLOATING,         0x020000000) \
+    WINDOW_PROPERTY_ENTRY("is-sticky",            WINDOW_PROPERTY_IS_STICKY,           0x040000000) \
+    WINDOW_PROPERTY_ENTRY("is-grabbed",           WINDOW_PROPERTY_IS_GRABBED,          0x080000000)
+
 enum window_property
 {
-    WINDOW_PROPERTY_ID                  = 0x000000001,
-    WINDOW_PROPERTY_PID                 = 0x000000002,
-    WINDOW_PROPERTY_APP                 = 0x000000004,
-    WINDOW_PROPERTY_TITLE               = 0x000000008,
-    WINDOW_PROPERTY_SCRATCHPAD          = 0x000000010,
-    WINDOW_PROPERTY_FRAME               = 0x000000020,
-    WINDOW_PROPERTY_ROLE                = 0x000000040,
-    WINDOW_PROPERTY_SUBROLE             = 0x000000080,
-    WINDOW_PROPERTY_ROOT_WINDOW         = 0x000000100,
-    WINDOW_PROPERTY_DISPLAY             = 0x000000200,
-    WINDOW_PROPERTY_SPACE               = 0x000000400,
-    WINDOW_PROPERTY_LEVEL               = 0x000000800,
-    WINDOW_PROPERTY_SUB_LEVEL           = 0x000001000,
-    WINDOW_PROPERTY_LAYER               = 0x000002000,
-    WINDOW_PROPERTY_SUB_LAYER           = 0x000004000,
-    WINDOW_PROPERTY_OPACITY             = 0x000008000,
-    WINDOW_PROPERTY_SPLIT_TYPE          = 0x000010000,
-    WINDOW_PROPERTY_SPLIT_CHILD         = 0x000020000,
-    WINDOW_PROPERTY_STACK_INDEX         = 0x000040000,
-    WINDOW_PROPERTY_CAN_MOVE            = 0x000080000,
-    WINDOW_PROPERTY_CAN_RESIZE          = 0x000100000,
-    WINDOW_PROPERTY_HAS_FOCUS           = 0x000200000,
-    WINDOW_PROPERTY_HAS_SHADOW          = 0x000400000,
-    WINDOW_PROPERTY_HAS_PARENT_ZOOM     = 0x000800000,
-    WINDOW_PROPERTY_HAS_FULLSCREEN_ZOOM = 0x001000000,
-    WINDOW_PROPERTY_IS_FULLSCREEN       = 0x004000000,
-    WINDOW_PROPERTY_IS_VISIBLE          = 0x008000000,
-    WINDOW_PROPERTY_IS_MINIMIZED        = 0x010000000,
-    WINDOW_PROPERTY_IS_HIDDEN           = 0x020000000,
-    WINDOW_PROPERTY_IS_FLOATING         = 0x040000000,
-    WINDOW_PROPERTY_IS_STICKY           = 0x080000000,
-    WINDOW_PROPERTY_IS_GRABBED          = 0x100000000
+#define WINDOW_PROPERTY_ENTRY(n, p, v) p = v,
+    WINDOW_PROPERTY_LIST
+#undef WINDOW_PROPERTY_ENTRY
 };
 
 static uint64_t window_property_val[] =
 {
-    [0x00] = WINDOW_PROPERTY_ID,
-    [0x01] = WINDOW_PROPERTY_PID,
-    [0x02] = WINDOW_PROPERTY_APP,
-    [0x03] = WINDOW_PROPERTY_TITLE,
-    [0x04] = WINDOW_PROPERTY_SCRATCHPAD,
-    [0x05] = WINDOW_PROPERTY_FRAME,
-    [0x06] = WINDOW_PROPERTY_ROLE,
-    [0x07] = WINDOW_PROPERTY_SUBROLE,
-    [0x08] = WINDOW_PROPERTY_ROOT_WINDOW,
-    [0x09] = WINDOW_PROPERTY_DISPLAY,
-    [0x0A] = WINDOW_PROPERTY_SPACE,
-    [0x0B] = WINDOW_PROPERTY_LEVEL,
-    [0x0C] = WINDOW_PROPERTY_SUB_LEVEL,
-    [0x0D] = WINDOW_PROPERTY_LAYER,
-    [0x0E] = WINDOW_PROPERTY_SUB_LAYER,
-    [0x0F] = WINDOW_PROPERTY_OPACITY,
-    [0x10] = WINDOW_PROPERTY_SPLIT_TYPE,
-    [0x11] = WINDOW_PROPERTY_SPLIT_CHILD,
-    [0x12] = WINDOW_PROPERTY_STACK_INDEX,
-    [0x13] = WINDOW_PROPERTY_CAN_MOVE,
-    [0x14] = WINDOW_PROPERTY_CAN_RESIZE,
-    [0x15] = WINDOW_PROPERTY_HAS_FOCUS,
-    [0x16] = WINDOW_PROPERTY_HAS_SHADOW,
-    [0x17] = WINDOW_PROPERTY_HAS_PARENT_ZOOM,
-    [0x18] = WINDOW_PROPERTY_HAS_FULLSCREEN_ZOOM,
-    [0x1A] = WINDOW_PROPERTY_IS_FULLSCREEN,
-    [0x1B] = WINDOW_PROPERTY_IS_VISIBLE,
-    [0x1C] = WINDOW_PROPERTY_IS_MINIMIZED,
-    [0x1D] = WINDOW_PROPERTY_IS_HIDDEN,
-    [0x1E] = WINDOW_PROPERTY_IS_FLOATING,
-    [0x1F] = WINDOW_PROPERTY_IS_STICKY,
-    [0x20] = WINDOW_PROPERTY_IS_GRABBED
+#define WINDOW_PROPERTY_ENTRY(n, p, v) p,
+    WINDOW_PROPERTY_LIST
+#undef WINDOW_PROPERTY_ENTRY
 };
 
 static char *window_property_str[] =
 {
-    "id",
-    "pid",
-    "app",
-    "title",
-    "scratchpad",
-    "frame",
-    "role",
-    "subrole",
-    "root-window",
-    "display",
-    "space",
-    "level",
-    "sub-level",
-    "layer",
-    "sub-layer",
-    "opacity",
-    "split-type",
-    "split-child",
-    "stack-index",
-    "can-move",
-    "can-resize",
-    "has-focus",
-    "has-shadow",
-    "has-parent-zoom",
-    "has-fullscreen-zoom",
-    "is-native-fullscreen",
-    "is-visible",
-    "is-minimized",
-    "is-hidden",
-    "is-floating",
-    "is-sticky",
-    "is-grabbed"
+#define WINDOW_PROPERTY_ENTRY(n, p, v) n,
+    WINDOW_PROPERTY_LIST
+#undef WINDOW_PROPERTY_ENTRY
 };
 
 struct window
