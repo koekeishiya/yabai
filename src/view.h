@@ -4,52 +4,39 @@
 #define AX_ABS(a, b) (((a) - (b) < 0) ? (((a) - (b)) * -1) : ((a) - (b)))
 #define AX_DIFF(a, b) (AX_ABS(a, b) >= 1.5f)
 
+#define SPACE_PROPERTY_LIST \
+    SPACE_PROPERTY_ENTRY("id",                   SPACE_PROPERTY_ID,            0x001) \
+    SPACE_PROPERTY_ENTRY("uuid",                 SPACE_PROPERTY_UUID,          0x002) \
+    SPACE_PROPERTY_ENTRY("index",                SPACE_PROPERTY_INDEX,         0x004) \
+    SPACE_PROPERTY_ENTRY("label",                SPACE_PROPERTY_LABEL,         0x008) \
+    SPACE_PROPERTY_ENTRY("type",                 SPACE_PROPERTY_TYPE,          0x010) \
+    SPACE_PROPERTY_ENTRY("display",              SPACE_PROPERTY_DISPLAY,       0x020) \
+    SPACE_PROPERTY_ENTRY("windows",              SPACE_PROPERTY_WINDOWS,       0x040) \
+    SPACE_PROPERTY_ENTRY("first-window",         SPACE_PROPERTY_FIRST_WINDOW,  0x080) \
+    SPACE_PROPERTY_ENTRY("last-window",          SPACE_PROPERTY_LAST_WINDOW,   0x100) \
+    SPACE_PROPERTY_ENTRY("has-focus",            SPACE_PROPERTY_HAS_FOCUS,     0x200) \
+    SPACE_PROPERTY_ENTRY("is-visible",           SPACE_PROPERTY_IS_VISIBLE,    0x400) \
+    SPACE_PROPERTY_ENTRY("is-native-fullscreen", SPACE_PROPERTY_IS_FULLSCREEN, 0x800)
+
 enum space_property
 {
-    SPACE_PROPERTY_ID            = 0x001,
-    SPACE_PROPERTY_UUID          = 0x002,
-    SPACE_PROPERTY_INDEX         = 0x004,
-    SPACE_PROPERTY_LABEL         = 0x008,
-    SPACE_PROPERTY_TYPE          = 0x010,
-    SPACE_PROPERTY_DISPLAY       = 0x020,
-    SPACE_PROPERTY_WINDOWS       = 0x040,
-    SPACE_PROPERTY_FIRST_WINDOW  = 0x080,
-    SPACE_PROPERTY_LAST_WINDOW   = 0x100,
-    SPACE_PROPERTY_HAS_FOCUS     = 0x200,
-    SPACE_PROPERTY_IS_VISIBLE    = 0x400,
-    SPACE_PROPERTY_IS_FULLSCREEN = 0x800
+#define SPACE_PROPERTY_ENTRY(n, p, v) p = v,
+    SPACE_PROPERTY_LIST
+#undef SPACE_PROPERTY_ENTRY
 };
 
 static uint64_t space_property_val[] =
 {
-    [0x0] = SPACE_PROPERTY_ID,
-    [0x1] = SPACE_PROPERTY_UUID,
-    [0x2] = SPACE_PROPERTY_INDEX,
-    [0x3] = SPACE_PROPERTY_LABEL,
-    [0x4] = SPACE_PROPERTY_TYPE,
-    [0x5] = SPACE_PROPERTY_DISPLAY,
-    [0x6] = SPACE_PROPERTY_WINDOWS,
-    [0x7] = SPACE_PROPERTY_FIRST_WINDOW,
-    [0x8] = SPACE_PROPERTY_LAST_WINDOW,
-    [0x9] = SPACE_PROPERTY_HAS_FOCUS,
-    [0xA] = SPACE_PROPERTY_IS_VISIBLE,
-    [0xB] = SPACE_PROPERTY_IS_FULLSCREEN
+#define SPACE_PROPERTY_ENTRY(n, p, v) p,
+    SPACE_PROPERTY_LIST
+#undef SPACE_PROPERTY_ENTRY
 };
 
 static char *space_property_str[] =
 {
-    "id",
-    "uuid",
-    "index",
-    "label",
-    "type",
-    "display",
-    "windows",
-    "first-window",
-    "last-window",
-    "has-focus",
-    "is-visible",
-    "is-native-fullscreen"
+#define SPACE_PROPERTY_ENTRY(n, p, v) n,
+    SPACE_PROPERTY_LIST
+#undef SPACE_PROPERTY_ENTRY
 };
 
 struct area
