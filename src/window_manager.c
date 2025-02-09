@@ -1670,10 +1670,9 @@ static void window_manager_add_existing_application_windows(struct space_manager
                 AXUIElementRef element_ref = _AXUIElementCreateWithRemoteToken(data_ref);
                 CFRelease(data_ref);
 
-                uint32_t element_wid = ax_window_id(element_ref);
-                printf("element_id: %lld\n", element_id);
-
                 bool matched = false;
+                uint32_t element_wid = ax_window_id(element_ref);
+
                 if (element_wid != 0) {
                     for (int i = 0; i < app_window_list_len; ++i) {
                         if (app_window_list[i] == element_wid) {
