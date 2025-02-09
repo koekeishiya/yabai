@@ -2,12 +2,12 @@
 .\"     Title: yabai
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.23
-.\"      Date: 2025-01-04
+.\"      Date: 2025-02-09
 .\"    Manual: Yabai Manual
 .\"    Source: Yabai
 .\"  Language: English
 .\"
-.TH "YABAI" "1" "2025-01-04" "Yabai" "Yabai Manual"
+.TH "YABAI" "1" "2025-02-09" "Yabai" "Yabai Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -812,7 +812,6 @@ WINDOW
     "has\-shadow": bool,
     "has\-parent\-zoom": bool,
     "has\-fullscreen\-zoom": bool,
-    "has\-ax\-reference": bool,
     "is\-native\-fullscreen": bool,
     "is\-visible": bool,
     "is\-minimized": bool,
@@ -820,37 +819,6 @@ WINDOW
     "is\-floating": bool,
     "is\-sticky": bool,
     "is\-grabbed": bool
-}
-.fam
-.fi
-.if n .RE
-.sp
-Some window properties are only accessible when yabai has a valid AX\-reference for that window.
-.br
-This AX\-reference can only be retrieved when the space that the window is visible on, is active.
-.br
-If windows are already opened on inactive spaces when yabai is launched, yabai can detect those
-.br
-windows and retrieve a limited amount of information about them. In addition, yabai window commands
-.br
-will NOT WORK for these windows. These windows can be identified by looking at the \f(CRhas\-ax\-reference\fP
-.br
-property. Once the space that the window belongs to becomes active, yabai will automatically create
-.br
-an AX\-reference. The queries will from that point forwards contain complete information, and the window
-.br
-can be used with yabai window commands.
-.sp
-The properties that contain incorrect information for windows with \f(CRhas\-ax\-reference: false\fP are as follows:
-.sp
-.if n .RS 4
-.nf
-.fam C
-{
-    "role": string,
-    "subrole": string,
-    "can\-move": bool,
-    "can\-resize": bool
 }
 .fam
 .fi

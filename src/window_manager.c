@@ -45,7 +45,7 @@ void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, in
     fprintf(rsp, "[");
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (window) window_serialize(rsp, window, flags); else window_nonax_serialize(rsp, window_list[i], flags);
+        if (window) window_serialize(rsp, window, flags);
         if (i < window_count - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
@@ -1592,13 +1592,11 @@ static uint32_t *window_manager_existing_application_window_list(struct applicat
     return space_list ? space_window_list_for_connection(space_list, space_count, application ? application->connection : 0, window_count, true) : NULL;
 }
 
-bool window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
+static void window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application)
 {
-    bool result = false;
-
     int global_window_count;
     uint32_t *global_window_list = window_manager_existing_application_window_list(application, &global_window_count);
-    if (!global_window_list) return result;
+    if (!global_window_list) return;
 
     CFArrayRef window_list_ref = application_window_list(application);
     int window_count = window_list_ref ? CFArrayGetCount(window_list_ref) : 0;
@@ -1628,35 +1626,74 @@ bool window_manager_add_existing_application_windows(struct space_manager *sm, s
         }
     }
 
-    if (global_window_count == window_count-empty_count) {
-        if (refresh_index != -1) {
-            debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
-            buf_del(wm->applications_to_refresh, refresh_index);
-            result = true;
-        }
-    } else {
+    if (global_window_count != window_count-empty_count) {
         bool missing_window = false;
+        uint32_t *app_window_list = NULL;
+
         for (int i = 0; i < global_window_count; ++i) {
             struct window *window = window_manager_find_window(wm, global_window_list[i]);
             if (!window) {
                 missing_window = true;
-                break;
+                ts_buf_push(app_window_list, global_window_list[i]);
             }
         }
 
-        if (refresh_index == -1 && missing_window) {
-            debug("%s: %s has windows that are not yet resolved\n", __FUNCTION__, application->name);
-            buf_push(wm->applications_to_refresh, application);
-        } else if (refresh_index != -1 && !missing_window) {
-            debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
-            buf_del(wm->applications_to_refresh, refresh_index);
-            result = true;
+        if (missing_window) {
+            debug("%s: %s has %d windows that are not yet resolved\n", __FUNCTION__, application->name, ts_buf_len(app_window_list));
+
+            //
+            // NOTE(koekeishiya): MacOS API does not return AXUIElementRef of windows on inactive spaces.
+            // However, we can just brute-force the element_id and create the AXUIElementRef ourselves.
+            //
+            // :Attribution
+            // https://github.com/decodism
+            // https://github.com/lwouis/alt-tab-macos/issues/1324#issuecomment-2631035482
+            //
+
+            int32_t tid = 0x636f636f;
+            uint8_t data[0x14] = {0};
+
+            for (uint64_t element_id = 0; element_id < UINT64_MAX; ++element_id) {
+                int app_window_list_len = ts_buf_len(app_window_list);
+                if (app_window_list_len == 0) break;
+
+                uint8_t *data_cursor = data;
+                memcpy(data_cursor, &application->pid, sizeof(uint32_t));
+                data_cursor += sizeof(uint32_t);
+                memset(data_cursor, 0, sizeof(uint32_t));
+                data_cursor += sizeof(uint32_t);
+                memcpy(data_cursor, &tid, sizeof(int32_t));
+                data_cursor += sizeof(uint32_t);
+                memcpy(data_cursor, &element_id, sizeof(uint64_t));
+
+                CFDataRef data_ref = CFDataCreate(NULL, data, 0x14);
+                AXUIElementRef element_ref = _AXUIElementCreateWithRemoteToken(data_ref);
+                CFRelease(data_ref);
+
+                uint32_t element_wid = ax_window_id(element_ref);
+                printf("element_id: %lld\n", element_id);
+
+                bool matched = false;
+                if (element_wid != 0) {
+                    for (int i = 0; i < app_window_list_len; ++i) {
+                        if (app_window_list[i] == element_wid) {
+                            matched = true;
+                            ts_buf_del(app_window_list, i);
+                            break;
+                        }
+                    }
+                }
+
+                if (matched) {
+                    window_manager_create_and_add_window(sm, wm, application, element_ref, element_wid, false);
+                } else {
+                    CFRelease(element_ref);
+                }
+            }
         }
     }
 
     if (window_list_ref) CFRelease(window_list_ref);
-
-    return result;
 }
 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window *window, int direction)
@@ -2444,9 +2481,7 @@ void window_manager_scratchpad_recover_windows(void)
     uint32_t *window_list = window_manager_existing_application_window_list(NULL, &window_count);
     if (!window_list) return;
 
-    if (scripting_addition_order_window_in(window_list, window_count)) {
-        space_manager_refresh_application_windows(&g_space_manager);
-    }
+    scripting_addition_order_window_in(window_list, window_count);
 }
 
 static void window_manager_validate_windows_on_space(struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
@@ -2655,7 +2690,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 
             if (application_observe(application)) {
                 window_manager_add_application(wm, application);
-                window_manager_add_existing_application_windows(sm, wm, application, -1);
+                window_manager_add_existing_application_windows(sm, wm, application);
             } else {
                 application_unobserve(application);
                 application_destroy(application);

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Implemented workaround to acquire AX-References for windows on inactive spaces [#2320](https://github.com/koekeishiya/yabai/issues/2320) [#2480](https://github.com/koekeishiya/yabai/issues/2480)
+
+### Removed
+- The window query property `has-ax-reference` has been removed because of the implemented workaround for AX-References rendering the information useless/unnecessary [#2320](https://github.com/koekeishiya/yabai/issues/2320) [#2480](https://github.com/koekeishiya/yabai/issues/2480)
 
 ## [7.1.6] - 2025-01-22
 ### Added

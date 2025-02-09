@@ -240,13 +240,6 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
     event_signal_push(SIGNAL_APPLICATION_TERMINATED, application);
     window_manager_remove_application(&g_window_manager, application->pid);
 
-    for (int i = 0; i < buf_len(g_window_manager.applications_to_refresh); ++i) {
-        if (application == g_window_manager.applications_to_refresh[i]) {
-            buf_del(g_window_manager.applications_to_refresh, i);
-            break;
-        }
-    }
-
     int window_count;
     struct window **window_list = window_manager_find_application_windows(&g_window_manager, application, &window_count);
 
@@ -343,14 +336,6 @@ static EVENT_HANDLER(APPLICATION_FRONT_SWITCHED)
     g_process_manager.last_front_pid = g_process_manager.front_pid;
     g_process_manager.front_pid = process->pid;
     event_signal_push(SIGNAL_APPLICATION_FRONT_SWITCHED, NULL);
-
-    for (int i = 0; i < buf_len(g_window_manager.applications_to_refresh); ++i) {
-        if (application == g_window_manager.applications_to_refresh[i]) {
-            debug("%s: %s has windows that are not yet resolved\n", __FUNCTION__, application->name);
-            window_manager_add_existing_application_windows(&g_space_manager, &g_window_manager, application, i);
-            break;
-        }
-    }
 
     uint32_t application_focused_window_id = application_focused_window(application);
     if (!application_focused_window_id) {
@@ -879,14 +864,6 @@ static EVENT_HANDLER(SPACE_CHANGED)
     debug("%s: %lld\n", __FUNCTION__, g_space_manager.current_space_id);
     struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
 
-    if (space_manager_refresh_application_windows(&g_space_manager)) {
-        struct window *focused_window = window_manager_focused_window(&g_window_manager);
-        if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
-            window_did_receive_focus(&g_window_manager, &g_mouse_state, focused_window);
-            window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
-        }
-    }
-
     if (!mission_control_is_active() && space_is_user(g_space_manager.current_space_id)) {
         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 
@@ -930,14 +907,6 @@ static EVENT_HANDLER(DISPLAY_CHANGED)
 
     debug("%s: %d %lld\n", __FUNCTION__, g_display_manager.current_display_id, g_space_manager.current_space_id);
     struct view *view = space_manager_find_view(&g_space_manager, g_space_manager.current_space_id);
-
-    if (space_manager_refresh_application_windows(&g_space_manager)) {
-        struct window *focused_window = window_manager_focused_window(&g_window_manager);
-        if (focused_window && window_manager_find_lost_focused_event(&g_window_manager, focused_window->id)) {
-            window_did_receive_focus(&g_window_manager, &g_mouse_state, focused_window);
-            window_manager_remove_lost_focused_event(&g_window_manager, focused_window->id);
-        }
-    }
 
     if (!mission_control_is_active() && space_is_user(g_space_manager.current_space_id)) {
         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
