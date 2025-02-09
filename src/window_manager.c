@@ -1652,18 +1652,23 @@ static void window_manager_add_existing_application_windows(struct space_manager
 
             int32_t tid = 0x636f636f;
             uint8_t data[0x14] = {0};
+            uint8_t *data_cursor = data;
+
+            memcpy(data_cursor, &application->pid, sizeof(uint32_t));
+            data_cursor += sizeof(uint32_t);
+            memset(data_cursor, 0, sizeof(uint32_t));
+            data_cursor += sizeof(uint32_t);
+            memcpy(data_cursor, &tid, sizeof(int32_t));
+            data_cursor += sizeof(uint32_t);
 
             for (uint64_t element_id = 0; element_id < UINT64_MAX; ++element_id) {
                 int app_window_list_len = ts_buf_len(app_window_list);
                 if (app_window_list_len == 0) break;
 
-                uint8_t *data_cursor = data;
-                memcpy(data_cursor, &application->pid, sizeof(uint32_t));
-                data_cursor += sizeof(uint32_t);
-                memset(data_cursor, 0, sizeof(uint32_t));
-                data_cursor += sizeof(uint32_t);
-                memcpy(data_cursor, &tid, sizeof(int32_t));
-                data_cursor += sizeof(uint32_t);
+                //
+                // NOTE(koekeishiya): Only the element_id changes between iterations.
+                //
+
                 memcpy(data_cursor, &element_id, sizeof(uint64_t));
 
                 CFDataRef data_ref = CFDataCreate(NULL, data, 0x14);
