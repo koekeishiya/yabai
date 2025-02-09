@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.8] - 2025-02-09
 ### Changed
 - Resolved window query flag serialization issue introduced in v7.1.7.... [#2532](https://github.com/koekeishiya/yabai/issues/2532)
 
@@ -722,7 +724,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.7...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.8...HEAD
+[7.1.8]: https://github.com/koekeishiya/yabai/compare/v7.1.7...v7.1.8
 [7.1.7]: https://github.com/koekeishiya/yabai/compare/v7.1.6...v7.1.7
 [7.1.6]: https://github.com/koekeishiya/yabai/compare/v7.1.5...v7.1.6
 [7.1.5]: https://github.com/koekeishiya/yabai/compare/v7.1.4...v7.1.5
