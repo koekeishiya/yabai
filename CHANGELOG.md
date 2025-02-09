@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.7] - 2025-02-09
 ### Changed
 - Implemented workaround to acquire AX-References for windows on inactive spaces [#2320](https://github.com/koekeishiya/yabai/issues/2320) [#2480](https://github.com/koekeishiya/yabai/issues/2480)
 
@@ -718,7 +720,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.6...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.7...HEAD
+[7.1.7]: https://github.com/koekeishiya/yabai/compare/v7.1.6...v7.1.7
 [7.1.6]: https://github.com/koekeishiya/yabai/compare/v7.1.5...v7.1.6
 [7.1.5]: https://github.com/koekeishiya/yabai/compare/v7.1.4...v7.1.5
 [7.1.4]: https://github.com/koekeishiya/yabai/compare/v7.1.3...v7.1.4
