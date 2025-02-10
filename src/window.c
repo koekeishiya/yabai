@@ -817,10 +817,3 @@ void window_destroy(struct window *window)
     CFRelease(window->ref);
     free(window);
 }
-
-void window_dump_cg_window_levels(void)
-{
-    for (int i = 0; i < CG_WINDOW_LEVEL_KEY_COUNT; ++i) {
-        printf("CGWindowLevelForKey(%s) -> %d\n", cg_window_level_key_str[i], CGWindowLevelForKey(i));
-    }
-}

@@ -28,58 +28,6 @@ static CFStringRef ax_window_notification[] =
     [AX_WINDOW_DEMINIMIZED_INDEX]    = kAXWindowDeminiaturizedNotification
 };
 
-enum cg_window_level_key
-{
-    CG_WINDOW_BASE_LEVEL_KEY                =  0,
-    CG_WINDOW_MINIMUM_LEVEL_KEY             =  1,
-    CG_WINDOW_DESKTOP_LEVEL_KEY             =  2,
-    CG_WINDOW_BACKSTOP_MENU_LEVEL_KEY       =  3,
-    CG_WINDOW_NORMAL_LEVEL_KEY              =  4,
-    CG_WINDOW_FLOATING_LEVEL_KEY            =  5,
-    CG_WINDOW_TORN_OFF_MENU_LEVEL_KEY       =  6,
-    CG_WINDOW_DOCK_LEVEL_KEY                =  7,
-    CG_WINDOW_MAIN_MENU_LEVEL_KEY           =  8,
-    CG_WINDOW_STATUS_LEVEL_KEY              =  9,
-    CG_WINDOW_MODAL_PANEL_LEVEL_KEY         = 10,
-    CG_WINDOW_POPUP_MENU_LEVEL_KEY          = 11,
-    CG_WINDOW_DRAGGING_LEVEL_KEY            = 12,
-    CG_WINDOW_SCREENSAVER_LEVEL_KEY         = 13,
-    CG_WINDOW_MAXIMUM_LEVEL_KEY             = 14,
-    CG_WINDOW_OVERLAY_LEVEL_KEY             = 15,
-    CG_WINDOW_HELP_LEVEL_KEY                = 16,
-    CG_WINDOW_UTILITY_LEVEL_KEY             = 17,
-    CG_WINDOW_DESKTOP_ICON_LEVEL_KEY        = 18,
-    CG_WINDOW_CURSOR_LEVEL_KEY              = 19,
-    CG_WINDOW_ASSISTIVE_TECH_HIGH_LEVEL_KEY = 20,
-    CG_WINDOW_LEVEL_KEY_COUNT               = 21
-};
-
-static const char *cg_window_level_key_str[] =
-{
-    [CG_WINDOW_BASE_LEVEL_KEY]                = "CG_WINDOW_BASE_LEVEL_KEY",
-    [CG_WINDOW_MINIMUM_LEVEL_KEY]             = "CG_WINDOW_MINIMUM_LEVEL_KEY",
-    [CG_WINDOW_DESKTOP_LEVEL_KEY]             = "CG_WINDOW_DESKTOP_LEVEL_KEY",
-    [CG_WINDOW_BACKSTOP_MENU_LEVEL_KEY]       = "CG_WINDOW_BACKSTOP_MENU_LEVEL_KEY",
-    [CG_WINDOW_NORMAL_LEVEL_KEY]              = "CG_WINDOW_NORMAL_LEVEL_KEY",
-    [CG_WINDOW_FLOATING_LEVEL_KEY]            = "CG_WINDOW_FLOATING_LEVEL_KEY",
-    [CG_WINDOW_TORN_OFF_MENU_LEVEL_KEY]       = "CG_WINDOW_TORN_OFF_MENU_LEVEL_KEY",
-    [CG_WINDOW_DOCK_LEVEL_KEY]                = "CG_WINDOW_DOCK_LEVEL_KEY",
-    [CG_WINDOW_MAIN_MENU_LEVEL_KEY]           = "CG_WINDOW_MAIN_MENU_LEVEL_KEY",
-    [CG_WINDOW_STATUS_LEVEL_KEY]              = "CG_WINDOW_STATUS_LEVEL_KEY",
-    [CG_WINDOW_MODAL_PANEL_LEVEL_KEY]         = "CG_WINDOW_MODAL_PANEL_LEVEL_KEY",
-    [CG_WINDOW_POPUP_MENU_LEVEL_KEY]          = "CG_WINDOW_POPUP_MENU_LEVEL_KEY",
-    [CG_WINDOW_DRAGGING_LEVEL_KEY]            = "CG_WINDOW_DRAGGING_LEVEL_KEY",
-    [CG_WINDOW_SCREENSAVER_LEVEL_KEY]         = "CG_WINDOW_SCREENSAVER_LEVEL_KEY",
-    [CG_WINDOW_MAXIMUM_LEVEL_KEY]             = "CG_WINDOW_MAXIMUM_LEVEL_KEY",
-    [CG_WINDOW_OVERLAY_LEVEL_KEY]             = "CG_WINDOW_OVERLAY_LEVEL_KEY",
-    [CG_WINDOW_HELP_LEVEL_KEY]                = "CG_WINDOW_HELP_LEVEL_KEY",
-    [CG_WINDOW_UTILITY_LEVEL_KEY]             = "CG_WINDOW_UTILITY_LEVEL_KEY",
-    [CG_WINDOW_DESKTOP_ICON_LEVEL_KEY]        = "CG_WINDOW_DESKTOP_ICON_LEVEL_KEY",
-    [CG_WINDOW_CURSOR_LEVEL_KEY]              = "CG_WINDOW_CURSOR_LEVEL_KEY",
-    [CG_WINDOW_ASSISTIVE_TECH_HIGH_LEVEL_KEY] = "CG_WINDOW_ASSISTIVE_TECH_HIGH_LEVEL_KEY",
-    [CG_WINDOW_LEVEL_KEY_COUNT]               = "CG_WINDOW_LEVEL_KEY_COUNT"
-};
-
 #define WINDOW_PROPERTY_LIST \
     WINDOW_PROPERTY_ENTRY("id",                   WINDOW_PROPERTY_ID,                  0x000000001) \
     WINDOW_PROPERTY_ENTRY("pid",                  WINDOW_PROPERTY_PID,                 0x000000002) \
@@ -214,6 +162,5 @@ bool window_observe(struct window *window);
 void window_unobserve(struct window *window);
 struct window *window_create(struct application *application, AXUIElementRef window_ref, uint32_t window_id);
 void window_destroy(struct window *window);
-void window_dump_cg_window_levels(void);
 
 #endif

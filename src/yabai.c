@@ -157,7 +157,6 @@ static inline bool configure_settings_and_acquire_lock(void)
     hook_nsobject_autorelease();
     hook_autoreleasepool_drain();
     hook_autoreleasepool_release();
-    window_dump_cg_window_levels();
 #endif
 
     int handle = open(g_lock_file, O_CREAT | O_WRONLY, 0600);
