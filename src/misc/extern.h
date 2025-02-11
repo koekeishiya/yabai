@@ -69,7 +69,7 @@ extern uint32_t SLSWindowIteratorGetParentID(CFTypeRef iterator);
 extern uint32_t SLSWindowIteratorGetWindowID(CFTypeRef iterator);
 extern uint64_t SLSWindowIteratorGetTags(CFTypeRef iterator);
 extern uint64_t SLSWindowIteratorGetAttributes(CFTypeRef iterator);
-extern int SLSWindowIteratorGetLevel(CFTypeRef iterator, int32_t index);
+extern int SLSWindowIteratorGetLevel(CFTypeRef iterator);
 extern OSStatus _SLPSGetFrontProcess(ProcessSerialNumber *psn);
 extern CGError SLSGetWindowOwner(int cid, uint32_t wid, int *wcid);
 extern CGError SLSGetConnectionPSN(int cid, ProcessSerialNumber *psn);

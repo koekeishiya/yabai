@@ -39,16 +39,19 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
         uint64_t attributes = SLSWindowIteratorGetAttributes(iterator);
         uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
         uint32_t wid = SLSWindowIteratorGetWindowID(iterator);
+        int level = SLSWindowIteratorGetLevel(iterator);
 
         if (include_minimized) {
             struct window *window = window_manager_find_window(&g_window_manager, wid);
             if (window) {
                 window_list[window_count++] = wid;
             } else if (parent_wid == 0) {
-                if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
-                    window_list[window_count++] = wid;
-                } else if ((attributes == 0x0 || attributes == 0x1) && ((tags & 0x1000000000000000) || (tags & 0x300000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
-                    window_list[window_count++] = wid;
+                if (level == 0 || level == 3 || level == 8) {
+                    if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+                        window_list[window_count++] = wid;
+                    } else if ((attributes == 0x0 || attributes == 0x1) && ((tags & 0x1000000000000000) || (tags & 0x300000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+                        window_list[window_count++] = wid;
+                    }
                 }
             }
         } else {
@@ -56,8 +59,10 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
             if (window && !window_is_minimized(window)) {
                 window_list[window_count++] = wid;
             } else if (parent_wid == 0) {
-                if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
-                    window_list[window_count++] = wid;
+                if (level == 0 || level == 3 || level == 8) {
+                    if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+                        window_list[window_count++] = wid;
+                    }
                 }
             }
         }

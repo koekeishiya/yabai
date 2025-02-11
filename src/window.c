@@ -604,7 +604,9 @@ int window_level(uint32_t wid)
         if (!iterator) goto err1;
 
         if (SLSWindowIteratorGetCount(iterator) == 1) {
-            level = SLSWindowIteratorGetLevel(iterator, 0);
+            if (SLSWindowIteratorAdvance(iterator)) {
+                level = SLSWindowIteratorGetLevel(iterator);
+            }
         }
 
         CFRelease(iterator);

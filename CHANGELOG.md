@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Resolved issue with window partially including non-windows, causing malformed json output (comma separators) [#2533](https://github.com/koekeishiya/yabai/issues/2533)
 
 ## [7.1.8] - 2025-02-09
 ### Changed
