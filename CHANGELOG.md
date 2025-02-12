@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.9] - 2025-02-12
 ### Changed
-- Resolved issue with window partially including non-windows, causing malformed json output (comma separators) [#2533](https://github.com/koekeishiya/yabai/issues/2533)
+- Resolved issue with window query partially including non-windows, causing malformed json output (comma separators) [#2533](https://github.com/koekeishiya/yabai/issues/2533)
 
 ## [7.1.8] - 2025-02-09
 ### Changed
@@ -726,7 +728,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.8...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.9...HEAD
+[7.1.9]: https://github.com/koekeishiya/yabai/compare/v7.1.8...v7.1.9
 [7.1.8]: https://github.com/koekeishiya/yabai/compare/v7.1.7...v7.1.8
 [7.1.7]: https://github.com/koekeishiya/yabai/compare/v7.1.6...v7.1.7
 [7.1.6]: https://github.com/koekeishiya/yabai/compare/v7.1.5...v7.1.6
