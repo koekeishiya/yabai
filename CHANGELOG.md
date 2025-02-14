@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.10] - 2025-02-14
 ### Changed
 - Adjust to macOS API change in Sequoia 15.3 altering the behaviour of SPACE_CREATED and SPACE_DESTROYED event notifications [#2548](https://github.com/koekeishiya/yabai/issues/2548)
 - Resolved weird issues after making assumptions in changes made for v7.1.7 [#2551](https://github.com/koekeishiya/yabai/issues/2551)
@@ -731,7 +733,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.9...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.10...HEAD
+[7.1.10]: https://github.com/koekeishiya/yabai/compare/v7.1.9...v7.1.10
 [7.1.9]: https://github.com/koekeishiya/yabai/compare/v7.1.8...v7.1.9
 [7.1.8]: https://github.com/koekeishiya/yabai/compare/v7.1.7...v7.1.8
 [7.1.7]: https://github.com/koekeishiya/yabai/compare/v7.1.6...v7.1.7
