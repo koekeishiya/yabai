@@ -45,7 +45,7 @@ void window_manager_query_windows_for_spaces(FILE *rsp, uint64_t *space_list, in
     fprintf(rsp, "[");
     for (int i = 0; i < window_count; ++i) {
         struct window *window = window_manager_find_window(&g_window_manager, window_list[i]);
-        if (window) window_serialize(rsp, window, flags);
+        if (window) window_serialize(rsp, window, flags); else window_nonax_serialize(rsp, window_list[i], flags);
         if (i < window_count - 1) fprintf(rsp, ",");
     }
     fprintf(rsp, "]\n");
@@ -1592,11 +1592,13 @@ static uint32_t *window_manager_existing_application_window_list(struct applicat
     return space_list ? space_window_list_for_connection(space_list, space_count, application ? application->connection : 0, window_count, true) : NULL;
 }
 
-static void window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application)
+bool window_manager_add_existing_application_windows(struct space_manager *sm, struct window_manager *wm, struct application *application, int refresh_index)
 {
+    bool result = false;
+
     int global_window_count;
     uint32_t *global_window_list = window_manager_existing_application_window_list(application, &global_window_count);
-    if (!global_window_list) return;
+    if (!global_window_list) return result;
 
     CFArrayRef window_list_ref = application_window_list(application);
     int window_count = window_list_ref ? CFArrayGetCount(window_list_ref) : 0;
@@ -1639,7 +1641,7 @@ static void window_manager_add_existing_application_windows(struct space_manager
         }
 
         if (missing_window) {
-            debug("%s: %s has %d windows that are not yet resolved\n", __FUNCTION__, application->name, ts_buf_len(app_window_list));
+            debug("%s: %s has %d windows that are not yet resolved, attempting workaround\n", __FUNCTION__, application->name, ts_buf_len(app_window_list));
 
             //
             // NOTE(koekeishiya): MacOS API does not return AXUIElementRef of windows on inactive spaces.
@@ -1695,9 +1697,25 @@ static void window_manager_add_existing_application_windows(struct space_manager
                 }
             }
         }
+
+        int app_window_list_len = ts_buf_len(app_window_list);
+        if (refresh_index == -1 && app_window_list_len > 0) {
+            debug("%s: workaround failed to resolve all windows for %s\n", __FUNCTION__, application->name);
+            buf_push(wm->applications_to_refresh, application);
+        } else if (refresh_index != -1 && app_window_list_len == 0) {
+            debug("%s: workaround successfully resolved all windows for %s\n", __FUNCTION__, application->name);
+            buf_del(wm->applications_to_refresh, refresh_index);
+            result = true;
+        }
+    } else if (refresh_index != -1) {
+        debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
+        buf_del(wm->applications_to_refresh, refresh_index);
+        result = true;
     }
 
     if (window_list_ref) CFRelease(window_list_ref);
+
+    return result;
 }
 
 enum window_op_error window_manager_set_window_insertion(struct space_manager *sm, struct window *window, int direction)
@@ -2485,7 +2503,9 @@ void window_manager_scratchpad_recover_windows(void)
     uint32_t *window_list = window_manager_existing_application_window_list(NULL, &window_count);
     if (!window_list) return;
 
-    scripting_addition_order_window_in(window_list, window_count);
+    if (scripting_addition_order_window_in(window_list, window_count)) {
+        space_manager_refresh_application_windows(&g_space_manager);
+    }
 }
 
 static void window_manager_validate_windows_on_space(struct window_manager *wm, struct view *view, uint32_t *window_list, int window_count)
@@ -2694,7 +2714,7 @@ void window_manager_begin(struct space_manager *sm, struct window_manager *wm)
 
             if (application_observe(application)) {
                 window_manager_add_application(wm, application);
-                window_manager_add_existing_application_windows(sm, wm, application);
+                window_manager_add_existing_application_windows(sm, wm, application, -1);
             } else {
                 application_unobserve(application);
                 application_destroy(application);

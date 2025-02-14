@@ -568,6 +568,7 @@ WINDOW
     "has-shadow": bool,
     "has-parent-zoom": bool,
     "has-fullscreen-zoom": bool,
+    "has-ax-reference": bool,
     "is-native-fullscreen": bool,
     "is-visible": bool,
     "is-minimized": bool,
@@ -575,6 +576,26 @@ WINDOW
     "is-floating": bool,
     "is-sticky": bool,
     "is-grabbed": bool
+}
+----
+
+Some window properties are only accessible when yabai has a valid AX-reference for that window. +
+This AX-reference can only be retrieved when the space that the window is visible on, is active. +
+If windows are already opened on inactive spaces when yabai is launched, yabai will attempt to detect +
+these using a workaround, and for most applications and windows this will work. Some windows are not +
+detected using this method, and for those windows yabai will retrieve a limited amount of information, +
+until the window that space belongs to becomes active -- yabai window commands will NOT WORK for these windows. +
+These windows can be identified by looking at the `has-ax-reference` property. Once the space that the window +
+belongs to becomes active, yabai will automatically create an AX-reference. The queries will from that point +
+forwards contain complete information, and the window  can be used with yabai window commands.
+
+The properties that contain incorrect information for windows with `has-ax-reference: false` are as follows:
+----
+{
+    "role": string,
+    "subrole": string,
+    "can-move": bool,
+    "can-resize": bool
 }
 ----
 

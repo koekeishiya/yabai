@@ -1047,6 +1047,23 @@ void space_manager_mark_spaces_invalid(struct space_manager *sm)
     }
 }
 
+bool space_manager_refresh_application_windows(struct space_manager *sm)
+{
+    int refresh_count = buf_len(g_window_manager.applications_to_refresh);
+    if (!refresh_count) return false;
+    int window_count = g_window_manager.window.count;
+    for (int i = 0; i < refresh_count; ++i) {
+        struct application *application = g_window_manager.applications_to_refresh[i];
+        debug("%s: %s has windows that are not yet resolved\n", __FUNCTION__, application->name);
+        bool result = window_manager_add_existing_application_windows(sm, &g_window_manager, application, i);
+        if (result) {
+            --refresh_count;
+            --i;
+        }
+    }
+    return window_count != g_window_manager.window.count;
+}
+
 void space_manager_handle_display_add(struct space_manager *sm, uint32_t did)
 {
     int space_count;
