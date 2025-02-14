@@ -1661,7 +1661,7 @@ static void window_manager_add_existing_application_windows(struct space_manager
             memcpy(data_cursor, &tid, sizeof(int32_t));
             data_cursor += sizeof(uint32_t);
 
-            for (uint64_t element_id = 0; element_id < UINT64_MAX; ++element_id) {
+            for (uint64_t element_id = 0; element_id < 0xffff; ++element_id) {
                 int app_window_list_len = ts_buf_len(app_window_list);
                 if (app_window_list_len == 0) break;
 
