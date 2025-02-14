@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Adjust to macOS API change in Sequoia 15.3 altering the behaviour of SPACE_CREATED and SPACE_DESTROYED event notifications [#2548](https://github.com/koekeishiya/yabai/issues/2548)
 
 ## [7.1.9] - 2025-02-12
 ### Changed

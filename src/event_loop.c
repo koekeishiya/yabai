@@ -839,16 +839,27 @@ static EVENT_HANDLER(SLS_WINDOW_DESTROYED)
 static EVENT_HANDLER(SLS_SPACE_CREATED)
 {
     uint64_t sid = (uint64_t)(intptr_t) context;
-    debug("%s: %lld\n", __FUNCTION__, sid);
-    event_signal_push(SIGNAL_SPACE_CREATED, context);
+    int type = SLSSpaceGetType(g_connection, sid);
+
+    if (type == 0 || type == 4) {
+        debug("%s: %lld, %d\n", __FUNCTION__, sid, type);
+	space_manager_find_view(&g_space_manager, sid);
+        event_signal_push(SIGNAL_SPACE_CREATED, context);
+    }
 }
 
 static EVENT_HANDLER(SLS_SPACE_DESTROYED)
 {
     uint64_t sid = (uint64_t)(intptr_t) context;
-    debug("%s: %lld\n", __FUNCTION__, sid);
-    space_manager_remove_label_for_space(&g_space_manager, sid);
-    event_signal_push(SIGNAL_SPACE_DESTROYED, context);
+    struct view *view = table_find(&g_space_manager.view, &sid);
+    if (view) {
+        debug("%s: %lld\n", __FUNCTION__, sid);
+	space_manager_remove_label_for_space(&g_space_manager, sid);
+        table_remove(&g_space_manager.view, &sid);
+        view_destroy(view);
+        free(view);
+        event_signal_push(SIGNAL_SPACE_DESTROYED, context);
+    }
 }
 
 static EVENT_HANDLER(SPACE_CHANGED)
