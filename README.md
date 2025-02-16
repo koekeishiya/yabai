@@ -1,25 +1,48 @@
-# yabai grid spaces
+<!-- Please be careful editing the below HTML, as GitHub is quite finicky with anything that looks like an HTML tag in GitHub Flavored Markdown. -->
+<p align="center">
+  <img width="75%" src="assets/banner/banner.svg" alt="Banner">
+</p>
+<p align="center">
+  <b>Tiling window management for the Mac.</b>
+</p>
+<p align="center">
+  <a href="https://github.com/koekeishiya/yabai/blob/master/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/koekeishiya/yabai.svg?color=green" alt="License Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc">
+    <img src="https://img.shields.io/badge/view-documentation-green.svg" alt="Documentation Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/wiki">
+    <img src="https://img.shields.io/badge/view-wiki-green.svg" alt="Wiki Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/blob/master/CHANGELOG.md">
+    <img src="https://img.shields.io/badge/view-changelog-green.svg" alt="Changelog Badge">
+  </a>
+  <a href="https://github.com/koekeishiya/yabai/releases">
+    <img src="https://img.shields.io/github/commits-since/koekeishiya/yabai/latest.svg?color=green" alt="Version Badge">
+  </a>
+</p>
 
-Grid space navigation in [yabai](https://github.com/koekeishiya/yabai).
+## About
 
-## Installation
+<img align="right" width="40%" src="assets/screenshot.png" alt="Screenshot">
 
-Install <https://github.com/mikkelricky/yabai/tree/grid-spaces> by running
+yabai is a window management utility that is designed to work as an extension to the built-in window manager of macOS.
+yabai allows you to control your windows, spaces and displays freely using an intuitive command line interface and optionally set user-defined keyboard shortcuts using [&nearr;&nbsp;skhd][gh-skhd] and other third-party software.
 
-```shell
-brew install --HEAD mikkelricky/formulae/myabai
-```
+The primary function of yabai is tiling window management; automatically modifying your window layout using a binary space partitioning algorithm to allow you to focus on the content of your windows without distractions.
+Additional features of yabai include focus-follows-mouse, disabling animations for switching spaces, creating spaces past the limit of 16 spaces, and much more.
 
-## Configuration
+## Installation and Configuration
 
-```shell
-# Navigate a grid with 3 columns.
-yabai --message config grid_columns 3
-```
+- The [&nearr;&nbsp;yabai&nbsp;wiki][yabai-wiki] has both brief and detailed installation instructions for multiple installation methods, and also explains how to uninstall yabai completely.
+- Sample configuration files can be found in the [&nearr;&nbsp;examples][yabai-examples] directory. Refer to the [&nearr;&nbsp;documentation][yabai-docs] or the wiki for further information.
+- Keyboard shortcuts can be defined with [&nearr;&nbsp;skhd][gh-skhd] or any other suitable software you may prefer.
 
-![grid spaces](docs/images/yabai-grid_columns.svg)
+## Requirements and Caveats
 
-## Usage
+Please read the below requirements carefully.
+Make sure you fulfil all of them before filing an issue.
 
 |Requirement|Note|
 |-:|:-|
@@ -71,10 +94,3 @@ You acknowledge that you understand the potential risk that may come from disabl
 
 <!-- External links -->
 [external-about-sip]: https://support.apple.com/en-us/HT204899
-
-```shell
-yabai --message space --focus north
-yabai --message space --focus east
-yabai --message space --focus south
-yabai --message space --focus west
-```
