@@ -618,9 +618,9 @@ uint64_t space_manager_grid_space(uint64_t sid, char *direction)
     for (int i = 0; i < display_spaces_count; ++i) {
         CFDictionaryRef display_ref = CFArrayGetValueAtIndex(display_spaces_ref, i);
         CFArrayRef spaces_ref = CFDictionaryGetValue(display_ref, CFSTR("Spaces"));
-        int spaces_count = CFArrayGetCount(spaces_ref);
+        uint64_t spaces_count = CFArrayGetCount(spaces_ref);
 
-        int grid_columns = INT_MAX;
+        uint64_t grid_columns = INT_MAX;
         if (NULL != g_space_manager.grid_columns
             && i < CFArrayGetCount(g_space_manager.grid_columns)) {
             int value = CFStringGetIntValue(CFArrayGetValueAtIndex(g_space_manager.grid_columns, i));
@@ -629,7 +629,7 @@ uint64_t space_manager_grid_space(uint64_t sid, char *direction)
             }
         }
 
-        for (int j = 0; j < spaces_count; ++j) {
+        for (uint64_t j = 0; j < spaces_count; ++j) {
             CFDictionaryRef space_ref = CFArrayGetValueAtIndex(spaces_ref, j);
             CFNumberRef sid_ref = CFDictionaryGetValue(space_ref, CFSTR("id64"));
             CFNumberGetValue(sid_ref, CFNumberGetType(sid_ref), &n_sid);
