@@ -608,6 +608,58 @@ out:
     return n_sid != sid ? n_sid : 0;
 }
 
+uint64_t space_manager_grid_space(uint64_t sid, char *direction)
+{
+    uint64_t n_sid = 0;
+
+    CFArrayRef display_spaces_ref = SLSCopyManagedDisplaySpaces(g_connection);
+    int display_spaces_count = CFArrayGetCount(display_spaces_ref);
+
+    for (int i = 0; i < display_spaces_count; ++i) {
+        CFDictionaryRef display_ref = CFArrayGetValueAtIndex(display_spaces_ref, i);
+        CFArrayRef spaces_ref = CFDictionaryGetValue(display_ref, CFSTR("Spaces"));
+        int spaces_count = CFArrayGetCount(spaces_ref);
+
+        for (int j = 0; j < spaces_count; ++j) {
+            CFDictionaryRef space_ref = CFArrayGetValueAtIndex(spaces_ref, j);
+            CFNumberRef sid_ref = CFDictionaryGetValue(space_ref, CFSTR("id64"));
+            CFNumberGetValue(sid_ref, CFNumberGetType(sid_ref), &n_sid);
+            if (n_sid == sid) {
+              // TODO: Get this from config
+              uint64_t grid_columns = 3;
+              uint64_t target_space_index = j;
+              uint64_t focused_column = j%grid_columns;
+
+              if (string_equals(direction, ARGUMENT_COMMON_SEL_NORTH)) {
+                target_space_index -= grid_columns;
+              } else if (string_equals(direction, ARGUMENT_COMMON_SEL_EAST)) {
+                if (focused_column < grid_columns - 1) {
+                  target_space_index += 1;
+                }
+              } else if (string_equals(direction, ARGUMENT_COMMON_SEL_SOUTH)) {
+                target_space_index += grid_columns;
+              } else if (string_equals(direction, ARGUMENT_COMMON_SEL_WEST)) {
+                if (0 < focused_column) {
+                  target_space_index -= 1;
+                }
+              }
+
+              if (0 <= target_space_index && target_space_index < spaces_count) {
+                CFDictionaryRef target_space_ref = CFArrayGetValueAtIndex(spaces_ref, target_space_index);
+                CFNumberRef target_space_id_ref = CFDictionaryGetValue(target_space_ref, CFSTR("id64"));
+                CFNumberGetValue(target_space_id_ref, CFNumberGetType(target_space_id_ref), &n_sid);
+              }
+
+              goto out;
+            }
+        }
+    }
+
+out:
+    CFRelease(display_spaces_ref);
+    return n_sid != sid ? n_sid : 0;
+}
+
 uint64_t space_manager_first_space(void)
 {
     uint64_t sid = 0;
