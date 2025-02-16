@@ -620,13 +620,20 @@ uint64_t space_manager_grid_space(uint64_t sid, char *direction)
         CFArrayRef spaces_ref = CFDictionaryGetValue(display_ref, CFSTR("Spaces"));
         int spaces_count = CFArrayGetCount(spaces_ref);
 
+        int grid_columns = INT_MAX;
+        if (NULL != g_space_manager.grid_columns
+            && i < CFArrayGetCount(g_space_manager.grid_columns)) {
+            int value = CFStringGetIntValue(CFArrayGetValueAtIndex(g_space_manager.grid_columns, i));
+            if (value > 0) {
+                grid_columns = value;
+            }
+        }
+
         for (int j = 0; j < spaces_count; ++j) {
             CFDictionaryRef space_ref = CFArrayGetValueAtIndex(spaces_ref, j);
             CFNumberRef sid_ref = CFDictionaryGetValue(space_ref, CFSTR("id64"));
             CFNumberGetValue(sid_ref, CFNumberGetType(sid_ref), &n_sid);
             if (n_sid == sid) {
-              // TODO: Get this from config
-              uint64_t grid_columns = 3;
               uint64_t target_space_index = j;
               uint64_t focused_column = j%grid_columns;
 
@@ -1183,6 +1190,8 @@ void space_manager_begin(struct space_manager *sm)
     int display_count;
     uint32_t *display_list = display_manager_active_display_list(&display_count);
     if (!display_list) return;
+
+    sm->grid_columns = NULL;
 
     for (int i = 0; i < display_count; ++i) {
         int space_count;
