@@ -1667,7 +1667,7 @@ bool window_manager_add_existing_application_windows(struct space_manager *sm, s
                 // NOTE(koekeishiya): Only the element_id changes between iterations.
                 //
 
-                *(uint64_t *) (data + 0xc) = element_id;
+                memcpy(data+0xc, &element_id, sizeof(uint64_t));
                 AXUIElementRef element_ref = _AXUIElementCreateWithRemoteToken(data_ref);
                 uint32_t element_wid = ax_window_id(element_ref);
                 bool matched = false;

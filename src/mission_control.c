@@ -3,26 +3,22 @@ extern enum mission_control_mode g_mission_control_mode;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
-__attribute__((no_sanitize("undefined")))
 static CONNECTION_CALLBACK(connection_handler)
 {
-    //
-    // NOTE(koekeishiya): Disable undefined sanitizer for this particular function.
-    // It will sometimes report load of misaligned address when reading from the
-    // data buffer, but there is nothing for us to do here because said memory is
-    // allocated and managed by macOS.
-    //
-
     if (type == 1204) {
         event_loop_post(&g_event_loop, MISSION_CONTROL_ENTER, NULL, 0);
     } else if (type == 1327) {
-        event_loop_post(&g_event_loop, SLS_SPACE_CREATED, (void *) (intptr_t) (* (uint64_t *) data), 0);
+        uint64_t sid; memcpy(&sid, data, sizeof(uint64_t));
+        event_loop_post(&g_event_loop, SLS_SPACE_CREATED, (void *) (intptr_t) sid , 0);
     } else if (type == 1328) {
-        event_loop_post(&g_event_loop, SLS_SPACE_DESTROYED, (void *) (intptr_t) (* (uint64_t *) data), 0);
+        uint64_t sid; memcpy(&sid, data, sizeof(uint64_t));
+        event_loop_post(&g_event_loop, SLS_SPACE_DESTROYED, (void *) (intptr_t) sid, 0);
     } else if (type == 808) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_ORDERED, (void *) (intptr_t) (* (uint32_t *) data), 0);
+        uint32_t wid; memcpy(&wid, data, sizeof(uint32_t));
+        event_loop_post(&g_event_loop, SLS_WINDOW_ORDERED, (void *) (intptr_t) wid, 0);
     } else if (type == 804) {
-        event_loop_post(&g_event_loop, SLS_WINDOW_DESTROYED, (void *) (intptr_t) (* (uint32_t *) data), 0);
+        uint32_t wid; memcpy(&wid, data, sizeof(uint32_t));
+        event_loop_post(&g_event_loop, SLS_WINDOW_DESTROYED, (void *) (intptr_t) wid, 0);
     }
 }
 #pragma clang diagnostic pop
