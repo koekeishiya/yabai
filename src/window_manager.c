@@ -1652,18 +1652,14 @@ bool window_manager_add_existing_application_windows(struct space_manager *sm, s
             // https://github.com/lwouis/alt-tab-macos/issues/1324#issuecomment-2631035482
             //
 
-            int32_t tid = 0x636f636f;
-            uint8_t data[0x14] = {0};
-            uint8_t *data_cursor = data;
+            CFMutableDataRef data_ref = CFDataCreateMutable(NULL, 0x14);
+            CFDataIncreaseLength(data_ref, 0x14);
 
-            memcpy(data_cursor, &application->pid, sizeof(uint32_t));
-            data_cursor += sizeof(uint32_t);
-            memset(data_cursor, 0, sizeof(uint32_t));
-            data_cursor += sizeof(uint32_t);
-            memcpy(data_cursor, &tid, sizeof(int32_t));
-            data_cursor += sizeof(uint32_t);
+            uint8_t *data = CFDataGetMutableBytePtr(data_ref);
+            *(uint32_t *) (data + 0x0) = application->pid;
+            *(uint32_t *) (data + 0x8) = 0x636f636f;
 
-            for (uint64_t element_id = 0; element_id < 0xffff; ++element_id) {
+            for (uint64_t element_id = 0; element_id < 0x7fff; ++element_id) {
                 int app_window_list_len = ts_buf_len(app_window_list);
                 if (app_window_list_len == 0) break;
 
@@ -1671,14 +1667,10 @@ bool window_manager_add_existing_application_windows(struct space_manager *sm, s
                 // NOTE(koekeishiya): Only the element_id changes between iterations.
                 //
 
-                memcpy(data_cursor, &element_id, sizeof(uint64_t));
-
-                CFDataRef data_ref = CFDataCreate(NULL, data, 0x14);
+                *(uint64_t *) (data + 0xc) = element_id;
                 AXUIElementRef element_ref = _AXUIElementCreateWithRemoteToken(data_ref);
-                CFRelease(data_ref);
-
-                bool matched = false;
                 uint32_t element_wid = ax_window_id(element_ref);
+                bool matched = false;
 
                 if (element_wid != 0) {
                     for (int i = 0; i < app_window_list_len; ++i) {
@@ -1696,6 +1688,8 @@ bool window_manager_add_existing_application_windows(struct space_manager *sm, s
                     CFRelease(element_ref);
                 }
             }
+
+            CFRelease(data_ref);
         }
 
         int app_window_list_len = ts_buf_len(app_window_list);
