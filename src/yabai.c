@@ -138,7 +138,8 @@ static inline bool configure_settings_and_acquire_lock(void)
 
     NSApplicationLoad();
     g_pid = getpid();
-    g_event_bytes = malloc(0xf8);
+    g_event_bytes = malloc(0x100);
+    memset(g_event_bytes, 0, 0x100);
     g_connection = SLSMainConnectionID();
     g_cv_host_clock_frequency   = CVGetHostClockFrequency();
     g_layer_normal_window_level = CGWindowLevelForKey(LAYER_NORMAL);
