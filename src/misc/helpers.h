@@ -262,14 +262,21 @@ static inline char *ts_string_escape(char *s)
     int num_replacements = 0;
 
     while (*cursor) {
-        if ((*cursor == '"') ||
-            (*cursor == '\\') ||
-            (*cursor == '\b') ||
-            (*cursor == '\f') ||
-            (*cursor == '\n') ||
-            (*cursor == '\r') ||
-            (*cursor == '\t')) {
+        switch (*cursor) {
+        case '"':
+        case '\\':
+        case '\b':
+        case '\f':
+        case '\n':
+        case '\r':
+        case '\t':
             ++num_replacements;
+            break;
+        default:
+            if (*cursor >= 0x00 && *cursor <= 0x1f) {
+                num_replacements += 5;
+            }
+            break;
         }
 
         ++cursor;
@@ -284,7 +291,7 @@ static inline char *ts_string_escape(char *s)
     for (char *dst = result, *cursor = s; *cursor; ++cursor) {
         if (*cursor == '"') {
             *dst++ = '\\';
-            *dst++ = *cursor;
+            *dst++ = '"';
         } else if (*cursor == '\\') {
             *dst++ = '\\';
             *dst++ = '\\';
@@ -303,6 +310,11 @@ static inline char *ts_string_escape(char *s)
         } else if (*cursor == '\t') {
             *dst++ = '\\';
             *dst++ = 't';
+        } else if (*cursor >= 0x00 && *cursor <= 0x1f) {
+            *dst++ = '\\';
+            *dst++ = 'u';
+            sprintf(dst, "%04x", (int)*cursor);
+            dst += 4;
         } else {
             *dst++ = *cursor;
         }
