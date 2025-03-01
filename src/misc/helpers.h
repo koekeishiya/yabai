@@ -262,21 +262,16 @@ static inline char *ts_string_escape(char *s)
     int num_replacements = 0;
 
     while (*cursor) {
-        switch (*cursor) {
-        case '"':
-        case '\\':
-        case '\b':
-        case '\f':
-        case '\n':
-        case '\r':
-        case '\t':
+        if ((*cursor == '"') ||
+            (*cursor == '\\') ||
+            (*cursor == '\b') ||
+            (*cursor == '\f') ||
+            (*cursor == '\n') ||
+            (*cursor == '\r') ||
+            (*cursor == '\t')) {
             ++num_replacements;
-            break;
-        default:
-            if (*cursor >= 0x00 && *cursor <= 0x1f) {
-                num_replacements += 5;
-            }
-            break;
+        } else if (*cursor >= 0x00 && *cursor <= 0x1f) {
+            num_replacements += 5;
         }
 
         ++cursor;
