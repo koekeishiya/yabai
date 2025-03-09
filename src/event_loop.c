@@ -605,7 +605,7 @@ static EVENT_HANDLER(WINDOW_FOCUSED)
         return;
     }
 
-    if (window_is_minimized(window)) {
+    if (window_check_flag(window, WINDOW_MINIMIZE)) {
         window_manager_add_lost_focused_event(&g_window_manager, window->id);
         return;
     }
@@ -703,6 +703,26 @@ static EVENT_HANDLER(WINDOW_RESIZED)
         window_clear_flag(window, WINDOW_FULLSCREEN);
     }
 
+    if (was_fullscreen != is_fullscreen) {
+        if (window_ax_can_move(window)) {
+            window_set_flag(window, WINDOW_MOVABLE);
+        } else {
+            window_clear_flag(window, WINDOW_MOVABLE);
+        }
+
+        if (window_ax_can_resize(window)) {
+            window_set_flag(window, WINDOW_RESIZABLE);
+        } else {
+            window_clear_flag(window, WINDOW_RESIZABLE);
+        }
+
+        if (window->role) CFRelease(window->role);
+        window->role = window_ax_role(window);
+
+        if (window->subrole) CFRelease(window->subrole);
+        window->subrole = window_ax_subrole(window);
+    }
+
     bool windowed_fullscreen = CGRectEqualToRect(window->windowed_frame, window->frame);
     window->frame = new_frame;
 
@@ -765,6 +785,24 @@ static EVENT_HANDLER(WINDOW_MINIMIZED)
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
     window_set_flag(window, WINDOW_MINIMIZE);
 
+    if (window_ax_can_move(window)) {
+        window_set_flag(window, WINDOW_MOVABLE);
+    } else {
+        window_clear_flag(window, WINDOW_MOVABLE);
+    }
+
+    if (window_ax_can_resize(window)) {
+        window_set_flag(window, WINDOW_RESIZABLE);
+    } else {
+        window_clear_flag(window, WINDOW_RESIZABLE);
+    }
+
+    if (window->role) CFRelease(window->role);
+    window->role = window_ax_role(window);
+
+    if (window->subrole) CFRelease(window->subrole);
+    window->subrole = window_ax_subrole(window);
+
     if (window->id == g_window_manager.last_window_id) {
         g_window_manager.last_window_id = g_window_manager.focused_window_id;
     }
@@ -790,6 +828,24 @@ static EVENT_HANDLER(WINDOW_DEMINIMIZED)
     }
 
     window_clear_flag(window, WINDOW_MINIMIZE);
+
+    if (window_ax_can_move(window)) {
+        window_set_flag(window, WINDOW_MOVABLE);
+    } else {
+        window_clear_flag(window, WINDOW_MOVABLE);
+    }
+
+    if (window_ax_can_resize(window)) {
+        window_set_flag(window, WINDOW_RESIZABLE);
+    } else {
+        window_clear_flag(window, WINDOW_RESIZABLE);
+    }
+
+    if (window->role) CFRelease(window->role);
+    window->role = window_ax_role(window);
+
+    if (window->subrole) CFRelease(window->subrole);
+    window->subrole = window_ax_subrole(window);
 
     uint64_t sid = space_manager_active_space();
     if (space_manager_is_window_on_space(sid, window)) {
@@ -824,6 +880,11 @@ static EVENT_HANDLER(WINDOW_TITLE_CHANGED)
     }
 
     debug("%s: %s %d\n", __FUNCTION__, window->application->name, window->id);
+
+    if (window->title) CFRelease(window->title);
+
+    window->title = window_title(window);
+
     event_signal_push(SIGNAL_WINDOW_TITLE_CHANGED, window);
 }
 
@@ -1009,7 +1070,7 @@ static EVENT_HANDLER(MOUSE_DOWN)
     debug("%s: %.2f, %.2f\n", __FUNCTION__, point.x, point.y);
 
     struct window *window = window_manager_find_window_at_point(&g_window_manager, point);
-    if (!window || window_is_fullscreen(window)) goto out;
+    if (!window || window_check_flag(window, WINDOW_FULLSCREEN)) goto out;
 
     g_mouse_state.window = window;
     g_mouse_state.window_frame = g_mouse_state.window->frame;
@@ -1047,7 +1108,7 @@ static EVENT_HANDLER(MOUSE_UP)
         goto err;
     }
 
-    if (window_is_fullscreen(g_mouse_state.window)) {
+    if (window_check_flag(g_mouse_state.window, WINDOW_FULLSCREEN)) {
         debug("%s: %d is transitioning into native-fullscreen mode, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
         goto err;
     }

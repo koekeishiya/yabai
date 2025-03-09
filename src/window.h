@@ -90,6 +90,9 @@ struct window
     AXUIElementRef ref;
     uint32_t id;
     uint32_t *volatile id_ptr;
+    CFStringRef role;
+    CFStringRef subrole;
+    CFStringRef title;
     CGRect frame;
     CGRect windowed_frame;
     bool is_root;
@@ -109,7 +112,9 @@ enum window_flag
     WINDOW_MINIMIZE   = 0x04,
     WINDOW_FLOAT      = 0x08,
     WINDOW_STICKY     = 0x10,
-    WINDOW_WINDOWED   = 0x20
+    WINDOW_WINDOWED   = 0x20,
+    WINDOW_MOVABLE    = 0x40,
+    WINDOW_RESIZABLE  = 0x80
 };
 
 enum window_rule_flag
@@ -136,6 +141,7 @@ void window_unknown_serialize(FILE *rsp, uint32_t wid, uint64_t flags);
 void window_serialize(FILE *rsp, struct window *window, uint64_t flags);
 char *window_property_title_ts(uint32_t wid);
 char *window_title_ts(struct window *window);
+CFStringRef window_title(struct window *window);
 bool window_shadow(uint32_t wid);
 float window_opacity(uint32_t wid);
 uint32_t window_parent(uint32_t wid);
@@ -145,15 +151,18 @@ uint64_t window_tags(uint32_t wid);
 bool window_is_sticky(uint32_t wid);
 CGPoint window_ax_origin(struct window *window);
 CGRect window_ax_frame(struct window *window);
+CFStringRef window_ax_role(struct window *window);
 CFStringRef window_role(struct window *window);
 char *window_role_ts(struct window *window);
+CFStringRef window_ax_subrole(struct window *window);
 CFStringRef window_subrole(struct window *window);
 char *window_subrole_ts(struct window *window);
+bool window_ax_can_move(struct window *window);
 bool window_can_move(struct window *window);
+bool window_ax_can_resize(struct window *window);
 bool window_can_resize(struct window *window);
 bool window_can_minimize(struct window *window);
 bool window_is_undersized(struct window *window);
-bool window_is_minimized(struct window *window);
 bool window_is_fullscreen(struct window *window);
 bool window_is_real(struct window *window);
 bool window_is_standard(struct window *window);

@@ -56,7 +56,7 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
             }
         } else {
             struct window *window = window_manager_find_window(&g_window_manager, wid);
-            if (window && !window_is_minimized(window)) {
+            if (window && !window_check_flag(window, WINDOW_MINIMIZE)) {
                 window_list[window_count++] = wid;
             } else if (parent_wid == 0) {
                 if (level == 0 || level == 3 || level == 8) {

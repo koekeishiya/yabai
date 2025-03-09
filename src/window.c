@@ -447,7 +447,7 @@ void window_serialize(FILE *rsp, struct window *window, uint64_t flags)
 
     if ((flags & WINDOW_PROPERTY_IS_VISIBLE) ||
         (flags & WINDOW_PROPERTY_IS_MINIMIZED)) {
-        is_minimized = window_is_minimized(window);
+        is_minimized = window_check_flag(window, WINDOW_MINIMIZE);
     }
 
     if ((flags & WINDOW_PROPERTY_IS_VISIBLE) ||
@@ -657,7 +657,7 @@ void window_serialize(FILE *rsp, struct window *window, uint64_t flags)
     if (flags & WINDOW_PROPERTY_IS_FULLSCREEN) {
         if (did_output) fprintf(rsp, ",\n");
 
-        fprintf(rsp, "\t\"is-native-fullscreen\":%s", json_bool(window_is_fullscreen(window)));
+        fprintf(rsp, "\t\"is-native-fullscreen\":%s", json_bool(window_check_flag(window, WINDOW_FULLSCREEN)));
         did_output = true;
     }
 
@@ -723,13 +723,14 @@ char *window_property_title_ts(uint32_t wid)
 
 char *window_title_ts(struct window *window)
 {
+    return window->title ? ts_cfstring_copy(window->title) : ts_string_copy("");
+}
+
+CFStringRef window_title(struct window *window)
+{
     CFTypeRef value = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXTitleAttribute, &value);
-    if (!value) return ts_string_copy("");
-
-    char *result = ts_cfstring_copy(value);
-    CFRelease(value);
-    return result;
+    return value;
 }
 
 CGPoint window_ax_origin(struct window *window)
@@ -769,7 +770,7 @@ CGRect window_ax_frame(struct window *window)
     return frame;
 }
 
-bool window_can_move(struct window *window)
+bool window_ax_can_move(struct window *window)
 {
     Boolean result;
     if (AXUIElementIsAttributeSettable(window->ref, kAXPositionAttribute, &result) != kAXErrorSuccess) {
@@ -778,13 +779,23 @@ bool window_can_move(struct window *window)
     return result;
 }
 
-bool window_can_resize(struct window *window)
+bool window_can_move(struct window *window)
+{
+    return window_check_flag(window, WINDOW_MOVABLE);
+}
+
+bool window_ax_can_resize(struct window *window)
 {
     Boolean result;
     if (AXUIElementIsAttributeSettable(window->ref, kAXSizeAttribute, &result) != kAXErrorSuccess) {
         result = 0;
     }
     return result;
+}
+
+bool window_can_resize(struct window *window)
+{
+    return window_check_flag(window, WINDOW_RESIZABLE);
 }
 
 bool window_can_minimize(struct window *window)
@@ -803,7 +814,7 @@ bool window_is_undersized(struct window *window)
     return false;
 }
 
-bool window_is_minimized(struct window *window)
+static bool window_is_minimized(struct window *window)
 {
     Boolean result = 0;
     CFTypeRef value;
@@ -813,7 +824,7 @@ bool window_is_minimized(struct window *window)
         CFRelease(value);
     }
 
-    return result || window_check_flag(window, WINDOW_MINIMIZE);
+    return result;
 }
 
 bool window_is_fullscreen(struct window *window)
@@ -975,11 +986,16 @@ err2:
     return tags;
 }
 
-CFStringRef window_role(struct window *window)
+CFStringRef window_ax_role(struct window *window)
 {
     const void *role = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXRoleAttribute, &role);
     return role;
+}
+
+CFStringRef window_role(struct window *window)
+{
+    return window->role;
 }
 
 char *window_role_ts(struct window *window)
@@ -988,15 +1004,19 @@ char *window_role_ts(struct window *window)
     if (!role) return ts_string_copy("");
 
     char *result = ts_cfstring_copy(role);
-    CFRelease(role);
     return result;
 }
 
-CFStringRef window_subrole(struct window *window)
+CFStringRef window_ax_subrole(struct window *window)
 {
     const void *srole = NULL;
     AXUIElementCopyAttributeValue(window->ref, kAXSubroleAttribute, &srole);
     return srole;
+}
+
+CFStringRef window_subrole(struct window *window)
+{
+    return window->subrole;
 }
 
 char *window_subrole_ts(struct window *window)
@@ -1005,7 +1025,6 @@ char *window_subrole_ts(struct window *window)
     if (!subrole) return ts_string_copy("");
 
     char *result = ts_cfstring_copy(subrole);
-    CFRelease(subrole);
     return result;
 }
 
@@ -1029,16 +1048,13 @@ bool window_is_real(struct window *window)
     CFStringRef srole = NULL;
 
     if (!(role  = window_role(window)))    goto out;
-    if (!(srole = window_subrole(window))) goto role;
+    if (!(srole = window_subrole(window))) goto out;
 
     win = CFEqual(role, kAXWindowRole) &&
           (CFEqual(srole, kAXStandardWindowSubrole) ||
            CFEqual(srole, kAXFloatingWindowSubrole) ||
            CFEqual(srole, kAXDialogSubrole));
 
-    CFRelease(srole);
-role:
-    CFRelease(role);
 out:
     return win;
 }
@@ -1050,14 +1066,11 @@ bool window_is_standard(struct window *window)
     CFStringRef srole = NULL;
 
     if (!(role  = window_role(window)))    goto out;
-    if (!(srole = window_subrole(window))) goto role;
+    if (!(srole = window_subrole(window))) goto out;
 
     standard_win = CFEqual(role, kAXWindowRole) &&
                    CFEqual(srole, kAXStandardWindowSubrole);
 
-    CFRelease(srole);
-role:
-    CFRelease(role);
 out:
     return standard_win;
 }
@@ -1074,8 +1087,6 @@ bool window_is_unknown(struct window *window)
     if (!subrole) return false;
 
     bool result = CFEqual(subrole, kAXUnknownSubrole);
-    CFRelease(subrole);
-
     return result;
 }
 
@@ -1089,11 +1100,25 @@ struct window *window_create(struct application *application, AXUIElementRef win
     window->id = window_id;
     window->id_ptr = &window->id;
     window->frame = window_ax_frame(window);
+    window->role = window_ax_role(window);
+    window->subrole = window_ax_subrole(window);
+    window->title = window_title(window);
     window->is_root = !window_parent(window->id) || window_is_root(window);
-    if (window_shadow(window->id)) window_set_flag(window, WINDOW_SHADOW);
+
+    if (window_shadow(window->id)) {
+        window_set_flag(window, WINDOW_SHADOW);
+    }
 
     if (window_is_minimized(window)) {
         window_set_flag(window, WINDOW_MINIMIZE);
+    }
+
+    if (window_ax_can_move(window)) {
+        window_set_flag(window, WINDOW_MOVABLE);
+    }
+
+    if (window_ax_can_resize(window)) {
+        window_set_flag(window, WINDOW_RESIZABLE);
     }
 
     if ((window_is_fullscreen(window)) ||
@@ -1111,6 +1136,9 @@ struct window *window_create(struct application *application, AXUIElementRef win
 void window_destroy(struct window *window)
 {
     window->id = 0;
+    if (window->role) CFRelease(window->role);
+    if (window->subrole) CFRelease(window->subrole);
+    if (window->title) CFRelease(window->title);
     CFRelease(window->ref);
     free(window);
 }

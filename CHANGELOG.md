@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Implement cached values for window query system to fix responsiveness issues for slow/frozen applications [#2377](https://github.com/koekeishiya/yabai/issues/2377)
 - Properly escape control characters U+0000 - U+001f in queries [#2517](https://github.com/koekeishiya/yabai/issues/2517)
 
 ## [7.1.10] - 2025-02-14
