@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Replace seticon script with AppleScript implementation instead of Python
 
 ## [7.1.11] - 2025-03-09
 ### Changed
