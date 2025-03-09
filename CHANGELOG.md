@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.11] - 2025-03-09
 ### Changed
 - Update scripting addition for macOS Sequoia 15.4 Beta 2 [#2558](https://github.com/koekeishiya/yabai/issues/2558)
 - Implement cached values for window query system to fix responsiveness issues for slow/frozen applications [#2377](https://github.com/koekeishiya/yabai/issues/2377)
@@ -737,7 +739,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.10...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.11...HEAD
+[7.1.11]: https://github.com/koekeishiya/yabai/compare/v7.1.10...v7.1.11
 [7.1.10]: https://github.com/koekeishiya/yabai/compare/v7.1.9...v7.1.10
 [7.1.9]: https://github.com/koekeishiya/yabai/compare/v7.1.8...v7.1.9
 [7.1.8]: https://github.com/koekeishiya/yabai/compare/v7.1.7...v7.1.8

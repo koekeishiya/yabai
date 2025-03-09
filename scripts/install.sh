@@ -57,8 +57,8 @@ fi
 
 AUTHOR="koekeishiya"
 NAME="yabai"
-VERSION="7.1.10"
-EXPECTED_HASH="a6f549bbf41a24c1f142dea61010b9ad49fafb423e0b4cfbf7f0c5c80b777430"
+VERSION="7.1.11"
+EXPECTED_HASH="c29c67ccacacf0c56e5263dcf3cd9a387ef6efa76bb480f60d5745d307c538e2"
 TMP_DIR="./${AUTHOR}-${NAME}-v${VERSION}-installer"
 
 mkdir $TMP_DIR
