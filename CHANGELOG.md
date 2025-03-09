@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Update scripting addition for macOS Sequoia 15.4 Beta 2 [#2558](https://github.com/koekeishiya/yabai/issues/2558)
 - Implement cached values for window query system to fix responsiveness issues for slow/frozen applications [#2377](https://github.com/koekeishiya/yabai/issues/2377)
 - Properly escape control characters U+0000 - U+001f in queries [#2517](https://github.com/koekeishiya/yabai/issues/2517)
 

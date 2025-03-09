@@ -6,7 +6,7 @@
 
 uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return 0x200000;
+        return os_version.minorVersion >= 4 ? 0x1f0000 : 0x200000;
     } else if (os_version.majorVersion == 14) {
         return 0x114000;
     } else if (os_version.majorVersion == 13) {
@@ -104,7 +104,7 @@ uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
 
 const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return "?? 12 00 ?? 73 ?? ?? 91 ?? 02 40 F9 ?? ?? 00 B4 97 3A 40 B9";
+        return "?? 12 00 ?? ?? ?? ?? 91 ?? 02 40 F9 ?? ?? 00 B4 ?? ?? ?? ??";
     } else if (os_version.majorVersion == 14) {
         if (os_version.minorVersion > 0) {
             return "36 16 00 ?? D6 ?? ?? 91 ?? 02 40 F9 ?? ?? 00 B4 ?? 03 14 AA";
@@ -138,7 +138,7 @@ const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return "00 10 6A 1E A8 C3 01 D1 ?? 01 ?? F8";
+        return "00 10 6A 1E A8 ?? ?? D1 ?? 01 ?? F8";
     } else if (os_version.majorVersion == 14) {
         return "00 10 6A 1E E0 03 14 AA ?? 03 ?? AA";
     } else if (os_version.majorVersion == 13) {
