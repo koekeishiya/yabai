@@ -1629,77 +1629,98 @@ bool window_manager_add_existing_application_windows(struct space_manager *sm, s
     }
 
     if (global_window_count != window_count-empty_count) {
-        bool missing_window = false;
-        uint32_t *app_window_list = NULL;
+        if (refresh_index == -1) {
+            bool missing_window = false;
+            uint32_t *app_window_list = NULL;
 
-        for (int i = 0; i < global_window_count; ++i) {
-            struct window *window = window_manager_find_window(wm, global_window_list[i]);
-            if (!window) {
-                missing_window = true;
-                ts_buf_push(app_window_list, global_window_list[i]);
+            for (int i = 0; i < global_window_count; ++i) {
+                struct window *window = window_manager_find_window(wm, global_window_list[i]);
+                if (!window) {
+                    missing_window = true;
+                    ts_buf_push(app_window_list, global_window_list[i]);
+                }
             }
-        }
 
-        if (missing_window) {
-            debug("%s: %s has %d windows that are not yet resolved, attempting workaround\n", __FUNCTION__, application->name, ts_buf_len(app_window_list));
-
-            //
-            // NOTE(koekeishiya): MacOS API does not return AXUIElementRef of windows on inactive spaces.
-            // However, we can just brute-force the element_id and create the AXUIElementRef ourselves.
-            //
-            // :Attribution
-            // https://github.com/decodism
-            // https://github.com/lwouis/alt-tab-macos/issues/1324#issuecomment-2631035482
-            //
-
-            CFMutableDataRef data_ref = CFDataCreateMutable(NULL, 0x14);
-            CFDataIncreaseLength(data_ref, 0x14);
-
-            uint8_t *data = CFDataGetMutableBytePtr(data_ref);
-            *(uint32_t *) (data + 0x0) = application->pid;
-            *(uint32_t *) (data + 0x8) = 0x636f636f;
-
-            for (uint64_t element_id = 0; element_id < 0x7fff; ++element_id) {
-                int app_window_list_len = ts_buf_len(app_window_list);
-                if (app_window_list_len == 0) break;
+            if (missing_window) {
+                debug("%s: %s has %d windows that are not yet resolved, attempting workaround\n", __FUNCTION__, application->name, ts_buf_len(app_window_list));
 
                 //
-                // NOTE(koekeishiya): Only the element_id changes between iterations.
+                // NOTE(koekeishiya): MacOS API does not return AXUIElementRef of windows on inactive spaces.
+                // However, we can just brute-force the element_id and create the AXUIElementRef ourselves.
+                //
+                // :Attribution
+                // https://github.com/decodism
+                // https://github.com/lwouis/alt-tab-macos/issues/1324#issuecomment-2631035482
                 //
 
-                memcpy(data+0xc, &element_id, sizeof(uint64_t));
-                AXUIElementRef element_ref = _AXUIElementCreateWithRemoteToken(data_ref);
-                uint32_t element_wid = ax_window_id(element_ref);
-                bool matched = false;
+                CFMutableDataRef data_ref = CFDataCreateMutable(NULL, 0x14);
+                CFDataIncreaseLength(data_ref, 0x14);
 
-                if (element_wid != 0) {
-                    for (int i = 0; i < app_window_list_len; ++i) {
-                        if (app_window_list[i] == element_wid) {
-                            matched = true;
-                            ts_buf_del(app_window_list, i);
-                            break;
+                uint8_t *data = CFDataGetMutableBytePtr(data_ref);
+                *(uint32_t *) (data + 0x0) = application->pid;
+                *(uint32_t *) (data + 0x8) = 0x636f636f;
+
+                for (uint64_t element_id = 0; element_id < 0x7fff; ++element_id) {
+                    int app_window_list_len = ts_buf_len(app_window_list);
+                    if (app_window_list_len == 0) break;
+
+                    memcpy(data+0xc, &element_id, sizeof(uint64_t));
+                    AXUIElementRef element_ref = _AXUIElementCreateWithRemoteToken(data_ref);
+
+                    const void *role = NULL;
+                    AXUIElementCopyAttributeValue(element_ref, kAXRoleAttribute, &role);
+
+                    if (role) {
+                        if (CFEqual(role, kAXWindowRole)) {
+                            uint32_t element_wid = ax_window_id(element_ref);
+                            bool matched = false;
+
+                            if (element_wid != 0) {
+                                for (int i = 0; i < app_window_list_len; ++i) {
+                                    if (app_window_list[i] == element_wid) {
+                                        matched = true;
+                                        ts_buf_del(app_window_list, i);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (matched) {
+                                window_manager_create_and_add_window(sm, wm, application, element_ref, element_wid, false);
+                            } else {
+                                CFRelease(element_ref);
+                            }
                         }
+
+                        CFRelease(role);
                     }
                 }
 
-                if (matched) {
-                    window_manager_create_and_add_window(sm, wm, application, element_ref, element_wid, false);
-                } else {
-                    CFRelease(element_ref);
+                CFRelease(data_ref);
+            }
+
+            if (ts_buf_len(app_window_list) > 0) {
+                debug("%s: workaround failed to resolve all windows for %s\n", __FUNCTION__, application->name);
+                buf_push(wm->applications_to_refresh, application);
+            } else {
+                debug("%s: workaround resolved all windows for %s\n", __FUNCTION__, application->name);
+            }
+        } else {
+            bool missing_window = false;
+
+            for (int i = 0; i < global_window_count; ++i) {
+                struct window *window = window_manager_find_window(wm, global_window_list[i]);
+                if (!window) {
+                    missing_window = true;
+                    break;
                 }
             }
 
-            CFRelease(data_ref);
-        }
-
-        int app_window_list_len = ts_buf_len(app_window_list);
-        if (refresh_index == -1 && app_window_list_len > 0) {
-            debug("%s: workaround failed to resolve all windows for %s\n", __FUNCTION__, application->name);
-            buf_push(wm->applications_to_refresh, application);
-        } else if (refresh_index != -1 && app_window_list_len == 0) {
-            debug("%s: workaround successfully resolved all windows for %s\n", __FUNCTION__, application->name);
-            buf_del(wm->applications_to_refresh, refresh_index);
-            result = true;
+            if (!missing_window) {
+                debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
+                buf_del(wm->applications_to_refresh, refresh_index);
+                result = true;
+            }
         }
     } else if (refresh_index != -1) {
         debug("%s: all windows for %s are now resolved\n", __FUNCTION__, application->name);
