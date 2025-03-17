@@ -736,6 +736,7 @@ COMMAND
 
 *--add event='<EVENT>' action='<ACTION>' [label='<LABEL>'] [app[!]='<REGEX>'] [title[!]='<REGEX>'] [active='yes|no']*::
     Add an optionally labelled signal to execute an action after processing an event of the given type. +
+    Labels need to be unique per added signal, otherwise they override the previous signal. +
     Some signals can be specified to trigger based on the application name and/or window title, and its active/focused state.
 
 *--remove '<SIGNAL_SEL>'*::
