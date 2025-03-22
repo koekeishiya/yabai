@@ -1572,7 +1572,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
             if (sel_sid) {
                 struct view *view = space_manager_find_view(&g_space_manager, sel_sid);
                 if (!token_is_valid(value)) {
-                    fprintf(rsp, "%s\n", bool_str[view->auto_balance]);
+                    fprintf(rsp, "%s\n", auto_balance_str[view->auto_balance]);
                 } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     view_set_flag(view, VIEW_AUTO_BALANCE);
                     view->auto_balance = SPLIT_NONE;
@@ -1590,7 +1590,7 @@ static void handle_domain_config(FILE *rsp, struct token domain, char *message)
                 }
             } else {
                 if (!token_is_valid(value)) {
-                    fprintf(rsp, "%s\n", bool_str[g_space_manager.auto_balance]);
+                    fprintf(rsp, "%s\n", auto_balance_str[g_space_manager.auto_balance]);
                 } else if (token_equals(value, ARGUMENT_COMMON_VAL_OFF)) {
                     space_manager_set_auto_balance_for_all_spaces(&g_space_manager, SPLIT_NONE);
                 } else if (token_equals(value, ARGUMENT_COMMON_VAL_ON)) {

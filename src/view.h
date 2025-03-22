@@ -135,6 +135,13 @@ static const char *window_node_split_str[] =
     "auto"
 };
 
+static const char *auto_balance_str[] = {
+    "off",
+    "vertical",
+    "horizontal",
+    "on"
+};
+
 struct feedback_window
 {
     uint32_t id;
