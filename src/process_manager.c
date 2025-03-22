@@ -21,7 +21,14 @@ static const char *process_name_blacklist[] =
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-struct process *process_create(ProcessSerialNumber psn)
+static inline pid_t process_pid_for_psn(ProcessSerialNumber psn)
+{
+    pid_t pid = 0;
+    GetProcessPID(&psn, &pid);
+    return pid;
+}
+
+static struct process *process_create(ProcessSerialNumber psn, pid_t pid)
 {
     ProcessInfoRec process_info = { .processInfoLength = sizeof(ProcessInfoRec) };
     GetProcessInformation(&psn, &process_info);
@@ -53,18 +60,23 @@ struct process *process_create(ProcessSerialNumber psn)
 
     struct process *process = malloc(sizeof(struct process));
     process->psn = psn;
-    GetProcessPID(&process->psn, &process->pid);
+    process->pid = pid;
     process->name = process_name;
     __atomic_store_n(&process->terminated, false, __ATOMIC_RELEASE);
     __atomic_store_n(&process->ns_application, workspace_application_create_running_ns_application(process), __ATOMIC_RELEASE);
     return process;
 }
 
-void process_destroy(struct process *process)
+static bool process_is_being_debugged(pid_t pid)
 {
-    workspace_application_destroy_running_ns_application(g_workspace_context, process);
-    free(process->name);
-    free(process);
+    struct kinfo_proc info;
+    info.kp_proc.p_flag = 0;
+
+    size_t size = sizeof(info);
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid };
+
+    sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    return ((info.kp_proc.p_flag & P_TRACED) != 0);
 }
 
 #pragma clang diagnostic push
@@ -91,10 +103,16 @@ static PROCESS_EVENT_HANDLER(process_handler)
             return noErr;
         }
 
-        struct process *process = process_create(psn);
+        pid_t pid = process_pid_for_psn(psn);
+        if (process_is_being_debugged(pid)) {
+            debug("%s: process with pid %d is running under a debugger! ignoring..\n", __FUNCTION__, pid);
+            return noErr;
+        }
+
+        struct process *process = process_create(psn, pid);
         if (!process) return noErr;
 
-        process_manager_add_process(pm, process);
+        table_add(&pm->process, &process->psn, process);
         event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, process, 0);
     } break;
     case kEventAppTerminated: {
@@ -102,7 +120,7 @@ static PROCESS_EVENT_HANDLER(process_handler)
         if (!process) return noErr;
 
         __atomic_store_n(&process->terminated, true, __ATOMIC_RELEASE);
-        process_manager_remove_process(pm, &psn);
+        table_remove(&pm->process, &psn);
         workspace_application_unobserve(g_workspace_context, process);
         __asm__ __volatile__ ("" ::: "memory");
 
@@ -120,12 +138,17 @@ static PROCESS_EVENT_HANDLER(process_handler)
 }
 #pragma clang diagnostic pop
 
-static void
-process_manager_add_running_processes(struct process_manager *pm)
+static void process_manager_add_running_processes(struct process_manager *pm)
 {
     ProcessSerialNumber psn = { kNoProcess, kNoProcess };
     while (GetNextProcess(&psn) == noErr) {
-        struct process *process = process_create(psn);
+        pid_t pid = process_pid_for_psn(psn);
+        if (process_is_being_debugged(pid)) {
+            debug("%s: process with pid %d is running under a debugger! ignoring..\n", __FUNCTION__, pid);
+            continue;
+        }
+
+        struct process *process = process_create(psn, pid);
         if (!process) continue;
 
         if (string_equals(process->name, "Finder")) {
@@ -133,28 +156,10 @@ process_manager_add_running_processes(struct process_manager *pm)
             pm->finder_psn = psn;
         }
 
-        process_manager_add_process(pm, process);
+        table_add(&pm->process, &process->psn, process);
     }
 }
-#pragma clang diagnostic pop
 
-struct process *process_manager_find_process(struct process_manager *pm, ProcessSerialNumber *psn)
-{
-    return table_find(&pm->process, psn);
-}
-
-void process_manager_remove_process(struct process_manager *pm, ProcessSerialNumber *psn)
-{
-    table_remove(&pm->process, psn);
-}
-
-void process_manager_add_process(struct process_manager *pm, struct process *process)
-{
-    table_add(&pm->process, &process->psn, process);
-}
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 bool process_manager_begin(struct process_manager *pm)
 {
     pm->target = GetApplicationEventTarget();
@@ -179,3 +184,15 @@ bool process_manager_begin(struct process_manager *pm)
     return InstallEventHandler(pm->target, pm->handler, 3, pm->type, pm, &pm->ref) == noErr;
 }
 #pragma clang diagnostic pop
+
+struct process *process_manager_find_process(struct process_manager *pm, ProcessSerialNumber *psn)
+{
+    return table_find(&pm->process, psn);
+}
+
+void process_destroy(struct process *process)
+{
+    workspace_application_destroy_running_ns_application(g_workspace_context, process);
+    free(process->name);
+    free(process);
+}

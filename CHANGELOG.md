@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Ignore applications that are being debugged [#599](https://github.com/koekeishiya/yabai/issues/599)
 - Fixed query output for `config auto_balance`; regression after [#190](https://github.com/koekeishiya/yabai/issues/190) in v7.1.6 [#2579](https://github.com/koekeishiya/yabai/issues/2579)
 - Workaround to acquire AX-References for windows on inactive spaces should only run at startup [#2575](https://github.com/koekeishiya/yabai/issues/2575)
 
