@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.12] - 2025-03-22
 ### Changed
 - Ignore applications that are being debugged [#599](https://github.com/koekeishiya/yabai/issues/599)
 - Fixed query output for `config auto_balance`; regression after [#190](https://github.com/koekeishiya/yabai/issues/190) in v7.1.6 [#2579](https://github.com/koekeishiya/yabai/issues/2579)
@@ -743,7 +745,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.11...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.12...HEAD
+[7.1.12]: https://github.com/koekeishiya/yabai/compare/v7.1.11...v7.1.12
 [7.1.11]: https://github.com/koekeishiya/yabai/compare/v7.1.10...v7.1.11
 [7.1.10]: https://github.com/koekeishiya/yabai/compare/v7.1.9...v7.1.10
 [7.1.9]: https://github.com/koekeishiya/yabai/compare/v7.1.8...v7.1.9
