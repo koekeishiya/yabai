@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Display --focus command should return an error if the target display already has focus [#2574](https://github.com/koekeishiya/yabai/issues/2574)
 
 ## [7.1.12] - 2025-03-22
 ### Changed
