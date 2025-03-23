@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.13] - 2025-03-23
 ### Changed
 - Implement different method of focusing displays without synthesizing mouse-events [#2452](https://github.com/koekeishiya/yabai/issues/2452) [#2289](https://github.com/koekeishiya/yabai/issues/2289)
 - Display --focus command should return an error if the target display already has focus [#2574](https://github.com/koekeishiya/yabai/issues/2574)
@@ -748,7 +750,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.12...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.13...HEAD
+[7.1.13]: https://github.com/koekeishiya/yabai/compare/v7.1.12...v7.1.13
 [7.1.12]: https://github.com/koekeishiya/yabai/compare/v7.1.11...v7.1.12
 [7.1.11]: https://github.com/koekeishiya/yabai/compare/v7.1.10...v7.1.11
 [7.1.10]: https://github.com/koekeishiya/yabai/compare/v7.1.9...v7.1.10
