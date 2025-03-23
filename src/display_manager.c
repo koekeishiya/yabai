@@ -412,13 +412,13 @@ static AXUIElementRef display_manager_find_element_at_point(CGPoint point)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-uint32_t display_manager_focus_display_with_point(CGPoint point, bool update_cursor_position)
+uint32_t display_manager_focus_display_with_window_at_point(CGPoint point)
 {
     int element_connection;
     ProcessSerialNumber element_psn;
 
     AXUIElementRef element_ref = display_manager_find_element_at_point(point);
-    if (!element_ref) goto click;
+    if (!element_ref) goto out;
 
     uint32_t element_id = ax_window_id(element_ref);
     if (!element_id) goto err_ref;
@@ -431,21 +431,28 @@ uint32_t display_manager_focus_display_with_point(CGPoint point, bool update_cur
 
 err_ref:
     CFRelease(element_ref);
-click:
-    CGPostMouseEvent(point, update_cursor_position, 1, true);
-    CGPostMouseEvent(point, update_cursor_position, 1, false);
-
+out:
     return 0;
 }
 #pragma clang diagnostic pop
+
+void display_manager_set_active_display_id(uint32_t did)
+{
+    CFStringRef uuid = display_uuid(did);
+    SLSSetActiveMenuBarDisplayIdentifier(g_connection, uuid, uuid);
+    CFRelease(uuid);
+}
 
 void display_manager_focus_display(uint32_t did, uint64_t sid)
 {
     struct window *window = window_manager_find_window_on_space_by_rank_filtering_window(&g_window_manager, sid, 1, 0);
     if (window) {
         window_manager_focus_window_with_raise(&window->application->psn, window->id, window->ref);
+        window_manager_center_mouse(&g_window_manager, window);
+        display_manager_set_active_display_id(did);
     } else {
-        display_manager_focus_display_with_point(display_center(did), true);
+        CGWarpMouseCursorPosition(display_center(did));
+        display_manager_set_active_display_id(did);
     }
 }
 

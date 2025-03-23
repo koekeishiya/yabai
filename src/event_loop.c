@@ -1379,7 +1379,8 @@ static EVENT_HANDLER(MOUSE_MOVED)
         CGRect bounds = display_bounds_constrained(cursor_did, false);
         if (!cgrect_contains_point(bounds, point)) goto out;
 
-        uint32_t wid = display_manager_focus_display_with_point(point, false);
+        uint32_t wid = display_manager_focus_display_with_window_at_point(point);
+        if (!wid) display_manager_set_active_display_id(cursor_did);
         g_mouse_state.ffm_window_id = wid;
     }
 

@@ -40,6 +40,7 @@ extern CFUUIDRef CGDisplayCreateUUIDFromDisplayID(uint32_t did);
 extern CFArrayRef SLSCopyManagedDisplays(int cid);
 extern uint64_t SLSManagedDisplayGetCurrentSpace(int cid, CFStringRef uuid);
 extern CFStringRef SLSCopyActiveMenuBarDisplayIdentifier(int cid);
+extern CGError SLSSetActiveMenuBarDisplayIdentifier(int cid, CFStringRef uuid, CFStringRef repeat_uuid);
 extern CFStringRef SLSCopyBestManagedDisplayForPoint(int cid, CGPoint point);
 extern bool SLSManagedDisplayIsAnimating(int cid, CFStringRef uuid);
 extern CGError SLSSetMenuBarInsetAndAlpha(int cid, double unused1, double unused2, float alpha);

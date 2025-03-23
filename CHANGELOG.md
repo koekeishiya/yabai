@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 ### Changed
+- Implement different method of focusing displays without synthesizing mouse-events [#2452](https://github.com/koekeishiya/yabai/issues/2452) [#2289](https://github.com/koekeishiya/yabai/issues/2289)
 - Display --focus command should return an error if the target display already has focus [#2574](https://github.com/koekeishiya/yabai/issues/2574)
 
 ## [7.1.12] - 2025-03-22
