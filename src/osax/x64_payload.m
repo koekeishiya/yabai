@@ -38,7 +38,7 @@ uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_fix_animation_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
-        return 0x280000;
+        return os_version.minorVersion >= 4 ? 0x270000 : 0x280000;
     } else if (os_version.majorVersion == 14) {
         return os_version.minorVersion > 0 ? 0x1f0000 : 0x210000;
     } else if (os_version.majorVersion == 13) {
@@ -157,6 +157,9 @@ const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_fix_animation_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 15) {
+        if (os_version.minorVersion >= 4) {
+            return "F2 0F 10 05 DB 13 0B 00 4C 89 F7 48 89 DE";
+        }
         return "F2 0F 10 05 ?? ?? ?? 00 48 8B ?? ?? 48 ?? ??";
     } else if (os_version.majorVersion == 14) {
         return "F2 0F 10 05 ?? ?? ?? 00 4C 89 ?? 48 89 DE";
