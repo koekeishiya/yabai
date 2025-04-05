@@ -7,7 +7,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ## [7.1.14] - 2025-04-05
-### Update scripting addition for macOS 15.4 Intel x86-64 [#2589](https://github.com/koekeishiya/yabai/issues/2589)
+### Changed
+- Update scripting addition for macOS 15.4 Intel x86-64 [#2589](https://github.com/koekeishiya/yabai/issues/2589)
 
 ## [7.1.13] - 2025-03-23
 ### Changed
