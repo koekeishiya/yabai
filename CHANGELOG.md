@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.14] - 2025-04-05
 ### Update scripting addition for macOS 15.4 Intel x86-64 [#2589](https://github.com/koekeishiya/yabai/issues/2589)
 
 ## [7.1.13] - 2025-03-23
@@ -751,7 +753,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.13...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.14...HEAD
+[7.1.14]: https://github.com/koekeishiya/yabai/compare/v7.1.13...v7.1.14
 [7.1.13]: https://github.com/koekeishiya/yabai/compare/v7.1.12...v7.1.13
 [7.1.12]: https://github.com/koekeishiya/yabai/compare/v7.1.11...v7.1.12
 [7.1.11]: https://github.com/koekeishiya/yabai/compare/v7.1.10...v7.1.11
