@@ -78,6 +78,23 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
         return;
     }
 
+    if (!__atomic_load_n(&process->ns_application, __ATOMIC_RELAXED)) {
+        debug("%s: %s (%d) missing ns_application. fetching..\n", __FUNCTION__, process->name, process->pid);
+        __atomic_store_n(&process->ns_application, workspace_application_create_running_ns_application(process), __ATOMIC_RELEASE);
+
+        if (!__atomic_load_n(&process->ns_application, __ATOMIC_RELAXED)) {
+            debug("%s: %s (%d) unable to fetch ns_application..\n", __FUNCTION__, process->name, process->pid);
+
+            __block ProcessSerialNumber psn = process->psn;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                struct process *_process = process_manager_find_process(&g_process_manager, &psn);
+                if (_process) event_loop_post(&g_event_loop, APPLICATION_LAUNCHED, _process, 0);
+            });
+
+            return;
+        }
+    }
+
     if (!workspace_application_is_finished_launching(process)) {
         debug("%s: %s (%d) is not finished launching, subscribing to finishedLaunching changes\n", __FUNCTION__, process->name, process->pid);
         workspace_application_observe_finished_launching(g_workspace_context, process);

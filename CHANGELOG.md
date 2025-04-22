@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Fetching NSRunningApplication for some processes will fail randomly; delay and retry when this happens [#2595](https://github.com/koekeishiya/yabai/issues/2595)
 
 ## [7.1.14] - 2025-04-05
 ### Changed
