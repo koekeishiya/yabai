@@ -2047,17 +2047,17 @@ static void handle_domain_window(FILE *rsp, struct token domain, char *message)
         command = selector.token;
     }
 
-    if (!acting_window &&
-        !token_equals(command, COMMAND_WINDOW_FOCUS) &&
-        !token_equals(command, COMMAND_WINDOW_CLOSE) &&
-        !token_equals(command, COMMAND_WINDOW_MINIMIZE) &&
-        !token_equals(command, COMMAND_WINDOW_DEMINIMIZE) &&
-        !token_equals(command, COMMAND_WINDOW_TOGGLE)) {
-        daemon_fail(rsp, "could not locate the window to act on!\n");
-        return;
-    }
-
     for (; token_is_valid(command); command = get_token(&message)) {
+        if (!acting_window &&
+            !token_equals(command, COMMAND_WINDOW_FOCUS) &&
+            !token_equals(command, COMMAND_WINDOW_CLOSE) &&
+            !token_equals(command, COMMAND_WINDOW_MINIMIZE) &&
+            !token_equals(command, COMMAND_WINDOW_DEMINIMIZE) &&
+            !token_equals(command, COMMAND_WINDOW_TOGGLE)) {
+            daemon_fail(rsp, "could not locate the window to act on!\n");
+            return;
+        }
+
         if (token_equals(command, COMMAND_WINDOW_FOCUS)) {
             struct selector selector = parse_window_selector(rsp, &message, acting_window, true);
 
