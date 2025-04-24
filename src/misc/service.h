@@ -299,7 +299,7 @@ static int service_stop(void)
         // not trigger automatically in the future.
         //
         // This is NOT the same as disabling the service, which will prevent
-        // it from being boostrapped in the future (without explicitly re-enabling
+        // it from being bootstrapped in the future (without explicitly re-enabling
         // it first).
         //
 
