@@ -4,7 +4,7 @@ extern int csr_get_active_config(uint32_t *config);
 #define CSR_ALLOW_UNRESTRICTED_FS 0x02
 #define CSR_ALLOW_TASK_FOR_PID    0x04
 
-#define SA_SOCKET_PATH_FMT "/tmp/yabai-sa_%s.socket"
+#define SA_SOCKET_PATH_FMT "/tmp/nimbuswm-sa_%s.socket"
 extern char g_sa_socket_file[MAXLEN];
 
 static char osax_base_dir[MAXLEN];
@@ -29,11 +29,11 @@ static char sa_plist[] =
     "<key>CFBundleExecutable</key>\n"
     "<string>loader</string>\n"
     "<key>CFBundleIdentifier</key>\n"
-    "<string>com.koekeishiya.yabai-osax</string>\n"
+    "<string>com.koekeishiya.nimbuswm-osax</string>\n"
     "<key>CFBundleInfoDictionaryVersion</key>\n"
     "<string>6.0</string>\n"
     "<key>CFBundleName</key>\n"
-    "<string>yabai</string>\n"
+    "<string>nimbuswm</string>\n"
     "<key>CFBundlePackageType</key>\n"
     "<string>osax</string>\n"
     "<key>CFBundleShortVersionString</key>\n"
@@ -58,7 +58,7 @@ static char sa_bundle_plist[] =
     "<key>CFBundleExecutable</key>\n"
     "<string>payload</string>\n"
     "<key>CFBundleIdentifier</key>\n"
-    "<string>com.koekeishiya.yabai-sa</string>\n"
+    "<string>com.koekeishiya.nimbuswm-sa</string>\n"
     "<key>CFBundleInfoDictionaryVersion</key>\n"
     "<string>6.0</string>\n"
     "<key>CFBundleName</key>\n"
@@ -78,7 +78,7 @@ static char sa_bundle_plist[] =
 
 static void scripting_addition_set_path(void)
 {
-    snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/Library/ScriptingAdditions/yabai.osax");
+    snprintf(osax_base_dir, sizeof(osax_base_dir), "%s", "/Library/ScriptingAdditions/nimbuswm.osax");
 
     snprintf(osax_contents_dir, sizeof(osax_contents_dir), "%s/%s", osax_base_dir, "Contents");
     snprintf(osax_contents_macos_dir, sizeof(osax_contents_macos_dir), "%s/%s", osax_contents_dir, "MacOS");
@@ -333,7 +333,7 @@ static bool scripting_addition_is_arm64e_enabled(void)
 
 static bool mach_loader_inject_payload(void)
 {
-    FILE *handle = popen("/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader", "r");
+    FILE *handle = popen("/Library/ScriptingAdditions/nimbuswm.osax/Contents/MacOS/loader", "r");
     if (!handle) return false;
 
     int result = pclose(handle);
@@ -351,13 +351,13 @@ static bool mach_loader_inject_payload(void)
 int scripting_addition_uninstall(void)
 {
     if (!scripting_addition_is_sip_friendly()) {
-        warn("yabai: System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!\n");
+        warn("nimbuswm: System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!\n");
         notify("scripting-addition", "System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!");
         return 1;
     }
 
     if (!is_root()) {
-        warn("yabai: scripting-addition must be uninstalled as root!\n");
+        warn("nimbuswm: scripting-addition must be uninstalled as root!\n");
         notify("scripting-addition", "must be uninstalled as root!");
         return 1;
     }
@@ -373,14 +373,14 @@ int scripting_addition_load(void)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     if (!is_root()) {
-        warn("yabai: scripting-addition must be loaded as root!\n");
+        warn("nimbuswm: scripting-addition must be loaded as root!\n");
         notify("scripting-addition", "must be loaded as root!");
         result = 1;
         goto out;
     }
 
     if (!scripting_addition_is_sip_friendly()) {
-        warn("yabai: System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!\n");
+        warn("nimbuswm: System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!\n");
         notify("scripting-addition", "System Integrity Protection: Filesystem Protections and Debugging Restrictions must be disabled!");
         result = 1;
         goto out;
@@ -393,7 +393,7 @@ int scripting_addition_load(void)
 
 #ifdef __arm64__
     if (!scripting_addition_is_arm64e_enabled()) {
-        warn("yabai: missing required nvram boot-arg '-arm64e_preview_abi'!\n");
+        warn("nimbuswm: missing required nvram boot-arg '-arm64e_preview_abi'!\n");
         notify("scripting-addition", "missing required nvram boot-arg '-arm64e_preview_abi'!");
         result = 1;
         goto out;
@@ -401,7 +401,7 @@ int scripting_addition_load(void)
 #endif
 
     if (!mach_loader_inject_payload()) {
-        warn("yabai: scripting-addition failed to inject payload into Dock.app!\n");
+        warn("nimbuswm: scripting-addition failed to inject payload into Dock.app!\n");
         notify("scripting-addition", "failed to inject payload into Dock.app!");
         result = 1;
         goto out;

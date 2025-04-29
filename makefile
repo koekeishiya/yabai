@@ -9,10 +9,10 @@ ASSET_PATH     = ./assets
 SMP_PATH       = ./examples
 ARCH_PATH      = ./archive
 OSAX_SRC       = ./src/osax/payload_bin.c ./src/osax/loader_bin.c
-YABAI_SRC      = ./src/manifest.m $(OSAX_SRC)
+NIMBUSWM_SRC   = ./src/manifest.m $(OSAX_SRC)
 OSAX_PATH      = ./src/osax
 INFO_PLIST     = $(ASSET_PATH)/Info.plist
-BINS           = $(BUILD_PATH)/yabai
+BINS           = $(BUILD_PATH)/nimbuswm
 
 .PHONY: all asan tsan install man icon archive publish sign clean-build clean
 
@@ -36,14 +36,14 @@ $(OSAX_SRC): $(OSAX_PATH)/loader.m $(OSAX_PATH)/payload.m
 	rm -f $(OSAX_PATH)/loader
 
 man:
-	asciidoctor -b manpage $(DOC_PATH)/yabai.asciidoc -o $(DOC_PATH)/yabai.1
+	asciidoctor -b manpage $(DOC_PATH)/nimbuswm.asciidoc -o $(DOC_PATH)/nimbuswm.1
 
 icon:
-	python3 $(SCRIPT_PATH)/seticon.py $(ASSET_PATH)/icon/2x/icon-512px@2x.png $(BUILD_PATH)/yabai
+	python3 $(SCRIPT_PATH)/seticon.py $(ASSET_PATH)/icon/2x/icon-512px@2x.png $(BUILD_PATH)/nimbuswm
 
 publish:
-	sed -i '' "60s/^VERSION=.*/VERSION=\"$(shell $(BUILD_PATH)/yabai --version | cut -d "v" -f 2)\"/" $(SCRIPT_PATH)/install.sh
-	sed -i '' "61s/^EXPECTED_HASH=.*/EXPECTED_HASH=\"$(shell shasum -a 256 $(BUILD_PATH)/$(shell $(BUILD_PATH)/yabai --version).tar.gz | cut -d " " -f 1)\"/" $(SCRIPT_PATH)/install.sh
+	sed -i '' "60s/^VERSION=.*/VERSION=\"$(shell $(BUILD_PATH)/nimbuswm --version | cut -d "v" -f 2)\"/" $(SCRIPT_PATH)/install.sh
+	sed -i '' "61s/^EXPECTED_HASH=.*/EXPECTED_HASH=\"$(shell shasum -a 256 $(BUILD_PATH)/$(shell $(BUILD_PATH)/nimbuswm --version).tar.gz | cut -d " " -f 1)\"/" $(SCRIPT_PATH)/install.sh
 
 archive: man install sign icon
 	rm -rf $(ARCH_PATH)
@@ -51,11 +51,11 @@ archive: man install sign icon
 	cp -r $(BUILD_PATH) $(ARCH_PATH)/
 	cp -r $(DOC_PATH) $(ARCH_PATH)/
 	cp -r $(SMP_PATH) $(ARCH_PATH)/
-	tar -cvzf $(BUILD_PATH)/$(shell $(BUILD_PATH)/yabai --version).tar.gz $(ARCH_PATH)
+	tar -cvzf $(BUILD_PATH)/$(shell $(BUILD_PATH)/nimbuswm --version).tar.gz $(ARCH_PATH)
 	rm -rf $(ARCH_PATH)
 
 sign:
-	codesign -fs "yabai-cert" $(BUILD_PATH)/yabai
+	codesign -fs "nimbuswm-cert" $(BUILD_PATH)/nimbuswm
 
 clean-build:
 	rm -rf $(BUILD_PATH)
@@ -63,6 +63,6 @@ clean-build:
 clean: clean-build
 	rm -f $(OSAX_SRC)
 
-$(BUILD_PATH)/yabai: $(YABAI_SRC)
+$(BUILD_PATH)/nimbuswm: $(NIMBUSWM_SRC)
 	mkdir -p $(BUILD_PATH)
 	xcrun clang $^ $(BUILD_FLAGS) $(CLI_FLAGS) $(FRAMEWORK_PATH) $(FRAMEWORK) -o $@

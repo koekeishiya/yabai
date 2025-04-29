@@ -19,32 +19,33 @@ static NSImage *g_notify_img;
 
 static bool notify_init(void)
 {
-    [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:[NotifyDelegate alloc]];
-    g_notify_img = [[[NSWorkspace sharedWorkspace] iconForFile:[[[NSBundle mainBundle] executablePath] stringByResolvingSymlinksInPath]] retain];
-    g_notify_init = true;
+  [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:[NotifyDelegate alloc]];
+  g_notify_img = [[[NSWorkspace sharedWorkspace] iconForFile:[[[NSBundle mainBundle] executablePath] stringByResolvingSymlinksInPath]] retain];
+  g_notify_init = true;
 
-    return true;
+  return true;
 }
 
 static void notify(const char *subtitle, const char *format, ...)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    if (!g_notify_init) notify_init();
+  if (!g_notify_init)
+    notify_init();
 
-    va_list args;
-    va_start(args, format);
-    NSUserNotification *notification = [[NSUserNotification alloc] init];
-    notification.title = @"yabai";
-    notification.subtitle = [NSString stringWithUTF8String:subtitle];
-    notification.informativeText = [[[NSString alloc] initWithFormat:[NSString stringWithUTF8String:format] arguments:args] autorelease];
-    [notification setValue:g_notify_img forKey:@"_identityImage"];
-    [notification setValue:@(false) forKey:@"_identityImageHasBorder"];
-    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
-    [notification release];
-    va_end(args);
+  va_list args;
+  va_start(args, format);
+  NSUserNotification *notification = [[NSUserNotification alloc] init];
+  notification.title = @"nimbuswm";
+  notification.subtitle = [NSString stringWithUTF8String:subtitle];
+  notification.informativeText = [[[NSString alloc] initWithFormat:[NSString stringWithUTF8String:format] arguments:args] autorelease];
+  [notification setValue:g_notify_img forKey:@"_identityImage"];
+  [notification setValue:@(false) forKey:@"_identityImageHasBorder"];
+  [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+  [notification release];
+  va_end(args);
 
-    [pool drain];
+  [pool drain];
 }
 
 #pragma clang diagnostic pop

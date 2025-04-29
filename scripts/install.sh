@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 
 #
-# This script will install the latest pre-built yabai release from GitHub.
+# This script will install the latest pre-built nimbuswm release from GitHub.
 # Depends on curl, shasum, tar, cp, cut.
 #
-# ARG1:   Directory in which to store the yabai binary; must be an absolutepath.
+# ARG1:   Directory in which to store the nimbuswm binary; must be an absolutepath.
 #         Fallback: /usr/local/bin
 #
-# ARG2:   Directory in which to store the yabai man-page; must be an absolutepath.
+# ARG2:   Directory in which to store the nimbuswm man-page; must be an absolutepath.
 #         Fallback: /usr/local/man/man1
 #
 # Author: Åsmund Vikane
@@ -56,7 +56,7 @@ if [ ! -w "$MAN_DIR" ]; then
 fi
 
 AUTHOR="koekeishiya"
-NAME="yabai"
+NAME="nimbuswm"
 VERSION="7.1.14"
 EXPECTED_HASH="a886bc9124c8fe864a78546b0289a2ef11a71c30703ad17625a429cf81229425"
 TMP_DIR="./${AUTHOR}-${NAME}-v${VERSION}-installer"
@@ -76,19 +76,19 @@ if [ "$FILE_HASH" = "$EXPECTED_HASH" ]; then
     cp -v ./archive/doc/${NAME}.1 ${MAN_DIR}/${NAME}.1
     echo "Finished copying files.."
     echo ""
-    echo "If you want yabai to be managed by launchd (start automatically upon login):"
-    echo "  yabai --start-service"
+    echo "If you want nimbuswm to be managed by launchd (start automatically upon login):"
+    echo "  nimbuswm --start-service"
     echo ""
     echo "When running as a launchd service logs will be found in:"
-    echo "  /tmp/yabai_<user>.[out|err].log"
+    echo "  /tmp/nimbuswm_<user>.[out|err].log"
     echo ""
     echo "If you are using the scripting-addition; remember to update your sudoers file:"
-    echo "  sudo visudo -f /private/etc/sudoers.d/yabai"
+    echo "  sudo visudo -f /private/etc/sudoers.d/nimbuswm"
     echo ""
     echo "Sudoers file configuration row:"
-    echo "  $(whoami) ALL=(root) NOPASSWD: sha256:$(shasum -a 256 ${BIN_DIR}/yabai | cut -d " " -f 1) ${BIN_DIR}/yabai --load-sa"
+    echo "  $(whoami) ALL=(root) NOPASSWD: sha256:$(shasum -a 256 ${BIN_DIR}/nimbuswm | cut -d " " -f 1) ${BIN_DIR}/nimbuswm --load-sa"
     echo ""
-    echo "README: https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(latest-release)#configure-scripting-addition"
+    echo "README: https://github.com/koekeishiya/nimbuswm/wiki/Installing-nimbuswm-(latest-release)#configure-scripting-addition"
 else
     echo "Hash does not match the expected value.. abort."
     echo "Expected hash: $EXPECTED_HASH"

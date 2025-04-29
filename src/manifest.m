@@ -93,4 +93,4 @@
 #include "space_manager.c"
 #include "window_manager.c"
 #include "mouse_handler.c"
-#include "yabai.c"
+#include "nimbuswm.c"

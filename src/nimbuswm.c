@@ -1,28 +1,28 @@
-#define SA_SOCKET_PATH_FMT      "/tmp/yabai-sa_%s.socket"
-#define SOCKET_PATH_FMT         "/tmp/yabai_%s.socket"
-#define LCFILE_PATH_FMT         "/tmp/yabai_%s.lock"
+#define SA_SOCKET_PATH_FMT "/tmp/nimbuswm-sa_%s.socket"
+#define SOCKET_PATH_FMT "/tmp/nimbuswm_%s.socket"
+#define LCFILE_PATH_FMT "/tmp/nimbuswm_%s.lock"
 
-#define SCRPT_ADD_LOAD_OPT      "--load-sa"
+#define SCRPT_ADD_LOAD_OPT "--load-sa"
 #define SCRPT_ADD_UNINSTALL_OPT "--uninstall-sa"
-#define SERVICE_INSTALL_OPT     "--install-service"
-#define SERVICE_UNINSTALL_OPT   "--uninstall-service"
-#define SERVICE_START_OPT       "--start-service"
-#define SERVICE_RESTART_OPT     "--restart-service"
-#define SERVICE_STOP_OPT        "--stop-service"
-#define CLIENT_OPT_LONG         "--message"
-#define CLIENT_OPT_SHRT         "-m"
-#define CONFIG_OPT_LONG         "--config"
-#define CONFIG_OPT_SHRT         "-c"
-#define DEBUG_VERBOSE_OPT_LONG  "--verbose"
-#define DEBUG_VERBOSE_OPT_SHRT  "-V"
-#define VERSION_OPT_LONG        "--version"
-#define VERSION_OPT_SHRT        "-v"
-#define HELP_OPT_LONG           "--help"
-#define HELP_OPT_SHRT           "-h"
+#define SERVICE_INSTALL_OPT "--install-service"
+#define SERVICE_UNINSTALL_OPT "--uninstall-service"
+#define SERVICE_START_OPT "--start-service"
+#define SERVICE_RESTART_OPT "--restart-service"
+#define SERVICE_STOP_OPT "--stop-service"
+#define CLIENT_OPT_LONG "--message"
+#define CLIENT_OPT_SHRT "-m"
+#define CONFIG_OPT_LONG "--config"
+#define CONFIG_OPT_SHRT "-c"
+#define DEBUG_VERBOSE_OPT_LONG "--verbose"
+#define DEBUG_VERBOSE_OPT_SHRT "-V"
+#define VERSION_OPT_LONG "--version"
+#define VERSION_OPT_SHRT "-v"
+#define HELP_OPT_LONG "--help"
+#define HELP_OPT_SHRT "-h"
 
-#define MAJOR  7
-#define MINOR  1
-#define PATCH 14
+#define MAJOR 0
+#define MINOR 1
+#define PATCH 0
 
 struct signal *g_signal_event[SIGNAL_TYPE_COUNT];
 struct process_manager g_process_manager;
@@ -53,28 +53,32 @@ pid_t g_pid;
 
 static int client_send_message(int argc, char **argv)
 {
-    if (argc <= 1) {
-        error("yabai-msg: no arguments given! abort..\n");
+    if (argc <= 1)
+    {
+        error("nimbuswm-msg: no arguments given! abort..\n");
     }
 
     char *user = getenv("USER");
-    if (!user) {
-        error("yabai-msg: 'env USER' not set! abort..\n");
+    if (!user)
+    {
+        error("nimbuswm-msg: 'env USER' not set! abort..\n");
     }
 
     int message_length = argc;
     int argl[argc];
 
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i)
+    {
         argl[i] = strlen(argv[i]);
         message_length += argl[i];
     }
 
-    char *message = malloc(sizeof(int)+message_length);
-    char *temp = sizeof(int)+message;
+    char *message = malloc(sizeof(int) + message_length);
+    char *temp = sizeof(int) + message;
 
     memcpy(message, &message_length, sizeof(int));
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i)
+    {
         memcpy(temp, argv[i], argl[i]);
         temp += argl[i];
         *temp++ = '\0';
@@ -85,16 +89,19 @@ static int client_send_message(int argc, char **argv)
     char socket_file[MAXLEN];
     snprintf(socket_file, sizeof(socket_file), SOCKET_PATH_FMT, user);
 
-    if (!socket_open(&sockfd)) {
-        error("yabai-msg: failed to open socket..\n");
+    if (!socket_open(&sockfd))
+    {
+        error("nimbuswm-msg: failed to open socket..\n");
     }
 
-    if (!socket_connect(sockfd, socket_file)) {
-        error("yabai-msg: failed to connect to socket..\n");
+    if (!socket_connect(sockfd, socket_file))
+    {
+        error("nimbuswm-msg: failed to connect to socket..\n");
     }
 
-    if (send(sockfd, message, sizeof(int)+message_length, 0) == -1) {
-        error("yabai-msg: failed to send data..\n");
+    if (send(sockfd, message, sizeof(int) + message_length, 0) == -1)
+    {
+        error("nimbuswm-msg: failed to send data..\n");
     }
 
     shutdown(sockfd, SHUT_WR);
@@ -105,15 +112,19 @@ static int client_send_message(int argc, char **argv)
     int bytes_read = 0;
     char rsp[BUFSIZ];
 
-    while ((bytes_read = read(sockfd, rsp, sizeof(rsp)-1)) > 0) {
+    while ((bytes_read = read(sockfd, rsp, sizeof(rsp) - 1)) > 0)
+    {
         rsp[bytes_read] = '\0';
 
-        if (rsp[0] == FAILURE_MESSAGE[0]) {
+        if (rsp[0] == FAILURE_MESSAGE[0])
+        {
             result = EXIT_FAILURE;
             output = stderr;
             fprintf(output, "%s", rsp + 1);
             fflush(output);
-        } else {
+        }
+        else
+        {
             fprintf(output, "%s", rsp);
             fflush(output);
         }
@@ -128,8 +139,9 @@ static int client_send_message(int argc, char **argv)
 static inline bool configure_settings_and_acquire_lock(void)
 {
     char *user = getenv("USER");
-    if (!user) {
-        error("yabai: 'env USER' not set! abort..\n");
+    if (!user)
+    {
+        error("nimbuswm: 'env USER' not set! abort..\n");
     }
 
     snprintf(g_sa_socket_file, sizeof(g_sa_socket_file), SA_SOCKET_PATH_FMT, user);
@@ -141,11 +153,11 @@ static inline bool configure_settings_and_acquire_lock(void)
     g_event_bytes = malloc(0x100);
     memset(g_event_bytes, 0, 0x100);
     g_connection = SLSMainConnectionID();
-    g_cv_host_clock_frequency   = CVGetHostClockFrequency();
+    g_cv_host_clock_frequency = CVGetHostClockFrequency();
     g_layer_normal_window_level = CGWindowLevelForKey(LAYER_NORMAL);
-    g_layer_below_window_level  = CGWindowLevelForKey(LAYER_BELOW);
-    g_layer_above_window_level  = CGWindowLevelForKey(LAYER_ABOVE);
-    CGSGetConnectionPortById    = macho_find_symbol("/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/SkyLight", "_CGSGetConnectionPortById");
+    g_layer_below_window_level = CGWindowLevelForKey(LAYER_BELOW);
+    g_layer_above_window_level = CGWindowLevelForKey(LAYER_ABOVE);
+    CGSGetConnectionPortById = macho_find_symbol("/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/SkyLight", "_CGSGetConnectionPortById");
 
     signal(SIGCHLD, SIG_IGN);
     signal(SIGPIPE, SIG_IGN);
@@ -161,17 +173,17 @@ static inline bool configure_settings_and_acquire_lock(void)
 #endif
 
     int handle = open(g_lock_file, O_CREAT | O_WRONLY, 0600);
-    if (handle == -1) {
-        error("yabai: could not create lock-file! abort..\n");
+    if (handle == -1)
+    {
+        error("nimbuswm: could not create lock-file! abort..\n");
     }
 
     struct flock lockfd = {
-        .l_start  = 0,
-        .l_len    = 0,
-        .l_pid    = g_pid,
-        .l_type   = F_WRLCK,
-        .l_whence = SEEK_SET
-    };
+        .l_start = 0,
+        .l_len = 0,
+        .l_pid = g_pid,
+        .l_type = F_WRLCK,
+        .l_whence = SEEK_SET};
 
     return fcntl(handle, F_SETLK, &lockfd) != -1;
 }
@@ -180,8 +192,9 @@ static inline bool configure_settings_and_acquire_lock(void)
 static void parse_arguments(int argc, char **argv)
 {
     if ((string_equals(argv[1], HELP_OPT_LONG)) ||
-        (string_equals(argv[1], HELP_OPT_SHRT))) {
-        fprintf(stdout, "Usage: yabai [option]\n"
+        (string_equals(argv[1], HELP_OPT_SHRT)))
+    {
+        fprintf(stdout, "Usage: nimbuswm [option]\n"
                         "Options:\n"
                         "    --load-sa              Install and load the scripting-addition.\n"
                         "    --uninstall-sa         Uninstall the scripting-addition.\n"
@@ -190,68 +203,85 @@ static void parse_arguments(int argc, char **argv)
                         "    --start-service        Enable, load, and start the launchd service.\n"
                         "    --restart-service      Attempts to restart the service instance.\n"
                         "    --stop-service         Stops a running instance of the service.\n"
-                        "    --message, -m <msg>    Send message to a running instance of yabai.\n"
+                        "    --message, -m <msg>    Send message to a running instance of nimbuswm.\n"
                         "    --config, -c <config>  Use the specified configuration file.\n"
                         "    --verbose, -V          Output debug information to stdout.\n"
                         "    --version, -v          Print version to stdout and exit.\n"
                         "    --help, -h             Print options to stdout and exit.\n"
-                        "Type `man yabai` for more information, or visit: "
-                        "https://github.com/koekeishiya/yabai/blob/v%d.%d.%d/doc/yabai.asciidoc\n", MAJOR, MINOR, PATCH);
+                        "Type `man nimbuswm` for more information, or visit: "
+                        "https://github.com/koekeishiya/nimbuswm/blob/v%d.%d.%d/doc/nimbuswm.asciidoc\n",
+                MAJOR, MINOR, PATCH);
         exit(EXIT_SUCCESS);
     }
 
     if ((string_equals(argv[1], VERSION_OPT_LONG)) ||
-        (string_equals(argv[1], VERSION_OPT_SHRT))) {
-        fprintf(stdout, "yabai-v%d.%d.%d\n", MAJOR, MINOR, PATCH);
+        (string_equals(argv[1], VERSION_OPT_SHRT)))
+    {
+        fprintf(stdout, "nimbuswm-v%d.%d.%d\n", MAJOR, MINOR, PATCH);
         exit(EXIT_SUCCESS);
     }
 
     if ((string_equals(argv[1], CLIENT_OPT_LONG)) ||
-        (string_equals(argv[1], CLIENT_OPT_SHRT))) {
-        exit(client_send_message(argc-1, argv+1));
+        (string_equals(argv[1], CLIENT_OPT_SHRT)))
+    {
+        exit(client_send_message(argc - 1, argv + 1));
     }
 
-    if (string_equals(argv[1], SCRPT_ADD_UNINSTALL_OPT)) {
+    if (string_equals(argv[1], SCRPT_ADD_UNINSTALL_OPT))
+    {
         exit(scripting_addition_uninstall());
     }
 
-    if (string_equals(argv[1], SCRPT_ADD_LOAD_OPT)) {
+    if (string_equals(argv[1], SCRPT_ADD_LOAD_OPT))
+    {
         exit(scripting_addition_load());
     }
 
-    if (string_equals(argv[1], SERVICE_INSTALL_OPT)) {
+    if (string_equals(argv[1], SERVICE_INSTALL_OPT))
+    {
         exit(service_install());
     }
 
-    if (string_equals(argv[1], SERVICE_UNINSTALL_OPT)) {
+    if (string_equals(argv[1], SERVICE_UNINSTALL_OPT))
+    {
         exit(service_uninstall());
     }
 
-    if (string_equals(argv[1], SERVICE_START_OPT)) {
+    if (string_equals(argv[1], SERVICE_START_OPT))
+    {
         exit(service_start());
     }
 
-    if (string_equals(argv[1], SERVICE_RESTART_OPT)) {
+    if (string_equals(argv[1], SERVICE_RESTART_OPT))
+    {
         exit(service_restart());
     }
 
-    if (string_equals(argv[1], SERVICE_STOP_OPT)) {
+    if (string_equals(argv[1], SERVICE_STOP_OPT))
+    {
         exit(service_stop());
     }
 
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i)
+    {
         char *opt = argv[i];
 
         if ((string_equals(opt, DEBUG_VERBOSE_OPT_LONG)) ||
-            (string_equals(opt, DEBUG_VERBOSE_OPT_SHRT))) {
+            (string_equals(opt, DEBUG_VERBOSE_OPT_SHRT)))
+        {
             g_verbose = true;
-        } else if ((string_equals(opt, CONFIG_OPT_LONG)) ||
-                   (string_equals(opt, CONFIG_OPT_SHRT))) {
+        }
+        else if ((string_equals(opt, CONFIG_OPT_LONG)) ||
+                 (string_equals(opt, CONFIG_OPT_SHRT)))
+        {
             char *val = i < argc - 1 ? argv[++i] : NULL;
-            if (!val) error("yabai: option '%s|%s' requires an argument!\n", CONFIG_OPT_LONG, CONFIG_OPT_SHRT);
+            if (!val)
+                error("nimbuswm: option '%s|%s' requires an argument!\n", CONFIG_OPT_LONG, CONFIG_OPT_SHRT);
             snprintf(g_config_file, sizeof(g_config_file), "%s", val);
-        } else {
-            error("yabai: '%s' is not a valid option!\n", opt);
+        }
+        else
+        {
+            error("nimbuswm: '%s' is not a valid option!\n", opt);
         }
     }
 }
@@ -259,73 +289,90 @@ static void parse_arguments(int argc, char **argv)
 #ifndef TESTS
 int main(int argc, char **argv)
 {
-    if (argc > 1) {
+    if (argc > 1)
+    {
         parse_arguments(argc, argv);
     }
 
-    if (is_root()) {
-        require("yabai: running as root is not allowed! abort..\n");
+    if (is_root())
+    {
+        require("nimbuswm: running as root is not allowed! abort..\n");
     }
 
-    if (!ax_privilege()) {
-        require("yabai: could not access accessibility features! abort..\n");
+    if (!ax_privilege())
+    {
+        require("nimbuswm: could not access accessibility features! abort..\n");
     }
 
-    if (!(SLSGetSpaceManagementMode(SLSMainConnectionID()) == 1)) {
-        require("yabai: 'display has separate spaces' is disabled! abort..\n");
+    if (!(SLSGetSpaceManagementMode(SLSMainConnectionID()) == 1))
+    {
+        require("nimbuswm: 'display has separate spaces' is disabled! abort..\n");
     }
 
-    if (!ts_init(MEGABYTES(8))) {
-        error("yabai: could not allocate temporary storage! abort..\n");
+    if (!ts_init(MEGABYTES(8)))
+    {
+        error("nimbuswm: could not allocate temporary storage! abort..\n");
     }
 
-    if (!memory_pool_init(&g_signal_storage, KILOBYTES(256))) {
-        error("yabai: could not allocate event signal storage! abort..\n");
+    if (!memory_pool_init(&g_signal_storage, KILOBYTES(256)))
+    {
+        error("nimbuswm: could not allocate event signal storage! abort..\n");
     }
 
-    if (!configure_settings_and_acquire_lock()) {
-        error("yabai: could not acquire lock-file! abort..\n");
+    if (!configure_settings_and_acquire_lock())
+    {
+        error("nimbuswm: could not acquire lock-file! abort..\n");
     }
 
-    if (!event_loop_begin(&g_event_loop)) {
-        error("yabai: could not start event loop! abort..\n");
+    if (!event_loop_begin(&g_event_loop))
+    {
+        error("nimbuswm: could not start event loop! abort..\n");
     }
 
-    if (!workspace_event_handler_begin(&g_workspace_context)) {
-        error("yabai: could not start workspace context! abort..\n");
+    if (!workspace_event_handler_begin(&g_workspace_context))
+    {
+        error("nimbuswm: could not start workspace context! abort..\n");
     }
 
-    if (!process_manager_begin(&g_process_manager)) {
-        error("yabai: could not start process manager! abort..\n");
+    if (!process_manager_begin(&g_process_manager))
+    {
+        error("nimbuswm: could not start process manager! abort..\n");
     }
 
-    if (!display_manager_begin(&g_display_manager)) {
-        error("yabai: could not start display manager! abort..\n");
+    if (!display_manager_begin(&g_display_manager))
+    {
+        error("nimbuswm: could not start display manager! abort..\n");
     }
 
-    if (!mouse_handler_begin(&g_mouse_state, MOUSE_EVENT_MASK)) {
-        error("yabai: could not start mouse handler! abort..\n");
+    if (!mouse_handler_begin(&g_mouse_state, MOUSE_EVENT_MASK))
+    {
+        error("nimbuswm: could not start mouse handler! abort..\n");
     }
 
     if (workspace_is_macos_monterey() ||
         workspace_is_macos_ventura() ||
         workspace_is_macos_sonoma() ||
-        workspace_is_macos_sequoia()) {
+        workspace_is_macos_sequoia())
+    {
         mission_control_observe();
 
         if (workspace_is_macos_ventura() ||
             workspace_is_macos_sonoma() ||
-            workspace_is_macos_sequoia()) {
+            workspace_is_macos_sequoia())
+        {
             SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1327, NULL);
             SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1328, NULL);
         }
-    } else {
+    }
+    else
+    {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 1204, NULL);
     }
 
     SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 808, NULL);
 
-    if (workspace_is_macos_sequoia()) {
+    if (workspace_is_macos_sequoia())
+    {
         SLSRegisterConnectionNotifyProc(g_connection, connection_handler, 804, NULL);
     }
 
@@ -333,22 +380,26 @@ int main(int argc, char **argv)
     space_manager_begin(&g_space_manager);
     window_manager_begin(&g_space_manager, &g_window_manager);
 
-    if (workspace_is_macos_sequoia()) {
+    if (workspace_is_macos_sequoia())
+    {
         update_window_notifications();
     }
 
-    if (!message_loop_begin(g_socket_file)) {
-        error("yabai: could not start message loop! abort..\n");
+    if (!message_loop_begin(g_socket_file))
+    {
+        error("nimbuswm: could not start message loop! abort..\n");
     }
 
     exec_config_file(g_config_file, sizeof(g_config_file));
 
-    for (;;) {
+    for (;;)
+    {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
         CFRunLoopRunResult result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 300, true);
         [pool drain];
 
-        if (result == kCFRunLoopRunFinished || result == kCFRunLoopRunStopped) break;
+        if (result == kCFRunLoopRunFinished || result == kCFRunLoopRunStopped)
+            break;
     }
 
     return 0;

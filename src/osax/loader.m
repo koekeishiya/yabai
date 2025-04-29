@@ -10,7 +10,7 @@
 kern_return_t (*_thread_convert_thread_state)(thread_act_t thread, int direction, thread_state_flavor_t flavor, thread_state_t in_state, mach_msg_type_number_t in_stateCnt, thread_state_t out_state, mach_msg_type_number_t *out_stateCnt);
 #endif
 
-static char *payload_path = "/Library/ScriptingAdditions/yabai.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload";
+static char *payload_path = "/Library/ScriptingAdditions/nimbuswm.osax/Contents/Resources/payload.bundle/Contents/MacOS/payload";
 
 //
 // :Attribution

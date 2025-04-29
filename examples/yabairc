@@ -5,14 +5,14 @@
 # it will be able to run the command without password
 #
 # see this wiki page for information:
-#  - https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(latest-release)#configure-scripting-addition
+#  - https://github.com/koekeishiya/nimbuswm/wiki/Installing-nimbuswm-(latest-release)#configure-scripting-addition
 #
-# yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
-# sudo yabai --load-sa
+# nimbuswm -m signal --add event=dock_did_restart action="sudo nimbuswm --load-sa"
+# sudo nimbuswm --load-sa
 #
 
 # global settings
-yabai -m config                                 \
+nimbuswm -m config                                 \
     external_bar                 off:40:0       \
     menubar_opacity              1.0            \
     mouse_follows_focus          off            \
@@ -44,4 +44,4 @@ yabai -m config                                 \
     mouse_action2                resize         \
     mouse_drop_action            swap
 
-echo "yabai configuration loaded.."
+echo "nimbuswm configuration loaded.."
