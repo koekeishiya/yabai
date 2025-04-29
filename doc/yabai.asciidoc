@@ -45,11 +45,11 @@ Options
 
 *--install-service*::
     Writes a launchd service file to disk. +
-    Path is ~/Library/LaunchAgents/com.koekeishiya.nimbuswm.plist.
+    Path is ~/Library/LaunchAgents/com.john-json.nimbuswm.plist.
 
 *--uninstall-service*::
     Removes a launchd service file from disk. +
-    Path is ~/Library/LaunchAgents/com.koekeishiya.nimbuswm.plist.
+    Path is ~/Library/LaunchAgents/com.john-json.nimbuswm.plist.
 
 *--start-service*::
     Enables, loads, and starts the launchd service. +

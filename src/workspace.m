@@ -40,7 +40,7 @@ void workspace_application_destroy_running_ns_application(void *ws_context, stru
             //
             // :WorstApiEverMade
             //
-            // NOTE(koekeishiya): Because the developers of this API did such an amazing job
+            // NOTE(john-json): Because the developers of this API did such an amazing job
             // there is no way for us to actually just friggin loop through the currently
             // registered observations and then call removeObservation on them..
             //
@@ -217,7 +217,7 @@ extern struct event_loop g_event_loop;
             //
             // :WorstApiEverMade
             //
-            // NOTE(koekeishiya): For some stupid reason it is possible to get notified by the system
+            // NOTE(john-json): For some stupid reason it is possible to get notified by the system
             // about a change, and NOT being able to remove ourselves from observation because
             // it claims that we are not observing the key-path, but we clearly are, as we would
             // otherwise not be here in the first place..
@@ -242,7 +242,7 @@ extern struct event_loop g_event_loop;
             //
             // :WorstApiEverMade
             //
-            // NOTE(koekeishiya): For some stupid reason it is possible to get notified by the system
+            // NOTE(john-json): For some stupid reason it is possible to get notified by the system
             // about a change, and NOT being able to remove ourselves from observation because
             // it claims that we are not observing the key-path, but we clearly are, as we would
             // otherwise not be here in the first place..

@@ -55,7 +55,7 @@ if [ ! -w "$MAN_DIR" ]; then
     exit 1
 fi
 
-AUTHOR="koekeishiya"
+AUTHOR="john-json"
 NAME="nimbuswm"
 VERSION="7.1.14"
 EXPECTED_HASH="a886bc9124c8fe864a78546b0289a2ef11a71c30703ad17625a429cf81229425"
@@ -88,7 +88,7 @@ if [ "$FILE_HASH" = "$EXPECTED_HASH" ]; then
     echo "Sudoers file configuration row:"
     echo "  $(whoami) ALL=(root) NOPASSWD: sha256:$(shasum -a 256 ${BIN_DIR}/nimbuswm | cut -d " " -f 1) ${BIN_DIR}/nimbuswm --load-sa"
     echo ""
-    echo "README: https://github.com/koekeishiya/nimbuswm/wiki/Installing-nimbuswm-(latest-release)#configure-scripting-addition"
+    echo "README: https://github.com/john-json/nimbuswm/wiki/Installing-nimbuswm-(latest-release)#configure-scripting-addition"
 else
     echo "Hash does not match the expected value.. abort."
     echo "Expected hash: $EXPECTED_HASH"

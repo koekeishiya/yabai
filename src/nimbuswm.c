@@ -209,7 +209,7 @@ static void parse_arguments(int argc, char **argv)
                         "    --version, -v          Print version to stdout and exit.\n"
                         "    --help, -h             Print options to stdout and exit.\n"
                         "Type `man nimbuswm` for more information, or visit: "
-                        "https://github.com/koekeishiya/nimbuswm/blob/v%d.%d.%d/doc/nimbuswm.asciidoc\n",
+                        "https://github.com/john-json/nimbuswm/blob/v%d.%d.%d/doc/nimbuswm.asciidoc\n",
                 MAJOR, MINOR, PATCH);
         exit(EXIT_SUCCESS);
     }

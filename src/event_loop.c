@@ -16,14 +16,14 @@ static void update_window_notifications(void)
 
     if (workspace_is_macos_sequoia())
     {
-        // NOTE(koekeishiya): Subscribe to all windows because of window_destroyed (and ordered) notifications
+        // NOTE(john-json): Subscribe to all windows because of window_destroyed (and ordered) notifications
         table_for(struct window * window, g_window_manager.window, {
             window_list[window_count++] = window->id;
         })
     }
     else
     {
-        // NOTE(koekeishiya): Subscribe to windows that have a feedback_border because of window_ordered notifications
+        // NOTE(john-json): Subscribe to windows that have a feedback_border because of window_ordered notifications
         table_for(struct window_node * node, g_window_manager.insert_feedback, {
             window_list[window_count++] = node->window_order[0];
         })
@@ -115,7 +115,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
         workspace_application_observe_finished_launching(g_workspace_context, process);
 
         //
-        // NOTE(koekeishiya): Do this again in case of race-conditions between the previous check and key-value observation subscription.
+        // NOTE(john-json): Do this again in case of race-conditions between the previous check and key-value observation subscription.
         // Not actually sure if this can happen in practice..
         //
 
@@ -145,7 +145,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
         workspace_application_observe_activation_policy(g_workspace_context, process);
 
         //
-        // NOTE(koekeishiya): Do this again in case of race-conditions between the previous check and key-value observation subscription.
+        // NOTE(john-json): Do this again in case of race-conditions between the previous check and key-value observation subscription.
         // Not actually sure if this can happen in practice..
         //
 
@@ -170,7 +170,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
     }
 
     //
-    // NOTE(koekeishiya): If we somehow receive a duplicate launched event due to the subscription-timing-mess above,
+    // NOTE(john-json): If we somehow receive a duplicate launched event due to the subscription-timing-mess above,
     // simply ignore the event..
     //
 
@@ -254,7 +254,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
                 //
                 // :AXBatching
                 //
-                // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+                // NOTE(john-json): Batch all operations and mark the view as dirty so that we can perform a single flush,
                 // making sure that each window is only moved and resized a single time, when the final layout has been computed.
                 // This is necessary to make sure that we do not call the AX API for each modification to the tree.
                 //
@@ -281,7 +281,7 @@ static EVENT_HANDLER(APPLICATION_LAUNCHED)
     //
     // :AXBatching
     //
-    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // NOTE(john-json): Flush previously batched operations if the view is marked as dirty.
     // This is necessary to make sure that we do not call the AX API for each modification to the tree.
     //
 
@@ -352,7 +352,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
             //
             // :AXBatching
             //
-            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // NOTE(john-json): Batch all operations and mark the view as dirty so that we can perform a single flush,
             // making sure that each window is only moved and resized a single time, when the final layout has been computed.
             // This is necessary to make sure that we do not call the AX API for each modification to the tree.
             //
@@ -386,7 +386,7 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
     //
     // :AXBatching
     //
-    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // NOTE(john-json): Flush previously batched operations if the view is marked as dirty.
     // This is necessary to make sure that we do not call the AX API for each modification to the tree.
     //
 
@@ -510,7 +510,7 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
             //
             // :AXBatching
             //
-            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // NOTE(john-json): Batch all operations and mark the view as dirty so that we can perform a single flush,
             // making sure that each window is only moved and resized a single time, when the final layout has been computed.
             // This is necessary to make sure that we do not call the AX API for each modification to the tree.
             //
@@ -531,7 +531,7 @@ static EVENT_HANDLER(APPLICATION_VISIBLE)
     //
     // :AXBatching
     //
-    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // NOTE(john-json): Flush previously batched operations if the view is marked as dirty.
     // This is necessary to make sure that we do not call the AX API for each modification to the tree.
     //
 
@@ -578,7 +578,7 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
             //
             // :AXBatching
             //
-            // NOTE(koekeishiya): Batch all operations and mark the view as dirty so that we can perform a single flush,
+            // NOTE(john-json): Batch all operations and mark the view as dirty so that we can perform a single flush,
             // making sure that each window is only moved and resized a single time, when the final layout has been computed.
             // This is necessary to make sure that we do not call the AX API for each modification to the tree.
             //
@@ -598,7 +598,7 @@ static EVENT_HANDLER(APPLICATION_HIDDEN)
     //
     // :AXBatching
     //
-    // NOTE(koekeishiya): Flush previously batched operations if the view is marked as dirty.
+    // NOTE(john-json): Flush previously batched operations if the view is marked as dirty.
     // This is necessary to make sure that we do not call the AX API for each modification to the tree.
     //
 
@@ -1617,7 +1617,7 @@ static EVENT_HANDLER(MOUSE_MOVED)
         {
 
             //
-            // NOTE(koekeishiya): Look for a window with role AXSheet or AXDrawer
+            // NOTE(john-json): Look for a window with role AXSheet or AXDrawer
             // and forward focus to it because we are not allowed to focus the main
             // window in these cases.
             //
@@ -1655,7 +1655,7 @@ static EVENT_HANDLER(MOUSE_MOVED)
         {
 
             //
-            // NOTE(koekeishiya): If any **floating** window would be fully occluded by
+            // NOTE(john-json): If any **floating** window would be fully occluded by
             // autoraising the window below the cursor we do not actually perform the
             // focus change, as it is likely that the user is trying to reach for the
             // smaller window that sits on top of the window we would otherwise raise.

@@ -5,7 +5,7 @@
 # it will be able to run the command without password
 #
 # see this wiki page for information:
-#  - https://github.com/koekeishiya/nimbuswm/wiki/Installing-nimbuswm-(latest-release)#configure-scripting-addition
+#  - https://github.com/john-json/nimbuswm/wiki/Installing-nimbuswm-(latest-release)#configure-scripting-addition
 #
 # nimbuswm -m signal --add event=dock_did_restart action="sudo nimbuswm --load-sa"
 # sudo nimbuswm --load-sa

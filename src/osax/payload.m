@@ -296,7 +296,7 @@ static void init_instances()
         //
         // @hack
         //
-        // NOTE(koekeishiya): For whatever reason, in Sonoma, DPDesktopPictureManager is initialized and swapped
+        // NOTE(john-json): For whatever reason, in Sonoma, DPDesktopPictureManager is initialized and swapped
         // to an alternate storage location instead of where it used to be stored in previous macOS versions..
         //
         // This alternate storage location resides 8-bytes before the usual location, so we simply do

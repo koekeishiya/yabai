@@ -174,7 +174,7 @@ void event_signal_push(enum signal_type type, void *context)
         es->app = ts_string_copy(application->name);
 
         //
-        // NOTE(koekeishiya): We always receive an application_front_switched event *before* an application_terminated
+        // NOTE(john-json): We always receive an application_front_switched event *before* an application_terminated
         // event. We need to know the difference between a front_switched + application_terminated sequence and a regular
         // application switch followed by a user-initiated termination of the previously focused application. The system
         // events are triggered within an interval that appear to be impossible to match even with a user automated sequence.
