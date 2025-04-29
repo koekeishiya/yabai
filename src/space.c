@@ -3,7 +3,8 @@ extern int g_connection;
 uint32_t space_display_id(uint64_t sid)
 {
     CFStringRef uuid_string = SLSCopyManagedDisplayForSpace(g_connection, sid);
-    if (!uuid_string) return 0;
+    if (!uuid_string)
+        return 0;
 
     CFUUIDRef uuid = CFUUIDCreateFromString(NULL, uuid_string);
     uint32_t id = CGDisplayGetDisplayIDFromUUID(uuid);
@@ -23,10 +24,12 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
 
     CFArrayRef space_list_ref = cfarray_of_cfnumbers(space_list, sizeof(uint64_t), space_count, kCFNumberSInt64Type);
     CFArrayRef window_list_ref = SLSCopyWindowsWithOptionsAndTags(g_connection, cid, space_list_ref, options, &set_tags, &clear_tags);
-    if (!window_list_ref) goto err;
+    if (!window_list_ref)
+        goto err;
 
     *count = CFArrayGetCount(window_list_ref);
-    if (!*count) goto out;
+    if (!*count)
+        goto out;
 
     CFTypeRef query = SLSWindowQueryWindows(g_connection, window_list_ref, *count);
     CFTypeRef iterator = SLSWindowQueryResultCopyWindows(query);
@@ -34,33 +37,49 @@ uint32_t *space_window_list_for_connection(uint64_t *space_list, int space_count
     int window_count = 0;
     window_list = ts_alloc_list(uint32_t, *count);
 
-    while (SLSWindowIteratorAdvance(iterator)) {
+    while (SLSWindowIteratorAdvance(iterator))
+    {
         uint64_t tags = SLSWindowIteratorGetTags(iterator);
         uint64_t attributes = SLSWindowIteratorGetAttributes(iterator);
         uint32_t parent_wid = SLSWindowIteratorGetParentID(iterator);
         uint32_t wid = SLSWindowIteratorGetWindowID(iterator);
         int level = SLSWindowIteratorGetLevel(iterator);
 
-        if (include_minimized) {
+        if (include_minimized)
+        {
             struct window *window = window_manager_find_window(&g_window_manager, wid);
-            if (window) {
+            if (window)
+            {
                 window_list[window_count++] = wid;
-            } else if (parent_wid == 0) {
-                if (level == 0 || level == 3 || level == 8) {
-                    if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+            }
+            else if (parent_wid == 0)
+            {
+                if (level == 0 || level == 3 || level == 8)
+                {
+                    if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000))))
+                    {
                         window_list[window_count++] = wid;
-                    } else if ((attributes == 0x0 || attributes == 0x1) && ((tags & 0x1000000000000000) || (tags & 0x300000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+                    }
+                    else if ((attributes == 0x0 || attributes == 0x1) && ((tags & 0x1000000000000000) || (tags & 0x300000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000))))
+                    {
                         window_list[window_count++] = wid;
                     }
                 }
             }
-        } else {
+        }
+        else
+        {
             struct window *window = window_manager_find_window(&g_window_manager, wid);
-            if (window && !window_check_flag(window, WINDOW_MINIMIZE)) {
+            if (window && !window_check_flag(window, WINDOW_MINIMIZE))
+            {
                 window_list[window_count++] = wid;
-            } else if (parent_wid == 0) {
-                if (level == 0 || level == 3 || level == 8) {
-                    if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000)))) {
+            }
+            else if (parent_wid == 0)
+            {
+                if (level == 0 || level == 3 || level == 8)
+                {
+                    if (((attributes & 0x2) || (tags & 0x400000000000000)) && (((tags & 0x1)) || ((tags & 0x2) && (tags & 0x80000000))))
+                    {
                         window_list[window_count++] = wid;
                     }
                 }
@@ -103,4 +122,34 @@ bool space_is_system(uint64_t sid)
 bool space_is_visible(uint64_t sid)
 {
     return sid == display_space_id(space_display_id(sid));
+}
+
+char *space_layout_to_string(int layout)
+{
+    switch (layout)
+    {
+    case SPACE_BSP:
+        return "bsp";
+    case SPACE_STACK:
+        return "stack";
+    case SPACE_FLOAT:
+        return "float";
+    case SPACE_CENTER:
+        return "center"; // ✅ new
+    default:
+        return "unknown";
+    }
+}
+
+int space_layout_from_string(const char *layout)
+{
+    if (string_equals(layout, "bsp"))
+        return SPACE_BSP;
+    if (string_equals(layout, "stack"))
+        return SPACE_STACK;
+    if (string_equals(layout, "float"))
+        return SPACE_FLOAT;
+    if (string_equals(layout, "center"))
+        return SPACE_CENTER; // ✅ new
+    return -1;
 }

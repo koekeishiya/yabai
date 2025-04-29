@@ -1,3 +1,5 @@
+// src/manifest.m
+
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 #include <CoreVideo/CoreVideo.h>
@@ -40,12 +42,13 @@
 #include <pwd.h>
 #include <spawn.h>
 #include <libproc.h>
+#include <mach-o/loader.h>
+#include <mach-o/nlist.h>
 
 #include "misc/extern.h"
 #include "misc/macros.h"
 #include "misc/memory_pool.h"
 #include "misc/ts.h"
-//#include "misc/autorelease.h"
 #include "misc/notify.h"
 #include "misc/log.h"
 #include "misc/helpers.h"
