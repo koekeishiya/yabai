@@ -33,14 +33,6 @@ static OBSERVER_CALLBACK(application_notification_handler)
 
         if (!__sync_bool_compare_and_swap(&window->id_ptr, &window->id, NULL)) return;
 
-        //
-        // NOTE(koekeishiya): Usually we avoid running code off the event-loop thread,
-        // however in this case it is fine, as we are only touching fields that never
-        // change after the window allocation and creation code.
-        //
-
-        window_unobserve(window);
-
         event_loop_post(&g_event_loop, WINDOW_DESTROYED, window, 0);
     }
 }

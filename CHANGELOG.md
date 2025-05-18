@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Fetching NSRunningApplication for some processes will fail randomly; delay and retry when this happens [#2595](https://github.com/koekeishiya/yabai/issues/2595)
 - Fixed crash when sequence of window commands initiated while focused window is untracked [#2606](https://github.com/koekeishiya/yabai/issues/2606)
+- Change when window_unobserve is called [#2605](https://github.com/koekeishiya/yabai/issues/2605)
 
 ## [7.1.14] - 2025-04-05
 ### Changed
