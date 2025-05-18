@@ -638,6 +638,8 @@ ARGUMENT
 *label='<LABEL>'*::
     Label used to identify the rule with a unique name
 
+Filter properties to match:
+
 *app[!]='<REGEX>'*::
     Name of application. If '!' is present, invert the match.
 
@@ -649,6 +651,8 @@ ARGUMENT
 
 *subrole[!]='<REGEX>'*::
     https://developer.apple.com/documentation/applicationservices/carbon_accessibility/subroles?language=objc[Accessibility subrole of window]. If '!' is present, invert the match.
+
+Window properties to set:
 
 *display='[^]<DISPLAY_SEL>'*::
     Send window to display. If '^' is present, follow focus.
