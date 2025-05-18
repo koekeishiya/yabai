@@ -26,6 +26,7 @@ struct space_manager
     bool window_zoom_persist;
     uint32_t auto_balance;
     struct space_label *labels;
+    CFArrayRef grid_columns;
 };
 
 enum space_op_error
@@ -63,6 +64,7 @@ uint64_t space_manager_mission_control_space(int desktop_id);
 uint64_t space_manager_cursor_space(void);
 uint64_t space_manager_prev_space(uint64_t sid);
 uint64_t space_manager_next_space(uint64_t sid);
+uint64_t space_manager_grid_space(uint64_t sid, char *direction);
 uint64_t space_manager_first_space(void);
 uint64_t space_manager_last_space(void);
 uint64_t space_manager_active_space(void);
