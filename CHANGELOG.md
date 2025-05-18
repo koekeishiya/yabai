@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.1.15] - 2025-05-18
 ### Changed
 - Fetching NSRunningApplication for some processes will fail randomly; delay and retry when this happens [#2595](https://github.com/koekeishiya/yabai/issues/2595)
 - Fixed crash when sequence of window commands initiated while focused window is untracked [#2606](https://github.com/koekeishiya/yabai/issues/2606)
@@ -758,7 +760,8 @@ The *window_destroyed* signal is now triggered for windows that are implicitly d
 ### Added
 - First official release
 
-[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.14...HEAD
+[Unreleased]: https://github.com/koekeishiya/yabai/compare/v7.1.15...HEAD
+[7.1.15]: https://github.com/koekeishiya/yabai/compare/v7.1.14...v7.1.15
 [7.1.14]: https://github.com/koekeishiya/yabai/compare/v7.1.13...v7.1.14
 [7.1.13]: https://github.com/koekeishiya/yabai/compare/v7.1.12...v7.1.13
 [7.1.12]: https://github.com/koekeishiya/yabai/compare/v7.1.11...v7.1.12
