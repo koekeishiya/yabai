@@ -980,6 +980,42 @@ static EVENT_HANDLER(SPACE_CHANGED)
     if (!mission_control_is_active() && space_is_user(g_space_manager.current_space_id)) {
         window_manager_validate_and_check_for_windows_on_space(&g_space_manager, &g_window_manager, g_space_manager.current_space_id);
 
+        //
+        // NOTE: Some applications (e.g. Arc browser) do not properly update their
+        // accessibility attributes when exiting fullscreen. We detect and correct this state
+        // during space changes to ensure windows are properly managed.
+        //
+        
+        table_for (struct window *window, g_window_manager.window, {
+            if (window && strcmp(window->application->name, "Arc") == 0) {
+                bool was_fullscreen = window_check_flag(window, WINDOW_FULLSCREEN);
+                bool is_fullscreen = window_is_fullscreen(window);
+                
+                if (was_fullscreen && (!is_fullscreen || (is_fullscreen && space_is_user(g_space_manager.current_space_id)))) {
+                    window_clear_flag(window, WINDOW_FULLSCREEN);
+                    
+                    if (window_ax_can_move(window)) {
+                        window_set_flag(window, WINDOW_MOVABLE);
+                    }
+                    
+                    if (window_ax_can_resize(window)) {
+                        window_set_flag(window, WINDOW_RESIZABLE);
+                    }
+                    
+                    if (window->role) CFRelease(window->role);
+                    window->role = window_ax_role(window);
+                    
+                    if (window->subrole) CFRelease(window->subrole);
+                    window->subrole = window_ax_subrole(window);
+                    
+                    if (window_manager_should_manage_window(window) && !window_manager_find_managed_window(&g_window_manager, window)) {
+                        struct view *space_view = space_manager_tile_window_on_space(&g_space_manager, window, g_space_manager.current_space_id);
+                        window_manager_add_managed_window(&g_window_manager, window, space_view);
+                    }
+                }
+            }
+        })
+
         if (view_is_invalid(view)) {
             view_update(view);
         }
