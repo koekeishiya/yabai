@@ -6,7 +6,7 @@
 
 uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 26) {
-        return 0x7000;
+        return 0x30000;
     } else if (os_version.majorVersion == 15) {
         return os_version.minorVersion >= 4 ? 0x1f0000 : 0x200000;
     } else if (os_version.majorVersion == 14) {
@@ -22,7 +22,7 @@ uint64_t get_dock_spaces_offset(NSOperatingSystemVersion os_version) {
 
 uint64_t get_dppm_offset(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 26) {
-        return 0x7000;
+        return 0x70000;
     } else if (os_version.majorVersion == 15) {
         return 0x250000;
     } else if (os_version.majorVersion == 14) {
@@ -118,9 +118,8 @@ uint64_t get_set_front_window_offset(NSOperatingSystemVersion os_version) {
 
 const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 26) {
-        // Pulling out of doBindingCommand:display function.
-        return "88 ?? ?? B0 08 ?? ?? 91 00 01 40 F9 E2 03 13 AA ?? ?? ?? 94 88 ?? ?? B0";
-        //return "28 ?? ?? ?? ?? ?? ?? 91 ?? ?? ?? F9 ?? ?? ?? B4 ?? ?? ?? 94 F5 03 00 AA E0 03 17 AA";
+        // Pulling out of doBindingCommand:display (search decompiled text in ghidra) function.
+        return "88 ?? ?? ?? 08 ?? ?? 91 00 01 40 F9 E2 03 13 AA ?? ?? ?? 94 88 ?? ?? ?? 08";
     } else if (os_version.majorVersion == 15) {
         return "?? 12 00 ?? ?? ?? ?? 91 ?? 02 40 F9 ?? ?? 00 B4 ?? ?? ?? ??";
     } else if (os_version.majorVersion == 14) {
@@ -139,8 +138,8 @@ const char *get_dock_spaces_pattern(NSOperatingSystemVersion os_version) {
 
 const char *get_dppm_pattern(NSOperatingSystemVersion os_version) {
     if (os_version.majorVersion == 26) {
-        return "48 ?? ?? F0 08 ?? ?? 91 00 01 40 F9 E2 03 16 AA E3 03 19 AA ?? ?? ?? 94";
-        // return "?? ?? ?? B0 08 ?? ?? 91 20 ?? ?? B7 FB 03 00 AA";
+        //Pulling from function 'DPRemoteConnection::_handleEvent:'
+        return "?? 20 00 ?? 08 ?? ?? 91 00 01 40 F9 E2 03 16 AA E3 03 19 AA ?? ?? ?? 94";
     } else if (os_version.majorVersion == 15) {
         return "?? 0F 00 ?? ?? ?? ?? 91 ?? 0E 00 ?? ?? ?? ?? F8 ?? 03 40 F9 ?? ?? ??";
     } else if (os_version.majorVersion == 14) {
